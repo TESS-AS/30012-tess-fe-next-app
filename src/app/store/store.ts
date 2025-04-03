@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+
 import { Product, StoreState, User } from '../types/store.types';
 
 export const useStore = create<StoreState>()(
