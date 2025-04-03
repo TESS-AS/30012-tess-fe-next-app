@@ -1,3 +1,12 @@
-export default function CategoryPage({ params }) {
-	return <h1>Category: {params.category}</h1>;
+interface Params {
+	category: string;
+}
+
+export default async function CategoryPage({
+	params,
+}: {
+	params: Promise<Params>;
+}) {
+	const resolvedParams = await params;
+	return <h1>Category: {resolvedParams.category}</h1>;
 }
