@@ -4,7 +4,7 @@ const OmniSelect: React.FC = () => {
   const [count, setCount] = useState<number>(1);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+    const {value} = e.target;
     const parsedValue = parseInt(value, 10);
 
     if (value === "") {

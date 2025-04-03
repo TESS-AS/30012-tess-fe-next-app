@@ -1,4 +1,5 @@
 import { AxiosResponse } from 'axios';
+
 import axiosInstance from './api'; 
 
 export async function productFetch(productName: string) {

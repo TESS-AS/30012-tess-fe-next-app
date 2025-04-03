@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+
 import { Product, StoreState, User } from '../types/store.types';
 
 export const useStore = create<StoreState>()(
@@ -8,7 +9,7 @@ export const useStore = create<StoreState>()(
         // Cart slice
         cart: [],
         addToCart: (product: Product) => {
-          const cart = get().cart;
+          const {cart} = get();
           const exists = cart.find((item) => item.id === product.id);
           if (exists) {
             set({
