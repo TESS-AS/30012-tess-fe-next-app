@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/router";  
 import { IProductSearch, ISuggestions } from "../types/search.types";
 import { loadItem } from "../services/product.service";
+import { useRouter } from "@/i18n/navigation";
 
 const SearchBarComponent: React.FC = () => {
   const [products, setProducts] = useState<IProductSearch[]>([]);
