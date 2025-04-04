@@ -7,6 +7,6 @@ export default async function CategoryPage({
 }: {
 	params: Promise<Params>;
 }) {
-	const resolvedParams = await params;
-	return <h1>Category: {resolvedParams.category}</h1>;
+	const { category } = await params;
+	return <h1>Category: {category}</h1>;
 }
