@@ -10,6 +10,7 @@ export default function Home() {
 				<Link href="/cement">Cement</Link>
 				<Link href="/tiles">Tiles</Link>
 				<Link href="/cement/ultra-strong">Ultra Strong Cement</Link>
+				<Link href="/cement/ultra-strong">Ultra Strong Cement</Link>
 				<Link href="/tiles/porcelain-white">Porcelain White Tile</Link>
 				<Link href="/about">About Us</Link>
 				<Link href="/contact">Contact</Link>

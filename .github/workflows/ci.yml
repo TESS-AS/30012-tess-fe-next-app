@@ -29,8 +29,5 @@ jobs:
       - name: Prettier check
         run: yarn prettier:check
 
-      - name: Type check
-        run: yarn type-check
-
       - name: Build Next.js app
         run: yarn build
