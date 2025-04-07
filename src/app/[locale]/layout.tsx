@@ -1,3 +1,4 @@
+import Main from "@/components/layouts/Main/Main";
 import { routing } from "@/i18n/routing";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -35,7 +36,9 @@ export default async function RootLayout({
 	return (
 		<html lang="en">
 			<body className={`${geistSans.variable} ${geistMono.variable}`}>
-				<NextIntlClientProvider>{children}</NextIntlClientProvider>
+				<NextIntlClientProvider>
+					<Main>{children}</Main>
+				</NextIntlClientProvider>
 			</body>
 		</html>
 	);
