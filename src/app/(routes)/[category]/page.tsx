@@ -1,3 +1,5 @@
+import ProductFilter from "@/app/components/Filter.component";
+
 export default async function CategoryPage({
 	params,
 }: {
@@ -5,5 +7,10 @@ export default async function CategoryPage({
 }) {
 	const { category } = await params;
 
-	return <h1>Category: {category}</h1>;
+	return (
+		<div>
+			<ProductFilter />
+			<h1>Category: {category}</h1>
+		</div>
+	);
 }
