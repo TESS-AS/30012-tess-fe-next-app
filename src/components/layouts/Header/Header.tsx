@@ -13,19 +13,27 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useRouter } from "@/i18n/navigation";
 import { Search, ShoppingCart, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useLocale } from "next-intl";
 
 import { mockCategories as categories } from "../../../mocks/mockCategories";
 
 export default function Header() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
+	const currentLocale = useLocale();
+	const router = useRouter();
 
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsSearchOpen(false);
+	};
+
+	const handleLanguageChange = (locale: string) => {
+		router.replace("/", { locale });
 	};
 
 	return (
@@ -56,6 +64,45 @@ export default function Header() {
 					</div>
 				</form>
 				<div className="flex items-center gap-2">
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant="ghost"
+								size="icon"
+								className="hidden md:flex">
+								<Image
+									src={`/icons/${currentLocale === "en" ? "en" : "no"}.svg`}
+									alt="Language"
+									width={20}
+									height={20}
+								/>
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							<DropdownMenuItem onClick={() => handleLanguageChange("en")}>
+								<div className="flex items-center gap-2">
+									<Image
+										src="/icons/en.svg"
+										alt="English"
+										width={20}
+										height={20}
+									/>
+									English
+								</div>
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => handleLanguageChange("no")}>
+								<div className="flex items-center gap-2">
+									<Image
+										src="/icons/no.svg"
+										alt="Norwegian"
+										width={20}
+										height={20}
+									/>
+									Norsk
+								</div>
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
 					<DropdownMenu>
 						<DropdownMenuTrigger
 							asChild

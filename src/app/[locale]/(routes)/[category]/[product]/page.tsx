@@ -1,10 +1,14 @@
+interface Params {
+	category: string;
+	product: string;
+}
+
 export default async function ProductPage({
 	params,
 }: {
-	params: Promise<{ category: string; product: string }>;
+	params: Promise<Params>;
 }) {
 	const { category, product } = await params;
-
 	return (
 		<div>
 			<h1>Category: {category}</h1>
