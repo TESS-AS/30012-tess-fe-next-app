@@ -1,5 +1,8 @@
 {
-	"HomePage": {
+	"home": {
 		"title": "Home Page No"
+	},
+	"category": {
+		"noResults": "Ingen resultater funnet"
 	}
 }
