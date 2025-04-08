@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -97,29 +97,34 @@ export function Filter({
 		mapCoords: undefined,
 	});
 
-	const handleChange = (
+	useEffect(() => {
+		onFilterChange?.(filters);
+	}, [filters, onFilterChange]);
+
+	const handleInputChange = (
 		e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
 	) => {
 		const { name, value } = e.target;
-		const newFilters = { ...filters, [name]: value };
-		setFilters(newFilters);
-		onFilterChange?.(newFilters);
+		setFilters((prev) => ({
+			...prev,
+			[name]: value,
+		}));
 	};
 
-	const handleAvailabilityChange = (option: string) => {
-		const newAvailability = filters.availability.includes(option)
-			? filters.availability.filter((item) => item !== option)
-			: [...filters.availability, option];
-
-		const newFilters = { ...filters, availability: newAvailability };
-		setFilters(newFilters);
-		onFilterChange?.(newFilters);
+	const handleAvailabilityToggle = (value: string) => {
+		setFilters((prev) => ({
+			...prev,
+			availability: prev.availability.includes(value)
+				? prev.availability.filter((v) => v !== value)
+				: [...prev.availability, value],
+		}));
 	};
 
 	const handleLocationChange = (coords: [number, number]) => {
-		const newFilters = { ...filters, mapCoords: coords };
-		setFilters(newFilters);
-		onFilterChange?.(newFilters);
+		setFilters((prev) => ({
+			...prev,
+			mapCoords: coords,
+		}));
 	};
 
 	return (
@@ -132,14 +137,14 @@ export function Filter({
 					name="search"
 					placeholder="Search products..."
 					value={filters.search}
-					onChange={handleChange}
+					onChange={handleInputChange}
 				/>
 
 				<div className="grid grid-cols-1 gap-4">
 					<Select
 						name="category"
 						value={filters.category}
-						onChange={handleChange}
+						onChange={handleInputChange}
 						options={categories}
 						placeholder="Select Category"
 					/>
@@ -147,7 +152,7 @@ export function Filter({
 					<Select
 						name="brand"
 						value={filters.brand}
-						onChange={handleChange}
+						onChange={handleInputChange}
 						options={brands}
 						placeholder="Select Brand"
 					/>
@@ -159,14 +164,14 @@ export function Filter({
 						name="minPrice"
 						placeholder="Min Price"
 						value={filters.minPrice}
-						onChange={handleChange}
+						onChange={handleInputChange}
 					/>
 					<Input
 						type="number"
 						name="maxPrice"
 						placeholder="Max Price"
 						value={filters.maxPrice}
-						onChange={handleChange}
+						onChange={handleInputChange}
 					/>
 				</div>
 
@@ -180,7 +185,7 @@ export function Filter({
 									filters.availability.includes(option) ? "default" : "outline"
 								}
 								size="sm"
-								onClick={() => handleAvailabilityChange(option)}>
+								onClick={() => handleAvailabilityToggle(option)}>
 								{filters.availability.includes(option) && (
 									<Check className="mr-1 h-4 w-4" />
 								)}
@@ -194,7 +199,7 @@ export function Filter({
 					<Select
 						name="spec"
 						value={filters.spec}
-						onChange={handleChange}
+						onChange={handleInputChange}
 						options={specifications}
 						placeholder="Select Specification"
 					/>
@@ -202,7 +207,7 @@ export function Filter({
 					<Select
 						name="certification"
 						value={filters.certification}
-						onChange={handleChange}
+						onChange={handleInputChange}
 						options={certifications}
 						placeholder="Select Certification"
 					/>

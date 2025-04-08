@@ -1,5 +1,8 @@
 {
-	"HomePage": {
+	"home": {
 		"title": "Home Page"
+	},
+	"category": {
+		"noResults": "No products found matching your criteria"
 	}
 }
