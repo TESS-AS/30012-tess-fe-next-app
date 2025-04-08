@@ -1,14 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { FilterValues } from "@/types/filter.types";
-
-interface Product {
-	id: string;
-	name: string;
-	price: number;
-	image: string;
-	category: string;
-}
+import { Product } from "@/types/store.types";
 
 export function useProductFilter(initialProducts: Product[]) {
 	const [filteredProducts, setFilteredProducts] = useState(initialProducts);
