@@ -3,6 +3,7 @@
 		"title": "Home Page"
 	},
 	"category": {
-		"noResults": "No products found matching your criteria"
+		"noResults": "No products found matching your criteria",
+		"viewAll": "View All Categories"
 	}
 }

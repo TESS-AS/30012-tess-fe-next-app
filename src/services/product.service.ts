@@ -1,6 +1,6 @@
 import { AxiosResponse } from "axios";
 
-import axiosInstance from "./api";
+import axiosInstance from "./axiosClient";
 
 export async function productFetch(productName: string) {
 	try {

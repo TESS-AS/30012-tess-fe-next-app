@@ -3,6 +3,7 @@
 		"title": "Home Page No"
 	},
 	"category": {
-		"noResults": "Ingen resultater funnet"
+		"noResults": "Ingen resultater funnet",
+		"viewAll": "Se alle kategorier"
 	}
 }
