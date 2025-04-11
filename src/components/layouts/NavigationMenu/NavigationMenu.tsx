@@ -23,8 +23,8 @@ export default function CategoryNavigationMenu({
 	const t = useTranslations();
 
 	return (
-		<NavigationMenu className="hidden w-full md:flex">
-			<NavigationMenuList className="flex max-w-full gap-2 px-2">
+		<NavigationMenu className="hidden w-full justify-between md:flex">
+			<NavigationMenuList className="flex w-full max-w-full justify-between gap-2 px-0">
 				{categories.slice(0, 7).map((category) => (
 					<NavigationMenuItem key={category.slug}>
 						{category.subcategories?.length ? (

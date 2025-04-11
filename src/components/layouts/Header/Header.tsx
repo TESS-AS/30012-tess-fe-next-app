@@ -177,7 +177,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 				</div>
 			</div>
 			<div className="border-t">
-				<div className="container m-auto flex h-12 items-center gap-4">
+				<div className="container m-auto flex h-12 w-full items-center justify-between gap-4">
 					<CategoryNavigationMenu categories={categories} />
 				</div>
 			</div>

@@ -1,6 +1,7 @@
 {
 	"home": {
-		"title": "Home Page No"
+		"title": "Home Page No",
+		"bannerTitle": "Velkommen til TESS!"
 	},
 	"category": {
 		"noResults": "Ingen resultater funnet",

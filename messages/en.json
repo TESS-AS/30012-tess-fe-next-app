@@ -1,6 +1,7 @@
 {
 	"home": {
-		"title": "Home Page"
+		"title": "Home Page",
+		"bannerTitle": "Welcome to TESS!"
 	},
 	"category": {
 		"noResults": "No products found matching your criteria",
