@@ -3,6 +3,7 @@
 import type React from "react";
 import { useState } from "react";
 
+import CategoryNavigationMenu from "@/components/layouts/NavigationMenu/NavigationMenu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,8 +19,6 @@ import { Search, ShoppingCart, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useLocale } from "next-intl";
-
-import { mockCategories as categories } from "../../../mocks/mockCategories";
 
 export default function Header() {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -176,16 +175,9 @@ export default function Header() {
 					</Sheet>
 				</div>
 			</div>
-			<div className="bg-muted border-t">
-				<div className="container m-auto flex h-12 items-center gap-4 overflow-x-auto">
-					{categories.map((category) => (
-						<Link
-							key={category.slug}
-							href={`/category/${category.slug}`}
-							className="text-muted-foreground hover:text-primary text-sm font-medium whitespace-nowrap transition-colors">
-							{category.name}
-						</Link>
-					))}
+			<div className="border-t">
+				<div className="container m-auto flex h-12 items-center gap-4">
+					<CategoryNavigationMenu />
 				</div>
 			</div>
 		</header>
