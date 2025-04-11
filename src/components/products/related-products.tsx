@@ -49,7 +49,7 @@ export async function RelatedProducts({
 					<ProductCard
 						key={product.id}
 						{...product}
-						href={`/${product.category}/${product.id}`}
+						href={`/${product.category}/${product.subcategory}/${product.id}`}
 					/>
 				))}
 			</div>
