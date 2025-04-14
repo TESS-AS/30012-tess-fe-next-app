@@ -5,9 +5,8 @@
 	},
 	"category": {
 		"noResults": "Ingen resultater funnet",
-      "viewAll": "Se alle kategorier"
-
-    },
+		"viewAll": "Se alle kategorier"
+	},
 	"product": {
 		"notFound": "Produkt ikke funnet",
 		"productDescription": "Produktbeskrivelse",

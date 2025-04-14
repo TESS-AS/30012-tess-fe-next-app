@@ -5,9 +5,8 @@
 	},
 	"category": {
 		"noResults": "No products found matching your criteria",
-      "viewAll": "View All Categories"
-
-    },
+		"viewAll": "View All Categories"
+	},
 	"product": {
 		"notFound": "Product not found",
 		"productDescription": "Product description",
