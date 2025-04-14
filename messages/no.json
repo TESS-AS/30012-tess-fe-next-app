@@ -5,6 +5,16 @@
 	},
 	"category": {
 		"noResults": "Ingen resultater funnet",
-		"viewAll": "Se alle kategorier"
+      "viewAll": "Se alle kategorier"
+
+    },
+	"product": {
+		"notFound": "Produkt ikke funnet",
+		"productDescription": "Produktbeskrivelse",
+		"selectSize": "Velg størrelse",
+		"adding": "Legger til i kassen...",
+		"addToCart": "Legg til i kassen",
+		"relatedProducts": "Relaterte produkter",
+		"viewAll": "Vis alle"
 	}
 }
