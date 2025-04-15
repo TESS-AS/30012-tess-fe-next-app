@@ -2,34 +2,36 @@
 
 import { useEffect, useState } from "react";
 
-export interface Category {
-	name: string;
-	slug: string;
-}
+import { mapCategoryTree } from "@/lib/utils";
+import axiosInstance from "@/services/axiosClient";
+import { Category } from "@/types/categories.types";
 
-export function useCategories(query = "") {
+export function useCategories(locale: string) {
 	const [categories, setCategories] = useState<Category[]>([]);
 	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<null | string>(null);
+	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
+		if (!locale) return;
+
 		const fetchCategories = async () => {
 			setLoading(true);
 			try {
-				const res = await fetch(
-					`https://30011-proxyapi-cuafeua6bha7ckby.norwayeast-01.azurewebsites.net/searchCategory/${query}`,
+				const response = await axiosInstance.get(`/categories/${locale}`);
+				const transformed = response.data.map((item: any) =>
+					mapCategoryTree(item, locale),
 				);
-				const data = await res.json();
-				setCategories(data.categories ?? []);
+				setCategories(transformed);
 			} catch (err) {
-				setError("Failed to fetch categories");
+				console.error("Error fetching categories:", err);
+				setError("Failed to load categories");
 			} finally {
 				setLoading(false);
 			}
 		};
 
 		fetchCategories();
-	}, [query]);
+	}, [locale]);
 
 	return { categories, loading, error };
 }

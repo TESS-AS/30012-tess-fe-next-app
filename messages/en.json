@@ -1,9 +1,11 @@
 {
 	"home": {
-		"title": "Home Page"
+		"title": "Home Page",
+		"bannerTitle": "Welcome to TESS!"
 	},
 	"category": {
-		"noResults": "No products found matching your criteria"
+		"noResults": "No products found matching your criteria",
+		"viewAll": "View All Categories"
 	},
 	"product": {
 		"notFound": "Product not found",

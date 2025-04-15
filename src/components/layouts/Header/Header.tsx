@@ -15,12 +15,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useRouter } from "@/i18n/navigation";
+import { Category } from "@/types/categories.types";
 import { Search, ShoppingCart, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 
-export default function Header() {
+export default function Header({ categories }: { categories: Category[] }) {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const currentLocale = useLocale();
@@ -176,8 +177,8 @@ export default function Header() {
 				</div>
 			</div>
 			<div className="border-t">
-				<div className="container m-auto flex h-12 items-center gap-4">
-					<CategoryNavigationMenu />
+				<div className="container m-auto flex h-12 w-full items-center justify-between gap-4">
+					<CategoryNavigationMenu categories={categories} />
 				</div>
 			</div>
 		</header>
