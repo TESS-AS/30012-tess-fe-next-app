@@ -1,6 +1,7 @@
-import { AxiosResponse } from "axios";
+import axios, { AxiosResponse } from "axios";
 
 import axiosInstance from "./api";
+import { IProduct } from "@/types/product.types";
 
 export async function productFetch(productName: string) {
 	try {
@@ -58,5 +59,38 @@ export async function loadItem(query?: string) {
 	} catch (error) {
 		console.error("Error loading category, using mock data", error);
 		return null;
+	}
+}
+
+export async function loadProductsByCategory(
+	categoryId: string,
+	limit?: number,
+	page?: number,
+	language?: string,
+) {
+	console.log("categoryId: ", categoryId, "language: ", language);
+	try {
+		const url = `https://30011-proxyapi-cuafeua6bha7ckby.norwayeast-01.azurewebsites.net/productsMainCat/?categoryId=${categoryId}&language=${language}&limit=${limit}&page=${page}`;
+		const response: AxiosResponse<IProduct[]> = await axios.get(url);
+		return response.data;
+	} catch (error) {
+		console.error("Error loading categories", error);
+		return [];
+	}
+}
+
+export async function loadProductsBySubCategory(
+	categoryId: string,
+	limit?: number,
+	page?: number,
+	language?: string,
+) {
+	try {
+		const url = `/productsSubCat/?categoryId=${categoryId}&language=${language}&limit=${limit}&page=${page}`;
+		const response: AxiosResponse<IProduct[]> = await axiosInstance.get(url);
+		return response.data;
+	} catch (error) {
+		console.error("Error loading sub categories", error);
+		return [];
 	}
 }

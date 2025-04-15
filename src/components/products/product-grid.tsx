@@ -3,13 +3,13 @@
 import { Filter } from "@/components/ui/filter";
 import { useProductFilter } from "@/hooks/useProductFilter";
 import { cn } from "@/lib/utils";
-import { mockProducts } from "@/mocks/mockProducts";
 import { useTranslations } from "next-intl";
 
 import { ProductCard } from "./product-card";
+import { IProduct } from "@/types/product.types";
 
 interface ProductGridProps {
-	initialProducts: typeof mockProducts;
+	initialProducts: IProduct[];
 	variant?: "default" | "compact";
 }
 
@@ -39,9 +39,8 @@ export function ProductGrid({
 					)}>
 					{filteredProducts.map((product) => (
 						<ProductCard
-							key={product.id}
+							key={product.product_number}
 							{...product}
-							href={`/${product.category}/${product.subcategory}/${product.id}`}
 							variant={variant}
 						/>
 					))}

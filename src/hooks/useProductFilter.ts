@@ -2,8 +2,9 @@ import { useCallback, useState } from "react";
 
 import { FilterValues } from "@/types/filter.types";
 import { Product } from "@/types/store.types";
+import { IProduct } from "@/types/product.types";
 
-export function useProductFilter(initialProducts: Product[]) {
+export function useProductFilter(initialProducts: IProduct[]) {
 	const [filteredProducts, setFilteredProducts] = useState(initialProducts);
 
 	const filterProducts = useCallback(
@@ -12,23 +13,23 @@ export function useProductFilter(initialProducts: Product[]) {
 				// Search filter
 				if (
 					filters.search &&
-					!product.name.toLowerCase().includes(filters.search.toLowerCase())
+					!product.product_name.toLowerCase().includes(filters.search.toLowerCase())
 				) {
 					return false;
 				}
 
 				// Price range filter
-				if (filters.minPrice && product.price < parseFloat(filters.minPrice)) {
-					return false;
-				}
-				if (filters.maxPrice && product.price > parseFloat(filters.maxPrice)) {
-					return false;
-				}
+				// if (filters.minPrice && product.price < parseFloat(filters.minPrice)) {
+				// 	return false;
+				// }
+				// if (filters.maxPrice && product.price > parseFloat(filters.maxPrice)) {
+				// 	return false;
+				// }
 
 				// Category filter
-				if (filters.category && product.category !== filters.category) {
-					return false;
-				}
+				// if (filters.category && product.category !== filters.category) {
+				// 	return false;
+				// }
 
 				return true;
 			});

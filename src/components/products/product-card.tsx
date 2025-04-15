@@ -1,28 +1,20 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { IProduct } from "@/types/product.types";
 import Image from "next/image";
 import Link from "next/link";
 
-interface ProductCardProps {
-	id: string;
-	name: string;
-	price: number;
-	image: string;
-	category: string;
-	href?: string;
+interface ProductCardProps extends IProduct {
 	className?: string;
 	aspectRatio?: "portrait" | "square";
 	variant?: "default" | "compact";
 }
 
 export function ProductCard({
-	id,
-	name,
-	price,
-	image,
-	category,
-	href,
+	product_number,
+	product_name,
+	media_m,
 	className,
 	aspectRatio = "square",
 	variant = "default",
@@ -39,10 +31,10 @@ export function ProductCard({
 					"bg-muted relative overflow-hidden rounded-md",
 					aspectRatio === "portrait" ? "aspect-[3/4]" : "aspect-square",
 				)}>
-				{image ? (
+				{media_m ? (
 					<Image
-						src={image}
-						alt={name}
+						src={media_m}
+						alt={product_name}
 						fill
 						className="object-cover transition-transform group-hover:scale-105"
 					/>
@@ -50,39 +42,14 @@ export function ProductCard({
 					<div className="bg-muted h-full w-full" />
 				)}
 			</div>
-			<div className={cn("mt-4", variant === "compact" && "mt-2")}>
-				<h3
-					className={cn(
-						"line-clamp-2 font-medium",
-						variant === "compact" ? "text-sm" : "text-base",
-					)}>
-					{name}
-				</h3>
-				<p
-					className={cn(
-						"text-muted-foreground mt-1",
-						variant === "compact" ? "text-xs" : "text-sm",
-					)}>
-					${price.toFixed(2)}
-				</p>
-				{variant === "default" && (
-					<p className="text-muted-foreground/60 mt-1 text-xs capitalize">
-						{category}
-					</p>
-				)}
+			<div className={cn("flex flex-col", variant === "default" ? "mt-4" : "mt-2")}>
+				<h3 className="text-sm font-medium">{product_name}</h3>
+				<div className="mt-2 flex items-center justify-between text-sm text-muted-foreground">
+					<p>{product_number}</p>
+				</div>
 			</div>
 		</div>
 	);
-
-	if (href) {
-		return (
-			<Link
-				href={href}
-				className="block">
-				{content}
-			</Link>
-		);
-	}
 
 	return content;
 }
