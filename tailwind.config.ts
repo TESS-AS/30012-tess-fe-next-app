@@ -90,7 +90,7 @@ const config = {
 					foreground: "hsl(var(--card-foreground))",
 				},
 				green: {
-					DEFAULT: "#108558",
+					DEFAULT: "#02a554",
 				},
 				"blue-dark": "#efce3925", // For --tw-gradient-from
 			},

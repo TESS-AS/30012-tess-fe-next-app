@@ -15,5 +15,10 @@
 		"addToCart": "Legg til i kassen",
 		"relatedProducts": "Relaterte produkter",
 		"viewAll": "Vis alle"
+	},
+	"search": {
+		"suggestions": "Søkeforslag",
+		"noSuggestions": "Ingen søkeforslag funnet",
+		"noProductsFound": "Ingen produkter funnet"
 	}
 }
