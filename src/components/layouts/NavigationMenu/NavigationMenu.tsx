@@ -53,20 +53,20 @@ export default function CategoryNavigationMenu({
 													</Link>
 												</div>
 
-												{subcategory.subcategories?.length > 0 && (
-													<ul className="ml-2 space-y-1">
-														{subcategory.subcategories.map((child) => (
-															<li key={child.slug}>
-																{/* Level 3 becomes filter via query param */}
-																<Link
-																	href={`/${category.slug}/${subcategory.slug}?segment=${child.slug}`}
-																	className="text-muted-foreground hover:text-foreground text-sm transition-colors">
-																	{child.name}
-																</Link>
-															</li>
-														))}
-													</ul>
-												)}
+												{Array.isArray(subcategory.subcategories) &&
+													subcategory.subcategories.length > 0 && (
+														<ul className="ml-2 space-y-1">
+															{subcategory.subcategories.map((child) => (
+																<li key={child.slug}>
+																	<Link
+																		href={`/${category.slug}/${subcategory.slug}?segment=${child.slug}`}
+																		className="text-muted-foreground hover:text-foreground text-sm transition-colors">
+																		{child.name}
+																	</Link>
+																</li>
+															))}
+														</ul>
+													)}
 											</li>
 										))}
 									</ul>
