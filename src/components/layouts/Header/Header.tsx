@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import CategoryNavigationMenu from "@/components/layouts/NavigationMenu/NavigationMenu";
 import { Badge } from "@/components/ui/badge";
@@ -20,12 +20,18 @@ import { Search, ShoppingCart, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useLocale } from "next-intl";
+import { useStore } from "@/store/store";
 
 export default function Header({ categories }: { categories: Category[] }) {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const currentLocale = useLocale();
 	const router = useRouter();
+	const { setCategories } = useStore();
+
+	useEffect(() => {
+		setCategories(categories);
+	}, [categories]);
 
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();

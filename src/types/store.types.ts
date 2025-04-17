@@ -1,3 +1,5 @@
+import { Category } from "./categories.types";
+
 export interface Product {
 	id: string;
 	name: string;
@@ -41,4 +43,8 @@ export interface StoreState {
 	// UI slice
 	isLoading: boolean;
 	setLoading: (loading: boolean) => void;
+
+	//
+	categories: Category[]
+	setCategories: (categories: Category[]) => void
 }

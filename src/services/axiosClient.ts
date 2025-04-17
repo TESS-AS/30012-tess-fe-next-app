@@ -7,15 +7,19 @@ const axiosClient = axios.create({
 });
 
 axiosClient.interceptors.request.use((config) => {
-	const token = localStorage.getItem("token");
-	if (token) config.headers.Authorization = `Bearer ${token}`;
+	// Only access localStorage in client-side environment
+	if (typeof window !== 'undefined') {
+		const token = localStorage.getItem("token");
+		if (token) config.headers.Authorization = `Bearer ${token}`;
+	}
 	return config;
 });
 
 axiosClient.interceptors.response.use(
 	(res) => res,
 	(err) => {
-		if (err.response?.status === 401) {
+		// Only access localStorage in client-side environment
+		if (typeof window !== 'undefined' && err.response?.status === 401) {
 			localStorage.removeItem("token");
 		}
 		console.error("API Error:", err);

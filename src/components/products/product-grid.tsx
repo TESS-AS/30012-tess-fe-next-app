@@ -3,10 +3,10 @@
 import { Filter } from "@/components/ui/filter";
 import { useProductFilter } from "@/hooks/useProductFilter";
 import { cn } from "@/lib/utils";
+import { IProduct } from "@/types/product.types";
 import { useTranslations } from "next-intl";
 
 import { ProductCard } from "./product-card";
-import { IProduct } from "@/types/product.types";
 
 interface ProductGridProps {
 	initialProducts: IProduct[];

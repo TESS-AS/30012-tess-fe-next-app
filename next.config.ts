@@ -3,7 +3,12 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
     images: {
-      domains: ['media.bluestonepim.com'],
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'media.bluestonepim.com',
+            },
+        ],
     },
 };
 

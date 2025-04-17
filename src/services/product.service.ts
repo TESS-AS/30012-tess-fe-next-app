@@ -1,7 +1,6 @@
+import { IProduct } from "@/types/product.types";
 import axios, { AxiosResponse } from "axios";
 
-import axiosInstance from "./api";
-import { IProduct } from "@/types/product.types";
 import axiosInstance from "./axiosClient";
 
 export async function productFetch(productName: string) {
@@ -65,13 +64,13 @@ export async function loadItem(query?: string) {
 
 export async function loadProductsByCategory(
 	categoryId: string,
-	limit?: number,
 	page?: number,
+	limit?: number,
 	language?: string,
 ) {
 	console.log("categoryId: ", categoryId, "language: ", language);
 	try {
-		const url = `https://30011-proxyapi-cuafeua6bha7ckby.norwayeast-01.azurewebsites.net/productsMainCat/?categoryId=${categoryId}&language=${language}&limit=${limit}&page=${page}`;
+		const url = `https://30011-proxyapi-cuafeua6bha7ckby.norwayeast-01.azurewebsites.net/productsMainCat/?categoryId=${categoryId}&page=${page}&limit=${limit}&language=${language}`;
 		const response: AxiosResponse<IProduct[]> = await axios.get(url);
 		return response.data;
 	} catch (error) {
@@ -82,12 +81,12 @@ export async function loadProductsByCategory(
 
 export async function loadProductsBySubCategory(
 	categoryId: string,
-	limit?: number,
 	page?: number,
+	limit?: number,
 	language?: string,
 ) {
 	try {
-		const url = `/productsSubCat/?categoryId=${categoryId}&language=${language}&limit=${limit}&page=${page}`;
+		const url = `/productsSubCat/?categoryId=${categoryId}`;
 		const response: AxiosResponse<IProduct[]> = await axiosInstance.get(url);
 		return response.data;
 	} catch (error) {
