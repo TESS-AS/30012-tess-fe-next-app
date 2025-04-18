@@ -89,9 +89,7 @@ const config = {
 					DEFAULT: "hsl(var(--card))",
 					foreground: "hsl(var(--card-foreground))",
 				},
-				green: {
-					DEFAULT: "#02a554",
-				},
+				green: "#02a554",
 				"blue-dark": "#efce3925", // For --tw-gradient-from
 			},
 			borderRadius: {

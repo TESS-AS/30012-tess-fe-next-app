@@ -63,7 +63,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 						<Input
 							type="search"
 							placeholder="Search products..."
-							className={cn(inputStyles(), "bg-background w-[650px] pl-8")}
+							className={"bg-background w-[650px] border-green-600 pl-8"}
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
 						/>
