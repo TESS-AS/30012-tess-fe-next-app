@@ -15,5 +15,10 @@
 		"addToCart": "Add to Cart",
 		"relatedProducts": "Related Products",
 		"viewAll": "View all"
+	},
+	"search": {
+		"suggestions": "Suggestions",
+		"noSuggestions": "No suggestions found",
+		"noProductsFound": "No products found"
 	}
 }

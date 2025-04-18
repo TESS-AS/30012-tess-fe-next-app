@@ -12,19 +12,25 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+import { Input, inputStyles } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useSearch } from "@/hooks/useProductSearch";
 import { useRouter } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
 import { Category } from "@/types/categories.types";
+import { IProductSearch, ISuggestions } from "@/types/search.types";
 import { Search, ShoppingCart, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function Header({ categories }: { categories: Category[] }) {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const currentLocale = useLocale();
+	const { data, isLoading } = useSearch(searchQuery);
+	const t = useTranslations();
+
 	const router = useRouter();
 
 	const handleSearch = (e: React.FormEvent) => {
@@ -57,10 +63,73 @@ export default function Header({ categories }: { categories: Category[] }) {
 						<Input
 							type="search"
 							placeholder="Search products..."
-							className="bg-background w-full pl-8 md:w-[400px] lg:w-[500px]"
+							className={"bg-background w-[650px] border-green-600 pl-8"}
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
 						/>
+						{searchQuery && data && (
+							<div className="absolute top-full left-0 z-50 mt-2 grid max-h-[400px] w-[650px] grid-cols-2 gap-4 overflow-y-auto rounded-md bg-white p-4 shadow-lg">
+								<div>
+									<h4 className="mb-2 text-sm font-semibold">
+										{t("search.suggestions")}
+									</h4>
+									{data.searchSuggestions?.length ? (
+										data.searchSuggestions.map(
+											(s: ISuggestions, idx: number) => (
+												<Link
+													key={idx}
+													href={`/search?query=${encodeURIComponent(s.keyword)}`}
+													className="block rounded-md p-2 text-sm hover:bg-gray-100">
+													{s.keyword}
+												</Link>
+											),
+										)
+									) : (
+										<p className="text-sm text-green-600">
+											{t("search.noSuggestions")}
+										</p>
+									)}
+								</div>
+
+								<div>
+									{data.productRes?.length ? (
+										data.productRes.map((product: IProductSearch) => (
+											<Link
+												key={product.product_number}
+												href={`/product/${product.product_number}`}
+												className="flex items-center gap-4 rounded-md p-3 hover:bg-gray-100">
+												<div className="flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md">
+													{product.media ? (
+														<Image
+															src={product.media}
+															alt={product.product_name}
+															width={64}
+															height={64}
+															className="max-h-16 max-w-16 object-contain"
+														/>
+													) : (
+														<div className="h-10 w-10 rounded bg-gray-300" />
+													)}
+												</div>
+
+												<div className="flex flex-col justify-center">
+													<span className="text-base font-medium">
+														{product.product_name}
+													</span>
+													<span className="text-muted-foreground text-sm">
+														{product.product_number}
+													</span>
+												</div>
+											</Link>
+										))
+									) : (
+										<p className="text-opacity-30 text-sm text-green-600">
+											{t("search.noProductsFound")}
+										</p>
+									)}
+								</div>
+							</div>
+						)}
 					</div>
 				</form>
 				<div className="flex items-center gap-2">
