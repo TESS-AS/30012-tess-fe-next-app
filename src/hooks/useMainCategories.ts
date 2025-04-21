@@ -30,9 +30,9 @@ export function useMainCategories() {
 					.filter((cat) => cat.group_id)
 					.map((cat) => ({
 						id: cat.group_id,
-						name: locale === "no" ? cat.name_no : cat.name_en,
+						name: locale === "no" ? cat.name_no || "" : cat.name_en || "",
 						description: "",
-						icon: categoryIconMap[cat.group_id] || Package,
+						icon: categoryIconMap[cat.group_id] ?? Package,
 					}));
 
 				setData(transformed);
