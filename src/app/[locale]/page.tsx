@@ -7,7 +7,7 @@ export default function Home() {
 	const t = useTranslations("home");
 
 	return (
-		<div className="grid min-h-screen grid-rows-[auto_1fr_20px] gap-16 font-[family-name:var(--font-geist-sans)]">
+		<div className="grid min-h-screen grid-rows-[auto_1fr_20px] gap-16 pt-5">
 			<Card className="w-full overflow-hidden">
 				<CardContent className="relative h-64 rounded-2xl p-0 shadow-md">
 					<Image
