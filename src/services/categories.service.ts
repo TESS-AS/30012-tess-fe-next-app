@@ -13,10 +13,22 @@ export async function loadCategories(locale: string) {
 	}
 }
 
-export async function loadFiltersBasedOnCategory(id: string) {
+export async function loadFiltersBasedOnCategory(
+    categoryNumber: string,
+    searchTerm: string | null = null
+) {
 	try {
-		const url = `/attributeFilter/${id}`;
-		const response: AxiosResponse = await axiosInstance.get(url);
+
+		const params = new URLSearchParams();
+        if (categoryNumber) {
+            params.append('categoryNumber', categoryNumber);
+        }
+        if (searchTerm) {
+            params.append('searchTerm', searchTerm);
+        }
+
+		const url = `/attributeFilter/${params.toString() ? `?${params.toString()}` : ''}`;
+		const response = await axiosInstance.get(url);
 		return response.data;
 	} catch (error) {
 		console.error("Error loading filters", error);

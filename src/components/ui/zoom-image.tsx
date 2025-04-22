@@ -59,7 +59,7 @@ export function ZoomImage({
 					width={width}
 					height={height}
 					className={cn(
-						"h-full w-full object-cover transition-transform",
+						"h-full w-full transition-transform",
 						isZoomed && "scale-150",
 					)}
 					style={

@@ -3,94 +3,85 @@ import axios, { AxiosResponse } from "axios";
 
 import axiosInstance from "./axiosClient";
 
-export async function productFetch(productName: string) {
-	try {
-		const editedProductName = productName.split(" ").join("%20");
-		const url = `/searchResult/${editedProductName}`;
-		const apires = await axiosInstance.get(url);
-		console.log("api res searchResult: ", apires, "url: ", url);
 
-		return apires.data;
-	} catch (error) {
-		console.error("Error fetching product:", error);
-		return null;
-	}
+interface SearchListResponse {
+    product: IProduct[];
+    page: number;
+    totalPages: number;
+	filters?: FilterValues[]
 }
 
-export async function loadSearchList(
-	query: string,
-	page: number,
-	pageSize: number,
-	categories?: string[],
-) {
-	try {
-		const url = `/searchList/${query}/${page}/${pageSize}`;
-		const response: AxiosResponse = await axiosInstance.post(url, categories);
+interface FilterValues {
+    key: string;
+    values: string[];
+}
 
-		console.log("api res searchList: ", response.data);
+export async function productFetch(productName: string) {
+    try {
+        const url = `/searchResult/${productName}`;
+        const apires = await axiosInstance.get(url);
 
-		return response.data;
-	} catch (error) {
-		console.error("Error loading search list", error);
-		return { items: [], total: 0 };
-	}
+        return apires.data;
+    } catch (error) {
+        console.error("Error fetching product:", error);
+        throw error;
+    }
 }
 
 export async function loadCategories(query: string) {
-	try {
-		const url = `/searchCategory/${query}`;
-		const response: AxiosResponse = await axiosInstance.get(url);
-		console.log(response.data);
-		return response.data;
-	} catch (error) {
-		console.error("Error loading categories", error);
-		return [];
-	}
+    try {
+        const url = `/searchCategory/${query}`;
+        const response: AxiosResponse = await axiosInstance.get(url);
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error loading categories", error);
+        return [];
+    }
 }
 
 export async function loadItem(query?: string) {
-	try {
-		const parsedQuery = query?.split(" ").join("%20");
-		const url = `/search/${parsedQuery}`;
+    try {
+        const parsedQuery = query?.split(" ").join("%20");
+        const url = `/search/${parsedQuery}`;
 
-		const response: AxiosResponse = await axiosInstance.get(url);
-		console.log("api res from search: ", response.data);
-		return response.data;
-	} catch (error) {
-		console.error("Error loading category, using mock data", error);
-		return null;
-	}
+        const response: AxiosResponse = await axiosInstance.get(url);
+        console.log("api res from search: ", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error loading category, using mock data", error);
+        return null;
+    }
 }
 
-export async function loadProductsByCategory(
-	categoryId: string,
-	page?: number,
-	limit?: number,
-	language?: string,
-) {
-	console.log("categoryId: ", categoryId, "language: ", language);
-	try {
-		const url = `https://30011-proxyapi-cuafeua6bha7ckby.norwayeast-01.azurewebsites.net/productsMainCat/?categoryId=${categoryId}&page=${page}&limit=${limit}&language=${language}`;
-		const response: AxiosResponse<IProduct[]> = await axios.get(url);
-		return response.data;
-	} catch (error) {
-		console.error("Error loading categories", error);
-		return [];
-	}
-}
+export async function searchProducts(
+    page: number = 1,
+    pageSize: number = 9,
+    searchTerm: string | null,
+    categoryNumber: string,
+    filters: FilterValues[] | null
+): Promise<SearchListResponse> {
+    try {
+        // Build query parameters
+        const params = new URLSearchParams();
+        if (categoryNumber) {
+            params.append('categoryNumber', categoryNumber);
+        }
+        if (searchTerm) {
+            params.append('searchTerm', searchTerm);
+        }
 
-export async function loadProductsBySubCategory(
-	categoryId: string,
-	page?: number,
-	limit?: number,
-	language?: string,
-) {
-	try {
-		const url = `/productsSubCat/?categoryId=${categoryId}`;
-		const response: AxiosResponse<IProduct[]> = await axiosInstance.get(url);
-		return response.data;
-	} catch (error) {
-		console.error("Error loading sub categories", error);
-		return [];
-	}
+        // Construct URL with path parameters and query string
+        const url = `/searchList/${page}/${pageSize}/${params.toString() ? `?${params.toString()}` : ''}`;
+
+        // Make request with or without body based on filters
+        const response = filters && filters.length > 0
+            ? await axiosInstance.post(url, { filters })
+            : await axiosInstance.post(url);
+        
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        throw error;
+    }
 }

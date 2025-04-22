@@ -1,89 +1,93 @@
 import { ProductActions } from "@/components/products/product-actions";
+import { ProductDetails } from "@/components/products/product-details";
 import { ProductGallery } from "@/components/products/product-gallery";
+import { ProductInfo } from "@/components/products/product-info";
 import { RelatedProducts } from "@/components/products/related-products";
-import { mockProducts } from "@/mocks/mockProducts";
-import { getTranslations } from "next-intl/server";
+import { Separator } from "@/components/ui/separator";
+import { productFetch } from "@/services/product.service";
+import { getLocale, getTranslations } from "next-intl/server";
+import { notFound } from "next/navigation";
 
 interface Params {
-	category: string;
-	product: string;
+    category: string;
+    product: string;
 }
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+async function getProducts(productId: string) {
+    try {
+        return await productFetch(productId);
+    } catch (error) {
+        console.error("Error fetching product:", error);
+        return [];
+    }
+}
 
 export default async function ProductPage({
-	params,
+    params,
 }: {
-	params: Promise<Params>;
+    params: Promise<Params>;
 }) {
-	const t = await getTranslations();
-	const { category, product } = await params;
+    const locale = await getLocale();
+    const { category, product } = await params;
 
-	// Simulate API delay for testing loader state
-	await delay(1000);
+    const _productData = await getProducts(product);
 
-	const productData = mockProducts.find((p) => p.id === product);
+    if (!_productData[0]) {
+        return notFound();
+    }
 
-	if (!productData) {
-		return <div>{t("product.notFound")}</div>;
-	}
+    const productData = _productData[0];
+    const productImages = Array.isArray(productData.media_id)
+        ? productData.media_id
+        : [productData.media_id];
 
-	const productImages = [
-		{
-			id: "1",
-			url: productData.image,
-			alt: productData.name,
-		},
-		{
-			id: "2",
-			url: productData.image,
-			alt: `${productData.name} - View 2`,
-		},
-		{
-			id: "3",
-			url: productData.image,
-			alt: `${productData.name} - View 3`,
-		},
-	];
+    // Get localized content
+    const localizedContent = {
+        name: locale === "en" ? productData.product_name_en : productData.product_name,
+        description: locale === "en" ? productData.short_desc_en : productData.short_desc_no,
+        technicalInfo: locale === "en" ? productData.technical_info_en : productData.technical_info_no,
+        application: locale === "en" ? productData.application_en : productData.application_no,
+        users: locale === "en" ? productData.users_en : productData.users_no,
+        remarks: locale === "en" ? productData.remarks_en : productData.remarks_no,
+    };
 
-	return (
-		<div className="container mx-auto space-y-12 px-4 py-8">
-			<div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-				{/* Product Gallery */}
-				<ProductGallery images={productImages} />
+    return (
+        <div className="container mx-auto space-y-12 px-4 py-8">
+            <div className="grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-2">
+                {/* Product Gallery */}
+                <ProductGallery images={productImages} />
 
-				{/* Product Info */}
-				<div className="flex flex-col gap-6">
-					<div>
-						<h1 className="text-2xl font-bold">{productData.name}</h1>
-						<p className="text-muted-foreground mt-1 text-sm capitalize">
-							{category}
-						</p>
-					</div>
+                {/* Product Info */}
+                <div className="flex flex-col gap-4">
+                    <ProductInfo
+                        name={localizedContent.name}
+                        category={category}
+                        price={productData.price}
+                    />
 
-					<p className="text-primary text-xl font-semibold">
-						${productData.price.toFixed(2)}
-					</p>
+                    <ProductActions items={productData.items} />
 
-					{/* Product Actions */}
-					<ProductActions productId={productData.id} />
+                    <ProductDetails
+                        description={localizedContent.description}
+                        attributes={productData.attributes}
+                        technicalInfo={localizedContent.technicalInfo}
+                        application={localizedContent.application}
+                        users={localizedContent.users}
+                        remarks={localizedContent.remarks}
+                    />
+                </div>
+            </div>
 
-					{/* Product Description */}
-					<div className="prose max-w-none">
-						<h2 className="text-lg font-semibold">
-							{t("product.productDescription")}
-						</h2>
-						<p className="text-muted-foreground">{productData.description}</p>
-					</div>
-				</div>
-			</div>
-
-			{/* Related Products */}
-			<RelatedProducts
-				currentProductId={productData.id}
-				category={category}
-				maxItems={4}
-			/>
-		</div>
-	);
+            {/* Related Products */}
+            {productData.product_to_product_reference.length > 0 && (
+                <div>
+                    <Separator className="my-8" />
+                    <RelatedProducts
+                        products={productData.product_to_product_reference}
+                        category={category}
+                    />
+                </div>
+            )}
+        </div>
+    );
 }

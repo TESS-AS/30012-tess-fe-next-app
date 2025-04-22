@@ -3,6 +3,9 @@
 		"title": "Home Page No",
 		"bannerTitle": "Velkommen til TESS!"
 	},
+	"products": {
+		"noProducts": "Ingen produkter funnet"
+	},
 	"category": {
 		"noResults": "Ingen resultater funnet",
 		"viewAll": "Se alle kategorier"
@@ -11,9 +14,19 @@
 		"notFound": "Produkt ikke funnet",
 		"productDescription": "Produktbeskrivelse",
 		"selectSize": "Velg størrelse",
+		"selectedSize": "Størrelse: {size}",
 		"adding": "Legger til i kassen...",
 		"addToCart": "Legg til i kassen",
+		"addToWishlist": "Legg til i ønskeliste",
 		"relatedProducts": "Relaterte produkter",
-		"viewAll": "Vis alle"
+		"viewAll": "Vis alle",
+		"specifications": "Spesifikasjoner",
+		"technicalInfo": "Teknisk informasjon",
+		"application": "Bruksområde",
+		"users": "Brukere",
+		"remarks": "Merknader"
+	},
+	"common": {
+		"reset": "Nullstill"
 	}
 }

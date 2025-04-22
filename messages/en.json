@@ -3,17 +3,32 @@
 		"title": "Home Page",
 		"bannerTitle": "Welcome to TESS!"
 	},
+	"products": {
+		"noProducts": "No products found"
+	},
 	"category": {
-		"noResults": "No products found matching your criteria",
+		"noResults": "No results found",
 		"viewAll": "View All Categories"
 	},
 	"product": {
 		"notFound": "Product not found",
-		"productDescription": "Product description",
+		"productDescription": "Product Description",
 		"selectSize": "Select size",
+		"selectedSize": "Size: {size}",
 		"adding": "Adding...",
 		"addToCart": "Add to Cart",
+		"addToWishlist": "Add to Wishlist",
 		"relatedProducts": "Related Products",
-		"viewAll": "View all"
+		"viewAll": "View all",
+		"specifications": "Specifications",
+		"description": "Description",
+		"details": "Details",
+		"technicalInfo": "Technical Information",
+		"application": "Application",
+		"users": "Users",
+		"remarks": "Remarks"
+	},
+	"common": {
+		"reset": "Reset"
 	}
 }

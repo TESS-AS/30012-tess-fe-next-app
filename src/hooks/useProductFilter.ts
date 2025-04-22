@@ -1,54 +1,40 @@
-import { useCallback, useState } from "react";
+"use client";
 
-import { FilterValues } from "@/types/filter.types";
-import { Product } from "@/types/store.types";
 import { IProduct } from "@/types/product.types";
+import { searchProducts } from "@/services/product.service";
+import { useCallback, useState } from "react";
+import { FilterValues } from "@/types/filter.types";
 
-export function useProductFilter(initialProducts: IProduct[]) {
-	const [filteredProducts, setFilteredProducts] = useState(initialProducts);
+interface UseProductFilterProps {
+    initialProducts: IProduct[];
+    categoryNumber: string;
+}
 
-	const filterProducts = useCallback(
-		(filters: FilterValues) => {
-			return initialProducts.filter((product) => {
-				// Search filter
-				if (
-					filters.search &&
-					!product.product_name.toLowerCase().includes(filters.search.toLowerCase())
-				) {
-					return false;
-				}
+export function useProductFilter({ initialProducts, categoryNumber }: UseProductFilterProps) {
+    const [products, setProducts] = useState<IProduct[]>(initialProducts);
+    const [isLoading, setIsLoading] = useState(false);
 
-				// Price range filter
-				// if (filters.minPrice && product.price < parseFloat(filters.minPrice)) {
-				// 	return false;
-				// }
-				// if (filters.maxPrice && product.price > parseFloat(filters.maxPrice)) {
-				// 	return false;
-				// }
+    const handleFilterChange = useCallback(async (filters: FilterValues[]) => {
+        try {
+            setIsLoading(true);
+            const response = await searchProducts(
+                1,              // page
+                9,              // pageSize
+                null,           // searchTerm
+                categoryNumber,
+                filters?.length > 0 ? filters : null
+            );
+            setProducts(response.product || []);
+        } catch (error) {
+            console.error('Error applying filters:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [categoryNumber]);
 
-				// Category filter
-				// if (filters.category && product.category !== filters.category) {
-				// 	return false;
-				// }
-
-				return true;
-			});
-		},
-		[initialProducts],
-	);
-
-	const handleFilterChange = useCallback(
-		(filters: FilterValues) => {
-			const filtered = filterProducts(filters);
-			if (filtered) {
-				setFilteredProducts(filtered);
-			}
-		},
-		[filterProducts],
-	);
-
-	return {
-		filteredProducts,
-		handleFilterChange,
-	};
+    return {
+        products,
+        isLoading,
+        handleFilterChange
+    };
 }
