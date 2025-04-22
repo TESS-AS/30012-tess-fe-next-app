@@ -1,3 +1,4 @@
+import MainCategorySection from "@/components/categories/main-categories";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -25,7 +26,7 @@ export default function Home() {
 			</Card>
 
 			<div className="flex justify-between gap-5">
-				<p className="text-lg font-medium">{t("title")}</p>
+				<MainCategorySection />
 			</div>
 		</div>
 	);

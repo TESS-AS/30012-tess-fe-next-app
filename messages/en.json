@@ -1,7 +1,8 @@
 {
 	"home": {
 		"title": "Home Page",
-		"bannerTitle": "Welcome to TESS!"
+		"bannerTitle": "Welcome to TESS!",
+		"browseOurTopCategories": "Browse our top categories for today"
 	},
 	"category": {
 		"noResults": "No products found matching your criteria",
