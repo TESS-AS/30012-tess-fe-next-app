@@ -1,21 +1,20 @@
 "use client";
+import { IProduct } from "@/types/product.types";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
-
-import { ProductCard } from "./product-card";
-import { IProduct } from "@/types/product.types";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import { ProductCard } from "./product-card";
+
 interface RelatedProductsProps {
-	products: IProduct[],
-	category: string,
+	products: IProduct[];
+	category: string;
 }
 
 export async function RelatedProducts({
 	products,
-	category
+	category,
 }: RelatedProductsProps) {
 	const pathname = usePathname();
 	const t = useTranslations();

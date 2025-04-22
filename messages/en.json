@@ -29,6 +29,12 @@
 		"remarks": "Remarks"
 	},
 	"common": {
-		"reset": "Reset"
+		"reset": "Reset",
+		"error": {
+			"title": "Something went wrong!",
+			"tryAgain": "Try again",
+			"categoryLoad": "We couldn't load the category content.",
+			"subcategoryLoad": "We couldn't load the subcategory content."
+		}
 	}
 }

@@ -1,25 +1,23 @@
 import { formatUrlToDisplayName } from "@/utils/string-utils";
 
 interface ProductInfoProps {
-    name: string;
-    category: string;
-    price?: number;
+	name: string;
+	category: string;
+	price?: number;
 }
 
 export function ProductInfo({ name, category, price }: ProductInfoProps) {
-    return (
-        <div>
-            <p className="text-sm text-muted-foreground capitalize">
-                {formatUrlToDisplayName(category)}
-            </p>
-            <h1 className="text-2xl font-bold mt-1">
-                {name}
-            </h1>
-            {price && (
-                <p className="text-primary text-xl font-semibold mt-2">
-                    {price.toFixed(2)} EUR
-                </p>
-            )}
-        </div>
-    );
+	return (
+		<div>
+			<p className="text-muted-foreground text-sm capitalize">
+				{formatUrlToDisplayName(category)}
+			</p>
+			<h1 className="mt-1 text-2xl font-bold">{name}</h1>
+			{price && (
+				<p className="text-primary mt-2 text-xl font-semibold">
+					{price.toFixed(2)} EUR
+				</p>
+			)}
+		</div>
+	);
 }

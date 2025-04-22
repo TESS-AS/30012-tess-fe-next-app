@@ -45,6 +45,6 @@ export interface StoreState {
 	setLoading: (loading: boolean) => void;
 
 	//
-	categories: Category[]
-	setCategories: (categories: Category[]) => void
+	categories: Category[];
+	setCategories: (categories: Category[]) => void;
 }

@@ -15,12 +15,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useRouter } from "@/i18n/navigation";
+import { useStore } from "@/store/store";
 import { Category } from "@/types/categories.types";
 import { Search, ShoppingCart, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useLocale } from "next-intl";
-import { useStore } from "@/store/store";
 
 export default function Header({ categories }: { categories: Category[] }) {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -31,7 +31,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 
 	useEffect(() => {
 		setCategories(categories);
-	}, [categories]);
+	}, [categories, setCategories]);
 
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();

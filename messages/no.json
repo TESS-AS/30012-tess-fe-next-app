@@ -27,6 +27,12 @@
 		"remarks": "Merknader"
 	},
 	"common": {
-		"reset": "Nullstill"
+		"reset": "Nullstill",
+		"error": {
+			"title": "Noe gikk galt!",
+			"tryAgain": "Prøv igjen",
+			"categoryLoad": "Vi kunne ikke laste kategorien innhold.",
+			"subcategoryLoad": "Vi kunne ikke laste subkategorien innhold."
+		}
 	}
 }
