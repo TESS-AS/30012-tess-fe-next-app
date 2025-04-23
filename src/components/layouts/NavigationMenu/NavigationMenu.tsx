@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useState } from "react";
 
 import {
 	NavigationMenu,
@@ -10,6 +11,7 @@ import {
 	NavigationMenuList,
 	NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import { useSearch } from "@/hooks/useProductSearch";
 import { cn } from "@/lib/utils";
 import type { Category } from "@/types/categories.types";
 import Link from "next/link";
@@ -21,6 +23,8 @@ export default function CategoryNavigationMenu({
 	categories: Category[];
 }) {
 	const t = useTranslations();
+	const [query, setQuery] = useState("");
+	const { data, isLoading } = useSearch(query);
 
 	return (
 		<NavigationMenu className="hidden w-full justify-between md:flex">
@@ -38,14 +42,32 @@ export default function CategoryNavigationMenu({
 									{category.name}
 								</NavigationMenuTrigger>
 								<NavigationMenuContent>
-									<ul className="grid max-h-[400px] w-[1250px] gap-3 p-4 md:grid-cols-2">
+									<ul className="grid max-h-[500px] w-[1250px] gap-6 overflow-y-auto p-6 md:grid-cols-2 lg:grid-cols-3">
 										{category.subcategories.map((subcategory) => (
-											<ListItem
-												key={subcategory.slug}
-												title={subcategory.name}
-												href={`/${category.slug}/${subcategory.slug}`}>
-												Shop all {subcategory.name.toLowerCase()} items.
-											</ListItem>
+											<li key={subcategory.slug}>
+												<div className="mb-2 text-sm font-semibold">
+													<Link
+														href={`/${category.slug}/${subcategory.slug}`}
+														className="hover:underline">
+														{subcategory.name}
+													</Link>
+												</div>
+
+												{Array.isArray(subcategory.subcategories) &&
+													subcategory.subcategories.length > 0 && (
+														<ul className="ml-2 space-y-1">
+															{subcategory.subcategories.map((child) => (
+																<li key={child.slug}>
+																	<Link
+																		href={`/${category.slug}/${subcategory.slug}?segment=${child.slug}`}
+																		className="text-muted-foreground hover:text-foreground text-sm transition-colors">
+																		{child.name}
+																	</Link>
+																</li>
+															))}
+														</ul>
+													)}
+											</li>
 										))}
 									</ul>
 								</NavigationMenuContent>

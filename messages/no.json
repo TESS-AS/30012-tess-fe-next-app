@@ -1,7 +1,8 @@
 {
 	"home": {
 		"title": "Home Page No",
-		"bannerTitle": "Velkommen til TESS!"
+		"bannerTitle": "Velkommen til TESS!",
+		"browseOurTopCategories": "Bla gjennom våre toppkategorier"
 	},
 	"products": {
 		"noProducts": "Ingen produkter funnet"
@@ -34,5 +35,10 @@
 			"categoryLoad": "Vi kunne ikke laste kategorien innhold.",
 			"subcategoryLoad": "Vi kunne ikke laste subkategorien innhold."
 		}
+	},
+	"search": {
+		"suggestions": "Søkeforslag",
+		"noSuggestions": "Ingen søkeforslag funnet",
+		"noProductsFound": "Ingen produkter funnet"
 	}
 }

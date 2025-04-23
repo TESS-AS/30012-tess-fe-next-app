@@ -11,7 +11,6 @@ import "../globals.css";
 
 export default async function RootLayout({
 	children,
-	params,
 }: {
 	children: ReactNode;
 	params: { locale: string };

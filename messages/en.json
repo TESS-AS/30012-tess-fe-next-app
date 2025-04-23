@@ -1,7 +1,8 @@
 {
 	"home": {
 		"title": "Home Page",
-		"bannerTitle": "Welcome to TESS!"
+		"bannerTitle": "Welcome to TESS!",
+		"browseOurTopCategories": "Browse our top categories for today"
 	},
 	"products": {
 		"noProducts": "No products found"
@@ -36,5 +37,10 @@
 			"categoryLoad": "We couldn't load the category content.",
 			"subcategoryLoad": "We couldn't load the subcategory content."
 		}
+	},
+	"search": {
+		"suggestions": "Suggestions",
+		"noSuggestions": "No suggestions found",
+		"noProductsFound": "No products found"
 	}
 }

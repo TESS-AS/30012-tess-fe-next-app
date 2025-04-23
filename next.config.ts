@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
 			{
 				protocol: "https",
 				hostname: "media.bluestonepim.com",
+				pathname: "/**",
 			},
 		],
 	},

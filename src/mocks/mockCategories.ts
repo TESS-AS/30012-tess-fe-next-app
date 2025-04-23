@@ -1,5 +1,16 @@
 // mocks/mockCategories.ts
 
+import {
+	Package,
+	Image,
+	MonitorSmartphone,
+	Type,
+	LayoutTemplate,
+	Figma,
+	Shapes,
+	Gift,
+} from "lucide-react";
+
 export const mockCategories = [
 	{
 		name: "Hoses & pipes",
@@ -72,5 +83,56 @@ export const mockCategories = [
 			{ name: "Belts & Chains", slug: "belts-and-chains" },
 			{ name: "Couplings", slug: "couplings" },
 		],
+	},
+];
+
+export const mockMainCategories = [
+	{
+		id: "3d",
+		name: "3D Assets",
+		description: "Immersive elements",
+		icon: Package,
+	},
+	{
+		id: "illustrations",
+		name: "Illustrations",
+		description: "Dimensional elements",
+		icon: Image,
+	},
+	{
+		id: "mockups",
+		name: "Mockups",
+		description: "Realistic display devices",
+		icon: MonitorSmartphone,
+	},
+	{
+		id: "fonts",
+		name: "Fonts",
+		description: "Expressive typography",
+		icon: Type,
+	},
+	{
+		id: "framer",
+		name: "Framer Templates",
+		description: "Easy-to-edit websites",
+		icon: LayoutTemplate,
+	},
+	{
+		id: "figma",
+		name: "Figma Templates",
+		description: "User interfaces",
+		icon: Figma,
+	},
+	{
+		id: "icons",
+		name: "Icons",
+		description: "Simplified symbols",
+		icon: Shapes,
+	},
+	{
+		id: "freebies",
+		name: "Freebies",
+		description: "Grab them all",
+		icon: Gift,
 	},
 ];
