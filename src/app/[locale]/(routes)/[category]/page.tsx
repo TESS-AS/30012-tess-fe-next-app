@@ -14,7 +14,6 @@ interface CategoryPageProps {
 
 async function getProductsForCategory(categoryNumber: string) {
 	try {
-		console.time('backend-products-fetch');
 		const response = await searchProducts(
 			1, // page
 			12, // pageSize
