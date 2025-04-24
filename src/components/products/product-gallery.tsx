@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 import { ZoomImage } from "../ui/zoom-image";
+import { Skeleton } from "../ui/skeleton";
 
 interface ProductImage {
 	filename: string;
@@ -30,6 +31,15 @@ export function ProductGallery({ images, className }: ProductGalleryProps) {
 		},
 	);
 
+	const [loadedImages, setLoadedImages] = useState<{ [key: number]: boolean }>({});
+
+	const handleImageLoad = (index: number) => {
+		setLoadedImages(prev => ({
+			...prev,
+			[index]: true
+		}));
+	};
+
 	if (!images || images.length === 0) {
 		return (
 			<div className="grid grid-cols-12 gap-4">
@@ -46,7 +56,7 @@ export function ProductGallery({ images, className }: ProductGalleryProps) {
 		<div className={cn("grid grid-cols-12 gap-4", className)}>
 			{/* Thumbnails */}
 			<div className="col-span-2 flex flex-col gap-4">
-				{images.map((image) => (
+				{images.map((image, index) => (
 					<Button
 						key={image.filename}
 						onClick={() => setSelectedImage(image)}
@@ -57,12 +67,21 @@ export function ProductGallery({ images, className }: ProductGalleryProps) {
 								? "border-primary"
 								: "border-transparent",
 						)}>
+						{!loadedImages[index] && (
+							<Skeleton className="absolute inset-0 z-10" />
+						)}
 						<Image
 							src={image.thumbnail_url || image.url}
 							alt={image.filename}
 							width={100}
 							height={100}
-							className="h-full w-full rounded-md object-cover"
+							quality={60}
+							loading="lazy"
+							className={cn(
+								"h-full w-full rounded-md object-contain transition-all duration-300",
+								!loadedImages[index] && "scale-110 blur-sm"
+							)}
+							onLoadingComplete={() => handleImageLoad(index)}
 						/>
 					</Button>
 				))}

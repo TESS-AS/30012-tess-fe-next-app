@@ -122,7 +122,7 @@ export function Filter({
 					</Button>
 				</div>
 			)}
-			<div className="space-y-6">
+			<div className="space-y-6 h-[1120px] overflow-auto">
 				{filters.map((filterCategory) => (
 					<div
 						key={filterCategory.category}

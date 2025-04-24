@@ -1,30 +1,50 @@
 "use client";
 
-import { ProductGrid } from "@/components/products/product-grid";
+import { useParams } from "next/navigation";
+import { useEffect } from "react";
+
 import { Category } from "@/types/categories.types";
 import { IProduct } from "@/types/product.types";
-import { useParams } from "next/navigation";
 import { formatUrlToDisplayName } from "@/utils/string-utils";
-
 import { FilterCategory } from "../ui/filter";
 import { Breadcrumb } from "../ui/breadcrumb";
+
+import { ProductGrid } from "@/components/products/product-grid";
 
 interface CategoryContentProps {
 	products: IProduct[];
 	categoryData?: Category;
 	filters: FilterCategory[];
+	segment?: string;
 }
 
 export default function CategoryContent({
 	products,
 	categoryData,
 	filters,
+	segment,
 }: CategoryContentProps) {
 	const params = useParams();
 	const category = params.category as string;
 	const subcategory = params.subcategory as string;
 
-	const breadcrumbItems = [
+	// Monitor component render time
+	useEffect(() => {
+		console.time('frontend-render');
+		return () => {
+			console.timeEnd('frontend-render');
+		};
+	}, []);
+
+	// Monitor data processing time
+	useEffect(() => {
+		if (segment) {
+			console.time('frontend-segment-processing');
+			console.timeEnd('frontend-segment-processing');
+		}
+	}, [segment]);
+
+	const breadcrumbs = [
 		{
 			href: `/${category}`,
 			label: formatUrlToDisplayName(category),
@@ -37,7 +57,21 @@ export default function CategoryContent({
 					},
 			  ]
 			: []),
+		...(segment
+			? [
+					{
+						href: `/${category}/${subcategory}?segment=${segment}`,
+						label: formatUrlToDisplayName(segment),
+						current: true,
+					},
+			  ]
+			: []),
 	];
+
+	// Mark the last item as current if there's no segment
+	if (!segment && breadcrumbs.length > 0) {
+		breadcrumbs[breadcrumbs.length - 1].current = true;
+	}
 
 	if (!categoryData) {
 		return (
@@ -52,7 +86,7 @@ export default function CategoryContent({
 	return (
 		<div className="py-8">
 			<div className="mb-6">
-				<Breadcrumb items={breadcrumbItems} />
+				<Breadcrumb items={breadcrumbs} />
 				<h1 className="mt-4 text-3xl font-bold text-gray-900">{title}</h1>
 			</div>
 			{products?.length > 0 ? (

@@ -3,11 +3,14 @@
 import { cn } from "@/lib/utils";
 import { IProduct } from "@/types/product.types";
 import Image from "next/image";
+import { useState } from "react";
 
 interface ProductCardProps extends IProduct {
 	className?: string;
 	aspectRatio?: "portrait" | "square";
 	variant?: "default" | "compact";
+	viewLayout?: string;
+	priority?: boolean;
 }
 
 export function ProductCard({
@@ -17,29 +20,74 @@ export function ProductCard({
 	className,
 	aspectRatio = "square",
 	variant = "default",
+	viewLayout,
+	priority = false,
 }: ProductCardProps) {
+	const [isImageLoading, setIsImageLoading] = useState(true);
+
 	const content = (
 		<div
 			className={cn(
 				"group bg-background cursor-pointer overflow-hidden rounded-lg border transition-all hover:shadow-md",
 				variant === "default" ? "p-4" : "p-2",
+				viewLayout === "list" && "flex flex-row",
 				className,
 			)}>
 			<div
 				className={cn(
-					"bg-muted relative overflow-hidden rounded-md",
+					" relative overflow-hidden rounded-md",
 					aspectRatio === "portrait" ? "aspect-[3/4]" : "aspect-square",
+					viewLayout === "list" ? "w-[250px] me-4" : "",
+					isImageLoading ? "animate-pulse" : "",
 				)}>
 				{media_m ? (
 					<Image
 						src={media_m}
 						alt={product_name}
 						fill
-						sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, 50vw"
-						className="transition-transform group-hover:scale-105"
+						priority={priority}
+						loading={priority ? "eager" : "lazy"}
+						sizes={
+							viewLayout === "list"
+								? "250px"
+								: "(min-width: 1280px) 256px, (min-width: 1024px) 192px, (min-width: 768px) 256px, (min-width: 640px) 384px, calc(100vw - 48px)"
+						}
+						quality={75}
+						className={cn(
+							"object-contain",
+							"transition-all duration-300",
+							isImageLoading
+								? "scale-110 blur-sm grayscale"
+								: "scale-100 blur-0 grayscale-0",
+							"group-hover:scale-105",
+						)}
+						onLoadingComplete={() => setIsImageLoading(false)}
 					/>
 				) : (
-					<div className="bg-muted h-full w-full" />
+					<div className="bg-white h-full w-full">
+						<Image
+							src="/images/tess.webp"
+							alt="Tess"
+							fill
+							priority={priority}
+							loading={priority ? "eager" : "lazy"}
+							sizes={
+								viewLayout === "list"
+									? "250px"
+									: "(min-width: 1280px) 256px, (min-width: 1024px) 192px, (min-width: 768px) 256px, (min-width: 640px) 384px, calc(100vw - 48px)"
+							}
+							quality={75}
+							className={cn(
+								"object-contain",
+								"transition-all duration-300",
+								isImageLoading
+									? "scale-110 blur-sm grayscale"
+									: "scale-100 blur-0 grayscale-0",
+								"group-hover:scale-105",
+							)}
+							onLoadingComplete={() => setIsImageLoading(false)}
+						/>
+					</div>
 				)}
 			</div>
 			<div

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Expand, X } from "lucide-react";
 import Image from "next/image";
+import { Skeleton } from "./skeleton";
 
 interface ZoomImageProps {
 	src: string;
@@ -22,6 +23,7 @@ export function ZoomImage({
 	height,
 	className,
 }: ZoomImageProps) {
+	const [isLoading, setIsLoading] = useState(true);
 	const [isZoomed, setIsZoomed] = useState(false);
 	const [position, setPosition] = useState({ x: 0, y: 0 });
 	const [isFullscreen, setIsFullscreen] = useState(false);
@@ -45,7 +47,7 @@ export function ZoomImage({
 		<>
 			<div
 				className={cn(
-					"group bg-muted relative overflow-hidden rounded-lg",
+					"group relative overflow-hidden rounded-lg",
 					isZoomed && "cursor-zoom-out",
 					!isZoomed && "cursor-zoom-in",
 					className,
@@ -53,14 +55,26 @@ export function ZoomImage({
 				onMouseMove={handleMouseMove}
 				onMouseEnter={() => setIsZoomed(true)}
 				onMouseLeave={() => setIsZoomed(false)}>
+				{isLoading && (
+					<Skeleton 
+						className={cn(
+							"absolute inset-0 z-10",
+							isLoading ? "animate-pulse" : "hidden"
+						)} 
+					/>
+				)}
 				<Image
 					src={src}
 					alt={alt}
 					width={width}
 					height={height}
+					quality={90}
+					priority={false}
+					loading="lazy"
 					className={cn(
-						"h-full w-full transition-transform",
-						isZoomed && "scale-150",
+						"h-full w-full object-contain transition-all duration-300",
+						isLoading ? "scale-110 blur-sm" : "scale-100 blur-0",
+						isZoomed ? "scale-150" : "scale-100"
 					)}
 					style={
 						isZoomed
@@ -69,6 +83,7 @@ export function ZoomImage({
 								}
 							: undefined
 					}
+					onLoadingComplete={() => setIsLoading(false)}
 				/>
 				<Button
 					onClick={handleFullscreen}

@@ -1,78 +1,69 @@
 import CategoryContent from "@/components/category/category-content";
-import { fetchCategories, findCategoryByName } from "@/lib/category-utils";
+import { fetchCategories } from "@/lib/category-utils";
 import { loadFiltersBasedOnCategory } from "@/services/categories.service";
 import { searchProducts } from "@/services/product.service";
+import { useStore } from "@/store/store";
 import { formatUrlToDisplayName } from "@/utils/string-utils";
-import { notFound } from "next/navigation";
 import { getLocale } from "next-intl/server";
 
 interface CategoryPageProps {
-	params: Promise<{
+	params: {
 		category: string;
-	}>;
+	};
 }
 
-async function getProductsForCategory(
-	categoryNumber: string,
-	searchTerm: string | null = null,
-) {
+async function getProductsForCategory(categoryNumber: string) {
 	try {
-		return await searchProducts(
+		console.time('backend-products-fetch');
+		const response = await searchProducts(
 			1, // page
-			9, // pageSize
-			searchTerm, // no searchTerm
+			12, // pageSize
+			null, // no searchTerm
 			categoryNumber,
 			null, // no filters
 		);
+		console.timeEnd('backend-products-fetch');
+		return response.product;
 	} catch (error) {
 		console.error("Error fetching products:", error);
-		throw new Error("Failed to fetch products");
-	}
-}
-
-async function getFiltersForCategory(
-	categoryId: string,
-	searchTerm: string | null = null,
-) {
-	try {
-		// Pass only the categoryNumber, no searchTerm for category page
-		return await loadFiltersBasedOnCategory(categoryId, searchTerm);
-	} catch (error) {
-		console.error("Error fetching filters:", error);
-		return []; // Return empty array instead of throwing
+		throw error;
 	}
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
 	try {
-		const { category } = await params;
+		const { category } = params;
 		const locale = await getLocale();
 		const formattedCategory = formatUrlToDisplayName(category);
 
-		console.log(formattedCategory);
-
 		const categories = await fetchCategories(locale);
-		const categoryData = await findCategoryByName(
-			categories,
-			formattedCategory,
+
+		const categoryData = categories.find(
+			(cat) => formatUrlToDisplayName(cat.slug) === formattedCategory,
 		);
-		console.log(categoryData, "cat");
 
 		if (!categoryData) {
-			return notFound();
+			throw new Error("Category not found");
 		}
 
-		const { product } = categoryData.groupId
-			? await getProductsForCategory(categoryData.groupId)
-			: { product: [] };
+		// Load filters and products in parallel
+		const [filters, product] = await Promise.all([
+			(async () => {
+				const result = await loadFiltersBasedOnCategory(categoryData.groupId);
+				return result;
+			})(),
+			(async () => {
+				const result = await getProductsForCategory(categoryData.groupId);
+				return result;
+			})(),
+		]);
 
-		const filterCategories = await getFiltersForCategory(categoryData.groupId);
 
 		return (
 			<CategoryContent
 				products={product}
 				categoryData={categoryData}
-				filters={filterCategories}
+				filters={filters}
 			/>
 		);
 	} catch (error) {

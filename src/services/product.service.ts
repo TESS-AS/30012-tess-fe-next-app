@@ -15,6 +15,15 @@ interface FilterValues {
 	values: string[];
 }
 
+const productsCache: {
+	[key: string]: {
+		data: any;
+		timestamp: number;
+	};
+} = {};
+
+const PRODUCTS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 export async function productFetch(productName: string) {
 	try {
 		const url = `/searchResult/${productName}`;
@@ -61,6 +70,24 @@ export async function searchProducts(
 	filters: FilterValues[] | null,
 ): Promise<SearchListResponse> {
 	try {
+		console.time('product-api-call');
+
+		// Create cache key
+		const cacheKey = `${categoryNumber}-${page}-${pageSize}${searchTerm ? `-${searchTerm}` : ''}${
+			filters ? `-${JSON.stringify(filters)}` : ''
+		}`;
+		const now = Date.now();
+
+		// Check cache
+		if (
+			productsCache[cacheKey] &&
+			now - productsCache[cacheKey].timestamp < PRODUCTS_CACHE_TTL
+		) {
+			console.log('Using cached products');
+			console.timeEnd('product-api-call');
+			return productsCache[cacheKey].data;
+		}
+
 		// Build query parameters
 		const params = new URLSearchParams();
 		if (categoryNumber) {
@@ -79,6 +106,13 @@ export async function searchProducts(
 				? await axiosInstance.post(url, { filters })
 				: await axiosInstance.post(url);
 
+		// Update cache
+		productsCache[cacheKey] = {
+			data: response.data,
+			timestamp: now,
+		};
+
+		console.timeEnd('product-api-call');
 		return response.data;
 	} catch (error) {
 		console.error("Error fetching products:", error);
