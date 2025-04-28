@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import CategoryNavigationMenu from "@/components/layouts/NavigationMenu/NavigationMenu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import AuthDialog from "@/components/ui/dialogs/auth-dialog";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -30,6 +31,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const currentLocale = useLocale();
 	const { data, isLoading } = useSearch(searchQuery);
 	const t = useTranslations();
+	const [isAuthOpen, setIsAuthOpen] = useState(false);
 
 	const router = useRouter();
 	const { setCategories } = useStore();
@@ -185,25 +187,16 @@ export default function Header({ categories }: { categories: Category[] }) {
 							className="hidden md:flex">
 							<Button
 								variant="ghost"
-								size="icon">
+								size="icon"
+								className="hidden md:flex"
+								onClick={() => {
+									router.replace("?auth=login", { scroll: false });
+									setIsAuthOpen(true);
+								}}>
 								<User className="h-5 w-5" />
 								<span className="sr-only">Account</span>
 							</Button>
 						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
-							<DropdownMenuItem asChild>
-								<Link href="/account">My Account</Link>
-							</DropdownMenuItem>
-							<DropdownMenuItem asChild>
-								<Link href="/orders">Orders</Link>
-							</DropdownMenuItem>
-							<DropdownMenuItem asChild>
-								<Link href="/wishlist">Wishlist</Link>
-							</DropdownMenuItem>
-							<DropdownMenuItem asChild>
-								<Link href="/logout">Logout</Link>
-							</DropdownMenuItem>
-						</DropdownMenuContent>
 					</DropdownMenu>
 					<Button
 						variant="ghost"
@@ -257,6 +250,10 @@ export default function Header({ categories }: { categories: Category[] }) {
 					<CategoryNavigationMenu categories={categories} />
 				</div>
 			</div>
+			<AuthDialog
+				isOpen={isAuthOpen}
+				onOpenChange={setIsAuthOpen}
+			/>
 		</header>
 	);
 }
