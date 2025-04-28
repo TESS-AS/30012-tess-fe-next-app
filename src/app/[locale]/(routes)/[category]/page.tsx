@@ -1,39 +1,26 @@
 import CategoryContent from "@/components/category/category-content";
-import { fetchCategories } from "@/lib/category-utils";
+import { fetchCategories, fetchProducts } from "@/lib/category-utils";
+import { formatUrlToDisplayName } from "@/lib/utils";
 import { loadFiltersBasedOnCategory } from "@/services/categories.service";
-import { searchProducts } from "@/services/product.service";
-import { useStore } from "@/store/store";
-import { formatUrlToDisplayName } from "@/utils/string-utils";
 import { getLocale } from "next-intl/server";
 
 interface CategoryPageProps {
-	params: {
+	params: Promise<{
 		category: string;
-	};
+	}>;
+	searchParams: Promise<{
+		query?: string;
+	}>;
 }
 
-async function getProductsForCategory(categoryNumber: string) {
+export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
 	try {
-		const response = await searchProducts(
-			1, // page
-			12, // pageSize
-			null, // no searchTerm
-			categoryNumber,
-			null, // no filters
-		);
-		console.timeEnd('backend-products-fetch');
-		return response.product;
-	} catch (error) {
-		console.error("Error fetching products:", error);
-		throw error;
-	}
-}
-
-export default async function CategoryPage({ params }: CategoryPageProps) {
-	try {
-		const { category } = params;
+		const { category } = await params;
+		const { query } = await searchParams;
 		const locale = await getLocale();
 		const formattedCategory = formatUrlToDisplayName(category);
+
+        console.log(query,"qokla query")
 
 		const categories = await fetchCategories(locale);
 
@@ -41,28 +28,30 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 			(cat) => formatUrlToDisplayName(cat.slug) === formattedCategory,
 		);
 
-		if (!categoryData) {
-			throw new Error("Category not found");
-		}
+		// Only throw if we have neither category nor query
+		// if (!categoryData && !query) {
+		// 	throw new Error("Neither category nor search query found");
+		// }
 
-		// Load filters and products in parallel
-		const [filters, product] = await Promise.all([
-			(async () => {
-				const result = await loadFiltersBasedOnCategory(categoryData.groupId);
-				return result;
-			})(),
-			(async () => {
-				const result = await getProductsForCategory(categoryData.groupId);
-				return result;
-			})(),
+		const [filters, products] = await Promise.all([
+			// Only fetch filters if we have a category
+			categoryData 
+				? loadFiltersBasedOnCategory(categoryData.groupId, null)
+				: loadFiltersBasedOnCategory(null, query),
+			// Fetch products based on either search query or category
+			query
+				? fetchProducts(null, query)
+				: fetchProducts(categoryData?.groupId || null, null)
 		]);
 
+        console.log(products,"qokla products")
 
 		return (
 			<CategoryContent
-				products={product}
+				products={products}
 				categoryData={categoryData}
 				filters={filters}
+                query={query}
 			/>
 		);
 	} catch (error) {

@@ -83,7 +83,7 @@ export function ZoomImage({
 								}
 							: undefined
 					}
-					onLoadingComplete={() => setIsLoading(false)}
+					onLoad={() => setIsLoading(false)}
 				/>
 				<Button
 					onClick={handleFullscreen}

@@ -103,7 +103,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 											return (
 											<Link
 												key={product.product_number}
-												href={`/product/${product.product_number}`}
+												href={`/product/product/${product.product_number}`}
 												className="flex items-center gap-4 rounded-md p-3 hover:bg-gray-100">
 												<div className="flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md">
 													{product.media ? (

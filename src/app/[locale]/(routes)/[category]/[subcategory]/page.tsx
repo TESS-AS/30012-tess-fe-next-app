@@ -1,9 +1,8 @@
 import CategoryContent from "@/components/category/category-content";
-import { fetchCategories, findSubCategoryRecursive } from "@/lib/category-utils";
+import { fetchCategories, fetchProducts, findSubCategoryRecursive } from "@/lib/category-utils";
+import { formatUrlToDisplayName } from "@/lib/utils";
 import { loadFiltersBasedOnCategory } from "@/services/categories.service";
 import { searchProducts } from "@/services/product.service";
-import { useStore } from "@/store/store";
-import { formatUrlToDisplayName } from "@/utils/string-utils";
 import { getLocale } from "next-intl/server";
 
 interface SubCategoryPageProps {
@@ -16,25 +15,6 @@ interface SubCategoryPageProps {
 	}>;
 }
 
-async function getProductsForSubCategory(
-	categoryNumber: string,
-	filters: any = null,
-) {
-	try {
-		const response = await searchProducts(
-			1, // page
-			12, // pageSize
-			null, // no searchTerm
-			categoryNumber,
-			filters, // no filters
-		);
-		return response.product;
-	} catch (error) {
-		console.error("Error fetching products:", error);
-		throw error;
-	}
-}
-
 export default async function SubCategoryPage({
 	params,
 	searchParams,
@@ -43,6 +23,7 @@ export default async function SubCategoryPage({
 		const { subcategory } = await params;
 		const { segment } = await searchParams;
 		const locale = await getLocale();
+		
 		const formattedSubCategory = formatUrlToDisplayName(subcategory);
 		const formattedSegment = segment ? formatUrlToDisplayName(segment) : undefined;
 
@@ -57,6 +38,7 @@ export default async function SubCategoryPage({
 			throw new Error("Subcategory not found");
 		}
 
+        console.log(subCategoryData.groupId,"qokla")
 		const [filters, product] = await Promise.all([
 			(async () => {
 				console.time('filters-load');
@@ -66,7 +48,7 @@ export default async function SubCategoryPage({
 			})(),
 			(async () => {
 				console.time('products-fetch');
-				const result = await getProductsForSubCategory(subCategoryData.groupId);
+				const result = await fetchProducts(subCategoryData.groupId, null);
 				console.timeEnd('products-fetch');
 				return result;
 			})(),
@@ -79,7 +61,7 @@ export default async function SubCategoryPage({
 				products={product}
 				categoryData={subCategoryData}
 				filters={filters}
-				segment={segment}
+				query={segment}
 			/>
 		)
 

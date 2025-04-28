@@ -66,7 +66,7 @@ export async function searchProducts(
 	page: number = 1,
 	pageSize: number = 9,
 	searchTerm: string | null,
-	categoryNumber: string,
+	categoryNumber: string | null,
 	filters: FilterValues[] | null,
 ): Promise<SearchListResponse> {
 	try {
@@ -99,6 +99,7 @@ export async function searchProducts(
 
 		// Construct URL with path parameters and query string
 		const url = `/searchList/${page}/${pageSize}/${params.toString() ? `?${params.toString()}` : ""}`;
+		console.log(url,"qokla url")
 
 		// Make request with or without body based on filters
 		const response =
@@ -106,6 +107,7 @@ export async function searchProducts(
 				? await axiosInstance.post(url, { filters })
 				: await axiosInstance.post(url);
 
+				console.log(response,"qokla response")
 		// Update cache
 		productsCache[cacheKey] = {
 			data: response.data,

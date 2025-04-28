@@ -17,6 +17,7 @@ export function ProductCard({
 	product_number,
 	product_name,
 	media_m,
+	short_description,
 	className,
 	aspectRatio = "square",
 	variant = "default",
@@ -61,7 +62,7 @@ export function ProductCard({
 								: "scale-100 blur-0 grayscale-0",
 							"group-hover:scale-105",
 						)}
-						onLoadingComplete={() => setIsImageLoading(false)}
+						onLoad={() => setIsImageLoading(false)}
 					/>
 				) : (
 					<div className="bg-white h-full w-full">
@@ -85,7 +86,7 @@ export function ProductCard({
 									: "scale-100 blur-0 grayscale-0",
 								"group-hover:scale-105",
 							)}
-							onLoadingComplete={() => setIsImageLoading(false)}
+							onLoad={() => setIsImageLoading(false)}
 						/>
 					</div>
 				)}
@@ -99,6 +100,11 @@ export function ProductCard({
 				<div className="text-muted-foreground mt-2 flex items-center justify-between text-sm">
 					<p>{product_number}</p>
 				</div>
+				{viewLayout === "list" && short_description && (
+					<div className="text-muted-foreground mt-2 flex items-center justify-between text-sm">
+						<p>{short_description}</p>
+					</div>
+				)}
 			</div>
 		</div>
 	);

@@ -23,7 +23,7 @@ export async function loadCategories(locale: string) {
 }
 
 export async function loadFiltersBasedOnCategory(
-	categoryNumber: string,
+	categoryNumber: string | null,
 	searchTerm: string | null = null,
 ) {
 	try {

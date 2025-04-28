@@ -1,99 +1,38 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { useEffect } from "react";
-
 import { Category } from "@/types/categories.types";
 import { IProduct } from "@/types/product.types";
-import { formatUrlToDisplayName } from "@/utils/string-utils";
 import { FilterCategory } from "../ui/filter";
 import { Breadcrumb } from "../ui/breadcrumb";
-
 import { ProductGrid } from "@/components/products/product-grid";
+import { useBreadcrumbs } from "@/hooks/useBreadcrumbs";
 
 interface CategoryContentProps {
 	products: IProduct[];
 	categoryData?: Category;
 	filters: FilterCategory[];
-	segment?: string;
+	query?: string;
 }
 
 export default function CategoryContent({
 	products,
 	categoryData,
 	filters,
-	segment,
+	query,
 }: CategoryContentProps) {
-	const params = useParams();
-	const category = params.category as string;
-	const subcategory = params.subcategory as string;
-
-	// Monitor component render time
-	useEffect(() => {
-		console.time('frontend-render');
-		return () => {
-			console.timeEnd('frontend-render');
-		};
-	}, []);
-
-	// Monitor data processing time
-	useEffect(() => {
-		if (segment) {
-			console.time('frontend-segment-processing');
-			console.timeEnd('frontend-segment-processing');
-		}
-	}, [segment]);
-
-	const breadcrumbs = [
-		{
-			href: `/${category}`,
-			label: formatUrlToDisplayName(category),
-		},
-		...(subcategory
-			? [
-					{
-						href: `/${category}/${subcategory}`,
-						label: formatUrlToDisplayName(subcategory),
-					},
-			  ]
-			: []),
-		...(segment
-			? [
-					{
-						href: `/${category}/${subcategory}?segment=${segment}`,
-						label: formatUrlToDisplayName(segment),
-						current: true,
-					},
-			  ]
-			: []),
-	];
-
-	// Mark the last item as current if there's no segment
-	if (!segment && breadcrumbs.length > 0) {
-		breadcrumbs[breadcrumbs.length - 1].current = true;
-	}
-
-	if (!categoryData) {
-		return (
-			<div className="flex items-center justify-center py-8">
-				<div className="text-gray-500">Category not found</div>
-			</div>
-		);
-	}
-
-	const title = categoryData?.name || "Products";
+	const breadcrumbs = useBreadcrumbs(query);
 
 	return (
 		<div className="py-8">
 			<div className="mb-6">
 				<Breadcrumb items={breadcrumbs} />
-				<h1 className="mt-4 text-3xl font-bold text-gray-900">{title}</h1>
 			</div>
 			{products?.length > 0 ? (
 				<ProductGrid
 					filters={filters}
 					initialProducts={products}
-					categoryNumber={categoryData.groupId}
+					categoryNumber={categoryData?.groupId || ""}
+					query={query || null}
 				/>
 			) : (
 				<div className="text-center text-gray-500">

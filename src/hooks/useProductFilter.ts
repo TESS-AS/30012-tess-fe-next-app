@@ -9,9 +9,10 @@ import { IProduct } from "@/types/product.types";
 interface UseProductFilterProps {
 	initialProducts: IProduct[];
 	categoryNumber: string;
+	query: string | null;
 }
 
-export function useProductFilter({ initialProducts, categoryNumber }: UseProductFilterProps) {
+export function useProductFilter({ initialProducts, categoryNumber, query }: UseProductFilterProps) {
 	const [products, setProducts] = useState<IProduct[]>(initialProducts);
 	const [isLoading, setIsLoading] = useState(false);
 	const [currentPage, setCurrentPage] = useState(1);
@@ -26,8 +27,8 @@ export function useProductFilter({ initialProducts, categoryNumber }: UseProduct
 			const nextPage = currentPage + 1;
 			const response = await searchProducts(
 				nextPage,
-				12,
-				null,
+				9,
+				query,
 				categoryNumber,
 				currentFilters,
 			);
@@ -55,8 +56,8 @@ export function useProductFilter({ initialProducts, categoryNumber }: UseProduct
 
 				const response = await searchProducts(
 					1,
-					12,
-					null,
+					9,
+					query,
 					categoryNumber,
 					filters?.length > 0 ? filters : null,
 				);

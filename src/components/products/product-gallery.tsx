@@ -81,7 +81,7 @@ export function ProductGallery({ images, className }: ProductGalleryProps) {
 								"h-full w-full rounded-md object-contain transition-all duration-300",
 								!loadedImages[index] && "scale-110 blur-sm"
 							)}
-							onLoadingComplete={() => handleImageLoad(index)}
+							onLoad={() => handleImageLoad(index)}
 						/>
 					</Button>
 				))}

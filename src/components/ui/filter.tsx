@@ -123,7 +123,7 @@ export function Filter({
 				</div>
 			)}
 			<div className="space-y-6 h-[1120px] overflow-auto">
-				{filters.map((filterCategory) => (
+				{filters?.map((filterCategory) => (
 					<div
 						key={filterCategory.category}
 						className="space-y-4">

@@ -1,7 +1,7 @@
-import { mapCategoryTree } from "@/lib/utils";
+import { formatUrlToDisplayName, mapCategoryTree } from "@/lib/utils";
 import axiosInstance from "@/services/axiosServer";
+import { searchProducts } from "@/services/product.service";
 import { Category, RawCategory } from "@/types/categories.types";
-import { formatUrlToDisplayName } from "@/utils/string-utils";
 
 // Cache for categories with TTL
 let categoriesCache: {
@@ -85,4 +85,21 @@ export function findSubCategoryRecursive(
 		}
 	}
 	return null;
+}
+
+export async function fetchProducts(categoryNumber: string | null, searchTerm: string | null) {
+	try {
+		const response = await searchProducts(
+			1, // page
+			9, // pageSize
+			searchTerm,
+			categoryNumber,
+			null, // no filters
+		);
+		console.timeEnd('backend-products-fetch');
+		return response.product;
+	} catch (error) {
+		console.error("Error fetching products:", error);
+		throw error;
+	}
 }

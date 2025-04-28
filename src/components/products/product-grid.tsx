@@ -28,6 +28,7 @@ interface ProductGridProps {
 	variant?: "default" | "compact";
 	filters: FilterCategory[];
 	categoryNumber: string;
+	query: string | null;
 }
 
 const SORT_OPTIONS = [
@@ -39,9 +40,10 @@ const SORT_OPTIONS = [
 
 export function ProductGrid({
 	initialProducts,
-	variant = "compact",
+	variant = "default",
 	filters,
 	categoryNumber,
+	query,
 }: ProductGridProps) {
 	const t = useTranslations();
 	const pathname = usePathname();
@@ -55,6 +57,7 @@ export function ProductGrid({
 		useProductFilter({
 			initialProducts,
 			categoryNumber,
+			query,
 		});
 
 	// Handle filter changes
@@ -109,7 +112,7 @@ export function ProductGrid({
 				<Filter
 					filters={filters}
 					onFilterChange={(newFilters) => {
-						setActiveFilters(newFilters);
+						// setActiveFilters(newFilters);
 						onFilterChange(newFilters);
 					}}
 				/>

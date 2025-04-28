@@ -1,4 +1,4 @@
-import { formatUrlToDisplayName } from "@/utils/string-utils";
+import { formatUrlToDisplayName } from "@/lib/utils";
 
 interface ProductInfoProps {
 	name: string;
