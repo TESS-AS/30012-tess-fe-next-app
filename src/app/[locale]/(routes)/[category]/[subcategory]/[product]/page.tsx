@@ -1,12 +1,42 @@
 import { ProductActions } from "@/components/products/product-actions";
 import { ProductGallery } from "@/components/products/product-gallery";
 import { RelatedProducts } from "@/components/products/related-products";
+import { getSeoMetadata } from "@/lib/seo";
 import { mockProducts } from "@/mocks/mockProducts";
 import { getTranslations } from "next-intl/server";
 
 interface Params {
+	locale: string;
 	category: string;
 	product: string;
+}
+
+export async function generateMetadata({
+	params,
+}: {
+	params: Promise<Params>;
+}) {
+	const { locale, category, product } = await params;
+	const t = await getTranslations({ locale, namespace: "product" });
+
+	const productData = mockProducts.find((p) => p.id === product);
+
+	if (!productData) {
+		return getSeoMetadata({
+			title: t("notFound"),
+			description: t("notFound"),
+			path: `/${category}/${product}`,
+			locale,
+		});
+	}
+
+	return getSeoMetadata({
+		title: productData.name,
+		description: productData.description,
+		path: `/${category}/${product}`,
+		image: productData.image,
+		locale,
+	});
 }
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -16,16 +46,15 @@ export default async function ProductPage({
 }: {
 	params: Promise<Params>;
 }) {
-	const t = await getTranslations();
 	const { category, product } = await params;
+	const t = await getTranslations("product");
 
-	// Simulate API delay for testing loader state
 	await delay(1000);
 
 	const productData = mockProducts.find((p) => p.id === product);
 
 	if (!productData) {
-		return <div>{t("product.notFound")}</div>;
+		return <div>{t("notFound")}</div>;
 	}
 
 	const productImages = [
@@ -70,9 +99,7 @@ export default async function ProductPage({
 
 					{/* Product Description */}
 					<div className="prose max-w-none">
-						<h2 className="text-lg font-semibold">
-							{t("product.productDescription")}
-						</h2>
+						<h2 className="text-lg font-semibold">{t("productDescription")}</h2>
 						<p className="text-muted-foreground">{productData.description}</p>
 					</div>
 				</div>
