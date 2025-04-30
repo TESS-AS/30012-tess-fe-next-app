@@ -31,12 +31,6 @@ interface ProductGridProps {
 	query: string | null;
 }
 
-const SORT_OPTIONS = [
-	{ value: "latest", label: "Latest" },
-	{ value: "oldest", label: "Oldest" },
-	{ value: "lowest", label: "Lowest" },
-	{ value: "highest", label: "Highest" },
-];
 
 export function ProductGrid({
 	initialProducts,
@@ -49,11 +43,19 @@ export function ProductGrid({
 	const pathname = usePathname();
 	const [isFiltering, setIsFiltering] = useState(false);
 	const [viewLayout, setViewLayout] = useState<string>("");
-	const [sort, setSort] = useState<string>("");
 	const [activeFilters, setActiveFilters] = useState<FilterValues[]>([]);
 	const observerTarget = useRef<HTMLDivElement>(null);
+	const [sort, setSort] = useState<string>('');
 
-	const { products, isLoading, hasMore, handleFilterChange, loadMore } =
+	const SORT_OPTIONS = [
+		{ value: " ", label: t("common.sort") },
+		{ value: "Alphabetical", label: "Alphabetical" },
+		{ value: "oldest", label: "Oldest" },
+		{ value: "lowest", label: "Lowest" },
+		{ value: "highest", label: "Highest" },
+	];
+
+	const { products, isLoading, hasMore, handleFilterChange, loadMore, handleSortChange } =
 		useProductFilter({
 			initialProducts,
 			categoryNumber,
@@ -105,6 +107,10 @@ export function ProductGrid({
 		};
 	}, [hasMore, isLoading, loadMore]);
 
+	const onSortChange = (value: string) => {
+		setSort(value); // this updates local UI if needed
+		handleSortChange(value); // trigger actual data fetch with sort
+	};
 	return (
 		<div className="flex flex-col gap-8 lg:flex-row">
 			{/* Sidebar Filter */}
@@ -112,7 +118,6 @@ export function ProductGrid({
 				<Filter
 					filters={filters}
 					onFilterChange={(newFilters) => {
-						// setActiveFilters(newFilters);
 						onFilterChange(newFilters);
 					}}
 				/>
@@ -121,22 +126,18 @@ export function ProductGrid({
 			{/* Product Grid */}
 			<div className="flex-1">
 				<div className="mb-4 flex items-center justify-between">
-					<Select
-						value={sort}
-						onValueChange={setSort}>
-						<SelectTrigger className="w-[180px]">
-							<SelectValue placeholder={SORT_OPTIONS[0].label} />
-						</SelectTrigger>
-						<SelectContent>
-							{SORT_OPTIONS.map((item) => (
-								<SelectItem
-									key={item.value}
-									value={item.value}>
-									{item.label}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
+				<Select value={sort} onValueChange={onSortChange}>
+					<SelectTrigger className="w-[180px]">
+						<SelectValue placeholder={t("common.sort")} />
+					</SelectTrigger>
+					<SelectContent>
+						{SORT_OPTIONS.map((option) => (
+							<SelectItem key={option.value} value={option.value}>
+								{option.label}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
 
 					<div className="flex gap-2">
 						<Button

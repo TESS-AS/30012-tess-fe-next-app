@@ -86,7 +86,8 @@ export default function Header({ categories }: { categories: Category[] }) {
 												<Link
 													key={idx}
 													href={`/search?query=${encodeURIComponent(s.keyword)}`}
-													className="block rounded-md p-2 text-sm hover:bg-gray-100">
+													className="block rounded-md p-2 text-sm hover:bg-gray-100"
+													onClick={() => setSearchQuery("")}>
 													{s.keyword}
 												</Link>
 											),
@@ -106,7 +107,8 @@ export default function Header({ categories }: { categories: Category[] }) {
 											<Link
 												key={product.product_number}
 												href={`/product/product/${product.product_number}`}
-												className="flex items-center gap-4 rounded-md p-3 hover:bg-gray-100">
+												className="flex items-center gap-4 rounded-md p-3 hover:bg-gray-100"
+												onClick={() => setSearchQuery("")}>
 												<div className="flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md">
 													{product.media ? (
 														<Image

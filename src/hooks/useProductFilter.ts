@@ -18,6 +18,7 @@ export function useProductFilter({ initialProducts, categoryNumber, query }: Use
 	const [currentPage, setCurrentPage] = useState(1);
 	const [hasMore, setHasMore] = useState(true);
 	const [currentFilters, setCurrentFilters] = useState<FilterValues[] | null>(null);
+	const [sort, setSort] = useState<string | null>(null);
 
 	const loadMore = useCallback(async () => {
 		if (!hasMore || isLoading) return;
@@ -31,6 +32,7 @@ export function useProductFilter({ initialProducts, categoryNumber, query }: Use
 				query,
 				categoryNumber,
 				currentFilters,
+				sort,
 			);
 
 			if (response.product && response.product.length > 0) {
@@ -60,6 +62,7 @@ export function useProductFilter({ initialProducts, categoryNumber, query }: Use
 					query,
 					categoryNumber,
 					filters?.length > 0 ? filters : null,
+					sort,
 				);
 
 				setProducts(response.product || []);
@@ -72,11 +75,40 @@ export function useProductFilter({ initialProducts, categoryNumber, query }: Use
 		[categoryNumber],
 	);
 
+	const handleSortChange = useCallback(
+		async (newSort: string) => {
+			setSort(newSort);
+			setCurrentPage(1);
+			setHasMore(true);
+
+			try {
+				setIsLoading(true);
+
+				const response = await searchProducts(
+					1,
+					9,
+					query,
+					categoryNumber,
+					currentFilters,
+					newSort,
+				);
+
+				setProducts(response.product || []);
+			} catch (error) {
+				console.error("Error sorting products:", error);
+			} finally {
+				setIsLoading(false);
+			}
+		},
+		[categoryNumber, currentFilters, query],
+	);
+
 	return {
 		products,
 		isLoading,
 		hasMore,
 		handleFilterChange,
+		handleSortChange,
 		loadMore,
 	};
 }

@@ -55,7 +55,7 @@ export default async function SubCategoryPage({
 		}
 
         console.log(subCategoryData.groupId,"qokla")
-		const [filters, product] = await Promise.all([
+		const [filters, products] = await Promise.all([
 			(async () => {
 				console.time('filters-load');
 				const result = await loadFiltersBasedOnCategory(subCategoryData.groupId);
@@ -70,11 +70,13 @@ export default async function SubCategoryPage({
 			})(),
 		]);
 
+        console.log(filters,products,"qokla products")
+
 
 		return (
 
 			<CategoryContent
-				products={product}
+				products={products}
 				categoryData={subCategoryData}
 				filters={filters}
 				query={segment}

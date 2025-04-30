@@ -62,7 +62,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
 				: fetchProducts(categoryData?.groupId || null, null)
 		]);
 
-        console.log(products,"qokla products")
+        console.log(filters,products,"qokla products")
 
 		return (
 			<CategoryContent

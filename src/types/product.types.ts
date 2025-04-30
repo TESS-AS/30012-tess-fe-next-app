@@ -2,7 +2,7 @@ export interface IProduct {
 	product_name: string;
 	media_m: string;
 	product_number: string;
-	short_description?: string;
+	short_desc?: string;
 }
 
 export interface IVariation {

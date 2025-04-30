@@ -68,6 +68,7 @@ export async function searchProducts(
 	searchTerm: string | null,
 	categoryNumber: string | null,
 	filters: FilterValues[] | null,
+	sort?: string | null,
 ): Promise<SearchListResponse> {
 	try {
 		console.time('product-api-call');
@@ -75,7 +76,7 @@ export async function searchProducts(
 		// Create cache key
 		const cacheKey = `${categoryNumber}-${page}-${pageSize}${searchTerm ? `-${searchTerm}` : ''}${
 			filters ? `-${JSON.stringify(filters)}` : ''
-		}`;
+		}${sort ? `-${sort}` : ''}`;
 		const now = Date.now();
 
 		// Check cache
@@ -95,6 +96,9 @@ export async function searchProducts(
 		}
 		if (searchTerm) {
 			params.append("searchTerm", searchTerm);
+		}
+		if (sort) {
+			params.append("sort", sort === " " ? "" : sort);
 		}
 
 		// Construct URL with path parameters and query string

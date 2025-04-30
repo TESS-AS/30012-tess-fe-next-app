@@ -36,7 +36,8 @@
 			"tryAgain": "Try again",
 			"categoryLoad": "We couldn't load the category content.",
 			"subcategoryLoad": "We couldn't load the subcategory content."
-		}
+		},
+		"sort": "Sort by"
 	},
 	"search": {
 		"suggestions": "Suggestions",

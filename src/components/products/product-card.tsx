@@ -17,7 +17,7 @@ export function ProductCard({
 	product_number,
 	product_name,
 	media_m,
-	short_description,
+	short_desc,
 	className,
 	aspectRatio = "square",
 	variant = "default",
@@ -26,6 +26,7 @@ export function ProductCard({
 }: ProductCardProps) {
 	const [isImageLoading, setIsImageLoading] = useState(true);
 
+	console.log(short_desc,"short_descs")
 	const content = (
 		<div
 			className={cn(
@@ -100,9 +101,9 @@ export function ProductCard({
 				<div className="text-muted-foreground mt-2 flex items-center justify-between text-sm">
 					<p>{product_number}</p>
 				</div>
-				{viewLayout === "list" && short_description && (
+				{viewLayout === "list" && short_desc && (
 					<div className="text-muted-foreground mt-2 flex items-center justify-between text-sm">
-						<p>{short_description}</p>
+						<p>{short_desc}</p>
 					</div>
 				)}
 			</div>
