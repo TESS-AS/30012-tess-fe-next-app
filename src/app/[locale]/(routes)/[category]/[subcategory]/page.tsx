@@ -69,7 +69,7 @@ export default async function SubCategoryPage({
 				return result;
 			})(),
 		]);
-
+		console.log(segment,"qokla segment")
         console.log(filters,products,"qokla products")
 
 
@@ -79,7 +79,7 @@ export default async function SubCategoryPage({
 				products={products}
 				categoryData={subCategoryData}
 				filters={filters}
-				query={segment}
+				segment={segment}
 			/>
 		)
 

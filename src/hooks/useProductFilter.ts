@@ -1,7 +1,4 @@
-"use client";
-
-import { useCallback, useState } from "react";
-
+import { useCallback, useEffect, useState } from "react";
 import { searchProducts } from "@/services/product.service";
 import { FilterValues } from "@/types/filter.types";
 import { IProduct } from "@/types/product.types";
@@ -12,13 +9,43 @@ interface UseProductFilterProps {
 	query: string | null;
 }
 
-export function useProductFilter({ initialProducts, categoryNumber, query }: UseProductFilterProps) {
+export function useProductFilter({
+	initialProducts,
+	categoryNumber,
+	query,
+}: UseProductFilterProps) {
 	const [products, setProducts] = useState<IProduct[]>(initialProducts);
 	const [isLoading, setIsLoading] = useState(false);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [hasMore, setHasMore] = useState(true);
 	const [currentFilters, setCurrentFilters] = useState<FilterValues[] | null>(null);
 	const [sort, setSort] = useState<string | null>(null);
+
+	// 👇 NEW: Refetch on categoryNumber or query change
+	useEffect(() => {
+		async function refetch() {
+			setIsLoading(true);
+			setCurrentPage(1);
+			setHasMore(true);
+			try {
+				const response = await searchProducts(
+					1,
+					9,
+					query,
+					categoryNumber,
+					currentFilters,
+					sort,
+				);
+				setProducts(response.product || []);
+			} catch (err) {
+				console.error("Error refetching on category/query change:", err);
+			} finally {
+				setIsLoading(false);
+			}
+		}
+
+		refetch();
+	}, [categoryNumber, query]);
 
 	const loadMore = useCallback(async () => {
 		if (!hasMore || isLoading) return;
@@ -36,7 +63,7 @@ export function useProductFilter({ initialProducts, categoryNumber, query }: Use
 			);
 
 			if (response.product && response.product.length > 0) {
-				setProducts(prev => [...prev, ...response.product]);
+				setProducts((prev) => [...prev, ...response.product]);
 				setCurrentPage(nextPage);
 			} else {
 				setHasMore(false);
@@ -46,15 +73,15 @@ export function useProductFilter({ initialProducts, categoryNumber, query }: Use
 		} finally {
 			setIsLoading(false);
 		}
-	}, [categoryNumber, currentFilters, currentPage, hasMore, isLoading]);
+	}, [categoryNumber, currentFilters, currentPage, hasMore, isLoading, query, sort]);
 
 	const handleFilterChange = useCallback(
 		async (filters: FilterValues[]) => {
 			try {
 				setIsLoading(true);
 				setCurrentFilters(filters);
-				setCurrentPage(1); // Reset to first page when filters change
-				setHasMore(true); // Reset hasMore state
+				setCurrentPage(1);
+				setHasMore(true);
 
 				const response = await searchProducts(
 					1,
@@ -72,7 +99,7 @@ export function useProductFilter({ initialProducts, categoryNumber, query }: Use
 				setIsLoading(false);
 			}
 		},
-		[categoryNumber],
+		[categoryNumber, query, sort],
 	);
 
 	const handleSortChange = useCallback(
@@ -100,7 +127,7 @@ export function useProductFilter({ initialProducts, categoryNumber, query }: Use
 				setIsLoading(false);
 			}
 		},
-		[categoryNumber, currentFilters, query],
+		[categoryNumber, query, currentFilters],
 	);
 
 	return {

@@ -12,6 +12,7 @@ interface CategoryContentProps {
 	categoryData?: Category;
 	filters: FilterCategory[];
 	query?: string;
+	segment?: string;
 }
 
 export default function CategoryContent({
@@ -19,9 +20,9 @@ export default function CategoryContent({
 	categoryData,
 	filters,
 	query,
+	segment,
 }: CategoryContentProps) {
-	const breadcrumbs = useBreadcrumbs(query);
-	console.log(products?.length > 0,"qokla is true")
+	const breadcrumbs = useBreadcrumbs(segment);
 	return (
 		<div className="py-8">
 			<div className="mb-6">

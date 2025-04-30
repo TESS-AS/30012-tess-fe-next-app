@@ -194,7 +194,13 @@ export function ProductGrid({
 							</Link>
 						))
 					) : (
-						<div className="text-muted-foreground flex h-[400px] items-center justify-center">
+						<div className={cn(
+							"text-muted-foreground flex h-[400px] items-center justify-center",
+							variant === "compact" 
+								? "col-span-2 sm:col-span-3 lg:col-span-4"
+								: "col-span-1 sm:col-span-2 lg:col-span-3",
+							viewLayout === "list" && "lg:col-span-1"
+						)}>
 							{t("category.noResults")}
 						</div>
 					)}
