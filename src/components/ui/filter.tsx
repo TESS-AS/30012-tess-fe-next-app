@@ -56,16 +56,25 @@ export function Filter({
 	const [selectedFilters, setSelectedFilters] = React.useState<
 		Record<string, string[]>
 	>({});
+	const [triggerFilterUpdate, setTriggerFilterUpdate] = React.useState(false);
+	const pendingFilterRef = React.useRef<FilterValues[] | null>(null);
 
+	React.useLayoutEffect(() => {
+		if (triggerFilterUpdate && pendingFilterRef.current !== null) {
+			onFilterChange(pendingFilterRef.current);
+			pendingFilterRef.current = null;
+			setTriggerFilterUpdate(false);
+		}
+	}, [triggerFilterUpdate, onFilterChange]);
+	
 	const handleFilterChange = React.useCallback(
 		(filterKey: string, value: string) => {
 			setSelectedFilters((prev) => {
 				const newFilters = { ...prev };
 				const currentValues = [...(newFilters[filterKey] || [])];
 				const valueIndex = currentValues.indexOf(value);
-
+	
 				if (valueIndex > -1) {
-					// Remove value
 					const updatedValues = currentValues.filter((v) => v !== value);
 					if (updatedValues.length === 0) {
 						delete newFilters[filterKey];
@@ -73,27 +82,25 @@ export function Filter({
 						newFilters[filterKey] = updatedValues;
 					}
 				} else {
-					// Add value
 					newFilters[filterKey] = [...currentValues, value];
 				}
-
-				// Convert to FilterValues array for API
+	
 				const filterArray: FilterValues[] = Object.entries(newFilters).map(
 					([key, values]) => ({
 						key,
-						values: [...values], // Create a new array to ensure immutability
+						values: [...values],
 					}),
 				);
-
-				// Call onFilterChange with the updated filters
-				onFilterChange(filterArray);
-
+	
+				pendingFilterRef.current = filterArray;
+				setTriggerFilterUpdate(true); // Trigger update in layout effect
+	
 				return newFilters;
 			});
 		},
-		[onFilterChange],
+		[],
 	);
-
+	
 	// Reset filters
 	const resetFilters = React.useCallback(() => {
 		setSelectedFilters({});
