@@ -40,5 +40,9 @@
 		"suggestions": "Søkeforslag",
 		"noSuggestions": "Ingen søkeforslag funnet",
 		"noProductsFound": "Ingen produkter funnet"
+	},
+	"seo": {
+		"defaultTitle": "Tess | Bygge- og sikkerhetsprodukter",
+		"defaultDescription": "Tess er din pålitelige leverandør av byggematerialer, sikkerhetsutstyr og industrielle produkter. Handle trygt og raskt på nett."
 	}
 }

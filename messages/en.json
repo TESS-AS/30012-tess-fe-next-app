@@ -42,5 +42,9 @@
 		"suggestions": "Suggestions",
 		"noSuggestions": "No suggestions found",
 		"noProductsFound": "No products found"
+	},
+	"seo": {
+		"defaultTitle": "Tess | Building & Safety Products",
+		"defaultDescription": "Tess is your trusted supplier for high-quality building materials, safety equipment, and industrial products. Shop online for fast, reliable service."
 	}
 }

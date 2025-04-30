@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 
 import Main from "@/components/layouts/Main/Main";
+import { getSeoMetadata } from "@/lib/seo";
 import { mapCategoryTree } from "@/lib/utils";
 import axiosServer from "@/services/axiosServer";
 import type { Category, RawCategory } from "@/types/categories.types";
@@ -9,14 +10,23 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import "../globals.css";
 
+export async function generateMetadata({
+	params,
+}: {
+	params: Promise<{ locale: string }>;
+}) {
+	const { locale } = await params;
+	return getSeoMetadata({ locale });
+}
+
 export default async function RootLayout({
 	children,
 }: {
 	children: ReactNode;
 	params: { locale: string };
 }) {
-	const messages = await getMessages();
 	const locale = await getLocale();
+	const messages = await getMessages();
 	const supportedLocales = ["en", "no"];
 
 	if (!supportedLocales.includes(locale)) {

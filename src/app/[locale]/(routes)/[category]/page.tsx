@@ -3,6 +3,24 @@ import { fetchCategories, fetchProducts } from "@/lib/category-utils";
 import { formatUrlToDisplayName } from "@/lib/utils";
 import { loadFiltersBasedOnCategory } from "@/services/categories.service";
 import { getLocale } from "next-intl/server";
+import { getSeoMetadata } from "@/lib/seo";
+import { getTranslations } from "next-intl/server";
+
+export async function generateMetadata({
+	params,
+}: {
+	params: Promise<{ category: string; locale: string }>;
+}) {
+	const { category, locale } = await params;
+	const t = await getTranslations({ locale, namespace: "category" });
+
+	return await getSeoMetadata({
+		title: category,
+		description: t("viewAll"),
+		path: `/category/${category}`,
+		locale,
+	});
+}
 
 interface CategoryPageProps {
 	params: Promise<{

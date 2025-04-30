@@ -7,8 +7,40 @@ import { Separator } from "@/components/ui/separator";
 import { productFetch } from "@/services/product.service";
 import { notFound } from "next/navigation";
 import { getLocale } from "next-intl/server";
+import { getSeoMetadata } from "@/lib/seo";
+import { mockProducts } from "@/mocks/mockProducts";
+import { getTranslations } from "next-intl/server";
+
+export async function generateMetadata({
+	params,
+}: {
+	params: Promise<Params>;
+}) {
+	const { locale, category, product } = await params;
+	const t = await getTranslations({ locale, namespace: "product" });
+
+	const productData = mockProducts.find((p) => p.id === product);
+
+	if (!productData) {
+		return getSeoMetadata({
+			title: t("notFound"),
+			description: t("notFound"),
+			path: `/${category}/${product}`,
+			locale,
+		});
+	}
+
+	return getSeoMetadata({
+		title: productData.name,
+		description: productData.description,
+		path: `/${category}/${product}`,
+		image: productData.image,
+		locale,
+	});
+}
 
 interface Params {
+	locale: string;
 	category: string;
 	product: string;
 }
@@ -29,6 +61,7 @@ export default async function ProductPage({
 }) {
 	const locale = await getLocale();
 	const { category, product } = await params;
+	const t = await getTranslations("product");
 
 	const _productData = await getProducts(product);
 

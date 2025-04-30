@@ -2,9 +2,25 @@ import CategoryContent from "@/components/category/category-content";
 import { fetchCategories, fetchProducts, findSubCategoryRecursive } from "@/lib/category-utils";
 import { formatUrlToDisplayName } from "@/lib/utils";
 import { loadFiltersBasedOnCategory } from "@/services/categories.service";
-import { searchProducts } from "@/services/product.service";
 import { getLocale } from "next-intl/server";
+import { getSeoMetadata } from "@/lib/seo";
+import { getTranslations } from "next-intl/server";
 
+export async function generateMetadata({
+	params,
+}: {
+	params: Promise<{ locale: string; subcategory: string }>;
+}) {
+	const { locale, subcategory } = await params;
+	const t = await getTranslations({ locale, namespace: "category" });
+
+	return await getSeoMetadata({
+		title: `${subcategory}`,
+		description: t("viewAll"),
+		path: `/subcategory/${subcategory}`,
+		locale,
+	});
+}
 interface SubCategoryPageProps {
 	params: Promise<{
 		subcategory: string;
