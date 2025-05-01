@@ -59,7 +59,7 @@ export default function CategoryNavigationMenu({
 															{subcategory.subcategories.map((child) => (
 																<li key={child.slug}>
 																	<Link
-																		href={`/${category.slug}/${subcategory.slug}?segment=${child.slug}`}
+																		href={`/${category.slug}/${subcategory.slug}/${child.slug}`}
 																		className="text-muted-foreground hover:text-foreground text-sm transition-colors">
 																		{child.name}
 																	</Link>

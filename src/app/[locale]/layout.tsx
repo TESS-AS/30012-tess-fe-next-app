@@ -42,7 +42,7 @@ export default async function RootLayout({
 
 	return (
 		<html lang={locale}>
-			<body>
+			<body className="overflow-hidden">
 				<NextIntlClientProvider
 					locale={locale}
 					messages={messages}>
