@@ -30,7 +30,6 @@ export async function loadFilters({
 	searchTerm?: string | null;
 }) {
 	try {
-		console.time("filters-api-call");
 
 		// Create cache key
 		const cacheKey = `${categoryNumber || "none"}-${searchTerm || "none"}`;
@@ -40,7 +39,6 @@ export async function loadFilters({
 			filtersCache[cacheKey] &&
 			now - filtersCache[cacheKey].timestamp < FILTERS_CACHE_TTL
 		) {
-			console.timeEnd("filters-api-call");
 			return filtersCache[cacheKey].data;
 		}
 
@@ -49,6 +47,7 @@ export async function loadFilters({
 		if (searchTerm) params.append("searchTerm", searchTerm);
 
 		const url = `/attributeFilter/${params.toString() ? `?${params.toString()}` : ""}`;
+		console.log(url,"qokla url filter")
 		const response = await axiosInstance.get(url);
 
 		filtersCache[cacheKey] = {
@@ -56,7 +55,6 @@ export async function loadFilters({
 			timestamp: now,
 		};
 
-		console.timeEnd("filters-api-call");
 		return response.data;
 	} catch (error) {
 		console.error("Error loading filters", error);

@@ -158,14 +158,13 @@ export function ProductGrid({
 							: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
 						viewLayout === "list" && "lg:grid-cols-1",
 					)}>
-					{isFiltering ? (
+					{isFiltering || isLoading ? (
 						<>
 							{[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
 								<div
 									key={i}
 									className="group relative space-y-4">
 									<Skeleton className="aspect-square w-full rounded-lg" />
-			
 									<div className="space-y-2">
 										<Skeleton className="h-4 w-3/4" />
 										<Skeleton className="h-4 w-1/2" />
@@ -174,29 +173,29 @@ export function ProductGrid({
 								</div>
 							))}
 						</>
-					) : ( 
-						products.length > 0
-							? products.map((product, idx) => (
-								<Link
-									key={idx}
-									href={`${pathname}/${product.product_number}`}>
-									<ProductCard
-										{...product}
-										variant={variant}
-										viewLayout={viewLayout}
-										priority={idx < 4} // Load first 4 images with priority
-									/>
-								</Link>
-							))
-							: <div className={cn(
-								"text-muted-foreground flex h-[400px] items-center justify-center",
-								variant === "compact" 
-									? "col-span-2 sm:col-span-3 lg:col-span-4"
-									: "col-span-1 sm:col-span-2 lg:col-span-3",
-								viewLayout === "list" && "lg:col-span-1"
-							)}>
-												{t("category.noResults")}
-								</div>
+					) : products.length > 0 ? (
+						products.map((product, idx) => (
+							<Link
+								key={idx}
+								href={`${pathname}/${product.product_number}`}>
+								<ProductCard
+									{...product}
+									variant={variant}
+									viewLayout={viewLayout}
+									priority={idx < 4}
+								/>
+							</Link>
+						))
+					) : (
+						<div className={cn(
+							"text-muted-foreground flex h-[400px] items-center justify-center",
+							variant === "compact" 
+								? "col-span-2 sm:col-span-3 lg:col-span-4"
+								: "col-span-1 sm:col-span-2 lg:col-span-3",
+							viewLayout === "list" && "lg:col-span-1"
+						)}>
+							{t("category.noResults")}
+						</div>
 					)}
 				</div>
 

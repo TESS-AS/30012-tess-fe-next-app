@@ -69,7 +69,6 @@ export async function searchProducts(
 	sort?: string | null,
 ): Promise<SearchListResponse> {
 	try {
-		console.time('product-api-call');
 
 		// Create cache key
 		const cacheKey = `${categoryNumber}-${page}-${pageSize}${searchTerm ? `-${searchTerm}` : ''}${
@@ -112,7 +111,6 @@ export async function searchProducts(
 			timestamp: now,
 		};
 
-		console.timeEnd('product-api-call');
 		return response.data;
 	} catch (error) {
 		console.error("Error fetching products:", error);

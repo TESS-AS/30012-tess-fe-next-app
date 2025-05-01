@@ -96,7 +96,6 @@ export async function fetchProducts(categoryNumber: string | null, searchTerm: s
 			categoryNumber,
 			null, // no filters
 		);
-		console.timeEnd('backend-products-fetch');
 		return response.product;
 	} catch (error) {
 		console.error("Error fetching products:", error);

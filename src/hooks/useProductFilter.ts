@@ -13,18 +13,17 @@ export function useProductFilter({
 	query,
 }: UseProductFilterProps) {
 	const [products, setProducts] = useState<IProduct[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
+	const [isLoading, setIsLoading] = useState(true); 
 	const [currentPage, setCurrentPage] = useState(1);
 	const [hasMore, setHasMore] = useState(true);
 	const [currentFilters, setCurrentFilters] = useState<FilterValues[] | null>(null);
 	const [sort, setSort] = useState<string | null>(null);
 
 	useEffect(() => {
-		async function refetch() {
-			setIsLoading(true);
-			setCurrentPage(1);
+		let isMounted = true;
+
+		async function fetchInitialProducts() {
 			try {
-				console.log("qokla 1")
 				const response = await searchProducts(
 					1,
 					9,
@@ -33,15 +32,27 @@ export function useProductFilter({
 					currentFilters,
 					sort,
 				);
-				setProducts(response.product || []);
+				
+				if (isMounted) {
+					setProducts(response.product || []);
+					setHasMore(response.product && response.product.length === 9);
+					setIsLoading(false);
+				}
 			} catch (err) {
-				console.error("Error refetching on category/query change:", err);
-			} finally {
-				setIsLoading(false);
+				console.error("Error fetching initial products:", err);
+				if (isMounted) {
+					setIsLoading(false);
+				}
 			}
 		}
 
-		refetch();
+		setIsLoading(true);
+		setCurrentPage(1);
+		fetchInitialProducts();
+
+		return () => {
+			isMounted = false;
+		};
 	}, [categoryNumber, query]);
 
 	const loadMore = useCallback(async () => {
@@ -50,7 +61,6 @@ export function useProductFilter({
 		try {
 			setIsLoading(true);
 			const nextPage = currentPage + 1;
-			console.log("qokla 2")
 			const response = await searchProducts(
 				nextPage,
 				9,
@@ -61,8 +71,9 @@ export function useProductFilter({
 			);
 
 			if (response.product && response.product.length > 0) {
-				setProducts((prev) => [...prev, ...response.product]);
+				setProducts(prev => [...prev, ...response.product]);
 				setCurrentPage(nextPage);
+				setHasMore(response.product.length === 9);
 			} else {
 				setHasMore(false);
 			}
@@ -90,6 +101,7 @@ export function useProductFilter({
 				);
 
 				setProducts(response.product || []);
+				setHasMore(response.product && response.product.length === 9);
 			} catch (error) {
 				console.error("Error applying filters:", error);
 			} finally {
@@ -101,12 +113,10 @@ export function useProductFilter({
 
 	const handleSortChange = useCallback(
 		async (newSort: string) => {
-			setSort(newSort);
-			setCurrentPage(1);
-			setHasMore(true);
-
 			try {
 				setIsLoading(true);
+				setSort(newSort);
+				setCurrentPage(1);
 
 				const response = await searchProducts(
 					1,
@@ -118,6 +128,7 @@ export function useProductFilter({
 				);
 
 				setProducts(response.product || []);
+				setHasMore(response.product && response.product.length === 9);
 			} catch (error) {
 				console.error("Error sorting products:", error);
 			} finally {
