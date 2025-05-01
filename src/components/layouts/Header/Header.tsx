@@ -101,9 +101,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 
 								<div>
 									{data.productRes?.length ? (
-										data.productRes.map((product: IProductSearch) => {
-											console.log(product,"product")
-											return (
+										data.productRes.map((product: IProductSearch) => (
 											<Link
 												key={product.product_number}
 												href={`/product/product/${product.product_number}`}
@@ -132,7 +130,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 													</span>
 												</div>
 											</Link>
-										)})
+										))
 									) : (
 										<p className="text-opacity-30 text-sm text-green-600">
 											{t("search.noProductsFound")}

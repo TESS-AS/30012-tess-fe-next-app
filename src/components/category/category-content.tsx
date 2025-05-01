@@ -8,7 +8,6 @@ import { ProductGrid } from "@/components/products/product-grid";
 import { useBreadcrumbs } from "@/hooks/useBreadcrumbs";
 
 interface CategoryContentProps {
-	products: IProduct[];
 	categoryData?: Category;
 	filters: FilterCategory[];
 	query?: string;
@@ -16,7 +15,6 @@ interface CategoryContentProps {
 }
 
 export default function CategoryContent({
-	products,
 	categoryData,
 	filters,
 	query,
@@ -30,7 +28,6 @@ export default function CategoryContent({
 			</div>
 			<ProductGrid
 				filters={filters}
-				initialProducts={products}
 				categoryNumber={categoryData?.groupId || ""}
 				query={query || null}
 			/>

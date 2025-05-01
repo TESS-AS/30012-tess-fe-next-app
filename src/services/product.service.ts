@@ -40,7 +40,6 @@ export async function loadCategories(query: string) {
 	try {
 		const url = `/searchCategory/${query}`;
 		const response: AxiosResponse = await axiosInstance.get(url);
-		console.log(response.data);
 		return response.data;
 	} catch (error) {
 		console.error("Error loading categories", error);
@@ -54,7 +53,6 @@ export async function loadItem(query?: string) {
 		const url = `/search/${parsedQuery}`;
 
 		const response: AxiosResponse = await axiosInstance.get(url);
-		console.log("api res from search: ", response.data);
 		return response.data;
 	} catch (error) {
 		console.error("Error loading category, using mock data", error);
@@ -84,8 +82,6 @@ export async function searchProducts(
 			productsCache[cacheKey] &&
 			now - productsCache[cacheKey].timestamp < PRODUCTS_CACHE_TTL
 		) {
-			console.log('Using cached products');
-			console.timeEnd('product-api-call');
 			return productsCache[cacheKey].data;
 		}
 
@@ -104,14 +100,12 @@ export async function searchProducts(
 		// Construct URL with path parameters and query string
 		const url = `/searchList/${page}/${pageSize}/${params.toString() ? `?${params.toString()}` : ""}`;
 		console.log(url,"qokla url")
-
 		// Make request with or without body based on filters
 		const response =
 			filters && filters.length > 0
 				? await axiosInstance.post(url, { filters })
 				: await axiosInstance.post(url);
 
-				console.log(response,"qokla response")
 		// Update cache
 		productsCache[cacheKey] = {
 			data: response.data,

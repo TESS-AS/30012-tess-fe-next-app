@@ -22,45 +22,41 @@ export async function loadCategories(locale: string) {
 	}
 }
 
-export async function loadFiltersBasedOnCategory(
-	categoryNumber: string | null,
-	searchTerm: string | null = null,
-) {
+export async function loadFilters({
+	categoryNumber,
+	searchTerm,
+}: {
+	categoryNumber?: string | null;
+	searchTerm?: string | null;
+}) {
 	try {
-		console.time('filters-api-call');
-		
+		console.time("filters-api-call");
+
 		// Create cache key
-		const cacheKey = `${categoryNumber}${searchTerm ? `-${searchTerm}` : ''}`;
+		const cacheKey = `${categoryNumber || "none"}-${searchTerm || "none"}`;
 		const now = Date.now();
 
-		// Check cache
 		if (
 			filtersCache[cacheKey] &&
 			now - filtersCache[cacheKey].timestamp < FILTERS_CACHE_TTL
 		) {
-			console.log('Using cached filters');
-			console.timeEnd('filters-api-call');
+			console.timeEnd("filters-api-call");
 			return filtersCache[cacheKey].data;
 		}
 
 		const params = new URLSearchParams();
-		if (categoryNumber) {
-			params.append("categoryNumber", categoryNumber);
-		}
-		if (searchTerm) {
-			params.append("searchTerm", searchTerm);
-		}
+		if (categoryNumber) params.append("categoryNumber", categoryNumber);
+		if (searchTerm) params.append("searchTerm", searchTerm);
 
 		const url = `/attributeFilter/${params.toString() ? `?${params.toString()}` : ""}`;
 		const response = await axiosInstance.get(url);
-		
-		// Update cache
+
 		filtersCache[cacheKey] = {
 			data: response.data,
 			timestamp: now,
 		};
 
-		console.timeEnd('filters-api-call');
+		console.timeEnd("filters-api-call");
 		return response.data;
 	} catch (error) {
 		console.error("Error loading filters", error);

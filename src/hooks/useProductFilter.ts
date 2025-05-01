@@ -4,30 +4,27 @@ import { FilterValues } from "@/types/filter.types";
 import { IProduct } from "@/types/product.types";
 
 interface UseProductFilterProps {
-	initialProducts: IProduct[];
 	categoryNumber: string;
 	query: string | null;
 }
 
 export function useProductFilter({
-	initialProducts,
 	categoryNumber,
 	query,
 }: UseProductFilterProps) {
-	const [products, setProducts] = useState<IProduct[]>(initialProducts);
+	const [products, setProducts] = useState<IProduct[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [hasMore, setHasMore] = useState(true);
 	const [currentFilters, setCurrentFilters] = useState<FilterValues[] | null>(null);
 	const [sort, setSort] = useState<string | null>(null);
 
-	// 👇 NEW: Refetch on categoryNumber or query change
 	useEffect(() => {
 		async function refetch() {
 			setIsLoading(true);
 			setCurrentPage(1);
-			setHasMore(true);
 			try {
+				console.log("qokla 1")
 				const response = await searchProducts(
 					1,
 					9,
@@ -53,6 +50,7 @@ export function useProductFilter({
 		try {
 			setIsLoading(true);
 			const nextPage = currentPage + 1;
+			console.log("qokla 2")
 			const response = await searchProducts(
 				nextPage,
 				9,
@@ -81,7 +79,6 @@ export function useProductFilter({
 				setIsLoading(true);
 				setCurrentFilters(filters);
 				setCurrentPage(1);
-				setHasMore(true);
 
 				const response = await searchProducts(
 					1,

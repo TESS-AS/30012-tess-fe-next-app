@@ -26,7 +26,6 @@ export function ProductCard({
 }: ProductCardProps) {
 	const [isImageLoading, setIsImageLoading] = useState(true);
 
-	console.log(short_desc,"short_descs")
 	const content = (
 		<div
 			className={cn(

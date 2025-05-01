@@ -24,16 +24,21 @@ import { useTranslations } from "next-intl";
 import { FilterValues } from "@/types/filter.types";
 
 interface ProductGridProps {
-	initialProducts: IProduct[];
 	variant?: "default" | "compact";
 	filters: FilterCategory[];
 	categoryNumber: string;
 	query: string | null;
 }
 
+const SORT_OPTIONS = [
+	{ value: " ", label: "Sort By" },
+	{ value: "Alphabetical", label: "Alphabetical" },
+	{ value: "oldest", label: "Oldest" },
+	{ value: "lowest", label: "Lowest" },
+	{ value: "highest", label: "Highest" },
+];
 
 export function ProductGrid({
-	initialProducts,
 	variant = "default",
 	filters,
 	categoryNumber,
@@ -47,29 +52,18 @@ export function ProductGrid({
 	const observerTarget = useRef<HTMLDivElement>(null);
 	const [sort, setSort] = useState<string>('');
 
-	const SORT_OPTIONS = [
-		{ value: " ", label: t("common.sort") },
-		{ value: "Alphabetical", label: "Alphabetical" },
-		{ value: "oldest", label: "Oldest" },
-		{ value: "lowest", label: "Lowest" },
-		{ value: "highest", label: "Highest" },
-	];
-
 	const { products, isLoading, hasMore, handleFilterChange, loadMore, handleSortChange } =
 		useProductFilter({
-			initialProducts,
 			categoryNumber,
 			query,
 		});
 
-	// Handle filter changes
 	const onFilterChange = useCallback(async (newFilters: FilterValues[]) => {
 		setIsFiltering(true);
 		await handleFilterChange(newFilters);
 		setIsFiltering(false);
 	}, [handleFilterChange]);
 
-	// Apply filters when activeFilters change
 	useEffect(() => {
 		const applyFilters = async () => {
 			if (activeFilters.length > 0) {
@@ -82,7 +76,6 @@ export function ProductGrid({
 		applyFilters();
 	}, [activeFilters, handleFilterChange]);
 
-	// Intersection Observer setup
 	useEffect(() => {
 		const observer = new IntersectionObserver(
 			(entries) => {
@@ -108,9 +101,10 @@ export function ProductGrid({
 	}, [hasMore, isLoading, loadMore]);
 
 	const onSortChange = (value: string) => {
-		setSort(value); // this updates local UI if needed
-		handleSortChange(value); // trigger actual data fetch with sort
+		setSort(value); 
+		handleSortChange(value);
 	};
+
 	return (
 		<div className="flex flex-col gap-8 lg:flex-row">
 			{/* Sidebar Filter */}
@@ -180,29 +174,29 @@ export function ProductGrid({
 								</div>
 							))}
 						</>
-					) : products.length > 0 ? (
-						products.map((product, idx) => (
-							<Link
-								key={idx}
-								href={`${pathname}/${product.product_number}`}>
-								<ProductCard
-									{...product}
-									variant={variant}
-									viewLayout={viewLayout}
-									priority={idx < 4} // Load first 4 images with priority
-								/>
-							</Link>
-						))
-					) : (
-						<div className={cn(
-							"text-muted-foreground flex h-[400px] items-center justify-center",
-							variant === "compact" 
-								? "col-span-2 sm:col-span-3 lg:col-span-4"
-								: "col-span-1 sm:col-span-2 lg:col-span-3",
-							viewLayout === "list" && "lg:col-span-1"
-						)}>
-							{t("category.noResults")}
-						</div>
+					) : ( 
+						products.length > 0
+							? products.map((product, idx) => (
+								<Link
+									key={idx}
+									href={`${pathname}/${product.product_number}`}>
+									<ProductCard
+										{...product}
+										variant={variant}
+										viewLayout={viewLayout}
+										priority={idx < 4} // Load first 4 images with priority
+									/>
+								</Link>
+							))
+							: <div className={cn(
+								"text-muted-foreground flex h-[400px] items-center justify-center",
+								variant === "compact" 
+									? "col-span-2 sm:col-span-3 lg:col-span-4"
+									: "col-span-1 sm:col-span-2 lg:col-span-3",
+								viewLayout === "list" && "lg:col-span-1"
+							)}>
+												{t("category.noResults")}
+								</div>
 					)}
 				</div>
 
