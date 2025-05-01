@@ -1,9 +1,13 @@
 import CategoryContent from "@/components/category/category-content";
-import { fetchCategories, fetchProducts, findSubCategoryRecursive } from "@/lib/category-utils";
-import { formatUrlToDisplayName } from "@/lib/utils";
-import { loadFilters,  } from "@/services/categories.service";
-import { getLocale } from "next-intl/server";
+import {
+	fetchCategories,
+	fetchProducts,
+	findSubCategoryRecursive,
+} from "@/lib/category-utils";
 import { getSeoMetadata } from "@/lib/seo";
+import { formatUrlToDisplayName } from "@/lib/utils";
+import { loadFilters } from "@/services/categories.service";
+import { getLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({
@@ -34,7 +38,7 @@ export default async function SubCategoryPage({
 	try {
 		const { subcategory } = await params;
 		const locale = await getLocale();
-		
+
 		const formattedSubCategory = formatUrlToDisplayName(subcategory);
 
 		const categories = await fetchCategories(locale);
@@ -59,8 +63,7 @@ export default async function SubCategoryPage({
 				categoryData={subCategoryData}
 				filters={filters}
 			/>
-		)
-
+		);
 	} catch (error) {
 		console.error("Error in SubCategoryPage:", error);
 		throw error;

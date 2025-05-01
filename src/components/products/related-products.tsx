@@ -12,10 +12,7 @@ interface RelatedProductsProps {
 	category: string;
 }
 
-export async function RelatedProducts({
-	products,
-	category,
-}: RelatedProductsProps) {
+export function RelatedProducts({ products, category }: RelatedProductsProps) {
 	const pathname = usePathname();
 	const t = useTranslations();
 

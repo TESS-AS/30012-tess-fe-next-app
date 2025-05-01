@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Expand, X } from "lucide-react";
 import Image from "next/image";
+
 import { Skeleton } from "./skeleton";
 
 interface ZoomImageProps {
@@ -56,11 +57,11 @@ export function ZoomImage({
 				onMouseEnter={() => setIsZoomed(true)}
 				onMouseLeave={() => setIsZoomed(false)}>
 				{isLoading && (
-					<Skeleton 
+					<Skeleton
 						className={cn(
 							"absolute inset-0 z-10",
-							isLoading ? "animate-pulse" : "hidden"
-						)} 
+							isLoading ? "animate-pulse" : "hidden",
+						)}
 					/>
 				)}
 				<Image
@@ -73,8 +74,8 @@ export function ZoomImage({
 					loading="lazy"
 					className={cn(
 						"h-full w-full object-contain transition-all duration-300",
-						isLoading ? "scale-110 blur-sm" : "scale-100 blur-0",
-						isZoomed ? "scale-150" : "scale-100"
+						isLoading ? "scale-110 blur-sm" : "blur-0 scale-100",
+						isZoomed ? "scale-150" : "scale-100",
 					)}
 					style={
 						isZoomed

@@ -1,11 +1,11 @@
 import CategoryContent from "@/components/category/category-content";
 import { fetchCategories } from "@/lib/category-utils";
+import { getSeoMetadata } from "@/lib/seo";
 import { formatUrlToDisplayName } from "@/lib/utils";
 import { loadFilters } from "@/services/categories.service";
-import { getLocale } from "next-intl/server";
-import { getSeoMetadata } from "@/lib/seo";
-import { getTranslations } from "next-intl/server";
 import { searchProducts } from "@/services/product.service";
+import { getLocale } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({
 	params,
@@ -32,7 +32,10 @@ interface CategoryPageProps {
 	}>;
 }
 
-export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
+export default async function CategoryPage({
+	params,
+	searchParams,
+}: CategoryPageProps) {
 	try {
 		const { category } = await params;
 		const { query } = await searchParams;

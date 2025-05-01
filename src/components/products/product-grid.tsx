@@ -1,15 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useCallback, useState } from "react";
+
 import { useProductFilter } from "@/hooks/useProductFilter";
 import { cn } from "@/lib/utils";
+import { FilterValues } from "@/types/filter.types";
 import { IProduct } from "@/types/product.types";
+import { LayoutGrid } from "lucide-react";
+import { AlignJustify } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { ProductCard } from "./product-card";
+import { Button } from "../ui/button";
 import { Filter, FilterCategory } from "../ui/filter";
-import { Skeleton } from "../ui/skeleton";
 import {
 	Select,
 	SelectContent,
@@ -17,11 +22,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "../ui/select";
-import { Button } from "../ui/button";
-import { LayoutGrid } from "lucide-react";
-import { AlignJustify } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { FilterValues } from "@/types/filter.types";
+import { Skeleton } from "../ui/skeleton";
 
 interface ProductGridProps {
 	variant?: "default" | "compact";
@@ -50,19 +51,28 @@ export function ProductGrid({
 	const [viewLayout, setViewLayout] = useState<string>("");
 	const [activeFilters, setActiveFilters] = useState<FilterValues[]>([]);
 	const observerTarget = useRef<HTMLDivElement>(null);
-	const [sort, setSort] = useState<string>('');
+	const [sort, setSort] = useState<string>("");
 
-	const { products, isLoading, hasMore, handleFilterChange, loadMore, handleSortChange } =
-		useProductFilter({
-			categoryNumber,
-			query,
-		});
+	const {
+		products,
+		isLoading,
+		hasMore,
+		handleFilterChange,
+		loadMore,
+		handleSortChange,
+	} = useProductFilter({
+		categoryNumber,
+		query,
+	});
 
-	const onFilterChange = useCallback(async (newFilters: FilterValues[]) => {
-		setIsFiltering(true);
-		await handleFilterChange(newFilters);
-		setIsFiltering(false);
-	}, [handleFilterChange]);
+	const onFilterChange = useCallback(
+		async (newFilters: FilterValues[]) => {
+			setIsFiltering(true);
+			await handleFilterChange(newFilters);
+			setIsFiltering(false);
+		},
+		[handleFilterChange],
+	);
 
 	useEffect(() => {
 		const applyFilters = async () => {
@@ -101,7 +111,7 @@ export function ProductGrid({
 	}, [hasMore, isLoading, loadMore]);
 
 	const onSortChange = (value: string) => {
-		setSort(value); 
+		setSort(value);
 		handleSortChange(value);
 	};
 
@@ -120,18 +130,22 @@ export function ProductGrid({
 			{/* Product Grid */}
 			<div className="flex-1">
 				<div className="mb-4 flex items-center justify-between">
-				<Select value={sort} onValueChange={onSortChange}>
-					<SelectTrigger className="w-[180px]">
-						<SelectValue placeholder={t("common.sort")} />
-					</SelectTrigger>
-					<SelectContent>
-						{SORT_OPTIONS.map((option) => (
-							<SelectItem key={option.value} value={option.value}>
-								{option.label}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
+					<Select
+						value={sort}
+						onValueChange={onSortChange}>
+						<SelectTrigger className="w-[180px]">
+							<SelectValue placeholder={t("common.sort")} />
+						</SelectTrigger>
+						<SelectContent>
+							{SORT_OPTIONS.map((option) => (
+								<SelectItem
+									key={option.value}
+									value={option.value}>
+									{option.label}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
 
 					<div className="flex gap-2">
 						<Button
@@ -187,13 +201,14 @@ export function ProductGrid({
 							</Link>
 						))
 					) : (
-						<div className={cn(
-							"text-muted-foreground flex h-[400px] items-center justify-center",
-							variant === "compact" 
-								? "col-span-2 sm:col-span-3 lg:col-span-4"
-								: "col-span-1 sm:col-span-2 lg:col-span-3",
-							viewLayout === "list" && "lg:col-span-1"
-						)}>
+						<div
+							className={cn(
+								"text-muted-foreground flex h-[400px] items-center justify-center",
+								variant === "compact"
+									? "col-span-2 sm:col-span-3 lg:col-span-4"
+									: "col-span-1 sm:col-span-2 lg:col-span-3",
+								viewLayout === "list" && "lg:col-span-1",
+							)}>
 							{t("category.noResults")}
 						</div>
 					)}

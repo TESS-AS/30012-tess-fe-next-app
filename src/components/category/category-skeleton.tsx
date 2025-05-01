@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function CategorySkeleton() {
 	return (
 		<div className="flex flex-col">
-			<div className="grid grid-cols-1 grid-row-2 gap-4 h-[100px] mb-4">
+			<div className="grid-row-2 mb-4 grid h-[100px] grid-cols-1 gap-4">
 				<Skeleton className="lg:w-2/4" />
 				<Skeleton className="lg:w-1/4" />
 			</div>

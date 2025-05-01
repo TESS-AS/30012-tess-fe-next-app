@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
+
 import { cn } from "@/lib/utils";
 import { IProduct } from "@/types/product.types";
 import Image from "next/image";
-import { useState } from "react";
 
 interface ProductCardProps extends IProduct {
 	className?: string;
@@ -36,9 +37,9 @@ export function ProductCard({
 			)}>
 			<div
 				className={cn(
-					" relative overflow-hidden rounded-md",
+					"relative overflow-hidden rounded-md",
 					aspectRatio === "portrait" ? "aspect-[3/4]" : "aspect-square",
-					viewLayout === "list" ? "w-[250px] me-4" : "",
+					viewLayout === "list" ? "me-4 w-[250px]" : "",
 					isImageLoading ? "animate-pulse" : "",
 				)}>
 				{media_m ? (
@@ -59,13 +60,13 @@ export function ProductCard({
 							"transition-all duration-300",
 							isImageLoading
 								? "scale-110 blur-sm grayscale"
-								: "scale-100 blur-0 grayscale-0",
+								: "blur-0 scale-100 grayscale-0",
 							"group-hover:scale-105",
 						)}
 						onLoad={() => setIsImageLoading(false)}
 					/>
 				) : (
-					<div className="bg-white h-full w-full">
+					<div className="h-full w-full bg-white">
 						<Image
 							src="/images/tess.webp"
 							alt="Tess"
@@ -83,7 +84,7 @@ export function ProductCard({
 								"transition-all duration-300",
 								isImageLoading
 									? "scale-110 blur-sm grayscale"
-									: "scale-100 blur-0 grayscale-0",
+									: "blur-0 scale-100 grayscale-0",
 								"group-hover:scale-105",
 							)}
 							onLoad={() => setIsImageLoading(false)}

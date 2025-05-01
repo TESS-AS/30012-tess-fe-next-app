@@ -69,11 +69,10 @@ export async function searchProducts(
 	sort?: string | null,
 ): Promise<SearchListResponse> {
 	try {
-
 		// Create cache key
-		const cacheKey = `${categoryNumber}-${page}-${pageSize}${searchTerm ? `-${searchTerm}` : ''}${
-			filters ? `-${JSON.stringify(filters)}` : ''
-		}${sort ? `-${sort}` : ''}`;
+		const cacheKey = `${categoryNumber}-${page}-${pageSize}${searchTerm ? `-${searchTerm}` : ""}${
+			filters ? `-${JSON.stringify(filters)}` : ""
+		}${sort ? `-${sort}` : ""}`;
 		const now = Date.now();
 
 		// Check cache
@@ -98,7 +97,7 @@ export async function searchProducts(
 
 		// Construct URL with path parameters and query string
 		const url = `/searchList/${page}/${pageSize}/${params.toString() ? `?${params.toString()}` : ""}`;
-		console.log(url,"qokla url")
+		console.log(url, "qokla url");
 		// Make request with or without body based on filters
 		const response =
 			filters && filters.length > 0

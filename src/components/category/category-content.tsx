@@ -1,11 +1,12 @@
 "use client";
 
-import { Category } from "@/types/categories.types";
-import { IProduct } from "@/types/product.types";
-import { FilterCategory } from "../ui/filter";
-import { Breadcrumb } from "../ui/breadcrumb";
 import { ProductGrid } from "@/components/products/product-grid";
 import { useBreadcrumbs } from "@/hooks/useBreadcrumbs";
+import { Category } from "@/types/categories.types";
+import { IProduct } from "@/types/product.types";
+
+import { Breadcrumb } from "../ui/breadcrumb";
+import { FilterCategory } from "../ui/filter";
 
 interface CategoryContentProps {
 	categoryData?: Category;

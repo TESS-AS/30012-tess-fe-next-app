@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+
 import { searchProducts } from "@/services/product.service";
 import { FilterValues } from "@/types/filter.types";
 import { IProduct } from "@/types/product.types";
@@ -13,10 +14,12 @@ export function useProductFilter({
 	query,
 }: UseProductFilterProps) {
 	const [products, setProducts] = useState<IProduct[]>([]);
-	const [isLoading, setIsLoading] = useState(true); 
+	const [isLoading, setIsLoading] = useState(true);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [hasMore, setHasMore] = useState(true);
-	const [currentFilters, setCurrentFilters] = useState<FilterValues[] | null>(null);
+	const [currentFilters, setCurrentFilters] = useState<FilterValues[] | null>(
+		null,
+	);
 	const [sort, setSort] = useState<string | null>(null);
 
 	useEffect(() => {
@@ -32,7 +35,7 @@ export function useProductFilter({
 					currentFilters,
 					sort,
 				);
-				
+
 				if (isMounted) {
 					setProducts(response.product || []);
 					setHasMore(response.product && response.product.length === 9);
@@ -71,7 +74,7 @@ export function useProductFilter({
 			);
 
 			if (response.product && response.product.length > 0) {
-				setProducts(prev => [...prev, ...response.product]);
+				setProducts((prev) => [...prev, ...response.product]);
 				setCurrentPage(nextPage);
 				setHasMore(response.product.length === 9);
 			} else {
@@ -82,7 +85,15 @@ export function useProductFilter({
 		} finally {
 			setIsLoading(false);
 		}
-	}, [categoryNumber, currentFilters, currentPage, hasMore, isLoading, query, sort]);
+	}, [
+		categoryNumber,
+		currentFilters,
+		currentPage,
+		hasMore,
+		isLoading,
+		query,
+		sort,
+	]);
 
 	const handleFilterChange = useCallback(
 		async (filters: FilterValues[]) => {

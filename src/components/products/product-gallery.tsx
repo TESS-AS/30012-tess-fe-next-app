@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
-import { ZoomImage } from "../ui/zoom-image";
 import { Skeleton } from "../ui/skeleton";
+import { ZoomImage } from "../ui/zoom-image";
 
 interface ProductImage {
 	filename: string;
@@ -31,12 +31,14 @@ export function ProductGallery({ images, className }: ProductGalleryProps) {
 		},
 	);
 
-	const [loadedImages, setLoadedImages] = useState<{ [key: number]: boolean }>({});
+	const [loadedImages, setLoadedImages] = useState<{ [key: number]: boolean }>(
+		{},
+	);
 
 	const handleImageLoad = (index: number) => {
-		setLoadedImages(prev => ({
+		setLoadedImages((prev) => ({
 			...prev,
-			[index]: true
+			[index]: true,
 		}));
 	};
 
@@ -79,7 +81,7 @@ export function ProductGallery({ images, className }: ProductGalleryProps) {
 							loading="lazy"
 							className={cn(
 								"h-full w-full rounded-md object-contain transition-all duration-300",
-								!loadedImages[index] && "scale-110 blur-sm"
+								!loadedImages[index] && "scale-110 blur-sm",
 							)}
 							onLoad={() => handleImageLoad(index)}
 						/>

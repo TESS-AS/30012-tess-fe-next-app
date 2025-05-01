@@ -11,7 +11,7 @@ let categoriesCache: {
 } = {
 	data: null,
 	timestamp: 0,
-	locale: '',
+	locale: "",
 };
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
@@ -34,7 +34,9 @@ export async function fetchCategories(locale: string) {
 			},
 		});
 
-		const categories = response.data.map((node) => mapCategoryTree(node, locale));
+		const categories = response.data.map((node) =>
+			mapCategoryTree(node, locale),
+		);
 
 		// Update cache
 		categoriesCache = {
@@ -59,7 +61,7 @@ export async function findCategoryByName(categories: Category[], name: string) {
 export function findSubCategoryRecursive(
 	categories: Category[],
 	subcategoryName: string,
-	segmentName?: string
+	segmentName?: string,
 ): Category | null {
 	for (const category of categories) {
 		if (formatUrlToDisplayName(category.slug) === subcategoryName) {
@@ -68,7 +70,7 @@ export function findSubCategoryRecursive(
 			// Try to find segment in this category's subcategories
 			const deeper = findSubCategoryRecursive(
 				category.subcategories || [],
-				segmentName
+				segmentName,
 			);
 			if (deeper) return deeper;
 			return category;
@@ -79,7 +81,7 @@ export function findSubCategoryRecursive(
 			const found = findSubCategoryRecursive(
 				category.subcategories,
 				subcategoryName,
-				segmentName
+				segmentName,
 			);
 			if (found) return found;
 		}
@@ -87,7 +89,10 @@ export function findSubCategoryRecursive(
 	return null;
 }
 
-export async function fetchProducts(categoryNumber: string | null, searchTerm: string | null) {
+export async function fetchProducts(
+	categoryNumber: string | null,
+	searchTerm: string | null,
+) {
 	try {
 		const response = await searchProducts(
 			1, // page

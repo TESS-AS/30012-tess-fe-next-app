@@ -66,14 +66,14 @@ export function Filter({
 			setTriggerFilterUpdate(false);
 		}
 	}, [triggerFilterUpdate, onFilterChange]);
-	
+
 	const handleFilterChange = React.useCallback(
 		(filterKey: string, value: string) => {
 			setSelectedFilters((prev) => {
 				const newFilters = { ...prev };
 				const currentValues = [...(newFilters[filterKey] || [])];
 				const valueIndex = currentValues.indexOf(value);
-	
+
 				if (valueIndex > -1) {
 					const updatedValues = currentValues.filter((v) => v !== value);
 					if (updatedValues.length === 0) {
@@ -84,23 +84,23 @@ export function Filter({
 				} else {
 					newFilters[filterKey] = [...currentValues, value];
 				}
-	
+
 				const filterArray: FilterValues[] = Object.entries(newFilters).map(
 					([key, values]) => ({
 						key,
 						values: [...values],
 					}),
 				);
-	
+
 				pendingFilterRef.current = filterArray;
 				setTriggerFilterUpdate(true); // Trigger update in layout effect
-	
+
 				return newFilters;
 			});
 		},
 		[],
 	);
-	
+
 	// Reset filters
 	const resetFilters = React.useCallback(() => {
 		setSelectedFilters({});
@@ -129,7 +129,7 @@ export function Filter({
 					</Button>
 				</div>
 			)}
-			<div className="space-y-6 h-[1120px] overflow-auto">
+			<div className="h-[1120px] space-y-6 overflow-auto">
 				{filters?.map((filterCategory) => (
 					<div
 						key={filterCategory.category}

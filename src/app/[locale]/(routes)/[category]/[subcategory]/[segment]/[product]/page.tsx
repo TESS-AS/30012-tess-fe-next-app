@@ -4,11 +4,11 @@ import { ProductGallery } from "@/components/products/product-gallery";
 import { ProductInfo } from "@/components/products/product-info";
 import { RelatedProducts } from "@/components/products/related-products";
 import { Separator } from "@/components/ui/separator";
+import { getSeoMetadata } from "@/lib/seo";
+import { mockProducts } from "@/mocks/mockProducts";
 import { productFetch } from "@/services/product.service";
 import { notFound } from "next/navigation";
 import { getLocale } from "next-intl/server";
-import { getSeoMetadata } from "@/lib/seo";
-import { mockProducts } from "@/mocks/mockProducts";
 import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({

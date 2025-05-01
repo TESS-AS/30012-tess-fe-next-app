@@ -30,7 +30,6 @@ export async function loadFilters({
 	searchTerm?: string | null;
 }) {
 	try {
-
 		// Create cache key
 		const cacheKey = `${categoryNumber || "none"}-${searchTerm || "none"}`;
 		const now = Date.now();
@@ -47,7 +46,7 @@ export async function loadFilters({
 		if (searchTerm) params.append("searchTerm", searchTerm);
 
 		const url = `/attributeFilter/${params.toString() ? `?${params.toString()}` : ""}`;
-		console.log(url,"qokla url filter")
+		console.log(url, "qokla url filter");
 		const response = await axiosInstance.get(url);
 
 		filtersCache[cacheKey] = {
