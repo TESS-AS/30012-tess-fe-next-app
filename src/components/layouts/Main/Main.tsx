@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 
+import CartDrawer from "@/components/cart/CartDrawer";
 import Header from "@/components/layouts/Header/Header";
 import { Category } from "@/types/categories.types";
 
@@ -18,6 +19,7 @@ export default function Main({
 			<div className="bg-background h-[calc(100vh-80px)] overflow-y-auto md:rounded-tl-2xl">
 				<div className="container mx-auto rounded-t-lg py-5">{children}</div>
 			</div>
+			<CartDrawer />
 		</div>
 	);
 }

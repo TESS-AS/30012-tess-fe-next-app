@@ -13,11 +13,11 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input, inputStyles } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useSearch } from "@/hooks/useProductSearch";
 import { useRouter } from "@/i18n/navigation";
-import { cn } from "@/lib/utils";
+import { useCart } from "@/lib/providers/CartProvider";
 import { Category } from "@/types/categories.types";
 import { IProductSearch, ISuggestions } from "@/types/search.types";
 import { Search, ShoppingCart, User } from "lucide-react";
@@ -32,6 +32,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const { data, isLoading } = useSearch(searchQuery);
 	const t = useTranslations();
 	const [isAuthOpen, setIsAuthOpen] = useState(false);
+	const { openCart } = useCart();
 
 	const router = useRouter();
 
@@ -194,15 +195,13 @@ export default function Header({ categories }: { categories: Category[] }) {
 					<Button
 						variant="ghost"
 						size="icon"
-						asChild
-						className="relative">
-						<Link href="/cart">
-							<ShoppingCart className="h-5 w-5" />
-							<Badge className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full p-0">
-								3
-							</Badge>
-							<span className="sr-only">Cart</span>
-						</Link>
+						className="relative"
+						onClick={openCart}>
+						<ShoppingCart className="h-5 w-5" />
+						<Badge className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full p-0">
+							2
+						</Badge>
+						<span className="sr-only">Cart</span>
 					</Button>
 					<Sheet
 						open={isSearchOpen}

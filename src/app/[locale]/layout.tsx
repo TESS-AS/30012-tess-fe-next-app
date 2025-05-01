@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 
 import Main from "@/components/layouts/Main/Main";
+import { CartProvider } from "@/lib/providers/CartProvider";
 import { getSeoMetadata } from "@/lib/seo";
 import { mapCategoryTree } from "@/lib/utils";
 import axiosServer from "@/services/axiosServer";
@@ -45,7 +46,9 @@ export default async function RootLayout({
 				<NextIntlClientProvider
 					locale={locale}
 					messages={messages}>
-					<Main categories={categories}>{children}</Main>
+					<CartProvider>
+						<Main categories={categories}>{children}</Main>
+					</CartProvider>
 				</NextIntlClientProvider>
 			</body>
 		</html>
