@@ -22,7 +22,6 @@ export default function CheckoutSteps() {
 
 	return (
 		<div className="w-full space-y-4">
-			{/* Express Checkout */}
 			<div className="space-y-2 rounded-md border bg-white p-4">
 				<h2 className="text-lg font-semibold">Express Checkout</h2>
 				<div className="flex gap-4">
