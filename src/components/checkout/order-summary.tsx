@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
+import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import ProductVariantTable from "@/components/checkout/product-variant-table";
+import Image from "next/image";
 
 export default function OrderSummary() {
 	return (
@@ -13,7 +13,6 @@ export default function OrderSummary() {
 				<span className="text-sm font-medium">$306.34</span>
 			</div>
 
-			{/* Product */}
 			<div className="mb-4 flex gap-4 border-b pb-4">
 				<div className="relative h-32 w-34 overflow-hidden rounded border">
 					<Image
@@ -26,7 +25,7 @@ export default function OrderSummary() {
 				<div className="flex flex-col justify-between text-sm">
 					<div>
 						<p className="font-medium">Protective Gloves</p>
-						<p className="text-muted-foreground">25 | Black | 27.5"</p>
+						<p className="text-muted-foreground">25 | Black | 27.5</p>
 					</div>
 					<div className="mt-2 flex items-center gap-2">
 						<Button
@@ -46,7 +45,6 @@ export default function OrderSummary() {
 			</div>
 			<ProductVariantTable />
 
-			{/* Promo */}
 			<div className="my-4 space-y-2">
 				<Input placeholder="Gift or promo code" />
 				<Button
@@ -56,7 +54,6 @@ export default function OrderSummary() {
 				</Button>
 			</div>
 
-			{/* Price Breakdown */}
 			<div className="mb-4 space-y-1 text-sm">
 				<div className="flex justify-between">
 					<span>Subtotal</span>
@@ -81,13 +78,11 @@ export default function OrderSummary() {
 				</div>
 			</div>
 
-			{/* Notice */}
 			<div className="mb-4 rounded bg-yellow-50 p-3 text-xs text-yellow-800">
 				Duties, Tax, and Shipping are estimated totals until shipping step is
 				complete.
 			</div>
 
-			{/* Save Info */}
 			<div className="space-y-2 text-sm">
 				<p className="font-semibold">Save Your Info (Optional)</p>
 				<p className="text-muted-foreground">
