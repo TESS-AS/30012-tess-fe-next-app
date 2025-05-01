@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import CategoryNavigationMenu from "@/components/layouts/NavigationMenu/NavigationMenu";
 import { Badge } from "@/components/ui/badge";
@@ -13,11 +13,11 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input, inputStyles } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useSearch } from "@/hooks/useProductSearch";
 import { useRouter } from "@/i18n/navigation";
-import { cn } from "@/lib/utils";
+import { useStore } from "@/store/store";
 import { Category } from "@/types/categories.types";
 import { IProductSearch, ISuggestions } from "@/types/search.types";
 import { Search, ShoppingCart, User } from "lucide-react";
@@ -34,6 +34,11 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const [isAuthOpen, setIsAuthOpen] = useState(false);
 
 	const router = useRouter();
+	const { setCategories } = useStore();
+
+	useEffect(() => {
+		setCategories(categories);
+	}, [categories, setCategories]);
 
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -81,7 +86,8 @@ export default function Header({ categories }: { categories: Category[] }) {
 												<Link
 													key={idx}
 													href={`/search?query=${encodeURIComponent(s.keyword)}`}
-													className="block rounded-md p-2 text-sm hover:bg-gray-100">
+													className="block rounded-md p-2 text-sm hover:bg-gray-100"
+													onClick={() => setSearchQuery("")}>
 													{s.keyword}
 												</Link>
 											),
@@ -98,8 +104,9 @@ export default function Header({ categories }: { categories: Category[] }) {
 										data.productRes.map((product: IProductSearch) => (
 											<Link
 												key={product.product_number}
-												href={`/product/${product.product_number}`}
-												className="flex items-center gap-4 rounded-md p-3 hover:bg-gray-100">
+												href={`/product/product/${product.product_number}`}
+												className="flex items-center gap-4 rounded-md p-3 hover:bg-gray-100"
+												onClick={() => setSearchQuery("")}>
 												<div className="flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md">
 													{product.media ? (
 														<Image

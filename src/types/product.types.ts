@@ -1,13 +1,30 @@
-export interface IItem {
-	content_unit: string;
+export interface IProduct {
+	product_name: string;
+	media_m: string;
+	product_number: string;
+	short_desc?: string;
+}
+
+export interface IVariation {
 	item_id: number;
 	item_number: string;
-	media_id: IMedia[];
 	parent_prod_number: string;
+	media_id: string;
+	content_unit: string;
 	unspsc: string;
 }
 
-export interface IProduct {
+export interface IAttribute {
+	attribute_identifier: string;
+	data_type: string;
+	language: string;
+	name: string;
+	name_key_language: string;
+	value_def: string;
+	value_max: string;
+}
+
+export interface IProductDetails {
 	product_number: string;
 	product_name: string;
 	product_name_en: string;
@@ -21,35 +38,10 @@ export interface IProduct {
 	remarks_no: string;
 	short_desc_en: string;
 	short_desc_no: string;
-	usp: IUsp;
-	bvp: number;
-	media_id: IMedia[];
-	attributes: IAttributes[];
-	items: IItem[];
-}
-
-export interface IMedia {
-	filename: string;
-	picture_type: string;
-	thumbnail_url: string;
-	url: string;
-}
-
-export interface IUsp {
-	usp1: string;
-	usp2: string;
-	usp3: string;
-	usp4: string;
-	usp5: string;
-	usp6: string;
-}
-
-export interface IAttributes {
-	name: string;
-	language: string;
-	data_type: string;
-	value_def: string;
-	value_max: string;
-	name_key_language: string;
-	attribute_identifier: string;
+	usp: string[];
+	bvp: string[];
+	media_id: string[];
+	attributes: IAttribute[];
+	product_to_product_reference: string | [];
+	items: IVariation[];
 }

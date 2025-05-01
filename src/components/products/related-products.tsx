@@ -1,32 +1,22 @@
-import { mockProducts } from "@/mocks/mockProducts";
+"use client";
+import { IProduct } from "@/types/product.types";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { ProductCard } from "./product-card";
 
 interface RelatedProductsProps {
-	currentProductId: string;
+	products: IProduct[];
 	category: string;
-	maxItems?: number;
 }
 
-export async function RelatedProducts({
-	currentProductId,
-	category,
-	maxItems = 4,
-}: RelatedProductsProps) {
-	const t = await getTranslations();
+export function RelatedProducts({ products, category }: RelatedProductsProps) {
+	const pathname = usePathname();
+	const t = useTranslations();
 
-	// Filter products from the same category, excluding the current product
-	const relatedProducts = mockProducts
-		.filter(
-			(product) =>
-				product.category === category && product.id !== currentProductId,
-		)
-		.slice(0, maxItems);
-
-	if (relatedProducts.length === 0) {
+	if (products.length === 0) {
 		return null;
 	}
 
@@ -45,12 +35,15 @@ export async function RelatedProducts({
 			</div>
 
 			<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-				{relatedProducts.map((product) => (
-					<ProductCard
-						key={product.id}
-						{...product}
-						href={`/${product.category}/${product.subcategory}/${product.id}`}
-					/>
+				{products.map((product) => (
+					<Link
+						key={product.product_number}
+						href={`${pathname}/${product.product_number}`}>
+						<ProductCard
+							{...product}
+							variant="compact"
+						/>
+					</Link>
 				))}
 			</div>
 		</section>
