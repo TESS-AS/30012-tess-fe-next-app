@@ -1,6 +1,10 @@
-import { ProductGrid } from "@/components/products/product-grid";
+import CategoryContent from "@/components/category/category-content";
+import { fetchCategories } from "@/lib/category-utils";
 import { getSeoMetadata } from "@/lib/seo";
-import { mockProducts } from "@/mocks/mockProducts";
+import { formatUrlToDisplayName } from "@/lib/utils";
+import { loadFilters } from "@/services/categories.service";
+import { searchProducts } from "@/services/product.service";
+import { getLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({
@@ -19,17 +23,47 @@ export async function generateMetadata({
 	});
 }
 
+interface CategoryPageProps {
+	params: Promise<{
+		category: string;
+	}>;
+	searchParams: Promise<{
+		query?: string;
+	}>;
+}
+
 export default async function CategoryPage({
 	params,
-}: {
-	params: Promise<{ category: string }>;
-}) {
-	const { category } = await params;
+	searchParams,
+}: CategoryPageProps) {
+	try {
+		const { category } = await params;
+		const { query } = await searchParams;
+		const locale = await getLocale();
+		const formattedCategory = formatUrlToDisplayName(category);
 
-	return (
-		<div className="py-8">
-			<h1 className="mb-8 text-2xl font-bold capitalize">{category}</h1>
-			<ProductGrid initialProducts={mockProducts} />
-		</div>
-	);
+		const categories = await fetchCategories(locale);
+
+		const categoryData = categories.find(
+			(cat) => formatUrlToDisplayName(cat.slug) === formattedCategory,
+		);
+
+		const categoryNumber = categoryData?.groupId || null;
+
+		const filters = await loadFilters({
+			categoryNumber,
+			searchTerm: query || null,
+		});
+
+		return (
+			<CategoryContent
+				categoryData={categoryData}
+				filters={filters}
+				query={query}
+			/>
+		);
+	} catch (error) {
+		console.error("Error in CategoryPage:", error);
+		throw error;
+	}
 }

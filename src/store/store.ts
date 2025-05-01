@@ -1,5 +1,6 @@
+import { Category } from "@/types/categories.types";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 import { Product, StoreState, User } from "../types/store.types";
 
@@ -48,9 +49,24 @@ export const useStore = create<StoreState>()(
 			// UI slice
 			isLoading: false,
 			setLoading: (loading: boolean) => set({ isLoading: loading }),
+
+			categories: [],
+			setCategories: (categories: Category[]) => set({ categories }),
 		}),
 		{
 			name: "ecommerce-storage",
+			storage: createJSONStorage(() => {
+				// Only use localStorage in the browser
+				if (typeof window !== "undefined") {
+					return window.localStorage;
+				}
+				// Return a dummy storage for SSR
+				return {
+					getItem: () => null,
+					setItem: () => {},
+					removeItem: () => {},
+				};
+			}),
 		},
 	),
 );

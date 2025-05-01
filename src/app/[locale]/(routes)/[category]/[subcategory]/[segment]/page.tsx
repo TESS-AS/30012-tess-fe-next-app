@@ -1,54 +1,57 @@
 import CategoryContent from "@/components/category/category-content";
 import {
 	fetchCategories,
-	fetchProducts,
 	findSubCategoryRecursive,
 } from "@/lib/category-utils";
 import { getSeoMetadata } from "@/lib/seo";
 import { formatUrlToDisplayName } from "@/lib/utils";
 import { loadFilters } from "@/services/categories.service";
-import { getLocale } from "next-intl/server";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export async function generateMetadata({
 	params,
 }: {
-	params: Promise<{ locale: string; subcategory: string }>;
+	params: Promise<{ locale: string; segment: string }>;
 }) {
-	const { locale, subcategory } = await params;
+	const { locale, segment } = await params;
 	const t = await getTranslations({ locale, namespace: "category" });
 
 	return await getSeoMetadata({
-		title: `${subcategory}`,
+		title: `${segment}`,
 		description: t("viewAll"),
-		path: `/subcategory/${subcategory}`,
+		path: `/segment/${segment}`,
 		locale,
 	});
 }
 
-interface SubCategoryPageProps {
+interface SegmentPageProps {
 	params: Promise<{
+		category: string;
 		subcategory: string;
+		segment: string;
 	}>;
 }
 
-export default async function SubCategoryPage({
-	params,
-}: SubCategoryPageProps) {
+export default async function SegmentPage({ params }: SegmentPageProps) {
 	try {
-		const { subcategory } = await params;
+		const { category, subcategory, segment } = await params;
 		const locale = await getLocale();
 
 		const formattedSubCategory = formatUrlToDisplayName(subcategory);
+		const formattedSegment = segment
+			? formatUrlToDisplayName(segment)
+			: undefined;
 
 		const categories = await fetchCategories(locale);
+
 		const subCategoryData = findSubCategoryRecursive(
 			categories,
 			formattedSubCategory,
+			formattedSegment,
 		);
 
 		if (!subCategoryData) {
-			throw new Error("Subcategory not found");
+			throw new Error("Segment not found");
 		}
 
 		const categoryNumber = subCategoryData?.groupId || null;
@@ -62,10 +65,11 @@ export default async function SubCategoryPage({
 			<CategoryContent
 				categoryData={subCategoryData}
 				filters={filters}
+				segment={segment}
 			/>
 		);
 	} catch (error) {
-		console.error("Error in SubCategoryPage:", error);
+		console.error("Error in SegmentPage:", error);
 		throw error;
 	}
 }
