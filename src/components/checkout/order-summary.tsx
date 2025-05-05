@@ -1,11 +1,19 @@
 "use client";
 
+import { useState } from "react";
+
 import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { checkoutProducts } from "@/mocks/mockCheckoutProducts";
+import { ExternalLink } from "lucide-react";
 import Image from "next/image";
 
+import { Modal, ModalContent, ModalHeader, ModalTitle } from "../ui/modal";
+
 export default function OrderSummary() {
+	const [openModalId, setOpenModalId] = useState<number | null>(null);
+
 	return (
 		<div className="h-fit w-full rounded-md border bg-white p-6 shadow-sm md:sticky md:top-6">
 			<div className="mb-4 flex items-center justify-between">
@@ -13,37 +21,69 @@ export default function OrderSummary() {
 				<span className="text-sm font-medium">$306.34</span>
 			</div>
 
-			<div className="mb-4 flex gap-4 border-b pb-4">
-				<div className="relative h-32 w-34 overflow-hidden rounded border">
-					<Image
-						src="/images/gloves.jpg"
-						alt="Product"
-						fill
-						className="object-cover"
-					/>
-				</div>
-				<div className="flex flex-col justify-between text-sm">
-					<div>
-						<p className="font-medium">Protective Gloves</p>
-						<p className="text-muted-foreground">25 | Black | 27.5</p>
+			{checkoutProducts.map((product) => (
+				<div
+					key={product.id}
+					className="mb-4 flex justify-between gap-4 border-b pb-4">
+					<div className="flex gap-4">
+						<div className="relative h-32 w-34 overflow-hidden rounded border">
+							<Image
+								src={product.image}
+								alt="Product"
+								fill
+								className="object-cover"
+							/>
+						</div>
+						<div className="flex flex-col justify-between text-sm">
+							<div>
+								<p className="font-medium">{product.name}</p>
+								<p className="text-muted-foreground">{product.details}</p>
+							</div>
+							<div className="mt-2 flex items-center gap-2">
+								<Button
+									size="icon"
+									variant="outline">
+									-
+								</Button>
+								<span>{product.quantity}</span>
+								<Button
+									size="icon"
+									variant="outline">
+									+
+								</Button>
+							</div>
+							<p className="mt-1 font-medium">${product.price}</p>
+						</div>
 					</div>
-					<div className="mt-2 flex items-center gap-2">
+					<div className="flex-end flex">
 						<Button
-							size="icon"
-							variant="outline">
-							-
+							variant="outline"
+							size="sm"
+							onClick={() => setOpenModalId(product.id)}>
+							<ExternalLink />
 						</Button>
-						<span>2</span>
-						<Button
-							size="icon"
-							variant="outline">
-							+
-						</Button>
+						<Modal
+							open={openModalId === product.id}
+							onOpenChange={(open) => setOpenModalId(open ? product.id : null)}>
+							<ModalContent>
+								<ModalHeader>
+									<ModalTitle>Product Variants - {product.name}</ModalTitle>
+								</ModalHeader>
+								<ProductVariantTable
+									variants={product.variants}
+									onAddVariant={(variant) => {
+										console.log("Adding variant:", variant);
+										setOpenModalId(null);
+									}}
+									onQuantityChange={(variant, quantity) => {
+										console.log("Quantity changed:", variant, quantity);
+									}}
+								/>
+							</ModalContent>
+						</Modal>
 					</div>
-					<p className="mt-1 font-medium">$236</p>
 				</div>
-			</div>
-			<ProductVariantTable />
+			))}
 
 			<div className="my-4 space-y-2">
 				<Input placeholder="Gift or promo code" />

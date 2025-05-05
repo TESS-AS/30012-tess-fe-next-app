@@ -1,3 +1,4 @@
+import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { ProductActions } from "@/components/products/product-actions";
 import { ProductDetails } from "@/components/products/product-details";
 import { ProductGallery } from "@/components/products/product-gallery";
@@ -61,7 +62,6 @@ export default async function ProductPage({
 }) {
 	const locale = await getLocale();
 	const { category, product } = await params;
-	const t = await getTranslations("product");
 
 	const _productData = await getProducts(product);
 
@@ -117,6 +117,13 @@ export default async function ProductPage({
 					/>
 				</div>
 			</div>
+			<ProductVariantTable
+				variants={[
+					{ thread: '1/4"', length: "19 mm", coating: "Zinc" },
+					{ thread: '1/4"', length: "25 mm", coating: "Zinc" },
+					{ thread: '5/16"', length: "32 mm", coating: "SS" },
+				]}
+			/>
 
 			{/* Related Products */}
 			{productData.product_to_product_reference.length > 0 && (

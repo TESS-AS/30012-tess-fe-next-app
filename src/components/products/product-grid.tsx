@@ -5,7 +5,6 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { useProductFilter } from "@/hooks/useProductFilter";
 import { cn } from "@/lib/utils";
 import { FilterValues } from "@/types/filter.types";
-import { IProduct } from "@/types/product.types";
 import { LayoutGrid } from "lucide-react";
 import { AlignJustify } from "lucide-react";
 import Link from "next/link";
@@ -105,7 +104,7 @@ export function ProductGrid({
 
 		return () => {
 			if (observerTarget.current) {
-				observer.unobserve(observerTarget.current);
+				observer.unobserve(observerTarget?.current);
 			}
 		};
 	}, [hasMore, isLoading, loadMore]);
