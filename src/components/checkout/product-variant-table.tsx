@@ -1,42 +1,76 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
 
-const variants = [
-	{ thread: '1/4"', length: "19 mm", coating: "Zinc" },
-	{ thread: '1/4"', length: "25 mm", coating: "Zinc" },
-	{ thread: '5/16"', length: "32 mm", coating: "SS" },
-];
+interface ProductVariant {
+	thread: string;
+	length: string;
+	coating: string;
+	quantity?: number;
+}
 
-export default function ProductVariantTable() {
+interface ProductVariantTableProps {
+	variants: ProductVariant[];
+	onAddVariant?: (variant: ProductVariant) => void;
+	onQuantityChange?: (variant: ProductVariant, quantity: number) => void;
+}
+
+export default function ProductVariantTable({
+	variants,
+	onAddVariant,
+	onQuantityChange,
+}: ProductVariantTableProps) {
 	return (
-		<div className="mt-4 overflow-auto rounded-md border">
-			<table className="min-w-full text-sm">
-				<thead className="bg-muted border-b text-left font-medium">
-					<tr>
-						<th className="p-2">Thread Size</th>
-						<th className="p-2">Length</th>
-						<th className="p-2">Coating</th>
-						<th className="p-2">Qty</th>
-						<th className="p-2">Add</th>
-					</tr>
-				</thead>
-				<tbody>
+		<div className="mt-4">
+			<Table className="rounded-md border">
+				<TableHeader className="bg-muted text-muted-foreground">
+					<TableRow>
+						<TableHead>Thread Size</TableHead>
+						<TableHead>Length</TableHead>
+						<TableHead>Coating</TableHead>
+						<TableHead>Qty</TableHead>
+						<TableHead className="w-[100px]">Actions</TableHead>
+					</TableRow>
+				</TableHeader>
+				<TableBody>
 					{variants.map((variant, i) => (
-						<tr
-							key={i}
-							className="border-b">
-							<td className="p-2">{variant.thread}</td>
-							<td className="p-2">{variant.length}</td>
-							<td className="p-2">{variant.coating}</td>
-							<td className="p-2">[1]</td>
-							<td className="cursor-pointer p-2 font-semibold text-purple-600">
-								[+]
-							</td>
-						</tr>
+						<TableRow
+							key={`${variant.thread}-${variant.length}-${variant.coating}-${i}`}>
+							<TableCell>{variant.thread}</TableCell>
+							<TableCell>{variant.length}</TableCell>
+							<TableCell>{variant.coating}</TableCell>
+							<TableCell>
+								<input
+									type="number"
+									min="1"
+									value={variant.quantity || 1}
+									onChange={(e) =>
+										onQuantityChange?.(variant, parseInt(e.target.value))
+									}
+									className="w-16 rounded-md border px-2 py-1"
+								/>
+							</TableCell>
+							<TableCell>
+								<Button
+									variant="ghost"
+									size="sm"
+									onClick={() => onAddVariant?.(variant)}
+									className="text-primary hover:text-primary/80">
+									Add
+								</Button>
+							</TableCell>
+						</TableRow>
 					))}
-				</tbody>
-			</table>
+				</TableBody>
+			</Table>
 		</div>
 	);
 }

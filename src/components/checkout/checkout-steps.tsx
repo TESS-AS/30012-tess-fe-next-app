@@ -3,118 +3,254 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { companyFields, shippingFields } from "@/constants/checkout";
+import { Order, PaymentMethod } from "@/types/orders.types";
+import { PayPalButtons } from "@paypal/react-paypal-js";
+import { CreditCard } from "lucide-react";
+import Image from "next/image";
 
+import { FormField } from "./form-field";
+import { StepHeader } from "./step-header";
+
+// Main component
 export default function CheckoutSteps() {
 	const [openStep, setOpenStep] = useState(1);
+	const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>();
+	const [orderData, setOrderData] = useState<
+		Partial<Order> & {
+			header: { companyName?: string; warehouseName?: string };
+		}
+	>({
+		source: "EC",
+		companyNumber: "01",
+		sequenceNo: "12345678",
+		orderDate: "2025-01-01",
+		orderTime: "12:12:00",
+		header: {
+			customerNo: "CUST123",
+			warehouseNumber: "L10",
+			companyName: "Test Company AS",
+			warehouseName: "Oslo Warehouse",
+			deliveryTerms: "Standard",
+			paymentTerms: "Net 30",
+		},
+		address: {
+			addressName: "",
+			addressLine1: "",
+			addressLine2: "",
+			addressLine3: "",
+			city: "",
+			postalCode: "",
+			countryCode: "NO",
+		},
+	});
 
-	const StepHeader = ({ step, title }: { step: number; title: string }) => (
-		<button
-			type="button"
-			onClick={() => setOpenStep(step)}
-			className="flex w-full items-center gap-4 border-b p-4 text-left">
-			<div className="flex h-6 w-6 items-center justify-center rounded-full bg-black text-sm font-medium text-white">
-				{step}
-			</div>
-			<h2 className="font-medium">{title}</h2>
-		</button>
-	);
+	const handleAddressChange = (field: string, value: string) => {
+		setOrderData((prev) => ({
+			...prev,
+			address: {
+				...prev.address!,
+				[field]: value,
+			},
+		}));
+	};
+
+	const isStepValid = (step: number) => {
+		if (step === 1) {
+			return shippingFields
+				.filter((f) => f.required)
+				.every(
+					(f) => orderData.address?.[f.field as keyof typeof orderData.address],
+				);
+		}
+		if (step === 2) {
+			return !!paymentMethod;
+		}
+		return true;
+	};
+
+	const handleSubmit = () => {
+		const finalOrderData: Partial<Order> = {
+			...orderData,
+			source: "EC",
+		};
+		console.log("Submitting order:", finalOrderData);
+		// Here you would integrate with your payment gateway based on paymentMethod
+		if (paymentMethod === "card") {
+			// Redirect to card payment gateway
+			console.log("Redirecting to card payment...");
+		} else {
+			// Redirect to PayPal
+			console.log("Redirecting to PayPal...");
+		}
+	};
+
+	const handleContinueToPayment = () => {
+		if (isStepValid(1)) {
+			setOpenStep(2);
+		}
+	};
 
 	return (
-		<div className="w-full space-y-4">
-			<div className="space-y-2 rounded-md border bg-white p-4">
-				<h2 className="text-lg font-semibold">Express Checkout</h2>
-				<div className="flex gap-4">
-					<Button className="w-[275px] bg-yellow-400 text-lg font-semibold text-black">
-						PayPal
-					</Button>
-					<Button className="w-[275px] bg-[#5a31f4] text-lg font-semibold text-white">
-						Shop Pay
+		<div className="w-full overflow-hidden rounded-md border bg-white">
+			<StepHeader
+				step={1}
+				title="Shipping"
+				isComplete={isStepValid(1)}
+				onClick={() => setOpenStep(1)}
+			/>
+			{openStep === 1 && (
+				<div className="space-y-6 p-6">
+					<div className="grid grid-cols-2 gap-6">
+						{companyFields.map((field) => (
+							<FormField
+								key={field.id}
+								{...field}
+								value={
+									orderData.header?.[
+										field.field as keyof typeof orderData.header
+									] || ""
+								}
+								onChange={() => {}}
+							/>
+						))}
+						{shippingFields.map((field) => (
+							<FormField
+								key={field.id}
+								{...field}
+								value={
+									orderData.address?.[
+										field.field as keyof typeof orderData.address
+									] || ""
+								}
+								onChange={(value) => handleAddressChange(field.field, value)}
+							/>
+						))}
+					</div>
+					<Button
+						className="w-full"
+						onClick={handleContinueToPayment}
+						disabled={!isStepValid(1)}>
+						Continue to Payment
 					</Button>
 				</div>
-			</div>
+			)}
 
-			<div className="overflow-hidden rounded-md border bg-white">
-				<StepHeader
-					step={1}
-					title="Enter Your Email"
-				/>
-				{openStep === 1 && (
-					<div className="space-y-4 p-4">
-						<p className="text-sm">
-							Already have an account?{" "}
-							<a
-								href="#"
-								className="underline">
-								Log In
-							</a>
-						</p>
-						<Input placeholder="Email Address*" />
-						<p className="text-muted-foreground text-xs">
-							By providing your email, you agree to our Privacy Policy and
-							Terms.
-						</p>
-						<Button
-							className="w-full bg-gray-400 text-white"
-							disabled>
-							Continue to Shipping
-						</Button>
-						<div className="flex items-start gap-2 text-sm">
-							<input
-								type="checkbox"
-								id="newsletter"
+			<StepHeader
+				step={2}
+				title="Payment"
+				isComplete={isStepValid(2)}
+				onClick={() => isStepValid(1) && setOpenStep(2)}
+			/>
+			{openStep === 2 && (
+				<div className="space-y-6 p-6">
+					<RadioGroup
+						value={paymentMethod}
+						onValueChange={(value: PaymentMethod) => setPaymentMethod(value)}
+						className="space-y-4">
+						<Card className="relative cursor-pointer rounded-md hover:bg-gray-50">
+							<RadioGroupItem
+								value="card"
+								id="card"
+								className="absolute top-4 right-4"
 							/>
-							<label htmlFor="newsletter">
-								Join our newsletter and receive 20% your first full price
-								purchase.
-							</label>
-						</div>
-					</div>
-				)}
-			</div>
+							<Label
+								htmlFor="card"
+								className="flex cursor-pointer items-center gap-4 p-4">
+								<div className="flex items-center gap-2">
+									<CreditCard className="h-6 w-6 text-blue-600" />
+									<span className="font-medium">Credit/Debit Card</span>
+									<Image
+										src={"/icons/visa.png"}
+										alt="Visa"
+										width={24}
+										height={24}
+										className="ms-1"
+									/>
+									<Image
+										src={"/icons/mastercard.png"}
+										alt="MasterCard"
+										width={24}
+										height={24}
+										className="mx-1"
+									/>
+									<Image
+										src={"/icons/maestro.png"}
+										alt="Maestro"
+										width={20}
+										height={20}
+									/>
+								</div>
+							</Label>
+						</Card>
 
-			<div className="overflow-hidden rounded-md border bg-white">
-				<StepHeader
-					step={2}
-					title="Shipping"
-				/>
-				{openStep === 2 && (
-					<div className="space-y-4 p-4">
-						<p className="text-muted-foreground text-sm">
-							Shipping form placeholder
-						</p>
+						<Card className="relative cursor-pointer rounded-md hover:bg-gray-50">
+							<RadioGroupItem
+								value="paypal"
+								id="paypal"
+								className="absolute top-4 right-4"
+							/>
+							<Label
+								htmlFor="paypal"
+								className="flex cursor-pointer items-center gap-4 p-4">
+								<div className="flex items-center gap-2">
+									<Image
+										src={"/images/paypal.png"}
+										alt="PayPal"
+										width={24}
+										height={24}
+									/>
+									<span className="font-medium">PayPal</span>
+								</div>
+							</Label>
+						</Card>
+					</RadioGroup>
+
+					{paymentMethod !== "paypal" ? (
 						<Button
 							className="w-full"
-							disabled>
-							Continue to Payment
+							onClick={handleSubmit}
+							disabled={!isStepValid(2)}>
+							Pay with Card
 						</Button>
-					</div>
-				)}
-			</div>
-
-			<div className="overflow-hidden rounded-md border bg-white">
-				<StepHeader
-					step={3}
-					title="Payment Method"
-				/>
-				{openStep === 3 && (
-					<div className="space-y-4 p-4">
-						<p className="text-muted-foreground text-sm">
-							Create a password for easy order review and faster checkout next
-							time you shop.
-						</p>
-						<Input
-							type="password"
-							placeholder="Password (Optional)"
+					) : (
+						<PayPalButtons
+							createOrder={(data, actions) => {
+								return actions.order.create({
+									purchase_units: [
+										{
+											amount: {
+												value: "100.00",
+												currency_code: "USD",
+											},
+										},
+									],
+									intent: "CAPTURE",
+								});
+							}}
+							onApprove={(data, actions) => {
+								if (!actions.order) {
+									console.error("Order actions not available");
+									return Promise.reject("Order actions not available");
+								}
+								return actions.order.capture().then((details) => {
+									console.log("Payment Approved:", details);
+									handleSubmit(); // Finalize order
+								});
+							}}
+							onError={(err) => {
+								console.error("PayPal error:", err);
+							}}
+							onCancel={() => {
+								console.log("Payment cancelled by user");
+							}}
 						/>
-						<Button
-							className="w-full bg-gray-300 text-white"
-							disabled>
-							Place Order
-						</Button>
-					</div>
-				)}
-			</div>
+					)}
+				</div>
+			)}
 		</div>
 	);
 }
