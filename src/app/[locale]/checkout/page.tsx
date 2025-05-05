@@ -8,8 +8,7 @@ import {
 } from "@paypal/react-paypal-js";
 
 const initialOptions: ReactPayPalScriptOptions = {
-	clientId:
-		"AdZvm8qHEQ_fY23qfg7I8hsLXFk_J6y9S1g60cdo03gQCVBTOOM4ykJKqWvxksrGteq0WcEW3w26XvG5",
+	clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "",
 	components: "buttons",
 	currency: "USD",
 };
