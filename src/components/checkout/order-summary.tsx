@@ -10,6 +10,7 @@ import { ExternalLink } from "lucide-react";
 import Image from "next/image";
 
 import { Modal, ModalContent, ModalHeader, ModalTitle } from "../ui/modal";
+import { toast } from "react-toastify";
 
 export default function OrderSummary() {
 	const [openModalId, setOpenModalId] = useState<number | null>(null);
@@ -74,6 +75,7 @@ export default function OrderSummary() {
 									onAddVariant={(variant) => {
 										console.log("Adding variant:", variant);
 										setOpenModalId(null);
+										toast.success("Variant added successfully");
 									}}
 									onQuantityChange={(variant, quantity) => {
 										console.log("Quantity changed:", variant, quantity);
