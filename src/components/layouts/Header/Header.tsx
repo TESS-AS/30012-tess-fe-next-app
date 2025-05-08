@@ -3,6 +3,7 @@
 import type React from "react";
 import { useEffect, useState } from "react";
 
+import ProductVariantTable from "@/components/checkout/product-variant-table";
 import CategoryNavigationMenu from "@/components/layouts/NavigationMenu/NavigationMenu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,12 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import {
+	Modal,
+	ModalContent,
+	ModalHeader,
+	ModalTitle,
+} from "@/components/ui/modal";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useSearch } from "@/hooks/useProductSearch";
 import { useRouter } from "@/i18n/navigation";
@@ -21,22 +28,25 @@ import { useCart } from "@/lib/providers/CartProvider";
 import { useStore } from "@/store/store";
 import { Category } from "@/types/categories.types";
 import { IProductSearch, ISuggestions } from "@/types/search.types";
-import { Search, ShoppingCart, User } from "lucide-react";
+import { Search, ShoppingCart, ShoppingCartIcon, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
+import { toast } from "react-toastify";
 
 export default function Header({ categories }: { categories: Category[] }) {
-	const [searchQuery, setSearchQuery] = useState("");
-	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const currentLocale = useLocale();
-	const { data, isLoading } = useSearch(searchQuery);
 	const t = useTranslations();
-	const [isAuthOpen, setIsAuthOpen] = useState(false);
 	const { openCart } = useCart();
-
 	const router = useRouter();
 	const { setCategories } = useStore();
+
+	const [searchQuery, setSearchQuery] = useState("");
+	const [isSearchOpen, setIsSearchOpen] = useState(false);
+	const [isAuthOpen, setIsAuthOpen] = useState(false);
+	const [isModalIdOpen, setIsModalIdOpen] = useState<string | null>(null);
+
+	const { data, isLoading } = useSearch(searchQuery);
 
 	useEffect(() => {
 		setCategories(categories);
@@ -66,7 +76,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 				</Link>
 				<form
 					onSubmit={handleSearch}
-					className="hidden w-full max-w-lg px-4 md:flex">
+					className="hidden w-[650px] px-4 md:flex">
 					<div className="relative w-full">
 						<Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
 						<Input
@@ -77,8 +87,8 @@ export default function Header({ categories }: { categories: Category[] }) {
 							onChange={(e) => setSearchQuery(e.target.value)}
 						/>
 						{searchQuery && data && (
-							<div className="absolute top-full left-0 z-50 mt-2 grid max-h-[400px] w-[650px] grid-cols-2 gap-4 overflow-y-auto rounded-md bg-white p-4 shadow-lg">
-								<div>
+							<div className="absolute top-full left-0 z-50 mt-2 grid max-h-[400px] w-[650px] grid-cols-3 gap-4 overflow-y-auto rounded-md bg-white p-4 shadow-lg">
+								<div className="col-span-1">
 									<h4 className="mb-2 text-sm font-semibold">
 										{t("search.suggestions")}
 									</h4>
@@ -101,37 +111,94 @@ export default function Header({ categories }: { categories: Category[] }) {
 									)}
 								</div>
 
-								<div>
+								<div className="col-span-2">
 									{data.productRes?.length ? (
 										data.productRes.map((product: IProductSearch) => (
-											<Link
-												key={product.product_number}
-												href={`/product/product/${product.product_number}`}
-												className="flex items-center gap-4 rounded-md p-3 hover:bg-gray-100"
-												onClick={() => setSearchQuery("")}>
-												<div className="flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md">
-													{product.media ? (
-														<Image
-															src={product.media}
-															alt={product.product_name}
-															width={64}
-															height={64}
-															className="max-h-16 max-w-16 object-contain"
+											<div key={product.product_number}>
+												<div className="flex w-full items-center justify-between gap-4 rounded-md p-3 hover:bg-gray-100">
+													<Link
+														className="flex flex-1 items-center gap-4"
+														href={`/product/product/${product.product_number}`}
+														onClick={() => setSearchQuery("")}>
+														<div className="flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md">
+															{product.media ? (
+																<Image
+																	src={product.media}
+																	alt={product.product_name}
+																	width={64}
+																	height={64}
+																	className="max-h-16 max-w-16 object-contain"
+																/>
+															) : (
+																<div className="h-10 w-10 rounded bg-gray-300" />
+															)}
+														</div>
+														<div className="flex flex-col justify-center">
+															<span className="text-base font-medium">
+																{product.product_name}
+															</span>
+															<span className="text-muted-foreground text-sm">
+																{product.product_number}
+															</span>
+														</div>
+													</Link>
+													<Button
+														variant="outline"
+														size="sm"
+														onClick={(e) => {
+															e.preventDefault();
+															setIsModalIdOpen(product.product_number);
+														}}>
+														<ShoppingCartIcon className="h-4 w-4" />
+													</Button>
+												</div>
+												<Modal
+													open={isModalIdOpen === product.product_number}
+													onOpenChange={(open) =>
+														setIsModalIdOpen(
+															open ? product.product_number : null,
+														)
+													}>
+													<ModalContent>
+														<ModalHeader>
+															<ModalTitle>
+																Product Variants - {product.product_name}
+															</ModalTitle>
+														</ModalHeader>
+														<ProductVariantTable
+															variants={[
+																{
+																	thread: '1/4"',
+																	length: "19 mm",
+																	coating: "Zinc",
+																},
+																{
+																	thread: '1/4"',
+																	length: "25 mm",
+																	coating: "Zinc",
+																},
+																{
+																	thread: '5/16"',
+																	length: "32 mm",
+																	coating: "SS",
+																},
+															]}
+															onAddVariant={(variant) => {
+																console.log("Adding variant:", variant);
+																setIsModalIdOpen(null);
+																toast.success("Variant added successfully");
+															}}
+															onQuantityChange={(variant, quantity) => {
+																console.log(
+																	"Quantity changed:",
+																	variant,
+																	quantity,
+																);
+															}}
 														/>
-													) : (
-														<div className="h-10 w-10 rounded bg-gray-300" />
-													)}
-												</div>
-
-												<div className="flex flex-col justify-center">
-													<span className="text-base font-medium">
-														{product.product_name}
-													</span>
-													<span className="text-muted-foreground text-sm">
-														{product.product_number}
-													</span>
-												</div>
-											</Link>
+													</ModalContent>
+												</Modal>
+											</div>
 										))
 									) : (
 										<p className="text-opacity-30 text-sm text-green-600">

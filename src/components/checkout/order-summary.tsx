@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { checkoutProducts } from "@/mocks/mockCheckoutProducts";
 import { ExternalLink } from "lucide-react";
 import Image from "next/image";
+import { toast } from "react-toastify";
 
 import { Modal, ModalContent, ModalHeader, ModalTitle } from "../ui/modal";
 
@@ -74,6 +75,7 @@ export default function OrderSummary() {
 									onAddVariant={(variant) => {
 										console.log("Adding variant:", variant);
 										setOpenModalId(null);
+										toast.success("Variant added successfully");
 									}}
 									onQuantityChange={(variant, quantity) => {
 										console.log("Quantity changed:", variant, quantity);
