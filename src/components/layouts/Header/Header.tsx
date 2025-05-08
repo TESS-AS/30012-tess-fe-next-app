@@ -3,6 +3,7 @@
 import type React from "react";
 import { useEffect, useState } from "react";
 
+import ProductVariantTable from "@/components/checkout/product-variant-table";
 import CategoryNavigationMenu from "@/components/layouts/NavigationMenu/NavigationMenu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,12 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import {
+	Modal,
+	ModalContent,
+	ModalHeader,
+	ModalTitle,
+} from "@/components/ui/modal";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useSearch } from "@/hooks/useProductSearch";
 import { useRouter } from "@/i18n/navigation";
@@ -25,8 +32,6 @@ import { Search, ShoppingCart, ShoppingCartIcon, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { Modal, ModalContent, ModalHeader, ModalTitle } from "@/components/ui/modal";
-import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { toast } from "react-toastify";
 
 export default function Header({ categories }: { categories: Category[] }) {
@@ -110,15 +115,11 @@ export default function Header({ categories }: { categories: Category[] }) {
 									{data.productRes?.length ? (
 										data.productRes.map((product: IProductSearch) => (
 											<div key={product.product_number}>
-												<div
-													
-													className="flex items-center w-full justify-between gap-4 rounded-md p-3 hover:bg-gray-100"
-												>
+												<div className="flex w-full items-center justify-between gap-4 rounded-md p-3 hover:bg-gray-100">
 													<Link
-														className="flex items-center gap-4 flex-1"
+														className="flex flex-1 items-center gap-4"
 														href={`/product/product/${product.product_number}`}
-														onClick={() => setSearchQuery("")}
-													>
+														onClick={() => setSearchQuery("")}>
 														<div className="flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md">
 															{product.media ? (
 																<Image
@@ -147,24 +148,40 @@ export default function Header({ categories }: { categories: Category[] }) {
 														onClick={(e) => {
 															e.preventDefault();
 															setIsModalIdOpen(product.product_number);
-														}}
-													>
+														}}>
 														<ShoppingCartIcon className="h-4 w-4" />
 													</Button>
 												</div>
 												<Modal
 													open={isModalIdOpen === product.product_number}
-													onOpenChange={(open) => setIsModalIdOpen(open ? product.product_number : null)}
-												>
+													onOpenChange={(open) =>
+														setIsModalIdOpen(
+															open ? product.product_number : null,
+														)
+													}>
 													<ModalContent>
 														<ModalHeader>
-															<ModalTitle>Product Variants - {product.product_name}</ModalTitle>
+															<ModalTitle>
+																Product Variants - {product.product_name}
+															</ModalTitle>
 														</ModalHeader>
 														<ProductVariantTable
 															variants={[
-																{ thread: '1/4"', length: "19 mm", coating: "Zinc" },
-																{ thread: '1/4"', length: "25 mm", coating: "Zinc" },
-																{ thread: '5/16"', length: "32 mm", coating: "SS" },
+																{
+																	thread: '1/4"',
+																	length: "19 mm",
+																	coating: "Zinc",
+																},
+																{
+																	thread: '1/4"',
+																	length: "25 mm",
+																	coating: "Zinc",
+																},
+																{
+																	thread: '5/16"',
+																	length: "32 mm",
+																	coating: "SS",
+																},
 															]}
 															onAddVariant={(variant) => {
 																console.log("Adding variant:", variant);
@@ -172,7 +189,11 @@ export default function Header({ categories }: { categories: Category[] }) {
 																toast.success("Variant added successfully");
 															}}
 															onQuantityChange={(variant, quantity) => {
-																console.log("Quantity changed:", variant, quantity);
+																console.log(
+																	"Quantity changed:",
+																	variant,
+																	quantity,
+																);
 															}}
 														/>
 													</ModalContent>

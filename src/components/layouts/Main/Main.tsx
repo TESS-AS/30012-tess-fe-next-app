@@ -4,8 +4,8 @@ import type { ReactNode } from "react";
 
 import CartDrawer from "@/components/cart/CartDrawer";
 import Header from "@/components/layouts/Header/Header";
-import { Category } from "@/types/categories.types";
 import NotificationBar from "@/components/ui/notification-bar";
+import { Category } from "@/types/categories.types";
 
 export default function Main({
 	children,

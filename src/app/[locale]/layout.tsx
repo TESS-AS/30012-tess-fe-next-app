@@ -10,7 +10,7 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import "../globals.css";
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer } from "react-toastify";
 
 export async function generateMetadata({
 	params,
@@ -48,7 +48,7 @@ export default async function RootLayout({
 					locale={locale}
 					messages={messages}>
 					<CartProvider>
-						<ToastContainer 
+						<ToastContainer
 							position="top-right"
 							autoClose={5000}
 							hideProgressBar
