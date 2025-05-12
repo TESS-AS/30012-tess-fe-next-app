@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-export { default } from "next-auth/middleware";
 import { auth } from "./auth";
 
 const protectedRoutes = ["profile"];
@@ -11,8 +10,8 @@ export default auth((req) => {
 	const isLoggedIn = !!req.auth;
 
 	const path = nextUrl.pathname;
-	const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
-	const isProtectedRoute = protectedRoutes.includes(path);
+	const isApiAuthRoute = path.startsWith(apiAuthPrefix);
+	const isProtectedRoute = protectedRoutes.includes(path.replace(/^\/+/, ""));
 
 	if (isApiAuthRoute) {
 		return NextResponse.next();
