@@ -22,6 +22,7 @@ import {
 	ModalTitle,
 } from "@/components/ui/modal";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useClickOutside } from "@/hooks/useClickOutside";
 import { useSearch } from "@/hooks/useProductSearch";
 import { useRouter } from "@/i18n/navigation";
 import { useCart } from "@/lib/providers/CartProvider";
@@ -33,7 +34,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "react-toastify";
-import { useClickOutside } from "@/hooks/useClickOutside";
 
 export default function Header({ categories }: { categories: Category[] }) {
 	const currentLocale = useLocale();
@@ -51,7 +51,6 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const [isModalIdOpen, setIsModalIdOpen] = useState<string | null>(null);
 
 	const { data, isLoading } = useSearch(searchQuery);
-
 
 	useEffect(() => {
 		setCategories(categories);
@@ -82,7 +81,9 @@ export default function Header({ categories }: { categories: Category[] }) {
 				<form
 					onSubmit={handleSearch}
 					className="hidden w-[650px] px-4 md:flex">
-					<div className="relative w-full" ref={searchRef}>
+					<div
+						className="relative w-full"
+						ref={searchRef}>
 						<Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
 						<Input
 							type="search"
@@ -92,7 +93,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 							onChange={(e) => setSearchQuery(e.target.value)}
 						/>
 						{searchQuery && data && (
-							<div className="absolute top-full left-0 z-50 mt-2 grid max-h-[400px] w-[650px] grid-cols-3 gap-4 overflow-y-auto rounded-md bg-white p-4 shadow-lg z-[999]">
+							<div className="absolute top-full left-0 z-50 z-[999] mt-2 grid max-h-[400px] w-[650px] grid-cols-3 gap-4 overflow-y-auto rounded-md bg-white p-4 shadow-lg">
 								<div className="col-span-1">
 									<h4 className="mb-2 text-sm font-semibold">
 										{t("Search.suggestions")}

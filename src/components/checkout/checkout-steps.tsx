@@ -12,9 +12,9 @@ import { PayPalButtons } from "@paypal/react-paypal-js";
 import { CreditCard } from "lucide-react";
 import Image from "next/image";
 
+import styles from "./checkout-steps.module.css";
 import { FormField } from "./form-field";
 import { StepHeader } from "./step-header";
-import styles from "./checkout-steps.module.css";
 
 // Main component
 export default function CheckoutSteps() {

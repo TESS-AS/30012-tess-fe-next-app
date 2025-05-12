@@ -1,5 +1,6 @@
 import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { ProductActions } from "@/components/products/product-actions";
+import { ProductBreadcrumbs } from "@/components/products/product-breadcrumbs";
 import { ProductDetails } from "@/components/products/product-details";
 import { ProductGallery } from "@/components/products/product-gallery";
 import { ProductInfo } from "@/components/products/product-info";
@@ -11,7 +12,6 @@ import { productFetch } from "@/services/product.service";
 import { notFound } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
-import { ProductBreadcrumbs } from "@/components/products/product-breadcrumbs";
 
 export async function generateMetadata({
 	params,
@@ -97,7 +97,10 @@ export default async function ProductPage({
 
 	return (
 		<div className="container mx-auto space-y-12 px-4 py-8">
-			<ProductBreadcrumbs segment={segment} productName={localizedContent.name} />
+			<ProductBreadcrumbs
+				segment={segment}
+				productName={localizedContent.name}
+			/>
 			<div className="grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-2">
 				{/* Product Gallery */}
 				<ProductGallery images={productImages} />

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+
 import { cn } from "@/lib/utils";
 import { ChevronRight, Home } from "lucide-react";
 import Link from "next/link";
@@ -43,13 +44,11 @@ const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
 					)}
 					{items.map((item, index) => {
 						const isLast = index === items.length - 1;
-						const linkClassName = cn(
-							"hover:text-foreground capitalize",
-							{
-								"text-foreground pointer-events-none font-semibold": item.current || isLast,
-								"text-muted-foreground": !item.current && !isLast,
-							}
-						);
+						const linkClassName = cn("hover:text-foreground capitalize", {
+							"text-foreground pointer-events-none font-semibold":
+								item.current || isLast,
+							"text-muted-foreground": !item.current && !isLast,
+						});
 
 						return (
 							<React.Fragment key={item.href}>

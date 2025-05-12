@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 
-import Main from "@/components/layouts/Main/Main";
 import { Footer } from "@/components/layouts/Footer/Footer";
+import Main from "@/components/layouts/Main/Main";
 import { CartProvider } from "@/lib/providers/CartProvider";
 import { getSeoMetadata } from "@/lib/seo";
 import { mapCategoryTree } from "@/lib/utils";
