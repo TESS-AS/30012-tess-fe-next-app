@@ -12,8 +12,6 @@ export default function MainCategorySection() {
 
 	const { data: session, status } = useSession();
 
-	console.log(session, status);
-
 	if (isLoading) return <p>Loading categories...</p>;
 	if (error) return <p>Failed to load categories.</p>;
 
