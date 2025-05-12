@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 export default function AuthDialog({
 	isOpen,
@@ -90,6 +91,15 @@ export default function AuthDialog({
 											Sign In
 										</Button>
 									</form>
+									<div className="text-muted-foreground mt-6 text-center text-sm">
+										or
+									</div>
+									<Button
+										variant="outline"
+										className="mt-4 w-full"
+										onClick={() => signIn("microsoft-entra-id")}>
+										Sign in with Microsoft
+									</Button>
 								</TabsContent>
 
 								<TabsContent
