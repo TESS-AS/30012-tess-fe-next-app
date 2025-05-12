@@ -16,7 +16,7 @@ export async function getSeoMetadata({
 	image?: string;
 	locale?: string;
 }): Promise<Metadata> {
-	const t = await getTranslations({ locale, namespace: "seo" });
+	const t = await getTranslations({ locale, namespace: "Seo" });
 
 	const resolvedTitle = title ?? t("defaultTitle");
 	const resolvedDescription = description ?? t("defaultDescription");

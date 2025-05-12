@@ -45,13 +45,13 @@ export function ProductActions({ items }: ProductActionsProps) {
 		<div className="mt-6 space-y-4">
 			<div>
 				<label className="mb-2 block text-sm font-medium">
-					{t("product.selectSize")}
+					{t("Product.selectSize")}
 				</label>
 				<Select
 					value={selectedSize}
 					onValueChange={setSelectedSize}>
 					<SelectTrigger className="w-full">
-						<SelectValue placeholder={t("product.selectSize")} />
+						<SelectValue placeholder={t("Product.selectSize")} />
 					</SelectTrigger>
 					<SelectContent>
 						{items.map((item) => (
@@ -76,7 +76,7 @@ export function ProductActions({ items }: ProductActionsProps) {
 					disabled={!selectedSize || isLoading}
 					size="lg">
 					<ShoppingCart className="mr-2 h-5 w-5" />
-					{isLoading ? t("product.adding") : t("product.addToCart")}
+					{isLoading ? t("Product.adding") : t("Product.addToCart")}
 				</Button>
 				<Button
 					onClick={handleAddToWishlist}
@@ -84,7 +84,7 @@ export function ProductActions({ items }: ProductActionsProps) {
 					disabled={isLoading}
 					size="lg">
 					<Heart className="mr-2 h-5 w-5" />
-					{t("product.addToWishlist")}
+					{t("Product.addToWishlist")}
 				</Button>
 			</div>
 		</div>

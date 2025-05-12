@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 export default function Home() {
-	const t = useTranslations("home");
+	const t = useTranslations("Home");
 
 	return (
 		<div className="grid min-h-screen grid-rows-[auto_1fr_20px] gap-16 pt-5">

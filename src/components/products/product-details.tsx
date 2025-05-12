@@ -29,17 +29,17 @@ export function ProductDetails({
 				<TabsTrigger
 					value="description"
 					disabled={!description}>
-					{t("product.description")}
+					{t("Product.description")}
 				</TabsTrigger>
 				<TabsTrigger
 					value="specifications"
 					disabled={!attributes?.length}>
-					{t("product.specifications")}
+					{t("Product.specifications")}
 				</TabsTrigger>
 				<TabsTrigger
 					value="details"
 					disabled={!technicalInfo && !application && !users && !remarks}>
-					{t("product.details")}
+					{t("Product.details")}
 				</TabsTrigger>
 			</TabsList>
 
@@ -79,28 +79,28 @@ export function ProductDetails({
 				className="mt-4 space-y-6">
 				{technicalInfo && (
 					<div>
-						<h3 className="mb-2 font-semibold">{t("product.technicalInfo")}</h3>
+						<h3 className="mb-2 font-semibold">{t("Product.technicalInfo")}</h3>
 						<p className="text-muted-foreground">{technicalInfo}</p>
 					</div>
 				)}
 
 				{application && (
 					<div>
-						<h3 className="mb-2 font-semibold">{t("product.application")}</h3>
+						<h3 className="mb-2 font-semibold">{t("Product.application")}</h3>
 						<p className="text-muted-foreground">{application}</p>
 					</div>
 				)}
 
 				{users && (
 					<div>
-						<h3 className="mb-2 font-semibold">{t("product.users")}</h3>
+						<h3 className="mb-2 font-semibold">{t("Product.users")}</h3>
 						<p className="text-muted-foreground">{users}</p>
 					</div>
 				)}
 
 				{remarks && (
 					<div>
-						<h3 className="mb-2 font-semibold">{t("product.remarks")}</h3>
+						<h3 className="mb-2 font-semibold">{t("Product.remarks")}</h3>
 						<p className="text-muted-foreground">{remarks}</p>
 					</div>
 				)}

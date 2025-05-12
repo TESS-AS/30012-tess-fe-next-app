@@ -16,12 +16,12 @@ export default function MainCategorySection() {
 		<section className="w-full space-y-6">
 			<div className="flex items-center justify-between">
 				<h2 className="text-xl font-bold text-[#02a554]">
-					{t("home.browseOurTopCategories")}
+					{t("Home.browseOurTopCategories")}
 				</h2>
 				<Link
 					href="/categories"
 					className="text-muted-foreground text-sm transition-colors hover:text-[#02a554]">
-					{t("category.viewAll")}
+					{t("Category.viewAll")}
 				</Link>
 			</div>
 

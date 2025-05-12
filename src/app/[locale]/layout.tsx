@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 
+import { Footer } from "@/components/layouts/Footer/Footer";
 import Main from "@/components/layouts/Main/Main";
 import { CartProvider } from "@/lib/providers/CartProvider";
 import { getSeoMetadata } from "@/lib/seo";
@@ -59,7 +60,10 @@ export default async function RootLayout({
 							draggable
 							pauseOnHover
 						/>
-						<Main categories={categories}>{children}</Main>
+						<Main categories={categories}>
+							<main>{children}</main>
+							<Footer />
+						</Main>
 					</CartProvider>
 				</NextIntlClientProvider>
 			</body>
