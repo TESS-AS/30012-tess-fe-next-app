@@ -16,7 +16,7 @@ export async function generateMetadata({
 	params: Promise<{ locale: string; subcategory: string }>;
 }) {
 	const { locale, subcategory } = await params;
-	const t = await getTranslations({ locale, namespace: "category" });
+	const t = await getTranslations({ locale, namespace: "Category" });
 
 	return await getSeoMetadata({
 		title: `${subcategory}`,

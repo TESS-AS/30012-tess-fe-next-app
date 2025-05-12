@@ -19,7 +19,7 @@ export async function generateMetadata({
 	params: Promise<Params>;
 }) {
 	const { locale, category, product } = await params;
-	const t = await getTranslations({ locale, namespace: "product" });
+	const t = await getTranslations({ locale, namespace: "Product" });
 
 	const productData = mockProducts.find((p) => p.id === product);
 

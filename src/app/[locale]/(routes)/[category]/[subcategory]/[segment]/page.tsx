@@ -14,7 +14,7 @@ export async function generateMetadata({
 	params: Promise<{ locale: string; segment: string }>;
 }) {
 	const { locale, segment } = await params;
-	const t = await getTranslations({ locale, namespace: "category" });
+	const t = await getTranslations({ locale, namespace: "Category" });
 
 	return await getSeoMetadata({
 		title: `${segment}`,

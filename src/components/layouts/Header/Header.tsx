@@ -95,7 +95,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 							<div className="absolute top-full left-0 z-50 mt-2 grid max-h-[400px] w-[650px] grid-cols-3 gap-4 overflow-y-auto rounded-md bg-white p-4 shadow-lg z-[999]">
 								<div className="col-span-1">
 									<h4 className="mb-2 text-sm font-semibold">
-										{t("search.suggestions")}
+										{t("Search.suggestions")}
 									</h4>
 									{data.searchSuggestions?.length ? (
 										data.searchSuggestions.map(
@@ -111,7 +111,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 										)
 									) : (
 										<p className="text-sm text-green-600">
-											{t("search.noSuggestions")}
+											{t("Search.noSuggestions")}
 										</p>
 									)}
 								</div>
@@ -207,7 +207,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 										))
 									) : (
 										<p className="text-opacity-30 text-sm text-green-600">
-											{t("search.noProductsFound")}
+											{t("Search.noProductsFound")}
 										</p>
 									)}
 								</div>

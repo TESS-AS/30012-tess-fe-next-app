@@ -1,51 +1,78 @@
 {
-	"home": {
-		"title": "Home Page",
-		"bannerTitle": "Welcome to TESS!",
-		"browseOurTopCategories": "Browse our top categories for today"
+	"Index": {
+	  "title": "Home"
 	},
-	"products": {
-		"noProducts": "No products found"
+	"NotFound": {
+	  "title": "Page Not Found",
+	  "description": "The page you are looking for does not exist."
 	},
-	"category": {
-		"noResults": "No results found",
-		"viewAll": "View All Categories"
+	"LocaleSwitcher": {
+	  "label": "Change language",
+	  "locale": "{locale, select, en {English} no {Norwegian} other {Unknown}}"
 	},
-	"product": {
-		"notFound": "Product not found",
-		"productDescription": "Product Description",
-		"selectSize": "Select size",
-		"selectedSize": "Size: {size}",
-		"adding": "Adding...",
-		"addToCart": "Add to Cart",
-		"addToWishlist": "Add to Wishlist",
-		"relatedProducts": "Related Products",
-		"viewAll": "View all",
-		"specifications": "Specifications",
-		"description": "Description",
-		"details": "Details",
-		"technicalInfo": "Technical Information",
-		"application": "Application",
-		"users": "Users",
-		"remarks": "Remarks"
-	},
-	"common": {
-		"reset": "Reset",
-		"error": {
-			"title": "Something went wrong!",
-			"tryAgain": "Try again",
-			"categoryLoad": "We couldn't load the category content.",
-			"subcategoryLoad": "We couldn't load the subcategory content."
-		},
-		"sort": "Sort by"
-	},
-	"search": {
-		"suggestions": "Suggestions",
-		"noSuggestions": "No suggestions found",
-		"noProductsFound": "No products found"
-	},
-	"seo": {
-		"defaultTitle": "Tess | Building & Safety Products",
-		"defaultDescription": "Tess is your trusted supplier for high-quality building materials, safety equipment, and industrial products. Shop online for fast, reliable service."
+	  "Home": {
+		  "title": "Home Page No",
+		  "bannerTitle": "Velkommen til TESS!",
+		  "browseOurTopCategories": "Bla gjennom våre toppkategorier"
+	  },
+	  "Products": {
+		  "noProducts": "Ingen produkter funnet"
+	  },
+	  "Category": {
+		  "noResults": "Ingen resultater funnet",
+		  "viewAll": "Se alle kategorier"
+	  },
+	  "Product": {
+		  "notFound": "Produkt ikke funnet",
+		  "productDescription": "Produktbeskrivelse",
+		  "selectSize": "Velg størrelse",
+		  "selectedSize": "Størrelse: {size}",
+		  "adding": "Legger til i kassen...",
+		  "addToCart": "Legg til i kassen",
+		  "addToWishlist": "Legg til i ønskeliste",
+		  "relatedProducts": "Relaterte produkter",
+		  "viewAll": "Vis alle",
+		  "specifications": "Spesifikasjoner",
+		  "technicalInfo": "Teknisk informasjon",
+		  "application": "Bruksområde",
+		  "users": "Brukere",
+		  "remarks": "Merknader"
+	  },
+	  "Common": {
+		  "reset": "Nullstill",
+		  "error": {
+			  "title": "Noe gikk galt!",
+			  "tryAgain": "Prøv igjen",
+			  "categoryLoad": "Vi kunne ikke laste kategorien innhold.",
+			  "subcategoryLoad": "Vi kunne ikke laste subkategorien innhold."
+		  },
+		  "sort": "Sorter"
+	  },
+	  "Search": {
+		  "suggestions": "Søkeforslag",
+		  "noSuggestions": "Ingen søkeforslag funnet",
+		  "noProductsFound": "Ingen produkter funnet"
+	  },
+	  "Seo": {
+		  "defaultTitle": "Tess | Bygge- og sikkerhetsprodukter",
+		  "defaultDescription": "Tess er din pålitelige leverandør av byggematerialer, sikkerhetsutstyr og industrielle produkter. Handle trygt og raskt på nett."
+	  },
+	"Footer": {
+	  "companyName": "TESS AS",
+	  "companyDescription": "Your trusted partner in technical supplies and services since 1968.",
+	  "company": "Company",
+	  "support": "Support",
+	  "legal": "Legal",
+	  "about": "About Us",
+	  "careers": "Careers",
+	  "contact": "Contact",
+	  "help": "Help Center",
+	  "shipping": "Shipping",
+	  "returns": "Returns",
+	  "terms": "Terms of Service",
+	  "privacy": "Privacy Policy",
+	  "cookies": "Cookie Policy",
+	  "rights": "All rights reserved."
 	}
-}
+  }
+  

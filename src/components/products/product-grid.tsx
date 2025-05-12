@@ -134,7 +134,7 @@ export function ProductGrid({
 						value={sort}
 						onValueChange={onSortChange}>
 						<SelectTrigger className="w-[180px]">
-							<SelectValue placeholder={t("common.sort")} />
+							<SelectValue placeholder={t("Common.sort")} />
 						</SelectTrigger>
 						<SelectContent>
 							{SORT_OPTIONS.map((option) => (
@@ -210,7 +210,7 @@ export function ProductGrid({
 									: "col-span-1 sm:col-span-2 lg:col-span-3",
 								viewLayout === "list" && "lg:col-span-1",
 							)}>
-							{t("category.noResults")}
+							{t("Category.noResults")}
 						</div>
 					)}
 				</div>
