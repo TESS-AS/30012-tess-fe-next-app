@@ -1,0 +1,3 @@
+.paypalWrapper :global(.paypal-buttons) {
+  z-index: 1 !important;
+}

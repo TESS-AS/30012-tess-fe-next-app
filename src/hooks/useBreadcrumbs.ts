@@ -1,3 +1,4 @@
+"use client";
 import { formatUrlToDisplayName } from "@/lib/utils";
 import { useParams } from "next/navigation";
 
@@ -7,17 +8,18 @@ interface BreadcrumbItem {
 	current?: boolean;
 }
 
-export function useBreadcrumbs(query?: string | null) {
+export function useBreadcrumbs(query?: string | null, productName?: string) {
 	const params = useParams();
 	const category = params.category as string;
 	const subcategory = params.subcategory as string;
+	const segment = params.segment as string;
 
 	const breadcrumbs: BreadcrumbItem[] = [
 		{
 			href: `/${category}`,
 			label: formatUrlToDisplayName(category),
 		},
-		...(subcategory
+		...(subcategory && subcategory !== "__default"
 			? [
 					{
 						href: `/${category}/${subcategory}`,
@@ -25,21 +27,24 @@ export function useBreadcrumbs(query?: string | null) {
 					},
 				]
 			: []),
-		...(query
+		...(segment && segment !== "__default"
 			? [
 					{
-						href: `/${category}/${subcategory}?query=${query}`,
-						label: formatUrlToDisplayName(query),
+						href: `/${category}/${subcategory}/${segment}`,
+						label: formatUrlToDisplayName(segment),
+					},
+				]
+			: []),
+		...(productName
+			? [
+					{
+						href: "#",
+						label: productName,
 						current: true,
 					},
 				]
 			: []),
 	];
-
-	// Mark the last item as current if there's no query
-	if (!query && breadcrumbs.length > 0) {
-		breadcrumbs[breadcrumbs.length - 1].current = true;
-	}
 
 	return breadcrumbs;
 }

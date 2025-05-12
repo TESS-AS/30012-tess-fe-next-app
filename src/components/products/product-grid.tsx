@@ -32,7 +32,8 @@ interface ProductGridProps {
 
 const SORT_OPTIONS = [
 	{ value: " ", label: "Sort By" },
-	{ value: "Alphabetical", label: "Alphabetical" },
+	{ value: "ALPHABETICAL", label: "A-Z" },
+	{ value: "ALPHABETICAL_DESC", label: "Z-A" },
 	{ value: "oldest", label: "Oldest" },
 	{ value: "lowest", label: "Lowest" },
 	{ value: "highest", label: "Highest" },
@@ -190,6 +191,7 @@ export function ProductGrid({
 						products.map((product, idx) => (
 							<Link
 								key={idx}
+								target="_blank"
 								href={`${pathname}/${product.product_number}`}>
 								<ProductCard
 									{...product}

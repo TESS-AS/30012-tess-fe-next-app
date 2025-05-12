@@ -11,6 +11,7 @@ import { productFetch } from "@/services/product.service";
 import { notFound } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
+import { ProductBreadcrumbs } from "@/components/products/product-breadcrumbs";
 
 export async function generateMetadata({
 	params,
@@ -44,6 +45,7 @@ interface Params {
 	locale: string;
 	category: string;
 	product: string;
+	segment: string;
 }
 
 async function getProducts(productId: string) {
@@ -61,7 +63,7 @@ export default async function ProductPage({
 	params: Promise<Params>;
 }) {
 	const locale = await getLocale();
-	const { category, product } = await params;
+	const { category, product, segment } = await params;
 
 	const _productData = await getProducts(product);
 
@@ -91,8 +93,11 @@ export default async function ProductPage({
 		remarks: locale === "en" ? productData.remarks_en : productData.remarks_no,
 	};
 
+	console.log(localizedContent.name);
+
 	return (
 		<div className="container mx-auto space-y-12 px-4 py-8">
+			<ProductBreadcrumbs segment={segment} productName={localizedContent.name} />
 			<div className="grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-2">
 				{/* Product Gallery */}
 				<ProductGallery images={productImages} />

@@ -14,6 +14,7 @@ import Image from "next/image";
 
 import { FormField } from "./form-field";
 import { StepHeader } from "./step-header";
+import styles from "./checkout-steps.module.css";
 
 // Main component
 export default function CheckoutSteps() {
@@ -217,37 +218,39 @@ export default function CheckoutSteps() {
 							Pay with Card
 						</Button>
 					) : (
-						<PayPalButtons
-							createOrder={(data, actions) => {
-								return actions.order.create({
-									purchase_units: [
-										{
-											amount: {
-												value: "100.00",
-												currency_code: "USD",
+						<div className={styles.paypalWrapper}>
+							<PayPalButtons
+								createOrder={(data, actions) => {
+									return actions.order.create({
+										purchase_units: [
+											{
+												amount: {
+													value: "100.00",
+													currency_code: "USD",
+												},
 											},
-										},
-									],
-									intent: "CAPTURE",
-								});
-							}}
-							onApprove={(data, actions) => {
-								if (!actions.order) {
-									console.error("Order actions not available");
-									return Promise.reject("Order actions not available");
-								}
-								return actions.order.capture().then((details) => {
-									console.log("Payment Approved:", details);
-									handleSubmit(); // Finalize order
-								});
-							}}
-							onError={(err) => {
-								console.error("PayPal error:", err);
-							}}
-							onCancel={() => {
-								console.log("Payment cancelled by user");
-							}}
-						/>
+										],
+										intent: "CAPTURE",
+									});
+								}}
+								onApprove={(data, actions) => {
+									if (!actions.order) {
+										console.error("Order actions not available");
+										return Promise.reject("Order actions not available");
+									}
+									return actions.order.capture().then((details) => {
+										console.log("Payment Approved:", details);
+										handleSubmit(); // Finalize order
+									});
+								}}
+								onError={(err) => {
+									console.error("PayPal error:", err);
+								}}
+								onCancel={() => {
+									console.log("Payment cancelled by user");
+								}}
+							/>
+						</div>
 					)}
 				</div>
 			)}

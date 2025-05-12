@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-
 import { cn } from "@/lib/utils";
 import { ChevronRight, Home } from "lucide-react";
 import Link from "next/link";
@@ -9,6 +8,7 @@ import Link from "next/link";
 interface BreadcrumbItem {
 	href: string;
 	label: string;
+	current?: boolean;
 }
 
 interface BreadcrumbProps extends React.HTMLAttributes<HTMLElement> {
@@ -43,6 +43,13 @@ const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
 					)}
 					{items.map((item, index) => {
 						const isLast = index === items.length - 1;
+						const linkClassName = cn(
+							"hover:text-foreground capitalize",
+							{
+								"text-foreground pointer-events-none font-semibold": item.current || isLast,
+								"text-muted-foreground": !item.current && !isLast,
+							}
+						);
 
 						return (
 							<React.Fragment key={item.href}>
@@ -56,13 +63,8 @@ const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
 								<li className="inline-flex items-center">
 									<Link
 										href={item.href}
-										className={cn(
-											"hover:text-foreground",
-											isLast
-												? "text-foreground pointer-events-none font-semibold"
-												: "text-muted-foreground",
-										)}
-										aria-current={isLast ? "page" : undefined}>
+										className={linkClassName}
+										aria-current={item.current || isLast ? "page" : undefined}>
 										{item.label}
 									</Link>
 								</li>
