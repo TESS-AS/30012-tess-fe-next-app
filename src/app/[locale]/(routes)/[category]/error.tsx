@@ -11,7 +11,7 @@ export default function Error({
 	error: Error & { digest?: string };
 	reset: () => void;
 }) {
-	const t = useTranslations("common.error");
+	const t = useTranslations("Common.error");
 
 	useEffect(() => {
 		// Log the error to an error reporting service

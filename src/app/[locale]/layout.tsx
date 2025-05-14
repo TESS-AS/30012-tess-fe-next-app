@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 
+import { Footer } from "@/components/layouts/Footer/Footer";
 import Main from "@/components/layouts/Main/Main";
 import { AuthProvider } from "@/lib/providers/AuthProvider";
 import { CartProvider } from "@/lib/providers/CartProvider";
@@ -62,7 +63,8 @@ export default async function RootLayout({
 								pauseOnHover
 							/>
 							<Main categories={categories}>{children}</Main>
-						</CartProvider>
+                            <Footer />
+                        </CartProvider>
 					</AuthProvider>
 				</NextIntlClientProvider>
 			</body>

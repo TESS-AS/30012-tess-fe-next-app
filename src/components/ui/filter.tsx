@@ -125,7 +125,7 @@ export function Filter({
 						onClick={resetFilters}
 						className="text-muted-foreground h-auto p-2">
 						<X className="mr-2 h-4 w-4" />
-						{t("common.reset")}
+						{t("Common.reset")}
 					</Button>
 				</div>
 			)}

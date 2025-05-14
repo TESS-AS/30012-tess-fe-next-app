@@ -24,12 +24,12 @@ export function RelatedProducts({ products, category }: RelatedProductsProps) {
 		<section className="space-y-6">
 			<div className="flex items-center justify-between">
 				<h2 className="text-2xl font-semibold">
-					{t("product.relatedProducts")}
+					{t("Product.relatedProducts")}
 				</h2>
 				<Link
 					href={`/${category}`}
 					className="text-muted-foreground hover:text-primary flex items-center gap-1 text-sm transition-colors">
-					{t("product.viewAll")}
+					{t("Product.viewAll")}
 					<ChevronRight className="h-4 w-4" />
 				</Link>
 			</div>
@@ -38,6 +38,7 @@ export function RelatedProducts({ products, category }: RelatedProductsProps) {
 				{products.map((product) => (
 					<Link
 						key={product.product_number}
+						target="_blank"
 						href={`${pathname}/${product.product_number}`}>
 						<ProductCard
 							{...product}
