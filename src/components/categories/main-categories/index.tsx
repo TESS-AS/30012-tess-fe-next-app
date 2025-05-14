@@ -3,11 +3,14 @@
 import { CategoryCard } from "@/components/categories/main-categories/category-card";
 import { useMainCategories } from "@/hooks/useMainCategories";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
 export default function MainCategorySection() {
 	const { data: mainCategories, isLoading, error } = useMainCategories();
 	const t = useTranslations();
+
+	const { data: session, status } = useSession();
 
 	if (isLoading) return <p>Loading categories...</p>;
 	if (error) return <p>Failed to load categories.</p>;

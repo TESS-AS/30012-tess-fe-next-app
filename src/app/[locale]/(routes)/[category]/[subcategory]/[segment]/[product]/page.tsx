@@ -93,8 +93,6 @@ export default async function ProductPage({
 		remarks: locale === "en" ? productData.remarks_en : productData.remarks_no,
 	};
 
-	console.log(localizedContent.name);
-
 	return (
 		<div className="container mx-auto space-y-12 px-4 py-8">
 			<ProductBreadcrumbs
