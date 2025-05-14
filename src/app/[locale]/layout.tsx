@@ -62,9 +62,12 @@ export default async function RootLayout({
 								draggable
 								pauseOnHover
 							/>
-							<Main categories={categories}>{children}</Main>
-                            <Footer />
-                        </CartProvider>
+							<Main categories={categories}>
+								<main>{children}</main>
+								<Footer />
+							</Main>
+							<Footer />
+						</CartProvider>
 					</AuthProvider>
 				</NextIntlClientProvider>
 			</body>
