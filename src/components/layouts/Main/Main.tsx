@@ -21,8 +21,8 @@ export default function Main({
 				autoHideDuration={10000}
 			/>
 			<Header categories={categories} />
-			<div className="bg-background h-[calc(100vh-80px)] overflow-y-auto md:rounded-tl-2xl">
-				<div className="container mx-auto rounded-t-lg py-5">{children}</div>
+			<div className="bg-background h-[calc(100vh-80px)] overflow-y-auto">
+				<div className="container mx-auto py-5">{children}</div>
 			</div>
 			<CartDrawer />
 		</div>

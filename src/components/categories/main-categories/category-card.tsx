@@ -1,41 +1,49 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 interface CategoryCardProps {
 	id: string;
 	name: string;
 	description: string;
-	icon: React.ElementType;
+	image: string;
 }
 
-export function CategoryCard({
-	name,
-	description,
-	icon: Icon,
-}: CategoryCardProps) {
+export function CategoryCard({ name, description, image }: CategoryCardProps) {
 	const slug = name.toLowerCase().replace(/\s+/g, "-");
 
 	return (
 		<Link
 			href={`/${slug}`}
-			className="h-full w-full">
-			<motion.div
-				whileHover={{ scale: 1.03 }}
-				transition={{ type: "spring", stiffness: 300 }}
-				className="h-full w-full">
-				<Card className="border-muted group h-full border transition-colors duration-300 hover:border-[#02a554]">
-					<CardContent className="space-y-3 p-5">
-						<Icon className="text-muted-foreground h-7 w-7 transition-colors group-hover:text-[#02a554]" />
-						<div className="text-base font-semibold group-hover:text-[#02a554]">
-							{name}
-						</div>
-						<p className="text-muted-foreground text-sm">{description}</p>
-					</CardContent>
-				</Card>
-			</motion.div>
+			className="group block h-full w-full">
+			<div className="h-full w-full">
+				<div className="relative h-64 w-full overflow-hidden rounded-xl">
+					<motion.div
+						whileHover={{ scale: 1.05 }}
+						transition={{ type: "spring", stiffness: 300 }}
+						className="absolute inset-0">
+						<Image
+							src={image}
+							alt={name}
+							fill
+							className="object-cover transition-transform duration-300 group-hover:scale-105"
+						/>
+					</motion.div>
+				</div>
+				<div className="mt-4 space-y-2">
+					<div className="flex items-center justify-between">
+						<h3 className="text-lg font-semibold text-black">{name}</h3>
+						<ArrowRight className="h-4 w-4 text-black" />
+					</div>
+					<p className="text-muted-foreground text-sm">{description}</p>
+					<div className="relative mt-4 h-px w-full overflow-hidden bg-neutral-300">
+						<div className="absolute top-0 left-0 h-full w-0 bg-green-600 transition-all duration-300 group-hover:w-full" />
+					</div>
+				</div>
+			</div>
 		</Link>
 	);
 }

@@ -63,7 +63,7 @@ export default async function RootLayout({
 								pauseOnHover
 							/>
 							<Main categories={categories}>
-								<main>{children}</main>
+								{children}
 								<Footer />
 							</Main>
 							<Footer />
