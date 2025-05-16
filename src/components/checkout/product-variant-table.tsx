@@ -1,6 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Plus, Minus } from "lucide-react";
+import { toast } from "react-toastify";
+import { useTranslations } from "next-intl";
+import { addToCart } from "@/services/carts.service";
 import {
 	Table,
 	TableBody,
@@ -9,62 +15,129 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import Image from "next/image";
 
 interface ProductVariant {
-	thread: string;
-	length: string;
-	coating: string;
+	content_unit: string;
+	item_id: number;
+	item_number: string;
+	media_id?: Array<any>;
+	parent_prod_number: string;
+	unspsc?: string | null;
 	quantity?: number;
 }
 
 interface ProductVariantTableProps {
 	variants: ProductVariant[];
-	onAddVariant?: (variant: ProductVariant) => void;
-	onQuantityChange?: (variant: ProductVariant, quantity: number) => void;
+	productNumber: string;
 }
 
 export default function ProductVariantTable({
 	variants,
-	onAddVariant,
-	onQuantityChange,
+	productNumber
 }: ProductVariantTableProps) {
+	const t = useTranslations();
+	const [quantities, setQuantities] = useState<Record<number, number>>({});
+	const [loading, setLoading] = useState<Record<number, boolean>>({});
 	return (
 		<div className="mt-4">
 			<Table className="rounded-md border">
 				<TableHeader className="bg-muted text-muted-foreground">
 					<TableRow>
-						<TableHead>Thread Size</TableHead>
-						<TableHead>Length</TableHead>
-						<TableHead>Coating</TableHead>
+						<TableHead>Image</TableHead>
+						<TableHead>Item Number</TableHead>
+						<TableHead>Item Id</TableHead>
+						<TableHead>UNSPSC</TableHead>
+						<TableHead>Unit</TableHead>
 						<TableHead>Qty</TableHead>
 						<TableHead className="w-[100px]">Actions</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
 					{variants.map((variant, i) => (
-						<TableRow
-							key={`${variant.thread}-${variant.length}-${variant.coating}-${i}`}>
-							<TableCell>{variant.thread}</TableCell>
-							<TableCell>{variant.length}</TableCell>
-							<TableCell>{variant.coating}</TableCell>
+						<TableRow key={variant.item_id || i}>
 							<TableCell>
-								<input
-									type="number"
-									min="1"
-									value={variant.quantity || 1}
-									onChange={(e) =>
-										onQuantityChange?.(variant, parseInt(e.target.value))
-									}
-									className="w-16 rounded-md border px-2 py-1"
-								/>
+								{variant.media_id?.[0]?.url ? (
+									<Image 
+										src={variant.media_id[0].url} 
+										alt={variant.item_number} 
+										width={60} 
+										height={60}
+										className="object-contain" 
+									/>
+								) : (
+									<div className="w-[60px] h-[60px] bg-muted" />
+								)}
+							</TableCell>
+							<TableCell>{variant.item_id}</TableCell>
+							<TableCell>{variant.item_number}</TableCell>
+							<TableCell>{variant.unspsc || '-'}</TableCell>
+							<TableCell>{variant.content_unit || 'STK'}</TableCell>
+							<TableCell>
+								<div className="flex items-center gap-2">
+									<Button
+										size="icon"
+										variant="outline"
+										disabled={!quantities[variant.item_id] || quantities[variant.item_id] <= 1}
+										onClick={() => setQuantities(prev => ({
+											...prev,
+											[variant.item_id]: Math.max(1, (prev[variant.item_id] || 1) - 1)
+										}))}>
+										<Minus className="h-4 w-4" />
+									</Button>
+									<Input
+										type="number"
+										value={quantities[variant.item_id] || 1}
+										className="w-16 text-center"
+										onChange={(e) => setQuantities(prev => ({
+											...prev,
+											[variant.item_id]: Math.max(1, parseInt(e.target.value) || 1)
+										}))}
+									/>
+									<Button
+										size="icon"
+										variant="outline"
+										onClick={() => setQuantities(prev => ({
+											...prev,
+											[variant.item_id]: (prev[variant.item_id] || 1) + 1
+										}))}>
+										<Plus className="h-4 w-4" />
+									</Button>
+								</div>
 							</TableCell>
 							<TableCell>
 								<Button
 									variant="ghost"
 									size="sm"
-									onClick={() => onAddVariant?.(variant)}
+									disabled={loading[variant.item_id]}
+									onClick={async () => {
+										setLoading(prev => ({ ...prev, [variant.item_id]: true }));
+										try {
+											const response = await addToCart(1, {
+												product_number: productNumber,
+												item_number: variant.item_number,
+												quantity: quantities[variant.item_id] || 1,
+												warehouse_number: "1",
+												company_number: "1"
+											});
+
+											if (response.message === "Error adding to cart") {
+												throw new Error(response.message);
+											}
+
+											toast(t("Product.addedToCart"), { type: "success" });
+											
+											// Reset quantity after successful add
+											setQuantities(prev => ({ ...prev, [variant.item_id]: 1 }));
+										} catch (error) {
+											console.error("Error adding to cart:", error);
+											toast(t("Product.errorAddingToCart"), { type: "error" });
+										} finally {
+											setLoading(prev => ({ ...prev, [variant.item_id]: false }));
+										}
+									}}
 									className="text-primary hover:text-primary/80">
-									Add
+									{loading[variant.item_id] ? t("Product.adding") : t("Product.addToCart")}
 								</Button>
 							</TableCell>
 						</TableRow>

@@ -8,6 +8,7 @@ interface CartItem {
 	quantity: number;
 	currency: string;
 	image?: string;
+	product_number: string;
 }
 
 interface CartContextType {
@@ -29,6 +30,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 			quantity: 1,
 			currency: "$",
 			image: "/images/gloves.jpg",
+			product_number: "P_31950",
 		},
 		{
 			name: "Building block",
@@ -36,6 +38,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 			quantity: 2,
 			currency: "$",
 			image: "/images/96701_kvadrat.png",
+			product_number: "P_96701",
 		},
 	]);
 

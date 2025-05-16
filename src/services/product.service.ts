@@ -3,6 +3,15 @@ import axios, { AxiosResponse } from "axios";
 
 import axiosInstance from "./axiosClient";
 
+interface WarehouseBalance {
+  warehouse_number: string;
+  warehouse_name: string;
+  balance: number;
+  company_name: string;
+  item_number: string;
+  parent_prod_number?: string;
+}
+
 interface SearchListResponse {
 	product: IProduct[];
 	page: number;
@@ -58,6 +67,81 @@ export async function loadItem(query?: string) {
 		console.error("Error loading category, using mock data", error);
 		return null;
 	}
+}
+
+export async function getItemCompanyBalance(itemNumber: string, companyNumber: string = '01'): Promise<WarehouseBalance[]> {
+  try {
+    const response = await axiosInstance.get(`/item/company/balance?itemNumber=${itemNumber}&companyNumber=${companyNumber}`);
+    return response.data.result;
+  } catch (error) {
+    console.error('Error fetching item company balance:', error);
+    throw error;
+  }
+}
+
+export async function getProductCompanyBalance(productNumber: string, companyNumber: string = '01'): Promise<WarehouseBalance[]> {
+  try {
+    const response = await axiosInstance.get(`/product/company/balance?productNumber=${productNumber}&companyNumber=${companyNumber}`);
+    return response.data.result;
+  } catch (error) {
+    console.error('Error fetching product company balance:', error);
+    throw error;
+  }
+}
+
+export async function getItemWarehouseBalance(
+  itemNumber: string,
+  companyNumber: string = '01',
+  warehouseNumber: string = 'L01'
+): Promise<WarehouseBalance> {
+  try {
+    const response = await axiosInstance.get(
+      `/item/warehouse/balance?itemNumber=${itemNumber}&companyNumber=${companyNumber}&warehouseNumber=${warehouseNumber}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching item warehouse balance:', error);
+    throw error;
+  }
+}
+
+export async function getProductWarehouseBalance(
+  productNumber: string,
+  companyNumber: string = '01',
+  warehouseNumber: string = 'L01'
+): Promise<WarehouseBalance[]> {
+  try {
+    const response = await axiosInstance.get(
+      `/product/warehouse/balance?productNumber=${productNumber}&companyNumber=${companyNumber}&warehouseNumber=${warehouseNumber}`
+    );
+    return response.data.result;
+  } catch (error) {
+    console.error('Error fetching product warehouse balance:', error);
+    throw error;
+  }
+}
+
+interface PriceRequest {
+  itemNumber: string;
+  quantity: number;
+}
+
+export async function calculateItemPrice(
+  request: PriceRequest,
+  companyNumber: string = '01',
+  warehouseNumber: string = 'L01',
+  customerNumber: string = '169999'
+) {
+  try {
+    const response = await axiosInstance.post(
+      `/item/price/${companyNumber}/${warehouseNumber}/${customerNumber}`,
+      request
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error calculating item price:', error);
+    throw error;
+  }
 }
 
 export async function searchProducts(

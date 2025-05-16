@@ -69,6 +69,7 @@ export default async function ProductPage({
 
 	const [productData] = _productData;
 
+	console.log("Product Data:", productData);
 	if (!productData) {
 		return notFound();
 	}
@@ -93,7 +94,6 @@ export default async function ProductPage({
 		remarks: locale === "en" ? productData.remarks_en : productData.remarks_no,
 	};
 
-	console.log(localizedContent.name);
 
 	return (
 		<div className="container mx-auto space-y-12 px-4 py-8">
@@ -113,7 +113,10 @@ export default async function ProductPage({
 						price={productData.price}
 					/>
 
-					<ProductActions items={productData.items} />
+					<ProductActions 
+						items={productData.items} 
+						productNumber={productData.product_number}
+					/>
 
 					<ProductDetails
 						description={localizedContent.description}
@@ -126,11 +129,8 @@ export default async function ProductPage({
 				</div>
 			</div>
 			<ProductVariantTable
-				variants={[
-					{ thread: '1/4"', length: "19 mm", coating: "Zinc" },
-					{ thread: '1/4"', length: "25 mm", coating: "Zinc" },
-					{ thread: '5/16"', length: "32 mm", coating: "SS" },
-				]}
+				variants={productData.items}
+				productNumber={productData.product_number}
 			/>
 
 			{/* Related Products */}

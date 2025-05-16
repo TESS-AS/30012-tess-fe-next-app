@@ -25,7 +25,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useSearch } from "@/hooks/useProductSearch";
 import { useRouter } from "@/i18n/navigation";
-import { useCart } from "@/lib/providers/CartProvider";
 import { useStore } from "@/store/store";
 import { Category } from "@/types/categories.types";
 import { IProductSearch, ISuggestions } from "@/types/search.types";
@@ -38,7 +37,6 @@ import { toast } from "react-toastify";
 export default function Header({ categories }: { categories: Category[] }) {
 	const currentLocale = useLocale();
 	const t = useTranslations();
-	const { openCart } = useCart();
 	const router = useRouter();
 	const { setCategories } = useStore();
 	const searchRef = useClickOutside<HTMLDivElement>(() => {
@@ -126,19 +124,6 @@ export default function Header({ categories }: { categories: Category[] }) {
 														className="flex flex-1 items-center gap-4"
 														href={`/product/product/${product.product_number}`}
 														onClick={() => setSearchQuery("")}>
-														<div className="flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md">
-															{product.media ? (
-																<Image
-																	src={product.media}
-																	alt={product.product_name}
-																	width={64}
-																	height={64}
-																	className="max-h-16 max-w-16 object-contain"
-																/>
-															) : (
-																<div className="h-10 w-10 rounded bg-gray-300" />
-															)}
-														</div>
 														<div className="flex flex-col justify-center">
 															<span className="text-base font-medium">
 																{product.product_name}
@@ -149,6 +134,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 														</div>
 													</Link>
 													<Button
+														className="me-2"
 														variant="outline"
 														size="sm"
 														onClick={(e) => {
@@ -157,6 +143,19 @@ export default function Header({ categories }: { categories: Category[] }) {
 														}}>
 														<ShoppingCartIcon className="h-4 w-4" />
 													</Button>
+													<div className="flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md">
+														{product.media ? (
+															<Image
+																src={product.media}
+																alt={product.product_name}
+																width={64}
+																height={64}
+																className="max-h-16 max-w-16 object-contain"
+															/>
+														) : (
+															<div className="h-10 w-10 rounded bg-gray-300" />
+														)}
+													</div>
 												</div>
 												<Modal
 													open={isModalIdOpen === product.product_number}
@@ -277,7 +276,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 						variant="ghost"
 						size="icon"
 						className="relative"
-						onClick={openCart}>
+						onClick={() => router.push("/cart")}>
 						<ShoppingCart className="h-5 w-5" />
 						<Badge className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full p-0">
 							2

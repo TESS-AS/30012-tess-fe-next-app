@@ -36,7 +36,9 @@
 		"technicalInfo": "Teknisk informasjon",
 		"application": "Bruksområde",
 		"users": "Brukere",
-		"remarks": "Merknader"
+		"remarks": "Merknader",
+		"description": "Beskrivelse",
+		"details": "Detaljer"
 	},
 	"Common": {
 		"reset": "Nullstill",
