@@ -1,31 +1,15 @@
-import {
-	Archive,
-	Drill,
-	Droplet,
-	Filter,
-	Flame,
-	FlaskConical,
-	Forklift,
-	Hammer,
-	Lightbulb,
-	Settings,
-	Shield,
-	UserCog,
-	Wrench,
-} from "lucide-react";
-
-export const categoryIconMap: Record<string, React.ElementType> = {
-	"01000000": Droplet, // Hoses and pipes
-	"02000000": Hammer, // Tools and machines
-	"03000000": Shield, // PPE, clothing and shoes
-	"04000000": Flame, // Welding
-	"05000000": Drill, // Fasteners
-	"06000000": FlaskConical, // Chemicals
-	"07000000": Lightbulb, // Lighting and electrical
-	"08000000": Settings, // Transmissions
-	"09000000": Forklift, // Lifting and loading
-	"10000000": Archive, // Office and storage
-	"12000000": Filter, // Filters
-	"13000000": Wrench, // Maintenance products
-	"14000000": UserCog, // Customer specific products
+export const categoryImageMap: Record<string, string> = {
+	"01000000": "/images/category-images/hoses-and-pipes.png",
+	"02000000": "/images/category-images/tools-and-machines.png",
+	"03000000": "/images/category-images/ppe-clothing-and-shoes.png",
+	"04000000": "/images/category-images/welding.png",
+	"05000000": "/images/category-images/tools-and-machines.png",
+	"06000000": "/images/category-images/chemicals.png",
+	"07000000": "/images/category-images/lightning-and-electrical.png",
+	"08000000": "/images/category-images/transmissions.png",
+	"09000000": "/images/category-images/lifting-and-loading.png",
+	"10000000": "/images/category-images/office-and-storage.png",
+	"12000000": "/images/category-images/chemicals.png",
+	"13000000": "/images/category-images/maintenance-products.png",
+	"14000000": "/images/category-images/hoses-and-pipes.png",
 };

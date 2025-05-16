@@ -126,10 +126,19 @@ export default function Header({ categories }: { categories: Category[] }) {
 											<div key={product.product_number}>
 												<div className="flex w-full items-center justify-between gap-4 rounded-md p-3 hover:bg-gray-100">
 													<Link
-														className="flex flex-1 items-center gap-4"
+														className="flex flex-[0.8] items-center justify-between gap-4"
 														href={`/product/product/${product.product_number}`}
 														onClick={() => setSearchQuery("")}>
-														<div className="flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md">
+														<div className="flex flex-col justify-center">
+															<span className="text-base font-medium">
+																{product.product_name}
+															</span>
+															<span className="text-muted-foreground text-sm">
+																{product.product_number}
+															</span>
+														</div>
+
+														<div className="flex h-16 w-16 min-w-16 flex-shrink-0 items-center justify-center self-center overflow-hidden rounded-md">
 															{product.media ? (
 																<Image
 																	src={product.media}
@@ -141,14 +150,6 @@ export default function Header({ categories }: { categories: Category[] }) {
 															) : (
 																<div className="h-10 w-10 rounded bg-gray-300" />
 															)}
-														</div>
-														<div className="flex flex-col justify-center">
-															<span className="text-base font-medium">
-																{product.product_name}
-															</span>
-															<span className="text-muted-foreground text-sm">
-																{product.product_number}
-															</span>
 														</div>
 													</Link>
 													<Button
