@@ -181,7 +181,6 @@ export async function searchProducts(
 
 		// Construct URL with path parameters and query string
 		const url = `/searchList/${page}/${pageSize}/${params.toString() ? `?${params.toString()}` : ""}`;
-		console.log(url, "qokla url");
 		// Make request with or without body based on filters
 		const response =
 			filters && filters.length > 0

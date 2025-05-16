@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
 
-import { categoryIconMap } from "@/constants/mainCategoryIcons";
+import { categoryImageMap } from "@/constants/mainCategoryIcons";
 import axiosClient from "@/services/axiosClient";
 import { RawCategory } from "@/types/categories.types";
-import { Package } from "lucide-react";
 import { useLocale } from "next-intl";
 
 export interface MainCategory {
 	id: string;
 	name: string;
 	description: string;
-	icon: React.ElementType;
+	image: string;
 }
 
 export function useMainCategories() {
@@ -32,7 +31,9 @@ export function useMainCategories() {
 						id: cat.group_id,
 						name: locale === "no" ? cat.name_no || "" : cat.name_en || "",
 						description: "",
-						icon: categoryIconMap[cat.group_id] ?? Package,
+						image:
+							categoryImageMap[cat.group_id] ??
+							"/images/categories/default.jpg",
 					}));
 
 				setData(transformed);

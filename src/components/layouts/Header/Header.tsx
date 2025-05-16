@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import ProductVariantTable from "@/components/checkout/product-variant-table";
 import CategoryNavigationMenu from "@/components/layouts/NavigationMenu/NavigationMenu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import AuthDialog from "@/components/ui/dialogs/auth-dialog";
@@ -31,6 +32,7 @@ import { IProductSearch, ISuggestions } from "@/types/search.types";
 import { Search, ShoppingCart, ShoppingCartIcon, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { signOut, useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
@@ -39,6 +41,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const t = useTranslations();
 	const router = useRouter();
 	const { setCategories } = useStore();
+	const { data: session, status } = useSession();
 	const searchRef = useClickOutside<HTMLDivElement>(() => {
 		setSearchQuery("");
 	});
@@ -121,7 +124,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 											<div key={product.product_number}>
 												<div className="flex w-full items-center justify-between gap-4 rounded-md p-3 hover:bg-gray-100">
 													<Link
-														className="flex flex-1 items-center gap-4"
+														className="flex flex-[0.8] items-center justify-between gap-4"
 														href={`/product/product/${product.product_number}`}
 														onClick={() => setSearchQuery("")}>
 														<div className="flex flex-col justify-center">
@@ -131,6 +134,20 @@ export default function Header({ categories }: { categories: Category[] }) {
 															<span className="text-muted-foreground text-sm">
 																{product.product_number}
 															</span>
+														</div>
+
+														<div className="flex h-16 w-16 min-w-16 flex-shrink-0 items-center justify-center self-center overflow-hidden rounded-md">
+															{product.media ? (
+																<Image
+																	src={product.media}
+																	alt={product.product_name}
+																	width={64}
+																	height={64}
+																	className="max-h-16 max-w-16 object-contain"
+																/>
+															) : (
+																<div className="h-10 w-10 rounded bg-gray-300" />
+															)}
 														</div>
 													</Link>
 													<Button
@@ -255,23 +272,62 @@ export default function Header({ categories }: { categories: Category[] }) {
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
-					<DropdownMenu>
-						<DropdownMenuTrigger
-							asChild
-							className="hidden md:flex">
-							<Button
-								variant="ghost"
-								size="icon"
-								className="hidden md:flex"
-								onClick={() => {
-									router.replace("?auth=login", { scroll: false });
-									setIsAuthOpen(true);
-								}}>
-								<User className="h-5 w-5" />
-								<span className="sr-only">Account</span>
-							</Button>
-						</DropdownMenuTrigger>
-					</DropdownMenu>
+					{status === "authenticated" && session?.user ? (
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button
+									variant="ghost"
+									className="px-3 font-medium">
+									{session.user.name?.split(" ")[0] ?? "Profile"}
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end">
+								<div className="flex items-center gap-3 px-3 py-2">
+									<Avatar className="h-9 w-9">
+										<AvatarImage
+											src={session.user.image ?? ""}
+											alt={session.user.name ?? "User"}
+										/>
+										<AvatarFallback>
+											{session.user.name
+												?.split(" ")
+												.map((n) => n[0])
+												.join("")}
+										</AvatarFallback>
+									</Avatar>
+									<div className="flex-1 overflow-hidden">
+										<div className="leading-none font-medium">
+											{session.user.name}
+										</div>
+										<div className="text-muted-foreground max-w-[160px] truncate text-sm">
+											{session.user.email}
+										</div>
+									</div>
+								</div>
+								<DropdownMenuItem onClick={() => router.push("/profile")}>
+									My Profile
+								</DropdownMenuItem>
+								<DropdownMenuItem onClick={() => router.push("/wishlist")}>
+									Wishlist
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									onClick={() => signOut()}
+									className="text-green-600">
+									Log out
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					) : (
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => {
+								router.replace("?auth=login", { scroll: false });
+								setIsAuthOpen(true);
+							}}>
+							<User className="h-5 w-5" />
+						</Button>
+					)}
 					<Button
 						variant="ghost"
 						size="icon"
