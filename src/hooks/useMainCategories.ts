@@ -26,13 +26,13 @@ export function useMainCategories() {
 					await axiosClient.get<RawCategory[]>("/mainCategories");
 
 				const transformed: MainCategory[] = response.data
-					.filter((cat) => cat.group_id)
+					.filter((cat) => cat.groupId)
 					.map((cat) => ({
-						id: cat.group_id,
-						name: locale === "no" ? cat.name_no || "" : cat.name_en || "",
+						id: cat.groupId,
+						name: locale === "no" ? cat.nameNo || "" : cat.nameEn || "",
 						description: "",
 						image:
-							categoryImageMap[cat.group_id] ??
+							categoryImageMap[cat.groupId] ??
 							"/images/categories/default.jpg",
 					}));
 

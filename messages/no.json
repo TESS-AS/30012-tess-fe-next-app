@@ -39,7 +39,10 @@
 		"users": "Brukere",
 		"remarks": "Merknader",
 		"description": "Beskrivelse",
-		"details": "Detaljer"
+		"details": "Detaljer",
+		"noVariants": "Ingen varianter funnet",
+		"addedToCart": "Legget til i kassen",
+		"errorAddingToCart": "Kunne ikke legge til i kassen"
 	},
 	"Common": {
 		"reset": "Nullstill",

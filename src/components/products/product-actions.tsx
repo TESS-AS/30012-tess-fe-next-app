@@ -32,12 +32,12 @@ export function ProductActions({ items, productNumber }: ProductActionsProps) {
 
 		setIsLoading(true);
 		try {
-			const response = await addToCart(1, {
-				product_number: productNumber,
-				item_number: selectedSize,
+			const response = await addToCart({
+				productNumber: productNumber,
+				itemNumber: selectedSize,
 				quantity: quantity,
-				warehouse_number: "1",
-				company_number: "1"
+				warehouseNumber: "1",
+				companyNumber: "1"
 			});
 
 			if (response.message === "Error adding to cart") {

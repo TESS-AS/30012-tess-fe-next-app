@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Minus } from "lucide-react";
@@ -39,6 +39,35 @@ export default function ProductVariantTable({
 	const t = useTranslations();
 	const [quantities, setQuantities] = useState<Record<number, number>>({});
 	const [loading, setLoading] = useState<Record<number, boolean>>({});
+	const [isLoading, setIsLoading] = useState(true);
+
+	// Simulate loading state
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setIsLoading(false);
+		}, 1000);
+		return () => clearTimeout(timer);
+	}, []);
+
+	if (isLoading) {
+		return (
+			<div className="mt-4 space-y-4">
+				<div className="h-8 w-full animate-pulse rounded bg-muted" />
+				{[...Array(3)].map((_, i) => (
+					<div key={i} className="h-16 w-full animate-pulse rounded bg-muted" />
+				))}
+			</div>
+		);
+	}
+
+	if (!variants || variants.length === 0) {
+		return (
+			<div className="mt-4 flex min-h-[200px] items-center justify-center">
+				<p className="text-sm text-muted-foreground">{t('Product.noVariants')}</p>
+			</div>
+		);
+	}
+
 	return (
 		<div className="mt-4">
 			<Table className="rounded-md border">
@@ -113,12 +142,12 @@ export default function ProductVariantTable({
 									onClick={async () => {
 										setLoading(prev => ({ ...prev, [variant.item_id]: true }));
 										try {
-											const response = await addToCart(1, {
-												product_number: productNumber,
-												item_number: variant.item_number,
+											const response = await addToCart({
+												productNumber: productNumber,
+												itemNumber: variant.item_number,
 												quantity: quantities[variant.item_id] || 1,
-												warehouse_number: "1",
-												company_number: "1"
+												warehouseNumber: "1",
+												companyNumber: "1"
 											});
 
 											if (response.message === "Error adding to cart") {

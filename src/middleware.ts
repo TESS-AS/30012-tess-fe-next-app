@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import createMiddleware from "next-intl/middleware";
-
+import createIntlMiddleware from "next-intl/middleware";
+import { auth } from "../auth";
 import { routing } from "./i18n/routing";
 
-const intlMiddleware = createMiddleware(routing);
+const protectedRoutes = ["profile"];
+const apiAuthPrefix = "/api/auth";
 
-export default function middleware(request: NextRequest) {
-	const response = intlMiddleware(request);
+function rewriteProductUrls(request: NextRequest) {
 	const url = request.nextUrl.clone();
 	const segments = url.pathname.split("/").filter(Boolean);
 
-	if (segments.length < 2) return response;
+	if (segments.length < 2) return null;
 
 	const [locale, ...rest] = segments;
 
@@ -40,19 +40,37 @@ export default function middleware(request: NextRequest) {
 		}
 	}
 
-	// CASE 3: Full 4-segment product path — pass through
-	if (rest.length === 4) {
-		const maybeProductId = rest.at(-1);
-		const isProductId = /^P_[A-Za-z0-9_-]+$/.test(maybeProductId ?? "");
-
-		if (isProductId) {
-			return response;
-		}
-	}
-
-	return response;
+	return null;
 }
 
+export default auth((request) => {
+	// First check authentication
+	const { nextUrl } = request;
+	const isLoggedIn = !!request.auth;
+
+	const path = nextUrl.pathname;
+	const isApiAuthRoute = path.startsWith(apiAuthPrefix);
+	const isProtectedRoute = protectedRoutes.some(route => path.includes(route));
+
+	if (isApiAuthRoute) {
+		return NextResponse.next();
+	}
+
+	if (isProtectedRoute && !isLoggedIn) {
+		return NextResponse.redirect(new URL("/login", nextUrl));
+	}
+
+	// Handle URL rewrites first
+	const rewriteResponse = rewriteProductUrls(request);
+	if (rewriteResponse) {
+		return rewriteResponse;
+	}
+
+	// Then handle internationalization
+	const intlMiddleware = createIntlMiddleware(routing);
+	return intlMiddleware(request);
+});
+
 export const config = {
-	matcher: "/((?!api|trpc|_next|_vercel|.*\\..*).*)",
+	matcher: ["/((?!api|_next|static|trpc|_vercel|.*\\..*|favicon.ico).*)"],
 };

@@ -144,6 +144,21 @@ export async function calculateItemPrice(
   }
 }
 
+export async function getProductVariations(
+	productNumber: string, 
+	warehouseNumber: string = 'L01', 
+	companyNumber: string = '01'
+) {
+	try {
+		const response = await axiosInstance.get(`/item/variants/${productNumber}/${warehouseNumber}/${companyNumber}`);
+		return response.data;
+
+	} catch (error) {
+		console.error('Error fetching product variations:', error);
+		throw error;
+	}
+}
+
 export async function searchProducts(
 	page: number = 1,
 	pageSize: number = 9,

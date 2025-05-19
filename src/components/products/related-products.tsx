@@ -38,7 +38,6 @@ export function RelatedProducts({ products, category }: RelatedProductsProps) {
 				{products.map((product) => (
 					<Link
 						key={product.product_number}
-						target="_blank"
 						href={`${pathname}/${product.product_number}`}>
 						<ProductCard
 							{...product}

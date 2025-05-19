@@ -1,8 +1,8 @@
 export interface IProduct {
-	product_name: string;
-	media_m: string;
-	product_number: string;
-	short_desc?: string;
+	productName: string;
+	mediaM: string;
+	productNumber: string;
+	shortDesc?: string;
 }
 
 export interface IVariation {

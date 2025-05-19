@@ -44,6 +44,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const { data: session, status } = useSession();
 	const searchRef = useClickOutside<HTMLDivElement>(() => {
 		setSearchQuery("");
+		setIsSearchOpen(false);
 	});
 
 	const [searchQuery, setSearchQuery] = useState("");
@@ -60,6 +61,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsSearchOpen(false);
+		setIsModalIdOpen(null);
 	};
 
 	const handleLanguageChange = (locale: string) => {
@@ -106,7 +108,11 @@ export default function Header({ categories }: { categories: Category[] }) {
 													key={idx}
 													href={`/search?query=${encodeURIComponent(s.keyword)}`}
 													className="block rounded-md p-2 text-sm hover:bg-gray-100"
-													onClick={() => setSearchQuery("")}>
+													onClick={() => {
+														setSearchQuery("");
+														setIsSearchOpen(false);
+														setIsModalIdOpen(null);
+													}}>
 													{s.keyword}
 												</Link>
 											),
@@ -135,8 +141,18 @@ export default function Header({ categories }: { categories: Category[] }) {
 																{product.product_number}
 															</span>
 														</div>
-
-														<div className="flex h-16 w-16 min-w-16 flex-shrink-0 items-center justify-center self-center overflow-hidden rounded-md">
+													</Link>
+													<div className="flex items-center gap-6">
+														<Button
+															variant="outline"
+															size="sm"
+															onClick={(e) => {
+															e.preventDefault();
+															setIsModalIdOpen(product.product_number);
+														}}>
+															<ShoppingCartIcon className="h-2 w-2" />
+														</Button>
+														<div className="flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md">
 															{product.media ? (
 																<Image
 																	src={product.media}
@@ -149,29 +165,6 @@ export default function Header({ categories }: { categories: Category[] }) {
 																<div className="h-10 w-10 rounded bg-gray-300" />
 															)}
 														</div>
-													</Link>
-													<Button
-														className="me-2"
-														variant="outline"
-														size="sm"
-														onClick={(e) => {
-															e.preventDefault();
-															setIsModalIdOpen(product.product_number);
-														}}>
-														<ShoppingCartIcon className="h-4 w-4" />
-													</Button>
-													<div className="flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md">
-														{product.media ? (
-															<Image
-																src={product.media}
-																alt={product.product_name}
-																width={64}
-																height={64}
-																className="max-h-16 max-w-16 object-contain"
-															/>
-														) : (
-															<div className="h-10 w-10 rounded bg-gray-300" />
-														)}
 													</div>
 												</div>
 												<Modal
@@ -181,43 +174,18 @@ export default function Header({ categories }: { categories: Category[] }) {
 															open ? product.product_number : null,
 														)
 													}>
-													<ModalContent>
-														<ModalHeader>
+													<ModalContent className="sm:max-w-[800px]">
+														<ModalHeader className="border-b pb-4">
 															<ModalTitle>
 																Product Variants - {product.product_name}
 															</ModalTitle>
 														</ModalHeader>
-														<ProductVariantTable
-															variants={[
-																{
-																	thread: '1/4"',
-																	length: "19 mm",
-																	coating: "Zinc",
-																},
-																{
-																	thread: '1/4"',
-																	length: "25 mm",
-																	coating: "Zinc",
-																},
-																{
-																	thread: '5/16"',
-																	length: "32 mm",
-																	coating: "SS",
-																},
-															]}
-															onAddVariant={(variant) => {
-																console.log("Adding variant:", variant);
-																setIsModalIdOpen(null);
-																toast.success("Variant added successfully");
-															}}
-															onQuantityChange={(variant, quantity) => {
-																console.log(
-																	"Quantity changed:",
-																	variant,
-																	quantity,
-																);
-															}}
-														/>
+														<div className="max-h-[70vh] overflow-y-auto px-1">
+															<ProductVariantTable
+																variants={[]}
+																productNumber={product.product_number}
+															/>
+														</div>
 													</ModalContent>
 												</Modal>
 											</div>

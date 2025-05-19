@@ -2,9 +2,9 @@ import { ArchiveCart, ArchiveCartResponse, CartLine, CartResponse } from "@/type
 import axiosInstance from "./axiosClient";
 import { AxiosResponse } from "axios";
 
-export async function getCart(userId: number): Promise<CartLine[]> {
+export async function getCart(): Promise<CartLine[]> {
     try {
-        const url = `/cart/${userId}`;
+        const url = `/cart`;
         const response: AxiosResponse<CartLine[]> = await axiosInstance.get(url);
         return response.data;
     } catch (error) {
@@ -13,9 +13,9 @@ export async function getCart(userId: number): Promise<CartLine[]> {
     }
 }
 
-export async function addToCart(userId: number, cartLine: CartLine): Promise<CartResponse> {
+export async function addToCart(cartLine: CartLine): Promise<CartResponse> {
     try {
-        const url = `/cart/addLine/${userId}`;
+        const url = `/cart/addLine`;
         const response: AxiosResponse<CartResponse> = await axiosInstance.post(url, cartLine);
         return response.data;
     } catch (error) {
@@ -27,9 +27,9 @@ export async function addToCart(userId: number, cartLine: CartLine): Promise<Car
     }
 }
 
-export async function removeFromCart(userId: number, cartLineId: number): Promise<CartResponse> {
+export async function removeFromCart(cartLineId: number): Promise<CartResponse> {
     try {
-        const url = `/cart/deleteLine/${userId}/${cartLineId}`;
+        const url = `/cart/deleteLine/${cartLineId}`;
         const response: AxiosResponse<CartResponse> = await axiosInstance.delete(url);
         return response.data;
     } catch (error) {
@@ -41,9 +41,9 @@ export async function removeFromCart(userId: number, cartLineId: number): Promis
     }
 }
 
-export async function updateCart(userId: number, cartLineId: number, payload: { itemNumber: string; quantity: number }): Promise<CartLine[]> {
+export async function updateCart(cartLineId: number, payload: { itemNumber: string; quantity: number }): Promise<CartLine[]> {
     try {
-        const url = `/cart/updateLine/${userId}/${cartLineId}`;
+        const url = `/cart/updateLine/${cartLineId}`;
         const response: AxiosResponse<CartLine[]> = await axiosInstance.patch(url, payload);
         return response.data;
     } catch (error) {
@@ -52,9 +52,9 @@ export async function updateCart(userId: number, cartLineId: number, payload: { 
     }
 }
 
-export async function archiveCart(userId: number, payload: ArchiveCart[]): Promise<{ message: string }> {
+export async function archiveCart(payload: ArchiveCart[]): Promise<{ message: string }> {
     try {
-        const url = `/cart/archiveCart/${userId}`;
+        const url = `/cart/archiveCart/`;
         const response: AxiosResponse<{ message: string }> = await axiosInstance.post(url, payload);
         return response.data;
     } catch (error) {
@@ -63,7 +63,7 @@ export async function archiveCart(userId: number, payload: ArchiveCart[]): Promi
     }
 }
     
-export async function getArchiveCart(userId: number, page: number = 1, pageSize: number = 9, order: string = "desc"): Promise<ArchiveCartResponse> {
+export async function getArchiveCart(page: number = 1, pageSize: number = 9, order: string = "desc"): Promise<ArchiveCartResponse> {
     try {
 
         const params = new URLSearchParams();
@@ -71,7 +71,7 @@ export async function getArchiveCart(userId: number, page: number = 1, pageSize:
         params.append("pageSize", pageSize.toString());
         params.append("order", order);
 
-        const url = `/cart/archiveCart/${userId}/${params.toString() ? `?${params.toString()}` : ""}`;
+        const url = `/cart/archiveCart/${params.toString() ? `?${params.toString()}` : ""}`;
         
         const response: AxiosResponse<ArchiveCartResponse> = await axiosInstance.get(url);
         return response.data;

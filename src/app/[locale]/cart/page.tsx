@@ -1,10 +1,10 @@
 "use client";
 
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Minus, Plus, Trash } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCart } from "@/lib/providers/CartProvider";
 import {
 	Table,
 	TableBody,
@@ -13,9 +13,9 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import React from "react";
 import ProductVariantTable from "@/components/checkout/product-variant-table";
-import { getCart, removeFromCart } from "@/services/carts.service";
+import { getCart, removeFromCart, updateCart } from "@/services/carts.service";
+import { getProductVariations } from "@/services/product.service";
 import { CartLine } from "@/types/carts.types";
 import CartSkeleton from "./loading";
 
@@ -53,16 +53,18 @@ const AnimatedTableRow = ({ isOpen, children }: { isOpen: boolean; children: Rea
 	);
 };
 
-export default function CartPage() {
+const CartPage = () => {
 	const router = useRouter();
 	const [isLoading, setIsLoading] = React.useState(true);
 	const [cartItems, setCartItems] = React.useState<CartLine[]>([]);
+	const [openItems, setOpenItems] = React.useState<boolean[]>([]);
+	const [variations, setVariations] = React.useState<Record<string, any>>({});
 
 	React.useEffect(() => {
 		const fetchCart = async () => {
 			try {
 				setIsLoading(true);
-				const items = await getCart(1); // TODO: Replace with actual user ID
+				const items = await getCart();
 				setCartItems(items);
 			} catch (error) {
 				console.error('Error fetching cart:', error);
@@ -105,20 +107,37 @@ export default function CartPage() {
 						</TableHeader>
 						<TableBody>
 							{!isLoading && cartItems.map((item, idx) => {
-								const [isOpen, setIsOpen] = React.useState(false);	
-
 								return (
 									<React.Fragment key={idx}>
 										<TableRow 
-											onClick={() => setIsOpen(!isOpen)} 
+											onClick={async () => {
+											const willOpen = !openItems[idx];
+											setOpenItems(prev => {
+												const newState = [...prev];
+												newState[idx] = willOpen;
+												return newState;
+											});
+
+											if (willOpen && !variations[item.productNumber]) {
+												try {
+													const productVariations = await getProductVariations(item.productNumber);
+													setVariations(prev => ({
+														...prev,
+														[item.productNumber]: productVariations
+													}));
+												} catch (error) {
+													console.error('Error fetching variations:', error);
+												}
+											}
+										}} 
 											className="cursor-pointer hover:bg-muted/50 transition-colors">
 											<TableCell>
 												<div className="flex items-center gap-4">
 													<div className="relative h-16 w-16 rounded bg-muted">
-														{item.media_url ? (
+														{item.mediaUrl ? (
 															<Image
-																src={item.media_url}
-																alt={item.product_name || ''}
+																src={item.mediaUrl}
+																alt={item.productName || ''}
 																fill
 																className="object-contain"
 															/>
@@ -126,7 +145,7 @@ export default function CartPage() {
 															<div className="h-full w-full bg-gray-200" />
 														)}
 													</div>
-													<span className="font-medium">{item.product_name}</span>
+													<span className="font-medium">{item.productName}</span>
 												</div>
 											</TableCell>
 											<TableCell className="text-muted-foreground">
@@ -137,9 +156,10 @@ export default function CartPage() {
 													<Button 
 														size="icon" 
 														variant="outline"
-														onClick={(e) => {
+														onClick={async (e) => {
 															e.stopPropagation();
-															// Add decrease quantity logic here
+															const products = await updateCart(item.cartLine ?? 0, { itemNumber: item.itemNumber, quantity: item.quantity - 1 });
+															setCartItems(products);
 														}}>
 														<Minus className="h-4 w-4" />
 													</Button>
@@ -147,9 +167,10 @@ export default function CartPage() {
 													<Button 
 														size="icon" 
 														variant="outline"
-														onClick={(e) => {
+														onClick={async (e) => {
 															e.stopPropagation();
-															// Add increase quantity logic here
+															const products = await updateCart(item.cartLine ?? 0, { itemNumber: item.itemNumber, quantity: item.quantity + 1 });
+															setCartItems(products);
 														}}>
 														<Plus className="h-4 w-4" />
 													</Button>
@@ -164,22 +185,21 @@ export default function CartPage() {
 													variant="ghost"
 													onClick={async (e) => {
 														e.stopPropagation();
-														await removeFromCart(1, Number(item.item_number));
-														setCartItems((prevItems) => prevItems.filter((i) => i.item_number !== item.item_number));
+														const products = await removeFromCart(Number(item.cartLine));
+														setCartItems(products.data);
 													}}>
 													<Trash className="h-4 w-4 text-muted-foreground" />
 												</Button>
 											</TableCell>
 										</TableRow>
-										<AnimatedTableRow isOpen={isOpen}>
+										<AnimatedTableRow isOpen={openItems[idx] || false}>
 											<ProductVariantTable
-												variants={item.variants || []}
-												productNumber={item.product_number}
+												variants={variations[item.productNumber]?.result || []}
+												productNumber={item.productNumber}
 											/>
 										</AnimatedTableRow>
 									</React.Fragment>
-								)})
-							}
+								)})}
 						</TableBody>
 					</Table>
 				</div>
@@ -238,4 +258,6 @@ export default function CartPage() {
 			</div>
 		</main>
 	);
-}
+};
+
+export default CartPage;

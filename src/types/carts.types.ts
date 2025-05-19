@@ -1,19 +1,19 @@
 export interface CartLine {
-    user_id?: number;
-    cart_line?: number;
-    product_number: string;
-    product_name?: string;
-    item_number: string;
+    userId?: number;
+    cartLine?: number;
+    productNumber: string;
+    productName?: string;
+    itemNumber: string;
     quantity: number;
-    warehouse_number: string;
-    company_number: string;
+    warehouseNumber: string;
+    companyNumber: string;
     price?: number;
-    media_url?: string;
+    mediaUrl?: string;
     variants?: Array<{
-        content_unit: string;
-        item_id: number;
-        item_number: string;
-        parent_prod_number: string;
+        contentUnit: string;
+        itemId: number;
+        itemNumber: string;
+        parentProdNumber: string;
         unspsc: string | null;
     }>;
 }
@@ -24,7 +24,7 @@ export interface CartResponse {
 }
 
 export interface ArchiveCart {
-    cart_line: number;
+    cartLine: number;
     price: number;
 }
 
@@ -32,7 +32,7 @@ export interface ArchiveCartResponse {
     currentPage: number;
     totalPages: number;
     data: {
-        user_id: number;
+        userId: number;
         date: string;
         cart: CartLine[]
     }[]
