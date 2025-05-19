@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export function mapCategoryTree(node: RawCategory, locale: string): Category {
 	const nameKey = `name_${locale}`;
-	const name = node[nameKey] || node.name_en || "Unnamed";
+	const name = node[nameKey] || node.nameEn || node.nameNo;
 
 	return {
 		name,
@@ -16,7 +16,7 @@ export function mapCategoryTree(node: RawCategory, locale: string): Category {
 			.toLowerCase()
 			.replace(/\s+/g, "-")
 			.replace(/[^\w-]/g, ""),
-		groupId: node.group_id,
+		groupId: node.groupId,
 		subcategories:
 			node.children?.map((child) => mapCategoryTree(child, locale)) ?? [],
 	};

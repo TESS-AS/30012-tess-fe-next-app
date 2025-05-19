@@ -1,7 +1,7 @@
 export interface RawCategory {
-	group_id: string;
-	name_en?: string;
-	name_no?: string;
+	groupId: string;
+	nameEn?: string;
+	nameNo?: string;
 	children?: RawCategory[];
 	[key: string]: any;
 }
