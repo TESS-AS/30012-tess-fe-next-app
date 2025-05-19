@@ -32,8 +32,7 @@ export function useMainCategories() {
 						name: locale === "no" ? cat.nameNo || "" : cat.nameEn || "",
 						description: "",
 						image:
-							categoryImageMap[cat.groupId] ??
-							"/images/categories/default.jpg",
+							categoryImageMap[cat.groupId] ?? "/images/categories/default.jpg",
 					}));
 
 				setData(transformed);

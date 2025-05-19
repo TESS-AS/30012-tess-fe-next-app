@@ -26,6 +26,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useSearch } from "@/hooks/useProductSearch";
 import { useRouter } from "@/i18n/navigation";
+import { useCart } from "@/lib/providers/CartProvider";
+import axiosClient from "@/services/axiosClient";
 import { useStore } from "@/store/store";
 import { Category } from "@/types/categories.types";
 import { IProductSearch, ISuggestions } from "@/types/search.types";
@@ -41,11 +43,16 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const t = useTranslations();
 	const router = useRouter();
 	const { setCategories } = useStore();
-	const { data: session, status } = useSession();
+	const { data: session, status } = useSession() as {
+		data: any;
+		status: "loading" | "authenticated" | "unauthenticated";
+	};
 	const searchRef = useClickOutside<HTMLDivElement>(() => {
 		setSearchQuery("");
 		setIsSearchOpen(false);
 	});
+
+	console.log(session, "data from SSO");
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -53,6 +60,26 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const [isModalIdOpen, setIsModalIdOpen] = useState<string | null>(null);
 
 	const { data, isLoading } = useSearch(searchQuery);
+
+	useEffect(() => {
+		if (
+			status === "authenticated" &&
+			session?.accessToken &&
+			session?.idToken
+		) {
+			(async () => {
+				try {
+					await axiosClient.post("/login/cookie", {
+						idToken: session.idToken,
+						accessToken: session.accessToken,
+					});
+					console.log("SSO user synced and cookie t");
+				} catch (err) {
+					console.error("Failed to sync SSO user:", err);
+				}
+			})();
+		}
+	}, [status, session]);
 
 	useEffect(() => {
 		setCategories(categories);
@@ -259,7 +286,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 										<AvatarFallback>
 											{session.user.name
 												?.split(" ")
-												.map((n) => n[0])
+												.map((n: string) => n[0])
 												.join("")}
 										</AvatarFallback>
 									</Avatar>
