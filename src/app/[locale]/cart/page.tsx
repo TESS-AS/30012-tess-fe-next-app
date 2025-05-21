@@ -1,10 +1,9 @@
 "use client";
 
 import React from "react";
+
+import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { Button } from "@/components/ui/button";
-import { Loader2, Minus, Plus, Trash } from "lucide-react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
 import {
 	Table,
 	TableBody,
@@ -13,36 +12,35 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { getCart, removeFromCart, updateCart } from "@/services/carts.service";
 import { getProductVariations } from "@/services/product.service";
 import { CartLine } from "@/types/carts.types";
+import { Loader2, Minus, Plus, Trash } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+
 import CartSkeleton from "./loading";
 
-const AnimatedTableRow = ({ isOpen, children }: { isOpen: boolean; children: React.ReactNode }) => {
+const AnimatedTableRow = ({
+	isOpen,
+	children,
+}: {
+	isOpen: boolean;
+	children: React.ReactNode;
+}) => {
 	return (
-		<TableRow className={isOpen ? 'border-b' : 'border-none'}>
-			<TableCell colSpan={5} className="p-0">
+		<TableRow className={isOpen ? "border-b" : "border-none"}>
+			<TableCell
+				colSpan={5}
+				className="p-0">
 				<div className="grid">
-					<div 
-						className={`
-							grid-rows-[0fr]
-							grid
-							transition-[grid-template-rows] duration-300 ease-out
-							${isOpen && 'grid-rows-[1fr]'}
-						`}>
+					<div
+						className={`grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out ${isOpen && "grid-rows-[1fr]"} `}>
 						<div className="overflow-hidden">
-							<div 
-								className={`
-									bg-muted px-6 py-4 text-sm text-muted-foreground
-									min-h-0
-									transform-gpu
-									${isOpen 
-										? 'opacity-100 scale-y-100' 
-										: 'opacity-0 scale-y-95'
-									}
-									transition-all duration-300 ease-out
-								`}>
+							<div
+								className={`bg-muted text-muted-foreground min-h-0 transform-gpu px-6 py-4 text-sm ${
+									isOpen ? "scale-y-100 opacity-100" : "scale-y-95 opacity-0"
+								} transition-all duration-300 ease-out`}>
 								{children}
 							</div>
 						</div>
@@ -59,6 +57,13 @@ const CartPage = () => {
 	const [cartItems, setCartItems] = React.useState<CartLine[]>([]);
 	const [openItems, setOpenItems] = React.useState<boolean[]>([]);
 	const [variations, setVariations] = React.useState<Record<string, any>>({});
+	const [loadingItems, setLoadingItems] = React.useState<Record<string, boolean>>({});
+	const [removingItems, setRemovingItems] = React.useState<Record<number, boolean>>({});
+
+	const refreshCart = async () => {
+		const updatedCart = await getCart();
+		setCartItems(updatedCart);
+	};
 
 	React.useEffect(() => {
 		const fetchCart = async () => {
@@ -67,7 +72,7 @@ const CartPage = () => {
 				const items = await getCart();
 				setCartItems(items);
 			} catch (error) {
-				console.error('Error fetching cart:', error);
+				console.error("Error fetching cart:", error);
 			} finally {
 				setIsLoading(false);
 			}
@@ -76,7 +81,7 @@ const CartPage = () => {
 		fetchCart();
 	}, []);
 
-	const subtotal = cartItems.reduce(
+	const subtotal = cartItems?.reduce(
 		(acc, item) => acc + (item.price || 0) * item.quantity,
 		0,
 	);
@@ -93,8 +98,17 @@ const CartPage = () => {
 		<main className="container min-h-screen py-10">
 			<div className="grid grid-cols-1 gap-10 md:grid-cols-3">
 				{/* Cart Items */}
-				<div className="md:col-span-2 space-y-6">
-					<h1 className="text-2xl font-semibold">Your Cart ({cartItems.length})</h1>
+				<div className="space-y-6 md:col-span-2">
+					<div className="flex items-center justify-between">
+						<h1 className="text-2xl font-semibold">
+							Your Cart ({cartItems?.length})
+						</h1>
+						<Button
+							variant="outline"
+							onClick={() => router.push("/cart/history")}>
+							View Cart History
+						</Button>
+					</div>
 					<Table>
 						<TableHeader>
 							<TableRow>
@@ -106,107 +120,162 @@ const CartPage = () => {
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{!isLoading && cartItems.map((item, idx) => {
-								return (
-									<React.Fragment key={idx}>
-										<TableRow 
-											onClick={async () => {
-											const willOpen = !openItems[idx];
-											setOpenItems(prev => {
-												const newState = [...prev];
-												newState[idx] = willOpen;
-												return newState;
-											});
+							{!isLoading &&
+								cartItems?.map((item, idx) => {
+									return (
+										<React.Fragment key={idx}>
+											<TableRow
+												onClick={async () => {
+													const willOpen = !openItems[idx];
+													setOpenItems((prev) => {
+														const newState = [...prev];
+														newState[idx] = willOpen;
+														return newState;
+													});
 
-											if (willOpen && !variations[item.productNumber]) {
-												try {
-													const productVariations = await getProductVariations(item.productNumber);
-													setVariations(prev => ({
-														...prev,
-														[item.productNumber]: productVariations
-													}));
-												} catch (error) {
-													console.error('Error fetching variations:', error);
-												}
-											}
-										}} 
-											className="cursor-pointer hover:bg-muted/50 transition-colors">
-											<TableCell>
-												<div className="flex items-center gap-4">
-													<div className="relative h-16 w-16 rounded bg-muted">
-														{item.mediaUrl ? (
-															<Image
-																src={item.mediaUrl}
-																alt={item.productName || ''}
-																fill
-																className="object-contain"
-															/>
-														) : (
-															<div className="h-full w-full bg-gray-200" />
-														)}
+													if (willOpen && !variations[item.productNumber]) {
+														try {
+															const productVariations =
+																await getProductVariations(item.productNumber,'L01','01');
+															setVariations((prev) => ({
+																...prev,
+																[item.productNumber]: productVariations,
+															}));
+														} catch (error) {
+															console.error(
+																"Error fetching variations:",
+																error,
+															);
+														}
+													}
+												}}
+												className="hover:bg-muted/50 cursor-pointer transition-colors">
+												<TableCell>
+													<div className="flex items-center gap-4">
+														<div className="bg-muted relative h-16 w-16 rounded">
+															{item.mediaId?.[0]?.url ? (
+																<Image
+																	src={item.mediaId[0].url}
+																	alt={item.mediaId[0].filename || ""}
+																	fill
+																	className="object-contain"
+																/>
+															) : (
+																<div className="h-full w-full bg-gray-200" />
+															)}
+														</div>
+														<div className="flex flex-col">
+															<span className="font-medium">
+																{item.productNumber}
+															</span>
+															<span className="text-muted-foreground text-xs">
+																{item.itemNumber}
+															</span>
+														</div>
 													</div>
-													<span className="font-medium">{item.productName}</span>
-												</div>
-											</TableCell>
-											<TableCell className="text-muted-foreground">
-												${(item.price || 0).toFixed(2)}
-											</TableCell>
-											<TableCell>
-												<div className="flex items-center gap-2">
-													<Button 
-														size="icon" 
-														variant="outline"
+												</TableCell>
+												<TableCell className="text-muted-foreground">
+													${(item.price || 0).toFixed(2)}
+												</TableCell>
+												<TableCell>
+													<div className="flex items-center gap-2">
+														<Button
+															size="icon"
+															variant="outline"
+															disabled={loadingItems[item.itemNumber]}
+															onClick={async (e) => {
+																e.stopPropagation();
+																setLoadingItems((prev) => ({ ...prev, [item.itemNumber]: true }));
+																try {
+																	await updateCart(item.cartLine ?? 0, {
+																		itemNumber: item.itemNumber,
+																		quantity: item.quantity - 1,
+																	});
+																	await refreshCart();
+																} finally {
+																	setLoadingItems((prev) => ({ ...prev, [item.itemNumber]: false }));
+																}
+															}}>
+															{loadingItems[item.itemNumber] ? (
+																<div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-primary" />
+															) : (
+																<Minus className="h-4 w-4" />
+															)}
+														</Button>
+														<span className="w-6 text-center">
+															{item.quantity}
+														</span>
+														<Button
+															size="icon"
+															variant="outline"
+															disabled={loadingItems[item.itemNumber]}
+															onClick={async (e) => {
+																e.stopPropagation();
+																setLoadingItems((prev) => ({ ...prev, [item.itemNumber]: true }));
+																try {
+																	await updateCart(item.cartLine ?? 0, {
+																		itemNumber: item.itemNumber,
+																		quantity: item.quantity + 1,
+																	});
+																	await refreshCart();
+																} finally {
+																	setLoadingItems((prev) => ({ ...prev, [item.itemNumber]: false }));
+																}
+															}}>
+															{loadingItems[item.itemNumber] ? (
+																<div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-primary" />
+															) : (
+																<Plus className="h-4 w-4" />
+															)}
+														</Button>
+													</div>
+												</TableCell>
+												<TableCell>
+													${((item.price || 0) * item.quantity).toFixed(2)}
+												</TableCell>
+												<TableCell className="text-right">
+													<Button
+														size="icon"
+														variant="ghost"
+														disabled={removingItems[item.cartLine ?? 0]}
 														onClick={async (e) => {
 															e.stopPropagation();
-															const products = await updateCart(item.cartLine ?? 0, { itemNumber: item.itemNumber, quantity: item.quantity - 1 });
-															setCartItems(products);
+															setRemovingItems((prev) => ({ ...prev, [item.cartLine ?? 0]: true }));
+															try {
+																await removeFromCart(
+																	Number(item.cartLine),
+																);
+																await refreshCart();
+															} finally {
+																setRemovingItems((prev) => ({ ...prev, [item.cartLine ?? 0]: false }));
+															}
 														}}>
-														<Minus className="h-4 w-4" />
+														{removingItems[item.cartLine ?? 0] ? (
+															<div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-primary" />
+														) : (
+															<Trash className="text-muted-foreground h-4 w-4" />
+														)}
 													</Button>
-													<span className="w-6 text-center">{item.quantity}</span>
-													<Button 
-														size="icon" 
-														variant="outline"
-														onClick={async (e) => {
-															e.stopPropagation();
-															const products = await updateCart(item.cartLine ?? 0, { itemNumber: item.itemNumber, quantity: item.quantity + 1 });
-															setCartItems(products);
-														}}>
-														<Plus className="h-4 w-4" />
-													</Button>
-												</div>
-											</TableCell>
-											<TableCell>
-												${((item.price || 0) * item.quantity).toFixed(2)}
-											</TableCell>
-											<TableCell className="text-right">
-												<Button
-													size="icon"
-													variant="ghost"
-													onClick={async (e) => {
-														e.stopPropagation();
-														const products = await removeFromCart(Number(item.cartLine));
-														setCartItems(products.data);
-													}}>
-													<Trash className="h-4 w-4 text-muted-foreground" />
-												</Button>
-											</TableCell>
-										</TableRow>
-										<AnimatedTableRow isOpen={openItems[idx] || false}>
-											<ProductVariantTable
-												variants={variations[item.productNumber]?.result || []}
-												productNumber={item.productNumber}
-											/>
-										</AnimatedTableRow>
-									</React.Fragment>
-								)})}
+												</TableCell>
+											</TableRow>
+											<AnimatedTableRow isOpen={openItems[idx] || false}>
+												<ProductVariantTable
+													variants={
+														variations[item.productNumber]?.result || []
+													}
+													productNumber={item.productNumber}
+												/>
+											</AnimatedTableRow>
+										</React.Fragment>
+									);
+								})}
 						</TableBody>
 					</Table>
 				</div>
 
 				{/* Order Summary */}
 				<div className="space-y-6">
-					<div className="rounded-xl border bg-card p-6 shadow">
+					<div className="bg-card rounded-xl border p-6 shadow">
 						<h2 className="text-xl font-semibold">Order Summary</h2>
 						<div className="mt-4 space-y-4 text-sm">
 							<div className="flex justify-between">
@@ -220,27 +289,33 @@ const CartPage = () => {
 						</div>
 						<Button
 							className="mt-6 w-full"
-							disabled={cartItems.length === 0 || isLoading}
+							disabled={cartItems?.length === 0 || isLoading}
 							onClick={handleCheckout}>
 							{isLoading ? (
 								<Loader2 className="h-4 w-4 animate-spin" />
 							) : (
-								'Continue to Checkout'
+								"Continue to Checkout"
 							)}
 						</Button>
 					</div>
 
 					{/* Related Products */}
-					<div className="rounded-xl border bg-card p-6 shadow">
-						<h2 className="text-lg font-semibold mb-4">Related Products</h2>
+					<div className="bg-card rounded-xl border p-6 shadow">
+						<h2 className="mb-4 text-lg font-semibold">Related Products</h2>
 						<div className="grid grid-cols-3 gap-4">
 							{[
 								{ src: "/images/helmet.jpg", name: "Helmet", price: "$12.00" },
 								{ src: "/images/gloves.jpg", name: "Gloves", price: "$24.50" },
-								{ src: "/images/welding.jpg", name: "Welding Mask", price: "$18.00" },
+								{
+									src: "/images/welding.jpg",
+									name: "Welding Mask",
+									price: "$18.00",
+								},
 							].map((product, index) => (
-								<div key={index} className="text-center">
-									<div className="relative h-24 w-full rounded bg-muted">
+								<div
+									key={index}
+									className="text-center">
+									<div className="bg-muted relative h-24 w-full rounded">
 										<Image
 											src={product.src}
 											alt={product.name}
@@ -249,7 +324,9 @@ const CartPage = () => {
 										/>
 									</div>
 									<p className="mt-2 text-sm">{product.name}</p>
-									<p className="text-muted-foreground text-sm">{product.price}</p>
+									<p className="text-muted-foreground text-sm">
+										{product.price}
+									</p>
 								</div>
 							))}
 						</div>

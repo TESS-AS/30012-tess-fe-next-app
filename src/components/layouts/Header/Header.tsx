@@ -26,7 +26,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useSearch } from "@/hooks/useProductSearch";
 import { useRouter } from "@/i18n/navigation";
-import { useCart } from "@/lib/providers/CartProvider";
 import axiosClient from "@/services/axiosClient";
 import { useStore } from "@/store/store";
 import { Category } from "@/types/categories.types";
@@ -36,7 +35,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
-import { toast } from "react-toastify";
+import { getCart } from "@/services/carts.service";
+import { CartLine } from "@/types/carts.types";
+import { getProductVariations } from "@/services/product.service";
 
 export default function Header({ categories }: { categories: Category[] }) {
 	const currentLocale = useLocale();
@@ -47,19 +48,24 @@ export default function Header({ categories }: { categories: Category[] }) {
 		data: any;
 		status: "loading" | "authenticated" | "unauthenticated";
 	};
+	const [searchQuery, setSearchQuery] = useState("");
+	// Reset variations when search query changes
+	useEffect(() => {
+		setVariations({});
+		setIsModalIdOpen(null);
+	}, [searchQuery]);
+	const [isSearchOpen, setIsSearchOpen] = useState(false);
+	const [isAuthOpen, setIsAuthOpen] = useState(false);
+	const [isModalIdOpen, setIsModalIdOpen] = useState<string | null>(null);
+	const [cart, setCart] = useState<CartLine[]>([]);
+	const [variations, setVariations] = useState<Record<string, any>>({});
+
+	const { data, isLoading } = useSearch(searchQuery);
+
 	const searchRef = useClickOutside<HTMLDivElement>(() => {
 		setSearchQuery("");
 		setIsSearchOpen(false);
 	});
-
-	console.log(session, "data from SSO");
-
-	const [searchQuery, setSearchQuery] = useState("");
-	const [isSearchOpen, setIsSearchOpen] = useState(false);
-	const [isAuthOpen, setIsAuthOpen] = useState(false);
-	const [isModalIdOpen, setIsModalIdOpen] = useState<string | null>(null);
-
-	const { data, isLoading } = useSearch(searchQuery);
 
 	useEffect(() => {
 		if (
@@ -84,6 +90,15 @@ export default function Header({ categories }: { categories: Category[] }) {
 	useEffect(() => {
 		setCategories(categories);
 	}, [categories, setCategories]);
+
+	const fetchCart = async () => {
+		const cart = await getCart();
+		setCart(cart);
+	}
+
+	useEffect(() => {
+		fetchCart();
+	}, [])
 
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -113,7 +128,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 					className="hidden w-[650px] px-4 md:flex">
 					<div
 						className="relative w-full"
-						ref={searchRef}>
+						ref={isModalIdOpen ? null : searchRef}>
 						<Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
 						<Input
 							type="search"
@@ -154,18 +169,18 @@ export default function Header({ categories }: { categories: Category[] }) {
 								<div className="col-span-2">
 									{data.productRes?.length ? (
 										data.productRes.map((product: IProductSearch) => (
-											<div key={product.product_number}>
+											<div key={product.productNumber}>
 												<div className="flex w-full items-center justify-between gap-4 rounded-md p-3 hover:bg-gray-100">
 													<Link
 														className="flex flex-[0.8] items-center justify-between gap-4"
-														href={`/product/product/${product.product_number}`}
+														href={`/product/product/${product.productNumber}`}
 														onClick={() => setSearchQuery("")}>
 														<div className="flex flex-col justify-center">
 															<span className="text-base font-medium">
-																{product.product_name}
+																{product.productName}
 															</span>
 															<span className="text-muted-foreground text-sm">
-																{product.product_number}
+																{product.productNumber}
 															</span>
 														</div>
 													</Link>
@@ -173,9 +188,16 @@ export default function Header({ categories }: { categories: Category[] }) {
 														<Button
 															variant="outline"
 															size="sm"
-															onClick={(e) => {
+															onClick={async (e) => {
 															e.preventDefault();
-															setIsModalIdOpen(product.product_number);
+															setIsModalIdOpen(product.productNumber);
+															const productVariations =
+																await getProductVariations(product.productNumber,'L01','01');
+																console.log(productVariations,"productVariations")
+																setVariations((prev) => ({
+																	...prev,
+																	[product.productNumber]: productVariations,
+																}));
 														}}>
 															<ShoppingCartIcon className="h-2 w-2" />
 														</Button>
@@ -183,7 +205,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 															{product.media ? (
 																<Image
 																	src={product.media}
-																	alt={product.product_name}
+																	alt={product.productName}
 																	width={64}
 																	height={64}
 																	className="max-h-16 max-w-16 object-contain"
@@ -195,22 +217,26 @@ export default function Header({ categories }: { categories: Category[] }) {
 													</div>
 												</div>
 												<Modal
-													open={isModalIdOpen === product.product_number}
-													onOpenChange={(open) =>
-														setIsModalIdOpen(
-															open ? product.product_number : null,
-														)
-													}>
-													<ModalContent className="sm:max-w-[800px]">
-														<ModalHeader className="border-b pb-4">
+													open={isModalIdOpen === product.productNumber}
+													onOpenChange={(open) => {
+														if (!open) {
+															setIsModalIdOpen(null);
+															setVariations((prev) => ({
+																...prev,
+																[product.productNumber]: []
+															}));
+														}
+													}}>
+													<ModalContent className="sm:max-w-[900px]">
+														<ModalHeader>
 															<ModalTitle>
-																Product Variants - {product.product_name}
+																Product Variants - {product.productName}
 															</ModalTitle>
 														</ModalHeader>
 														<div className="max-h-[70vh] overflow-y-auto px-1">
 															<ProductVariantTable
-																variants={[]}
-																productNumber={product.product_number}
+																variants={variations[product.productNumber]}
+																productNumber={product.productNumber}
 															/>
 														</div>
 													</ModalContent>
@@ -330,7 +356,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 						onClick={() => router.push("/cart")}>
 						<ShoppingCart className="h-5 w-5" />
 						<Badge className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full p-0">
-							2
+							{cart?.length}
 						</Badge>
 						<span className="sr-only">Cart</span>
 					</Button>

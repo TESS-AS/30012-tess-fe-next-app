@@ -4,12 +4,12 @@ import axios, { AxiosResponse } from "axios";
 import axiosInstance from "./axiosClient";
 
 interface WarehouseBalance {
-  warehouse_number: string;
-  warehouse_name: string;
+  warehouseNumber: string;
+  warehouseName: string;
   balance: number;
-  company_name: string;
-  item_number: string;
-  parent_prod_number?: string;
+  companyName: string;
+  itemNumber: string;
+  parentProdNumber?: string;
 }
 
 interface SearchListResponse {
@@ -92,11 +92,10 @@ export async function getProductCompanyBalance(productNumber: string, companyNum
 export async function getItemWarehouseBalance(
   itemNumber: string,
   companyNumber: string = '01',
-  warehouseNumber: string = 'L01'
 ): Promise<WarehouseBalance> {
   try {
     const response = await axiosInstance.get(
-      `/item/warehouse/balance?itemNumber=${itemNumber}&companyNumber=${companyNumber}&warehouseNumber=${warehouseNumber}`
+      `/item/company/balance?itemNumber=${itemNumber}&companyNumber=${companyNumber}`
     );
     return response.data;
   } catch (error) {
@@ -112,7 +111,7 @@ export async function getProductWarehouseBalance(
 ): Promise<WarehouseBalance[]> {
   try {
     const response = await axiosInstance.get(
-      `/product/warehouse/balance?productNumber=${productNumber}&companyNumber=${companyNumber}&warehouseNumber=${warehouseNumber}`
+      `/product/company/balance?productNumber=${productNumber}&companyNumber=${companyNumber}&warehouseNumber=${warehouseNumber}`
     );
     return response.data.result;
   } catch (error) {
@@ -142,6 +141,16 @@ export async function calculateItemPrice(
     console.error('Error calculating item price:', error);
     throw error;
   }
+}
+
+export async function getProductPrice(customerNumber: string, companyNumber: string, productNumber: string, warehouseNumber: string) {
+	try {
+		const response = await axiosInstance.get(`/product/price/${customerNumber}/${companyNumber}/${productNumber}/${warehouseNumber}`);
+		return response.data;
+	} catch (error) {
+		console.error('Error fetching product price:', error);
+		throw error;
+	}
 }
 
 export async function getProductVariations(

@@ -1,15 +1,8 @@
 "use client";
 
 import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { addToCart } from "@/services/carts.service";
 import { IVariation } from "@/types/product.types";
 import { ShoppingCart, Heart, Minus, Plus } from "lucide-react";
@@ -37,7 +30,7 @@ export function ProductActions({ items, productNumber }: ProductActionsProps) {
 				itemNumber: selectedSize,
 				quantity: quantity,
 				warehouseNumber: "1",
-				companyNumber: "1"
+				companyNumber: "1",
 			});
 
 			if (response.message === "Error adding to cart") {

@@ -74,24 +74,24 @@ export default async function ProductPage({
 		return notFound();
 	}
 
-	const productImages = Array.isArray(productData.media_id)
-		? productData.media_id
-		: [productData.media_id];
+	const productImages = Array.isArray(productData.mediaId)
+		? productData.mediaId
+		: [productData.mediaId];
 
 	// Get localized content
 	const localizedContent = {
 		name:
-			locale === "en" ? productData.product_name_en : productData.product_name,
+			locale === "en" ? productData.productNameEn : productData.productName,
 		description:
-			locale === "en" ? productData.short_desc_en : productData.short_desc_no,
+			locale === "en" ? productData.shortDescEn : productData.shortDescNo,
 		technicalInfo:
 			locale === "en"
-				? productData.technical_info_en
-				: productData.technical_info_no,
+				? productData.technicalInfoEn
+				: productData.technicalInfoNo,
 		application:
-			locale === "en" ? productData.application_en : productData.application_no,
-		users: locale === "en" ? productData.users_en : productData.users_no,
-		remarks: locale === "en" ? productData.remarks_en : productData.remarks_no,
+			locale === "en" ? productData.applicationEn : productData.applicationNo,
+		users: locale === "en" ? productData.usersEn : productData.usersNo,
+		remarks: locale === "en" ? productData.remarksEn : productData.remarksNo,
 	};
 
 
@@ -102,10 +102,8 @@ export default async function ProductPage({
 				productName={localizedContent.name}
 			/>
 			<div className="grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-2">
-				{/* Product Gallery */}
 				<ProductGallery images={productImages} />
 
-				{/* Product Info */}
 				<div className="flex flex-col gap-4">
 					<ProductInfo
 						name={localizedContent.name}
@@ -130,15 +128,15 @@ export default async function ProductPage({
 			</div>
 			<ProductVariantTable
 				variants={productData.items}
-				productNumber={productData.product_number}
+				productNumber={productData.productNumber}
 			/>
 
 			{/* Related Products */}
-			{productData.product_to_product_reference.length > 0 && (
+			{productData.productToProductReference.length > 0 && (
 				<div>
 					<Separator className="my-8" />
 					<RelatedProducts
-						products={productData.product_to_product_reference}
+						products={productData.productToProductReference}
 						category={category}
 					/>
 				</div>

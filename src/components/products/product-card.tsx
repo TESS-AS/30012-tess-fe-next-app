@@ -15,10 +15,10 @@ interface ProductCardProps extends IProduct {
 }
 
 export function ProductCard({
-	product_number,
-	product_name,
-	media_m,
-	short_desc,
+	productNumber,
+	productName,
+	mediaM,
+	shortDesc,
 	className,
 	aspectRatio = "square",
 	variant = "default",
@@ -42,10 +42,10 @@ export function ProductCard({
 					viewLayout === "list" ? "me-4 w-[250px]" : "",
 					isImageLoading ? "animate-pulse" : "",
 				)}>
-				{media_m ? (
+				{mediaM ? (
 					<Image
-						src={media_m}
-						alt={product_name}
+						src={mediaM}
+						alt={productName}
 						fill
 						priority={priority}
 						loading={priority ? "eager" : "lazy"}
@@ -97,13 +97,13 @@ export function ProductCard({
 					"flex flex-col",
 					variant === "default" ? "mt-4" : "mt-2",
 				)}>
-				<h3 className="min-h-[50px] text-sm font-medium">{product_name}</h3>
+				<h3 className="min-h-[50px] text-sm font-medium">{productName}</h3>
 				<div className="text-muted-foreground mt-2 flex items-center justify-between text-sm">
-					<p>{product_number}</p>
+					<p>{productNumber}</p>
 				</div>
-				{viewLayout === "list" && short_desc && (
+				{viewLayout === "list" && shortDesc && (
 					<div className="text-muted-foreground mt-2 flex items-center justify-between text-sm">
-						<p>{short_desc}</p>
+						<p>{shortDesc}</p>
 					</div>
 				)}
 			</div>

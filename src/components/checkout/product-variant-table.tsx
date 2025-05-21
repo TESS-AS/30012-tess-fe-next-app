@@ -1,12 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Plus, Minus } from "lucide-react";
-import { toast } from "react-toastify";
-import { useTranslations } from "next-intl";
-import { addToCart } from "@/services/carts.service";
 import {
 	Table,
 	TableBody,
@@ -15,16 +9,29 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent } from "@/components/ui/select";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { toast } from "react-toastify";
+import { addToCart } from "@/services/carts.service";
+import { getItemWarehouseBalance } from "@/services/product.service";
+import { Minus, Plus } from "lucide-react";
+
+interface Warehouse {
+	warehouseNumber: string;
+	balance?: number;
+}
 
 interface ProductVariant {
-	content_unit: string;
-	item_id: number;
-	item_number: string;
-	media_id?: Array<any>;
-	parent_prod_number: string;
+	contentUnit: string;
+	itemNumber: number;
+	mediaId?: Array<any>;
+	parentProdNumber: string;
 	unspsc?: string | null;
 	quantity?: number;
+	warehouses?: Warehouse[];
 }
 
 interface ProductVariantTableProps {
@@ -34,36 +41,77 @@ interface ProductVariantTableProps {
 
 export default function ProductVariantTable({
 	variants,
-	productNumber
+	productNumber,
 }: ProductVariantTableProps) {
 	const t = useTranslations();
 	const [quantities, setQuantities] = useState<Record<number, number>>({});
 	const [loading, setLoading] = useState<Record<number, boolean>>({});
+	const [warehouse, setWarehouse] = useState<Record<number, string>>({});
 	const [isLoading, setIsLoading] = useState(true);
+	const [variantsWithWarehouses, setVariantsWithWarehouses] = useState<ProductVariant[]>([]);
 
-	// Simulate loading state
+	const fetchWarehouses = async (itemNumber: string): Promise<Warehouse[]> => {
+		try {
+			const response = await getItemWarehouseBalance(itemNumber);
+			return Array.isArray(response)
+				? response.map((w) => ({
+						warehouseNumber: w.warehouseNumber,
+						balance: w.balance,
+				  }))
+				: [];
+		} catch (error) {
+			console.error("Error fetching warehouses:", error);
+			return [];
+		}
+	};
+
 	useEffect(() => {
-		const timer = setTimeout(() => {
-			setIsLoading(false);
-		}, 1000);
-		return () => clearTimeout(timer);
-	}, []);
+		const loadWarehousesData = async () => {
+			try {
+				console.log(variants,"qokla variatnwss")
+				const updatedVariants = await Promise.all(
+					variants.map(async (variant) => {
+						const warehouses = await fetchWarehouses(variant.itemNumber.toString());
+						// Set default selected warehouse
+						if (warehouses.length > 0) {
+							setWarehouse((prev) => ({
+								...prev,
+								[variant.itemNumber]: warehouses[0].warehouseNumber,
+							}));
+						}
+						return { ...variant, warehouses };
+					})
+				);
+				setVariantsWithWarehouses(updatedVariants);
+				setQuantities({});
+			} catch (error) {
+				console.error("Error loading warehouses:", error);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		setIsLoading(true);
+		loadWarehousesData();
+	}, [variants]);
 
 	if (isLoading) {
 		return (
 			<div className="mt-4 space-y-4">
-				<div className="h-8 w-full animate-pulse rounded bg-muted" />
+				<div className="bg-muted h-8 w-full animate-pulse rounded" />
 				{[...Array(3)].map((_, i) => (
-					<div key={i} className="h-16 w-full animate-pulse rounded bg-muted" />
+					<div key={i} className="bg-muted h-16 w-full animate-pulse rounded" />
 				))}
 			</div>
 		);
 	}
 
-	if (!variants || variants.length === 0) {
+	if (!variantsWithWarehouses.length) {
 		return (
 			<div className="mt-4 flex min-h-[200px] items-center justify-center">
-				<p className="text-sm text-muted-foreground">{t('Product.noVariants')}</p>
+				<p className="text-muted-foreground text-sm">
+					{t("Product.noVariants")}
+				</p>
 			</div>
 		);
 	}
@@ -74,103 +122,182 @@ export default function ProductVariantTable({
 				<TableHeader className="bg-muted text-muted-foreground">
 					<TableRow>
 						<TableHead>Image</TableHead>
+						<TableHead>Parent Number</TableHead>
 						<TableHead>Item Number</TableHead>
-						<TableHead>Item Id</TableHead>
 						<TableHead>UNSPSC</TableHead>
 						<TableHead>Unit</TableHead>
 						<TableHead>Qty</TableHead>
+						<TableHead>Warehouse</TableHead>
 						<TableHead className="w-[100px]">Actions</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
-					{variants.map((variant, i) => (
-						<TableRow key={variant.item_id || i}>
-							<TableCell>
-								{variant.media_id?.[0]?.url ? (
-									<Image 
-										src={variant.media_id[0].url} 
-										alt={variant.item_number} 
-										width={60} 
-										height={60}
-										className="object-contain" 
-									/>
-								) : (
-									<div className="w-[60px] h-[60px] bg-muted" />
-								)}
-							</TableCell>
-							<TableCell>{variant.item_id}</TableCell>
-							<TableCell>{variant.item_number}</TableCell>
-							<TableCell>{variant.unspsc || '-'}</TableCell>
-							<TableCell>{variant.content_unit || 'STK'}</TableCell>
-							<TableCell>
-								<div className="flex items-center gap-2">
-									<Button
-										size="icon"
-										variant="outline"
-										disabled={!quantities[variant.item_id] || quantities[variant.item_id] <= 1}
-										onClick={() => setQuantities(prev => ({
-											...prev,
-											[variant.item_id]: Math.max(1, (prev[variant.item_id] || 1) - 1)
-										}))}>
-										<Minus className="h-4 w-4" />
-									</Button>
-									<Input
-										type="number"
-										value={quantities[variant.item_id] || 1}
-										className="w-16 text-center"
-										onChange={(e) => setQuantities(prev => ({
-											...prev,
-											[variant.item_id]: Math.max(1, parseInt(e.target.value) || 1)
-										}))}
-									/>
-									<Button
-										size="icon"
-										variant="outline"
-										onClick={() => setQuantities(prev => ({
-											...prev,
-											[variant.item_id]: (prev[variant.item_id] || 1) + 1
-										}))}>
-										<Plus className="h-4 w-4" />
-									</Button>
-								</div>
-							</TableCell>
-							<TableCell>
-								<Button
-									variant="ghost"
-									size="sm"
-									disabled={loading[variant.item_id]}
-									onClick={async () => {
-										setLoading(prev => ({ ...prev, [variant.item_id]: true }));
-										try {
-											const response = await addToCart({
-												productNumber: productNumber,
-												itemNumber: variant.item_number,
-												quantity: quantities[variant.item_id] || 1,
-												warehouseNumber: "1",
-												companyNumber: "1"
-											});
+					{variantsWithWarehouses.map((variant) => {
+						const qty = quantities[variant.itemNumber] || 1;
+						const selectedWarehouse = warehouse[variant.itemNumber];
+						console.log(variant.itemNumber,"qokla variant")
 
-											if (response.message === "Error adding to cart") {
-												throw new Error(response.message);
+						return (
+							<TableRow key={variant.itemNumber}>
+								<TableCell>
+									{variant.mediaId?.[0]?.url ? (
+										<Image
+											src={variant.mediaId[0].url}
+											alt={variant.itemNumber.toString()}
+											width={60}
+											height={60}
+											className="object-contain"
+										/>
+									) : (
+										<div className="bg-muted h-[60px] w-[60px]" />
+									)}
+								</TableCell>
+								<TableCell>{variant.parentProdNumber}</TableCell>
+								<TableCell>{variant.itemNumber}</TableCell>
+								<TableCell>{variant.unspsc || "-"}</TableCell>
+								<TableCell>{variant.contentUnit || "STK"}</TableCell>
+								<TableCell>
+									<div className="flex items-center gap-2">
+										<Button
+											size="icon"
+											variant="outline"
+											disabled={qty <= 1}
+											onClick={() =>
+												setQuantities((prev) => ({
+													...prev,
+													[variant.itemNumber]: Math.max(1, qty - 1),
+												}))
+											}
+										>
+											<Minus className="h-4 w-4" />
+										</Button>
+										<Input
+											type="number"
+											value={qty}
+											className="w-16 text-center"
+											onChange={(e) =>
+												setQuantities((prev) => ({
+													...prev,
+													[variant.itemNumber]: Math.max(1, parseInt(e.target.value) || 1),
+												}))
+											}
+										/>
+										<Button
+											size="icon"
+											variant="outline"
+											onClick={() =>
+												setQuantities((prev) => ({
+													...prev,
+													[variant.itemNumber]: qty + 1,
+												}))
+											}
+										>
+											<Plus className="h-4 w-4" />
+										</Button>
+									</div>
+								</TableCell>
+								<TableCell>
+									<Select
+										value={selectedWarehouse || ""}
+										onValueChange={(value) =>
+											setWarehouse((prev) => ({
+												...prev,
+												[variant.itemNumber]: value,
+											}))
+										}
+									>
+										<SelectTrigger className="w-[180px]">
+											<SelectValue placeholder={t("Product.selectWarehouse")} />
+										</SelectTrigger>
+										<SelectContent>
+											{variant.warehouses?.map((w) => (
+												<SelectItem key={w.warehouseNumber} value={w.warehouseNumber}>
+													{w.warehouseNumber}
+													{w.balance !== undefined ? ` (${w.balance})` : ""}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								</TableCell>
+								<TableCell>
+									<Button
+										variant="ghost"
+										size="sm"
+										disabled={loading[variant.itemNumber]}
+										onClick={async () => {
+											if (!selectedWarehouse) {
+												toast(t("Product.selectWarehouseFirst"), {
+													type: "warning",
+													position: "bottom-right",
+													autoClose: 2000,
+												});
+												return;
 											}
 
-											toast(t("Product.addedToCart"), { type: "success" });
-											
-											// Reset quantity after successful add
-											setQuantities(prev => ({ ...prev, [variant.item_id]: 1 }));
-										} catch (error) {
-											console.error("Error adding to cart:", error);
-											toast(t("Product.errorAddingToCart"), { type: "error" });
-										} finally {
-											setLoading(prev => ({ ...prev, [variant.item_id]: false }));
-										}
-									}}
-									className="text-primary hover:text-primary/80">
-									{loading[variant.item_id] ? t("Product.adding") : t("Product.addToCart")}
-								</Button>
-							</TableCell>
-						</TableRow>
-					))}
+											// Check if the selected warehouse has a balance
+											const selectedWarehouseData = variant.warehouses?.find(
+												(w) => w.warehouseNumber === selectedWarehouse
+											);
+											if (selectedWarehouseData?.balance === undefined || selectedWarehouseData.balance === null) {
+												toast(t("Product.noBalanceForWarehouse"), {
+													type: "warning",
+													position: "bottom-right",
+													autoClose: 2000,
+												});
+												return;
+											}
+
+											setLoading((prev) => ({
+												...prev,
+												[variant.itemNumber]: true,
+											}));
+
+											try {
+												const response = await addToCart({
+													productNumber,
+													itemNumber: variant.itemNumber.toString(),
+													quantity: qty,
+													warehouseNumber: selectedWarehouse,
+													companyNumber: "1",
+												});
+
+												if (response.message === "Error adding to cart") {
+													throw new Error(response.message);
+												}
+
+												toast(t("Product.addedToCart"), {
+													type: "success",
+													position: "bottom-right",
+													autoClose: 2000,
+												});
+
+												setQuantities((prev) => ({
+													...prev,
+													[variant.itemNumber]: 1,
+												}));
+											} catch (err) {
+												console.error("Error adding to cart:", err);
+												toast(t("Product.errorAddingToCart"), {
+													type: "error",
+													position: "bottom-right",
+													autoClose: 2000,
+												});
+											} finally {
+												setLoading((prev) => ({
+													...prev,
+													[variant.itemNumber]: false,
+												}));
+											}
+										}}
+									>
+										{loading[variant.itemNumber]
+											? t("Product.adding")
+											: t("Product.addToCart")}
+									</Button>
+								</TableCell>
+							</TableRow>
+						);
+					})}
 				</TableBody>
 			</Table>
 		</div>

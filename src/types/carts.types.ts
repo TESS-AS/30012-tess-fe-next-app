@@ -8,7 +8,7 @@ export interface CartLine {
     warehouseNumber: string;
     companyNumber: string;
     price?: number;
-    mediaUrl?: string;
+    mediaId?: Array<Media>;
     variants?: Array<{
         contentUnit: string;
         itemId: number;
@@ -16,6 +16,13 @@ export interface CartLine {
         parentProdNumber: string;
         unspsc: string | null;
     }>;
+}
+
+export interface Media {
+    filename: string;
+    picture_type: string;
+    thumbnail_url: string;
+    url: string;
 }
 
 export interface CartResponse {

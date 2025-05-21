@@ -42,7 +42,10 @@
 		"details": "Details",
 		"noVariants": "No variants found",
 		"addedToCart": "Added to cart",
-		"errorAddingToCart": "Error adding to cart"
+		"errorAddingToCart": "Error adding to cart",
+		"selectWarehouse": "Select warehouse",
+		"selectWarehouseFirst": "Please select a warehouse",
+		"noBalanceForWarehouse": "No balance available for this warehouse"
 	},
 	"Common": {
 		"reset": "Nullstill",

@@ -191,8 +191,7 @@ export function ProductGrid({
 						products.map((product, idx) => (
 							<Link
 								key={idx}
-								target="_blank"
-								href={`${pathname}/${product.product_number}`}>
+								href={`${pathname}/${product.productNumber}`}>
 								<ProductCard
 									{...product}
 									variant={variant}

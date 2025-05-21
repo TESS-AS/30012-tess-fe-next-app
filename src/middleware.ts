@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
+
 import { auth } from "../auth";
 import { routing } from "./i18n/routing";
 
@@ -50,7 +51,9 @@ export default auth((request) => {
 
 	const path = nextUrl.pathname;
 	const isApiAuthRoute = path.startsWith(apiAuthPrefix);
-	const isProtectedRoute = protectedRoutes.some(route => path.includes(route));
+	const isProtectedRoute = protectedRoutes.some((route) =>
+		path.includes(route),
+	);
 
 	if (isApiAuthRoute) {
 		return NextResponse.next();

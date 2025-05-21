@@ -42,7 +42,10 @@
 		"details": "Detaljer",
 		"noVariants": "Ingen varianter funnet",
 		"addedToCart": "Legget til i kassen",
-		"errorAddingToCart": "Kunne ikke legge til i kassen"
+		"errorAddingToCart": "Kunne ikke legge til i kassen",
+		"selectWarehouse": "Vennligst velg en lagerstasjon",
+		"selectWarehouseFirst": "Vennligst velg en lagerstasjon først",
+		"noBalanceForWarehouse": "Ingen balanse tilgjengelig for denne lagerstasjonen"
 	},
 	"Common": {
 		"reset": "Nullstill",

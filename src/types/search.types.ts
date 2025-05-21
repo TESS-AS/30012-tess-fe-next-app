@@ -1,6 +1,6 @@
 export interface IProductSearch {
-	product_name: string;
-	product_number: string;
+	productName: string;
+	productNumber: string;
 	media: string;
 }
 

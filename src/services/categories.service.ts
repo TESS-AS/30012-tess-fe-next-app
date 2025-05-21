@@ -25,13 +25,15 @@ export async function loadCategories(locale: string) {
 export async function loadFilters({
 	categoryNumber,
 	searchTerm,
+	language,
 }: {
 	categoryNumber?: string | null;
 	searchTerm?: string | null;
+	language?: string | null;
 }) {
 	try {
 		// Create cache key
-		const cacheKey = `${categoryNumber || "none"}-${searchTerm || "none"}`;
+		const cacheKey = `${categoryNumber || "none"}-${searchTerm || "none"}-${language || "none"}`;
 		const now = Date.now();
 
 		if (
@@ -44,6 +46,7 @@ export async function loadFilters({
 		const params = new URLSearchParams();
 		if (categoryNumber) params.append("categoryNumber", categoryNumber);
 		if (searchTerm) params.append("searchTerm", searchTerm);
+		if (language) params.append("language", language);
 
 		const url = `/attributeFilter/${params.toString() ? `?${params.toString()}` : ""}`;
 		const response = await axiosInstance.get(url);
