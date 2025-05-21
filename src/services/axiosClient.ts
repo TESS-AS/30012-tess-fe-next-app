@@ -3,6 +3,7 @@ import axios from "axios";
 
 const axiosClient = axios.create({
 	baseURL,
+	withCredentials: true,
 	headers: defaultHeaders,
 });
 
