@@ -145,7 +145,7 @@ export async function calculateItemPrice(
 
 export async function getProductPrice(customerNumber: string, companyNumber: string, productNumber: string, warehouseNumber: string) {
 	try {
-		const response = await axiosInstance.get(`/product/price/${customerNumber}/${companyNumber}/${productNumber}/${warehouseNumber}`);
+		const response = await axiosInstance.get(`/product/price/110036/916934351/P_VB9010023/L01`);
 		return response.data;
 	} catch (error) {
 		console.error('Error fetching product price:', error);

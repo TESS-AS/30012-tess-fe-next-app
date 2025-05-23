@@ -26,7 +26,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useSearch } from "@/hooks/useProductSearch";
 import { useRouter } from "@/i18n/navigation";
-import axiosClient from "@/services/axiosClient";
 import { useStore } from "@/store/store";
 import { Category } from "@/types/categories.types";
 import { IProductSearch, ISuggestions } from "@/types/search.types";
@@ -66,26 +65,6 @@ export default function Header({ categories }: { categories: Category[] }) {
 		setSearchQuery("");
 		setIsSearchOpen(false);
 	});
-
-	useEffect(() => {
-		if (
-			status === "authenticated" &&
-			session?.accessToken &&
-			session?.idToken
-		) {
-			(async () => {
-				try {
-					await axiosClient.post("/login/cookie", {
-						idToken: session.idToken,
-						accessToken: session.accessToken,
-					});
-					console.log("SSO user synced and cookie t");
-				} catch (err) {
-					console.error("Failed to sync SSO user:", err);
-				}
-			})();
-		}
-	}, [status, session]);
 
 	useEffect(() => {
 		setCategories(categories);

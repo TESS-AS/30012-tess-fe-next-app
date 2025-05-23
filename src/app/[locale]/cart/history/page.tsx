@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { getArchiveCart } from '@/services/carts.service';
 import { ArchiveCartResponse } from '@/types/carts.types';
 import {
@@ -16,8 +16,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { useParams } from 'next/navigation';
 
 const CartHistoryPage = () => {
+	const params = useParams();
+	const locale = params.locale as string;
+	console.log(locale,"qokla locale 2")
 	const [isLoading, setIsLoading] = useState(true);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [archiveData, setArchiveData] = useState<ArchiveCartResponse>();
@@ -58,9 +62,11 @@ const CartHistoryPage = () => {
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead>Date</TableHead>
+								<TableHead className="w-[180px]">Date</TableHead>
 								<TableHead>User Id</TableHead>
-								<TableHead></TableHead>
+								<TableHead className="text-right">Items</TableHead>
+								<TableHead className="text-right">Total Amount</TableHead>
+								<TableHead className="w-[100px]"></TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -72,58 +78,66 @@ const CartHistoryPage = () => {
 								);
 
 								return (
-                                    <div key={idx}>
-									<TableRow key={idx}>
-										<TableCell>
-											{format(
-												new Date(item.date),
-												'MMM dd, yyyy HH:mm',
-											)}
+                                    <React.Fragment key={idx}>
+									<TableRow 
+										className={expandedRow === idx ? 'bg-muted/50' : ''}
+									>
+										<TableCell className="font-medium">
+											{new Date(item.date).toLocaleString(locale, {
+												year: 'numeric',
+												month: 'short',
+												day: '2-digit',
+												hour: '2-digit',
+												minute: '2-digit'
+											})}
 										</TableCell>
-										<TableCell>
-											{item.userId}
+										<TableCell>{item.userId}</TableCell>
+										<TableCell className="text-right">{item.cart.length}</TableCell>
+										<TableCell className="text-right font-medium">
+											${total.toFixed(2)}
 										</TableCell>
 										<TableCell>
 											<Button
-												variant="outline"
-												onClick={() => setExpandedRow(idx)}>
-												View
+												variant={expandedRow === idx ? "secondary" : "outline"}
+												size="sm"
+												onClick={() => setExpandedRow(expandedRow === idx ? null : idx)}>
+												{expandedRow === idx ? 'Hide' : 'View'}
 											</Button>
 										</TableCell>
 									</TableRow>
                                     {expandedRow === idx && (
                                         <TableRow> 
-                                            <TableCell colSpan={4}>
-                                                <Table>
-                                                    <TableHeader>
-                                                        <TableRow>
-                                                            <TableHead>Product Number</TableHead>
-                                                            <TableHead>Item Number</TableHead>
-                                                            <TableHead>Quantity</TableHead>
-                                                            <TableHead>Warehouse Number</TableHead>
-                                                            <TableHead>Company Number</TableHead>
-                                                        </TableRow>
-                                                    </TableHeader>
-                                                    <TableBody>
-                                                        {item.cart.map((cartItem, idx) => {
-                                                            return (
+                                            <TableCell colSpan={5} className="p-0">
+                                                <div className="border-t bg-muted/30 px-2 py-4">
+                                                    <Table>
+                                                        <TableHeader>
+                                                            <TableRow>
+                                                                <TableHead className="w-[180px]">Product Number</TableHead>
+                                                                <TableHead>Item Number</TableHead>
+                                                                <TableHead className="text-right">Quantity</TableHead>
+                                                                <TableHead>Warehouse</TableHead>
+                                                                <TableHead>Company</TableHead>
+                                                            </TableRow>
+                                                        </TableHeader>
+                                                        <TableBody>
+                                                            {item.cart.map((cartItem, idx) => (
                                                                 <TableRow key={idx}>
-                                                                    <TableCell>
+                                                                    <TableCell className="font-medium">
                                                                         {cartItem.productNumber}
                                                                     </TableCell>
                                                                     <TableCell>{cartItem.itemNumber}</TableCell>
-                                                                    <TableCell>{cartItem.quantity}</TableCell>
+                                                                    <TableCell className="text-right">{cartItem.quantity}</TableCell>
                                                                     <TableCell>{cartItem.warehouseNumber}</TableCell>
                                                                     <TableCell>{cartItem.companyNumber}</TableCell>
                                                                 </TableRow>
-                                                            );
-                                                        })}
-                                                    </TableBody>
-                                                </Table>
+                                                            ))}
+                                                        </TableBody>
+                                                    </Table>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     )}
-                                    </div>
+                                    </React.Fragment>
 								);
 							})}
 						</TableBody>

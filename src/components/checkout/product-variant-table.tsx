@@ -17,11 +17,12 @@ import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import { addToCart } from "@/services/carts.service";
 import { getItemWarehouseBalance } from "@/services/product.service";
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, Loader2 } from "lucide-react";
 
 interface Warehouse {
 	warehouseNumber: string;
 	balance?: number;
+	warehouseName?: string;
 }
 
 interface ProductVariant {
@@ -50,15 +51,24 @@ export default function ProductVariantTable({
 	const [isLoading, setIsLoading] = useState(true);
 	const [variantsWithWarehouses, setVariantsWithWarehouses] = useState<ProductVariant[]>([]);
 
-	const fetchWarehouses = async (itemNumber: string): Promise<Warehouse[]> => {
+	const fetchWarehousesBalance = async (itemNumber: string): Promise<Warehouse[]> => {
 		try {
 			const response = await getItemWarehouseBalance(itemNumber);
-			return Array.isArray(response)
-				? response.map((w) => ({
+			if (!Array.isArray(response)) return [];
+			
+			// Create a Map to store unique warehouses by warehouseNumber
+			const uniqueWarehouses = new Map();
+			response.forEach((w) => {
+				if (!uniqueWarehouses.has(w.warehouseNumber)) {
+					uniqueWarehouses.set(w.warehouseNumber, {
 						warehouseNumber: w.warehouseNumber,
 						balance: w.balance,
-				  }))
-				: [];
+						warehouseName: w.warehouseName,
+					});
+				}
+			});
+			
+			return Array.from(uniqueWarehouses.values());
 		} catch (error) {
 			console.error("Error fetching warehouses:", error);
 			return [];
@@ -68,20 +78,23 @@ export default function ProductVariantTable({
 	useEffect(() => {
 		const loadWarehousesData = async () => {
 			try {
-				console.log(variants,"qokla variatnwss")
-				const updatedVariants = await Promise.all(
-					variants.map(async (variant) => {
-						const warehouses = await fetchWarehouses(variant.itemNumber.toString());
-						// Set default selected warehouse
-						if (warehouses.length > 0) {
-							setWarehouse((prev) => ({
-								...prev,
-								[variant.itemNumber]: warehouses[0].warehouseNumber,
-							}));
-						}
-						return { ...variant, warehouses };
-					})
-				);
+				let updatedVariants: ProductVariant[] = [];
+				if(variants) {
+					updatedVariants = await Promise.all(
+						variants?.map(async (variant) => {
+							const warehouses = await fetchWarehousesBalance(variant?.itemNumber?.toString());
+							// Set default selected warehouse
+							if (warehouses.length > 0) {
+								setWarehouse((prev) => ({
+									...prev,
+									[variant.itemNumber]: warehouses[0].warehouseNumber,
+								}));
+							}
+							return { ...variant, warehouses };
+						})
+					);
+				}
+				console.log(updatedVariants,"qokla updatedVariants")
 				setVariantsWithWarehouses(updatedVariants);
 				setQuantities({});
 			} catch (error) {
@@ -135,7 +148,7 @@ export default function ProductVariantTable({
 					{variantsWithWarehouses.map((variant) => {
 						const qty = quantities[variant.itemNumber] || 1;
 						const selectedWarehouse = warehouse[variant.itemNumber];
-						console.log(variant.itemNumber,"qokla variant")
+						console.log(variant,"qokla selectedWarehouse")
 
 						return (
 							<TableRow key={variant.itemNumber}>
@@ -211,8 +224,11 @@ export default function ProductVariantTable({
 										</SelectTrigger>
 										<SelectContent>
 											{variant.warehouses?.map((w) => (
-												<SelectItem key={w.warehouseNumber} value={w.warehouseNumber}>
-													{w.warehouseNumber}
+												<SelectItem 
+													key={`${variant.itemNumber}-${w.warehouseNumber}`} 
+													value={w.warehouseNumber}
+												>
+													{w.warehouseName} - {w.warehouseNumber}
 													{w.balance !== undefined ? ` (${w.balance})` : ""}
 												</SelectItem>
 											))}
@@ -224,6 +240,7 @@ export default function ProductVariantTable({
 										variant="ghost"
 										size="sm"
 										disabled={loading[variant.itemNumber]}
+										className="min-w-[120px] relative"
 										onClick={async () => {
 											if (!selectedWarehouse) {
 												toast(t("Product.selectWarehouseFirst"), {
@@ -290,9 +307,14 @@ export default function ProductVariantTable({
 											}
 										}}
 									>
-										{loading[variant.itemNumber]
-											? t("Product.adding")
-											: t("Product.addToCart")}
+										{loading[variant.itemNumber] ? (
+											<>
+												<Loader2 className="h-4 w-4 animate-spin mr-2 inline" />
+												{t("Product.adding")}
+											</>
+										) : (
+											t("Product.addToCart")
+										)}
 									</Button>
 								</TableCell>
 							</TableRow>

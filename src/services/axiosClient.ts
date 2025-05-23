@@ -10,9 +10,7 @@ const axiosClient = axios.create({
 axiosClient.interceptors.request.use((config) => {
 	// Only access localStorage in client-side environment
 	if (typeof window !== "undefined") {
-		// const token = localStorage.getItem("token");
-		const token =
-			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc0NzY1MDAzOSwiZXhwIjoxNzQ4MjU0ODM5fQ.zzA7Vmh4SoNv5gbPlCwG790axQE7LmTBqcjahB-OREI";
+		const token = localStorage.getItem("token");
 		if (token) config.headers.Authorization = `Bearer ${token}`;
 	}
 	return config;

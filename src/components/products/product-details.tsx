@@ -1,6 +1,9 @@
+"use client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getProductPrice } from "@/services/product.service";
 import { IAttribute } from "@/types/product.types";
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 
 interface ProductDetailsProps {
 	description?: string;
@@ -20,6 +23,14 @@ export function ProductDetails({
 	remarks,
 }: ProductDetailsProps) {
 	const t = useTranslations();
+
+	async function fetchPrices() {
+		const prices = await getProductPrice("110036","916934351","P_VB9010023","L01")
+		console.log(prices,"qokla prices")
+	}
+	useEffect(() => {
+		fetchPrices()
+	}, []);
 
 	return (
 		<Tabs
@@ -66,7 +77,7 @@ export function ProductDetails({
 									<span className="text-sm font-medium">{item.name}</span>
 								</div>
 								<div className="px-3 py-2">
-									<span className="text-sm">{item.value_def}</span>
+									<span className="text-sm">{item.valueDef}</span>
 								</div>
 							</div>
 						))}
