@@ -146,8 +146,8 @@ export default function Header({ categories }: { categories: Category[] }) {
 																<Image
 																	src={product.media}
 																	alt={product.product_name}
-																	width={64}
-																	height={64}
+																	width={128}
+																	height={128}
 																	className="max-h-16 max-w-16 object-contain"
 																/>
 															) : (
