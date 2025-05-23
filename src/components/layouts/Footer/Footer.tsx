@@ -49,26 +49,24 @@ export function Footer() {
 	const t = useTranslations("Footer");
 
 	return (
-		<footer className="bg-background border-t">
-			<div className="container mx-auto px-4 py-12">
-				<div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-					{/* Company Info */}
+		<footer className="relative left-[calc(-50vw+50%)] w-[100vw] bg-[#222222] text-zinc-100">
+			<div className="container mx-auto py-12">
+				<div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
 					<div>
 						<h3 className="text-lg font-semibold">{t("companyName")}</h3>
-						<p className="text-muted-foreground mt-4 text-sm">
+						<p className="mt-4 text-sm text-zinc-400">
 							{t("companyDescription")}
 						</p>
 					</div>
 
-					{/* Company Links */}
 					<div>
-						<h3 className="text-lg font-semibold">{t("company")}</h3>
+						<h3 className="text-lg font-semibold">Company</h3>
 						<ul className="mt-4 space-y-2">
 							{footerLinks.company.map((link) => (
 								<li key={link.href}>
 									<Link
 										href={link.href}
-										className="text-muted-foreground hover:text-foreground text-sm">
+										className="text-sm text-zinc-400 transition-colors hover:text-white">
 										{t(link.label)}
 									</Link>
 								</li>
@@ -76,15 +74,14 @@ export function Footer() {
 						</ul>
 					</div>
 
-					{/* Support Links */}
 					<div>
-						<h3 className="text-lg font-semibold">{t("support")}</h3>
+						<h3 className="text-lg font-semibold">Support</h3>
 						<ul className="mt-4 space-y-2">
 							{footerLinks.support.map((link) => (
 								<li key={link.href}>
 									<Link
 										href={link.href}
-										className="text-muted-foreground hover:text-foreground text-sm">
+										className="text-sm text-zinc-400 transition-colors hover:text-white">
 										{t(link.label)}
 									</Link>
 								</li>
@@ -92,15 +89,14 @@ export function Footer() {
 						</ul>
 					</div>
 
-					{/* Legal Links */}
 					<div>
-						<h3 className="text-lg font-semibold">{t("legal")}</h3>
+						<h3 className="text-lg font-semibold">Legal</h3>
 						<ul className="mt-4 space-y-2">
 							{footerLinks.legal.map((link) => (
 								<li key={link.href}>
 									<Link
 										href={link.href}
-										className="text-muted-foreground hover:text-foreground text-sm">
+										className="text-sm text-zinc-400 transition-colors hover:text-white">
 										{t(link.label)}
 									</Link>
 								</li>
@@ -109,9 +105,8 @@ export function Footer() {
 					</div>
 				</div>
 
-				{/* Bottom Section */}
-				<div className="mt-12 border-t pt-8">
-					<div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
+				<div className="mt-12 border-t border-neutral-500 pt-8">
+					<div className="flex flex-col items-center justify-between gap-4 md:flex-row">
 						<div className="flex space-x-6">
 							{socialLinks.map((item) => {
 								const Icon = item.icon;
@@ -121,14 +116,14 @@ export function Footer() {
 										href={item.href}
 										target="_blank"
 										rel="noopener noreferrer"
-										className="text-muted-foreground hover:text-foreground">
+										className="text-white transition-colors hover:text-green-600">
 										<span className="sr-only">{item.name}</span>
 										<Icon className="h-5 w-5" />
 									</Link>
 								);
 							})}
 						</div>
-						<p className="text-muted-foreground text-sm">
+						<p className="text-sm text-green-600">
 							&copy; {new Date().getFullYear()} {t("companyName")}.{" "}
 							{t("rights")}
 						</p>

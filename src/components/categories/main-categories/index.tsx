@@ -28,7 +28,7 @@ export default function MainCategorySection() {
 	return (
 		<section className="relative right-1/2 left-1/2 -mx-[50vw] mt-15 w-screen bg-[#f9f9f9] py-15">
 			<div className="absolute inset-0 z-0 h-[50%] w-full bg-[#222222]" />
-			<div className="relative z-10 space-y-12 px-4 sm:px-6 lg:px-20 xl:px-32">
+			<div className="relative z-10 container mx-auto space-y-12">
 				<div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
 					<div className="space-y-3 md:max-w-lg">
 						<p className="text-sm tracking-wider text-green-600 uppercase">

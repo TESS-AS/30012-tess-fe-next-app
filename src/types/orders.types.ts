@@ -40,4 +40,14 @@ export interface Order {
 	lines: OrderLines[];
 }
 
+export type OrderStatus = "Completed" | "Cancelled";
+
+export interface OrderItems {
+	id: number;
+	date: string;
+	status: OrderStatus;
+	total: number;
+	items: { imageUrl: string }[];
+}
+
 export type PaymentMethod = "card" | "paypal";
