@@ -3,6 +3,7 @@
 import { ReactNode, useEffect } from "react";
 
 import axiosClient from "@/services/axiosClient";
+import { AxiosError } from "axios";
 import { SessionProvider, signOut, useSession } from "next-auth/react";
 
 function SyncSSOTokenAndFetchUser() {
@@ -24,8 +25,9 @@ function SyncSSOTokenAndFetchUser() {
 					});
 					const { data: user } = await axiosClient.get("/user");
 				} catch (err) {
-					console.error("SSO sync or user fetch failed", err);
-					if (err?.response?.status === 401) {
+					const axiosError = err as AxiosError;
+					console.error("SSO sync or user fetch failed", axiosError);
+					if (axiosError?.response?.status === 401) {
 						signOut();
 					}
 				}
