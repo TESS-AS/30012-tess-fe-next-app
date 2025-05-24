@@ -37,7 +37,7 @@ export default async function RootLayout({
 		notFound();
 	}
 
-	const res = await axiosServer.get(`/categories/${locale}`);
+	const res = await axiosServer.get(`/categories`);
 	const raw: RawCategory[] = res.data;
 	const categories: Category[] = raw.map((node) =>
 		mapCategoryTree(node, locale),

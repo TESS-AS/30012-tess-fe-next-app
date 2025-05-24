@@ -1,0 +1,25 @@
+export interface ProfileUser {
+	userId: number;
+	firstName: string;
+	lastName: string;
+	username: string | null;
+	email: string;
+	phoneNumber: string | null;
+	defaultAddressId: number;
+	defaultWarehouseId: string;
+	assortmentIds: string[] | null;
+	customerNumbers: string[];
+	orgNumbers: string[];
+}
+
+export interface UserAddress {
+	addressId: number;
+	addressName: string;
+	addressLine1: string;
+	addressLine2: string;
+	addressLine3: string;
+	postalCode: string;
+	city: string;
+	deliveryCode: string;
+	condition: string;
+}

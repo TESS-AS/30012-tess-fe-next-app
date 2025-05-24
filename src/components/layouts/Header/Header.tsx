@@ -126,32 +126,32 @@ export default function Header({ categories }: { categories: Category[] }) {
 								<div className="col-span-2">
 									{data.productRes?.length ? (
 										data.productRes.map((product: IProductSearch) => (
-											<div key={product.product_number}>
+											<div key={product.productNumber}>
 												<div className="flex w-full items-center justify-between gap-4 rounded-md p-3 hover:bg-gray-100">
 													<Link
 														className="flex flex-[0.8] items-center justify-between gap-4"
-														href={`/product/product/${product.product_number}`}
+														href={`/product/product/${product.productNumber}`}
 														onClick={() => setSearchQuery("")}>
 														<div className="flex flex-col justify-center">
 															<span className="text-base font-medium">
-																{product.product_name}
+																{product.productName}
 															</span>
 															<span className="text-muted-foreground text-sm">
-																{product.product_number}
+																{product.productNumber}
 															</span>
 														</div>
 
-														<div className="flex h-16 w-16 min-w-16 flex-shrink-0 items-center justify-center self-center overflow-hidden rounded-md">
+														<div className="flex h-32 w-32 min-w-16 flex-shrink-0 items-center justify-center self-center overflow-hidden rounded-md">
 															{product.media ? (
 																<Image
 																	src={product.media}
-																	alt={product.product_name}
-																	width={64}
-																	height={64}
-																	className="max-h-16 max-w-16 object-contain"
+																	alt={product.productName}
+																	width={128}
+																	height={128}
+																	className="max-h-32 max-w-32 object-contain"
 																/>
 															) : (
-																<div className="h-10 w-10 rounded bg-gray-300" />
+																<div className="h-32 w-32 rounded bg-gray-300" />
 															)}
 														</div>
 													</Link>
@@ -160,22 +160,22 @@ export default function Header({ categories }: { categories: Category[] }) {
 														size="sm"
 														onClick={(e) => {
 															e.preventDefault();
-															setIsModalIdOpen(product.product_number);
+															setIsModalIdOpen(product.productNumber);
 														}}>
 														<ShoppingCartIcon className="h-4 w-4" />
 													</Button>
 												</div>
 												<Modal
-													open={isModalIdOpen === product.product_number}
+													open={isModalIdOpen === product.productNumber}
 													onOpenChange={(open) =>
 														setIsModalIdOpen(
-															open ? product.product_number : null,
+															open ? product.productNumber : null,
 														)
 													}>
 													<ModalContent>
 														<ModalHeader>
 															<ModalTitle>
-																Product Variants - {product.product_name}
+																Product Variants - {product.productName}
 															</ModalTitle>
 														</ModalHeader>
 														<ProductVariantTable
