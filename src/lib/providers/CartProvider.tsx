@@ -1,9 +1,16 @@
 "use client";
 
+import {
+	createContext,
+	useContext,
+	useState,
+	ReactNode,
+	useEffect,
+} from "react";
+
 import { getCart } from "@/services/carts.service";
 import { CartLine } from "@/types/carts.types";
 import { CartItem } from "@/types/store.types";
-import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 
 interface CartContextType {
 	items: CartLine[];

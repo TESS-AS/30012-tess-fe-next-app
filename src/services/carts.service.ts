@@ -6,12 +6,12 @@ import {
 } from "@/types/carts.types";
 import { AxiosResponse } from "axios";
 
-import axiosInstance from "./axiosClient";
+import axiosClient from "./axiosClient";
 
 export async function getCart(): Promise<CartLine[]> {
 	try {
 		const url = `/cart`;
-		const response: AxiosResponse<CartLine[]> = await axiosInstance.get(url);
+		const response: AxiosResponse<CartLine[]> = await axiosClient.get(url);
 		return response.data;
 	} catch (error) {
 		console.error("Error loading cart", error);
@@ -22,7 +22,7 @@ export async function getCart(): Promise<CartLine[]> {
 export async function addToCart(cartLine: CartLine): Promise<CartResponse> {
 	try {
 		const url = `/cart/addLine`;
-		const response: AxiosResponse<CartResponse> = await axiosInstance.post(
+		const response: AxiosResponse<CartResponse> = await axiosClient.post(
 			url,
 			cartLine,
 		);
@@ -41,8 +41,7 @@ export async function removeFromCart(
 ): Promise<CartResponse> {
 	try {
 		const url = `/cart/deleteLine/${cartLineId}`;
-		const response: AxiosResponse<CartResponse> =
-			await axiosInstance.delete(url);
+		const response: AxiosResponse<CartResponse> = await axiosClient.delete(url);
 		return response.data;
 	} catch (error) {
 		console.error("Error removing from cart", error);
@@ -59,7 +58,7 @@ export async function updateCart(
 ): Promise<CartLine[]> {
 	try {
 		const url = `/cart/updateLine/${cartLineId}`;
-		const response: AxiosResponse<CartLine[]> = await axiosInstance.patch(
+		const response: AxiosResponse<CartLine[]> = await axiosClient.patch(
 			url,
 			payload,
 		);
@@ -70,13 +69,11 @@ export async function updateCart(
 	}
 }
 
-export async function archiveCart(
-	payload: ArchiveCart[],
-): Promise<{ message: string }> {
+export async function archiveCart(): Promise<{ message: string }> {
 	try {
 		const url = `/cart/archiveCart/`;
 		const response: AxiosResponse<{ message: string }> =
-			await axiosInstance.post(url, payload);
+			await axiosClient.post(url);
 		return response.data;
 	} catch (error) {
 		console.error("Error archiving cart", error);
@@ -98,7 +95,7 @@ export async function getArchiveCart(
 		const url = `/cart/archiveCart/${params.toString() ? `?${params.toString()}` : ""}`;
 
 		const response: AxiosResponse<ArchiveCartResponse> =
-			await axiosInstance.get(url);
+			await axiosClient.get(url);
 		return response.data;
 	} catch (error) {
 		console.error("Error getting archive cart", error);

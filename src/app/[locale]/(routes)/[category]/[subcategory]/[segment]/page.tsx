@@ -43,15 +43,15 @@ export default async function SegmentPage({ params }: SegmentPageProps) {
 			: undefined;
 
 		const categories = await fetchCategories(locale);
-		console.log(categories,"qokla categories")
-		console.log(formattedSubCategory,"qokla formattedSubCategory")
+		console.log(categories, "qokla categories");
+		console.log(formattedSubCategory, "qokla formattedSubCategory");
 
 		const subCategoryData = findSubCategoryRecursive(
 			categories,
 			formattedSubCategory,
 			formattedSegment,
 		);
-		console.log(subCategoryData,"qokla subcat")
+		console.log(subCategoryData, "qokla subcat");
 
 		if (!subCategoryData) {
 			throw new Error("Segment not found");

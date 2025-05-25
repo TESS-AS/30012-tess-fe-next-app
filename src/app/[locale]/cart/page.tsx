@@ -12,15 +12,24 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { getCart, removeFromCart, updateCart } from "@/services/carts.service";
-import { calculateItemPrice, getProductPrice, getProductVariations } from "@/services/product.service";
+import {
+	archiveCart,
+	getCart,
+	removeFromCart,
+	updateCart,
+} from "@/services/carts.service";
+import {
+	calculateItemPrice,
+	getProductPrice,
+	getProductVariations,
+} from "@/services/product.service";
 import { CartLine } from "@/types/carts.types";
+import { PriceResponse } from "@/types/search.types";
 import { Loader2, Minus, Plus, Trash } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import CartSkeleton from "./loading";
-import { PriceResponse } from "@/types/search.types";
 
 const AnimatedTableRow = ({
 	isOpen,
@@ -39,7 +48,7 @@ const AnimatedTableRow = ({
 						className={`grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out ${isOpen && "grid-rows-[1fr]"} `}>
 						<div className="overflow-hidden">
 							<div
-								className={`bg-muted text-muted-foreground min-h-0 transform-gpu px-6 py-4 text-sm ${
+								className={`bg-muted/50 text-muted-foreground min-h-0 transform-gpu px-6 py-4 text-sm ${
 									isOpen ? "scale-y-100 opacity-100" : "scale-y-95 opacity-0"
 								} transition-all duration-300 ease-out`}>
 								{children}
@@ -58,10 +67,16 @@ const CartPage = () => {
 	const [cartItems, setCartItems] = React.useState<CartLine[]>([]);
 	const [openItems, setOpenItems] = React.useState<boolean[]>([]);
 	const [variations, setVariations] = React.useState<Record<string, any>>({});
-	const [loadingItems, setLoadingItems] = React.useState<Record<string, boolean>>({});
-	const [removingItems, setRemovingItems] = React.useState<Record<number, boolean>>({});
+	const [loadingItems, setLoadingItems] = React.useState<
+		Record<string, boolean>
+	>({});
+	const [removingItems, setRemovingItems] = React.useState<
+		Record<number, boolean>
+	>({});
 	const [prices, setPrices] = React.useState<Record<string, number>>({});
-	const [calculatedPrices, setCalculatedPrices] = React.useState<Record<string, number>>({}); // Store calculated prices
+	const [calculatedPrices, setCalculatedPrices] = React.useState<
+		Record<string, number>
+	>({}); // Store calculated prices
 
 	const refreshCart = async () => {
 		const updatedCart = await getCart();
@@ -77,26 +92,40 @@ const CartPage = () => {
 
 				// Get base prices
 				for (const item of items) {
-					const priceData = await getProductPrice('169999', '01', item.productNumber);
-					setPrices(prev => ({
+					const priceData = await getProductPrice(
+						"169999",
+						"01",
+						item.productNumber,
+					);
+					setPrices((prev) => ({
 						...prev,
-						[item.itemNumber]: priceData?.find((p: PriceResponse) => p.itemNumber === String(item.itemNumber))?.basePrice || 0
+						[item.itemNumber]:
+							priceData?.find(
+								(p: PriceResponse) => p.itemNumber === String(item.itemNumber),
+							)?.basePrice || 0,
 					}));
 				}
 
 				// Calculate initial prices for all items
-				const priceRequests = items.map(item => ({
+				const priceRequests = items.map((item) => ({
 					itemNumber: item.itemNumber,
 					quantity: item.quantity,
-					warehouseNumber: 'L01'
+					warehouseNumber: "L01",
 				}));
 
 				if (priceRequests.length > 0) {
-					const priceResults = await calculateItemPrice(priceRequests, '169999', '01');
-					const newPrices = priceResults.reduce((acc: Record<string, number>, item: PriceResponse) => ({
-						...acc,
-						[item.itemNumber]: item.basePriceTotal || 0
-					}), {} as Record<string, number>);
+					const priceResults = await calculateItemPrice(
+						priceRequests,
+						"169999",
+						"01",
+					);
+					const newPrices = priceResults.reduce(
+						(acc: Record<string, number>, item: PriceResponse) => ({
+							...acc,
+							[item.itemNumber]: item.basePriceTotal || 0,
+						}),
+						{} as Record<string, number>,
+					);
 					setCalculatedPrices(newPrices);
 				}
 			} catch (error) {
@@ -110,12 +139,22 @@ const CartPage = () => {
 	}, []);
 
 	const subtotal = cartItems?.reduce(
-		(acc, item) => acc + (calculatedPrices[item.itemNumber] || prices[item.itemNumber] || 0),
+		(acc, item) =>
+			acc + (calculatedPrices[item.itemNumber] || prices[item.itemNumber] || 0),
 		0,
 	);
 
 	const handleCheckout = () => {
 		router.push("/checkout");
+	};
+
+	const handleArchiveCart = async () => {
+		try {
+			await archiveCart();
+			refreshCart();
+		} catch (error) {
+			console.error("Error archiving cart:", error);
+		}
 	};
 
 	if (isLoading) {
@@ -131,11 +170,19 @@ const CartPage = () => {
 						<h1 className="text-2xl font-semibold">
 							Your Cart ({cartItems?.length})
 						</h1>
-						<Button
-							variant="outline"
-							onClick={() => router.push("/cart/history")}>
-							View Cart History
-						</Button>
+						<div className="flex items-center gap-2">
+							<Button
+								variant="outline"
+								onClick={() => handleArchiveCart()}
+								className="mr-2">
+								Archive Cart
+							</Button>
+							<Button
+								variant="outline"
+								onClick={() => router.push("/cart/history")}>
+								View Cart History
+							</Button>
+						</div>
 					</div>
 					<Table>
 						<TableHeader>
@@ -150,7 +197,7 @@ const CartPage = () => {
 						<TableBody>
 							{!isLoading &&
 								cartItems?.map((item, idx) => {
-									console.log(item,"itemqokla")
+									console.log(item, "itemqokla");
 									return (
 										<React.Fragment key={idx}>
 											<TableRow
@@ -165,7 +212,15 @@ const CartPage = () => {
 													if (willOpen && !variations[item.productNumber]) {
 														try {
 															const productVariations =
-																await getProductVariations(item.productNumber,'L01','01');
+																await getProductVariations(
+																	item.productNumber,
+																	"L01",
+																	"01",
+																);
+															console.log(
+																productVariations,
+																"productVariations",
+															);
 															setVariations((prev) => ({
 																...prev,
 																[item.productNumber]: productVariations,
@@ -205,8 +260,9 @@ const CartPage = () => {
 												</TableCell>
 												<TableCell className="text-muted-foreground">
 													<div className="flex flex-col">
-														<span>Unit: ${(prices[item.itemNumber] || 0).toFixed(2)}</span>
-														<span className="text-sm text-primary">Total: ${(calculatedPrices[item.itemNumber] || 0).toFixed(2)}</span>
+														<span>
+															Unit: ${(prices[item.itemNumber] || 0).toFixed(2)}
+														</span>
 													</div>
 												</TableCell>
 												<TableCell>
@@ -217,7 +273,10 @@ const CartPage = () => {
 															disabled={loadingItems[item.itemNumber]}
 															onClick={async (e) => {
 																e.stopPropagation();
-																setLoadingItems((prev) => ({ ...prev, [item.itemNumber]: true }));
+																setLoadingItems((prev) => ({
+																	...prev,
+																	[item.itemNumber]: true,
+																}));
 																try {
 																	const newQuantity = item.quantity - 1;
 																	await updateCart(item.cartLine ?? 0, {
@@ -226,21 +285,35 @@ const CartPage = () => {
 																	});
 																	// Calculate new price
 																	const priceResult = await calculateItemPrice(
-																		[{ itemNumber: item.itemNumber, quantity: newQuantity, warehouseNumber: 'L01' }],
-																		'169999',
-																		'01'
+																		[
+																			{
+																				itemNumber: item.itemNumber,
+																				quantity: newQuantity,
+																				warehouseNumber: "L01",
+																			},
+																		],
+																		"169999",
+																		"01",
 																	);
-																	setCalculatedPrices(prev => ({
+																	setCalculatedPrices((prev) => ({
 																		...prev,
-																		[item.itemNumber]: priceResult.find((item: PriceResponse) => item.itemNumber === String(item.itemNumber))?.basePriceTotal || 0
+																		[item.itemNumber]:
+																			priceResult.find(
+																				(item: PriceResponse) =>
+																					item.itemNumber ===
+																					String(item.itemNumber),
+																			)?.basePriceTotal || 0,
 																	}));
 																	await refreshCart();
 																} finally {
-																	setLoadingItems((prev) => ({ ...prev, [item.itemNumber]: false }));
+																	setLoadingItems((prev) => ({
+																		...prev,
+																		[item.itemNumber]: false,
+																	}));
 																}
 															}}>
 															{loadingItems[item.itemNumber] ? (
-																<div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-primary" />
+																<div className="border-t-primary h-4 w-4 animate-spin rounded-full border-2 border-gray-300" />
 															) : (
 																<Minus className="h-4 w-4" />
 															)}
@@ -254,7 +327,10 @@ const CartPage = () => {
 															disabled={loadingItems[item.itemNumber]}
 															onClick={async (e) => {
 																e.stopPropagation();
-																setLoadingItems((prev) => ({ ...prev, [item.itemNumber]: true }));
+																setLoadingItems((prev) => ({
+																	...prev,
+																	[item.itemNumber]: true,
+																}));
 																try {
 																	const newQuantity = item.quantity + 1;
 																	await updateCart(item.cartLine ?? 0, {
@@ -263,21 +339,35 @@ const CartPage = () => {
 																	});
 																	// Calculate new price
 																	const priceResult = await calculateItemPrice(
-																		[{ itemNumber: item.itemNumber, quantity: newQuantity, warehouseNumber: 'L01' }],
-																		'169999',
-																		'01'
+																		[
+																			{
+																				itemNumber: item.itemNumber,
+																				quantity: newQuantity,
+																				warehouseNumber: "L01",
+																			},
+																		],
+																		"169999",
+																		"01",
 																	);
-																	setCalculatedPrices(prev => ({
+																	setCalculatedPrices((prev) => ({
 																		...prev,
-																		[item.itemNumber]: priceResult.find((item: PriceResponse) => item.itemNumber === String(item.itemNumber))?.basePriceTotal || 0
+																		[item.itemNumber]:
+																			priceResult.find(
+																				(item: PriceResponse) =>
+																					item.itemNumber ===
+																					String(item.itemNumber),
+																			)?.basePriceTotal || 0,
 																	}));
 																	await refreshCart();
 																} finally {
-																	setLoadingItems((prev) => ({ ...prev, [item.itemNumber]: false }));
+																	setLoadingItems((prev) => ({
+																		...prev,
+																		[item.itemNumber]: false,
+																	}));
 																}
 															}}>
 															{loadingItems[item.itemNumber] ? (
-																<div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-primary" />
+																<div className="border-t-primary h-4 w-4 animate-spin rounded-full border-2 border-gray-300" />
 															) : (
 																<Plus className="h-4 w-4" />
 															)}
@@ -285,9 +375,7 @@ const CartPage = () => {
 													</div>
 												</TableCell>
 												<TableCell>
-													${
-													calculatedPrices[item.itemNumber]
-													}
+													${calculatedPrices[item.itemNumber]}
 												</TableCell>
 												<TableCell className="text-right">
 													<Button
@@ -296,18 +384,22 @@ const CartPage = () => {
 														disabled={removingItems[item.cartLine ?? 0]}
 														onClick={async (e) => {
 															e.stopPropagation();
-															setRemovingItems((prev) => ({ ...prev, [item.cartLine ?? 0]: true }));
+															setRemovingItems((prev) => ({
+																...prev,
+																[item.cartLine ?? 0]: true,
+															}));
 															try {
-																await removeFromCart(
-																	Number(item.cartLine),
-																);
+																await removeFromCart(Number(item.cartLine));
 																await refreshCart();
 															} finally {
-																setRemovingItems((prev) => ({ ...prev, [item.cartLine ?? 0]: false }));
+																setRemovingItems((prev) => ({
+																	...prev,
+																	[item.cartLine ?? 0]: false,
+																}));
 															}
 														}}>
 														{removingItems[item.cartLine ?? 0] ? (
-															<div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-primary" />
+															<div className="border-t-primary h-4 w-4 animate-spin rounded-full border-2 border-gray-300" />
 														) : (
 															<Trash className="text-muted-foreground h-4 w-4" />
 														)}
@@ -316,9 +408,7 @@ const CartPage = () => {
 											</TableRow>
 											<AnimatedTableRow isOpen={openItems[idx] || false}>
 												<ProductVariantTable
-													variants={
-														variations[item.productNumber]?.result || []
-													}
+													variants={variations[item.productNumber] || []}
 													productNumber={item.productNumber}
 												/>
 											</AnimatedTableRow>

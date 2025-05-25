@@ -80,8 +80,7 @@ export default async function ProductPage({
 
 	// Get localized content
 	const localizedContent = {
-		name:
-			locale === "en" ? productData.productNameEn : productData.productName,
+		name: locale === "en" ? productData.productNameEn : productData.productName,
 		description:
 			locale === "en" ? productData.shortDescEn : productData.shortDescNo,
 		technicalInfo:
@@ -93,7 +92,6 @@ export default async function ProductPage({
 		users: locale === "en" ? productData.usersEn : productData.usersNo,
 		remarks: locale === "en" ? productData.remarksEn : productData.remarksNo,
 	};
-
 
 	return (
 		<div className="container mx-auto space-y-12 px-4 py-8">
@@ -111,8 +109,8 @@ export default async function ProductPage({
 						price={productData.price}
 					/>
 
-					<ProductActions 
-						items={productData.items} 
+					<ProductActions
+						items={productData.items}
 						productNumber={productData.product_number}
 					/>
 

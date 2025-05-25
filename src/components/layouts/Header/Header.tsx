@@ -26,6 +26,9 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useSearch } from "@/hooks/useProductSearch";
 import { useRouter } from "@/i18n/navigation";
+import { getCart } from "@/services/carts.service";
+import { getProductVariations } from "@/services/product.service";
+import { CartLine } from "@/types/carts.types";
 import { Category } from "@/types/categories.types";
 import { IProductSearch, ISuggestions } from "@/types/search.types";
 import { Search, ShoppingCart, ShoppingCartIcon, User } from "lucide-react";
@@ -33,9 +36,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
-import { getCart } from "@/services/carts.service";
-import { CartLine } from "@/types/carts.types";
-import { getProductVariations } from "@/services/product.service";
 
 export default function Header({ categories }: { categories: Category[] }) {
 	const currentLocale = useLocale();
@@ -67,11 +67,11 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const fetchCart = async () => {
 		const cart = await getCart();
 		setCart(cart);
-	}
+	};
 
 	useEffect(() => {
 		fetchCart();
-	}, [])
+	}, []);
 
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -162,16 +162,23 @@ export default function Header({ categories }: { categories: Category[] }) {
 															variant="outline"
 															size="sm"
 															onClick={async (e) => {
-															e.preventDefault();
-															setIsModalIdOpen(product.productNumber);
-															const productVariations =
-																await getProductVariations(product.productNumber,'L01','01');
-																console.log(productVariations,"productVariations")
+																e.preventDefault();
+																setIsModalIdOpen(product.productNumber);
+																const productVariations =
+																	await getProductVariations(
+																		product.productNumber,
+																		"L01",
+																		"01",
+																	);
+																console.log(
+																	productVariations,
+																	"productVariations",
+																);
 																setVariations((prev) => ({
 																	...prev,
 																	[product.productNumber]: productVariations,
 																}));
-														}}>
+															}}>
 															<ShoppingCartIcon className="h-2 w-2" />
 														</Button>
 														<div className="flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md">
@@ -196,7 +203,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 															setIsModalIdOpen(null);
 															setVariations((prev) => ({
 																...prev,
-																[product.productNumber]: []
+																[product.productNumber]: [],
 															}));
 														}
 													}}>

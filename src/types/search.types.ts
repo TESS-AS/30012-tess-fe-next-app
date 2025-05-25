@@ -27,12 +27,12 @@ export interface SearchResponse {
 
 export interface PriceResponse {
 	itemNumber: string;
-    warehouseNumber: string;
-    quantity: number;
-    basePrice: number;
-    basePriceTotal: number;
-    quantityPrice: number;
-    methodMatches: {},
-    bestPrice: number,
-    bestSource: string
+	warehouseNumber: string;
+	quantity: number;
+	basePrice: number;
+	basePriceTotal: number;
+	quantityPrice: number;
+	methodMatches: {};
+	bestPrice: number;
+	bestSource: string;
 }

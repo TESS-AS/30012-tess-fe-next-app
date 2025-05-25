@@ -1,9 +1,8 @@
 "use client";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getProductPrice } from "@/services/product.service";
 import { IAttribute } from "@/types/product.types";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
 
 interface ProductDetailsProps {
 	description?: string;

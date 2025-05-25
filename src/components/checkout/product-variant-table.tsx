@@ -1,6 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+	Select,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+	SelectContent,
+} from "@/components/ui/select";
 import {
 	Table,
 	TableBody,
@@ -9,16 +19,16 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent } from "@/components/ui/select";
+import { addToCart } from "@/services/carts.service";
+import {
+	getItemWarehouseBalance,
+	getProductPrice,
+} from "@/services/product.service";
+import { PriceResponse } from "@/types/search.types";
+import { Minus, Plus, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
-import { addToCart } from "@/services/carts.service";
-import { getItemWarehouseBalance, getProductPrice } from "@/services/product.service";
-import { Minus, Plus, Loader2 } from "lucide-react";
-import { PriceResponse } from "@/types/search.types";
 
 interface Warehouse {
 	warehouseNumber: string;
@@ -51,14 +61,18 @@ export default function ProductVariantTable({
 	const [loading, setLoading] = useState<Record<number, boolean>>({});
 	const [warehouse, setWarehouse] = useState<Record<number, string>>({});
 	const [isLoading, setIsLoading] = useState(true);
-	const [variantsWithWarehouses, setVariantsWithWarehouses] = useState<ProductVariant[]>([]);
+	const [variantsWithWarehouses, setVariantsWithWarehouses] = useState<
+		ProductVariant[]
+	>([]);
 	const [prices, setPrices] = useState<Record<number, number>>({});
 
-	const fetchWarehousesBalance = async (itemNumber: string): Promise<Warehouse[]> => {
+	const fetchWarehousesBalance = async (
+		itemNumber: string,
+	): Promise<Warehouse[]> => {
 		try {
 			const response = await getItemWarehouseBalance(itemNumber);
 			if (!Array.isArray(response)) return [];
-			
+
 			// Create a Map to store unique warehouses by warehouseNumber
 			const uniqueWarehouses = new Map();
 			response.forEach((w) => {
@@ -70,7 +84,7 @@ export default function ProductVariantTable({
 					});
 				}
 			});
-			
+
 			return Array.from(uniqueWarehouses.values());
 		} catch (error) {
 			console.error("Error fetching warehouses:", error);
@@ -82,10 +96,12 @@ export default function ProductVariantTable({
 		const loadWarehousesData = async () => {
 			try {
 				let updatedVariants: ProductVariant[] = [];
-				if(variants) {
+				if (variants) {
 					updatedVariants = await Promise.all(
 						variants?.map(async (variant) => {
-							const warehouses = await fetchWarehousesBalance(variant?.itemNumber?.toString());
+							const warehouses = await fetchWarehousesBalance(
+								variant?.itemNumber?.toString(),
+							);
 							// Set default selected warehouse
 							if (warehouses.length > 0) {
 								setWarehouse((prev) => ({
@@ -93,21 +109,29 @@ export default function ProductVariantTable({
 									[variant.itemNumber]: warehouses[0].warehouseNumber,
 								}));
 							}
-							console.log(productNumber,"qokla product number")
+							console.log(productNumber, "qokla product number");
 
 							// Fetch price for the variant
 							try {
-								const priceData = await getProductPrice('169999', '01', productNumber);
-								setPrices(prev => ({
+								const priceData = await getProductPrice(
+									"169999",
+									"01",
+									productNumber,
+								);
+								setPrices((prev) => ({
 									...prev,
-									[variant.itemNumber]: priceData?.find((item: PriceResponse) => item.itemNumber === String(variant.itemNumber))?.basePrice || 0	
+									[variant.itemNumber]:
+										priceData?.find(
+											(item: PriceResponse) =>
+												item.itemNumber === String(variant.itemNumber),
+										)?.basePrice || 0,
 								}));
 							} catch (error) {
-								console.error('Error fetching price:', error);
+								console.error("Error fetching price:", error);
 							}
 
 							return { ...variant, warehouses };
-						})
+						}),
 					);
 				}
 				setVariantsWithWarehouses(updatedVariants);
@@ -123,14 +147,17 @@ export default function ProductVariantTable({
 		loadWarehousesData();
 	}, [variants]);
 
-	console.log(prices,"qokla prices")
+	console.log(prices, "qokla prices");
 
 	if (isLoading) {
 		return (
 			<div className="mt-4 space-y-4">
 				<div className="bg-muted h-8 w-full animate-pulse rounded" />
 				{[...Array(3)].map((_, i) => (
-					<div key={i} className="bg-muted h-16 w-full animate-pulse rounded" />
+					<div
+						key={i}
+						className="bg-muted h-16 w-full animate-pulse rounded"
+					/>
 				))}
 			</div>
 		);
@@ -159,14 +186,14 @@ export default function ProductVariantTable({
 						<TableHead>Price</TableHead>
 						<TableHead>Qty</TableHead>
 						<TableHead>Warehouse</TableHead>
-						<TableHead className="w-[100px]">Actions</TableHead>
+						<TableHead>Actions</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
 					{variantsWithWarehouses.map((variant) => {
 						const qty = quantities[variant.itemNumber] || 1;
 						const selectedWarehouse = warehouse[variant.itemNumber];
-						console.log(prices[variant.itemNumber],"qokla selectedWarehouse")
+						console.log(prices[variant.itemNumber], "qokla selectedWarehouse");
 
 						return (
 							<TableRow key={variant.itemNumber}>
@@ -187,7 +214,7 @@ export default function ProductVariantTable({
 								<TableCell>{variant.itemNumber}</TableCell>
 								<TableCell>{variant.unspsc || "-"}</TableCell>
 								<TableCell>{variant.contentUnit}</TableCell>
-								<TableCell>${prices[variant.itemNumber] || '0.00'}</TableCell>
+								<TableCell>${prices[variant.itemNumber] || "0.00"}</TableCell>
 								<TableCell>
 									<div className="flex items-center gap-2">
 										<Button
@@ -199,8 +226,7 @@ export default function ProductVariantTable({
 													...prev,
 													[variant.itemNumber]: Math.max(1, qty - 1),
 												}))
-											}
-										>
+											}>
 											<Minus className="h-4 w-4" />
 										</Button>
 										<Input
@@ -210,7 +236,10 @@ export default function ProductVariantTable({
 											onChange={(e) =>
 												setQuantities((prev) => ({
 													...prev,
-													[variant.itemNumber]: Math.max(1, parseInt(e.target.value) || 1),
+													[variant.itemNumber]: Math.max(
+														1,
+														parseInt(e.target.value) || 1,
+													),
 												}))
 											}
 										/>
@@ -222,8 +251,7 @@ export default function ProductVariantTable({
 													...prev,
 													[variant.itemNumber]: qty + 1,
 												}))
-											}
-										>
+											}>
 											<Plus className="h-4 w-4" />
 										</Button>
 									</div>
@@ -236,17 +264,15 @@ export default function ProductVariantTable({
 												...prev,
 												[variant.itemNumber]: value,
 											}))
-										}
-									>
+										}>
 										<SelectTrigger className="w-[180px]">
 											<SelectValue placeholder={t("Product.selectWarehouse")} />
 										</SelectTrigger>
 										<SelectContent>
 											{variant.warehouses?.map((w) => (
-												<SelectItem 
-													key={`${variant.itemNumber}-${w.warehouseNumber}`} 
-													value={w.warehouseNumber}
-												>
+												<SelectItem
+													key={`${variant.itemNumber}-${w.warehouseNumber}`}
+													value={w.warehouseNumber}>
 													{w.warehouseName} - {w.warehouseNumber}
 													{w.balance !== undefined ? ` (${w.balance})` : ""}
 												</SelectItem>
@@ -259,7 +285,7 @@ export default function ProductVariantTable({
 										variant="ghost"
 										size="sm"
 										disabled={loading[variant.itemNumber]}
-										className="min-w-[120px] relative"
+										className="relative"
 										onClick={async () => {
 											if (!selectedWarehouse) {
 												toast(t("Product.selectWarehouseFirst"), {
@@ -272,9 +298,12 @@ export default function ProductVariantTable({
 
 											// Check if the selected warehouse has a balance
 											const selectedWarehouseData = variant.warehouses?.find(
-												(w) => w.warehouseNumber === selectedWarehouse
+												(w) => w.warehouseNumber === selectedWarehouse,
 											);
-											if (selectedWarehouseData?.balance === undefined || selectedWarehouseData.balance === null) {
+											if (
+												selectedWarehouseData?.balance === undefined ||
+												selectedWarehouseData.balance === null
+											) {
 												toast(t("Product.noBalanceForWarehouse"), {
 													type: "warning",
 													position: "bottom-right",
@@ -324,11 +353,10 @@ export default function ProductVariantTable({
 													[variant.itemNumber]: false,
 												}));
 											}
-										}}
-									>
+										}}>
 										{loading[variant.itemNumber] ? (
 											<>
-												<Loader2 className="h-4 w-4 animate-spin mr-2 inline" />
+												<Loader2 className="mr-2 inline h-4 w-4 animate-spin" />
 												{t("Product.adding")}
 											</>
 										) : (

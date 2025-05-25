@@ -30,7 +30,7 @@ export default async function RootLayout({
 	params: { locale: string };
 }) {
 	const locale = await getLocale();
-	console.log(locale,"qokla locale")
+	console.log(locale, "qokla locale");
 	const messages = await getMessages();
 	const supportedLocales = ["en", "no"];
 
@@ -46,7 +46,7 @@ export default async function RootLayout({
 
 	return (
 		<html lang={locale ?? "no"}>
-			<body>
+			<body className="overflow-hidden">
 				<NextIntlClientProvider
 					locale={locale}
 					messages={messages}>
@@ -65,7 +65,7 @@ export default async function RootLayout({
 							/>
 							<Main categories={categories}>
 								{children}
-							<Footer />
+								<Footer />
 							</Main>
 						</CartProvider>
 					</AuthProvider>
