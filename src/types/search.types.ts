@@ -15,8 +15,8 @@ export interface ISearchList {
 }
 
 export interface SearchArray {
-	product_number: string;
-	product_name: string;
+	productNumber: string;
+	productName: string;
 	media_m: string;
 }
 

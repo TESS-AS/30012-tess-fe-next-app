@@ -184,7 +184,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 																	className="max-h-16 max-w-16 object-contain"
 																/>
 															) : (
-																<div className="h-10 w-10 rounded bg-gray-300" />
+																<div className="h-32 w-32 rounded bg-gray-300" />
 															)}
 														</div>
 													</div>

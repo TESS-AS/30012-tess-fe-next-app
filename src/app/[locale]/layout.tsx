@@ -38,18 +38,11 @@ export default async function RootLayout({
 		notFound();
 	}
 
-	let categories: Category[] = [];
-	try {
-		console.log('Fetching categories for locale:', locale);
-		console.log('API Base URL:', process.env.NEXT_PUBLIC_API_BASE_URL);
-		const res = await axiosServer.get(`/categories/${locale}`);
-		const raw: RawCategory[] = res.data;
-		categories = raw.map((node) => mapCategoryTree(node, locale));
-	} catch (error) {
-		console.error('Error fetching categories:', error);
-		// Provide empty categories array instead of failing
-		categories = [];
-	}
+	const res = await axiosServer.get(`/categories`);
+	const raw: RawCategory[] = res.data;
+	const categories: Category[] = raw.map((node) =>
+		mapCategoryTree(node, locale),
+	);
 
 	return (
 		<html lang={locale ?? "no"}>
