@@ -53,7 +53,7 @@ export default async function RootLayout({
 
 	return (
 		<html lang={locale ?? "no"}>
-			<body className="overflow-hidden">
+			<body>
 				<NextIntlClientProvider
 					locale={locale}
 					messages={messages}>
@@ -72,9 +72,8 @@ export default async function RootLayout({
 							/>
 							<Main categories={categories}>
 								{children}
-								<Footer />
-							</Main>
 							<Footer />
+							</Main>
 						</CartProvider>
 					</AuthProvider>
 				</NextIntlClientProvider>

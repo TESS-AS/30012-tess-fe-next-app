@@ -26,7 +26,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useSearch } from "@/hooks/useProductSearch";
 import { useRouter } from "@/i18n/navigation";
-import { useStore } from "@/store/store";
 import { Category } from "@/types/categories.types";
 import { IProductSearch, ISuggestions } from "@/types/search.types";
 import { Search, ShoppingCart, ShoppingCartIcon, User } from "lucide-react";
@@ -42,7 +41,6 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const currentLocale = useLocale();
 	const t = useTranslations();
 	const router = useRouter();
-	const { setCategories } = useStore();
 	const { data: session, status } = useSession() as {
 		data: any;
 		status: "loading" | "authenticated" | "unauthenticated";
@@ -65,10 +63,6 @@ export default function Header({ categories }: { categories: Category[] }) {
 		setSearchQuery("");
 		setIsSearchOpen(false);
 	});
-
-	useEffect(() => {
-		setCategories(categories);
-	}, [categories, setCategories]);
 
 	const fetchCart = async () => {
 		const cart = await getCart();

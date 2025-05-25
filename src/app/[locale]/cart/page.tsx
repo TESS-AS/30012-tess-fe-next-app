@@ -13,13 +13,14 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { getCart, removeFromCart, updateCart } from "@/services/carts.service";
-import { getProductVariations } from "@/services/product.service";
+import { calculateItemPrice, getProductPrice, getProductVariations } from "@/services/product.service";
 import { CartLine } from "@/types/carts.types";
 import { Loader2, Minus, Plus, Trash } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import CartSkeleton from "./loading";
+import { PriceResponse } from "@/types/search.types";
 
 const AnimatedTableRow = ({
 	isOpen,
@@ -59,6 +60,8 @@ const CartPage = () => {
 	const [variations, setVariations] = React.useState<Record<string, any>>({});
 	const [loadingItems, setLoadingItems] = React.useState<Record<string, boolean>>({});
 	const [removingItems, setRemovingItems] = React.useState<Record<number, boolean>>({});
+	const [prices, setPrices] = React.useState<Record<string, number>>({});
+	const [calculatedPrices, setCalculatedPrices] = React.useState<Record<string, number>>({}); // Store calculated prices
 
 	const refreshCart = async () => {
 		const updatedCart = await getCart();
@@ -71,6 +74,31 @@ const CartPage = () => {
 				setIsLoading(true);
 				const items = await getCart();
 				setCartItems(items);
+
+				// Get base prices
+				for (const item of items) {
+					const priceData = await getProductPrice('169999', '01', item.productNumber);
+					setPrices(prev => ({
+						...prev,
+						[item.itemNumber]: priceData?.find((p: PriceResponse) => p.itemNumber === String(item.itemNumber))?.basePrice || 0
+					}));
+				}
+
+				// Calculate initial prices for all items
+				const priceRequests = items.map(item => ({
+					itemNumber: item.itemNumber,
+					quantity: item.quantity,
+					warehouseNumber: 'L01'
+				}));
+
+				if (priceRequests.length > 0) {
+					const priceResults = await calculateItemPrice(priceRequests, '169999', '01');
+					const newPrices = priceResults.reduce((acc: Record<string, number>, item: PriceResponse) => ({
+						...acc,
+						[item.itemNumber]: item.basePriceTotal || 0
+					}), {} as Record<string, number>);
+					setCalculatedPrices(newPrices);
+				}
 			} catch (error) {
 				console.error("Error fetching cart:", error);
 			} finally {
@@ -82,7 +110,7 @@ const CartPage = () => {
 	}, []);
 
 	const subtotal = cartItems?.reduce(
-		(acc, item) => acc + (item.price || 0) * item.quantity,
+		(acc, item) => acc + (calculatedPrices[item.itemNumber] || prices[item.itemNumber] || 0),
 		0,
 	);
 
@@ -176,7 +204,10 @@ const CartPage = () => {
 													</div>
 												</TableCell>
 												<TableCell className="text-muted-foreground">
-													${(item.price || 0).toFixed(2)}
+													<div className="flex flex-col">
+														<span>Unit: ${(prices[item.itemNumber] || 0).toFixed(2)}</span>
+														<span className="text-sm text-primary">Total: ${(calculatedPrices[item.itemNumber] || 0).toFixed(2)}</span>
+													</div>
 												</TableCell>
 												<TableCell>
 													<div className="flex items-center gap-2">
@@ -188,10 +219,21 @@ const CartPage = () => {
 																e.stopPropagation();
 																setLoadingItems((prev) => ({ ...prev, [item.itemNumber]: true }));
 																try {
+																	const newQuantity = item.quantity - 1;
 																	await updateCart(item.cartLine ?? 0, {
 																		itemNumber: item.itemNumber,
-																		quantity: item.quantity - 1,
+																		quantity: newQuantity,
 																	});
+																	// Calculate new price
+																	const priceResult = await calculateItemPrice(
+																		[{ itemNumber: item.itemNumber, quantity: newQuantity, warehouseNumber: 'L01' }],
+																		'169999',
+																		'01'
+																	);
+																	setCalculatedPrices(prev => ({
+																		...prev,
+																		[item.itemNumber]: priceResult.find((item: PriceResponse) => item.itemNumber === String(item.itemNumber))?.basePriceTotal || 0
+																	}));
 																	await refreshCart();
 																} finally {
 																	setLoadingItems((prev) => ({ ...prev, [item.itemNumber]: false }));
@@ -214,10 +256,21 @@ const CartPage = () => {
 																e.stopPropagation();
 																setLoadingItems((prev) => ({ ...prev, [item.itemNumber]: true }));
 																try {
+																	const newQuantity = item.quantity + 1;
 																	await updateCart(item.cartLine ?? 0, {
 																		itemNumber: item.itemNumber,
-																		quantity: item.quantity + 1,
+																		quantity: newQuantity,
 																	});
+																	// Calculate new price
+																	const priceResult = await calculateItemPrice(
+																		[{ itemNumber: item.itemNumber, quantity: newQuantity, warehouseNumber: 'L01' }],
+																		'169999',
+																		'01'
+																	);
+																	setCalculatedPrices(prev => ({
+																		...prev,
+																		[item.itemNumber]: priceResult.find((item: PriceResponse) => item.itemNumber === String(item.itemNumber))?.basePriceTotal || 0
+																	}));
 																	await refreshCart();
 																} finally {
 																	setLoadingItems((prev) => ({ ...prev, [item.itemNumber]: false }));
@@ -232,7 +285,9 @@ const CartPage = () => {
 													</div>
 												</TableCell>
 												<TableCell>
-													${((item.price || 0) * item.quantity).toFixed(2)}
+													${
+													calculatedPrices[item.itemNumber]
+													}
 												</TableCell>
 												<TableCell className="text-right">
 													<Button

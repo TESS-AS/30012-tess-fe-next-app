@@ -24,14 +24,6 @@ export function ProductDetails({
 }: ProductDetailsProps) {
 	const t = useTranslations();
 
-	async function fetchPrices() {
-		const prices = await getProductPrice("110036","916934351","P_VB9010023","L01")
-		console.log(prices,"qokla prices")
-	}
-	useEffect(() => {
-		fetchPrices()
-	}, []);
-
 	return (
 		<Tabs
 			defaultValue="description"

@@ -2,6 +2,7 @@ import { IProduct } from "@/types/product.types";
 import axios, { AxiosResponse } from "axios";
 
 import axiosInstance from "./axiosClient";
+import { PriceResponse } from "@/types/search.types";
 
 interface WarehouseBalance {
   warehouseNumber: string;
@@ -123,17 +124,17 @@ export async function getProductWarehouseBalance(
 interface PriceRequest {
   itemNumber: string;
   quantity: number;
+  warehouseNumber: string;
 }
 
 export async function calculateItemPrice(
-  request: PriceRequest,
+  request: PriceRequest[],
+  customerNumber: string = '169999',
   companyNumber: string = '01',
-  warehouseNumber: string = 'L01',
-  customerNumber: string = '169999'
 ) {
   try {
     const response = await axiosInstance.post(
-      `/item/price/${companyNumber}/${warehouseNumber}/${customerNumber}`,
+      `/item/price/${customerNumber}/${companyNumber}`,
       request
     );
     return response.data;
@@ -143,9 +144,9 @@ export async function calculateItemPrice(
   }
 }
 
-export async function getProductPrice(customerNumber: string, companyNumber: string, productNumber: string, warehouseNumber: string) {
+export async function getProductPrice(customerNumber: string = '169999', companyNumber: string = '01', productNumber: string, warehouseNumber: string = 'L01'): Promise<PriceResponse[]> {
 	try {
-		const response = await axiosInstance.get(`/product/price/110036/916934351/P_VB9010023/L01`);
+		const response = await axiosInstance.get(`/product/price/${customerNumber}/${companyNumber}/${productNumber}/${warehouseNumber}`);
 		return response.data;
 	} catch (error) {
 		console.error('Error fetching product price:', error);

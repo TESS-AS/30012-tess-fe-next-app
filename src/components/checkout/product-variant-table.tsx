@@ -16,8 +16,9 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 import { addToCart } from "@/services/carts.service";
-import { getItemWarehouseBalance } from "@/services/product.service";
+import { getItemWarehouseBalance, getProductPrice } from "@/services/product.service";
 import { Minus, Plus, Loader2 } from "lucide-react";
+import { PriceResponse } from "@/types/search.types";
 
 interface Warehouse {
 	warehouseNumber: string;
@@ -33,6 +34,7 @@ interface ProductVariant {
 	unspsc?: string | null;
 	quantity?: number;
 	warehouses?: Warehouse[];
+	price?: number;
 }
 
 interface ProductVariantTableProps {
@@ -50,6 +52,7 @@ export default function ProductVariantTable({
 	const [warehouse, setWarehouse] = useState<Record<number, string>>({});
 	const [isLoading, setIsLoading] = useState(true);
 	const [variantsWithWarehouses, setVariantsWithWarehouses] = useState<ProductVariant[]>([]);
+	const [prices, setPrices] = useState<Record<number, number>>({});
 
 	const fetchWarehousesBalance = async (itemNumber: string): Promise<Warehouse[]> => {
 		try {
@@ -90,11 +93,23 @@ export default function ProductVariantTable({
 									[variant.itemNumber]: warehouses[0].warehouseNumber,
 								}));
 							}
+							console.log(productNumber,"qokla product number")
+
+							// Fetch price for the variant
+							try {
+								const priceData = await getProductPrice('169999', '01', productNumber);
+								setPrices(prev => ({
+									...prev,
+									[variant.itemNumber]: priceData?.find((item: PriceResponse) => item.itemNumber === String(variant.itemNumber))?.basePrice || 0	
+								}));
+							} catch (error) {
+								console.error('Error fetching price:', error);
+							}
+
 							return { ...variant, warehouses };
 						})
 					);
 				}
-				console.log(updatedVariants,"qokla updatedVariants")
 				setVariantsWithWarehouses(updatedVariants);
 				setQuantities({});
 			} catch (error) {
@@ -107,6 +122,8 @@ export default function ProductVariantTable({
 		setIsLoading(true);
 		loadWarehousesData();
 	}, [variants]);
+
+	console.log(prices,"qokla prices")
 
 	if (isLoading) {
 		return (
@@ -139,6 +156,7 @@ export default function ProductVariantTable({
 						<TableHead>Item Number</TableHead>
 						<TableHead>UNSPSC</TableHead>
 						<TableHead>Unit</TableHead>
+						<TableHead>Price</TableHead>
 						<TableHead>Qty</TableHead>
 						<TableHead>Warehouse</TableHead>
 						<TableHead className="w-[100px]">Actions</TableHead>
@@ -148,7 +166,7 @@ export default function ProductVariantTable({
 					{variantsWithWarehouses.map((variant) => {
 						const qty = quantities[variant.itemNumber] || 1;
 						const selectedWarehouse = warehouse[variant.itemNumber];
-						console.log(variant,"qokla selectedWarehouse")
+						console.log(prices[variant.itemNumber],"qokla selectedWarehouse")
 
 						return (
 							<TableRow key={variant.itemNumber}>
@@ -168,7 +186,8 @@ export default function ProductVariantTable({
 								<TableCell>{variant.parentProdNumber}</TableCell>
 								<TableCell>{variant.itemNumber}</TableCell>
 								<TableCell>{variant.unspsc || "-"}</TableCell>
-								<TableCell>{variant.contentUnit || "STK"}</TableCell>
+								<TableCell>{variant.contentUnit}</TableCell>
+								<TableCell>${prices[variant.itemNumber] || '0.00'}</TableCell>
 								<TableCell>
 									<div className="flex items-center gap-2">
 										<Button

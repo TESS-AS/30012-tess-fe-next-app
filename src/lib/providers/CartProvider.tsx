@@ -1,19 +1,13 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
-
-interface CartItem {
-	name: string;
-	price: number;
-	quantity: number;
-	currency: string;
-	image?: string;
-	product_number: string;
-}
+import { getCart } from "@/services/carts.service";
+import { CartLine } from "@/types/carts.types";
+import { CartItem } from "@/types/store.types";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 
 interface CartContextType {
-	items: CartItem[];
-	addItem: (item: CartItem) => void;
+	items: CartLine[];
+	addItem: (item: CartLine) => void;
 	removeItem: (index: number) => void;
 	isOpen: boolean;
 	openCart: () => void;
@@ -23,28 +17,19 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-	const [items, setItems] = useState<CartItem[]>([
-		{
-			name: "Protective Gloves",
-			price: 29.99,
-			quantity: 1,
-			currency: "$",
-			image: "/images/gloves.jpg",
-			product_number: "P_31950",
-		},
-		{
-			name: "Building block",
-			price: 49.99,
-			quantity: 2,
-			currency: "$",
-			image: "/images/96701_kvadrat.png",
-			product_number: "P_96701",
-		},
-	]);
+	const [items, setItems] = useState<CartLine[]>([]);
+
+	useEffect(() => {
+		const fetchCart = async () => {
+			const cart = await getCart();
+			setItems(cart);
+		};
+		fetchCart();
+	}, []);
 
 	const [isOpen, setIsOpen] = useState(false);
 
-	const addItem = (item: CartItem) => {
+	const addItem = (item: CartLine) => {
 		setItems((prevItems) => [...prevItems, item]);
 	};
 
@@ -52,7 +37,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 	const closeCart = () => setIsOpen(false);
 
 	const removeItem = (index: number) => {
-		setItems((prevItems) => prevItems.filter((_, i) => i !== index));
+		setItems((prevItems) => prevItems!.filter((_, i) => i !== index));
 	};
 
 	return (
