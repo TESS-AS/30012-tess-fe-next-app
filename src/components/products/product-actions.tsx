@@ -3,30 +3,44 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
+import { addToCart } from "@/services/carts.service";
 import { IVariation } from "@/types/product.types";
-import { ShoppingCart, Heart } from "lucide-react";
+import { ShoppingCart, Heart, Minus, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "react-toastify";
 
 export interface ProductActionsProps {
 	items: IVariation[];
+	productNumber: string;
 }
 
-export function ProductActions({ items }: ProductActionsProps) {
+export function ProductActions({ items, productNumber }: ProductActionsProps) {
 	const t = useTranslations();
 	const [selectedSize, setSelectedSize] = useState<string>();
+	const [quantity, setQuantity] = useState(1);
 	const [isLoading, setIsLoading] = useState(false);
 
 	const handleAddToCart = async () => {
+		if (!selectedSize) return;
+
 		setIsLoading(true);
 		try {
-			await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+			const response = await addToCart({
+				productNumber: productNumber,
+				itemNumber: selectedSize,
+				quantity: quantity,
+				warehouseNumber: "1",
+				companyNumber: "1",
+			});
+
+			if (response.message === "Error adding to cart") {
+				throw new Error(response.message);
+			}
+
+			toast(t("Product.addedToCart"), { type: "success" });
+		} catch (error) {
+			console.error("Error adding to cart:", error);
+			toast(t("Product.errorAddingToCart"), { type: "error" });
 		} finally {
 			setIsLoading(false);
 		}
@@ -42,8 +56,8 @@ export function ProductActions({ items }: ProductActionsProps) {
 	};
 
 	return (
-		<div className="mt-6 space-y-4">
-			<div>
+		<div className="mt-6 space-y-6">
+			{/* <div>
 				<label className="mb-2 block text-sm font-medium">
 					{t("Product.selectSize")}
 				</label>
@@ -68,7 +82,7 @@ export function ProductActions({ items }: ProductActionsProps) {
 						))}
 					</SelectContent>
 				</Select>
-			</div>
+			</div> */}
 
 			<div className="flex gap-4">
 				<Button

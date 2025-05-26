@@ -1,3 +1,5 @@
+"use client";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IAttribute } from "@/types/product.types";
 import { useTranslations } from "next-intl";
@@ -66,7 +68,7 @@ export function ProductDetails({
 									<span className="text-sm font-medium">{item.name}</span>
 								</div>
 								<div className="px-3 py-2">
-									<span className="text-sm">{item.value_def}</span>
+									<span className="text-sm">{item.valueDef}</span>
 								</div>
 							</div>
 						))}

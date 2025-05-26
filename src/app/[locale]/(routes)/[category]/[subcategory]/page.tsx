@@ -56,6 +56,7 @@ export default async function SubCategoryPage({
 		const filters = await loadFilters({
 			categoryNumber,
 			searchTerm: null,
+			language: locale,
 		});
 
 		return (

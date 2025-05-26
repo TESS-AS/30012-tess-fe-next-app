@@ -70,17 +70,9 @@ export default function OrderSummary() {
 								<ModalHeader>
 									<ModalTitle>Product Variants - {product.name}</ModalTitle>
 								</ModalHeader>
-								<ProductVariantTable
-									variants={product.variants}
-									onAddVariant={(variant) => {
-										console.log("Adding variant:", variant);
-										setOpenModalId(null);
-										toast.success("Variant added successfully");
-									}}
-									onQuantityChange={(variant, quantity) => {
-										console.log("Quantity changed:", variant, quantity);
-									}}
-								/>
+								{/* <ProductVariantTable
+									variants={[]}
+								/> */}
 							</ModalContent>
 						</Modal>
 					</div>

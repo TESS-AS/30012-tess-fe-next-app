@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 
-import CartDrawer from "@/components/cart/CartDrawer";
 import Header from "@/components/layouts/Header/Header";
 import NotificationBar from "@/components/ui/notification-bar";
 import { Category } from "@/types/categories.types";
@@ -21,10 +20,9 @@ export default function Main({
 				autoHideDuration={10000}
 			/>
 			<Header categories={categories} />
-			<div className="bg-background h-[calc(100vh-80px)] overflow-y-auto">
+			<div className="bg-background h-[calc(100vh-80px)] overflow-x-hidden overflow-y-auto">
 				<div className="container mx-auto py-5">{children}</div>
 			</div>
-			<CartDrawer />
 		</div>
 	);
 }

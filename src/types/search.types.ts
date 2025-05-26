@@ -24,3 +24,15 @@ export interface SearchResponse {
 	searchSuggestions: ISuggestions[];
 	productRes: IProductSearch[];
 }
+
+export interface PriceResponse {
+	itemNumber: string;
+	warehouseNumber: string;
+	quantity: number;
+	basePrice: number;
+	basePriceTotal: number;
+	quantityPrice: number;
+	methodMatches: {};
+	bestPrice: number;
+	bestSource: string;
+}

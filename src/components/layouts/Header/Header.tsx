@@ -26,8 +26,9 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useSearch } from "@/hooks/useProductSearch";
 import { useRouter } from "@/i18n/navigation";
-import { useCart } from "@/lib/providers/CartProvider";
-import { useStore } from "@/store/store";
+import { getCart } from "@/services/carts.service";
+import { getProductVariations } from "@/services/product.service";
+import { CartLine } from "@/types/carts.types";
 import { Category } from "@/types/categories.types";
 import { IProductSearch, ISuggestions } from "@/types/search.types";
 import { Search, ShoppingCart, ShoppingCartIcon, User } from "lucide-react";
@@ -35,36 +36,47 @@ import Image from "next/image";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
-import { toast } from "react-toastify";
 
 export default function Header({ categories }: { categories: Category[] }) {
 	const currentLocale = useLocale();
 	const t = useTranslations();
-	const { openCart } = useCart();
 	const router = useRouter();
-	const { setCategories } = useStore();
 	const { data: session, status } = useSession() as {
 		data: any;
 		status: "loading" | "authenticated" | "unauthenticated";
 	};
-	const searchRef = useClickOutside<HTMLDivElement>(() => {
-		setSearchQuery("");
-	});
-
 	const [searchQuery, setSearchQuery] = useState("");
+	// Reset variations when search query changes
+	useEffect(() => {
+		setVariations({});
+		setIsModalIdOpen(null);
+	}, [searchQuery]);
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [isAuthOpen, setIsAuthOpen] = useState(false);
 	const [isModalIdOpen, setIsModalIdOpen] = useState<string | null>(null);
+	const [cart, setCart] = useState<CartLine[]>([]);
+	const [variations, setVariations] = useState<Record<string, any>>({});
 
 	const { data, isLoading } = useSearch(searchQuery);
 
+	const searchRef = useClickOutside<HTMLDivElement>(() => {
+		setSearchQuery("");
+		setIsSearchOpen(false);
+	});
+
+	const fetchCart = async () => {
+		const cart = await getCart();
+		setCart(cart);
+	};
+
 	useEffect(() => {
-		setCategories(categories);
-	}, [categories, setCategories]);
+		fetchCart();
+	}, []);
 
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsSearchOpen(false);
+		setIsModalIdOpen(null);
 	};
 
 	const handleLanguageChange = (locale: string) => {
@@ -89,7 +101,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 					className="hidden w-[650px] px-4 md:flex">
 					<div
 						className="relative w-full"
-						ref={searchRef}>
+						ref={isModalIdOpen ? null : searchRef}>
 						<Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
 						<Input
 							type="search"
@@ -111,7 +123,11 @@ export default function Header({ categories }: { categories: Category[] }) {
 													key={idx}
 													href={`/search?query=${encodeURIComponent(s.keyword)}`}
 													className="block rounded-md p-2 text-sm hover:bg-gray-100"
-													onClick={() => setSearchQuery("")}>
+													onClick={() => {
+														setSearchQuery("");
+														setIsSearchOpen(false);
+														setIsModalIdOpen(null);
+													}}>
 													{s.keyword}
 												</Link>
 											),
@@ -140,75 +156,69 @@ export default function Header({ categories }: { categories: Category[] }) {
 																{product.productNumber}
 															</span>
 														</div>
-
-														<div className="flex h-32 w-32 min-w-16 flex-shrink-0 items-center justify-center self-center overflow-hidden rounded-md">
+													</Link>
+													<div className="flex items-center gap-6">
+														<Button
+															variant="outline"
+															size="sm"
+															onClick={async (e) => {
+																e.preventDefault();
+																setIsModalIdOpen(product.productNumber);
+																const productVariations =
+																	await getProductVariations(
+																		product.productNumber,
+																		"L01",
+																		"01",
+																	);
+																console.log(
+																	productVariations,
+																	"productVariations",
+																);
+																setVariations((prev) => ({
+																	...prev,
+																	[product.productNumber]: productVariations,
+																}));
+															}}>
+															<ShoppingCartIcon className="h-2 w-2" />
+														</Button>
+														<div className="flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md">
 															{product.media ? (
 																<Image
 																	src={product.media}
 																	alt={product.productName}
-																	width={128}
-																	height={128}
-																	className="max-h-32 max-w-32 object-contain"
+																	width={64}
+																	height={64}
+																	className="max-h-16 max-w-16 object-contain"
 																/>
 															) : (
 																<div className="h-32 w-32 rounded bg-gray-300" />
 															)}
 														</div>
-													</Link>
-													<Button
-														variant="outline"
-														size="sm"
-														onClick={(e) => {
-															e.preventDefault();
-															setIsModalIdOpen(product.productNumber);
-														}}>
-														<ShoppingCartIcon className="h-4 w-4" />
-													</Button>
+													</div>
 												</div>
 												<Modal
 													open={isModalIdOpen === product.productNumber}
-													onOpenChange={(open) =>
-														setIsModalIdOpen(
-															open ? product.productNumber : null,
-														)
-													}>
-													<ModalContent>
+													onOpenChange={(open) => {
+														if (!open) {
+															setIsModalIdOpen(null);
+															setVariations((prev) => ({
+																...prev,
+																[product.productNumber]: [],
+															}));
+														}
+													}}>
+													<ModalContent className="sm:max-w-[900px]">
 														<ModalHeader>
 															<ModalTitle>
 																Product Variants - {product.productName}
 															</ModalTitle>
 														</ModalHeader>
-														<ProductVariantTable
-															variants={[
-																{
-																	thread: '1/4"',
-																	length: "19 mm",
-																	coating: "Zinc",
-																},
-																{
-																	thread: '1/4"',
-																	length: "25 mm",
-																	coating: "Zinc",
-																},
-																{
-																	thread: '5/16"',
-																	length: "32 mm",
-																	coating: "SS",
-																},
-															]}
-															onAddVariant={(variant) => {
-																console.log("Adding variant:", variant);
-																setIsModalIdOpen(null);
-																toast.success("Variant added successfully");
-															}}
-															onQuantityChange={(variant, quantity) => {
-																console.log(
-																	"Quantity changed:",
-																	variant,
-																	quantity,
-																);
-															}}
-														/>
+														<div className="max-h-[70vh] overflow-y-auto px-1">
+															<ProductVariantTable
+																variants={variations[product.productNumber]}
+																productNumber={product.productNumber}
+															/>
+														</div>
 													</ModalContent>
 												</Modal>
 											</div>
@@ -323,10 +333,10 @@ export default function Header({ categories }: { categories: Category[] }) {
 						variant="ghost"
 						size="icon"
 						className="relative"
-						onClick={openCart}>
+						onClick={() => router.push("/cart")}>
 						<ShoppingCart className="h-5 w-5" />
 						<Badge className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full p-0">
-							2
+							{cart?.length}
 						</Badge>
 						<span className="sr-only">Cart</span>
 					</Button>
