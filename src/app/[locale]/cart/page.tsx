@@ -12,9 +12,9 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useCart } from "@/hooks/useCart";
 import {
 	archiveCart,
-	getCart,
 	removeFromCart,
 	updateCart,
 } from "@/services/carts.service";
@@ -78,20 +78,23 @@ const CartPage = () => {
 		Record<string, number>
 	>({}); // Store calculated prices
 
+	const { cart, isAuthenticated } = useCart();
+
 	const refreshCart = async () => {
-		const updatedCart = await getCart();
-		setCartItems(updatedCart);
+		setCartItems(cart);
 	};
 
 	React.useEffect(() => {
-		const fetchCart = async () => {
+		const loadCartData = async () => {
 			try {
+				if (!isAuthenticated) {
+					return;
+				}
 				setIsLoading(true);
-				const items = await getCart();
-				setCartItems(items);
+				setCartItems(cart);
 
 				// Get base prices
-				for (const item of items) {
+				for (const item of cart) {
 					const priceData = await getProductPrice(
 						"169999",
 						"01",
@@ -107,7 +110,7 @@ const CartPage = () => {
 				}
 
 				// Calculate initial prices for all items
-				const priceRequests = items.map((item) => ({
+				const priceRequests = cart?.map((item) => ({
 					itemNumber: item.itemNumber,
 					quantity: item.quantity,
 					warehouseNumber: "L01",
@@ -135,8 +138,8 @@ const CartPage = () => {
 			}
 		};
 
-		fetchCart();
-	}, []);
+		loadCartData();
+	}, [cart]);
 
 	const subtotal = cartItems?.reduce(
 		(acc, item) =>
