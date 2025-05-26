@@ -5,14 +5,19 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { useProductFilter } from "@/hooks/useProductFilter";
 import { cn } from "@/lib/utils";
 import { FilterValues } from "@/types/filter.types";
-import { LayoutGrid } from "lucide-react";
-import { AlignJustify } from "lucide-react";
+import { LayoutGrid, AlignJustify, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { ProductCard } from "./product-card";
 import { Button } from "../ui/button";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+	TooltipProvider,
+} from "../ui/tooltip";
 import { Filter, FilterCategory } from "../ui/filter";
 import {
 	Select,
@@ -49,7 +54,6 @@ export function ProductGrid({
 	const pathname = usePathname();
 	const [isFiltering, setIsFiltering] = useState(false);
 	const [viewLayout, setViewLayout] = useState<string>("");
-	const [activeFilters, setActiveFilters] = useState<FilterValues[]>([]);
 	const observerTarget = useRef<HTMLDivElement>(null);
 	const [sort, setSort] = useState<string>("");
 
@@ -60,6 +64,8 @@ export function ProductGrid({
 		handleFilterChange,
 		loadMore,
 		handleSortChange,
+		selectedFilters,
+		removeFilter,
 	} = useProductFilter({
 		categoryNumber,
 		query,
@@ -75,16 +81,13 @@ export function ProductGrid({
 	);
 
 	useEffect(() => {
-		const applyFilters = async () => {
-			if (activeFilters.length > 0) {
-				setIsFiltering(true);
-				await handleFilterChange(activeFilters);
-				setIsFiltering(false);
-			}
-		};
+		// Reset isFiltering when loading is complete
+		if (!isLoading) {
+			setIsFiltering(false);
+		}
+	}, [isLoading]);
 
-		applyFilters();
-	}, [activeFilters, handleFilterChange]);
+
 
 	useEffect(() => {
 		const observer = new IntersectionObserver(
@@ -117,18 +120,57 @@ export function ProductGrid({
 
 	return (
 		<div className="flex flex-col gap-8 lg:flex-row">
-			{/* Sidebar Filter */}
+			{/* Sidebar */}
 			<aside className="lg:w-1/4">
 				<Filter
 					filters={filters}
+					className="sticky top-4"
+					variant="default"
+					size="default"
 					onFilterChange={(newFilters) => {
 						onFilterChange(newFilters);
 					}}
+					selectedFilters={selectedFilters}
 				/>
 			</aside>
 
 			{/* Product Grid */}
 			<div className="flex-1">
+				{/* Active Filters */}
+				{Object.keys(selectedFilters).length > 0 && (
+					<div className="mb-4 flex flex-wrap gap-2">
+						{Object.entries(selectedFilters).map(([key, values]) =>
+							values.map((value) => (
+								<div
+									key={`${key}-${value}`}
+									className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm">
+									<TooltipProvider>
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<div className="flex items-center gap-1">
+													<span className="max-w-[100px] truncate font-medium">{key}:</span>
+													<span className="max-w-[100px] truncate">{value}</span>
+												</div>
+											</TooltipTrigger>
+											<TooltipContent>
+												<p>
+													{key}: {value}
+												</p>
+											</TooltipContent>
+										</Tooltip>
+									</TooltipProvider>
+									<button
+										onClick={() => removeFilter(key, value)}
+										className="ml-1 rounded-full p-0.5 hover:bg-primary/20">
+										<X className="h-3 w-3" />
+									</button>
+								</div>
+							))
+						)}
+					</div>
+				)}
+
+				{/* Controls */}
 				<div className="mb-4 flex items-center justify-between">
 					<Select
 						value={sort}

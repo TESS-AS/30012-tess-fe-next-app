@@ -55,7 +55,8 @@
 			"categoryLoad": "Vi kunne ikke laste kategorien innhold.",
 			"subcategoryLoad": "Vi kunne ikke laste subkategorien innhold."
 		},
-		"sort": "Sorter"
+		"sort": "Sorter",
+		"search": "Søk"
 	},
 	"Search": {
 		"suggestions": "Søkeforslag",
