@@ -1,52 +1,78 @@
+// useGetOrders.ts
 import { useEffect, useState } from "react";
 
-import { OrderItems } from "@/types/orders.types";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
+import axiosClient from "@/services/axiosClient";
+import {
+	mapLineStatusToOrderStatus,
+	OrderItems,
+	OrderResponse,
+} from "@/types/orderHistory.types";
 
-const ALL_ORDERS: OrderItems[] = [
-	{
-		id: 440765,
-		date: "2024-10-29",
-		status: "Completed",
-		total: 14.5,
-		items: [{ imageUrl: "../../../images/gloves.jpg" }],
-	},
-	{
-		id: 437919,
-		date: "2024-10-21",
-		status: "Cancelled",
-		total: 178.5,
-		items: [{ imageUrl: "../../../images/helmet.jpg" }],
-	},
-	{
-		id: 384924,
-		date: "2024-02-09",
-		status: "Completed",
-		total: 208,
-		items: [
-			{ imageUrl: "../../../images/gloves.jpg" },
-			{ imageUrl: "../../../images/gloves.jpg" },
-		],
-	},
-];
+export interface OrderFilters {
+	orderNumber?: number;
+	invoiceNumber?: string;
+	fromDate?: string;
+	toDate?: string;
+	status?: number;
+}
 
-export function useGetOrders(page: number, perPage: number = 3) {
+export function useGetOrders(
+	page: number,
+	perPage: number = 3,
+	filters: OrderFilters = {},
+) {
+	const { data: profile, isLoading: isProfileLoading } = useGetProfileData();
 	const [data, setData] = useState<OrderItems[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
+	const [totalPages, setTotalPages] = useState(1);
 
 	useEffect(() => {
+		if (isProfileLoading || !profile?.customerNumbers?.length) return;
+
+		const customerNumber = profile.customerNumbers[0];
 		setIsLoading(true);
-		const timeout = setTimeout(() => {
-			const start = (page - 1) * perPage;
-			const end = start + perPage;
-			setData(ALL_ORDERS.slice(start, end));
-			setIsLoading(false);
-		}, 300);
-		return () => clearTimeout(timeout);
-	}, [page, perPage]);
+
+		const params = {
+			page,
+			limit: perPage,
+			ordernumber: filters.orderNumber,
+			invoicenumber: filters.invoiceNumber,
+			fromDate: filters.fromDate,
+			toDate: filters.toDate,
+			status: filters.status,
+		};
+
+		axiosClient
+			.get<OrderResponse[]>(`/order/${customerNumber}`, { params })
+			.then((res) => {
+				const mapped: OrderItems[] = res.data.map((order) => {
+					const maxStatus = Math.max(
+						...order.orderLines.map((line) => line.lineStatus),
+					);
+					return {
+						id: order.orderId,
+						date: order.date,
+						status: mapLineStatusToOrderStatus(maxStatus),
+						total: order.sum,
+						items: order.orderLines,
+					};
+				});
+				setData(mapped);
+				setTotalPages(Math.ceil(res.data.length / perPage));
+			})
+			.catch((err) => {
+				console.error("Failed to fetch orders:", err);
+				setData([]);
+			})
+			.finally(() => {
+				setIsLoading(false);
+			});
+	}, [page, perPage, profile, isProfileLoading, filters]);
 
 	return {
 		data,
 		isLoading,
-		totalPages: Math.ceil(ALL_ORDERS.length / perPage),
+		totalPages,
 	};
 }
