@@ -3,7 +3,6 @@ import { ReactNode } from "react";
 import { Footer } from "@/components/layouts/Footer/Footer";
 import Main from "@/components/layouts/Main/Main";
 import { AuthProvider } from "@/lib/providers/AuthProvider";
-import { CartProvider } from "@/lib/providers/CartProvider";
 import { getSeoMetadata } from "@/lib/seo";
 import { mapCategoryTree } from "@/lib/utils";
 import axiosServer from "@/services/axiosServer";
@@ -51,23 +50,21 @@ export default async function RootLayout({
 					locale={locale}
 					messages={messages}>
 					<AuthProvider>
-						<CartProvider>
-							<ToastContainer
-								position="top-right"
-								autoClose={5000}
-								hideProgressBar
-								newestOnTop
-								closeOnClick
-								rtl={false}
-								pauseOnFocusLoss
-								draggable
-								pauseOnHover
-							/>
-							<Main categories={categories}>
-								{children}
-								<Footer />
-							</Main>
-						</CartProvider>
+						<ToastContainer
+							position="top-right"
+							autoClose={5000}
+							hideProgressBar
+							newestOnTop
+							closeOnClick
+							rtl={false}
+							pauseOnFocusLoss
+							draggable
+							pauseOnHover
+						/>
+						<Main categories={categories}>
+							{children}
+							<Footer />
+						</Main>
 					</AuthProvider>
 				</NextIntlClientProvider>
 			</body>

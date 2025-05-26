@@ -23,12 +23,11 @@ import {
 	ModalTitle,
 } from "@/components/ui/modal";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useCart } from "@/hooks/useCart";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useSearch } from "@/hooks/useProductSearch";
 import { useRouter } from "@/i18n/navigation";
-import { getCart } from "@/services/carts.service";
 import { getProductVariations } from "@/services/product.service";
-import { CartLine } from "@/types/carts.types";
 import { Category } from "@/types/categories.types";
 import { IProductSearch, ISuggestions } from "@/types/search.types";
 import { Search, ShoppingCart, ShoppingCartIcon, User } from "lucide-react";
@@ -54,8 +53,8 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [isAuthOpen, setIsAuthOpen] = useState(false);
 	const [isModalIdOpen, setIsModalIdOpen] = useState<string | null>(null);
-	const [cart, setCart] = useState<CartLine[]>([]);
 	const [variations, setVariations] = useState<Record<string, any>>({});
+	const { cart } = useCart();
 
 	const { data, isLoading } = useSearch(searchQuery);
 
@@ -63,15 +62,6 @@ export default function Header({ categories }: { categories: Category[] }) {
 		setSearchQuery("");
 		setIsSearchOpen(false);
 	});
-
-	const fetchCart = async () => {
-		const cart = await getCart();
-		setCart(cart);
-	};
-
-	useEffect(() => {
-		fetchCart();
-	}, []);
 
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();
