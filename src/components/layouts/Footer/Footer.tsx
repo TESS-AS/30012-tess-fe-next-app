@@ -49,7 +49,7 @@ export function Footer() {
 	const t = useTranslations("Footer");
 
 	return (
-		<footer className="relative left-[calc(-50vw+50%)] w-[100vw] bg-[#222222] text-zinc-100">
+		<footer className="relative left-[calc(-50vw+50%)] mt-20 w-[100vw] bg-[#222222] text-zinc-100">
 			<div className="container mx-auto py-12">
 				<div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
 					<div>
