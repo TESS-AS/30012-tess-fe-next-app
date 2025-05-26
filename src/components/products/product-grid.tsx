@@ -12,12 +12,6 @@ import { useTranslations } from "next-intl";
 
 import { ProductCard } from "./product-card";
 import { Button } from "../ui/button";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-	TooltipProvider,
-} from "../ui/tooltip";
 import { Filter, FilterCategory } from "../ui/filter";
 import {
 	Select,
@@ -27,6 +21,12 @@ import {
 	SelectValue,
 } from "../ui/select";
 import { Skeleton } from "../ui/skeleton";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+	TooltipProvider,
+} from "../ui/tooltip";
 
 interface ProductGridProps {
 	variant?: "default" | "compact";
@@ -87,8 +87,6 @@ export function ProductGrid({
 		}
 	}, [isLoading]);
 
-
-
 	useEffect(() => {
 		const observer = new IntersectionObserver(
 			(entries) => {
@@ -143,13 +141,17 @@ export function ProductGrid({
 							values.map((value) => (
 								<div
 									key={`${key}-${value}`}
-									className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm">
+									className="bg-primary/10 flex items-center gap-1 rounded-full px-3 py-1 text-sm">
 									<TooltipProvider>
 										<Tooltip>
 											<TooltipTrigger asChild>
 												<div className="flex items-center gap-1">
-													<span className="max-w-[100px] truncate font-medium">{key}:</span>
-													<span className="max-w-[100px] truncate">{value}</span>
+													<span className="max-w-[100px] truncate font-medium">
+														{key}:
+													</span>
+													<span className="max-w-[100px] truncate">
+														{value}
+													</span>
 												</div>
 											</TooltipTrigger>
 											<TooltipContent>
@@ -161,11 +163,11 @@ export function ProductGrid({
 									</TooltipProvider>
 									<button
 										onClick={() => removeFilter(key, value)}
-										className="ml-1 rounded-full p-0.5 hover:bg-primary/20">
+										className="hover:bg-primary/20 ml-1 rounded-full p-0.5">
 										<X className="h-3 w-3" />
 									</button>
 								</div>
-							))
+							)),
 						)}
 					</div>
 				)}

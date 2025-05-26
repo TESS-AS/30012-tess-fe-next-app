@@ -2,14 +2,12 @@
 
 import * as React from "react";
 
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { FilterValues } from "@/types/filter.types";
 import { cva, VariantProps } from "class-variance-authority";
 import { Search, X } from "lucide-react";
-
 import { useTranslations } from "next-intl";
-
-import { Input } from "@/components/ui/input";
 
 import { Button } from "./button";
 import { Checkbox } from "./checkbox";
@@ -122,13 +120,10 @@ export function Filter({
 
 	return (
 		<div
-			className={cn(
-				filterVariants({ variant, size, className }),
-				"space-y-4",
-			)}
+			className={cn(filterVariants({ variant, size, className }), "space-y-4")}
 			{...props}>
 			<div className="relative">
-				<Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+				<Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
 				<Input
 					type="text"
 					placeholder={t("Common.search")}
@@ -140,7 +135,10 @@ export function Filter({
 
 			{selectedFilterCount > 0 && (
 				<div className="mb-4 flex justify-end">
-					<Button variant="ghost" size="sm" onClick={resetFilters}>
+					<Button
+						variant="ghost"
+						size="sm"
+						onClick={resetFilters}>
 						<X className="mr-2 h-4 w-4" />
 						{t("Common.reset")}
 					</Button>
@@ -169,13 +167,14 @@ export function Filter({
 								{filterCategory.category}
 							</h3>
 							{filteredFilters.map((filter) => (
-								<div key={filter.key} className="space-y-2">
+								<div
+									key={filter.key}
+									className="space-y-2">
 									<h4 className="text-sm font-medium">{filter.key}</h4>
 									<div className="space-y-2">
 										{filter.values.map((value) => {
 											const isSelected =
-												selectedFilters[filter.key]?.includes(value) ||
-												false;
+												selectedFilters[filter.key]?.includes(value) || false;
 											return (
 												<div
 													key={value}
