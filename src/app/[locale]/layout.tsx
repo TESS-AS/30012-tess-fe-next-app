@@ -29,7 +29,6 @@ export default async function RootLayout({
 	params: { locale: string };
 }) {
 	const locale = await getLocale();
-	console.log(locale, "qokla locale");
 	const messages = await getMessages();
 	const supportedLocales = ["en", "no"];
 

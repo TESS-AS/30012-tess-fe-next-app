@@ -109,7 +109,6 @@ export default function ProductVariantTable({
 									[variant.itemNumber]: warehouses[0].warehouseNumber,
 								}));
 							}
-							console.log(productNumber, "qokla product number");
 
 							// Fetch price for the variant
 							try {
@@ -147,7 +146,6 @@ export default function ProductVariantTable({
 		loadWarehousesData();
 	}, [variants]);
 
-	console.log(prices, "qokla prices");
 
 	if (isLoading) {
 		return (
@@ -193,7 +191,6 @@ export default function ProductVariantTable({
 					{variantsWithWarehouses.map((variant) => {
 						const qty = quantities[variant.itemNumber] || 1;
 						const selectedWarehouse = warehouse[variant.itemNumber];
-						console.log(prices[variant.itemNumber], "qokla selectedWarehouse");
 
 						return (
 							<TableRow key={variant.itemNumber}>

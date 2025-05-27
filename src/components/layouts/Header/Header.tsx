@@ -65,8 +65,11 @@ export default function Header({ categories }: { categories: Category[] }) {
 
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();
+		if (searchQuery.trim()) {
+			router.push(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+		}
 		setIsSearchOpen(false);
-		setIsModalIdOpen(null);
+		setSearchQuery('');
 	};
 
 	const handleLanguageChange = (locale: string) => {
@@ -112,12 +115,12 @@ export default function Header({ categories }: { categories: Category[] }) {
 												<Link
 													key={idx}
 													href={`/search?query=${encodeURIComponent(s.keyword)}`}
-													className="block rounded-md p-2 text-sm hover:bg-gray-100"
 													onClick={() => {
-														setSearchQuery("");
+														setSearchQuery('');
 														setIsSearchOpen(false);
-														setIsModalIdOpen(null);
-													}}>
+													}}
+													className="block rounded-md p-2 text-sm hover:bg-gray-100"
+												>
 													{s.keyword}
 												</Link>
 											),
