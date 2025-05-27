@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+const baseUrl = process.env.NEXTAUTH_URL;
 
 export async function getSeoMetadata({
 	title,
