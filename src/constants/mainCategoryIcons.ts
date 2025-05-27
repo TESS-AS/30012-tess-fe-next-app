@@ -1,0 +1,15 @@
+export const categoryImageMap: Record<string, string> = {
+	"01000000": "/images/category-images/hoses-and-pipes.png",
+	"02000000": "/images/category-images/tools-and-machines.png",
+	"03000000": "/images/category-images/ppe-clothing-and-shoes.png",
+	"04000000": "/images/category-images/welding.png",
+	"05000000": "/images/category-images/tools-and-machines.png",
+	"06000000": "/images/category-images/chemicals.png",
+	"07000000": "/images/category-images/lightning-and-electrical.png",
+	"08000000": "/images/category-images/transmissions.png",
+	"09000000": "/images/category-images/lifting-and-loading.png",
+	"10000000": "/images/category-images/office-and-storage.png",
+	"12000000": "/images/category-images/chemicals.png",
+	"13000000": "/images/category-images/maintenance-products.png",
+	"14000000": "/images/category-images/hoses-and-pipes.png",
+};
