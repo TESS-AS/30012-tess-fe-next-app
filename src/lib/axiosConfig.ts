@@ -1,4 +1,5 @@
-export const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
+export const baseURL =
+	"https://30011-proxyapi-cuafeua6bha7ckby.norwayeast-01.azurewebsites.net";
 
 export const defaultHeaders = {
 	"Content-Type": "application/json",
