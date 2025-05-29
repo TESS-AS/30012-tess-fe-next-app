@@ -1,59 +1,40 @@
-# Make sure it uses up to date node js version
-FROM node:23-alpine AS base
+# Stage 1: Dependencies
+FROM node:20-alpine AS deps
 
-FROM base AS deps
+WORKDIR /app
+
 RUN apk add --no-cache libc6-compat
-# If you still run into build issue, go to "Problem #3: Making /app is read only.
-# in case you have permission issues.
+
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+
+# Stage 2: Build
+FROM node:20-alpine AS builder
+
 WORKDIR /app
 
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
-RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
-
-FROM base AS builder
-WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Uncomment the following line in case you want to disable telemetry during the build.
-# ENV NEXT_TELEMETRY_DISABLED=1
-ENV NEXT_PRIVATE_STANDALONE=true
+ENV NODE_ENV=production
+RUN yarn build
 
-RUN \
-  if [ -f yarn.lock ]; then yarn run build; \
-  elif [ -f package-lock.json ]; then npm run build; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+# Stage 3: Production runtime
+FROM node:20-alpine AS runner
 
-FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV=production
-# Uncomment the following line in case you want to disable telemetry during the build.
-# ENV NEXT_TELEMETRY_DISABLED=1
-ENV NEXT_PRIVATE_STANDALONE=true
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
-
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Ensuring no unnecessary permissions are given and add necessary permissions for it to run server.js properly.
-RUN chmod -R a-w+x . && chmod -R a+x .next node_modules
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
 
 USER nextjs
 
 EXPOSE 3000
-
 ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
-CMD ["node", "server.js"]
+
+CMD ["node_modules/.bin/next", "start"]
