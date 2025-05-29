@@ -1,5 +1,5 @@
-import axios from "axios";
 import { baseURL } from "@/lib/axiosConfig";
+import axios from "axios";
 
 const axiosServer = axios.create({
 	baseURL,
