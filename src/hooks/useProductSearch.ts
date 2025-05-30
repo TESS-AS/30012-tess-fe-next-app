@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback } from "react";
-
-import axiosClient from "@/services/axiosClient";
-import { SearchResponse } from "@/types/search.types";
+import { useState, useCallback, useEffect } from 'react';
+import axiosClient from '@/services/axiosClient';
+import { loadAttributes, ProductAttributeResponse } from '@/services/product.service';
+import { SearchResponse } from '@/types/search.types';
 
 type DebouncedFunction<T extends (...args: any[]) => any> = {
 	(...args: Parameters<T>): void;
@@ -27,23 +27,37 @@ function debounce<T extends (...args: any[]) => any>(func: T, delay: number): De
 
 export function useSearch(query: string) {
 	const [data, setData] = useState<SearchResponse | null>(null);
+	const [attributeResults, setAttributeResults] = useState<ProductAttributeResponse['results']>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<unknown>(null);
 
 	const fetchSearch = useCallback(async (searchQuery: string) => {
 		if (!searchQuery) {
 			setData(null);
+			setAttributeResults([]);
 			return;
 		}
 
 		try {
 			setIsLoading(true);
+			// 1) Fetch base search results
 			const response = await axiosClient.get<SearchResponse>(
 				`/search/${searchQuery}`,
 			);
-			setData(response.data);
+			const searchResults = response.data;
+			setData(searchResults);
+
+			// 2) If we have results, fetch their attributes
+			if (searchResults?.productRes?.length > 0) {
+				const productNumbers = searchResults.productRes.map((p) => p.productNumber);
+				const attrResponse = await loadAttributes(searchQuery, productNumbers);
+				setAttributeResults(attrResponse.results);
+			} else {
+				setAttributeResults([]);
+			}
 		} catch (err) {
 			setError(err);
+			setAttributeResults([]);
 		} finally {
 			setIsLoading(false);
 		}
@@ -57,6 +71,7 @@ export function useSearch(query: string) {
 	useEffect(() => {
 		if (!query) {
 			setData(null);
+			setAttributeResults([]);
 			return;
 		}
 
@@ -68,5 +83,5 @@ export function useSearch(query: string) {
 		};
 	}, [query, debouncedFetchSearch]);
 
-	return { data, isLoading, error };
+	return { data, attributeResults, isLoading, error };
 }
