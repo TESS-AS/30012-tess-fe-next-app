@@ -56,7 +56,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const [variations, setVariations] = useState<Record<string, any>>({});
 	const { cart } = useCart();
 
-	const { data, isLoading } = useSearch(searchQuery);
+	const { data, attributeResults, isLoading } = useSearch(searchQuery);
 
 	const searchRef = useClickOutside<HTMLDivElement>(() => {
 		setSearchQuery("");
@@ -65,8 +65,11 @@ export default function Header({ categories }: { categories: Category[] }) {
 
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();
+		if (searchQuery.trim()) {
+			router.push(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+		}
 		setIsSearchOpen(false);
-		setIsModalIdOpen(null);
+		setSearchQuery('');
 	};
 
 	const handleLanguageChange = (locale: string) => {
@@ -112,12 +115,12 @@ export default function Header({ categories }: { categories: Category[] }) {
 												<Link
 													key={idx}
 													href={`/search?query=${encodeURIComponent(s.keyword)}`}
-													className="block rounded-md p-2 text-sm hover:bg-gray-100"
 													onClick={() => {
-														setSearchQuery("");
+														setSearchQuery('');
 														setIsSearchOpen(false);
-														setIsModalIdOpen(null);
-													}}>
+													}}
+													className="block rounded-md p-2 text-sm hover:bg-gray-100"
+												>
 													{s.keyword}
 												</Link>
 											),
@@ -131,7 +134,11 @@ export default function Header({ categories }: { categories: Category[] }) {
 
 								<div className="col-span-2">
 									{data.productRes?.length ? (
-										data.productRes.map((product: IProductSearch) => (
+										data.productRes.map((product: IProductSearch) => {
+											const attr = attributeResults.find(
+											  r => r.productNumber === product.productNumber
+											);
+											return (
 											<div key={product.productNumber}>
 												<div className="flex w-full items-center justify-between gap-4 rounded-md p-3 hover:bg-gray-100">
 													<Link
@@ -145,6 +152,11 @@ export default function Header({ categories }: { categories: Category[] }) {
 															<span className="text-muted-foreground text-sm">
 																{product.productNumber}
 															</span>
+															{attr && attr.matchedAttributes.length > 0 && (
+																<div className="inline-flex items-center mt-2 px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full">
+																	<span>{attr.matchedAttributes[0]}</span>
+																</div>
+															)}
 														</div>
 													</Link>
 													<div className="flex items-center gap-6">
@@ -212,7 +224,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 													</ModalContent>
 												</Modal>
 											</div>
-										))
+										)})
 									) : (
 										<p className="text-opacity-30 text-sm text-green-600">
 											{t("Search.noProductsFound")}

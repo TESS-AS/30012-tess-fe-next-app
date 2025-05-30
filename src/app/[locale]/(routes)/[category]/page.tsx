@@ -40,7 +40,6 @@ export default async function CategoryPage({
 		const { category } = await params;
 		const { query } = await searchParams;
 		const locale = await getLocale();
-		console.log(locale, "qokla locale");
 		const formattedCategory = formatUrlToDisplayName(category);
 
 		const categories = await fetchCategories(locale);

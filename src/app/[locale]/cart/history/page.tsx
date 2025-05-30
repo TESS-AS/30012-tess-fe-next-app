@@ -22,7 +22,6 @@ import { useParams } from "next/navigation";
 const CartHistoryPage = () => {
 	const params = useParams();
 	const locale = params.locale as string;
-	console.log(locale, "qokla locale 2");
 	const [isLoading, setIsLoading] = useState(true);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [archiveData, setArchiveData] = useState<ArchiveCartResponse>();

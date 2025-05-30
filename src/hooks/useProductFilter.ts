@@ -17,9 +17,8 @@ export function useProductFilter({
 	const [isLoading, setIsLoading] = useState(true);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [hasMore, setHasMore] = useState(true);
-	const [currentFilters, setCurrentFilters] = useState<FilterValues[] | null>(
-		null,
-	);
+	const [currentFilters, setCurrentFilters] = useState<FilterValues[] | null>(null);
+	const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
 	const [sort, setSort] = useState<string | null>(null);
 
 	useEffect(() => {
@@ -102,6 +101,13 @@ export function useProductFilter({
 				setCurrentFilters(filters);
 				setCurrentPage(1);
 
+				// Update selected filters state
+				const newSelectedFilters: Record<string, string[]> = {};
+				filters.forEach((filter) => {
+					newSelectedFilters[filter.key] = filter.values;
+				});
+				setSelectedFilters(newSelectedFilters);
+
 				const response = await searchProducts(
 					1,
 					9,
@@ -149,6 +155,24 @@ export function useProductFilter({
 		[categoryNumber, query, currentFilters],
 	);
 
+	const removeFilter = useCallback(
+		async (key: string, value: string) => {
+			const newFilters = selectedFilters[key].filter((v) => v !== value);
+			const filterArray: FilterValues[] = Object.entries({
+				...selectedFilters,
+				[key]: newFilters,
+			})
+				.filter(([, vals]) => vals.length > 0)
+				.map(([k, vals]) => ({
+					key: k,
+					values: vals,
+				}));
+
+			await handleFilterChange(filterArray);
+		},
+		[handleFilterChange, selectedFilters],
+	);
+
 	return {
 		products,
 		isLoading,
@@ -156,5 +180,7 @@ export function useProductFilter({
 		handleFilterChange,
 		handleSortChange,
 		loadMore,
+		selectedFilters,
+		removeFilter,
 	};
 }
