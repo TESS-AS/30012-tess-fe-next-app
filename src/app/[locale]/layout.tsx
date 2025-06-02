@@ -12,6 +12,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import "../globals.css";
 import { ToastContainer } from "react-toastify";
+import { AppContextProvider } from "@/lib/appContext";
 
 export async function generateMetadata({
 	params,
@@ -49,21 +50,23 @@ export default async function RootLayout({
 					locale={locale}
 					messages={messages}>
 					<AuthProvider>
-						<ToastContainer
-							position="top-right"
-							autoClose={5000}
-							hideProgressBar
-							newestOnTop
-							closeOnClick
-							rtl={false}
-							pauseOnFocusLoss
-							draggable
-							pauseOnHover
-						/>
-						<Main categories={categories}>
-							{children}
-							<Footer />
-						</Main>
+						<AppContextProvider>
+							<ToastContainer
+								position="top-right"
+								autoClose={5000}
+								hideProgressBar
+								newestOnTop
+								closeOnClick
+								rtl={false}
+								pauseOnFocusLoss
+								draggable
+								pauseOnHover
+							/>
+							<Main categories={categories}>
+								{children}
+								<Footer />
+							</Main>
+						</AppContextProvider>
 					</AuthProvider>
 				</NextIntlClientProvider>
 			</body>

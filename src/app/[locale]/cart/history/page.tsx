@@ -129,7 +129,7 @@ const CartHistoryPage = () => {
 												{item.cart.length}
 											</TableCell>
 											<TableCell className="text-right font-medium">
-												${total.toFixed(2)}
+												{total?.toFixed(2)},- kr
 											</TableCell>
 											<TableCell>
 												<Button

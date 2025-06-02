@@ -19,7 +19,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { addToCart } from "@/services/carts.service";
+import { addToCart, getCart } from "@/services/carts.service";
 import {
 	getItemWarehouseBalance,
 	getProductPrice,
@@ -29,6 +29,7 @@ import { Minus, Plus, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
+import { useAppContext } from "@/lib/appContext";
 
 interface Warehouse {
 	warehouseNumber: string;
@@ -65,6 +66,7 @@ export default function ProductVariantTable({
 		ProductVariant[]
 	>([]);
 	const [prices, setPrices] = useState<Record<number, number>>({});
+	const { isCartChanging, setIsCartChanging } = useAppContext();
 
 	const fetchWarehousesBalance = async (
 		itemNumber: string,
@@ -210,7 +212,7 @@ export default function ProductVariantTable({
 								<TableCell>{variant.itemNumber}</TableCell>
 								<TableCell>{variant.unspsc || "-"}</TableCell>
 								<TableCell>{variant.contentUnit}</TableCell>
-								<TableCell>${prices[variant.itemNumber] || "0.00"}</TableCell>
+								<TableCell>{prices[variant.itemNumber]?.toFixed(2) || "0.00"},- kr</TableCell>
 								<TableCell>
 									<div className="flex items-center gap-2">
 										<Button
@@ -321,6 +323,7 @@ export default function ProductVariantTable({
 													warehouseNumber: selectedWarehouse,
 													companyNumber: "1",
 												});
+												setIsCartChanging(!isCartChanging);
 
 												if (response.message === "Error adding to cart") {
 													throw new Error(response.message);
@@ -336,6 +339,7 @@ export default function ProductVariantTable({
 													...prev,
 													[variant.itemNumber]: 1,
 												}));
+												await getCart();
 											} catch (err) {
 												console.error("Error adding to cart:", err);
 												toast(t("Product.errorAddingToCart"), {
