@@ -1,27 +1,70 @@
-export type OrderStatus = "Completed" | "In Progress" | "Failed";
+export type OrderStatus =
+	| "Something Wrong"
+	| "Written"
+	| "Confirmed"
+	| "Picked"
+	| "Packed"
+	| "Shipped"
+	| "Invoiced";
 
 export const mapLineStatusToOrderStatus = (status: number): OrderStatus => {
-	if (status >= 60) return "Completed";
-	if (status >= 40 && status < 60) return "In Progress";
-	return "Failed";
+	switch (status) {
+		case 0:
+			return "Something Wrong";
+		case 10:
+			return "Written";
+		case 20:
+			return "Confirmed";
+		case 30:
+			return "Picked";
+		case 40:
+			return "Packed";
+		case 45:
+			return "Shipped";
+		case 50:
+		case 60:
+			return "Invoiced";
+		default:
+			return "Something Wrong";
+	}
 };
 
 export function getStatusBadgeProps(status: OrderStatus) {
 	switch (status) {
-		case "Completed":
+		case "Invoiced":
 			return {
 				variant: "secondary" as const,
-				className: "text-green-700 border-green-700",
+				className: "text-green-600 border-green-600 bg-green-100",
 			};
-		case "In Progress":
+		case "Packed":
 			return {
 				variant: "default" as const,
-				className: "text-blue-600 border-blue-600",
+				className: "text-yellow-700 border-yellow-700 bg-yellow-100",
 			};
-		case "Failed":
+		case "Shipped":
+			return {
+				variant: "default" as const,
+				className: "text-indigo-700 border-indigo-700 bg-indigo-100",
+			};
+		case "Picked":
+			return {
+				variant: "default" as const,
+				className: "text-purple-700 border-purple-700 bg-purple-100",
+			};
+		case "Confirmed":
+			return {
+				variant: "default" as const,
+				className: "text-blue-700 border-blue-700 bg-blue-100",
+			};
+		case "Written":
+			return {
+				variant: "default" as const,
+				className: "text-sky-700 border-sky-700 bg-sky-100",
+			};
+		case "Something Wrong":
 			return {
 				variant: "destructive" as const,
-				className: "text-red-600 border-red-600",
+				className: "text-red-700 border-red-700 bg-red-100",
 			};
 		default:
 			return { variant: "outline" as const };

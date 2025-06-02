@@ -78,5 +78,5 @@ export default auth((request) => {
 });
 
 export const config = {
-	matcher: ["/(en|fr|es)/((?!api|_next|...).*)"],
+	matcher: ["/((?!_next|favicon.ico|api|.*\\..*).*)"],
 };

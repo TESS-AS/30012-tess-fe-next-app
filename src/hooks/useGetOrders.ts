@@ -35,7 +35,7 @@ export function useGetOrders(
 
 		const params = {
 			page,
-			limit: perPage,
+			pageSize: perPage,
 			ordernumber: filters.orderNumber,
 			invoicenumber: filters.invoiceNumber,
 			fromDate: filters.fromDate,
