@@ -218,7 +218,7 @@ export function ProductGrid({
 					)}>
 					{isFiltering || isLoading ? (
 						<>
-							{[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+							{[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
 								<div
 									key={i}
 									className="group relative space-y-4">
@@ -270,7 +270,7 @@ export function ProductGrid({
 									: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
 								viewLayout === "list" && "lg:grid-cols-1",
 							)}>
-							{[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+							{[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
 								<div
 									key={i}
 									className="group relative space-y-4">
@@ -288,7 +288,7 @@ export function ProductGrid({
 				</div>
 
 				{/* No more products message */}
-				{!isLoading && !hasMore && products.length > 0 && (
+				{!isLoading && !hasMore && products.length > 9 && (
 					<div className="text-muted-foreground mt-8 text-center">
 						No more products to load
 					</div>

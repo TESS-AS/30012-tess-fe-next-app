@@ -78,7 +78,6 @@ export default function CheckoutSteps() {
 			...orderData,
 			source: "EC",
 		};
-		console.log("Submitting order:", finalOrderData);
 		// Here you would integrate with your payment gateway based on paymentMethod
 		if (paymentMethod === "card") {
 			// Redirect to card payment gateway

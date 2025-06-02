@@ -219,10 +219,6 @@ const CartPage = () => {
 																	"L01",
 																	"01",
 																);
-															console.log(
-																productVariations,
-																"productVariations",
-															);
 															setVariations((prev) => ({
 																...prev,
 																[item.productNumber]: productVariations,

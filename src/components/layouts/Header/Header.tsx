@@ -153,8 +153,15 @@ export default function Header({ categories }: { categories: Category[] }) {
 																{product.productNumber}
 															</span>
 															{attr && attr.matchedAttributes.length > 0 && (
-																<div className="inline-flex items-center mt-2 px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full">
-																	<span>{attr.matchedAttributes[0]}</span>
+																<div className="mt-2 flex flex-wrap gap-1">
+																	{attr.matchedAttributes.map((a, i) => (
+																		<span
+																			key={i}
+																			className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+																		>
+																			{a}
+																		</span>
+																	))}
 																</div>
 															)}
 														</div>
@@ -163,6 +170,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 														<Button
 															variant="outline"
 															size="sm"
+															type="button"
 															onClick={async (e) => {
 																e.preventDefault();
 																setIsModalIdOpen(product.productNumber);

@@ -50,6 +50,7 @@ export async function loadFilters({
 
 		const url = `/attributeFilter/${params.toString() ? `?${params.toString()}` : ""}`;
 		const response = await axiosInstance.get(url);
+		console.log(response,"response")
 
 		filtersCache[cacheKey] = {
 			data: response.data,

@@ -15,6 +15,8 @@ function rewriteProductUrls(request: NextRequest) {
 
 	const [locale, ...rest] = segments;
 
+	if (rest[0] === "__default") return null;
+
 	// CASE 1: /locale/search/:productId
 	if (rest[0] === "search" && rest.length === 2) {
 		const [, productId] = rest;
@@ -52,7 +54,7 @@ export default auth((request) => {
 	const path = nextUrl.pathname;
 	const isApiAuthRoute = path.startsWith(apiAuthPrefix);
 	const isProtectedRoute = protectedRoutes.some((route) =>
-		path.includes(route),
+		path.split('/').includes(route),
 	);
 
 	if (isApiAuthRoute) {
@@ -60,7 +62,8 @@ export default auth((request) => {
 	}
 
 	if (isProtectedRoute && !isLoggedIn) {
-		return NextResponse.redirect(new URL("/login", nextUrl));
+		const locale = nextUrl.pathname.split("/")[1];
+		return NextResponse.redirect(new URL(`/${locale}/login`, nextUrl));
 	}
 
 	// Handle URL rewrites first
@@ -75,5 +78,5 @@ export default auth((request) => {
 });
 
 export const config = {
-	matcher: ["/((?!api|_next|static|trpc|_vercel|.*\\..*|favicon.ico).*)"],
+	matcher: ["/(en|fr|es)/((?!api|_next|...).*)"]
 };
