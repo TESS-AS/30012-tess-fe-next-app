@@ -22,11 +22,22 @@ import {
 	ModalHeader,
 	ModalTitle,
 } from "@/components/ui/modal";
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useCart } from "@/hooks/useCart";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useSearch } from "@/hooks/useProductSearch";
 import { useRouter } from "@/i18n/navigation";
+import axiosClient from "@/services/axiosClient";
 import { getProductVariations } from "@/services/product.service";
 import { Category } from "@/types/categories.types";
 import { IProductSearch, ISuggestions } from "@/types/search.types";
@@ -44,15 +55,13 @@ export default function Header({ categories }: { categories: Category[] }) {
 		data: any;
 		status: "loading" | "authenticated" | "unauthenticated";
 	};
+	const { data: profile, isLoading: isProfileLoading } = useGetProfileData();
 	const [searchQuery, setSearchQuery] = useState("");
-	// Reset variations when search query changes
-	useEffect(() => {
-		setVariations({});
-		setIsModalIdOpen(null);
-	}, [searchQuery]);
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [isAuthOpen, setIsAuthOpen] = useState(false);
 	const [isModalIdOpen, setIsModalIdOpen] = useState<string | null>(null);
+	const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+	const [newCustomerNumber, setNewCustomerNumber] = useState("");
 	const [variations, setVariations] = useState<Record<string, any>>({});
 	const { cart } = useCart();
 
@@ -62,6 +71,17 @@ export default function Header({ categories }: { categories: Category[] }) {
 		setSearchQuery("");
 		setIsSearchOpen(false);
 	});
+
+	useEffect(() => {
+		setVariations({});
+		setIsModalIdOpen(null);
+	}, [searchQuery]);
+
+	useEffect(() => {
+		if (!newCustomerNumber && profile?.customerNumbers?.[0]) {
+			setNewCustomerNumber(profile?.customerNumbers?.[0]);
+		}
+	}, [profile, newCustomerNumber]);
 
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -74,6 +94,15 @@ export default function Header({ categories }: { categories: Category[] }) {
 
 	const handleLanguageChange = (locale: string) => {
 		router.replace("/", { locale });
+	};
+
+	const handleLogout = async () => {
+		try {
+			await axiosClient.post("/logout");
+		} catch (error) {
+			console.error("Logout API failed", error);
+		}
+		await signOut();
 	};
 
 	return (
@@ -99,7 +128,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 						<Input
 							type="search"
 							placeholder="Search products..."
-							className={"bg-background w-[650px] border-green-600 pl-8"}
+							className="bg-background w-[650px] border-green-600 pl-8"
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
 						/>
@@ -189,14 +218,15 @@ export default function Header({ categories }: { categories: Category[] }) {
 																}}>
 																<ShoppingCartIcon className="h-2 w-2" />
 															</Button>
-															<div className="flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md">
+															<div className="flex h-32 w-32 min-w-32 items-center justify-center overflow-hidden rounded-md">
 																{product.media ? (
 																	<Image
 																		src={product.media}
 																		alt={product.productName}
-																		width={64}
-																		height={64}
-																		className="max-h-16 max-w-16 object-contain"
+																		unoptimized
+																		width={128}
+																		height={128}
+																		className="max-h-23 max-w-32 object-contain"
 																	/>
 																) : (
 																	<div className="h-32 w-32 rounded bg-gray-300" />
@@ -242,46 +272,61 @@ export default function Header({ categories }: { categories: Category[] }) {
 						)}
 					</div>
 				</form>
+
 				<div className="flex items-center gap-2">
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
+					{!isProfileLoading && profile?.customerNumbers?.[0] && (
+						<>
 							<Button
-								variant="ghost"
-								size="icon"
-								className="hidden md:flex">
-								<Image
-									src={`/icons/${currentLocale === "en" ? "en" : "no"}.svg`}
-									alt="Language"
-									width={20}
-									height={20}
-								/>
+								variant="outline"
+								size="sm"
+								onClick={() => setIsCustomerModalOpen(true)}
+								className="hidden text-sm md:flex">
+								Customer #: {profile?.customerNumbers?.[0]}
 							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
-							<DropdownMenuItem onClick={() => handleLanguageChange("en")}>
-								<div className="flex items-center gap-2">
-									<Image
-										src="/icons/en.svg"
-										alt="English"
-										width={20}
-										height={20}
-									/>
-									English
-								</div>
-							</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => handleLanguageChange("no")}>
-								<div className="flex items-center gap-2">
-									<Image
-										src="/icons/no.svg"
-										alt="Norwegian"
-										width={20}
-										height={20}
-									/>
-									Norsk
-								</div>
-							</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
+							<Modal
+								open={isCustomerModalOpen}
+								onOpenChange={setIsCustomerModalOpen}>
+								<ModalContent className="sm:max-w-md">
+									<ModalHeader>
+										<ModalTitle>Update Customer Number</ModalTitle>
+									</ModalHeader>
+									<div className="space-y-4 p-4">
+										<Select
+											value={newCustomerNumber}
+											onValueChange={(val) => setNewCustomerNumber(val)}>
+											<SelectTrigger className="w-full">
+												<SelectValue placeholder="Select customer number" />
+											</SelectTrigger>
+											<SelectContent
+												position="popper"
+												className="z-[9999]">
+												<SelectGroup>
+													<SelectLabel>Customer Numbers</SelectLabel>
+													{profile?.customerNumbers?.map((number) => (
+														<SelectItem
+															key={number}
+															value={number}>
+															{number}
+														</SelectItem>
+													))}
+												</SelectGroup>
+											</SelectContent>
+										</Select>
+
+										<Button
+											className="w-full"
+											onClick={() => {
+												console.log("New customer number:", newCustomerNumber);
+												setIsCustomerModalOpen(false);
+											}}>
+											Save
+										</Button>
+									</div>
+								</ModalContent>
+							</Modal>
+						</>
+					)}
+
 					{status === "authenticated" && session?.user ? (
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
@@ -321,7 +366,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 									Wishlist
 								</DropdownMenuItem>
 								<DropdownMenuItem
-									onClick={() => signOut()}
+									onClick={handleLogout}
 									className="text-green-600">
 									Log out
 								</DropdownMenuItem>
@@ -331,13 +376,11 @@ export default function Header({ categories }: { categories: Category[] }) {
 						<Button
 							variant="ghost"
 							size="icon"
-							onClick={() => {
-								router.replace("?auth=login", { scroll: false });
-								setIsAuthOpen(true);
-							}}>
+							onClick={() => setIsAuthOpen(true)}>
 							<User className="h-5 w-5" />
 						</Button>
 					)}
+
 					<Button
 						variant="ghost"
 						size="icon"
@@ -349,6 +392,45 @@ export default function Header({ categories }: { categories: Category[] }) {
 						</Badge>
 						<span className="sr-only">Cart</span>
 					</Button>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant="ghost"
+								size="icon"
+								className="hidden md:flex">
+								<Image
+									src={`/icons/${currentLocale === "en" ? "en" : "no"}.svg`}
+									alt="Language"
+									width={20}
+									height={20}
+								/>
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							<DropdownMenuItem onClick={() => handleLanguageChange("en")}>
+								<div className="flex items-center gap-2">
+									<Image
+										src="/icons/en.svg"
+										alt="English"
+										width={20}
+										height={20}
+									/>
+									English
+								</div>
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => handleLanguageChange("no")}>
+								<div className="flex items-center gap-2">
+									<Image
+										src="/icons/no.svg"
+										alt="Norwegian"
+										width={20}
+										height={20}
+									/>
+									Norsk
+								</div>
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
 					<Sheet
 						open={isSearchOpen}
 						onOpenChange={setIsSearchOpen}>
@@ -383,11 +465,13 @@ export default function Header({ categories }: { categories: Category[] }) {
 					</Sheet>
 				</div>
 			</div>
+
 			<div className="border-t">
 				<div className="container m-auto flex h-12 w-full items-center justify-between gap-4">
 					<CategoryNavigationMenu categories={categories} />
 				</div>
 			</div>
+
 			<AuthDialog
 				isOpen={isAuthOpen}
 				onOpenChange={setIsAuthOpen}
