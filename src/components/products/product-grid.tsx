@@ -5,8 +5,7 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { useProductFilter } from "@/hooks/useProductFilter";
 import { cn } from "@/lib/utils";
 import { FilterValues } from "@/types/filter.types";
-import { LayoutGrid } from "lucide-react";
-import { AlignJustify } from "lucide-react";
+import { LayoutGrid, AlignJustify, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -22,6 +21,12 @@ import {
 	SelectValue,
 } from "../ui/select";
 import { Skeleton } from "../ui/skeleton";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+	TooltipProvider,
+} from "../ui/tooltip";
 
 interface ProductGridProps {
 	variant?: "default" | "compact";
@@ -49,7 +54,6 @@ export function ProductGrid({
 	const pathname = usePathname();
 	const [isFiltering, setIsFiltering] = useState(false);
 	const [viewLayout, setViewLayout] = useState<string>("");
-	const [activeFilters, setActiveFilters] = useState<FilterValues[]>([]);
 	const observerTarget = useRef<HTMLDivElement>(null);
 	const [sort, setSort] = useState<string>("");
 
@@ -60,6 +64,8 @@ export function ProductGrid({
 		handleFilterChange,
 		loadMore,
 		handleSortChange,
+		selectedFilters,
+		removeFilter,
 	} = useProductFilter({
 		categoryNumber,
 		query,
@@ -75,16 +81,11 @@ export function ProductGrid({
 	);
 
 	useEffect(() => {
-		const applyFilters = async () => {
-			if (activeFilters.length > 0) {
-				setIsFiltering(true);
-				await handleFilterChange(activeFilters);
-				setIsFiltering(false);
-			}
-		};
-
-		applyFilters();
-	}, [activeFilters, handleFilterChange]);
+		// Reset isFiltering when loading is complete
+		if (!isLoading) {
+			setIsFiltering(false);
+		}
+	}, [isLoading]);
 
 	useEffect(() => {
 		const observer = new IntersectionObserver(
@@ -117,18 +118,61 @@ export function ProductGrid({
 
 	return (
 		<div className="flex flex-col gap-8 lg:flex-row">
-			{/* Sidebar Filter */}
+			{/* Sidebar */}
 			<aside className="lg:w-1/4">
 				<Filter
 					filters={filters}
+					className="sticky top-4"
+					variant="default"
+					size="default"
 					onFilterChange={(newFilters) => {
 						onFilterChange(newFilters);
 					}}
+					selectedFilters={selectedFilters}
 				/>
 			</aside>
 
 			{/* Product Grid */}
 			<div className="flex-1">
+				{/* Active Filters */}
+				{Object.keys(selectedFilters).length > 0 && (
+					<div className="mb-4 flex flex-wrap gap-2">
+						{Object.entries(selectedFilters).map(([key, values]) =>
+							values.map((value) => (
+								<div
+									key={`${key}-${value}`}
+									className="bg-primary/10 flex items-center gap-1 rounded-full px-3 py-1 text-sm">
+									<TooltipProvider>
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<div className="flex items-center gap-1">
+													<span className="max-w-[100px] truncate font-medium">
+														{key}:
+													</span>
+													<span className="max-w-[100px] truncate">
+														{value}
+													</span>
+												</div>
+											</TooltipTrigger>
+											<TooltipContent>
+												<p>
+													{key}: {value}
+												</p>
+											</TooltipContent>
+										</Tooltip>
+									</TooltipProvider>
+									<button
+										onClick={() => removeFilter(key, value)}
+										className="hover:bg-primary/20 ml-1 rounded-full p-0.5">
+										<X className="h-3 w-3" />
+									</button>
+								</div>
+							)),
+						)}
+					</div>
+				)}
+
+				{/* Controls */}
 				<div className="mb-4 flex items-center justify-between">
 					<Select
 						value={sort}
@@ -174,7 +218,7 @@ export function ProductGrid({
 					)}>
 					{isFiltering || isLoading ? (
 						<>
-							{[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+							{[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
 								<div
 									key={i}
 									className="group relative space-y-4">
@@ -226,7 +270,7 @@ export function ProductGrid({
 									: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
 								viewLayout === "list" && "lg:grid-cols-1",
 							)}>
-							{[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+							{[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
 								<div
 									key={i}
 									className="group relative space-y-4">
@@ -244,7 +288,7 @@ export function ProductGrid({
 				</div>
 
 				{/* No more products message */}
-				{!isLoading && !hasMore && products.length > 0 && (
+				{!isLoading && !hasMore && products.length > 9 && (
 					<div className="text-muted-foreground mt-8 text-center">
 						No more products to load
 					</div>

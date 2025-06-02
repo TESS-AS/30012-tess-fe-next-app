@@ -242,3 +242,24 @@ export async function searchProducts(
 		throw error;
 	}
 }
+
+export interface ProductAttributeResponse {
+	results: Array<{
+		productNumber: string;
+		matchedAttributes: string[];
+	}>;
+}
+
+export async function loadAttributes(
+	query: string,
+	productNumbers: string[],
+): Promise<ProductAttributeResponse> {
+	try {
+		const url = `/search/highlight/product?query=${encodeURIComponent(query)}&productNumbers=${encodeURIComponent(productNumbers.join(";"))}`;
+		const response = await axiosInstance.get<ProductAttributeResponse>(url);
+		return response.data;
+	} catch (error) {
+		console.error("Error loading product attributes:", error);
+		return { results: [] };
+	}
+}

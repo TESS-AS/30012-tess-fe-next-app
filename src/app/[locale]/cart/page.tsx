@@ -200,7 +200,6 @@ const CartPage = () => {
 						<TableBody>
 							{!isLoading &&
 								cartItems?.map((item, idx) => {
-									console.log(item, "itemqokla");
 									return (
 										<React.Fragment key={idx}>
 											<TableRow
@@ -220,10 +219,6 @@ const CartPage = () => {
 																	"L01",
 																	"01",
 																);
-															console.log(
-																productVariations,
-																"productVariations",
-															);
 															setVariations((prev) => ({
 																...prev,
 																[item.productNumber]: productVariations,

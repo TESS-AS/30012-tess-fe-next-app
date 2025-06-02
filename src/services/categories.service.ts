@@ -50,6 +50,7 @@ export async function loadFilters({
 
 		const url = `/attributeFilter/${params.toString() ? `?${params.toString()}` : ""}`;
 		const response = await axiosInstance.get(url);
+		console.log(response, "response");
 
 		filtersCache[cacheKey] = {
 			data: response.data,
@@ -60,5 +61,26 @@ export async function loadFilters({
 	} catch (error) {
 		console.error("Error loading filters", error);
 		return [];
+	}
+}
+
+interface ProductAttributeResponse {
+	results: Array<{
+		productNumber: string;
+		matchedAttributes: string[];
+	}>;
+}
+
+export async function loadAttributes(
+	query: string,
+	productNumbers: string[],
+): Promise<ProductAttributeResponse> {
+	try {
+		const url = `/search/highlight/product?query=${encodeURIComponent(query)}&productNumbers=${encodeURIComponent(productNumbers.join(";"))}`;
+		const response = await axiosInstance.get<ProductAttributeResponse>(url);
+		return response.data;
+	} catch (error) {
+		console.error("Error loading product attributes:", error);
+		return { results: [] };
 	}
 }

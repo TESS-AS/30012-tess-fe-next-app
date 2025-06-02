@@ -56,7 +56,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const [variations, setVariations] = useState<Record<string, any>>({});
 	const { cart } = useCart();
 
-	const { data, isLoading } = useSearch(searchQuery);
+	const { data, attributeResults, isLoading } = useSearch(searchQuery);
 
 	const searchRef = useClickOutside<HTMLDivElement>(() => {
 		setSearchQuery("");
@@ -65,8 +65,11 @@ export default function Header({ categories }: { categories: Category[] }) {
 
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();
+		if (searchQuery.trim()) {
+			router.push(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+		}
 		setIsSearchOpen(false);
-		setIsModalIdOpen(null);
+		setSearchQuery("");
 	};
 
 	const handleLanguageChange = (locale: string) => {
@@ -112,12 +115,11 @@ export default function Header({ categories }: { categories: Category[] }) {
 												<Link
 													key={idx}
 													href={`/search?query=${encodeURIComponent(s.keyword)}`}
-													className="block rounded-md p-2 text-sm hover:bg-gray-100"
 													onClick={() => {
 														setSearchQuery("");
 														setIsSearchOpen(false);
-														setIsModalIdOpen(null);
-													}}>
+													}}
+													className="block rounded-md p-2 text-sm hover:bg-gray-100">
 													{s.keyword}
 												</Link>
 											),
@@ -131,88 +133,105 @@ export default function Header({ categories }: { categories: Category[] }) {
 
 								<div className="col-span-2">
 									{data.productRes?.length ? (
-										data.productRes.map((product: IProductSearch) => (
-											<div key={product.productNumber}>
-												<div className="flex w-full items-center justify-between gap-4 rounded-md p-3 hover:bg-gray-100">
-													<Link
-														className="flex flex-[0.8] items-center justify-between gap-4"
-														href={`/product/product/${product.productNumber}`}
-														onClick={() => setSearchQuery("")}>
-														<div className="flex flex-col justify-center">
-															<span className="text-base font-medium">
-																{product.productName}
-															</span>
-															<span className="text-muted-foreground text-sm">
-																{product.productNumber}
-															</span>
-														</div>
-													</Link>
-													<div className="flex items-center gap-6">
-														<Button
-															variant="outline"
-															size="sm"
-															onClick={async (e) => {
-																e.preventDefault();
-																setIsModalIdOpen(product.productNumber);
-																const productVariations =
-																	await getProductVariations(
-																		product.productNumber,
-																		"L01",
-																		"01",
+										data.productRes.map((product: IProductSearch) => {
+											const attr = attributeResults.find(
+												(r) => r.productNumber === product.productNumber,
+											);
+											return (
+												<div key={product.productNumber}>
+													<div className="flex w-full items-center justify-between gap-4 rounded-md p-3 hover:bg-gray-100">
+														<Link
+															className="flex flex-[0.8] items-center justify-between gap-4"
+															href={`/product/product/${product.productNumber}`}
+															onClick={() => setSearchQuery("")}>
+															<div className="flex flex-col justify-center">
+																<span className="text-base font-medium">
+																	{product.productName}
+																</span>
+																<span className="text-muted-foreground text-sm">
+																	{product.productNumber}
+																</span>
+																{attr && attr.matchedAttributes.length > 0 && (
+																	<div className="mt-2 flex flex-wrap gap-1">
+																		{attr.matchedAttributes.map((a, i) => (
+																			<span
+																				key={i}
+																				className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-xs font-medium">
+																				{a}
+																			</span>
+																		))}
+																	</div>
+																)}
+															</div>
+														</Link>
+														<div className="flex items-center gap-6">
+															<Button
+																variant="outline"
+																size="sm"
+																type="button"
+																onClick={async (e) => {
+																	e.preventDefault();
+																	setIsModalIdOpen(product.productNumber);
+																	const productVariations =
+																		await getProductVariations(
+																			product.productNumber,
+																			"L01",
+																			"01",
+																		);
+																	console.log(
+																		productVariations,
+																		"productVariations",
 																	);
-																console.log(
-																	productVariations,
-																	"productVariations",
-																);
-																setVariations((prev) => ({
-																	...prev,
-																	[product.productNumber]: productVariations,
-																}));
-															}}>
-															<ShoppingCartIcon className="h-2 w-2" />
-														</Button>
-														<div className="flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md">
-															{product.media ? (
-																<Image
-																	src={product.media}
-																	alt={product.productName}
-																	width={64}
-																	height={64}
-																	className="max-h-16 max-w-16 object-contain"
-																/>
-															) : (
-																<div className="h-32 w-32 rounded bg-gray-300" />
-															)}
+																	setVariations((prev) => ({
+																		...prev,
+																		[product.productNumber]: productVariations,
+																	}));
+																}}>
+																<ShoppingCartIcon className="h-2 w-2" />
+															</Button>
+															<div className="flex h-16 w-16 min-w-16 items-center justify-center overflow-hidden rounded-md">
+																{product.media ? (
+																	<Image
+																		src={product.media}
+																		alt={product.productName}
+																		width={64}
+																		height={64}
+																		className="max-h-16 max-w-16 object-contain"
+																	/>
+																) : (
+																	<div className="h-32 w-32 rounded bg-gray-300" />
+																)}
+															</div>
 														</div>
 													</div>
+													<Modal
+														open={isModalIdOpen === product.productNumber}
+														onOpenChange={(open) => {
+															if (!open) {
+																setIsModalIdOpen(null);
+																setVariations((prev) => ({
+																	...prev,
+																	[product.productNumber]: [],
+																}));
+															}
+														}}>
+														<ModalContent className="sm:max-w-[900px]">
+															<ModalHeader>
+																<ModalTitle>
+																	Product Variants - {product.productName}
+																</ModalTitle>
+															</ModalHeader>
+															<div className="max-h-[70vh] overflow-y-auto px-1">
+																<ProductVariantTable
+																	variants={variations[product.productNumber]}
+																	productNumber={product.productNumber}
+																/>
+															</div>
+														</ModalContent>
+													</Modal>
 												</div>
-												<Modal
-													open={isModalIdOpen === product.productNumber}
-													onOpenChange={(open) => {
-														if (!open) {
-															setIsModalIdOpen(null);
-															setVariations((prev) => ({
-																...prev,
-																[product.productNumber]: [],
-															}));
-														}
-													}}>
-													<ModalContent className="sm:max-w-[900px]">
-														<ModalHeader>
-															<ModalTitle>
-																Product Variants - {product.productName}
-															</ModalTitle>
-														</ModalHeader>
-														<div className="max-h-[70vh] overflow-y-auto px-1">
-															<ProductVariantTable
-																variants={variations[product.productNumber]}
-																productNumber={product.productNumber}
-															/>
-														</div>
-													</ModalContent>
-												</Modal>
-											</div>
-										))
+											);
+										})
 									) : (
 										<p className="text-opacity-30 text-sm text-green-600">
 											{t("Search.noProductsFound")}
