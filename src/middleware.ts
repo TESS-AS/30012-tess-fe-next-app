@@ -54,7 +54,7 @@ export default auth((request) => {
 	const path = nextUrl.pathname;
 	const isApiAuthRoute = path.startsWith(apiAuthPrefix);
 	const isProtectedRoute = protectedRoutes.some((route) =>
-		path.split('/').includes(route),
+		path.split("/").includes(route),
 	);
 
 	if (isApiAuthRoute) {
@@ -78,5 +78,5 @@ export default auth((request) => {
 });
 
 export const config = {
-	matcher: ["/(en|fr|es)/((?!api|_next|...).*)"]
+	matcher: ["/(en|fr|es)/((?!api|_next|...).*)"],
 };

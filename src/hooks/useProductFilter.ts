@@ -17,8 +17,12 @@ export function useProductFilter({
 	const [isLoading, setIsLoading] = useState(true);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [hasMore, setHasMore] = useState(true);
-	const [currentFilters, setCurrentFilters] = useState<FilterValues[] | null>(null);
-	const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
+	const [currentFilters, setCurrentFilters] = useState<FilterValues[] | null>(
+		null,
+	);
+	const [selectedFilters, setSelectedFilters] = useState<
+		Record<string, string[]>
+	>({});
 	const [sort, setSort] = useState<string | null>(null);
 
 	useEffect(() => {

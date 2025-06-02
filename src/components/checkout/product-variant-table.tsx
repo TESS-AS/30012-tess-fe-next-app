@@ -146,7 +146,6 @@ export default function ProductVariantTable({
 		loadWarehousesData();
 	}, [variants]);
 
-
 	if (isLoading) {
 		return (
 			<div className="mt-4 space-y-4">

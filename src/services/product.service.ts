@@ -250,13 +250,16 @@ export interface ProductAttributeResponse {
 	}>;
 }
 
-export async function loadAttributes(query: string, productNumbers: string[]): Promise<ProductAttributeResponse> {
+export async function loadAttributes(
+	query: string,
+	productNumbers: string[],
+): Promise<ProductAttributeResponse> {
 	try {
-		const url = `/search/highlight/product?query=${encodeURIComponent(query)}&productNumbers=${encodeURIComponent(productNumbers.join(';'))}`;
+		const url = `/search/highlight/product?query=${encodeURIComponent(query)}&productNumbers=${encodeURIComponent(productNumbers.join(";"))}`;
 		const response = await axiosInstance.get<ProductAttributeResponse>(url);
 		return response.data;
 	} catch (error) {
-		console.error('Error loading product attributes:', error);
+		console.error("Error loading product attributes:", error);
 		return { results: [] };
 	}
 }

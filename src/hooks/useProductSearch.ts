@@ -1,14 +1,21 @@
-import { useState, useCallback, useEffect } from 'react';
-import axiosClient from '@/services/axiosClient';
-import { loadAttributes, ProductAttributeResponse } from '@/services/product.service';
-import { SearchResponse } from '@/types/search.types';
+import { useState, useCallback, useEffect } from "react";
+
+import axiosClient from "@/services/axiosClient";
+import {
+	loadAttributes,
+	ProductAttributeResponse,
+} from "@/services/product.service";
+import { SearchResponse } from "@/types/search.types";
 
 type DebouncedFunction<T extends (...args: any[]) => any> = {
 	(...args: Parameters<T>): void;
 	cancel: () => void;
-}
+};
 
-function debounce<T extends (...args: any[]) => any>(func: T, delay: number): DebouncedFunction<T> {
+function debounce<T extends (...args: any[]) => any>(
+	func: T,
+	delay: number,
+): DebouncedFunction<T> {
 	let timeoutId: NodeJS.Timeout;
 
 	const debouncedFn = function (...args: Parameters<T>) {
@@ -27,7 +34,9 @@ function debounce<T extends (...args: any[]) => any>(func: T, delay: number): De
 
 export function useSearch(query: string) {
 	const [data, setData] = useState<SearchResponse | null>(null);
-	const [attributeResults, setAttributeResults] = useState<ProductAttributeResponse['results']>([]);
+	const [attributeResults, setAttributeResults] = useState<
+		ProductAttributeResponse["results"]
+	>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<unknown>(null);
 
@@ -49,7 +58,9 @@ export function useSearch(query: string) {
 
 			// 2) If we have results, fetch their attributes
 			if (searchResults?.productRes?.length > 0) {
-				const productNumbers = searchResults.productRes.map((p) => p.productNumber);
+				const productNumbers = searchResults.productRes.map(
+					(p) => p.productNumber,
+				);
 				const attrResponse = await loadAttributes(searchQuery, productNumbers);
 				setAttributeResults(attrResponse.results);
 			} else {
@@ -65,7 +76,7 @@ export function useSearch(query: string) {
 
 	const debouncedFetchSearch = useCallback(
 		debounce((searchQuery: string) => fetchSearch(searchQuery), 100),
-		[fetchSearch]
+		[fetchSearch],
 	);
 
 	useEffect(() => {
