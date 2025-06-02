@@ -20,8 +20,8 @@ export default function Main({
 				autoHideDuration={10000}
 			/>
 			<Header categories={categories} />
-			<div className="bg-background h-[calc(100vh-80px)] overflow-x-hidden overflow-y-auto">
-				<div className="container mx-auto py-5">{children}</div>
+			<div className="bg-background h-[calc(100vh-114px)] overflow-x-hidden overflow-y-auto">
+				<div className="container mx-auto">{children}</div>
 			</div>
 		</div>
 	);

@@ -83,5 +83,9 @@
 		"privacy": "Privacy Policy",
 		"cookies": "Cookie Policy",
 		"rights": "All rights reserved."
+	},
+	"Cart": {
+		"archived": "Cart archived",
+		"errorArchiving": "Error archiving cart"
 	}
 }

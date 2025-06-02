@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 
 import { Footer } from "@/components/layouts/Footer/Footer";
 import Main from "@/components/layouts/Main/Main";
+import { AppContextProvider } from "@/lib/appContext";
 import { AuthProvider } from "@/lib/providers/AuthProvider";
 import { getSeoMetadata } from "@/lib/seo";
 import { mapCategoryTree } from "@/lib/utils";
@@ -49,21 +50,23 @@ export default async function RootLayout({
 					locale={locale}
 					messages={messages}>
 					<AuthProvider>
-						<ToastContainer
-							position="top-right"
-							autoClose={5000}
-							hideProgressBar
-							newestOnTop
-							closeOnClick
-							rtl={false}
-							pauseOnFocusLoss
-							draggable
-							pauseOnHover
-						/>
-						<Main categories={categories}>
-							{children}
-							<Footer />
-						</Main>
+						<AppContextProvider>
+							<ToastContainer
+								position="top-right"
+								autoClose={5000}
+								hideProgressBar
+								newestOnTop
+								closeOnClick
+								rtl={false}
+								pauseOnFocusLoss
+								draggable
+								pauseOnHover
+							/>
+							<Main categories={categories}>
+								{children}
+								<Footer />
+							</Main>
+						</AppContextProvider>
 					</AuthProvider>
 				</NextIntlClientProvider>
 			</body>

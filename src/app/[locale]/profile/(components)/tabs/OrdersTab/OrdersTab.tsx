@@ -62,7 +62,7 @@ export default function OrdersTab() {
 								<span>{new Date(order.date).toLocaleDateString()}</span>
 							</div>
 							<span className="mt-2 text-base font-semibold text-black md:mt-0">
-								{order.total.toFixed(2)} €
+								{order?.total?.toFixed(2)} €
 							</span>
 						</div>
 						<div className="flex flex-wrap gap-2 pt-2">

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 
 import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { Button } from "@/components/ui/button";
@@ -12,9 +12,10 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { useCart } from "@/hooks/useCart";
+import { useAppContext } from "@/lib/appContext";
 import {
 	archiveCart,
+	getCart,
 	removeFromCart,
 	updateCart,
 } from "@/services/carts.service";
@@ -28,6 +29,8 @@ import { PriceResponse } from "@/types/search.types";
 import { Loader2, Minus, Plus, Trash } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { toast } from "react-toastify";
 
 import CartSkeleton from "./loading";
 
@@ -63,6 +66,9 @@ const AnimatedTableRow = ({
 
 const CartPage = () => {
 	const router = useRouter();
+	const { isCartChanging, setIsCartChanging } = useAppContext();
+	const t = useTranslations();
+
 	const [isLoading, setIsLoading] = React.useState(true);
 	const [cartItems, setCartItems] = React.useState<CartLine[]>([]);
 	const [openItems, setOpenItems] = React.useState<boolean[]>([]);
@@ -78,16 +84,11 @@ const CartPage = () => {
 		Record<string, number>
 	>({}); // Store calculated prices
 
-	const { cart, isAuthenticated } = useCart();
-
-	const refreshCart = async () => {
-		setCartItems(cart);
-	};
-
-	React.useEffect(() => {
+	useEffect(() => {
 		const loadCartData = async () => {
 			try {
-				if (!isAuthenticated) {
+				const cart = await getCart();
+				if (!cart) {
 					return;
 				}
 				setIsLoading(true);
@@ -139,7 +140,7 @@ const CartPage = () => {
 		};
 
 		loadCartData();
-	}, [cart]);
+	}, []);
 
 	const subtotal = cartItems?.reduce(
 		(acc, item) =>
@@ -153,10 +154,21 @@ const CartPage = () => {
 
 	const handleArchiveCart = async () => {
 		try {
+			setIsLoading(true);
 			await archiveCart();
-			refreshCart();
+			await getCart();
+			setCartItems([]);
+			setIsCartChanging(!isCartChanging);
+			toast(t("Cart.archived"), {
+				type: "success",
+			});
 		} catch (error) {
 			console.error("Error archiving cart:", error);
+			toast(t("Cart.errorArchiving"), {
+				type: "error",
+			});
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
@@ -259,7 +271,7 @@ const CartPage = () => {
 												<TableCell className="text-muted-foreground">
 													<div className="flex flex-col">
 														<span>
-															Unit: ${(prices[item.itemNumber] || 0).toFixed(2)}
+															Unit: {prices[item.itemNumber]?.toFixed(2)},- kr
 														</span>
 													</div>
 												</TableCell>
@@ -302,7 +314,7 @@ const CartPage = () => {
 																					String(item.itemNumber),
 																			)?.basePriceTotal || 0,
 																	}));
-																	await refreshCart();
+																	await getCart();
 																} finally {
 																	setLoadingItems((prev) => ({
 																		...prev,
@@ -356,7 +368,7 @@ const CartPage = () => {
 																					String(item.itemNumber),
 																			)?.basePriceTotal || 0,
 																	}));
-																	await refreshCart();
+																	await getCart();
 																} finally {
 																	setLoadingItems((prev) => ({
 																		...prev,
@@ -373,7 +385,7 @@ const CartPage = () => {
 													</div>
 												</TableCell>
 												<TableCell>
-													${calculatedPrices[item.itemNumber]}
+													{calculatedPrices[item.itemNumber]?.toFixed(2)},- kr
 												</TableCell>
 												<TableCell className="text-right">
 													<Button
@@ -388,7 +400,7 @@ const CartPage = () => {
 															}));
 															try {
 																await removeFromCart(Number(item.cartLine));
-																await refreshCart();
+																await getCart();
 															} finally {
 																setRemovingItems((prev) => ({
 																	...prev,
@@ -424,7 +436,7 @@ const CartPage = () => {
 						<div className="mt-4 space-y-4 text-sm">
 							<div className="flex justify-between">
 								<span>Subtotal</span>
-								<span>${subtotal.toFixed(2)}</span>
+								<span>{subtotal.toFixed(2)},- kr</span>
 							</div>
 							<div className="flex justify-between">
 								<span>Shipping</span>

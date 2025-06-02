@@ -32,13 +32,15 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useCart } from "@/hooks/useCart";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useSearch } from "@/hooks/useProductSearch";
 import { useRouter } from "@/i18n/navigation";
+import { useAppContext } from "@/lib/appContext";
 import axiosClient from "@/services/axiosClient";
+import { getCart } from "@/services/carts.service";
 import { getProductVariations } from "@/services/product.service";
+import { CartLine } from "@/types/carts.types";
 import { Category } from "@/types/categories.types";
 import { IProductSearch, ISuggestions } from "@/types/search.types";
 import { Search, ShoppingCart, ShoppingCartIcon, User } from "lucide-react";
@@ -63,9 +65,17 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
 	const [newCustomerNumber, setNewCustomerNumber] = useState("");
 	const [variations, setVariations] = useState<Record<string, any>>({});
-	const { cart } = useCart();
-
 	const { data, attributeResults, isLoading } = useSearch(searchQuery);
+	const [cart, setCart] = useState<CartLine[]>([]);
+	const { isCartChanging } = useAppContext();
+
+	useEffect(() => {
+		async function loadCart() {
+			const cart = await getCart();
+			setCart(cart);
+		}
+		loadCart();
+	}, [isCartChanging]);
 
 	const searchRef = useClickOutside<HTMLDivElement>(() => {
 		setSearchQuery("");
