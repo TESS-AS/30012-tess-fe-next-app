@@ -28,8 +28,11 @@ import { PriceResponse } from "@/types/search.types";
 import { Loader2, Minus, Plus, Trash } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useAppContext } from "@/lib/appContext";
 
 import CartSkeleton from "./loading";
+import { toast } from "react-toastify";
+import { useTranslations } from "next-intl";
 
 const AnimatedTableRow = ({
 	isOpen,
@@ -63,6 +66,9 @@ const AnimatedTableRow = ({
 
 const CartPage = () => {
 	const router = useRouter();
+	const { isCartChanging, setIsCartChanging } = useAppContext();
+	const t = useTranslations()
+
 	const [isLoading, setIsLoading] = React.useState(true);
 	const [cartItems, setCartItems] = React.useState<CartLine[]>([]);
 	const [openItems, setOpenItems] = React.useState<boolean[]>([]);
@@ -148,10 +154,21 @@ const CartPage = () => {
 
 	const handleArchiveCart = async () => {
 		try {
+			setIsLoading(true);
 			await archiveCart();
 			await getCart();
+			setCartItems([]);
+			setIsCartChanging(!isCartChanging);
+			toast(t('Cart.archived'), {
+				type: "success",
+			});
 		} catch (error) {
 			console.error("Error archiving cart:", error);
+			toast(t('Cart.errorArchiving'), {
+				type: "error",
+			});
+		} finally {	
+			setIsLoading(false);
 		}
 	};
 
