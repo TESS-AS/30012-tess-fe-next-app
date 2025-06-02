@@ -36,7 +36,9 @@ import { useClickOutside } from "@/hooks/useClickOutside";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useSearch } from "@/hooks/useProductSearch";
 import { useRouter } from "@/i18n/navigation";
+import { useAppContext } from "@/lib/appContext";
 import axiosClient from "@/services/axiosClient";
+import { getCart } from "@/services/carts.service";
 import { getProductVariations } from "@/services/product.service";
 import { CartLine } from "@/types/carts.types";
 import { Category } from "@/types/categories.types";
@@ -46,8 +48,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
-import { getCart } from "@/services/carts.service";
-import { useAppContext } from "@/lib/appContext";
 
 export default function Header({ categories }: { categories: Category[] }) {
 	const currentLocale = useLocale();

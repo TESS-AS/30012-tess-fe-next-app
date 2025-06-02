@@ -19,6 +19,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useAppContext } from "@/lib/appContext";
 import { addToCart, getCart } from "@/services/carts.service";
 import {
 	getItemWarehouseBalance,
@@ -29,7 +30,6 @@ import { Minus, Plus, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
-import { useAppContext } from "@/lib/appContext";
 
 interface Warehouse {
 	warehouseNumber: string;
@@ -212,7 +212,9 @@ export default function ProductVariantTable({
 								<TableCell>{variant.itemNumber}</TableCell>
 								<TableCell>{variant.unspsc || "-"}</TableCell>
 								<TableCell>{variant.contentUnit}</TableCell>
-								<TableCell>{prices[variant.itemNumber]?.toFixed(2) || "0.00"},- kr</TableCell>
+								<TableCell>
+									{prices[variant.itemNumber]?.toFixed(2) || "0.00"},- kr
+								</TableCell>
 								<TableCell>
 									<div className="flex items-center gap-2">
 										<Button

@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 
 import { Footer } from "@/components/layouts/Footer/Footer";
 import Main from "@/components/layouts/Main/Main";
+import { AppContextProvider } from "@/lib/appContext";
 import { AuthProvider } from "@/lib/providers/AuthProvider";
 import { getSeoMetadata } from "@/lib/seo";
 import { mapCategoryTree } from "@/lib/utils";
@@ -12,7 +13,6 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import "../globals.css";
 import { ToastContainer } from "react-toastify";
-import { AppContextProvider } from "@/lib/appContext";
 
 export async function generateMetadata({
 	params,
