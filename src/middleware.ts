@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import createIntlMiddleware from "next-intl/middleware";
 
 import { auth } from "../auth";
-import { routing } from "./i18n/routing";
 
 const protectedRoutes = ["profile"];
 const apiAuthPrefix = "/api/auth";
@@ -47,7 +45,6 @@ function rewriteProductUrls(request: NextRequest) {
 }
 
 export default auth((request) => {
-	// First check authentication
 	const { nextUrl } = request;
 	const isLoggedIn = !!request.auth;
 
@@ -66,17 +63,14 @@ export default auth((request) => {
 		return NextResponse.redirect(new URL(`/${locale}/login`, nextUrl));
 	}
 
-	// Handle URL rewrites first
 	const rewriteResponse = rewriteProductUrls(request);
 	if (rewriteResponse) {
 		return rewriteResponse;
 	}
 
-	// Then handle internationalization
-	const intlMiddleware = createIntlMiddleware(routing);
-	return intlMiddleware(request);
+	return NextResponse.next();
 });
 
 export const config = {
-	matcher: ["/((?!_next|favicon.ico|api|.*\\..*).*)"],
+	matcher: ["/", "/((?!api|_next|_vercel|.*\\..*).*)"],
 };
