@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
+
 import { auth } from "../auth";
 
 // Route groups
@@ -59,7 +60,7 @@ export default auth((request) => {
 	// Check authentication
 	const isLoggedIn = !!request.auth;
 	const isProtected = protectedRoutes.some((route) =>
-		path.split("/").includes(route)
+		path.split("/").includes(route),
 	);
 
 	if (isProtected && !isLoggedIn) {
