@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { auth } from "../auth";
-import { routing } from "./i18n/routing";
 
 // Route groups
 const protectedRoutes = ["profile"];
@@ -83,5 +82,5 @@ export default auth((request) => {
 
 // Only apply to non-static, non-api, non-next routes
 export const config = {
-	matcher: ["/((?!_next|favicon.ico|api|.*\\..*).*)"],
+	matcher: ["/", "/((?!api|_next|_vercel|.*\\..*).*)"],
 };
