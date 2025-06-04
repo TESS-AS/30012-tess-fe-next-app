@@ -75,7 +75,7 @@ export function useSearch(query: string) {
 	}, []);
 
 	const debouncedFetchSearch = useCallback(
-		debounce((searchQuery: string) => fetchSearch(searchQuery), 100),
+		debounce((searchQuery: string) => fetchSearch(searchQuery), 15),
 		[fetchSearch],
 	);
 
