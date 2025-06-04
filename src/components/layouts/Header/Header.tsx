@@ -74,7 +74,9 @@ export default function Header({ categories }: { categories: Category[] }) {
 			const cart = await getCart();
 			setCart(cart);
 		}
-		loadCart();
+		if(status === "authenticated"){
+			loadCart();
+		}
 	}, [isCartChanging]);
 
 	const searchRef = useClickOutside<HTMLDivElement>(() => {

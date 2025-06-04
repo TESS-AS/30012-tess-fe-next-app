@@ -1,43 +1,48 @@
-interface Address {
-	addressName: string;
+export interface Address {
+	name: string;
 	addressLine1: string;
 	addressLine2: string;
 	addressLine3: string;
-	city: string;
 	postalCode: string;
-	countryCode: string;
+	partyQualifier: string;
+	country: string;
 }
 
-interface OrderHeader {
-	orderType?: string;
-	customerNo: string;
-	warehouseNumber: string;
-	customerReference1?: string;
-	customerReference2?: string;
-	deliveryTerms: string;
-	paymentTerms: string;
+export interface SalesOrderHeader {
+	customerReference: string;
+	customersOrderNumberEdifact: string;
+	customerNumber: string;
+	dispatchDate: string;
+	orderType: string;
+	customersOrderReference: string;
+	warehouseId: string;
+	termsOfDelivery: string;
+	termsOfPayment: string;
+	paidAmount: number;
+	cashRegister: string;
+	text: string;
 }
 
 interface OrderLines {
-	orderLineType: string;
-	itemNumber: string;
-	unit: string;
-	quantity: number;
-	salesPrice: number;
-	customerReference3: string;
-	customerReference4: string;
-	customerReference5: string;
+	warehouseId: string,
+	orderType: string,
+	itemCode: string,
+	orderedQuantity: number,
+	salesPrice: number,
+	requestedDeliveryDate: string,
+	accountPart3: string,
+	accountPart4: string,
+	accountPart5: string,
+	text: string
 }
 
 export interface Order {
-	source: string;
-	companyNumber: string;
-	sequenceNo: string;
-	orderDate: string;
-	orderTime: string;
-	header: OrderHeader;
-	address: Address;
-	lines: OrderLines[];
+	documentControl: {
+		companyCode: string;
+	},
+	salesOrderHeader: SalesOrderHeader,
+	salesOrderAddresses: Address[],
+	salesOrderLines: OrderLines[],
 }
 
 export type PaymentMethod = "card" | "paypal";

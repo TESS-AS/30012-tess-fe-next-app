@@ -7,10 +7,16 @@ export interface CreateCustomerDimensions {
 export interface CreateUserDimensions {
     userId: number;
     customerNumber: string;
-    dimension1Id: number[];
-    dimension2Id: number[];
-    dimension3Id: number[];
-    dimension1Label: string;
-    dimension2Label: string;
-    dimension3Label: string;
+    [key: string]: string | number | number[]; // dynamic support for dimension keys
+}
+
+export interface UserDimensionsResponse {
+    userId: number;
+    customerId: number;
+    customerNumber: string;
+    [key: string]: any; // allows dynamic dimension keys like dimension1, dimension2...
+}
+
+export interface CustomerDimension {
+    [key: string]: string | number;
 }

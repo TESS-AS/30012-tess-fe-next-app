@@ -1,35 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { checkoutProducts } from "@/mocks/mockCheckoutProducts";
 import { ExternalLink } from "lucide-react";
 import Image from "next/image";
 import { toast } from "react-toastify";
 
 import { Modal, ModalContent, ModalHeader, ModalTitle } from "../ui/modal";
+import { useAppContext } from "@/lib/appContext";
+import { getCart } from "@/services/carts.service";
+import { CartLine } from "@/types/carts.types";
 
 export default function OrderSummary() {
-	const [openModalId, setOpenModalId] = useState<number | null>(null);
+	const [openModalId, setOpenModalId] = useState<string | null>(null);
+	const [cartItems, setCartItems] = useState<CartLine[]>([]);
+	useEffect(() => {
+		async function loadCart() {	
+			const cart = await getCart();
+			setCartItems(cart);
+		}
+		loadCart();
+	}, [])
 
 	return (
 		<div className="h-fit w-full rounded-md border bg-white p-6 shadow-sm md:sticky md:top-6">
 			<div className="mb-4 flex items-center justify-between">
-				<h2 className="text-lg font-semibold">Bag (2)</h2>
+				<h2 className="text-lg font-semibold">Bag ({cartItems.length})</h2>
 				<span className="text-sm font-medium">$306.34</span>
 			</div>
 
-			{checkoutProducts.map((product) => (
+			{cartItems.map((product) => (
 				<div
-					key={product.id}
+					key={product.productNumber}
 					className="mb-4 flex justify-between gap-4 border-b pb-4">
 					<div className="flex gap-4">
 						<div className="relative h-32 w-34 overflow-hidden rounded border">
 							<Image
-								src={product.image}
+								src={product.mediaId?.[0].url || ""}
 								alt="Product"
 								fill
 								className="object-cover"
@@ -37,8 +47,8 @@ export default function OrderSummary() {
 						</div>
 						<div className="flex flex-col justify-between text-sm">
 							<div>
-								<p className="font-medium">{product.name}</p>
-								<p className="text-muted-foreground">{product.details}</p>
+								<p className="font-medium">{product.productName}</p>
+								{/* <p className="text-muted-foreground">{product.productDetails}</p> */}
 							</div>
 							<div className="mt-2 flex items-center gap-2">
 								<Button
@@ -60,15 +70,15 @@ export default function OrderSummary() {
 						<Button
 							variant="outline"
 							size="sm"
-							onClick={() => setOpenModalId(product.id)}>
+							onClick={() => setOpenModalId(product.productNumber)}>
 							<ExternalLink />
 						</Button>
 						<Modal
-							open={openModalId === product.id}
-							onOpenChange={(open) => setOpenModalId(open ? product.id : null)}>
+							open={openModalId === product.productNumber}
+							onOpenChange={(open) => setOpenModalId(open ? product.productNumber : null)}>
 							<ModalContent>
 								<ModalHeader>
-									<ModalTitle>Product Variants - {product.name}</ModalTitle>
+									<ModalTitle>Product Variants - {product.productName}</ModalTitle>
 								</ModalHeader>
 								{/* <ProductVariantTable
 									variants={[]}

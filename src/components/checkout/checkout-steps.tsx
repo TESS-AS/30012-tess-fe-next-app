@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { companyFields, shippingFields } from "@/constants/checkout";
-import { Order, PaymentMethod } from "@/types/orders.types";
+import { companyFields, referenceFields, shippingFields } from "@/constants/checkout";
+import { Address, Order, PaymentMethod } from "@/types/orders.types";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import { CreditCard } from "lucide-react";
 import Image from "next/image";
@@ -15,56 +15,78 @@ import Image from "next/image";
 import styles from "./checkout-steps.module.css";
 import { FormField } from "./form-field";
 import { StepHeader } from "./step-header";
+import { CartLine } from "@/types/carts.types";
+import { getCart } from "@/services/carts.service";
+import { salesOrder } from "@/services/orders.service";
 
 // Main component
 export default function CheckoutSteps() {
 	const [openStep, setOpenStep] = useState(1);
 	const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>();
-	const [orderData, setOrderData] = useState<
-		Partial<Order> & {
-			header: { companyName?: string; warehouseName?: string };
-		}
-	>({
-		source: "EC",
-		companyNumber: "01",
-		sequenceNo: "12345678",
-		orderDate: "2025-01-01",
-		orderTime: "12:12:00",
-		header: {
-			customerNo: "CUST123",
-			warehouseNumber: "L10",
-			companyName: "Test Company AS",
-			warehouseName: "Oslo Warehouse",
-			deliveryTerms: "Standard",
-			paymentTerms: "Net 30",
+	const [orderData, setOrderData] = useState<Order>({
+		documentControl: {
+			companyCode: "01",
 		},
-		address: {
-			addressName: "",
-			addressLine1: "",
-			addressLine2: "",
-			addressLine3: "",
-			city: "",
-			postalCode: "",
-			countryCode: "NO",
+		salesOrderHeader: {
+			customerReference: "",
+			customersOrderNumberEdifact: "",
+			customerNumber: "",
+			dispatchDate: "",
+			orderType: "",
+			customersOrderReference: "",
+			warehouseId: "",
+			termsOfDelivery: "",
+			termsOfPayment: "",
+			paidAmount: 0,
+			cashRegister: "",
+			text: "",
 		},
+		salesOrderAddresses: [],
+		salesOrderLines: [],
 	});
+	const [cartItems, setCartItems] = useState<CartLine[]>([]);
 
-	const handleAddressChange = (field: string, value: string) => {
-		setOrderData((prev) => ({
-			...prev,
-			address: {
-				...prev.address!,
-				[field]: value,
-			},
-		}));
+	
+	useEffect(() => {
+		async function loadCart() {	
+			const cart = await getCart();
+			setCartItems(cart);
+		}
+		loadCart();	
+	}, [])
+
+
+	const handleAddressChange = (field: keyof Address, value: string) => {
+		setOrderData((prev) => {
+			const existingAddress = prev.salesOrderAddresses[0] || {
+				name: "",
+				addressLine1: "",
+				addressLine2: "",
+				addressLine3: "",
+				postalCode: "",
+				partyQualifier: "DP",
+				country: "NO",
+			};
+	
+			return {
+				...prev,
+				salesOrderAddresses: [
+					{
+						...existingAddress,
+						[field]: value,
+					},
+				],
+			};
+		});
 	};
+	
 
 	const isStepValid = (step: number) => {
 		if (step === 1) {
 			return shippingFields
 				.filter((f) => f.required)
 				.every(
-					(f) => orderData.address?.[f.field as keyof typeof orderData.address],
+					(f) => orderData.salesOrderAddresses[0]?.[f.field as keyof typeof orderData.salesOrderAddresses[0]],
 				);
 		}
 		if (step === 2) {
@@ -73,18 +95,36 @@ export default function CheckoutSteps() {
 		return true;
 	};
 
-	const handleSubmit = () => {
-		const finalOrderData: Partial<Order> = {
+	const handleSubmit = async () => {
+		const payload: Order = {
 			...orderData,
-			source: "EC",
+			documentControl: {
+				companyCode: "01",
+			},
+			salesOrderHeader: {
+				...orderData.salesOrderHeader,
+				customerReference: "", // Dimension 1
+				customersOrderReference: "", // Dimension 2
+			},
+			salesOrderAddresses: orderData.salesOrderAddresses,
+			salesOrderLines: cartItems.map((item) => ({
+				warehouseId: "",
+				orderType: "",
+				itemCode: item?.productNumber || "",
+				orderedQuantity: item.quantity,
+				salesPrice: item.price || 0,
+				requestedDeliveryDate: "",
+				accountPart3: "", // Dimension 3
+				accountPart4: "",
+				accountPart5: "",
+				text: ""
+			}))
 		};
-		// Here you would integrate with your payment gateway based on paymentMethod
-		if (paymentMethod === "card") {
-			// Redirect to card payment gateway
-			console.log("Redirecting to card payment...");
-		} else {
-			// Redirect to PayPal
-			console.log("Redirecting to PayPal...");
+		try {
+			await salesOrder(payload);
+			console.log("Order sent successfully!");
+		} catch (error) {
+			console.error("Order submission failed:", error);
 		}
 	};
 
@@ -110,8 +150,8 @@ export default function CheckoutSteps() {
 								key={field.id}
 								{...field}
 								value={
-									orderData.header?.[
-										field.field as keyof typeof orderData.header
+									orderData.documentControl?.[
+										field.field as keyof typeof orderData.documentControl
 									] || ""
 								}
 								onChange={() => {}}
@@ -122,11 +162,23 @@ export default function CheckoutSteps() {
 								key={field.id}
 								{...field}
 								value={
-									orderData.address?.[
-										field.field as keyof typeof orderData.address
-									] || ""
+									orderData.salesOrderAddresses[0]?.[
+										field.field as keyof Address
+									] ?? ""
 								}
-								onChange={(value) => handleAddressChange(field.field, value)}
+								onChange={(value) =>
+									handleAddressChange(field.field as keyof Address, value)
+								}
+							/>
+						))}
+						{referenceFields.map((field) => (
+							<FormField
+								key={field.id}
+								{...field}
+								value={(orderData as any)[field.field] || ""}
+								onChange={(value) =>
+									setOrderData((prev) => ({ ...prev, [field.field]: value }))
+								}
 							/>
 						))}
 					</div>
