@@ -1,29 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ExternalLink } from "lucide-react";
 import Image from "next/image";
-import { toast } from "react-toastify";
 
 import { Modal, ModalContent, ModalHeader, ModalTitle } from "../ui/modal";
 import { useAppContext } from "@/lib/appContext";
-import { getCart } from "@/services/carts.service";
-import { CartLine } from "@/types/carts.types";
 
 export default function OrderSummary() {
+
+	const { cartItems } = useAppContext();
 	const [openModalId, setOpenModalId] = useState<string | null>(null);
-	const [cartItems, setCartItems] = useState<CartLine[]>([]);
-	useEffect(() => {
-		async function loadCart() {	
-			const cart = await getCart();
-			setCartItems(cart);
-		}
-		loadCart();
-	}, [])
+	
 
 	return (
 		<div className="h-fit w-full rounded-md border bg-white p-6 shadow-sm md:sticky md:top-6">

@@ -15,12 +15,12 @@ import Image from "next/image";
 import styles from "./checkout-steps.module.css";
 import { FormField } from "./form-field";
 import { StepHeader } from "./step-header";
-import { CartLine } from "@/types/carts.types";
-import { getCart } from "@/services/carts.service";
 import { salesOrder } from "@/services/orders.service";
+import { useAppContext } from "@/lib/appContext";
 
 // Main component
 export default function CheckoutSteps() {
+	const { cartItems } = useAppContext();	
 	const [openStep, setOpenStep] = useState(1);
 	const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>();
 	const [orderData, setOrderData] = useState<Order>({
@@ -44,17 +44,6 @@ export default function CheckoutSteps() {
 		salesOrderAddresses: [],
 		salesOrderLines: [],
 	});
-	const [cartItems, setCartItems] = useState<CartLine[]>([]);
-
-	
-	useEffect(() => {
-		async function loadCart() {	
-			const cart = await getCart();
-			setCartItems(cart);
-		}
-		loadCart();	
-	}, [])
-
 
 	const handleAddressChange = (field: keyof Address, value: string) => {
 		setOrderData((prev) => {

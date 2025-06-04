@@ -66,18 +66,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const [newCustomerNumber, setNewCustomerNumber] = useState("");
 	const [variations, setVariations] = useState<Record<string, any>>({});
 	const { data, attributeResults, isLoading } = useSearch(searchQuery);
-	const [cart, setCart] = useState<CartLine[]>([]);
-	const { isCartChanging } = useAppContext();
-
-	useEffect(() => {
-		async function loadCart() {
-			const cart = await getCart();
-			setCart(cart);
-		}
-		if(status === "authenticated"){
-			loadCart();
-		}
-	}, [isCartChanging]);
+	const { cartItems } = useAppContext();
 
 	const searchRef = useClickOutside<HTMLDivElement>(() => {
 		setSearchQuery("");
@@ -400,7 +389,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 						onClick={() => router.push("/cart")}>
 						<ShoppingCart className="h-5 w-5" />
 						<Badge className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full p-0">
-							{cart?.length}
+							{cartItems?.length}
 						</Badge>
 						<span className="sr-only">Cart</span>
 					</Button>

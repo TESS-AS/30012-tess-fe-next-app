@@ -33,7 +33,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		if (status === "authenticated") {
 			loadCartData();
 		}
-	}, [status]);
+	}, [status, isCartChanging]);
 
 	return (
 		<AppContext.Provider value={{ isCartChanging, setIsCartChanging, cartItems, setCartItems }}>

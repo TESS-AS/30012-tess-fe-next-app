@@ -29,6 +29,7 @@ import { PriceResponse } from "@/types/search.types";
 import { Loader2, Minus, Plus, Trash } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
@@ -68,6 +69,10 @@ const CartPage = () => {
 	const router = useRouter();
 	const { isCartChanging, setIsCartChanging } = useAppContext();
 	const t = useTranslations();
+	const { status } = useSession() as {
+		data: any;
+		status: "loading" | "authenticated" | "unauthenticated";
+	};
 
 	const [isLoading, setIsLoading] = React.useState(true);
 	const [cartItems, setCartItems] = React.useState<CartLine[]>([]);
@@ -84,63 +89,68 @@ const CartPage = () => {
 		Record<string, number>
 	>({}); // Store calculated prices
 
-	useEffect(() => {
-		const loadCartData = async () => {
-			try {
-				const cart = await getCart();
-				if (!cart) {
-					return;
-				}
-				setIsLoading(true);
-				setCartItems(cart);
-
-				// Get base prices
-				for (const item of cart) {
-					const priceData = await getProductPrice(
-						"169999",
-						"01",
-						item.productNumber,
-					);
-					setPrices((prev) => ({
-						...prev,
-						[item.itemNumber]:
-							priceData?.find(
-								(p: PriceResponse) => p.itemNumber === String(item.itemNumber),
-							)?.basePrice || 0,
-					}));
-				}
-
-				// Calculate initial prices for all items
-				const priceRequests = cart?.map((item) => ({
-					itemNumber: item.itemNumber,
-					quantity: item.quantity,
-					warehouseNumber: "L01",
-				}));
-
-				if (priceRequests.length > 0) {
-					const priceResults = await calculateItemPrice(
-						priceRequests,
-						"169999",
-						"01",
-					);
-					const newPrices = priceResults.reduce(
-						(acc: Record<string, number>, item: PriceResponse) => ({
-							...acc,
-							[item.itemNumber]: item.basePriceTotal || 0,
-						}),
-						{} as Record<string, number>,
-					);
-					setCalculatedPrices(newPrices);
-				}
-			} catch (error) {
-				console.error("Error fetching cart:", error);
-			} finally {
-				setIsLoading(false);
+	const loadCartData = async () => {
+		try {
+			const cart = await getCart();
+			if (!cart) {
+				return;
 			}
-		};
+			setIsLoading(true);
+			setCartItems(cart);
 
-		loadCartData();
-	}, []);
+			// Get base prices
+			for (const item of cart) {
+				const priceData = await getProductPrice(
+					"169999",
+					"01",
+					item.productNumber,
+				);
+				setPrices((prev) => ({
+					...prev,
+					[item.itemNumber]:
+						priceData?.find(
+							(p: PriceResponse) => p.itemNumber === String(item.itemNumber),
+						)?.basePrice || 0,
+				}));
+			}
+
+			// Calculate initial prices for all items
+			const priceRequests = cart?.map((item) => ({
+				itemNumber: item.itemNumber,
+				quantity: item.quantity,
+				warehouseNumber: "L01",
+			}));
+
+			if (priceRequests.length > 0) {
+				const priceResults = await calculateItemPrice(
+					priceRequests,
+					"169999",
+					"01",
+				);
+				const newPrices = priceResults.reduce(
+					(acc: Record<string, number>, item: PriceResponse) => ({
+						...acc,
+						[item.itemNumber]: item.basePriceTotal || 0,
+					}),
+					{} as Record<string, number>,
+				);
+				setCalculatedPrices(newPrices);
+			}
+		} catch (error) {
+			console.error("Error fetching cart:", error);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+	
+	useEffect(() => {
+
+		if (status === "authenticated") {
+			loadCartData();
+		} else {
+			setCartItems([]);
+		}
+	}, [status]);
 
 	const subtotal = cartItems?.reduce(
 		(acc, item) =>
@@ -314,7 +324,7 @@ const CartPage = () => {
 																					String(item.itemNumber),
 																			)?.basePriceTotal || 0,
 																	}));
-																	await getCart();
+																	await loadCartData();
 																} finally {
 																	setLoadingItems((prev) => ({
 																		...prev,
@@ -368,7 +378,7 @@ const CartPage = () => {
 																					String(item.itemNumber),
 																			)?.basePriceTotal || 0,
 																	}));
-																	await getCart();
+																	await loadCartData();
 																} finally {
 																	setLoadingItems((prev) => ({
 																		...prev,
@@ -400,7 +410,8 @@ const CartPage = () => {
 															}));
 															try {
 																await removeFromCart(Number(item.cartLine));
-																await getCart();
+																await loadCartData();
+																setIsCartChanging(!isCartChanging);
 															} finally {
 																setRemovingItems((prev) => ({
 																	...prev,
