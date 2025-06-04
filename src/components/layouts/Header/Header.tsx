@@ -127,8 +127,8 @@ export default function Header({ categories }: { categories: Category[] }) {
 							onChange={(e) => setSearchQuery(e.target.value)}
 						/>
 						{searchQuery && data && (
-							<div className="absolute top-full left-0 z-50 z-[999] mt-2 grid max-h-[400px] w-[650px] grid-cols-3 gap-4 overflow-y-auto rounded-md bg-white p-4 shadow-lg">
-								<div className="col-span-1">
+							<div className="fixed top-16 left-1/2 z-[9999] grid max-h-[80vh] w-[80vw] -translate-x-1/2 grid-cols-3 gap-4 overflow-y-auto border-t bg-white p-4 shadow-lg">
+								<div className="col-span-1 border-r border-gray-200 pr-4">
 									<h4 className="mb-2 text-sm font-semibold">
 										{t("Search.suggestions")}
 									</h4>
@@ -162,7 +162,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 											);
 											return (
 												<div key={product.productNumber}>
-													<div className="flex w-full items-center justify-between gap-4 rounded-md p-3 hover:bg-gray-100">
+													<div className="flex w-full items-center justify-between gap-4 border-b p-3 hover:bg-gray-100">
 														<Link
 															className="flex flex-[0.8] items-center justify-between gap-4"
 															href={`/product/product/${product.productNumber}`}
