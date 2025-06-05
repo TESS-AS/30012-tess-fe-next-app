@@ -181,7 +181,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 													<div className="flex w-full items-center justify-between gap-4 border-b p-3 hover:bg-gray-100">
 														<Link
 															className="flex flex-[0.8] items-center justify-between gap-4"
-															href={`/product/product/${product.productNumber}`}
+															href={`/product/product/product/product/${product.productNumber}`}
 															onClick={() => setSearchQuery("")}>
 															<div className="flex flex-col justify-center">
 																<span className="text-base font-medium">
