@@ -9,6 +9,9 @@ export const { auth, handlers } = NextAuth({
 			issuer: process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER,
 		}),
 	],
+	session: {
+		strategy: "jwt",
+	},
 	callbacks: {
 		async jwt({ token, account }: any) {
 			if (account) {
