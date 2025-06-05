@@ -2,7 +2,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IAttribute } from "@/types/product.types";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "react-i18next";
 
 interface ProductDetailsProps {
 	description?: string;
@@ -21,7 +21,7 @@ export function ProductDetails({
 	users,
 	remarks,
 }: ProductDetailsProps) {
-	const t = useTranslations();
+	const {t} = useTranslation('common');
 
 	return (
 		<Tabs

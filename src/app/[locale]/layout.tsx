@@ -9,10 +9,9 @@ import { mapCategoryTree } from "@/lib/utils";
 import axiosServer from "@/services/axiosServer";
 import type { Category, RawCategory } from "@/types/categories.types";
 import { notFound } from "next/navigation";
-import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
 import "../globals.css";
 import { ToastContainer } from "react-toastify";
+import '../../lib/i18n';
 
 export async function generateMetadata({
 	params,
@@ -29,46 +28,37 @@ export default async function RootLayout({
 	children: ReactNode;
 	params: { locale: string };
 }) {
-	const locale = await getLocale();
-	const messages = await getMessages();
-	const supportedLocales = ["en", "no"];
+	const supportedLocales = ["no", "en"];
 
-	if (!supportedLocales.includes(locale)) {
-		notFound();
-	}
 
 	const res = await axiosServer.get(`/categories`);
 	const raw: RawCategory[] = res.data;
 	const categories: Category[] = raw.map((node) =>
-		mapCategoryTree(node, locale),
+		mapCategoryTree(node, supportedLocales[0]),
 	);
 
 	return (
-		<html lang={locale ?? "no"}>
+		<html lang={supportedLocales[0]}>
 			<body className="overflow-hidden">
-				<NextIntlClientProvider
-					locale={locale}
-					messages={messages}>
-					<AuthProvider>
-						<AppContextProvider>
-							<ToastContainer
-								position="top-right"
-								autoClose={5000}
-								hideProgressBar
-								newestOnTop
-								closeOnClick
-								rtl={false}
-								pauseOnFocusLoss
-								draggable
-								pauseOnHover
-							/>
-							<Main categories={categories}>
-								{children}
-								<Footer />
-							</Main>
-						</AppContextProvider>
-					</AuthProvider>
-				</NextIntlClientProvider>
+				<AuthProvider>
+					<AppContextProvider>
+						<ToastContainer
+							position="top-right"
+							autoClose={5000}
+							hideProgressBar
+							newestOnTop
+							closeOnClick
+							rtl={false}
+							pauseOnFocusLoss
+							draggable
+							pauseOnHover
+						/>
+						<Main categories={categories}>
+							{children}
+							<Footer />
+						</Main>
+					</AppContextProvider>
+				</AuthProvider>
 			</body>
 		</html>
 	);

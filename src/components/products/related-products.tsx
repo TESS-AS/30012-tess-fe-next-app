@@ -3,9 +3,9 @@ import { IProduct } from "@/types/product.types";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
 
 import { ProductCard } from "./product-card";
+import { useTranslation } from "react-i18next";
 
 interface RelatedProductsProps {
 	products: IProduct[];
@@ -14,7 +14,7 @@ interface RelatedProductsProps {
 
 export function RelatedProducts({ products, category }: RelatedProductsProps) {
 	const pathname = usePathname();
-	const t = useTranslations();
+	const {t} = useTranslation('common');
 
 	if (products.length === 0) {
 		return null;

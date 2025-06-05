@@ -2,13 +2,9 @@ import MainCategorySection from "@/components/categories/main-categories";
 import { Quote } from "@/components/quote";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Star } from "lucide-react";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
 
 export default function Home() {
-	const t = useTranslations("Home");
-
 	return (
 		<div className="mt-[-20px] grid min-h-screen grid-rows-[auto_1fr_20px] gap-16">
 			<div className="relative right-1/2 left-1/2 -mr-[50vw] -ml-[50vw] w-screen">

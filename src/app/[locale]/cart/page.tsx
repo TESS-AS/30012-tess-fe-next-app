@@ -28,11 +28,11 @@ import { CartLine } from "@/types/carts.types";
 import { PriceResponse } from "@/types/search.types";
 import { Loader2, Minus, Plus, Trash } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
 import CartSkeleton from "./loading";
+import { useRouter } from "next/router";
+import { useTranslation } from "react-i18next";
 
 const AnimatedTableRow = ({
 	isOpen,
@@ -67,7 +67,7 @@ const AnimatedTableRow = ({
 const CartPage = () => {
 	const router = useRouter();
 	const { isCartChanging, setIsCartChanging } = useAppContext();
-	const t = useTranslations();
+	const {t} = useTranslation('common');
 
 	const [isLoading, setIsLoading] = React.useState(true);
 	const [cartItems, setCartItems] = React.useState<CartLine[]>([]);

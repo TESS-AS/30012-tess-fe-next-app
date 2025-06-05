@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { useMainCategories } from "@/hooks/useMainCategories";
 import { useKeenSlider } from "keen-slider/react";
 import { useSession } from "next-auth/react";
-import { useTranslations } from "next-intl";
 import "keen-slider/keen-slider.min.css";
+import { useTranslation } from "react-i18next";
 
 export default function MainCategorySection() {
 	const { data: mainCategories, isLoading, error } = useMainCategories();
-	const t = useTranslations();
+	const {t} = useTranslation('common');
 	const { data: session } = useSession();
 
 	const [sliderRef] = useKeenSlider<HTMLDivElement>({

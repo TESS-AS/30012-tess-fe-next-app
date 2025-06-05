@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { addToCart } from "@/services/carts.service";
 import { IVariation } from "@/types/product.types";
 import { ShoppingCart, Heart, Minus, Plus } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 export interface ProductActionsProps {
 	items: IVariation[];
@@ -15,7 +15,7 @@ export interface ProductActionsProps {
 }
 
 export function ProductActions({ items, productNumber }: ProductActionsProps) {
-	const t = useTranslations();
+	const {t} = useTranslation('common');
 	const [selectedSize, setSelectedSize] = useState<string>();
 	const [quantity, setQuantity] = useState(1);
 	const [isLoading, setIsLoading] = useState(false);

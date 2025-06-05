@@ -3,9 +3,7 @@ import { fetchCategories } from "@/lib/category-utils";
 import { getSeoMetadata } from "@/lib/seo";
 import { formatUrlToDisplayName } from "@/lib/utils";
 import { loadFilters } from "@/services/categories.service";
-import { searchProducts } from "@/services/product.service";
-import { getLocale } from "next-intl/server";
-import { getTranslations } from "next-intl/server";
+import { useTranslation } from "react-i18next";
 
 export async function generateMetadata({
 	params,
@@ -13,11 +11,11 @@ export async function generateMetadata({
 	params: Promise<{ category: string; locale: string }>;
 }) {
 	const { category, locale } = await params;
-	const t = await getTranslations({ locale, namespace: "Category" });
+	const {t} = useTranslation("common");
 
 	return await getSeoMetadata({
 		title: category,
-		description: t("viewAll"),
+		description: t("Category.viewAll"),
 		path: `/category/${category}`,
 		locale,
 	});

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+// import { getTranslations } from "next-intl/server";
 
 const baseUrl = process.env.NEXTAUTH_URL;
 
@@ -16,10 +16,10 @@ export async function getSeoMetadata({
 	image?: string;
 	locale?: string;
 }): Promise<Metadata> {
-	const t = await getTranslations({ locale, namespace: "Seo" });
+	// const t = await getTranslations({ locale, namespace: "Seo" });
 
-	const resolvedTitle = title ?? t("defaultTitle");
-	const resolvedDescription = description ?? t("defaultDescription");
+	const resolvedTitle = title ?? "defaultTitle";
+	const resolvedDescription = description ?? "defaultDescription";
 	const resolvedImage = image ?? `${baseUrl}/og-${locale}.jpg`;
 	const url = `${baseUrl}/${locale}${path}`;
 

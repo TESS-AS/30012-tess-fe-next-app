@@ -2,23 +2,23 @@
 
 import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "react-i18next";
 
 const footerLinks = {
 	company: [
-		{ label: "about", href: "/about" },
-		{ label: "careers", href: "/careers" },
-		{ label: "contact", href: "/contact" },
+		{ label: "Footer.about", href: "/about" },
+		{ label: "Footer.careers", href: "/careers" },
+		{ label: "Footer.contact", href: "/contact" },
 	],
 	support: [
-		{ label: "help", href: "/help" },
-		{ label: "shipping", href: "/shipping" },
-		{ label: "returns", href: "/returns" },
+		{ label: "Footer.help", href: "/help" },
+		{ label: "Footer.shipping", href: "/shipping" },
+		{ label: "Footer.returns", href: "/returns" },
 	],
 	legal: [
-		{ label: "terms", href: "/terms" },
-		{ label: "privacy", href: "/privacy" },
-		{ label: "cookies", href: "/cookies" },
+		{ label: "Footer.terms", href: "/terms" },
+		{ label: "Footer.privacy", href: "/privacy" },
+		{ label: "Footer.cookies", href: "/cookies" },
 	],
 };
 
@@ -46,16 +46,16 @@ const socialLinks = [
 ];
 
 export function Footer() {
-	const t = useTranslations("Footer");
+	const {t} = useTranslation("common");
 
 	return (
 		<footer className="relative left-[calc(-50vw+50%)] mt-20 w-[100vw] bg-[#222222] text-zinc-100">
 			<div className="container mx-auto py-12">
 				<div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
 					<div>
-						<h3 className="text-lg font-semibold">{t("companyName")}</h3>
+						<h3 className="text-lg font-semibold">{t("Footer.companyName")}</h3>
 						<p className="mt-4 text-sm text-zinc-400">
-							{t("companyDescription")}
+							{t("Footer.companyDescription")}
 						</p>
 					</div>
 
@@ -124,8 +124,8 @@ export function Footer() {
 							})}
 						</div>
 						<p className="text-sm text-green-600">
-							&copy; {new Date().getFullYear()} {t("companyName")}.{" "}
-							{t("rights")}
+							&copy; {new Date().getFullYear()} {t("Footer.companyName")}.{" "}
+							{t("Footer.rights")}
 						</p>
 					</div>
 				</div>

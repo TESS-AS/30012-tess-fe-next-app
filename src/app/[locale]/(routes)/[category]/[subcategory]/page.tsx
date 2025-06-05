@@ -9,6 +9,7 @@ import { formatUrlToDisplayName } from "@/lib/utils";
 import { loadFilters } from "@/services/categories.service";
 import { getLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
+import { useTranslation } from "react-i18next";
 
 export async function generateMetadata({
 	params,
@@ -16,11 +17,12 @@ export async function generateMetadata({
 	params: Promise<{ locale: string; subcategory: string }>;
 }) {
 	const { locale, subcategory } = await params;
-	const t = await getTranslations({ locale, namespace: "Category" });
+	// const t = await getTranslations({ locale, namespace: "Category" });
+	// const {t} = useTranslation("common");	
 
 	return await getSeoMetadata({
 		title: `${subcategory}`,
-		description: t("viewAll"),
+		description: "viewAll",
 		path: `/subcategory/${subcategory}`,
 		locale,
 	});

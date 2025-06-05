@@ -8,7 +8,6 @@ import { FilterValues } from "@/types/filter.types";
 import { LayoutGrid, AlignJustify, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
 
 import { ProductCard } from "./product-card";
 import { Button } from "../ui/button";
@@ -27,6 +26,7 @@ import {
 	TooltipTrigger,
 	TooltipProvider,
 } from "../ui/tooltip";
+import { useTranslation } from "react-i18next";
 
 interface ProductGridProps {
 	variant?: "default" | "compact";
@@ -50,7 +50,7 @@ export function ProductGrid({
 	categoryNumber,
 	query,
 }: ProductGridProps) {
-	const t = useTranslations();
+	const {t} = useTranslation('common');
 	const pathname = usePathname();
 	const [isFiltering, setIsFiltering] = useState(false);
 	const [viewLayout, setViewLayout] = useState<string>("");

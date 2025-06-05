@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { categoryImageMap } from "@/constants/mainCategoryIcons";
 import axiosClient from "@/services/axiosClient";
 import { RawCategory } from "@/types/categories.types";
-import { useLocale } from "next-intl";
 
 export interface MainCategory {
 	id: string;
@@ -16,7 +15,8 @@ export function useMainCategories() {
 	const [data, setData] = useState<MainCategory[] | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<unknown>(null);
-	const locale = useLocale();
+	// const locale = useLocale();
+	const locale = "no";
 
 	useEffect(() => {
 		const fetchMainCategories = async () => {

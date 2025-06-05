@@ -15,14 +15,14 @@ import { useSearch } from "@/hooks/useProductSearch";
 import { cn } from "@/lib/utils";
 import type { Category } from "@/types/categories.types";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useTranslation } from "react-i18next";
 
 export default function CategoryNavigationMenu({
 	categories,
 }: {
 	categories: Category[];
 }) {
-	const t = useTranslations();
+	const {t} = useTranslation('common');
 	const [query, setQuery] = useState("");
 	const { data, isLoading } = useSearch(query);
 

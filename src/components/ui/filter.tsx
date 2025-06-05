@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import { FilterValues } from "@/types/filter.types";
 import { cva, VariantProps } from "class-variance-authority";
 import { Search, X } from "lucide-react";
-import { useTranslations } from "next-intl";
 
 import { Button } from "./button";
 import { Checkbox } from "./checkbox";
@@ -17,6 +16,7 @@ import {
 	TooltipTrigger,
 	TooltipProvider,
 } from "./tooltip";
+import { useTranslation } from "react-i18next";
 
 export interface FilterCategory {
 	category: string;
@@ -61,7 +61,7 @@ export function Filter({
 	selectedFilters: externalSelectedFilters = {},
 	...props
 }: FilterProps) {
-	const t = useTranslations();
+	const t = useTranslation('common');
 	const [searchTerm, setSearchTerm] = React.useState("");
 	const [internalSelectedFilters, setInternalSelectedFilters] = React.useState<
 		Record<string, string[]>

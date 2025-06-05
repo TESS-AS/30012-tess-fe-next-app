@@ -28,8 +28,8 @@ import {
 import { PriceResponse } from "@/types/search.types";
 import { Minus, Plus, Loader2 } from "lucide-react";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 interface Warehouse {
 	warehouseNumber: string;
@@ -57,7 +57,7 @@ export default function ProductVariantTable({
 	variants,
 	productNumber,
 }: ProductVariantTableProps) {
-	const t = useTranslations();
+	const {t} = useTranslation();
 	const [quantities, setQuantities] = useState<Record<number, number>>({});
 	const [loading, setLoading] = useState<Record<number, boolean>>({});
 	const [warehouse, setWarehouse] = useState<Record<number, string>>({});

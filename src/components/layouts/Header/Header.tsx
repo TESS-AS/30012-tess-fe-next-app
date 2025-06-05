@@ -35,7 +35,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useSearch } from "@/hooks/useProductSearch";
-import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import axiosClient from "@/services/axiosClient";
 import { getCart } from "@/services/carts.service";
@@ -47,11 +46,13 @@ import { Search, ShoppingCart, ShoppingCartIcon, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
-import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "next/router";
+import { useTranslation } from "react-i18next";
 
 export default function Header({ categories }: { categories: Category[] }) {
-	const currentLocale = useLocale();
-	const t = useTranslations();
+	// const currentLocale = useLocale();
+	const currentLocale = 'no';
+	const {t} = useTranslation('common');
 	const router = useRouter();
 	const { data: session, status } = useSession() as {
 		data: any;
