@@ -80,5 +80,5 @@ export default auth((request) => {
 
 // Only apply to non-static, non-api, non-next routes
 export const config = {
-	matcher: ["/", "/((?!api|_next|_vercel|.*\\..*).*)"],
+	matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
 };
