@@ -4,6 +4,7 @@ import type React from "react";
 import { useEffect, useState } from "react";
 
 import ProductVariantTable from "@/components/checkout/product-variant-table";
+import CustomerNumberSwitcher from "@/components/customer-profile/customer-number-switcher";
 import CategoryNavigationMenu from "@/components/layouts/NavigationMenu/NavigationMenu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -22,15 +23,6 @@ import {
 	ModalHeader,
 	ModalTitle,
 } from "@/components/ui/modal";
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectLabel,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
@@ -62,8 +54,6 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [isAuthOpen, setIsAuthOpen] = useState(false);
 	const [isModalIdOpen, setIsModalIdOpen] = useState<string | null>(null);
-	const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
-	const [newCustomerNumber, setNewCustomerNumber] = useState("");
 	const [variations, setVariations] = useState<Record<string, any>>({});
 	const { data, attributeResults, isLoading } = useSearch(searchQuery);
 	const [cart, setCart] = useState<CartLine[]>([]);
@@ -86,12 +76,6 @@ export default function Header({ categories }: { categories: Category[] }) {
 		setVariations({});
 		setIsModalIdOpen(null);
 	}, [searchQuery]);
-
-	useEffect(() => {
-		if (!newCustomerNumber && profile?.customerNumbers?.[0]) {
-			setNewCustomerNumber(profile.customerNumbers?.[0]);
-		}
-	}, [profile, newCustomerNumber]);
 
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -284,59 +268,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 				</form>
 
 				<div className="flex items-center gap-2">
-					{!isProfileLoading && profile?.customerNumbers?.[0] && (
-						<>
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={() => setIsCustomerModalOpen(true)}
-								className="hidden text-sm md:flex">
-								Customer #: {profile?.customerNumbers?.[0]}
-							</Button>
-							<Modal
-								open={isCustomerModalOpen}
-								onOpenChange={setIsCustomerModalOpen}>
-								<ModalContent className="sm:max-w-md">
-									<ModalHeader>
-										<ModalTitle>Update Customer Number</ModalTitle>
-									</ModalHeader>
-									<div className="space-y-4 p-4">
-										<Select
-											value={newCustomerNumber}
-											onValueChange={(val) => setNewCustomerNumber(val)}>
-											<SelectTrigger className="w-full">
-												<SelectValue placeholder="Select customer number" />
-											</SelectTrigger>
-											<SelectContent
-												position="popper"
-												className="z-[9999]">
-												<SelectGroup>
-													<SelectLabel>Customer Numbers</SelectLabel>
-													{profile?.customerNumbers?.map((number) => (
-														<SelectItem
-															key={number}
-															value={number}>
-															{number}
-														</SelectItem>
-													))}
-												</SelectGroup>
-											</SelectContent>
-										</Select>
-
-										<Button
-											className="w-full"
-											onClick={() => {
-												console.log("New customer number:", newCustomerNumber);
-												setIsCustomerModalOpen(false);
-											}}>
-											Save
-										</Button>
-									</div>
-								</ModalContent>
-							</Modal>
-						</>
-					)}
-
+					{profile && <CustomerNumberSwitcher profile={profile} />}
 					{status === "authenticated" && session?.user ? (
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>

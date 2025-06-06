@@ -87,7 +87,7 @@ export default function PersonalInfoTab() {
 					<div className="rounded-md border bg-gray-100 p-3 text-sm">
 						{Array.isArray(profile?.customerNumbers) &&
 						profile?.customerNumbers.length > 0
-							? profile?.customerNumbers.join(", ")
+							? profile.customerNumbers.join(", ")
 							: "No customer numbers assigned"}
 					</div>
 				</div>
