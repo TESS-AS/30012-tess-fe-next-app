@@ -24,4 +24,5 @@ export interface UserAddress {
 	city: string;
 	deliveryCode: string;
 	condition: string;
+	type: "personal" | "business";
 }

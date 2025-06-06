@@ -1,13 +1,15 @@
-import * as yup from "yup";
+import { z } from "zod";
 
-export const profileSchema = yup.object().shape({
-	firstName: yup.string().required("Required"),
-	lastName: yup.string().required("Required"),
-	email: yup.string().email().required("Required"),
-	gender: yup.string().oneOf(["male", "female"]),
-	dateOfBirth: yup.string(),
-	phoneNumber: yup
+export const profileSchema = z.object({
+	firstName: z.string().min(1, "Required"),
+	lastName: z.string().min(1, "Required"),
+	email: z.string().email("Invalid email address"),
+	gender: z.enum(["male", "female"]).optional(),
+	dateOfBirth: z.string().optional(),
+	phoneNumber: z
 		.string()
-		.matches(/^[+0-9\s\-()]*$/, "Invalid phone number")
+		.regex(/^[+0-9\s\-()]*$/, "Invalid phone number")
 		.optional(),
 });
+
+export type ProfileFormValues = z.infer<typeof profileSchema>;
