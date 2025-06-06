@@ -12,9 +12,7 @@ export function useGetUserAdresses() {
 		const fetchUserData = async () => {
 			try {
 				setIsLoading(true);
-				const response = await axiosClient.get<UserAddress[]>(
-					"/address/defaultAddress",
-				);
+				const response = await axiosClient.get<UserAddress[]>("/address/user");
 				setData(response.data ?? []);
 			} catch (err) {
 				setError(err);

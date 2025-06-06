@@ -1,25 +1,21 @@
-// hooks/useGetBusinessAddresses.ts
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import axiosClient from "@/services/axiosClient";
 import { UserAddress } from "@/types/user.types";
 
-export function useGetBusinessAddresses(
-	customerNumber: string | undefined,
-	shouldFetch: boolean,
-) {
+export function useGetOrganizationAddresses(orgNumber?: string) {
 	const [data, setData] = useState<UserAddress[] | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<unknown>(null);
 
 	useEffect(() => {
-		if (!shouldFetch || !customerNumber) return;
+		if (!orgNumber) return;
 
-		const fetchData = async () => {
+		const fetchOrgAddresses = async () => {
 			try {
 				setIsLoading(true);
 				const response = await axiosClient.get<UserAddress[]>(
-					`/address/customer/${customerNumber}`,
+					`/address/organization/${orgNumber}`,
 				);
 				setData(response.data ?? []);
 			} catch (err) {
@@ -29,8 +25,8 @@ export function useGetBusinessAddresses(
 			}
 		};
 
-		fetchData();
-	}, [customerNumber, shouldFetch]);
+		fetchOrgAddresses();
+	}, [orgNumber]);
 
 	return { data, isLoading, error };
 }
