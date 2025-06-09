@@ -10,6 +10,8 @@ export interface ProfileUser {
 	assortmentIds: string[] | null;
 	customerNumbers: string[];
 	orgNumbers: string[];
+	defaultCustomerNumber: string;
+	defaultWarehosueName: string; // It's a typo on BE attribute
 }
 
 export interface UserAddress {
@@ -22,4 +24,5 @@ export interface UserAddress {
 	city: string;
 	deliveryCode: string;
 	condition: string;
+	type: "personal" | "business";
 }

@@ -3,8 +3,11 @@
 import { useEffect } from "react";
 
 import { useGetProfileData } from "@/hooks/useGetProfileData";
-import { profileSchema } from "@/lib/validation/profileSchema";
-import { yupResolver } from "@hookform/resolvers/yup";
+import {
+	profileSchema,
+	ProfileFormValues,
+} from "@/lib/validation/profileSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 export default function PersonalInfoTab() {
@@ -15,8 +18,8 @@ export default function PersonalInfoTab() {
 		handleSubmit,
 		setValue,
 		formState: { errors },
-	} = useForm({
-		resolver: yupResolver(profileSchema),
+	} = useForm<ProfileFormValues>({
+		resolver: zodResolver(profileSchema),
 	});
 
 	useEffect(() => {
@@ -67,6 +70,9 @@ export default function PersonalInfoTab() {
 						className="w-full rounded-md border px-3 py-2"
 						disabled
 					/>
+					{errors.email && (
+						<p className="text-sm text-red-500">{errors.email.message}</p>
+					)}
 				</div>
 
 				<div>
@@ -87,7 +93,7 @@ export default function PersonalInfoTab() {
 					<div className="rounded-md border bg-gray-100 p-3 text-sm">
 						{Array.isArray(profile?.customerNumbers) &&
 						profile?.customerNumbers.length > 0
-							? profile?.customerNumbers.join(", ")
+							? profile.customerNumbers.join(", ")
 							: "No customer numbers assigned"}
 					</div>
 				</div>
