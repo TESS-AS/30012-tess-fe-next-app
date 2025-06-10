@@ -8,7 +8,7 @@ export async function getSeoMetadata({
 	description,
 	path = "/",
 	image,
-	locale = "en",
+	locale = "no",
 }: {
 	title?: string;
 	description?: string;

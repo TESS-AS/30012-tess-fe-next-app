@@ -31,9 +31,9 @@ export default function UserAddressesTab() {
 	const [editingAddress, setEditingAddress] = useState<UserAddress | null>(
 		null,
 	);
-	const [defaultType, setDefaultType] = useState<"personal" | "business">(
-		"personal",
-	);
+	const [defaultType, setDefaultType] = useState<
+		"personal" | "business" | "organization"
+	>("personal");
 
 	const ORG_NUMBER = "980386996"; // static for now
 

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const addressSchema = z.object({
-	type: z.enum(["personal", "business"]),
+	type: z.enum(["personal", "business", "organization"]),
 	addressName: z.string().min(1, "Address name is required"),
 	addressLine1: z.string().min(1, "Address Line 1 is required"),
 	addressLine2: z.string().optional(),

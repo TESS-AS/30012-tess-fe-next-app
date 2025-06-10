@@ -2,11 +2,25 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { auth } from "../auth";
 
-// Route groups
 const protectedRoutes = ["profile"];
 const apiAuthPrefix = "/api/auth";
+const supportedLocales = ["en", "no"];
 
-// Rewriting product-related URLs
+function redirectToLocale(request: NextRequest): NextResponse | null {
+	const { pathname } = request.nextUrl;
+
+	const hasLocale = supportedLocales.some((locale) =>
+		pathname.startsWith(`/${locale}`),
+	);
+
+	if (!hasLocale) {
+		const locale = "no";
+		return NextResponse.redirect(new URL(`/${locale}${pathname}`, request.url));
+	}
+
+	return null;
+}
+
 function rewriteProductUrls(request: NextRequest): NextResponse | null {
 	const url = request.nextUrl.clone();
 	const segments = url.pathname.split("/").filter(Boolean);
@@ -37,7 +51,7 @@ function rewriteProductUrls(request: NextRequest): NextResponse | null {
 			while (filled.length < 4) {
 				filled.splice(filled.length - 1, 0, "__default");
 			}
-			url.pathname = `/${filled.join("/")}`;
+			url.pathname = `/${segments[0]}/${filled.join("/")}`;
 			return NextResponse.rewrite(url);
 		}
 	}
@@ -45,23 +59,16 @@ function rewriteProductUrls(request: NextRequest): NextResponse | null {
 	return null;
 }
 
-// Middleware logic
 export default auth((request) => {
-	if (process.env.NODE_ENV !== "production") {
-		console.log("=== HEADERS START ===");
-		for (const [key, value] of request.headers.entries()) {
-			console.log(`${key}: ${value}`);
-		}
-		console.log("=== HEADERS END ===");
-	}
-
 	const { nextUrl } = request;
 	const path = nextUrl.pathname;
-	const isApiAuthRoute = path.startsWith(apiAuthPrefix);
 
-	if (isApiAuthRoute) {
+	if (path.startsWith(apiAuthPrefix)) {
 		return NextResponse.next();
 	}
+
+	const localeRedirect = redirectToLocale(request);
+	if (localeRedirect) return localeRedirect;
 
 	const isLoggedIn = !!request.auth;
 	const isProtected = protectedRoutes.some((route) =>
@@ -69,7 +76,9 @@ export default auth((request) => {
 	);
 
 	if (isProtected && !isLoggedIn) {
-		return NextResponse.redirect(new URL("/login", nextUrl));
+		return NextResponse.redirect(
+			new URL(`/${path.split("/")[1]}/login`, nextUrl),
+		);
 	}
 
 	const rewritten = rewriteProductUrls(request);
