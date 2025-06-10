@@ -21,9 +21,9 @@ export default function Home() {
 							priority
 						/>
 
-						<div className="absolute inset-0 z-10 bg-black/40" />
+						<div className="absolute inset-0 z-1 bg-black/40" />
 
-						<div className="absolute inset-0 z-20 container mx-auto flex items-center">
+						<div className="absolute inset-0 z-2 container mx-auto flex items-center">
 							<div className="max-w-xl space-y-6 text-white">
 								<p className="text-sm tracking-wide text-white/80 uppercase">
 									Let’s get to work
