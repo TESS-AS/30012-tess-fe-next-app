@@ -28,7 +28,7 @@ interface AddressModalProps {
 	onClose: () => void;
 	address: UserAddress | null;
 	onSave: (updatedAddress: UserAddress) => void;
-	defaultType: "personal" | "business";
+	defaultType: "personal" | "business" | "organization";
 }
 
 export default function AddressModal({

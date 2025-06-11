@@ -5,7 +5,7 @@ import { UserAddress } from "@/types/user.types";
 
 export const getDefaultAddressFormValues = (
 	address: UserAddress | null,
-	defaultType: "personal" | "business",
+	defaultType: "personal" | "business" | "organization",
 ): AddressFormValues => {
 	if (address) {
 		return {

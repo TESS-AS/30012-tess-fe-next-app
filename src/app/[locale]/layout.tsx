@@ -10,9 +10,9 @@ import axiosServer from "@/services/axiosServer";
 import type { Category, RawCategory } from "@/types/categories.types";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
-import "../globals.css";
 import { ToastContainer } from "react-toastify";
+
+import "../globals.css";
 
 export async function generateMetadata({
 	params,
@@ -23,28 +23,37 @@ export async function generateMetadata({
 	return getSeoMetadata({ locale });
 }
 
-export default async function RootLayout({
+export default async function LocaleLayout({
 	children,
+	params,
 }: {
 	children: ReactNode;
-	params: { locale: string };
+	params: Promise<{ locale: string }>;
 }) {
-	const locale = await getLocale();
-	const messages = await getMessages();
-	const supportedLocales = ["en", "no"];
+	const { locale } = await params;
+	const supportedLocales = ["no", "en"];
 
 	if (!supportedLocales.includes(locale)) {
 		notFound();
 	}
 
-	const res = await axiosServer.get(`/categories`);
+	let messages;
+	try {
+		messages = (await import(`../../../messages/${locale}.json`)).default;
+	} catch (error) {
+		console.error(`Missing translation file for locale: ${locale}`);
+		notFound();
+	}
+
+	const res = await axiosServer.get("/categories");
 	const raw: RawCategory[] = res.data;
+
 	const categories: Category[] = raw.map((node) =>
 		mapCategoryTree(node, locale),
 	);
 
 	return (
-		<html lang={locale ?? "no"}>
+		<html lang={locale}>
 			<body className="overflow-hidden">
 				<NextIntlClientProvider
 					locale={locale}
