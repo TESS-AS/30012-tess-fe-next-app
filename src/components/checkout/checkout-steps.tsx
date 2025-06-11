@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { companyFields, shippingFields } from "@/constants/checkout";
 import { Address, Order, PaymentMethod } from "@/types/orders.types";
@@ -17,13 +18,18 @@ import { FormField } from "./form-field";
 import { StepHeader } from "./step-header";
 import { salesOrder } from "@/services/orders.service";
 import { useAppContext } from "@/lib/appContext";
-import { CustomerDimension, UserDimensionsResponse } from "@/types/dimensions.types";
-import { getCustomerDimensions, getUserDimensions, formatDimensionsToHierarchy } from "@/services/dimensions.service";
+import { CustomerDimension, UserDimensionItem } from "@/types/dimensions.types";
+import { getCustomerDimensions, getUserDimensions } from "@/services/dimensions.service";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { formatCustomerDimensionsToHierarchy, formatUserDimensionsToHierarchy } from "@/utils/dimensionFormaters";
 
 // Main component
 export default function CheckoutSteps() {
+
 	const { cartItems } = useAppContext();	
+
+	const { data: profile } = useGetProfileData();
 	const [openStep, setOpenStep] = useState(1);
 	const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>();
 	const [orderData, setOrderData] = useState<Order>({
@@ -45,28 +51,73 @@ export default function CheckoutSteps() {
 			text: "",
 		},
 		salesOrderAddresses: [],
-		salesOrderLines: cartItems.map((item) => ({
-			warehouseId: "",
-			orderType: "",
-			itemCode: item?.productNumber || "",
-			orderedQuantity: item.quantity,
-			salesPrice: item.price || 0,
-			requestedDeliveryDate: "",
-			accountPart3: "", // Dimension 3
-			accountPart4: "", // userId
-			accountPart5: "",
-			text: ""
-		})),
+		salesOrderLines: [],
 	});
 	const [customerDimensions, setCustomerDimensions] = useState<CustomerDimension[]>([]);
-	const [userDimensions, setUserDimensions] = useState<UserDimensionsResponse[]>([]);
+	const [userDimensions, setUserDimensions] = useState<UserDimensionItem[]>([]);
 	const [customerDimension, setCustomerDimension] = useState<string>('');
+	const [userDimension, setUserDimension] = useState<string>('');
+	const [isUserDimensionTypingMode, setIsUserDimensionTypingMode] = useState(false);
+	const [isCustomerDimensionTypingMode, setIsCustomerDimensionTypingMode] = useState(false);
+
+	const updateOrderData = (parts: string[]) => {
+		setOrderData((prev) => {
+			let updatedOrder = { ...prev };
+
+			if (parts.length === 1) {
+				updatedOrder.salesOrderHeader = {
+					...prev.salesOrderHeader,
+					customersOrderReference: parts[0]
+				};
+			}
+			else if (parts.length === 2) {
+				updatedOrder.salesOrderHeader = {
+					...prev.salesOrderHeader,
+					customersOrderReference: parts[0],
+					customerReference: parts[1]
+				};
+			}
+			else if (parts.length === 3) {
+				updatedOrder.salesOrderHeader = {
+					...prev.salesOrderHeader,
+					customersOrderReference: parts[0],
+					customerReference: parts[1]
+				};
+				updatedOrder.salesOrderLines = prev.salesOrderLines.map(line => ({
+					...line,
+					accountPart3: parts[2]
+				}));
+			}
+
+			return updatedOrder;
+		});
+	};
+
+	useEffect(() => {
+		// if (cartItems?.length && profile) {
+			setOrderData(prev => ({
+				...prev,
+				salesOrderLines: cartItems.map((item) => ({
+					warehouseId: "",
+					orderType: "",
+					itemCode: item?.productNumber || "",
+					orderedQuantity: item.quantity,
+					salesPrice: item.price || 0,
+					requestedDeliveryDate: "",
+					accountPart3: "", // Dimension 3
+					accountPart4: String(profile?.userId || ""), // userId
+					accountPart5: "",
+					text: ""
+				}))
+			}));
+		// }
+	}, [cartItems, profile]);
 
 	useEffect(() => {
 		const loadDimensions = async () => {
 			const customerDimensions = await getCustomerDimensions('110036')
 			setCustomerDimensions(customerDimensions)
-			const userDimensions = await getUserDimensions('110036')
+			const userDimensions = await getUserDimensions()
 			setUserDimensions(userDimensions)
 		}
 		loadDimensions()
@@ -178,82 +229,98 @@ export default function CheckoutSteps() {
 						<div className="space-y-4">
 							<div className="space-y-2">
 								<Label>Customer Dimensions</Label>
-								<Select 
-									value={customerDimension} 
-									onValueChange={(value) => {
-										console.log('onValueChange called with:', value);
-										const parts = value.split('<');
-										console.log('Split parts:', parts);
-										setCustomerDimension(value)
-										setOrderData((prev) => {
-											let updatedOrder = { ...prev };
-
-											if (parts.length === 1) {
-												updatedOrder.salesOrderHeader = {
-													...prev.salesOrderHeader,
-													customersOrderReference: parts[0]
-												};
-											}
-											else if (parts.length === 2) {
-												updatedOrder.salesOrderHeader = {
-													...prev.salesOrderHeader,
-													customersOrderReference: parts[0],
-													customerReference: parts[1]
-												};
-											}
-											else if (parts.length === 3) {
-												updatedOrder.salesOrderHeader = {
-													...prev.salesOrderHeader,
-													customersOrderReference: parts[0],
-													customerReference: parts[1]
-												};
-												updatedOrder.salesOrderLines = prev.salesOrderLines.map(line => ({
-													...line,
-													accountPart3: parts[2]
-												}));
-											}
-
-											return updatedOrder;
-										});
-									}}
-								>
-									<SelectTrigger>
-										<SelectValue placeholder="Select Customer Dimension" />
-									</SelectTrigger>
-									<SelectContent>
-										{formatDimensionsToHierarchy(customerDimensions).map((item, index) => (
-										<SelectItem 
-											key={`${item.value}-${index}`} 
-											value={item.value}
+								<div className="relative user-dimensions">
+									{!isCustomerDimensionTypingMode ? (
+										<Select 
+											value={customerDimension} 
+											onValueChange={(value) => {
+												const parts = value.split('<');
+												setCustomerDimension(value);
+												updateOrderData(parts);
+											}}
 										>
-											{item.label}
-										</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
+											<SelectTrigger isDimensionSelector onClick={() => setIsCustomerDimensionTypingMode(false)}>
+												<SelectValue placeholder="Select Customer Dimension" />
+											</SelectTrigger>
+											<SelectContent>
+												{formatCustomerDimensionsToHierarchy(customerDimensions).map((item, index) => (
+												<SelectItem 
+													key={`${item.value}-${index}`} 
+													value={item.value}
+												>
+													{item.label}
+												</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									) : (
+										<Input
+											type="text"
+											value={customerDimension}
+											placeholder="Type Customer Dimension"
+											onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+												const value = e.target.value;
+												setCustomerDimension(value);
+												const parts = value.split('<');
+												updateOrderData(parts);
+											}}
+											onFocus={() => setIsCustomerDimensionTypingMode(true)}
+										/>
+									)}
+									<button
+										type="button"
+										className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-sm text-gray-500 hover:text-gray-700"
+										onClick={() => setIsCustomerDimensionTypingMode(!isCustomerDimensionTypingMode)}
+									>
+										{isCustomerDimensionTypingMode ? 'Select' : 'Text'}
+									</button>
+								</div>
 							</div>
 							<div className="space-y-2">
 								<Label>User Dimensions</Label>
-								<Select value={orderData.salesOrderHeader.customersOrderReference} onValueChange={(value) =>
-									setOrderData((prev) => ({
-										...prev,
-										salesOrderHeader: {
-											...prev.salesOrderHeader,
-											customersOrderReference: value
-										}
-									}))
-								}>
-									<SelectTrigger>
-										<SelectValue placeholder="Select User Dimension" />
-									</SelectTrigger>
-									<SelectContent>
-										{userDimensions.map((dim, index) => (
-											<SelectItem key={`${dim.id}-${index}`} value={dim?.id?.toString()}>
-												{dim.name}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
+								<div className="relative user-dimensions">
+									{!isUserDimensionTypingMode
+										
+										? (<Select value={userDimension} onValueChange={(value) => {
+											const parts = value.split('<');
+											setUserDimension(value)
+											updateOrderData(parts);
+										}}>
+											<SelectTrigger isDimensionSelector onClick={() => setIsUserDimensionTypingMode(false)}>
+												<SelectValue placeholder="Select User Dimension" />
+											</SelectTrigger>
+											<SelectContent>
+												{formatUserDimensionsToHierarchy(userDimensions).map((dim, index) => (
+													<SelectItem key={`${dim.value}-${index}`} value={dim.value}>
+														{dim.label}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>)
+										: (
+											<Input
+												type="text"
+												value={userDimension}
+												placeholder="Type User Dimension"
+												onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+													const value = e.target.value;
+													setUserDimension(value);
+													const parts = value.split('<');
+													updateOrderData(parts);
+												}}
+												onFocus={() => setIsUserDimensionTypingMode(true)}
+											/>
+										)
+									}
+									<button
+										type="button"
+										className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-sm text-gray-500 hover:text-gray-700"
+										onClick={() => setIsUserDimensionTypingMode(!isUserDimensionTypingMode)}
+									>
+										{isUserDimensionTypingMode ? 'Select' : 'Text'}
+									</button>
+
+								</div>
 							</div>
 						</div>
 					</div>

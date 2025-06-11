@@ -14,8 +14,8 @@ const SelectValue = SelectPrimitive.Value;
 
 const SelectTrigger = React.forwardRef<
 	React.ElementRef<typeof SelectPrimitive.Trigger>,
-	React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
+	React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & { isDimensionSelector?: boolean }
+>(({ className, children, isDimensionSelector, ...props }, ref) => (
 	<SelectPrimitive.Trigger
 		ref={ref}
 		className={cn(
@@ -25,7 +25,7 @@ const SelectTrigger = React.forwardRef<
 		{...props}>
 		{children}
 		<SelectPrimitive.Icon asChild>
-			<ChevronDown className="h-4 w-4 opacity-50" />
+			<ChevronDown className={`${isDimensionSelector ? 'mr-6' : ''} h-4 w-4 opacity-50`} />
 		</SelectPrimitive.Icon>
 	</SelectPrimitive.Trigger>
 ));

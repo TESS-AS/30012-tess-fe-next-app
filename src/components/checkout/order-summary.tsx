@@ -9,6 +9,7 @@ import Image from "next/image";
 
 import { Modal, ModalContent, ModalHeader, ModalTitle } from "../ui/modal";
 import { useAppContext } from "@/lib/appContext";
+import ProductVariantTable from "./product-variant-table";
 
 export default function OrderSummary() {
 
@@ -29,12 +30,12 @@ export default function OrderSummary() {
 					key={product.productNumber}
 					className="mb-4 flex justify-between gap-4 border-b pb-4">
 					<div className="flex gap-4">
-						<div className="relative h-32 w-34 overflow-hidden rounded border">
+						<div className="bg-muted relative h-32 w-34 overflow-hidden rounded border">
 							<Image
 								src={product.mediaId?.[0].url || ""}
 								alt="Product"
 								fill
-								className="object-cover"
+								className="object-contain"
 							/>
 						</div>
 						<div className="flex flex-col justify-between text-sm">
@@ -78,9 +79,10 @@ export default function OrderSummary() {
 								<ModalHeader>
 									<ModalTitle>Product Variants - {product.productName}</ModalTitle>
 								</ModalHeader>
-								{/* <ProductVariantTable
+								<ProductVariantTable
 									variants={[]}
-								/> */}
+									productNumber={product.productNumber}
+								/>
 							</ModalContent>
 						</Modal>
 					</div>

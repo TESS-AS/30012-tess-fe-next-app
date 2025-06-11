@@ -1,36 +1,5 @@
 import axiosInstance from "./axiosClient";
-import { CreateCustomerDimensions, CreateUserDimensions, UserDimensionsResponse, CustomerDimension } from "@/types/dimensions.types";
-
-type DimensionItem = {
-    d1_id: number;
-    d1_name: string;
-    d2_id: number | null;
-    d2_name: string | null;
-    d3_id: number | null;
-    d3_name: string | null;
-};
-
-export function formatDimensionsToHierarchy(dimensions: DimensionItem[]): Array<{ label: string; value: string }> {
-    return dimensions.flatMap(dim => {
-        const results = [{ label: dim.d1_name, value: dim.d1_name }];
-        
-        if (dim.d2_name) {
-            results.push({ 
-                label: `${dim.d1_name}<${dim.d2_name}`, 
-                value: `${dim.d1_name}<${dim.d2_name}` 
-            });
-        }
-        
-        if (dim.d3_name) {
-            results.push({ 
-                label: `${dim.d1_name}<${dim.d2_name}<${dim.d3_name}`, 
-                value: `${dim.d1_name}<${dim.d2_name}<${dim.d3_name}` 
-            });
-        }
-        
-        return results;
-    });
-}
+import { CreateCustomerDimensions, CreateUserDimensions, CustomerDimension, UserDimensionItem } from "@/types/dimensions.types";
 
 export async function createCustomerDimensions(payload: CreateCustomerDimensions): Promise<{ success: boolean; data: object }> {
     try {
@@ -72,9 +41,9 @@ export const getCustomerDimensions = async (customerNumber: string): Promise<Cus
     }
 };
 
-export const getUserDimensions = async (customerNumber: string): Promise<UserDimensionsResponse[]> => {
+export const getUserDimensions = async (customerNumber?: string): Promise<UserDimensionItem[]> => {
     try {
-        const response = await axiosInstance.get(`/dimension/getUserDimension/${customerNumber}`);
+        const response = await axiosInstance.get(`/dimension/getUserDimension${customerNumber ? `?customerNumber=${customerNumber}` : ""}`);
         return response.data;
     } catch (error) {
         console.error("Error getting user dimensions:", error);
