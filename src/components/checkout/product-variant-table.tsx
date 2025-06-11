@@ -24,6 +24,8 @@ import { addToCart, getCart } from "@/services/carts.service";
 import {
 	getItemWarehouseBalance,
 	getProductPrice,
+	getProductWarehouseBalance,
+	loadItemBalanceBatch,
 } from "@/services/product.service";
 import { PriceResponse } from "@/types/search.types";
 import { Minus, Plus, Loader2 } from "lucide-react";
@@ -68,73 +70,52 @@ export default function ProductVariantTable({
 	const [prices, setPrices] = useState<Record<number, number>>({});
 	const { isCartChanging, setIsCartChanging } = useAppContext();
 
-	const fetchWarehousesBalance = async (
-		itemNumber: string,
-	): Promise<Warehouse[]> => {
-		try {
-			const response = await getItemWarehouseBalance(itemNumber);
-			if (!Array.isArray(response)) return [];
-
-			// Create a Map to store unique warehouses by warehouseNumber
-			const uniqueWarehouses = new Map();
-			response.forEach((w) => {
-				if (!uniqueWarehouses.has(w.warehouseNumber)) {
-					uniqueWarehouses.set(w.warehouseNumber, {
-						warehouseNumber: w.warehouseNumber,
-						balance: w.balance,
-						warehouseName: w.warehouseName,
-					});
-				}
-			});
-
-			return Array.from(uniqueWarehouses.values());
-		} catch (error) {
-			console.error("Error fetching warehouses:", error);
-			return [];
+	useEffect(() => {
+		const loadPrices = async () => {
+			const priceData = await getProductPrice(
+				"169999",
+				"01",
+				productNumber,
+			);
+			priceData.map((item: PriceResponse) => {
+				setPrices((prev) => ({
+					...prev,
+					[item.itemNumber]: item.basePrice || 0,
+				}));
+			})
 		}
-	};
+		loadPrices();
+
+	}, [])
 
 	useEffect(() => {
 		const loadWarehousesData = async () => {
 			try {
-				let updatedVariants: ProductVariant[] = [];
-				if (variants) {
-					updatedVariants = await Promise.all(
-						variants?.map(async (variant) => {
-							const warehouses = await fetchWarehousesBalance(
-								variant?.itemNumber?.toString(),
-							);
-							// Set default selected warehouse
-							if (warehouses.length > 0) {
-								setWarehouse((prev) => ({
-									...prev,
-									[variant.itemNumber]: warehouses[0].warehouseNumber,
-								}));
-							}
+				if (!variants?.length) return;
 
-							// Fetch price for the variant
-							try {
-								const priceData = await getProductPrice(
-									"169999",
-									"01",
-									productNumber,
-								);
-								setPrices((prev) => ({
-									...prev,
-									[variant.itemNumber]:
-										priceData?.find(
-											(item: PriceResponse) =>
-												item.itemNumber === String(variant.itemNumber),
-										)?.basePrice || 0,
-								}));
-							} catch (error) {
-								console.error("Error fetching price:", error);
-							}
+				const itemNumbers = variants.map(variant => variant.itemNumber.toString());
 
-							return { ...variant, warehouses };
-						}),
-					);
-				}
+				const warehousesData = await loadItemBalanceBatch(itemNumbers);
+
+				const updatedVariants = variants.map(variant => {
+					const variantWarehouses = warehousesData.find(w => w.item_number === variant.itemNumber.toString());
+
+					const warehouses = variantWarehouses?.warehouses.map(w => ({
+						warehouseNumber: w.warehouse_number,
+						warehouseName: w.warehouse_name,
+						balance: w.balance
+					})) || [];
+
+					if (warehouses.length > 0) {
+						setWarehouse(prev => ({
+							...prev,
+							[variant.itemNumber]: warehouses[0].warehouseNumber
+						}));
+					}
+
+					return { ...variant, warehouses };
+				});
+
 				setVariantsWithWarehouses(updatedVariants);
 				setQuantities({});
 			} catch (error) {
@@ -269,9 +250,9 @@ export default function ProductVariantTable({
 											<SelectValue placeholder={t("Product.selectWarehouse")} />
 										</SelectTrigger>
 										<SelectContent>
-											{variant.warehouses?.map((w) => (
+											{variant.warehouses?.map((w, index) => (
 												<SelectItem
-													key={`${variant.itemNumber}-${w.warehouseNumber}`}
+													key={`${variant.itemNumber}-${w.warehouseNumber}-${index}`}
 													value={w.warehouseNumber}>
 													{w.warehouseName} - {w.warehouseNumber}
 													{w.balance !== undefined ? ` (${w.balance})` : ""}

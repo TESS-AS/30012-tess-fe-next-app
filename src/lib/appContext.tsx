@@ -2,13 +2,20 @@
 
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { CartLine } from "@/types/carts.types";
-import { getCart } from "@/services/carts.service";
+import { getCart, updateCart, removeFromCart } from "@/services/carts.service";
 import { useSession } from "next-auth/react";
+import { calculateItemPrice, getProductPrice } from "@/services/product.service";
+import { PriceResponse } from "@/types/search.types";
 interface AppContextType {
 	isCartChanging: boolean;
 	setIsCartChanging: (value: boolean) => void;
 	cartItems: CartLine[];
 	setCartItems: (value: CartLine[]) => void;
+	prices: Record<string, number>;
+	calculatedPrices: Record<string, number>;
+	isLoading: boolean;
+	updateQuantity: (cartLine: number, itemNumber: string, newQuantity: number) => Promise<void>;
+	removeItem: (cartLine: number) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -16,27 +23,110 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const [isCartChanging, setIsCartChanging] = useState(false);
 	const [cartItems, setCartItems] = useState<CartLine[]>([]);
+	const [prices, setPrices] = useState<Record<string, number>>({});
+	const [calculatedPrices, setCalculatedPrices] = useState<Record<string, number>>({});
+	const [isLoading, setIsLoading] = useState(false);
+
 	const { status } = useSession() as {
 		data: any;
 		status: "loading" | "authenticated" | "unauthenticated";
 	};
 
-	useEffect(() => {
-		const loadCartData = async () => {
-			try {
-				const cart = await getCart();
-				setCartItems(cart);
-			} catch (error) {
-				console.error("Error loading cart data:", error);
+	const loadCartData = async () => {
+		try {
+			const cart = await getCart();
+			if (!cart) {
+				return;
 			}
-		};
+			setIsLoading(true);
+			setCartItems(cart);
+
+			// Get base prices
+			for (const item of cart) {
+				const priceData = await getProductPrice(
+					"169999",
+					"01",
+					item.productNumber,
+				);
+				setPrices((prev) => ({
+					...prev,
+					[item.itemNumber]:
+						priceData?.find(
+							(p: PriceResponse) => p.itemNumber === String(item.itemNumber),
+						)?.basePrice || 0,
+				}));
+			}
+
+			// Calculate initial prices for all items
+			const priceRequests = cart?.map((item) => ({
+				itemNumber: item.itemNumber,
+				quantity: item.quantity,
+				warehouseNumber: "L01",
+			}));
+
+			if (priceRequests.length > 0) {
+				const priceResults = await calculateItemPrice(
+					priceRequests,
+					"169999",
+					"01",
+				);
+				const newPrices = priceResults.reduce(
+					(acc: Record<string, number>, item: PriceResponse) => ({
+						...acc,
+						[item.itemNumber]: item.basePriceTotal || 0,
+					}),
+					{} as Record<string, number>,
+				);
+				setCalculatedPrices(newPrices);
+			}
+		} catch (error) {
+			console.error("Error fetching cart:", error);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	useEffect(() => {
 		if (status === "authenticated") {
 			loadCartData();
 		}
 	}, [status, isCartChanging]);
 
+	const updateQuantity = async (cartLine: number, itemNumber: string, newQuantity: number) => {
+		try {
+			await updateCart(cartLine, {
+				itemNumber,
+				quantity: newQuantity,
+			});
+			setIsCartChanging(!isCartChanging);
+		} catch (error) {
+			console.error("Error updating cart quantity:", error);
+			throw error;
+		}
+	};
+
+	const removeItem = async (cartLine: number) => {
+		try {
+			await removeFromCart(cartLine);
+			setIsCartChanging(!isCartChanging);
+		} catch (error) {
+			console.error("Error removing item from cart:", error);
+			throw error;
+		}
+	};
+
 	return (
-		<AppContext.Provider value={{ isCartChanging, setIsCartChanging, cartItems, setCartItems }}>
+		<AppContext.Provider value={{ 
+			isCartChanging, 
+			setIsCartChanging, 
+			cartItems, 
+			setCartItems,
+			prices,
+			calculatedPrices,
+			isLoading,
+			updateQuantity,
+			removeItem
+		}}>
 			{children}
 		</AppContext.Provider>
 	);

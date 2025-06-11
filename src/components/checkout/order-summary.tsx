@@ -12,15 +12,16 @@ import { useAppContext } from "@/lib/appContext";
 
 export default function OrderSummary() {
 
-	const { cartItems } = useAppContext();
+	const { cartItems, prices, calculatedPrices, updateQuantity } = useAppContext();
 	const [openModalId, setOpenModalId] = useState<string | null>(null);
 	
 
+	console.log(cartItems,"cartItems")
 	return (
 		<div className="h-fit w-full rounded-md border bg-white p-6 shadow-sm md:sticky md:top-6">
 			<div className="mb-4 flex items-center justify-between">
 				<h2 className="text-lg font-semibold">Bag ({cartItems.length})</h2>
-				<span className="text-sm font-medium">$306.34</span>
+				<span className="text-sm font-medium">{cartItems?.reduce((acc, item) => acc + (calculatedPrices[item.itemNumber] || prices[item.itemNumber] || 0), 0).toFixed(2)},- kr</span>
 			</div>
 
 			{cartItems.map((product) => (
@@ -38,23 +39,29 @@ export default function OrderSummary() {
 						</div>
 						<div className="flex flex-col justify-between text-sm">
 							<div>
-								<p className="font-medium">{product.productName}</p>
-								{/* <p className="text-muted-foreground">{product.productDetails}</p> */}
+								<p className="font-medium">{product.productNumber}</p>
+								<p className="text-muted-foreground">{product.itemNumber}</p>
 							</div>
 							<div className="mt-2 flex items-center gap-2">
 								<Button
 									size="icon"
-									variant="outline">
+									variant="outline"
+									onClick={async () => {
+										await updateQuantity(product.cartLine ?? 0, product.itemNumber, product.quantity - 1);
+									}}>
 									-
 								</Button>
 								<span>{product.quantity}</span>
 								<Button
 									size="icon"
-									variant="outline">
+									variant="outline"
+									onClick={async () => {
+										await updateQuantity(product.cartLine ?? 0, product.itemNumber, product.quantity + 1);
+									}}>
 									+
 								</Button>
 							</div>
-							<p className="mt-1 font-medium">${product.price}</p>
+							<p className="mt-1 font-medium">{calculatedPrices[product.itemNumber]?.toFixed(2)},- kr</p>
 						</div>
 					</div>
 					<div className="flex-end flex">
@@ -92,7 +99,7 @@ export default function OrderSummary() {
 			<div className="mb-4 space-y-1 text-sm">
 				<div className="flex justify-between">
 					<span>Subtotal</span>
-					<span>$236</span>
+					<span>{cartItems?.reduce((acc, item) => acc + (calculatedPrices[item.itemNumber] || prices[item.itemNumber] || 0), 0).toFixed(2)},- kr</span>
 				</div>
 				<div className="flex justify-between">
 					<span>Duties</span>

@@ -19,13 +19,8 @@ import {
 	removeFromCart,
 	updateCart,
 } from "@/services/carts.service";
-import {
-	calculateItemPrice,
-	getProductPrice,
-	getProductVariations,
-} from "@/services/product.service";
 import { CartLine } from "@/types/carts.types";
-import { PriceResponse } from "@/types/search.types";
+import { getProductVariations } from "@/services/product.service";
 import { Loader2, Minus, Plus, Trash } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -67,90 +62,17 @@ const AnimatedTableRow = ({
 
 const CartPage = () => {
 	const router = useRouter();
-	const { isCartChanging, setIsCartChanging } = useAppContext();
+	const { isCartChanging, setIsCartChanging, cartItems, prices, calculatedPrices, isLoading, updateQuantity, removeItem } = useAppContext();
 	const t = useTranslations();
 	const { status } = useSession() as {
 		data: any;
 		status: "loading" | "authenticated" | "unauthenticated";
 	};
 
-	const [isLoading, setIsLoading] = React.useState(true);
-	const [cartItems, setCartItems] = React.useState<CartLine[]>([]);
 	const [openItems, setOpenItems] = React.useState<boolean[]>([]);
 	const [variations, setVariations] = React.useState<Record<string, any>>({});
-	const [loadingItems, setLoadingItems] = React.useState<
-		Record<string, boolean>
-	>({});
-	const [removingItems, setRemovingItems] = React.useState<
-		Record<number, boolean>
-	>({});
-	const [prices, setPrices] = React.useState<Record<string, number>>({});
-	const [calculatedPrices, setCalculatedPrices] = React.useState<
-		Record<string, number>
-	>({}); // Store calculated prices
-
-	const loadCartData = async () => {
-		try {
-			const cart = await getCart();
-			if (!cart) {
-				return;
-			}
-			setIsLoading(true);
-			setCartItems(cart);
-
-			// Get base prices
-			for (const item of cart) {
-				const priceData = await getProductPrice(
-					"169999",
-					"01",
-					item.productNumber,
-				);
-				setPrices((prev) => ({
-					...prev,
-					[item.itemNumber]:
-						priceData?.find(
-							(p: PriceResponse) => p.itemNumber === String(item.itemNumber),
-						)?.basePrice || 0,
-				}));
-			}
-
-			// Calculate initial prices for all items
-			const priceRequests = cart?.map((item) => ({
-				itemNumber: item.itemNumber,
-				quantity: item.quantity,
-				warehouseNumber: "L01",
-			}));
-
-			if (priceRequests.length > 0) {
-				const priceResults = await calculateItemPrice(
-					priceRequests,
-					"169999",
-					"01",
-				);
-				const newPrices = priceResults.reduce(
-					(acc: Record<string, number>, item: PriceResponse) => ({
-						...acc,
-						[item.itemNumber]: item.basePriceTotal || 0,
-					}),
-					{} as Record<string, number>,
-				);
-				setCalculatedPrices(newPrices);
-			}
-		} catch (error) {
-			console.error("Error fetching cart:", error);
-		} finally {
-			setIsLoading(false);
-		}
-	};
-	
-	useEffect(() => {
-
-		if (status === "authenticated") {
-			loadCartData();
-		} else {
-			setCartItems([]);
-		}
-	}, [status]);
+	const [loadingItems, setLoadingItems] = React.useState<Record<string, boolean>>({});
+	const [removingItems, setRemovingItems] = React.useState<Record<number, boolean>>({});
 
 	const subtotal = cartItems?.reduce(
 		(acc, item) =>
@@ -164,26 +86,30 @@ const CartPage = () => {
 
 	const handleArchiveCart = async () => {
 		try {
-			setIsLoading(true);
 			await archiveCart();
-			await getCart();
-			setCartItems([]);
 			setIsCartChanging(!isCartChanging);
-			toast(t("Cart.archived"), {
-				type: "success",
-			});
+			toast.success(t("Cart archived successfully"));
 		} catch (error) {
 			console.error("Error archiving cart:", error);
-			toast(t("Cart.errorArchiving"), {
-				type: "error",
-			});
-		} finally {
-			setIsLoading(false);
+			toast.error(t("Error archiving cart"));
 		}
 	};
 
 	if (isLoading) {
 		return <CartSkeleton />;
+	}
+
+	if (status === "unauthenticated") {
+		return (
+			<div className="flex flex-col items-center justify-center gap-4 py-12">
+				<h1 className="text-2xl font-semibold">
+					{t("Please login to view your cart")}
+				</h1>
+				<Button onClick={() => router.push("/auth/login")}>
+					{t("Login")}
+				</Button>
+			</div>
+		);
 	}
 
 	return (
@@ -298,33 +224,7 @@ const CartPage = () => {
 																	[item.itemNumber]: true,
 																}));
 																try {
-																	const newQuantity = item.quantity - 1;
-																	await updateCart(item.cartLine ?? 0, {
-																		itemNumber: item.itemNumber,
-																		quantity: newQuantity,
-																	});
-																	// Calculate new price
-																	const priceResult = await calculateItemPrice(
-																		[
-																			{
-																				itemNumber: item.itemNumber,
-																				quantity: newQuantity,
-																				warehouseNumber: "L01",
-																			},
-																		],
-																		"169999",
-																		"01",
-																	);
-																	setCalculatedPrices((prev) => ({
-																		...prev,
-																		[item.itemNumber]:
-																			priceResult.find(
-																				(item: PriceResponse) =>
-																					item.itemNumber ===
-																					String(item.itemNumber),
-																			)?.basePriceTotal || 0,
-																	}));
-																	await loadCartData();
+																	await updateQuantity(item.cartLine ?? 0, item.itemNumber, item.quantity - 1);
 																} finally {
 																	setLoadingItems((prev) => ({
 																		...prev,
@@ -352,33 +252,7 @@ const CartPage = () => {
 																	[item.itemNumber]: true,
 																}));
 																try {
-																	const newQuantity = item.quantity + 1;
-																	await updateCart(item.cartLine ?? 0, {
-																		itemNumber: item.itemNumber,
-																		quantity: newQuantity,
-																	});
-																	// Calculate new price
-																	const priceResult = await calculateItemPrice(
-																		[
-																			{
-																				itemNumber: item.itemNumber,
-																				quantity: newQuantity,
-																				warehouseNumber: "L01",
-																			},
-																		],
-																		"169999",
-																		"01",
-																	);
-																	setCalculatedPrices((prev) => ({
-																		...prev,
-																		[item.itemNumber]:
-																			priceResult.find(
-																				(item: PriceResponse) =>
-																					item.itemNumber ===
-																					String(item.itemNumber),
-																			)?.basePriceTotal || 0,
-																	}));
-																	await loadCartData();
+																	await updateQuantity(item.cartLine ?? 0, item.itemNumber, item.quantity + 1);
 																} finally {
 																	setLoadingItems((prev) => ({
 																		...prev,
@@ -409,9 +283,7 @@ const CartPage = () => {
 																[item.cartLine ?? 0]: true,
 															}));
 															try {
-																await removeFromCart(Number(item.cartLine));
-																await loadCartData();
-																setIsCartChanging(!isCartChanging);
+																await removeItem(Number(item.cartLine));
 															} finally {
 																setRemovingItems((prev) => ({
 																	...prev,

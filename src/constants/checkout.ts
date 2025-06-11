@@ -61,25 +61,3 @@ export const shippingFields: Omit<FormFieldProps, "value" | "onChange">[] = [
 		field: "countryCode",
 	},
 ];
-
-export const referenceFields: Omit<FormFieldProps, "value" | "onChange">[] = [
-	{
-		id: "reference1",
-		label: "Reference 1",
-		placeholder: "Enter reference 1 (e.g., Project)",
-		required: true,
-		field: "reference1",
-	},
-	{
-		id: "reference2",
-		label: "Reference 2",
-		placeholder: "Enter reference 2 (optional)",
-		field: "reference2",
-	},
-	{
-		id: "reference3",
-		label: "Reference 3",
-		placeholder: "Enter reference 3 (optional)",
-		field: "reference3",
-	},
-];

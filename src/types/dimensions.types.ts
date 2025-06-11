@@ -18,5 +18,11 @@ export interface UserDimensionsResponse {
 }
 
 export interface CustomerDimension {
-    [key: string]: string | number;
+    d1_id: number;
+    d1_name: string;
+    d2_id: number | null;
+    d2_name: string | null;
+    d3_id: number | null;
+    d3_name: string | null;
+    [key: string]: string | number | null;
 }

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { companyFields, referenceFields, shippingFields } from "@/constants/checkout";
+import { companyFields, shippingFields } from "@/constants/checkout";
 import { Address, Order, PaymentMethod } from "@/types/orders.types";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import { CreditCard } from "lucide-react";
@@ -17,6 +17,9 @@ import { FormField } from "./form-field";
 import { StepHeader } from "./step-header";
 import { salesOrder } from "@/services/orders.service";
 import { useAppContext } from "@/lib/appContext";
+import { CustomerDimension, UserDimensionsResponse } from "@/types/dimensions.types";
+import { getCustomerDimensions, getUserDimensions, formatDimensionsToHierarchy } from "@/services/dimensions.service";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 // Main component
 export default function CheckoutSteps() {
@@ -42,9 +45,34 @@ export default function CheckoutSteps() {
 			text: "",
 		},
 		salesOrderAddresses: [],
-		salesOrderLines: [],
+		salesOrderLines: cartItems.map((item) => ({
+			warehouseId: "",
+			orderType: "",
+			itemCode: item?.productNumber || "",
+			orderedQuantity: item.quantity,
+			salesPrice: item.price || 0,
+			requestedDeliveryDate: "",
+			accountPart3: "", // Dimension 3
+			accountPart4: "", // userId
+			accountPart5: "",
+			text: ""
+		})),
 	});
+	const [customerDimensions, setCustomerDimensions] = useState<CustomerDimension[]>([]);
+	const [userDimensions, setUserDimensions] = useState<UserDimensionsResponse[]>([]);
+	const [customerDimension, setCustomerDimension] = useState<string>('');
 
+	useEffect(() => {
+		const loadDimensions = async () => {
+			const customerDimensions = await getCustomerDimensions('110036')
+			setCustomerDimensions(customerDimensions)
+			const userDimensions = await getUserDimensions('110036')
+			setUserDimensions(userDimensions)
+		}
+		loadDimensions()
+			
+	}, [])
+	
 	const handleAddressChange = (field: keyof Address, value: string) => {
 		setOrderData((prev) => {
 			const existingAddress = prev.salesOrderAddresses[0] || {
@@ -68,7 +96,6 @@ export default function CheckoutSteps() {
 			};
 		});
 	};
-	
 
 	const isStepValid = (step: number) => {
 		if (step === 1) {
@@ -92,22 +119,9 @@ export default function CheckoutSteps() {
 			},
 			salesOrderHeader: {
 				...orderData.salesOrderHeader,
-				customerReference: "", // Dimension 1
-				customersOrderReference: "", // Dimension 2
 			},
 			salesOrderAddresses: orderData.salesOrderAddresses,
-			salesOrderLines: cartItems.map((item) => ({
-				warehouseId: "",
-				orderType: "",
-				itemCode: item?.productNumber || "",
-				orderedQuantity: item.quantity,
-				salesPrice: item.price || 0,
-				requestedDeliveryDate: "",
-				accountPart3: "", // Dimension 3
-				accountPart4: "",
-				accountPart5: "",
-				text: ""
-			}))
+			salesOrderLines: orderData.salesOrderLines
 		};
 		try {
 			await salesOrder(payload);
@@ -122,6 +136,7 @@ export default function CheckoutSteps() {
 			setOpenStep(2);
 		}
 	};
+	console.log(orderData,"order data")
 
 	return (
 		<div className="w-full overflow-hidden rounded-md border bg-white">
@@ -160,16 +175,87 @@ export default function CheckoutSteps() {
 								}
 							/>
 						))}
-						{referenceFields.map((field) => (
-							<FormField
-								key={field.id}
-								{...field}
-								value={(orderData as any)[field.field] || ""}
-								onChange={(value) =>
-									setOrderData((prev) => ({ ...prev, [field.field]: value }))
-								}
-							/>
-						))}
+						<div className="space-y-4">
+							<div className="space-y-2">
+								<Label>Customer Dimensions</Label>
+								<Select 
+									value={customerDimension} 
+									onValueChange={(value) => {
+										console.log('onValueChange called with:', value);
+										const parts = value.split('<');
+										console.log('Split parts:', parts);
+										setCustomerDimension(value)
+										setOrderData((prev) => {
+											let updatedOrder = { ...prev };
+
+											if (parts.length === 1) {
+												updatedOrder.salesOrderHeader = {
+													...prev.salesOrderHeader,
+													customersOrderReference: parts[0]
+												};
+											}
+											else if (parts.length === 2) {
+												updatedOrder.salesOrderHeader = {
+													...prev.salesOrderHeader,
+													customersOrderReference: parts[0],
+													customerReference: parts[1]
+												};
+											}
+											else if (parts.length === 3) {
+												updatedOrder.salesOrderHeader = {
+													...prev.salesOrderHeader,
+													customersOrderReference: parts[0],
+													customerReference: parts[1]
+												};
+												updatedOrder.salesOrderLines = prev.salesOrderLines.map(line => ({
+													...line,
+													accountPart3: parts[2]
+												}));
+											}
+
+											return updatedOrder;
+										});
+									}}
+								>
+									<SelectTrigger>
+										<SelectValue placeholder="Select Customer Dimension" />
+									</SelectTrigger>
+									<SelectContent>
+										{formatDimensionsToHierarchy(customerDimensions).map((item, index) => (
+										<SelectItem 
+											key={`${item.value}-${index}`} 
+											value={item.value}
+										>
+											{item.label}
+										</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+							<div className="space-y-2">
+								<Label>User Dimensions</Label>
+								<Select value={orderData.salesOrderHeader.customersOrderReference} onValueChange={(value) =>
+									setOrderData((prev) => ({
+										...prev,
+										salesOrderHeader: {
+											...prev.salesOrderHeader,
+											customersOrderReference: value
+										}
+									}))
+								}>
+									<SelectTrigger>
+										<SelectValue placeholder="Select User Dimension" />
+									</SelectTrigger>
+									<SelectContent>
+										{userDimensions.map((dim, index) => (
+											<SelectItem key={`${dim.id}-${index}`} value={dim?.id?.toString()}>
+												{dim.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+						</div>
 					</div>
 					<Button
 						className="w-full"
