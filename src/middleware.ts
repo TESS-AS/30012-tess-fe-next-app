@@ -74,7 +74,6 @@ export default auth((request) => {
 	const localeRedirect = redirectToLocale(request);
 	if (localeRedirect) return localeRedirect;
 
-	const isLoggedIn = !!request.auth;
 	const isProtected = protectedRoutes.some((route) =>
 		path.split("/").includes(route),
 	);
