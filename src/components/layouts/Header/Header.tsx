@@ -112,7 +112,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 						<Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
 						<Input
 							type="search"
-							placeholder="Search products..."
+							placeholder={t("Common.searchProducts")}
 							className="bg-background w-[650px] border-green-600 pl-8"
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
@@ -386,7 +386,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 									<Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
 									<Input
 										type="search"
-										placeholder="Search products..."
+										placeholder={t("Common.searchProducts")}
 										className="bg-background w-full pl-8"
 										value={searchQuery}
 										onChange={(e) => setSearchQuery(e.target.value)}

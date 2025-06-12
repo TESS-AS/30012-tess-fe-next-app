@@ -14,7 +14,9 @@
 		"title": "Home Page No",
 		"bannerTitle": "Velkommen til TESS!",
 		"browseOurTopCategories": "Bla gjennom våre toppkategorier",
-		"ourCategories": "Our categories"
+		"ourCategories": "Our categories",
+		"seeCategories": "Se kategorier",
+		"learnMore": "Lær mer"
 	},
 	"Products": {
 		"noProducts": "Ingen produkter funnet"
@@ -56,7 +58,8 @@
 			"subcategoryLoad": "Vi kunne ikke laste subkategorien innhold."
 		},
 		"sort": "Sorter",
-		"search": "Søk"
+		"search": "Søk",
+		"searchProducts": "Søk etter produkter..."
 	},
 	"Search": {
 		"suggestions": "Søkeforslag",

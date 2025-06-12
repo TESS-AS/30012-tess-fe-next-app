@@ -2,7 +2,6 @@ import MainCategorySection from "@/components/categories/main-categories";
 import { Quote } from "@/components/quote";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Star } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
@@ -21,7 +20,10 @@ export default function Home() {
 							className="object-cover"
 							priority
 						/>
-						<div className="absolute inset-0 flex items-center bg-black/40 px-8 sm:px-30">
+
+						<div className="absolute inset-0 z-1 bg-black/40" />
+
+						<div className="absolute inset-0 z-2 container mx-auto flex items-center">
 							<div className="max-w-xl space-y-6 text-white">
 								<p className="text-sm tracking-wide text-white/80 uppercase">
 									Let’s get to work
@@ -34,15 +36,14 @@ export default function Home() {
 									counter and have access to the best market availability with
 									more than 130 local service centers.
 								</p>
-
 								<div className="flex flex-wrap items-center gap-4">
 									<Button className="rounded-full bg-green-600 px-6 py-2 hover:bg-green-800">
-										See Categories
+										{t("seeCategories")}
 									</Button>
 									<Button
 										variant="outline"
 										className="rounded-full bg-white/90 px-6 py-2 text-black hover:bg-white">
-										Learn More
+										{t("learnMore")}
 									</Button>
 								</div>
 							</div>

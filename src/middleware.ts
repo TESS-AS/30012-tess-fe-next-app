@@ -6,8 +6,24 @@ import { routing } from "./i18n/routing";
 
 const protectedRoutes = ["profile"];
 const apiAuthPrefix = "/api/auth";
+const supportedLocales = ["en", "no"];
 
-function rewriteProductUrls(request: NextRequest) {
+function redirectToLocale(request: NextRequest): NextResponse | null {
+	const { pathname } = request.nextUrl;
+
+	const hasLocale = supportedLocales.some((locale) =>
+		pathname.startsWith(`/${locale}`),
+	);
+
+	if (!hasLocale) {
+		const locale = "no";
+		return NextResponse.redirect(new URL(`/${locale}${pathname}`, request.url));
+	}
+
+	return null;
+}
+
+function rewriteProductUrls(request: NextRequest): NextResponse | null {
 	const url = request.nextUrl.clone();
 	const segments = url.pathname.split("/").filter(Boolean);
 
@@ -37,8 +53,7 @@ function rewriteProductUrls(request: NextRequest) {
 			while (filled.length < 4) {
 				filled.splice(filled.length - 1, 0, "__default");
 			}
-
-			url.pathname = `/${locale}/${filled.join("/")}`;
+			url.pathname = `/${segments[0]}/${filled.join("/")}`;
 			return NextResponse.rewrite(url);
 		}
 	}
@@ -47,23 +62,27 @@ function rewriteProductUrls(request: NextRequest) {
 }
 
 export default auth((request) => {
-	// First check authentication
 	const { nextUrl } = request;
 	const isLoggedIn = !!request.auth;
 
 	const path = nextUrl.pathname;
-	const isApiAuthRoute = path.startsWith(apiAuthPrefix);
-	const isProtectedRoute = protectedRoutes.some((route) =>
-		path.split("/").includes(route),
-	);
 
-	if (isApiAuthRoute) {
+	if (path.startsWith(apiAuthPrefix)) {
 		return NextResponse.next();
 	}
 
-	if (isProtectedRoute && !isLoggedIn) {
-		const locale = nextUrl.pathname.split("/")[1];
-		return NextResponse.redirect(new URL(`/${locale}/login`, nextUrl));
+	const localeRedirect = redirectToLocale(request);
+	if (localeRedirect) return localeRedirect;
+
+	const isLoggedIn = !!request.auth;
+	const isProtected = protectedRoutes.some((route) =>
+		path.split("/").includes(route),
+	);
+
+	if (isProtected && !isLoggedIn) {
+		return NextResponse.redirect(
+			new URL(`/${path.split("/")[1]}/login`, nextUrl),
+		);
 	}
 
 	// Handle URL rewrites first
