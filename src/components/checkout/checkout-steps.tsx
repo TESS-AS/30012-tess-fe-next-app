@@ -23,6 +23,7 @@ import { getCustomerDimensions, getUserDimensions } from "@/services/dimensions.
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { formatCustomerDimensionsToHierarchy, formatUserDimensionsToHierarchy } from "@/utils/dimensionFormaters";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
 // Main component
 export default function CheckoutSteps() {
@@ -34,7 +35,7 @@ export default function CheckoutSteps() {
 	const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>();
 	const [orderData, setOrderData] = useState<Order>({
 		documentControl: {
-			companyCode: "01",
+			companyCode: "",
 		},
 		salesOrderHeader: {
 			customerReference: "",
@@ -57,8 +58,13 @@ export default function CheckoutSteps() {
 	const [userDimensions, setUserDimensions] = useState<UserDimensionItem[]>([]);
 	const [customerDimension, setCustomerDimension] = useState<string>('');
 	const [userDimension, setUserDimension] = useState<string>('');
-	const [isUserDimensionTypingMode, setIsUserDimensionTypingMode] = useState(false);
-	const [isCustomerDimensionTypingMode, setIsCustomerDimensionTypingMode] = useState(false);
+	const [userDimensionOne, setUserDimensionOne] = useState<string>('');
+	const [userDimensionTwo, setUserDimensionTwo] = useState<string>('');
+	const [userDimensionThree, setUserDimensionThree] = useState<string>('');
+	const [customerDimensionOne, setCustomerDimensionOne] = useState<string>('');
+	const [customerDimensionTwo, setCustomerDimensionTwo] = useState<string>('');
+	const [customerDimensionThree, setCustomerDimensionThree] = useState<string>('');
+	const [activeTab, setActiveTab] = useState<'customer' | 'user'>('customer');
 
 	const updateOrderData = (parts: string[]) => {
 		setOrderData((prev) => {
@@ -94,11 +100,16 @@ export default function CheckoutSteps() {
 	};
 
 	useEffect(() => {
-		// if (cartItems?.length && profile) {
+		if (cartItems?.length && profile) {
 			setOrderData(prev => ({
 				...prev,
+				documentControl: {
+					companyCode: profile?.defaultCompanyNumber < 10 
+						? `0${profile?.defaultCompanyNumber}` 
+						: profile?.defaultCompanyNumber?.toString(),
+				},
 				salesOrderLines: cartItems.map((item) => ({
-					warehouseId: "",
+					warehouseNumber: `${profile?.defaultWarehouseId} ${profile?.defaultWarehosueName}` || "",
 					orderType: "",
 					itemCode: item?.productNumber || "",
 					orderedQuantity: item.quantity,
@@ -110,7 +121,7 @@ export default function CheckoutSteps() {
 					text: ""
 				}))
 			}));
-		// }
+		}
 	}, [cartItems, profile]);
 
 	useEffect(() => {
@@ -205,9 +216,9 @@ export default function CheckoutSteps() {
 								key={field.id}
 								{...field}
 								value={
-									orderData.documentControl?.[
-										field.field as keyof typeof orderData.documentControl
-									] || ""
+									field.label === "Company" 
+									? orderData.documentControl.companyCode
+									: `${profile?.defaultWarehouseNumber} ${profile?.defaultWarehosueName}`
 								}
 								onChange={() => {}}
 							/>
@@ -226,11 +237,22 @@ export default function CheckoutSteps() {
 								}
 							/>
 						))}
+					</div>
 						<div className="space-y-4">
-							<div className="space-y-2">
-								<Label>Customer Dimensions</Label>
-								<div className="relative user-dimensions">
-									{!isCustomerDimensionTypingMode ? (
+							<Tabs
+								defaultValue="customer"
+								value={activeTab}
+								onValueChange={(val) =>
+									setActiveTab(val as "customer" | "user")
+								}
+								className="w-full">
+								<TabsList className="mb-4 grid w-full grid-cols-2">
+									<TabsTrigger value="customer">Customer Dimensions</TabsTrigger>
+									<TabsTrigger value="user">User Dimensions</TabsTrigger>
+								</TabsList>
+								<TabsContent value="customer">	
+									<div className="space-y-2">
+										<Label>Customer Dimensions</Label>
 										<Select 
 											value={customerDimension} 
 											onValueChange={(value) => {
@@ -239,7 +261,7 @@ export default function CheckoutSteps() {
 												updateOrderData(parts);
 											}}
 										>
-											<SelectTrigger isDimensionSelector onClick={() => setIsCustomerDimensionTypingMode(false)}>
+											<SelectTrigger>
 												<SelectValue placeholder="Select Customer Dimension" />
 											</SelectTrigger>
 											<SelectContent>
@@ -253,40 +275,44 @@ export default function CheckoutSteps() {
 												))}
 											</SelectContent>
 										</Select>
-									) : (
 										<Input
 											type="text"
-											value={customerDimension}
-											placeholder="Type Customer Dimension"
+											value={customerDimensionOne}
+											placeholder="Customer Dimension 1"
 											onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 												const value = e.target.value;
-												setCustomerDimension(value);
-												const parts = value.split('<');
-												updateOrderData(parts);
+												setCustomerDimensionOne(value);
 											}}
-											onFocus={() => setIsCustomerDimensionTypingMode(true)}
 										/>
-									)}
-									<button
-										type="button"
-										className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-sm text-gray-500 hover:text-gray-700"
-										onClick={() => setIsCustomerDimensionTypingMode(!isCustomerDimensionTypingMode)}
-									>
-										{isCustomerDimensionTypingMode ? 'Select' : 'Text'}
-									</button>
-								</div>
-							</div>
-							<div className="space-y-2">
-								<Label>User Dimensions</Label>
-								<div className="relative user-dimensions">
-									{!isUserDimensionTypingMode
-										
-										? (<Select value={userDimension} onValueChange={(value) => {
+										<Input
+											type="text"
+											value={customerDimensionTwo}
+											placeholder="Customer Dimension 2"
+											onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+												const value = e.target.value;
+												setCustomerDimensionTwo(value);
+											}}
+										/>
+										<Input
+											type="text"
+											value={customerDimensionThree}
+											placeholder="Customer Dimension 3"
+											onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+												const value = e.target.value;
+												setCustomerDimensionThree(value);
+											}}
+										/>
+									</div>
+								</TabsContent>
+								<TabsContent value="user">
+									<div className="space-y-2">
+										<Label>User Dimensions</Label>
+										<Select value={userDimension} onValueChange={(value) => {
 											const parts = value.split('<');
 											setUserDimension(value)
 											updateOrderData(parts);
 										}}>
-											<SelectTrigger isDimensionSelector onClick={() => setIsUserDimensionTypingMode(false)}>
+											<SelectTrigger>
 												<SelectValue placeholder="Select User Dimension" />
 											</SelectTrigger>
 											<SelectContent>
@@ -296,34 +322,38 @@ export default function CheckoutSteps() {
 													</SelectItem>
 												))}
 											</SelectContent>
-										</Select>)
-										: (
-											<Input
-												type="text"
-												value={userDimension}
-												placeholder="Type User Dimension"
-												onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-													const value = e.target.value;
-													setUserDimension(value);
-													const parts = value.split('<');
-													updateOrderData(parts);
-												}}
-												onFocus={() => setIsUserDimensionTypingMode(true)}
-											/>
-										)
-									}
-									<button
-										type="button"
-										className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-sm text-gray-500 hover:text-gray-700"
-										onClick={() => setIsUserDimensionTypingMode(!isUserDimensionTypingMode)}
-									>
-										{isUserDimensionTypingMode ? 'Select' : 'Text'}
-									</button>
-
-								</div>
-							</div>
+										</Select>
+										<Input
+											type="text"
+											value={userDimensionOne}
+											placeholder="User Dimension 1"
+											onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+												const value = e.target.value;
+												setUserDimensionOne(value);
+											}}
+										/>
+										<Input
+											type="text"
+											value={userDimensionTwo}
+											placeholder="User Dimension 2"
+											onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+												const value = e.target.value;
+												setUserDimensionTwo(value);
+											}}
+										/>
+										<Input
+											type="text"
+											value={userDimensionThree}
+											placeholder="User Dimension 3"
+											onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+												const value = e.target.value;
+												setUserDimensionThree(value);
+											}}
+										/>
+									</div>
+								</TabsContent>
+							</Tabs>
 						</div>
-					</div>
 					<Button
 						className="w-full"
 						onClick={handleContinueToPayment}

@@ -3,17 +3,17 @@ import { FormFieldProps } from "@/components/checkout/form-field";
 // Form field configurations
 export const companyFields: Omit<FormFieldProps, "value" | "onChange">[] = [
 	{
-		id: "companyName",
+		id: "companyCode",
 		label: "Company",
 		placeholder: "",
-		field: "companyName",
+		field: "companyCode",
 		disabled: true,
 	},
 	{
-		id: "warehouseName",
+		id: "defaultWarehouseNumber",
 		label: "Warehouse",
 		placeholder: "",
-		field: "warehouseName",
+		field: "defaultWarehouseNumber",
 		disabled: true,
 	},
 ];

@@ -24,7 +24,7 @@ export interface SalesOrderHeader {
 }
 
 interface OrderLines {
-	warehouseId: string,
+	warehouseNumber: string,
 	orderType: string,
 	itemCode: string,
 	orderedQuantity: number,
