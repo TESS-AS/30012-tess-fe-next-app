@@ -78,23 +78,13 @@ export default auth((request) => {
 		path.split("/").includes(route),
 	);
 
-	if (isProtected && !isLoggedIn) {
-		return NextResponse.redirect(
-			new URL(`/${path.split("/")[1]}/login`, nextUrl),
-		);
-	}
+	const rewritten = rewriteProductUrls(request);
+	if (rewritten) return rewritten;
 
-	// Handle URL rewrites first
-	const rewriteResponse = rewriteProductUrls(request);
-	if (rewriteResponse) {
-		return rewriteResponse;
-	}
-
-	// Then handle internationalization
-	const intlMiddleware = createIntlMiddleware(routing);
-	return intlMiddleware(request);
+	return NextResponse.next();
 });
 
+// Only apply to non-static, non-api, non-next routes
 export const config = {
 	matcher: ["/((?!_next|favicon.ico|api|.*\\..*).*)"],
 };

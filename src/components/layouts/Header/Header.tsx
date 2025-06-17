@@ -182,24 +182,21 @@ export default function Header({ categories }: { categories: Category[] }) {
 
 				<div className="flex items-center gap-2">
 					{profile && <CustomerNumberSwitcher profile={profile} />}
-					{status === "authenticated" && session?.user ? (
+					{profile ? (
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button
 									variant="ghost"
 									className="px-3 font-medium">
-									{session.user.name?.split(" ")[0] ?? "Profile"}
+									{profile.firstName ?? "Profile"}
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
 								<div className="flex items-center gap-3 px-3 py-2">
 									<Avatar className="h-9 w-9">
-										<AvatarImage
-											src={session.user.image ?? ""}
-											alt={session.user.name ?? "User"}
-										/>
+										<AvatarImage alt={profile.firstName ?? "User"} />
 										<AvatarFallback>
-											{session.user.name
+											{profile.firstName
 												?.split(" ")
 												.map((n: string) => n[0])
 												.join("")}
@@ -207,10 +204,10 @@ export default function Header({ categories }: { categories: Category[] }) {
 									</Avatar>
 									<div className="flex-1 overflow-hidden">
 										<div className="leading-none font-medium">
-											{session.user.name}
+											{profile.firstName}
 										</div>
 										<div className="text-muted-foreground max-w-[160px] truncate text-sm">
-											{session.user.email}
+											{profile.email}
 										</div>
 									</div>
 								</div>

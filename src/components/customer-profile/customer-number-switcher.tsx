@@ -16,6 +16,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useGetAssortments } from "@/hooks/useGetAssortments";
+import { useGetCustomers } from "@/hooks/useGetCustomers";
+import { useGetWarehouses } from "@/hooks/useGetWarehouse";
 import axiosClient from "@/services/axiosClient";
 import { ProfileUser } from "@/types/user.types";
 
@@ -28,29 +31,34 @@ export default function CustomerNumberSwitcher({
 }: CustomerNumberSwitcherProps) {
 	const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
 	const [newCustomerNumber, setNewCustomerNumber] = useState("");
-	const [isSaving, setIsSaving] = useState(false);
+	const [selectedAssortment, setSelectedAssortment] = useState("");
 	const [defaultCustomerNumber, setDefaultCustomerNumber] = useState("");
+	const [isSaving, setIsSaving] = useState(false);
+
+	const { customers } = useGetCustomers(true);
+	const { warehouses } = useGetWarehouses(true);
+	const { assortments } = useGetAssortments(true);
+
+	console.log(assortments, "sss");
 
 	useEffect(() => {
-		if (profile?.defaultCustomerNumber) {
-			setDefaultCustomerNumber(profile.defaultCustomerNumber);
+		if (customers.length && !newCustomerNumber) {
+			setNewCustomerNumber(customers[0].customerNumber);
+			setDefaultCustomerNumber(customers[0].customerNumber);
 		}
-		if (profile?.customerNumbers?.length && !newCustomerNumber) {
-			setNewCustomerNumber(profile.customerNumbers[0]);
+		if (assortments.length && !selectedAssortment) {
+			setSelectedAssortment(assortments[0].assortmentnumber);
 		}
-	}, [profile]);
-
-	if (!profile?.defaultCustomerNumber) return null;
+	}, [customers, assortments]);
 
 	const handleSave = async () => {
-		if (!newCustomerNumber || !profile?.orgNumbers?.[0]) return;
-
 		setIsSaving(true);
 		try {
 			await axiosClient.post("/user/defaultVariables", {
 				companyNumber: profile.orgNumbers[0],
 				customerNumber: newCustomerNumber,
-				warehouseNumber: profile.defaultWarehouseId,
+				warehouseNumber: warehouses[0]?.id,
+				assortmentId: selectedAssortment,
 			});
 			setDefaultCustomerNumber(newCustomerNumber);
 			setIsCustomerModalOpen(false);
@@ -80,10 +88,10 @@ export default function CustomerNumberSwitcher({
 					</ModalHeader>
 					<div className="space-y-4 p-4">
 						<div className="space-y-2">
-							<Label htmlFor="customerSelect">Select customer number</Label>
+							<Label htmlFor="customerSelect">Customers</Label>
 							<Select
 								value={newCustomerNumber}
-								onValueChange={(val) => setNewCustomerNumber(val)}>
+								onValueChange={setNewCustomerNumber}>
 								<SelectTrigger
 									id="customerSelect"
 									className="w-full">
@@ -94,11 +102,11 @@ export default function CustomerNumberSwitcher({
 									className="z-[9999]">
 									<SelectGroup>
 										<>
-											{profile.customerNumbers.map((number) => (
+											{customers.map((customer) => (
 												<SelectItem
-													key={number}
-													value={number}>
-													{number}
+													key={customer.customerNumber}
+													value={customer.customerNumber}>
+													{customer.customerName} ({customer.customerNumber})
 												</SelectItem>
 											))}
 										</>
@@ -106,29 +114,68 @@ export default function CustomerNumberSwitcher({
 								</SelectContent>
 							</Select>
 						</div>
+						<div className="space-y-2">
+							<Label htmlFor="warehouseSelect">Warehouses</Label>
+							<Select
+								value={warehouses[0]?.id}
+								disabled={warehouses.length === 0}>
+								<SelectTrigger
+									id="warehouseSelect"
+									className="w-full">
+									<SelectValue
+										placeholder={
+											warehouses.length === 0
+												? "No warehouse available"
+												: "Select warehouse"
+										}
+									/>
+								</SelectTrigger>
+								<SelectContent>
+									<SelectGroup>
+										<>
+											{warehouses.length > 0 && (
+												<SelectItem value={warehouses[0].id}>
+													{warehouses[0].name} ({warehouses[0].id})
+												</SelectItem>
+											)}
+										</>
+									</SelectGroup>
+								</SelectContent>
+							</Select>
+						</div>
 
-						{profile.defaultWarehouseId && profile.defaultWarehosueName && (
-							<div className="space-y-2">
-								<Label htmlFor="warehouseSelect">Select warehouse</Label>
-								<Select
-									value={profile.defaultWarehouseId}
-									disabled>
-									<SelectTrigger
-										id="warehouseSelect"
-										className="w-full">
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectGroup>
-											<SelectItem value={profile.defaultWarehouseId}>
-												{profile.defaultWarehosueName} (
-												{profile.defaultWarehouseId})
-											</SelectItem>
-										</SelectGroup>
-									</SelectContent>
-								</Select>
-							</div>
-						)}
+						<div className="space-y-2">
+							<Label htmlFor="assortmentSelect">Assortments</Label>
+							<Select
+								value={selectedAssortment}
+								disabled={assortments.length === 0}
+								onValueChange={setSelectedAssortment}>
+								<SelectTrigger
+									id="assortmentSelect"
+									className="w-full">
+									<SelectValue
+										placeholder={
+											assortments.length === 0
+												? "No assortments available"
+												: "Select assortment"
+										}
+									/>
+								</SelectTrigger>
+								<SelectContent>
+									<SelectGroup>
+										<>
+											{assortments.map((a) => (
+												<SelectItem
+													key={a.assortmentnumber}
+													value={a.assortmentnumber}>
+													{a.assortmentname} ({a.assortmentnumber})
+												</SelectItem>
+											))}
+										</>
+									</SelectGroup>
+								</SelectContent>
+							</Select>
+						</div>
 
 						<Button
 							className="w-full"
