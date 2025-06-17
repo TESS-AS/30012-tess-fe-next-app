@@ -42,14 +42,27 @@ export default function CustomerNumberSwitcher({
 	console.log(assortments, "sss");
 
 	useEffect(() => {
-		if (customers.length && !newCustomerNumber) {
-			setNewCustomerNumber(customers[0].customerNumber);
-			setDefaultCustomerNumber(customers[0].customerNumber);
+		if (
+			customers.length &&
+			!newCustomerNumber &&
+			profile?.defaultCustomerNumber
+		) {
+			setNewCustomerNumber(profile.defaultCustomerNumber);
+			setDefaultCustomerNumber(profile.defaultCustomerNumber);
 		}
-		if (assortments.length && !selectedAssortment) {
-			setSelectedAssortment(assortments[0].assortmentnumber);
+		if (
+			assortments.length &&
+			!selectedAssortment &&
+			profile?.defaultAssortmentNumber
+		) {
+			const match = assortments.find(
+				(a) => a.assortmentnumber === profile.defaultAssortmentNumber,
+			);
+			if (match) {
+				setSelectedAssortment(match.assortmentnumber);
+			}
 		}
-	}, [customers, assortments]);
+	}, [customers, assortments, profile]);
 
 	const handleSave = async () => {
 		setIsSaving(true);
@@ -130,7 +143,7 @@ export default function CustomerNumberSwitcher({
 										}
 									/>
 								</SelectTrigger>
-								<SelectContent>
+								<SelectContent className="z-[9999]">
 									<SelectGroup>
 										<>
 											{warehouses.length > 0 && (
@@ -161,7 +174,7 @@ export default function CustomerNumberSwitcher({
 										}
 									/>
 								</SelectTrigger>
-								<SelectContent>
+								<SelectContent className="z-[9999]">
 									<SelectGroup>
 										<>
 											{assortments.map((a) => (
