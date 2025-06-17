@@ -75,12 +75,6 @@ export default auth((request) => {
 		path.split("/").includes(route),
 	);
 
-	if (isProtected && !isLoggedIn) {
-		return NextResponse.redirect(
-			new URL(`/${path.split("/")[1]}/login`, nextUrl),
-		);
-	}
-
 	const rewritten = rewriteProductUrls(request);
 	if (rewritten) return rewritten;
 
