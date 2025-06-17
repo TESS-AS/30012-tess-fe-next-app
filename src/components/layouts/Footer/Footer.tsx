@@ -11,14 +11,14 @@ const footerLinks = {
 		{ label: "contact", href: "/contact" },
 	],
 	support: [
-		{ label: "help", href: "/help" },
-		{ label: "shipping", href: "/shipping" },
-		{ label: "returns", href: "/returns" },
+		{ label: "help", href: "/legal" }, // Help Center
+		{ label: "shipping", href: "/legal/shipping-policy" },
+		{ label: "returns", href: "/legal/refund-policy" },
 	],
 	legal: [
-		{ label: "terms", href: "/terms" },
-		{ label: "privacy", href: "/privacy" },
-		{ label: "cookies", href: "/cookies" },
+		{ label: "terms", href: "/legal/terms" },
+		{ label: "privacy", href: "/legal/privacy-policy" },
+		{ label: "cookies", href: "/legal/cookies" },
 	],
 };
 

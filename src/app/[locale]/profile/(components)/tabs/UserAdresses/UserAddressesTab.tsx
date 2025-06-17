@@ -100,46 +100,82 @@ export default function UserAddressesTab() {
 		);
 	};
 
-	const renderAddresses = (addresses: UserAddress[]) => (
-		<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-			{addresses.map((address) => (
-				<div
-					key={address.addressId}
-					className="relative rounded-md border border-gray-200 p-4 shadow-sm transition hover:shadow-md">
-					{activeTab === "personal" && (
-						<div className="absolute top-2 right-2 flex gap-2">
-							<button
-								onClick={() => handleEdit(address)}
-								className="text-gray-500 hover:text-black"
-								aria-label="Edit Address">
-								<Pencil size={16} />
-							</button>
-							<button
-								onClick={() => handleDelete(address.addressId)}
-								className="text-gray-500 hover:text-red-600"
-								aria-label="Delete Address">
-								<Trash2 size={16} />
-							</button>
+	const renderAddresses = (
+		addresses: UserAddress[],
+		layout: "cards" | "list" = "cards",
+	) => {
+		const isOrganization = activeTab === "organization";
+
+		if (layout === "list") {
+			return (
+				<div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+					{addresses.map((address) => (
+						<div
+							key={address.addressId}
+							className="rounded-md border p-4 shadow-sm transition hover:shadow">
+							<h3 className="text-sm font-semibold">{address.addressName}</h3>
+							<p className="text-sm text-gray-700">
+								{address.postalCode}, {address.city}
+							</p>
+							{!isOrganization && address.deliveryCode && (
+								<p className="text-sm text-gray-500">
+									Delivery Code: {address.deliveryCode}
+								</p>
+							)}
+							{!isOrganization && address.condition && (
+								<p className="text-sm text-gray-500">
+									Condition: {address.condition}
+								</p>
+							)}
 						</div>
-					)}
-					<h3 className="mb-1 text-sm font-semibold">{address.addressName}</h3>
-					<p className="text-sm text-gray-700">
-						{address.postalCode}, {address.city}
-					</p>
-					{address.deliveryCode && (
-						<p className="text-sm text-gray-500">
-							Delivery Code: {address.deliveryCode}
-						</p>
-					)}
-					{address.condition && (
-						<p className="text-sm text-gray-500">
-							Condition: {address.condition}
-						</p>
-					)}
+					))}
 				</div>
-			))}
-		</div>
-	);
+			);
+		}
+
+		return (
+			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+				{addresses.map((address) => (
+					<div
+						key={address.addressId}
+						className="relative rounded-md border border-gray-200 p-4 shadow-sm transition hover:shadow-md">
+						{activeTab === "personal" && (
+							<div className="absolute top-2 right-2 flex gap-2">
+								<button
+									onClick={() => handleEdit(address)}
+									className="text-gray-500 hover:text-black"
+									aria-label="Edit Address">
+									<Pencil size={16} />
+								</button>
+								<button
+									onClick={() => handleDelete(address.addressId)}
+									className="text-gray-500 hover:text-red-600"
+									aria-label="Delete Address">
+									<Trash2 size={16} />
+								</button>
+							</div>
+						)}
+						<h3 className="mb-1 text-sm font-semibold">
+							{address.addressName}
+						</h3>
+						<p className="text-sm text-gray-700">
+							{address.postalCode}, {address.city}
+						</p>
+						{address.deliveryCode && (
+							<p className="text-sm text-gray-500">
+								Delivery Code: {address.deliveryCode}
+							</p>
+						)}
+						{address.condition && (
+							<p className="text-sm text-gray-500">
+								Condition: {address.condition}
+							</p>
+						)}
+					</div>
+				))}
+			</div>
+		);
+	};
 
 	return (
 		<div className="space-y-6 rounded-lg border p-6 shadow-sm">
@@ -243,7 +279,7 @@ export default function UserAddressesTab() {
 								No organization addresses found.
 							</p>
 						) : (
-							renderAddresses(orgAddresses)
+							renderAddresses(orgAddresses, "list")
 						)}
 					</>
 				</TabsContent>
