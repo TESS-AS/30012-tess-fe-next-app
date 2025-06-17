@@ -42,7 +42,7 @@ function rewriteProductUrls(request: NextRequest): NextResponse | null {
 	}
 
 	// CASE 2: /locale/category[/subcategory]/productId (only if ID looks valid)
-	if (rest.length === 2 || rest.length === 3) {
+	if (rest.length === 2 || rest.length === 3 ) {
 		const maybeProductId = rest.at(-1);
 		const isProductId =
 			/^P_[A-Za-z0-9_-]+$/.test(maybeProductId ?? "") ||

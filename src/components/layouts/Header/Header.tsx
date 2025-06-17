@@ -40,6 +40,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
+import { loadCategoryTree } from "@/services/categories.service";
+import { ProductItem } from "@/components/products/product-item-search";
 
 export default function Header({ categories }: { categories: Category[] }) {
 	const currentLocale = useLocale();
@@ -149,104 +151,24 @@ export default function Header({ categories }: { categories: Category[] }) {
 									{data.productRes?.length ? (
 										data.productRes.map((product: IProductSearch) => {
 											const attr = attributeResults.find(
-												(r) => r.productNumber === product.productNumber,
+											  (r) => r.productNumber === product.productNumber
 											);
 											return (
-												<div key={product.productNumber}>
-													<div className="flex w-full items-center justify-between gap-4 border-b p-3 hover:bg-gray-100">
-														<Link
-															className="flex flex-[0.8] items-center justify-between gap-4"
-															href={`/product/product/product/product/${product.productNumber}`}
-															onClick={() => setSearchQuery("")}>
-															<div className="flex flex-col justify-center">
-																<span className="text-base font-medium">
-																	{product.productName}
-																</span>
-																<span className="text-muted-foreground text-sm">
-																	{product.productNumber}
-																</span>
-																{attr && attr.matchedAttributes.length > 0 && (
-																	<div className="mt-2 flex flex-wrap gap-1">
-																		{attr.matchedAttributes.map((a, i) => (
-																			<span
-																				key={i}
-																				className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-xs font-medium">
-																				{a}
-																			</span>
-																		))}
-																	</div>
-																)}
-															</div>
-														</Link>
-														<div className="flex items-center gap-6">
-															<Button
-																variant="outline"
-																size="sm"
-																type="button"
-																onClick={async (e) => {
-																	e.preventDefault();
-																	setIsModalIdOpen(product.productNumber);
-																	const productVariations =
-																		await getProductVariations(
-																			product.productNumber,
-																			"L01",
-																			"01",
-																		);
-																	console.log(
-																		productVariations,
-																		"productVariations",
-																	);
-																	setVariations((prev) => ({
-																		...prev,
-																		[product.productNumber]: productVariations,
-																	}));
-																}}>
-																<ShoppingCartIcon className="h-2 w-2" />
-															</Button>
-															<div className="flex h-32 w-32 min-w-32 items-center justify-center overflow-hidden rounded-md">
-																{product.media ? (
-																	<Image
-																		src={product.media}
-																		alt={product.productName}
-																		unoptimized
-																		width={128}
-																		height={128}
-																		className="max-h-23 max-w-32 object-contain"
-																	/>
-																) : (
-																	<div className="h-32 w-32 rounded bg-gray-300" />
-																)}
-															</div>
-														</div>
-													</div>
-													<Modal
-														open={isModalIdOpen === product.productNumber}
-														onOpenChange={(open) => {
-															if (!open) {
-																setIsModalIdOpen(null);
-																setVariations((prev) => ({
-																	...prev,
-																	[product.productNumber]: [],
-																}));
-															}
-														}}>
-														<ModalContent className="sm:max-w-[900px]">
-															<ModalHeader>
-																<ModalTitle>
-																	Product Variants - {product.productName}
-																</ModalTitle>
-															</ModalHeader>
-															<div className="max-h-[70vh] overflow-y-auto px-1">
-																<ProductVariantTable
-																	variants={variations[product.productNumber]}
-																	productNumber={product.productNumber}
-																/>
-															</div>
-														</ModalContent>
-													</Modal>
-												</div>
+											  <ProductItem
+												key={product.productNumber}
+												product={product}
+												attr={attr}
+												currentLocale={currentLocale}
+												loadCategoryTree={loadCategoryTree}
+												setSearchQuery={setSearchQuery}
+												isModalIdOpen={isModalIdOpen}
+												setIsModalIdOpen={setIsModalIdOpen}
+												getProductVariations={getProductVariations}
+												setVariations={setVariations}
+												variations={variations}
+											  />
 											);
-										})
+										  })
 									) : (
 										<p className="text-opacity-30 text-sm text-green-600">
 											{t("Search.noProductsFound")}

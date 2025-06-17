@@ -96,9 +96,10 @@ export default function ProductVariantTable({
 				const itemNumbers = variants.map(variant => variant.itemNumber.toString());
 
 				const warehousesData = await loadItemBalanceBatch(itemNumbers);
+				console.log(warehousesData,"warehousedata")
 
 				const updatedVariants = variants.map(variant => {
-					const variantWarehouses = warehousesData.find(w => w.item_number === variant.itemNumber.toString());
+					const variantWarehouses = warehousesData?.find(w => w.item_number === variant.itemNumber.toString());
 
 					const warehouses = variantWarehouses?.warehouses.map(w => ({
 						warehouseNumber: w.warehouse_number,
