@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import createIntlMiddleware from "next-intl/middleware";
 
 import { auth } from "../auth";
+import { routing } from "./i18n/routing";
 
 const protectedRoutes = ["profile"];
 const apiAuthPrefix = "/api/auth";
@@ -25,21 +27,21 @@ function rewriteProductUrls(request: NextRequest): NextResponse | null {
 	const url = request.nextUrl.clone();
 	const segments = url.pathname.split("/").filter(Boolean);
 
-	if (segments.length < 1) return null;
+	if (segments.length < 2) return null;
 
-	const rest = segments;
+	const [locale, ...rest] = segments;
 
 	if (rest[0] === "__default") return null;
 
-	// /search/:productId
+	// CASE 1: /locale/search/:productId
 	if (rest[0] === "search" && rest.length === 2) {
 		const [, productId] = rest;
 		const filled = ["__default", "__default", "__default", productId];
-		url.pathname = `/${filled.join("/")}`;
+		url.pathname = `/${locale}/${filled.join("/")}`;
 		return NextResponse.rewrite(url);
 	}
 
-	// /category[/subcategory]/productId
+	// CASE 2: /locale/category[/subcategory]/productId (only if ID looks valid)
 	if (rest.length === 2 || rest.length === 3) {
 		const maybeProductId = rest.at(-1);
 		const isProductId =
@@ -61,6 +63,8 @@ function rewriteProductUrls(request: NextRequest): NextResponse | null {
 
 export default auth((request) => {
 	const { nextUrl } = request;
+	const isLoggedIn = !!request.auth;
+
 	const path = nextUrl.pathname;
 
 	if (path.startsWith(apiAuthPrefix)) {
@@ -70,7 +74,6 @@ export default auth((request) => {
 	const localeRedirect = redirectToLocale(request);
 	if (localeRedirect) return localeRedirect;
 
-	const isLoggedIn = !!request.auth;
 	const isProtected = protectedRoutes.some((route) =>
 		path.split("/").includes(route),
 	);
@@ -83,5 +86,5 @@ export default auth((request) => {
 
 // Only apply to non-static, non-api, non-next routes
 export const config = {
-	matcher: ["/", "/((?!api|_next|_vercel|.*\\..*).*)"],
+	matcher: ["/((?!_next|favicon.ico|api|.*\\..*).*)"],
 };

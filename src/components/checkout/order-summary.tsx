@@ -2,77 +2,112 @@
 
 import { useState } from "react";
 
-import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { checkoutProducts } from "@/mocks/mockCheckoutProducts";
+import { useAppContext } from "@/lib/appContext";
 import { ExternalLink } from "lucide-react";
 import Image from "next/image";
-import { toast } from "react-toastify";
 
+import ProductVariantTable from "./product-variant-table";
 import { Modal, ModalContent, ModalHeader, ModalTitle } from "../ui/modal";
 
 export default function OrderSummary() {
-	const [openModalId, setOpenModalId] = useState<number | null>(null);
+	const { cartItems, prices, calculatedPrices, updateQuantity } =
+		useAppContext();
+	const [openModalId, setOpenModalId] = useState<string | null>(null);
 
+	console.log(cartItems, "cartItems");
 	return (
 		<div className="h-fit w-full rounded-md border bg-white p-6 shadow-sm md:sticky md:top-6">
 			<div className="mb-4 flex items-center justify-between">
-				<h2 className="text-lg font-semibold">Bag (2)</h2>
-				<span className="text-sm font-medium">$306.34</span>
+				<h2 className="text-lg font-semibold">Bag ({cartItems.length})</h2>
+				<span className="text-sm font-medium">
+					{cartItems
+						?.reduce(
+							(acc, item) =>
+								acc +
+								(calculatedPrices[item.itemNumber] ||
+									prices[item.itemNumber] ||
+									0),
+							0,
+						)
+						.toFixed(2)}
+					,- kr
+				</span>
 			</div>
 
-			{checkoutProducts.map((product) => (
+			{cartItems.map((product) => (
 				<div
-					key={product.id}
+					key={product.productNumber}
 					className="mb-4 flex justify-between gap-4 border-b pb-4">
 					<div className="flex gap-4">
-						<div className="relative h-32 w-34 overflow-hidden rounded border">
+						<div className="bg-muted relative h-32 w-34 overflow-hidden rounded border">
 							<Image
-								src={product.image}
+								src={product.mediaId?.[0].url || ""}
 								alt="Product"
 								fill
-								className="object-cover"
+								className="object-contain"
 							/>
 						</div>
 						<div className="flex flex-col justify-between text-sm">
 							<div>
-								<p className="font-medium">{product.name}</p>
-								<p className="text-muted-foreground">{product.details}</p>
+								<p className="font-medium">{product.productNumber}</p>
+								<p className="text-muted-foreground">{product.itemNumber}</p>
 							</div>
 							<div className="mt-2 flex items-center gap-2">
 								<Button
 									size="icon"
-									variant="outline">
+									variant="outline"
+									onClick={async () => {
+										await updateQuantity(
+											product.cartLine ?? 0,
+											product.itemNumber,
+											product.quantity - 1,
+										);
+									}}>
 									-
 								</Button>
 								<span>{product.quantity}</span>
 								<Button
 									size="icon"
-									variant="outline">
+									variant="outline"
+									onClick={async () => {
+										await updateQuantity(
+											product.cartLine ?? 0,
+											product.itemNumber,
+											product.quantity + 1,
+										);
+									}}>
 									+
 								</Button>
 							</div>
-							<p className="mt-1 font-medium">${product.price}</p>
+							<p className="mt-1 font-medium">
+								{calculatedPrices[product.itemNumber]?.toFixed(2)},- kr
+							</p>
 						</div>
 					</div>
 					<div className="flex-end flex">
 						<Button
 							variant="outline"
 							size="sm"
-							onClick={() => setOpenModalId(product.id)}>
+							onClick={() => setOpenModalId(product.productNumber)}>
 							<ExternalLink />
 						</Button>
 						<Modal
-							open={openModalId === product.id}
-							onOpenChange={(open) => setOpenModalId(open ? product.id : null)}>
+							open={openModalId === product.productNumber}
+							onOpenChange={(open) =>
+								setOpenModalId(open ? product.productNumber : null)
+							}>
 							<ModalContent>
 								<ModalHeader>
-									<ModalTitle>Product Variants - {product.name}</ModalTitle>
+									<ModalTitle>
+										Product Variants - {product.productName}
+									</ModalTitle>
 								</ModalHeader>
-								{/* <ProductVariantTable
+								<ProductVariantTable
 									variants={[]}
-								/> */}
+									productNumber={product.productNumber}
+								/>
 							</ModalContent>
 						</Modal>
 					</div>
@@ -91,7 +126,19 @@ export default function OrderSummary() {
 			<div className="mb-4 space-y-1 text-sm">
 				<div className="flex justify-between">
 					<span>Subtotal</span>
-					<span>$236</span>
+					<span>
+						{cartItems
+							?.reduce(
+								(acc, item) =>
+									acc +
+									(calculatedPrices[item.itemNumber] ||
+										prices[item.itemNumber] ||
+										0),
+								0,
+							)
+							.toFixed(2)}
+						,- kr
+					</span>
 				</div>
 				<div className="flex justify-between">
 					<span>Duties</span>

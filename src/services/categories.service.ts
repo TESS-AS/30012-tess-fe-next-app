@@ -84,3 +84,14 @@ export async function loadAttributes(
 		return { results: [] };
 	}
 }
+
+export async function loadCategoryTree(productNumber: string) {
+	try {
+		const url = `/categoryTree/${productNumber}`;
+		const response: AxiosResponse = await axiosInstance.get(url);
+		return response.data;
+	} catch (error) {
+		console.error("Error loading category tree", error);
+		return [];
+	}
+}

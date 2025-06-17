@@ -1,13 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { companyFields, shippingFields } from "@/constants/checkout";
-import { Order, PaymentMethod } from "@/types/orders.types";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { useAppContext } from "@/lib/appContext";
+import {
+	getCustomerDimensions,
+	getUserDimensions,
+} from "@/services/dimensions.service";
+import { salesOrder } from "@/services/orders.service";
+import { CustomerDimension, UserDimensionItem } from "@/types/dimensions.types";
+import { Address, Order, PaymentMethod } from "@/types/orders.types";
+import {
+	formatCustomerDimensionsToHierarchy,
+	formatUserDimensionsToHierarchy,
+} from "@/utils/dimensionFormaters";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import { CreditCard } from "lucide-react";
 import Image from "next/image";
@@ -15,48 +28,149 @@ import Image from "next/image";
 import styles from "./checkout-steps.module.css";
 import { FormField } from "./form-field";
 import { StepHeader } from "./step-header";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "../ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
 // Main component
 export default function CheckoutSteps() {
+	const { cartItems } = useAppContext();
+
+	const { data: profile } = useGetProfileData();
 	const [openStep, setOpenStep] = useState(1);
 	const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>();
-	const [orderData, setOrderData] = useState<
-		Partial<Order> & {
-			header: { companyName?: string; warehouseName?: string };
-		}
-	>({
-		source: "EC",
-		companyNumber: "01",
-		sequenceNo: "12345678",
-		orderDate: "2025-01-01",
-		orderTime: "12:12:00",
-		header: {
-			customerNo: "CUST123",
-			warehouseNumber: "L10",
-			companyName: "Test Company AS",
-			warehouseName: "Oslo Warehouse",
-			deliveryTerms: "Standard",
-			paymentTerms: "Net 30",
+	const [orderData, setOrderData] = useState<Order>({
+		documentControl: {
+			companyCode: "",
 		},
-		address: {
-			addressName: "",
-			addressLine1: "",
-			addressLine2: "",
-			addressLine3: "",
-			city: "",
-			postalCode: "",
-			countryCode: "NO",
+		salesOrderHeader: {
+			customerReference: "",
+			customersOrderNumberEdifact: "",
+			customerNumber: "",
+			dispatchDate: "",
+			orderType: "",
+			customersOrderReference: "",
+			warehouseId: "",
+			termsOfDelivery: "",
+			termsOfPayment: "",
+			paidAmount: 0,
+			cashRegister: "",
+			text: "",
 		},
+		salesOrderAddresses: [],
+		salesOrderLines: [],
 	});
+	const [customerDimensions, setCustomerDimensions] = useState<
+		CustomerDimension[]
+	>([]);
+	const [userDimensions, setUserDimensions] = useState<UserDimensionItem[]>([]);
+	const [customerDimension, setCustomerDimension] = useState<string>("");
+	const [userDimension, setUserDimension] = useState<string>("");
+	const [userDimensionOne, setUserDimensionOne] = useState<string>("");
+	const [userDimensionTwo, setUserDimensionTwo] = useState<string>("");
+	const [userDimensionThree, setUserDimensionThree] = useState<string>("");
+	const [customerDimensionOne, setCustomerDimensionOne] = useState<string>("");
+	const [customerDimensionTwo, setCustomerDimensionTwo] = useState<string>("");
+	const [customerDimensionThree, setCustomerDimensionThree] =
+		useState<string>("");
+	const [activeTab, setActiveTab] = useState<"customer" | "user">("customer");
 
-	const handleAddressChange = (field: string, value: string) => {
-		setOrderData((prev) => ({
-			...prev,
-			address: {
-				...prev.address!,
-				[field]: value,
-			},
-		}));
+	const updateOrderData = (parts: string[]) => {
+		setOrderData((prev) => {
+			const updatedOrder = { ...prev };
+
+			if (parts.length === 1) {
+				updatedOrder.salesOrderHeader = {
+					...prev.salesOrderHeader,
+					customersOrderReference: parts[0],
+				};
+			} else if (parts.length === 2) {
+				updatedOrder.salesOrderHeader = {
+					...prev.salesOrderHeader,
+					customersOrderReference: parts[0],
+					customerReference: parts[1],
+				};
+			} else if (parts.length === 3) {
+				updatedOrder.salesOrderHeader = {
+					...prev.salesOrderHeader,
+					customersOrderReference: parts[0],
+					customerReference: parts[1],
+				};
+				updatedOrder.salesOrderLines = prev.salesOrderLines.map((line) => ({
+					...line,
+					accountPart3: parts[2],
+				}));
+			}
+
+			return updatedOrder;
+		});
+	};
+
+	useEffect(() => {
+		if (cartItems?.length && profile) {
+			setOrderData((prev) => ({
+				...prev,
+				documentControl: {
+					companyCode:
+						profile?.defaultCompanyNumber < 10
+							? `0${profile?.defaultCompanyNumber}`
+							: profile?.defaultCompanyNumber?.toString(),
+				},
+				salesOrderLines: cartItems.map((item) => ({
+					warehouseNumber:
+						`${profile?.defaultWarehouseId} ${profile?.defaultWarehosueName}` ||
+						"",
+					orderType: "",
+					itemCode: item?.productNumber || "",
+					orderedQuantity: item.quantity,
+					salesPrice: item.price || 0,
+					requestedDeliveryDate: "",
+					accountPart3: "", // Dimension 3
+					accountPart4: String(profile?.userId || ""), // userId
+					accountPart5: "",
+					text: "",
+				})),
+			}));
+		}
+	}, [cartItems, profile]);
+
+	useEffect(() => {
+		const loadDimensions = async () => {
+			const customerDimensions = await getCustomerDimensions("110036");
+			setCustomerDimensions(customerDimensions);
+			const userDimensions = await getUserDimensions();
+			setUserDimensions(userDimensions);
+		};
+		loadDimensions();
+	}, []);
+
+	const handleAddressChange = (field: keyof Address, value: string) => {
+		setOrderData((prev) => {
+			const existingAddress = prev.salesOrderAddresses[0] || {
+				name: "",
+				addressLine1: "",
+				addressLine2: "",
+				addressLine3: "",
+				postalCode: "",
+				partyQualifier: "DP",
+				country: "NO",
+			};
+
+			return {
+				...prev,
+				salesOrderAddresses: [
+					{
+						...existingAddress,
+						[field]: value,
+					},
+				],
+			};
+		});
 	};
 
 	const isStepValid = (step: number) => {
@@ -64,7 +178,10 @@ export default function CheckoutSteps() {
 			return shippingFields
 				.filter((f) => f.required)
 				.every(
-					(f) => orderData.address?.[f.field as keyof typeof orderData.address],
+					(f) =>
+						orderData.salesOrderAddresses[0]?.[
+							f.field as keyof (typeof orderData.salesOrderAddresses)[0]
+						],
 				);
 		}
 		if (step === 2) {
@@ -73,18 +190,23 @@ export default function CheckoutSteps() {
 		return true;
 	};
 
-	const handleSubmit = () => {
-		const finalOrderData: Partial<Order> = {
+	const handleSubmit = async () => {
+		const payload: Order = {
 			...orderData,
-			source: "EC",
+			documentControl: {
+				companyCode: "01",
+			},
+			salesOrderHeader: {
+				...orderData.salesOrderHeader,
+			},
+			salesOrderAddresses: orderData.salesOrderAddresses,
+			salesOrderLines: orderData.salesOrderLines,
 		};
-		// Here you would integrate with your payment gateway based on paymentMethod
-		if (paymentMethod === "card") {
-			// Redirect to card payment gateway
-			console.log("Redirecting to card payment...");
-		} else {
-			// Redirect to PayPal
-			console.log("Redirecting to PayPal...");
+		try {
+			await salesOrder(payload);
+			console.log("Order sent successfully!");
+		} catch (error) {
+			console.error("Order submission failed:", error);
 		}
 	};
 
@@ -93,6 +215,7 @@ export default function CheckoutSteps() {
 			setOpenStep(2);
 		}
 	};
+	console.log(orderData, "order data");
 
 	return (
 		<div className="w-full overflow-hidden rounded-md border bg-white">
@@ -110,9 +233,9 @@ export default function CheckoutSteps() {
 								key={field.id}
 								{...field}
 								value={
-									orderData.header?.[
-										field.field as keyof typeof orderData.header
-									] || ""
+									field.label === "Company"
+										? orderData.documentControl.companyCode
+										: `${profile?.defaultWarehouseNumber} ${profile?.defaultWarehosueName}`
 								}
 								onChange={() => {}}
 							/>
@@ -122,13 +245,135 @@ export default function CheckoutSteps() {
 								key={field.id}
 								{...field}
 								value={
-									orderData.address?.[
-										field.field as keyof typeof orderData.address
-									] || ""
+									orderData.salesOrderAddresses[0]?.[
+										field.field as keyof Address
+									] ?? ""
 								}
-								onChange={(value) => handleAddressChange(field.field, value)}
+								onChange={(value) =>
+									handleAddressChange(field.field as keyof Address, value)
+								}
 							/>
 						))}
+					</div>
+					<div className="space-y-4">
+						<Tabs
+							defaultValue="customer"
+							value={activeTab}
+							onValueChange={(val) => setActiveTab(val as "customer" | "user")}
+							className="w-full">
+							<TabsList className="mb-4 grid w-full grid-cols-2">
+								<TabsTrigger value="customer">Customer Dimensions</TabsTrigger>
+								<TabsTrigger value="user">User Dimensions</TabsTrigger>
+							</TabsList>
+							<TabsContent value="customer">
+								<div className="space-y-2">
+									<Label>Customer Dimensions</Label>
+									<Select
+										value={customerDimension}
+										onValueChange={(value) => {
+											const parts = value.split("<");
+											setCustomerDimension(value);
+											updateOrderData(parts);
+										}}>
+										<SelectTrigger>
+											<SelectValue placeholder="Select Customer Dimension" />
+										</SelectTrigger>
+										<SelectContent>
+											{formatCustomerDimensionsToHierarchy(
+												customerDimensions,
+											).map((item, index) => (
+												<SelectItem
+													key={`${item.value}-${index}`}
+													value={item.value}>
+													{item.label}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+									<Input
+										type="text"
+										value={customerDimensionOne}
+										placeholder="Customer Dimension 1"
+										onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+											const { value } = e.target;
+											setCustomerDimensionOne(value);
+										}}
+									/>
+									<Input
+										type="text"
+										value={customerDimensionTwo}
+										placeholder="Customer Dimension 2"
+										onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+											const { value } = e.target;
+											setCustomerDimensionTwo(value);
+										}}
+									/>
+									<Input
+										type="text"
+										value={customerDimensionThree}
+										placeholder="Customer Dimension 3"
+										onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+											const { value } = e.target;
+											setCustomerDimensionThree(value);
+										}}
+									/>
+								</div>
+							</TabsContent>
+							<TabsContent value="user">
+								<div className="space-y-2">
+									<Label>User Dimensions</Label>
+									<Select
+										value={userDimension}
+										onValueChange={(value) => {
+											const parts = value.split("<");
+											setUserDimension(value);
+											updateOrderData(parts);
+										}}>
+										<SelectTrigger>
+											<SelectValue placeholder="Select User Dimension" />
+										</SelectTrigger>
+										<SelectContent>
+											{formatUserDimensionsToHierarchy(userDimensions).map(
+												(dim, index) => (
+													<SelectItem
+														key={`${dim.value}-${index}`}
+														value={dim.value}>
+														{dim.label}
+													</SelectItem>
+												),
+											)}
+										</SelectContent>
+									</Select>
+									<Input
+										type="text"
+										value={userDimensionOne}
+										placeholder="User Dimension 1"
+										onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+											const { value } = e.target;
+											setUserDimensionOne(value);
+										}}
+									/>
+									<Input
+										type="text"
+										value={userDimensionTwo}
+										placeholder="User Dimension 2"
+										onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+											const { value } = e.target;
+											setUserDimensionTwo(value);
+										}}
+									/>
+									<Input
+										type="text"
+										value={userDimensionThree}
+										placeholder="User Dimension 3"
+										onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+											const { value } = e.target;
+											setUserDimensionThree(value);
+										}}
+									/>
+								</div>
+							</TabsContent>
+						</Tabs>
 					</div>
 					<Button
 						className="w-full"

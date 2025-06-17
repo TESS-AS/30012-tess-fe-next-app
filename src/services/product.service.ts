@@ -13,6 +13,17 @@ interface WarehouseBalance {
 	parentProdNumber?: string;
 }
 
+export interface WarehouseBatch {
+	item_number: string;
+	warehouses: [
+		{
+			warehouse_number: string;
+			warehouse_name: string;
+			balance: number;
+		},
+	];
+}
+
 interface SearchListResponse {
 	product: IProduct[];
 	page: number;
@@ -261,5 +272,18 @@ export async function loadAttributes(
 	} catch (error) {
 		console.error("Error loading product attributes:", error);
 		return { results: [] };
+	}
+}
+
+export async function loadItemBalanceBatch(
+	itemNumbers: string[],
+): Promise<WarehouseBatch[]> {
+	try {
+		const url = `/item/balance/batch`;
+		const response = await axiosInstance.post(url, { itemNumbers });
+		return response.data;
+	} catch (error) {
+		console.error("Error loading item balance batch:", error);
+		return [];
 	}
 }
