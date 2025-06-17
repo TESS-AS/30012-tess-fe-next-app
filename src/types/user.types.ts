@@ -11,6 +11,7 @@ export interface ProfileUser {
 	customerNumbers: string[];
 	orgNumbers: string[];
 	defaultCustomerNumber: string;
+	defaultAssortmentNumber: string;
 	defaultWarehosueName: string; // It's a typo on BE attribute
 	defaultCompanyNumber: number;
 	defaultWarehouseNumber: string;
