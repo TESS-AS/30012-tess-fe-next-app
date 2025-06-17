@@ -19,8 +19,8 @@ import {
 	removeFromCart,
 	updateCart,
 } from "@/services/carts.service";
-import { CartLine } from "@/types/carts.types";
 import { getProductVariations } from "@/services/product.service";
+import { CartLine } from "@/types/carts.types";
 import { Loader2, Minus, Plus, Trash } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -62,7 +62,16 @@ const AnimatedTableRow = ({
 
 const CartPage = () => {
 	const router = useRouter();
-	const { isCartChanging, setIsCartChanging, cartItems, prices, calculatedPrices, isLoading, updateQuantity, removeItem } = useAppContext();
+	const {
+		isCartChanging,
+		setIsCartChanging,
+		cartItems,
+		prices,
+		calculatedPrices,
+		isLoading,
+		updateQuantity,
+		removeItem,
+	} = useAppContext();
 	const t = useTranslations();
 	const { status } = useSession() as {
 		data: any;
@@ -71,8 +80,12 @@ const CartPage = () => {
 
 	const [openItems, setOpenItems] = React.useState<boolean[]>([]);
 	const [variations, setVariations] = React.useState<Record<string, any>>({});
-	const [loadingItems, setLoadingItems] = React.useState<Record<string, boolean>>({});
-	const [removingItems, setRemovingItems] = React.useState<Record<number, boolean>>({});
+	const [loadingItems, setLoadingItems] = React.useState<
+		Record<string, boolean>
+	>({});
+	const [removingItems, setRemovingItems] = React.useState<
+		Record<number, boolean>
+	>({});
 
 	const subtotal = cartItems?.reduce(
 		(acc, item) =>
@@ -105,9 +118,7 @@ const CartPage = () => {
 				<h1 className="text-2xl font-semibold">
 					{t("Please login to view your cart")}
 				</h1>
-				<Button onClick={() => router.push("/auth/login")}>
-					{t("Login")}
-				</Button>
+				<Button onClick={() => router.push("/auth/login")}>{t("Login")}</Button>
 			</div>
 		);
 	}
@@ -224,7 +235,11 @@ const CartPage = () => {
 																	[item.itemNumber]: true,
 																}));
 																try {
-																	await updateQuantity(item.cartLine ?? 0, item.itemNumber, item.quantity - 1);
+																	await updateQuantity(
+																		item.cartLine ?? 0,
+																		item.itemNumber,
+																		item.quantity - 1,
+																	);
 																} finally {
 																	setLoadingItems((prev) => ({
 																		...prev,
@@ -252,7 +267,11 @@ const CartPage = () => {
 																	[item.itemNumber]: true,
 																}));
 																try {
-																	await updateQuantity(item.cartLine ?? 0, item.itemNumber, item.quantity + 1);
+																	await updateQuantity(
+																		item.cartLine ?? 0,
+																		item.itemNumber,
+																		item.quantity + 1,
+																	);
 																} finally {
 																	setLoadingItems((prev) => ({
 																		...prev,

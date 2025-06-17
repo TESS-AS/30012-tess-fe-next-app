@@ -1,11 +1,21 @@
 "use client";
 
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { CartLine } from "@/types/carts.types";
+import {
+	createContext,
+	ReactNode,
+	useContext,
+	useEffect,
+	useState,
+} from "react";
+
 import { getCart, updateCart, removeFromCart } from "@/services/carts.service";
-import { useSession } from "next-auth/react";
-import { calculateItemPrice, getProductPrice } from "@/services/product.service";
+import {
+	calculateItemPrice,
+	getProductPrice,
+} from "@/services/product.service";
+import { CartLine } from "@/types/carts.types";
 import { PriceResponse } from "@/types/search.types";
+import { useSession } from "next-auth/react";
 interface AppContextType {
 	isCartChanging: boolean;
 	setIsCartChanging: (value: boolean) => void;
@@ -14,7 +24,11 @@ interface AppContextType {
 	prices: Record<string, number>;
 	calculatedPrices: Record<string, number>;
 	isLoading: boolean;
-	updateQuantity: (cartLine: number, itemNumber: string, newQuantity: number) => Promise<void>;
+	updateQuantity: (
+		cartLine: number,
+		itemNumber: string,
+		newQuantity: number,
+	) => Promise<void>;
 	removeItem: (cartLine: number) => Promise<void>;
 }
 
@@ -24,7 +38,9 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const [isCartChanging, setIsCartChanging] = useState(false);
 	const [cartItems, setCartItems] = useState<CartLine[]>([]);
 	const [prices, setPrices] = useState<Record<string, number>>({});
-	const [calculatedPrices, setCalculatedPrices] = useState<Record<string, number>>({});
+	const [calculatedPrices, setCalculatedPrices] = useState<
+		Record<string, number>
+	>({});
 	const [isLoading, setIsLoading] = useState(false);
 
 	const { status } = useSession() as {
@@ -92,7 +108,11 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		}
 	}, [status, isCartChanging]);
 
-	const updateQuantity = async (cartLine: number, itemNumber: string, newQuantity: number) => {
+	const updateQuantity = async (
+		cartLine: number,
+		itemNumber: string,
+		newQuantity: number,
+	) => {
 		try {
 			await updateCart(cartLine, {
 				itemNumber,
@@ -116,17 +136,18 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	};
 
 	return (
-		<AppContext.Provider value={{ 
-			isCartChanging, 
-			setIsCartChanging, 
-			cartItems, 
-			setCartItems,
-			prices,
-			calculatedPrices,
-			isLoading,
-			updateQuantity,
-			removeItem
-		}}>
+		<AppContext.Provider
+			value={{
+				isCartChanging,
+				setIsCartChanging,
+				cartItems,
+				setCartItems,
+				prices,
+				calculatedPrices,
+				isLoading,
+				updateQuantity,
+				removeItem,
+			}}>
 			{children}
 		</AppContext.Provider>
 	);

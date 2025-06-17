@@ -4,25 +4,36 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAppContext } from "@/lib/appContext";
 import { ExternalLink } from "lucide-react";
 import Image from "next/image";
 
-import { Modal, ModalContent, ModalHeader, ModalTitle } from "../ui/modal";
-import { useAppContext } from "@/lib/appContext";
 import ProductVariantTable from "./product-variant-table";
+import { Modal, ModalContent, ModalHeader, ModalTitle } from "../ui/modal";
 
 export default function OrderSummary() {
-
-	const { cartItems, prices, calculatedPrices, updateQuantity } = useAppContext();
+	const { cartItems, prices, calculatedPrices, updateQuantity } =
+		useAppContext();
 	const [openModalId, setOpenModalId] = useState<string | null>(null);
-	
 
-	console.log(cartItems,"cartItems")
+	console.log(cartItems, "cartItems");
 	return (
 		<div className="h-fit w-full rounded-md border bg-white p-6 shadow-sm md:sticky md:top-6">
 			<div className="mb-4 flex items-center justify-between">
 				<h2 className="text-lg font-semibold">Bag ({cartItems.length})</h2>
-				<span className="text-sm font-medium">{cartItems?.reduce((acc, item) => acc + (calculatedPrices[item.itemNumber] || prices[item.itemNumber] || 0), 0).toFixed(2)},- kr</span>
+				<span className="text-sm font-medium">
+					{cartItems
+						?.reduce(
+							(acc, item) =>
+								acc +
+								(calculatedPrices[item.itemNumber] ||
+									prices[item.itemNumber] ||
+									0),
+							0,
+						)
+						.toFixed(2)}
+					,- kr
+				</span>
 			</div>
 
 			{cartItems.map((product) => (
@@ -48,7 +59,11 @@ export default function OrderSummary() {
 									size="icon"
 									variant="outline"
 									onClick={async () => {
-										await updateQuantity(product.cartLine ?? 0, product.itemNumber, product.quantity - 1);
+										await updateQuantity(
+											product.cartLine ?? 0,
+											product.itemNumber,
+											product.quantity - 1,
+										);
 									}}>
 									-
 								</Button>
@@ -57,12 +72,18 @@ export default function OrderSummary() {
 									size="icon"
 									variant="outline"
 									onClick={async () => {
-										await updateQuantity(product.cartLine ?? 0, product.itemNumber, product.quantity + 1);
+										await updateQuantity(
+											product.cartLine ?? 0,
+											product.itemNumber,
+											product.quantity + 1,
+										);
 									}}>
 									+
 								</Button>
 							</div>
-							<p className="mt-1 font-medium">{calculatedPrices[product.itemNumber]?.toFixed(2)},- kr</p>
+							<p className="mt-1 font-medium">
+								{calculatedPrices[product.itemNumber]?.toFixed(2)},- kr
+							</p>
 						</div>
 					</div>
 					<div className="flex-end flex">
@@ -74,10 +95,14 @@ export default function OrderSummary() {
 						</Button>
 						<Modal
 							open={openModalId === product.productNumber}
-							onOpenChange={(open) => setOpenModalId(open ? product.productNumber : null)}>
+							onOpenChange={(open) =>
+								setOpenModalId(open ? product.productNumber : null)
+							}>
 							<ModalContent>
 								<ModalHeader>
-									<ModalTitle>Product Variants - {product.productName}</ModalTitle>
+									<ModalTitle>
+										Product Variants - {product.productName}
+									</ModalTitle>
 								</ModalHeader>
 								<ProductVariantTable
 									variants={[]}
@@ -101,7 +126,19 @@ export default function OrderSummary() {
 			<div className="mb-4 space-y-1 text-sm">
 				<div className="flex justify-between">
 					<span>Subtotal</span>
-					<span>{cartItems?.reduce((acc, item) => acc + (calculatedPrices[item.itemNumber] || prices[item.itemNumber] || 0), 0).toFixed(2)},- kr</span>
+					<span>
+						{cartItems
+							?.reduce(
+								(acc, item) =>
+									acc +
+									(calculatedPrices[item.itemNumber] ||
+										prices[item.itemNumber] ||
+										0),
+								0,
+							)
+							.toFixed(2)}
+						,- kr
+					</span>
 				</div>
 				<div className="flex justify-between">
 					<span>Duties</span>

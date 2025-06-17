@@ -72,45 +72,45 @@ export default function ProductVariantTable({
 
 	useEffect(() => {
 		const loadPrices = async () => {
-			const priceData = await getProductPrice(
-				"169999",
-				"01",
-				productNumber,
-			);
+			const priceData = await getProductPrice("169999", "01", productNumber);
 			priceData.map((item: PriceResponse) => {
 				setPrices((prev) => ({
 					...prev,
 					[item.itemNumber]: item.basePrice || 0,
 				}));
-			})
-		}
+			});
+		};
 		loadPrices();
-
-	}, [])
+	}, []);
 
 	useEffect(() => {
 		const loadWarehousesData = async () => {
 			try {
 				if (!variants?.length) return;
 
-				const itemNumbers = variants.map(variant => variant.itemNumber.toString());
+				const itemNumbers = variants.map((variant) =>
+					variant.itemNumber.toString(),
+				);
 
 				const warehousesData = await loadItemBalanceBatch(itemNumbers);
-				console.log(warehousesData,"warehousedata")
+				console.log(warehousesData, "warehousedata");
 
-				const updatedVariants = variants.map(variant => {
-					const variantWarehouses = warehousesData?.find(w => w.item_number === variant.itemNumber.toString());
+				const updatedVariants = variants.map((variant) => {
+					const variantWarehouses = warehousesData?.find(
+						(w) => w.item_number === variant.itemNumber.toString(),
+					);
 
-					const warehouses = variantWarehouses?.warehouses.map(w => ({
-						warehouseNumber: w.warehouse_number,
-						warehouseName: w.warehouse_name,
-						balance: w.balance
-					})) || [];
+					const warehouses =
+						variantWarehouses?.warehouses.map((w) => ({
+							warehouseNumber: w.warehouse_number,
+							warehouseName: w.warehouse_name,
+							balance: w.balance,
+						})) || [];
 
 					if (warehouses.length > 0) {
-						setWarehouse(prev => ({
+						setWarehouse((prev) => ({
 							...prev,
-							[variant.itemNumber]: warehouses[0].warehouseNumber
+							[variant.itemNumber]: warehouses[0].warehouseNumber,
 						}));
 					}
 

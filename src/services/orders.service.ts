@@ -1,4 +1,5 @@
 import { Order } from "@/types/orders.types";
+
 import axiosInstance from "./axiosClient";
 
 export async function salesOrder(payload: Order): Promise<string> {
@@ -7,6 +8,6 @@ export async function salesOrder(payload: Order): Promise<string> {
 		return response.data;
 	} catch (error) {
 		console.error("Error fetching sales order:", error);
-        throw error;
-    }
+		throw error;
+	}
 }

@@ -275,8 +275,9 @@ export async function loadAttributes(
 	}
 }
 
-
-export async function loadItemBalanceBatch(itemNumbers: string[]): Promise<WarehouseBatch[]> {
+export async function loadItemBalanceBatch(
+	itemNumbers: string[],
+): Promise<WarehouseBatch[]> {
 	try {
 		const url = `/item/balance/batch`;
 		const response = await axiosInstance.post(url, { itemNumbers });

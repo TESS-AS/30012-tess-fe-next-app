@@ -85,7 +85,6 @@ export async function loadAttributes(
 	}
 }
 
-
 export async function loadCategoryTree(productNumber: string) {
 	try {
 		const url = `/categoryTree/${productNumber}`;

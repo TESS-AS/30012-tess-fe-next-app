@@ -24,25 +24,25 @@ export interface SalesOrderHeader {
 }
 
 interface OrderLines {
-	warehouseNumber: string,
-	orderType: string,
-	itemCode: string,
-	orderedQuantity: number,
-	salesPrice: number,
-	requestedDeliveryDate: string,
-	accountPart3: string,
-	accountPart4: string,
-	accountPart5: string,
-	text: string
+	warehouseNumber: string;
+	orderType: string;
+	itemCode: string;
+	orderedQuantity: number;
+	salesPrice: number;
+	requestedDeliveryDate: string;
+	accountPart3: string;
+	accountPart4: string;
+	accountPart5: string;
+	text: string;
 }
 
 export interface Order {
 	documentControl: {
 		companyCode: string;
-	},
-	salesOrderHeader: SalesOrderHeader,
-	salesOrderAddresses: Address[],
-	salesOrderLines: OrderLines[],
+	};
+	salesOrderHeader: SalesOrderHeader;
+	salesOrderAddresses: Address[];
+	salesOrderLines: OrderLines[];
 }
 
 export type PaymentMethod = "card" | "paypal";

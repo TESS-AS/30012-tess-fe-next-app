@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import ProductVariantTable from "@/components/checkout/product-variant-table";
 import CustomerNumberSwitcher from "@/components/customer-profile/customer-number-switcher";
 import CategoryNavigationMenu from "@/components/layouts/NavigationMenu/NavigationMenu";
+import { ProductItem } from "@/components/products/product-item-search";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import axiosClient from "@/services/axiosClient";
 import { getCart } from "@/services/carts.service";
+import { loadCategoryTree } from "@/services/categories.service";
 import { getProductVariations } from "@/services/product.service";
 import { CartLine } from "@/types/carts.types";
 import { Category } from "@/types/categories.types";
@@ -40,8 +42,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
-import { loadCategoryTree } from "@/services/categories.service";
-import { ProductItem } from "@/components/products/product-item-search";
 
 export default function Header({ categories }: { categories: Category[] }) {
 	const currentLocale = useLocale();
@@ -151,24 +151,24 @@ export default function Header({ categories }: { categories: Category[] }) {
 									{data.productRes?.length ? (
 										data.productRes.map((product: IProductSearch) => {
 											const attr = attributeResults.find(
-											  (r) => r.productNumber === product.productNumber
+												(r) => r.productNumber === product.productNumber,
 											);
 											return (
-											  <ProductItem
-												key={product.productNumber}
-												product={product}
-												attr={attr}
-												currentLocale={currentLocale}
-												loadCategoryTree={loadCategoryTree}
-												setSearchQuery={setSearchQuery}
-												isModalIdOpen={isModalIdOpen}
-												setIsModalIdOpen={setIsModalIdOpen}
-												getProductVariations={getProductVariations}
-												setVariations={setVariations}
-												variations={variations}
-											  />
+												<ProductItem
+													key={product.productNumber}
+													product={product}
+													attr={attr}
+													currentLocale={currentLocale}
+													loadCategoryTree={loadCategoryTree}
+													setSearchQuery={setSearchQuery}
+													isModalIdOpen={isModalIdOpen}
+													setIsModalIdOpen={setIsModalIdOpen}
+													getProductVariations={getProductVariations}
+													setVariations={setVariations}
+													variations={variations}
+												/>
 											);
-										  })
+										})
 									) : (
 										<p className="text-opacity-30 text-sm text-green-600">
 											{t("Search.noProductsFound")}
