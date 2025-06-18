@@ -288,7 +288,8 @@ const CartPage = () => {
 													</div>
 												</TableCell>
 												<TableCell>
-													{calculatedPrices[item.itemNumber]?.toFixed(2)},- kr
+													{(calculatedPrices[item.itemNumber] ?? 0)?.toFixed(2)}
+													,- kr
 												</TableCell>
 												<TableCell className="text-right">
 													<Button
