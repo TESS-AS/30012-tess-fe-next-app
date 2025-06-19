@@ -50,7 +50,6 @@ export const DimensionSearchInput = ({
 		setResults([]); // Clear results on selection
 	};
 
-
 	return (
 		<div className="relative mb-4">
 			<Input
