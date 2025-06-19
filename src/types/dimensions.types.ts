@@ -49,3 +49,10 @@ export type UserDimensionItem = {
 		mode: boolean;
 	};
 };
+
+export interface SearchDimensionResponse {
+	dimensionId: number;
+	dimensionName: string;
+	customerId: number;
+	customerNumber: string;
+}

@@ -15,6 +15,7 @@ export interface ProfileUser {
 	defaultWarehosueName: string; // It's a typo on BE attribute
 	defaultCompanyNumber: number;
 	defaultWarehouseNumber: string;
+	punchout: boolean;
 }
 
 export interface UserAddress {

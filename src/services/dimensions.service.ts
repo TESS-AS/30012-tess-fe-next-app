@@ -2,6 +2,7 @@ import {
 	CreateCustomerDimensions,
 	CreateUserDimensions,
 	CustomerDimension,
+	SearchDimensionResponse,
 	UserDimensionItem,
 } from "@/types/dimensions.types";
 
@@ -92,6 +93,21 @@ export const updateUserDimensions = async (
 		return response.data;
 	} catch (error) {
 		console.error("Error updating user dimensions:", error);
+		throw error;
+	}
+};
+
+export const searchDimensions = async (
+	type: number,
+	search: string,
+): Promise<SearchDimensionResponse[]> => {
+	try {
+		const response = await axiosInstance.get(
+			`/dimension/dimensionSearch/${type}/${search}`,
+		);
+		return response.data;
+	} catch (error) {
+		console.error("Error searching dimensions:", error);
 		throw error;
 	}
 };
