@@ -5,7 +5,6 @@ import { useCallback, useEffect, useState } from "react";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { companyFields, shippingFields } from "@/constants/checkout";
@@ -14,12 +13,10 @@ import { useAppContext } from "@/lib/appContext";
 import {
 	getCustomerDimensions,
 	getUserDimensions,
-	searchDimensions,
 } from "@/services/dimensions.service";
 import { salesOrder } from "@/services/orders.service";
 import {
 	CustomerDimension,
-	SearchDimensionResponse,
 	UserDimensionItem,
 } from "@/types/dimensions.types";
 import { Address, Order, PaymentMethod } from "@/types/orders.types";
@@ -28,7 +25,6 @@ import {
 	formatUserDimensionsToHierarchy,
 } from "@/utils/dimensionFormaters";
 import { PayPalButtons } from "@paypal/react-paypal-js";
-import debounce from "lodash/debounce";
 import { CreditCard } from "lucide-react";
 import Image from "next/image";
 
@@ -44,10 +40,12 @@ import {
 	SelectValue,
 } from "../ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Input } from "../ui/input";
+
 
 // Main component
 export default function CheckoutSteps() {
-	const { cartItems } = useAppContext();
+	const { cartItems, calculatedPrices, prices } = useAppContext();
 
 	const { data: profile } = useGetProfileData();
 	const [openStep, setOpenStep] = useState(1);
@@ -88,6 +86,9 @@ export default function CheckoutSteps() {
 		useState<string>("");
 	const [activeTab, setActiveTab] = useState<"customer" | "user">("customer");
 	const [activeDimension, setActiveDimension] = useState<number | null>(null);
+	const [useCustomerSearchInput, setCustomerSearchInput] = useState<"search" | "select" | "manual">("manual");
+	const [useUserSearchInput, setUserSearchInput] = useState<"search" | "select" | "manual">("manual");
+	const isPunchoutUser = profile?.punchout;
 
 	const customerDimensionsRef = useClickOutside<HTMLDivElement>(() => {
 		setCustomerDimensionOne("");
@@ -102,9 +103,6 @@ export default function CheckoutSteps() {
 		setUserDimensionThree("");
 		setActiveDimension(null);
 	});
-	const [searchDimensionResults, setSearchDimesnsions] = useState<
-		SearchDimensionResponse[]
-	>([]);
 
 	const updateOrderData = (parts: string[]) => {
 		setOrderData((prev) => {
@@ -137,6 +135,7 @@ export default function CheckoutSteps() {
 		});
 	};
 
+
 	useEffect(() => {
 		if (cartItems?.length && profile) {
 			setOrderData((prev) => ({
@@ -149,12 +148,12 @@ export default function CheckoutSteps() {
 				},
 				salesOrderLines: cartItems.map((item) => ({
 					warehouseNumber:
-						`${profile?.defaultWarehouseId} ${profile?.defaultWarehosueName}` ||
+						`${profile?.defaultWarehouseNumber} ${profile?.defaultWarehosueName}` ||
 						"",
 					orderType: "",
 					itemCode: item?.productNumber || "",
 					orderedQuantity: item.quantity,
-					salesPrice: item.price || 0,
+					salesPrice: calculatedPrices[item.itemNumber] || 0,
 					requestedDeliveryDate: "",
 					accountPart3: "", // Dimension 3
 					accountPart4: String(profile?.userId || ""), // userId
@@ -199,22 +198,51 @@ export default function CheckoutSteps() {
 		});
 	};
 
+
+	// add new text input manual 
+
 	const isStepValid = (step: number) => {
-		if (step === 1 && !profile) {
-			return shippingFields
+		if (step === 1) {
+			if (!orderData.salesOrderAddresses?.[0]) return false;
+			
+			const hasValidShippingFields = shippingFields
 				.filter((f) => f.required)
-				.every(
-					(f) =>
-						orderData.salesOrderAddresses[0]?.[
-							f.field as keyof (typeof orderData.salesOrderAddresses)[0]
-						],
-				);
+				.every((f) => {
+					const value = orderData.salesOrderAddresses[0][f.field as keyof Address];
+					return value !== undefined && value !== null && value !== "";
+				});
+
+			return hasValidShippingFields;
+
+			// if (activeTab === "customer") {
+			// 	if (!useCustomerSearchInput) {
+			// 		return hasValidShippingFields && customerDimension !== "";
+			// 	} else {
+			// 		const hasLevel1 = customerDimensionOne !== "";
+			// 		const hasLevel2 = hasLevel1 && customerDimensionTwo !== "";
+			// 		const hasLevel3 = hasLevel2 && customerDimensionThree !== "";
+
+			// 		return hasValidShippingFields && hasLevel1;
+			// 	}
+			// } else {
+			// 	if (!useUserSearchInput) {
+			// 		return hasValidShippingFields && userDimension !== "";
+			// 	} else {
+			// 		const hasLevel1 = userDimensionOne !== "";
+			// 		const hasLevel2 = hasLevel1 && userDimensionTwo !== "";
+			// 		const hasLevel3 = hasLevel2 && userDimensionThree !== "";
+
+			// 		return hasValidShippingFields && hasLevel1;
+			// 	}
+			// }
 		}
 		if (step === 2) {
-			return !!paymentMethod;
+			return !isPunchoutUser && !!paymentMethod;
 		}
 		return true;
 	};
+
+
 
 	const handleSubmit = async () => {
 		const payload: Order = {
@@ -229,15 +257,41 @@ export default function CheckoutSteps() {
 			salesOrderLines: orderData.salesOrderLines,
 		};
 		try {
-			await salesOrder(payload);
-			console.log("Order sent successfully!");
+			const response = await salesOrder(payload);
+			
+			const parser = new DOMParser();
+			const doc = parser.parseFromString(response, 'text/html');
+			
+			const form = doc.getElementById('punchoutForm') as HTMLFormElement;
+			
+			if (form) {
+				const actionUrl = form.action;
+				const method = form.method;
+				
+				const submitForm = document.createElement('form');
+				submitForm.method = method;
+				submitForm.action = actionUrl;
+				
+				Array.from(form.getElementsByTagName('input')).forEach(input => {
+					const newInput = document.createElement('input');
+					newInput.type = 'hidden';
+					newInput.name = input.name;
+					newInput.value = input.value;
+					submitForm.appendChild(newInput);
+				});
+				document.body.appendChild(submitForm);
+				submitForm.submit();
+				document.body.removeChild(submitForm);
+			} else {
+				console.error('Punchout form not found in response');
+			}
 		} catch (error) {
 			console.error("Order submission failed:", error);
 		}
 	};
 
 	const handleContinueToPayment = () => {
-		if (!profile) {
+		if (isPunchoutUser) {
 			handleSubmit();
 			return;
 		}
@@ -296,38 +350,62 @@ export default function CheckoutSteps() {
 								<TabsTrigger value="user">User Dimensions</TabsTrigger>
 							</TabsList>
 							<TabsContent value="customer">
+								<div className="flex items-center gap-4 mb-4">
+									<Label className="text-sm">Dimension Input Mode:</Label>
+									<RadioGroup
+										defaultValue={useCustomerSearchInput}
+										onValueChange={(value) => setCustomerSearchInput(value as "search" | "select" | "manual")}
+										className="flex items-center gap-4">
+										<div className="flex items-center gap-1">
+											<RadioGroupItem value="select" id="select" />
+											<Label htmlFor="select">Select</Label>
+										</div>
+										<div className="flex items-center gap-1">
+											<RadioGroupItem value="search" id="search" />
+											<Label htmlFor="search">Search</Label>
+										</div>
+										<div className="flex items-center gap-1">
+											<RadioGroupItem value="manual" id="manual" />
+											<Label htmlFor="manual">Manual</Label>
+										</div>
+									</RadioGroup>
+								</div>
+
 								<div className="space-y-2">
-									<Label>Customer Dimensions</Label>
-									<Select
-										value={customerDimension}
-										onValueChange={(value) => {
-											const parts = value.split("<");
-											setCustomerDimension(value);
-											updateOrderData(parts);
-										}}>
-										<SelectTrigger>
-											<SelectValue placeholder="Select Customer Dimension" />
-										</SelectTrigger>
-										<SelectContent>
-											{formatCustomerDimensionsToHierarchy(
-												customerDimensions,
-											).map((item, index) => (
-												<SelectItem
-													key={`${item.value}-${index}`}
-													value={item.value}>
-													{item.label}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-									<div ref={customerDimensionsRef}>
+									{useCustomerSearchInput === "select" && (
+										<>
+										<Label>Customer Dimensions</Label>
+										<Select
+											value={customerDimension}
+											onValueChange={(value) => {
+												const parts = value.split("<");
+												setCustomerDimension(value);
+												updateOrderData(parts);
+											}}>
+											<SelectTrigger>
+												<SelectValue placeholder="Select Customer Dimension" />
+											</SelectTrigger>
+											<SelectContent>
+												{formatCustomerDimensionsToHierarchy(
+													customerDimensions,
+												).map((item, index) => (
+													<SelectItem
+														key={`${item.value}-${index}`}
+														value={item.value}>
+														{item.label}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										</>
+									)}
+									
+									{useCustomerSearchInput === "search" && (<div ref={customerDimensionsRef}>
 										<DimensionSearchInput
 											level={1}
 											value={customerDimensionOne}
 											onChange={(value) => {
 												setCustomerDimensionOne(value);
-												setCustomerDimensionTwo("");
-												setCustomerDimensionThree("");
 												setActiveDimension(value ? 1 : null);
 											}}
 											placeholder="Customer Dimension 1"
@@ -349,8 +427,6 @@ export default function CheckoutSteps() {
 											value={customerDimensionTwo}
 											onChange={(value) => {
 												setCustomerDimensionTwo(value);
-												setCustomerDimensionOne("");
-												setCustomerDimensionThree("");
 												setActiveDimension(value ? 2 : null);
 											}}
 											placeholder="Customer Dimension 2"
@@ -372,8 +448,6 @@ export default function CheckoutSteps() {
 											value={customerDimensionThree}
 											onChange={(value) => {
 												setCustomerDimensionThree(value);
-												setCustomerDimensionOne("");
-												setCustomerDimensionTwo("");
 												setActiveDimension(value ? 3 : null);
 											}}
 											placeholder="Customer Dimension 3"
@@ -390,119 +464,245 @@ export default function CheckoutSteps() {
 											}}
 											isVisible={activeDimension === null || activeDimension === 3}
 										/>
-									</div>
+									</div>)}
+									{useCustomerSearchInput === "manual" && (
+										<div className="relative mb-4">
+											<Input
+												type="text"
+												value={customerDimension}
+												placeholder="Customer Dimension 1"
+												onChange={(e) => {
+													setCustomerDimension(e.target.value)
+													setOrderData((prev) => ({
+														...prev,
+														salesOrderHeader: {
+															...prev.salesOrderHeader,
+															customersOrderReference: e.target.value,
+														},
+													}));
+												}}
+												className="mb-4"
+											/>
+											<Input
+												type="text"
+												value={customerDimensionTwo}
+												placeholder="Customer Dimension 2"
+												onChange={(e) => {
+													setCustomerDimensionTwo(e.target.value)
+													setOrderData((prev) => ({
+														...prev,
+														salesOrderHeader: {
+															...prev.salesOrderHeader,
+															customerReference: e.target.value,
+														},
+													}));
+												}}
+												className="mb-4"
+											/>
+											<Input
+												type="text"
+												value={customerDimensionThree}
+												placeholder="Customer Dimension 3"
+												onChange={(e) => {
+													setCustomerDimensionThree(e.target.value)
+													setOrderData((prev) => ({
+														...prev,
+														salesOrderLines: prev.salesOrderLines.map((line) => ({
+															...line,
+															accountPart3: e.target.value,
+														})),
+													}));
+												}}
+											/>
+										</div>
+									)}
 								</div>
 							</TabsContent>
 							<TabsContent value="user">
+								<div className="flex items-center gap-4 mb-4">
+									<Label className="text-sm">Dimension Input Mode:</Label>
+									<RadioGroup
+										defaultValue={useUserSearchInput}
+										onValueChange={(value) => setUserSearchInput(value as "search" | "select" | "manual")}
+										className="flex items-center gap-4">
+										<div className="flex items-center gap-1">
+											<RadioGroupItem value="select" id="select" />
+											<Label htmlFor="select">Select</Label>
+										</div>
+										<div className="flex items-center gap-1">
+											<RadioGroupItem value="search" id="search" />
+											<Label htmlFor="search">Search</Label>
+										</div>
+										<div className="flex items-center gap-1">
+											<RadioGroupItem value="manual" id="manual" />
+											<Label htmlFor="manual">Manual</Label>
+										</div>
+									</RadioGroup>
+								</div>
 								<div className="space-y-2">
-									<Label>User Dimensions</Label>
-									<Select
-										value={userDimension}
-										onValueChange={(value) => {
-											const parts = value.split("<");
-											setUserDimension(value);
-											updateOrderData(parts);
-										}}>
-										<SelectTrigger>
-											<SelectValue placeholder="Select User Dimension" />
-										</SelectTrigger>
-										<SelectContent>
-											{formatUserDimensionsToHierarchy(userDimensions).map(
-												(dim, index) => (
-													<SelectItem
-														key={`${dim.value}-${index}`}
-														value={dim.value}>
-														{dim.label}
-													</SelectItem>
-												),
-											)}
-										</SelectContent>
-									</Select>
-									<div ref={userDimensionsRef}>
-										<DimensionSearchInput
-											level={1}
-											value={userDimensionOne}
-											onChange={(value) => {
-												setUserDimensionOne(value);
-												setUserDimensionTwo("");
-												setUserDimensionThree("");
-												setActiveDimension(value ? 1 : null);
-											}}
-											placeholder="User Dimension 1"
-											onSelect={(dimension) => {
-												setUserDimensionOne(dimension.dimensionName);
-											setActiveDimension(null);
-												setOrderData((prev) => ({
-													...prev,
-													salesOrderHeader: {
-														...prev.salesOrderHeader,
-														customersOrderReference: dimension.customerNumber,
-													},
-												}));
-											}}
-											isVisible={activeDimension === null || activeDimension === 4}
-										/>
-										<DimensionSearchInput
-											level={2}
-											value={userDimensionTwo}
-											onChange={(value) => {
-											setUserDimensionTwo(value);
-												setUserDimensionOne("");
-												setUserDimensionThree("");
-												setActiveDimension(value ? 2 : null);
-											}}
-											placeholder="User Dimension 2"
-											onSelect={(dimension) => {
-												setUserDimensionTwo(dimension.dimensionName);
-											setActiveDimension(null);
-												setOrderData((prev) => ({
-													...prev,
-													salesOrderHeader: {
-														...prev.salesOrderHeader,
-														customerReference: dimension.customerNumber,
-													},
-												}));
-											}}
-											isVisible={activeDimension === null || activeDimension === 5}
-										/>
-										<DimensionSearchInput
-											level={3}
-											value={userDimensionThree}
-											onChange={(value) => {
-											setUserDimensionThree(value);
-												setUserDimensionOne("");
-												setUserDimensionTwo("");
-												setActiveDimension(value ? 3 : null);
-											}}
-											placeholder="User Dimension 3"
-											onSelect={(dimension) => {
-												setUserDimensionThree(dimension.dimensionName);
-											setActiveDimension(null);
-												setOrderData((prev) => ({
-													...prev,
-													salesOrderLines: prev.salesOrderLines.map((line) => ({
-														...line,
-														accountPart3: dimension.customerNumber,
-													})),
-												}));
-											}}
-											isVisible={activeDimension === null || activeDimension === 6}
-										/>
-                  					</div>
+								
+									{useUserSearchInput === "select" && (
+									<>
+										<Label>User Dimensions</Label>
+										<Select
+											value={userDimension}
+											onValueChange={(value) => {
+												const parts = value.split("<");
+												setUserDimension(value);
+												updateOrderData(parts);
+											}}>
+											<SelectTrigger>
+												<SelectValue placeholder="Select User Dimension" />
+											</SelectTrigger>
+											<SelectContent>
+												{formatUserDimensionsToHierarchy(userDimensions).map(
+													(dim, index) => (
+														<SelectItem
+															key={`${dim.value}-${index}`}
+															value={dim.value}>
+															{dim.label}
+														</SelectItem>
+													),
+												)}
+											</SelectContent>
+										</Select>
+									</>
+									)}
+									{useUserSearchInput === "search" && (
+										<div ref={userDimensionsRef}>
+											<DimensionSearchInput
+												level={1}
+												value={userDimensionOne}
+												onChange={(value) => {
+													setUserDimensionOne(value);
+													setActiveDimension(value ? 1 : null);
+												}}
+												placeholder="User Dimension 1"
+												onSelect={(dimension) => {
+													setUserDimensionOne(dimension.dimensionName);
+													setActiveDimension(null);
+													setOrderData((prev) => ({
+														...prev,
+														salesOrderHeader: {
+															...prev.salesOrderHeader,
+															customersOrderReference: dimension.customerNumber,
+														},
+													}));
+												}}
+												isVisible={activeDimension === null || activeDimension === 4}
+											/>
+											<DimensionSearchInput
+												level={2}
+												value={userDimensionTwo}
+												onChange={(value) => {
+													setUserDimensionTwo(value);
+													setActiveDimension(value ? 2 : null);
+												}}
+												placeholder="User Dimension 2"
+												onSelect={(dimension) => {
+													setUserDimensionTwo(dimension.dimensionName);
+													setActiveDimension(null);
+													setOrderData((prev) => ({
+														...prev,
+														salesOrderHeader: {
+															...prev.salesOrderHeader,
+															customerReference: dimension.customerNumber,
+														},
+													}));
+												}}
+												isVisible={activeDimension === null || activeDimension === 5}
+											/>
+											<DimensionSearchInput
+												level={3}
+												value={userDimensionThree}
+												onChange={(value) => {
+													setUserDimensionThree(value);
+													setActiveDimension(value ? 3 : null);
+												}}
+												placeholder="User Dimension 3"
+												onSelect={(dimension) => {
+													setUserDimensionThree(dimension.dimensionName);
+													setActiveDimension(null);
+													setOrderData((prev) => ({
+														...prev,
+														salesOrderLines: prev.salesOrderLines.map((line) => ({
+															...line,
+															accountPart3: dimension.customerNumber,
+														})),
+													}));
+												}}
+												isVisible={activeDimension === null || activeDimension === 6}
+											/>
+										</div>
+									)}
+									{useUserSearchInput === "manual" && (
+										<div className="relative mb-4">
+											<Input
+												type="text"
+												value={userDimension}
+												placeholder="User Dimension 1"
+												onChange={(e) => {
+													setUserDimension(e.target.value)
+													setOrderData((prev) => ({
+														...prev,
+														salesOrderHeader: {
+															...prev.salesOrderHeader,
+															customersOrderReference: e.target.value,
+														},
+													}));
+												}}
+												className="mb-4"
+											/>
+											<Input
+												type="text"
+												value={userDimensionTwo}
+												placeholder="User Dimension 2"
+												onChange={(e) => {
+													setUserDimensionTwo(e.target.value)
+													setOrderData((prev) => ({
+														...prev,
+														salesOrderHeader: {
+															...prev.salesOrderHeader,
+															customerReference: e.target.value,
+														},
+													}));
+												}}
+												className="mb-4"
+											/>
+											<Input
+												type="text"
+												value={userDimensionThree}
+												placeholder="User Dimension 3"
+												onChange={(e) => {
+													setUserDimensionThree(e.target.value)
+													setOrderData((prev) => ({
+														...prev,
+														salesOrderLines: prev.salesOrderLines.map((line) => ({
+															...line,
+															accountPart3: e.target.value,
+														})),
+													}));
+												}}
+											/>
+										</div>
+									)}
+									
 								</div>
 							</TabsContent>
 						</Tabs>
 					</div>
+
+
 					<Button
 						className="w-full"
 						onClick={handleContinueToPayment}
-						disabled={!profile || !isStepValid(1)}>
-						Continue to Payment
+						disabled={!isStepValid(1)}>
+						{isPunchoutUser ? "Submit" : "Continue to Payment"}
 					</Button>
 				</div>
 			)}
 
-			{!profile && (
+			{!isPunchoutUser && (
 				<StepHeader
 					step={2}
 					title="Payment"
@@ -510,7 +710,7 @@ export default function CheckoutSteps() {
 					onClick={() => isStepValid(1) && setOpenStep(2)}
 				/>
 			)}
-			{openStep === 2 && (
+			{!isPunchoutUser && openStep === 2 && (
 				<div className="space-y-6 p-6">
 					<RadioGroup
 						value={paymentMethod}
