@@ -32,6 +32,7 @@ import { Minus, Plus, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 
 interface Warehouse {
 	warehouseNumber: string;
@@ -60,6 +61,7 @@ export default function ProductVariantTable({
 	productNumber,
 }: ProductVariantTableProps) {
 	const t = useTranslations();
+	const { data: profile } = useGetProfileData();
 	const [quantities, setQuantities] = useState<Record<number, number>>({});
 	const [loading, setLoading] = useState<Record<number, boolean>>({});
 	const [warehouse, setWarehouse] = useState<Record<number, string>>({});
@@ -72,7 +74,7 @@ export default function ProductVariantTable({
 
 	useEffect(() => {
 		const loadPrices = async () => {
-			const priceData = await getProductPrice("169999", "01", productNumber);
+			const priceData = await getProductPrice(profile?.defaultCustomerNumber, profile?.defaultCompanyNumber, productNumber);
 			priceData.map((item: PriceResponse) => {
 				setPrices((prev) => ({
 					...prev,

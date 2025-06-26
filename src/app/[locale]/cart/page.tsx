@@ -29,6 +29,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
 import CartSkeleton from "./loading";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 
 const AnimatedTableRow = ({
 	isOpen,
@@ -61,6 +62,8 @@ const AnimatedTableRow = ({
 };
 
 const CartPage = () => {
+
+	const { data: profile } = useGetProfileData();
 	const router = useRouter();
 	const {
 		isCartChanging,
@@ -175,8 +178,8 @@ const CartPage = () => {
 															const productVariations =
 																await getProductVariations(
 																	item.productNumber,
-																	"L01",
-																	"01",
+																	profile?.defaultWarehouseNumber || "",
+																	profile?.defaultCompanyNumber || "",
 																);
 															setVariations((prev) => ({
 																...prev,

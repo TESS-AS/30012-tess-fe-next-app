@@ -13,7 +13,7 @@ import { IProductSearch } from "@/types/search.types";
 import { ShoppingCartIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import ProductVariantTable from "../checkout/product-variant-table";
 
 interface Props {
@@ -30,8 +30,8 @@ interface Props {
 	setIsModalIdOpen: (id: string | null) => void;
 	getProductVariations: (
 		productNumber: string,
-		warehouseCode: string,
-		warehouseLocation: string,
+		warehouseNumber: string,
+		companyNumber: string,
 	) => Promise<any[]>;
 	setVariations: (variations: Record<string, any>) => void;
 	variations: Record<string, any>;
@@ -49,6 +49,7 @@ export function ProductItem({
 	setVariations,
 	variations,
 }: Props) {
+	const { data: profile } = useGetProfileData();
 	const [categoryPath, setCategoryPath] = useState("");
 
 	useEffect(() => {
@@ -100,8 +101,8 @@ export function ProductItem({
 							setIsModalIdOpen(product.productNumber);
 							const productVariations = await getProductVariations(
 								product.productNumber,
-								"L01",
-								"01",
+								profile?.defaultWarehouseNumber || "",
+								profile?.defaultCompanyNumber || "",
 							);
 							setVariations((prev: Record<string, any>) => ({
 								...prev,

@@ -141,7 +141,7 @@ export default function CheckoutSteps() {
 				...prev,
 				documentControl: {
 					companyCode:
-						profile?.defaultCompanyNumber < 10
+						Number(profile?.defaultCompanyNumber) < 10
 							? `0${profile?.defaultCompanyNumber}`
 							: profile?.defaultCompanyNumber?.toString(),
 				},
@@ -246,9 +246,6 @@ export default function CheckoutSteps() {
 	const handleSubmit = async () => {
 		const payload: Order = {
 			...orderData,
-			documentControl: {
-				companyCode: "01",
-			},
 			salesOrderHeader: {
 				...orderData.salesOrderHeader,
 			},
