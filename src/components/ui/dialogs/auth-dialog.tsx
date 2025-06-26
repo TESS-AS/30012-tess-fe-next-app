@@ -97,7 +97,7 @@ export default function AuthDialog({
 									<Button
 										variant="outline"
 										className="mt-4 w-full"
-										onClick={() => signIn("microsoft-entra-id")}>
+										onClick={() => signIn("microsoft-entra-id",{prompt: "select_acount"})}>
 										Sign in with Microsoft
 									</Button>
 								</TabsContent>
