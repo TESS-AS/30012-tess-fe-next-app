@@ -19,6 +19,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
 import { addToCart, getCart } from "@/services/carts.service";
 import {
@@ -32,7 +33,6 @@ import { Minus, Plus, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
-import { useGetProfileData } from "@/hooks/useGetProfileData";
 
 interface Warehouse {
 	warehouseNumber: string;
@@ -74,7 +74,11 @@ export default function ProductVariantTable({
 
 	useEffect(() => {
 		const loadPrices = async () => {
-			const priceData = await getProductPrice(profile?.defaultCustomerNumber, profile?.defaultCompanyNumber, productNumber);
+			const priceData = await getProductPrice(
+				profile?.defaultCustomerNumber,
+				profile?.defaultCompanyNumber,
+				productNumber,
+			);
 			priceData.map((item: PriceResponse) => {
 				setPrices((prev) => ({
 					...prev,

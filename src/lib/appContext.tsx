@@ -8,6 +8,7 @@ import {
 	useState,
 } from "react";
 
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { getCart, updateCart, removeFromCart } from "@/services/carts.service";
 import {
 	calculateItemPrice,
@@ -16,7 +17,6 @@ import {
 import { CartLine } from "@/types/carts.types";
 import { PriceResponse } from "@/types/search.types";
 import { useSession } from "next-auth/react";
-import { useGetProfileData } from "@/hooks/useGetProfileData";
 interface AppContextType {
 	isCartChanging: boolean;
 	setIsCartChanging: (value: boolean) => void;

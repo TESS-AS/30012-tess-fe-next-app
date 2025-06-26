@@ -12,6 +12,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
 import {
 	archiveCart,
@@ -29,7 +30,6 @@ import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
 import CartSkeleton from "./loading";
-import { useGetProfileData } from "@/hooks/useGetProfileData";
 
 const AnimatedTableRow = ({
 	isOpen,
@@ -62,7 +62,6 @@ const AnimatedTableRow = ({
 };
 
 const CartPage = () => {
-
 	const { data: profile } = useGetProfileData();
 	const router = useRouter();
 	const {

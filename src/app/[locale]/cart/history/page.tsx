@@ -11,6 +11,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { getArchiveCart } from "@/services/carts.service";
 import { getProductPrice } from "@/services/product.service";
 import { ArchiveCartResponse } from "@/types/carts.types";
@@ -18,7 +19,6 @@ import { PriceResponse } from "@/types/search.types";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { useGetProfileData } from "@/hooks/useGetProfileData";
 
 const CartHistoryPage = () => {
 	const params = useParams();

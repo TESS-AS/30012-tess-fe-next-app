@@ -8,12 +8,13 @@ import {
 	ModalHeader,
 	ModalTitle,
 } from "@/components/ui/modal"; // Adjust as needed
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { Category, RawCategory } from "@/types/categories.types";
 import { IProductSearch } from "@/types/search.types";
 import { ShoppingCartIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useGetProfileData } from "@/hooks/useGetProfileData";
+
 import ProductVariantTable from "../checkout/product-variant-table";
 
 interface Props {
