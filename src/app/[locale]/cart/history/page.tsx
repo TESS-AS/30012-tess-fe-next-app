@@ -11,6 +11,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { getArchiveCart } from "@/services/carts.service";
 import { getProductPrice } from "@/services/product.service";
 import { ArchiveCartResponse } from "@/types/carts.types";
@@ -21,6 +22,7 @@ import { useParams } from "next/navigation";
 
 const CartHistoryPage = () => {
 	const params = useParams();
+	const { data: profile } = useGetProfileData();
 	const locale = params.locale as string;
 	const [isLoading, setIsLoading] = useState(true);
 	const [currentPage, setCurrentPage] = useState(1);
@@ -39,7 +41,7 @@ const CartHistoryPage = () => {
 				item.cart.map(async (cartItem) => {
 					try {
 						const price = await getProductPrice(
-							"169999",
+							profile?.defaultCustomerNumber,
 							cartItem.companyNumber,
 							cartItem.productNumber,
 							cartItem.warehouseNumber,

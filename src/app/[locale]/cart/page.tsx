@@ -12,6 +12,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
 import {
 	archiveCart,
@@ -61,6 +62,7 @@ const AnimatedTableRow = ({
 };
 
 const CartPage = () => {
+	const { data: profile } = useGetProfileData();
 	const router = useRouter();
 	const {
 		isCartChanging,
@@ -175,8 +177,8 @@ const CartPage = () => {
 															const productVariations =
 																await getProductVariations(
 																	item.productNumber,
-																	"L01",
-																	"01",
+																	profile?.defaultWarehouseNumber || "",
+																	profile?.defaultCompanyNumber || "",
 																);
 															setVariations((prev) => ({
 																...prev,

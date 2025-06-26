@@ -19,6 +19,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
 import { addToCart, getCart } from "@/services/carts.service";
 import {
@@ -60,6 +61,7 @@ export default function ProductVariantTable({
 	productNumber,
 }: ProductVariantTableProps) {
 	const t = useTranslations();
+	const { data: profile } = useGetProfileData();
 	const [quantities, setQuantities] = useState<Record<number, number>>({});
 	const [loading, setLoading] = useState<Record<number, boolean>>({});
 	const [warehouse, setWarehouse] = useState<Record<number, string>>({});
@@ -72,7 +74,11 @@ export default function ProductVariantTable({
 
 	useEffect(() => {
 		const loadPrices = async () => {
-			const priceData = await getProductPrice("169999", "01", productNumber);
+			const priceData = await getProductPrice(
+				profile?.defaultCustomerNumber,
+				profile?.defaultCompanyNumber,
+				productNumber,
+			);
 			priceData.map((item: PriceResponse) => {
 				setPrices((prev) => ({
 					...prev,

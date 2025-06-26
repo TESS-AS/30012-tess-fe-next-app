@@ -8,6 +8,7 @@ import {
 	ModalHeader,
 	ModalTitle,
 } from "@/components/ui/modal"; // Adjust as needed
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { Category, RawCategory } from "@/types/categories.types";
 import { IProductSearch } from "@/types/search.types";
 import { ShoppingCartIcon } from "lucide-react";
@@ -30,8 +31,8 @@ interface Props {
 	setIsModalIdOpen: (id: string | null) => void;
 	getProductVariations: (
 		productNumber: string,
-		warehouseCode: string,
-		warehouseLocation: string,
+		warehouseNumber: string,
+		companyNumber: string,
 	) => Promise<any[]>;
 	setVariations: (variations: Record<string, any>) => void;
 	variations: Record<string, any>;
@@ -49,6 +50,7 @@ export function ProductItem({
 	setVariations,
 	variations,
 }: Props) {
+	const { data: profile } = useGetProfileData();
 	const [categoryPath, setCategoryPath] = useState("");
 
 	useEffect(() => {
@@ -100,8 +102,8 @@ export function ProductItem({
 							setIsModalIdOpen(product.productNumber);
 							const productVariations = await getProductVariations(
 								product.productNumber,
-								"L01",
-								"01",
+								profile?.defaultWarehouseNumber || "",
+								profile?.defaultCompanyNumber || "",
 							);
 							setVariations((prev: Record<string, any>) => ({
 								...prev,

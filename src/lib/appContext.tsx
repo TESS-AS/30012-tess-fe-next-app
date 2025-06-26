@@ -8,6 +8,7 @@ import {
 	useState,
 } from "react";
 
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { getCart, updateCart, removeFromCart } from "@/services/carts.service";
 import {
 	calculateItemPrice,
@@ -42,6 +43,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		Record<string, number>
 	>({});
 	const [isLoading, setIsLoading] = useState(false);
+	const { data: profile } = useGetProfileData();
 
 	const { status } = useSession() as {
 		data: any;
@@ -60,8 +62,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			// Get base prices
 			for (const item of cart) {
 				const priceData = await getProductPrice(
-					"169999",
-					"01",
+					profile?.defaultCustomerNumber,
+					profile?.defaultCompanyNumber,
 					item.productNumber,
 				);
 				setPrices((prev) => ({
@@ -77,14 +79,14 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			const priceRequests = cart?.map((item) => ({
 				itemNumber: item.itemNumber,
 				quantity: item.quantity,
-				warehouseNumber: "L01",
+				warehouseNumber: profile?.defaultWarehouseNumber || "",
 			}));
 
 			if (priceRequests.length > 0) {
 				const priceResults = await calculateItemPrice(
 					priceRequests,
-					"169999",
-					"01",
+					profile?.defaultCustomerNumber,
+					profile?.defaultCompanyNumber,
 				);
 				const newPrices = priceResults.reduce(
 					(acc: Record<string, number>, item: PriceResponse) => ({

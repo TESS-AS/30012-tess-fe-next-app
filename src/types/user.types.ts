@@ -13,7 +13,7 @@ export interface ProfileUser {
 	defaultCustomerNumber: string;
 	defaultAssortmentNumber: string;
 	defaultWarehosueName: string; // It's a typo on BE attribute
-	defaultCompanyNumber: number;
+	defaultCompanyNumber: string;
 	defaultWarehouseNumber: string;
 	punchout: boolean;
 }
