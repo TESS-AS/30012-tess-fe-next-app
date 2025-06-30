@@ -30,6 +30,11 @@ interface AppContextType {
 		itemNumber: string,
 		newQuantity: number,
 	) => Promise<void>;
+	updateWarehouse: (
+		cartLine: number,
+		itemNumber: string,
+		warehouseNumber: number,
+	) => Promise<void>;
 	removeItem: (cartLine: number) => Promise<void>;
 }
 
@@ -127,6 +132,23 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		}
 	};
 
+	const updateWarehouse = async (
+		cartLine: number,
+		itemNumber: string,
+		warehouseNumber: number,
+	) => {
+		try {
+			await updateCart(cartLine, {
+				itemNumber,
+				warehouseNumber,
+			});
+			setIsCartChanging(!isCartChanging);
+		} catch (error) {
+			console.error("Error updating cart quantity:", error);
+			throw error;
+		}
+	};
+
 	const removeItem = async (cartLine: number) => {
 		try {
 			await removeFromCart(cartLine);
@@ -148,6 +170,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				calculatedPrices,
 				isLoading,
 				updateQuantity,
+				updateWarehouse,
 				removeItem,
 			}}>
 			{children}
