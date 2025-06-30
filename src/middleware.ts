@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import createIntlMiddleware from "next-intl/middleware";
 
 import { auth } from "../auth";
-import { routing } from "./i18n/routing";
 
 const protectedRoutes = ["profile"];
 const apiAuthPrefix = "/api/auth";
@@ -44,16 +42,18 @@ function rewriteProductUrls(request: NextRequest): NextResponse | null {
 	// CASE 2: /locale/category[/subcategory]/productId (only if ID looks valid)
 	if (rest.length === 2 || rest.length === 3) {
 		const maybeProductId = rest.at(-1);
-		const isProductId = maybeProductId ? (
-			// P_ prefixed IDs with alphanumeric and special chars
-			/^P_[A-Za-z0-9_-]+$/.test(maybeProductId) ||
-			// Pure numeric IDs
-			/^\d+$/.test(maybeProductId) ||
-			// Prefixed IDs with optional hyphenated suffixes
-			/^(AT|TR|VH|VS|US|GW|KN|KF|CW|GK|AV|JB|AU|AS|AK|VM|ZS)\d+(?:-[A-Za-z0-9]+)?$/i.test(maybeProductId) ||
-			// Special p_rw format
-			/^p_rw\d+$/i.test(maybeProductId)
-		) : false;
+		const isProductId = maybeProductId
+			? // P_ prefixed IDs with alphanumeric and special chars
+				/^P_[A-Za-z0-9_-]+$/.test(maybeProductId) ||
+				// Pure numeric IDs
+				/^\d+$/.test(maybeProductId) ||
+				// Prefixed IDs with optional hyphenated suffixes
+				/^(AT|TR|VH|VS|US|GW|KN|KF|CW|GK|AV|JB|AU|AS|AK|VM|ZS)\d+(?:-[A-Za-z0-9]+)?$/i.test(
+					maybeProductId,
+				) ||
+				// Special p_rw format
+				/^p_rw\d+$/i.test(maybeProductId)
+			: false;
 
 		if (isProductId) {
 			const filled = [...rest];

@@ -5,6 +5,13 @@ import React, { useEffect, useState } from "react";
 import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { Button } from "@/components/ui/button";
 import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import {
 	Table,
 	TableBody,
 	TableCell,
@@ -12,6 +19,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { orderStatusOptions } from "@/constants/orderConstants";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
 import {
@@ -20,7 +28,11 @@ import {
 	removeFromCart,
 	updateCart,
 } from "@/services/carts.service";
-import { getProductVariations, loadItemBalanceBatch, WarehouseBatch } from "@/services/product.service";
+import {
+	getProductVariations,
+	loadItemBalanceBatch,
+	WarehouseBatch,
+} from "@/services/product.service";
 import { CartLine } from "@/types/carts.types";
 import { Loader2, Minus, Plus, Trash } from "lucide-react";
 import Image from "next/image";
@@ -30,8 +42,6 @@ import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
 import CartSkeleton from "./loading";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { orderStatusOptions } from "@/constants/orderConstants";
 
 const AnimatedTableRow = ({
 	isOpen,
@@ -84,11 +94,10 @@ const CartPage = () => {
 	};
 	const [warehouseBlance, setWarehouseBlance] = useState<WarehouseBatch[]>([]);
 
-
 	useEffect(() => {
 		async function loadWarehousesData() {
 			if (cartItems && cartItems.length > 0) {
-				console.log(cartItems,"cartitems")
+				console.log(cartItems, "cartitems");
 				const itemNumbers = cartItems.map((item) => item.itemNumber.toString());
 				const warehousesData = await loadItemBalanceBatch(itemNumbers);
 				const dataArray = Array.isArray(warehousesData) ? warehousesData : [];
@@ -100,9 +109,9 @@ const CartPage = () => {
 		if (!isLoading) {
 			loadWarehousesData();
 		}
-	}, [cartItems, isLoading])
+	}, [cartItems, isLoading]);
 
-	const [openItems, setOpenItems] = React.useState<boolean[]>([]);	
+	const [openItems, setOpenItems] = React.useState<boolean[]>([]);
 	const [variations, setVariations] = React.useState<Record<string, any>>({});
 	const [loadingItems, setLoadingItems] = React.useState<
 		Record<string, boolean>
@@ -317,42 +326,58 @@ const CartPage = () => {
 													,- kr
 												</TableCell>
 												<TableCell>
-
-												<Select
-													onValueChange={async (e: string) => {
-														setLoadingItems((prev) => ({
-															...prev,
-															[item.itemNumber]: true,
-														}));
-														try {
-															await updateWarehouse(
-																item.cartLine ?? 0,
-																item.itemNumber,
-																Number(warehouseBlance?.find(w => w.item_number === item.itemNumber)?.warehouses?.find(w => w.warehouse_name === e)?.warehouse_number) || 0,
-															);
-														} finally {
+													<Select
+														onValueChange={async (e: string) => {
 															setLoadingItems((prev) => ({
 																...prev,
-																[item.itemNumber]: false,
+																[item.itemNumber]: true,
 															}));
-														}
-													}}
-													value={warehouseBlance.find(w => w.item_number === item.itemNumber)?.warehouses?.find(w => w.warehouse_number === item.warehouseNumber)?.warehouse_name || ''}>
-													<SelectTrigger className="w-full">
-														<SelectValue placeholder="Select Warehouse" />
-													</SelectTrigger>
-													<SelectContent>
-														{warehouseBlance
-															.find(w => w.item_number === item.itemNumber)?.warehouses
-															?.map((warehouse) => (
-																<SelectItem
-																	key={warehouse.warehouse_number}
-																	value={warehouse.warehouse_name}>
-																	{warehouse.warehouse_name} ({warehouse.balance})
-																</SelectItem>
-															))}
-													</SelectContent>
-												</Select>
+															try {
+																await updateWarehouse(
+																	item.cartLine ?? 0,
+																	item.itemNumber,
+																	Number(
+																		warehouseBlance
+																			?.find(
+																				(w) =>
+																					w.item_number === item.itemNumber,
+																			)
+																			?.warehouses?.find(
+																				(w) => w.warehouse_name === e,
+																			)?.warehouse_number,
+																	) || 0,
+																);
+															} finally {
+																setLoadingItems((prev) => ({
+																	...prev,
+																	[item.itemNumber]: false,
+																}));
+															}
+														}}
+														value={
+															warehouseBlance
+																.find((w) => w.item_number === item.itemNumber)
+																?.warehouses?.find(
+																	(w) =>
+																		w.warehouse_number === item.warehouseNumber,
+																)?.warehouse_name || ""
+														}>
+														<SelectTrigger className="w-full">
+															<SelectValue placeholder="Select Warehouse" />
+														</SelectTrigger>
+														<SelectContent>
+															{warehouseBlance
+																.find((w) => w.item_number === item.itemNumber)
+																?.warehouses?.map((warehouse) => (
+																	<SelectItem
+																		key={warehouse.warehouse_number}
+																		value={warehouse.warehouse_name}>
+																		{warehouse.warehouse_name} (
+																		{warehouse.balance})
+																	</SelectItem>
+																))}
+														</SelectContent>
+													</Select>
 												</TableCell>
 												<TableCell className="text-right">
 													<Button
