@@ -90,5 +90,9 @@
 	"Cart": {
 		"archived": "Cart archived",
 		"errorArchiving": "Error archiving cart"
+	},
+	"Login": {
+		"title": "Login",
+		"loginToViewCart": "Please login to view your cart"
 	}
 }

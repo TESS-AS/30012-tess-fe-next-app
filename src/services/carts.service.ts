@@ -53,7 +53,7 @@ export async function removeFromCart(
 
 export async function updateCart(
 	cartLineId: number,
-	payload: { itemNumber: string; quantity?: number; warehouseNumber?: number },
+	payload: { itemNumber: string; quantity?: number; warehouseNumber?: string },
 ): Promise<CartLine[]> {
 	try {
 		const url = `/cart/updateLine/${cartLineId}`;

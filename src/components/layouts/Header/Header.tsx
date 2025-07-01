@@ -3,7 +3,6 @@
 import type React from "react";
 import { useEffect, useState } from "react";
 
-import ProductVariantTable from "@/components/checkout/product-variant-table";
 import CustomerNumberSwitcher from "@/components/customer-profile/customer-number-switcher";
 import CategoryNavigationMenu from "@/components/layouts/NavigationMenu/NavigationMenu";
 import { ProductItem } from "@/components/products/product-item-search";
@@ -18,12 +17,6 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import {
-	Modal,
-	ModalContent,
-	ModalHeader,
-	ModalTitle,
-} from "@/components/ui/modal";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
@@ -31,26 +24,20 @@ import { useSearch } from "@/hooks/useProductSearch";
 import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import axiosClient from "@/services/axiosClient";
-import { getCart } from "@/services/carts.service";
 import { loadCategoryTree } from "@/services/categories.service";
 import { getProductVariations } from "@/services/product.service";
-import { CartLine } from "@/types/carts.types";
 import { Category } from "@/types/categories.types";
 import { IProductSearch, ISuggestions } from "@/types/search.types";
-import { Search, ShoppingCart, ShoppingCartIcon, User } from "lucide-react";
+import { Search, ShoppingCart, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 
 export default function Header({ categories }: { categories: Category[] }) {
 	const currentLocale = useLocale();
 	const t = useTranslations();
 	const router = useRouter();
-	const { data: session, status } = useSession() as {
-		data: any;
-		status: "loading" | "authenticated" | "unauthenticated";
-	};
 	const { data: profile, isLoading: isProfileLoading } = useGetProfileData();
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isSearchOpen, setIsSearchOpen] = useState(false);

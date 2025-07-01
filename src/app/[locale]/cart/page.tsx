@@ -88,10 +88,7 @@ const CartPage = () => {
 		removeItem,
 	} = useAppContext();
 	const t = useTranslations();
-	const { status } = useSession() as {
-		data: any;
-		status: "loading" | "authenticated" | "unauthenticated";
-	};
+	const { status } = useSession();
 	const [warehouseBlance, setWarehouseBlance] = useState<WarehouseBatch[]>([]);
 
 	useEffect(() => {
@@ -149,9 +146,9 @@ const CartPage = () => {
 		return (
 			<div className="flex flex-col items-center justify-center gap-4 py-12">
 				<h1 className="text-2xl font-semibold">
-					{t("Please login to view your cart")}
+					{t("Login.title")}
 				</h1>
-				<Button onClick={() => router.push("/auth/login")}>{t("Login")}</Button>
+				<Button onClick={() => router.push("/auth/login")}>{t("Login.loginToViewCart")}</Button>
 			</div>
 		);
 	}
@@ -336,7 +333,7 @@ const CartPage = () => {
 																await updateWarehouse(
 																	item.cartLine ?? 0,
 																	item.itemNumber,
-																	Number(
+																	String(
 																		warehouseBlance
 																			?.find(
 																				(w) =>
@@ -345,7 +342,7 @@ const CartPage = () => {
 																			?.warehouses?.find(
 																				(w) => w.warehouse_name === e,
 																			)?.warehouse_number,
-																	) || 0,
+																	),
 																);
 															} finally {
 																setLoadingItems((prev) => ({
