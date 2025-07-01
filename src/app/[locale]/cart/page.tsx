@@ -33,7 +33,6 @@ import {
 	loadItemBalanceBatch,
 	WarehouseBatch,
 } from "@/services/product.service";
-import { CartLine } from "@/types/carts.types";
 import { Loader2, Minus, Plus, Trash } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -145,10 +144,10 @@ const CartPage = () => {
 	if (status === "unauthenticated") {
 		return (
 			<div className="flex flex-col items-center justify-center gap-4 py-12">
-				<h1 className="text-2xl font-semibold">
-					{t("Login.title")}
-				</h1>
-				<Button onClick={() => router.push("/auth/login")}>{t("Login.loginToViewCart")}</Button>
+				<h1 className="text-2xl font-semibold">{t("Login.title")}</h1>
+				<Button onClick={() => router.push("/auth/login")}>
+					{t("Login.loginToViewCart")}
+				</Button>
 			</div>
 		);
 	}

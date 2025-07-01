@@ -24,7 +24,8 @@ export function useGetProfileData() {
 	};
 
 	useEffect(() => {
-		if (status === "authenticated" &&
+		if (
+			status === "authenticated" &&
 			session?.accessToken &&
 			session?.idToken
 		) {

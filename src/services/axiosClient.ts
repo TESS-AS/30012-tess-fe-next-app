@@ -14,7 +14,7 @@ axiosClient.interceptors.response.use(
 			console.warn("Unauthorized - maybe session expired?");
 		}
 		return Promise.reject(error);
-	}
+	},
 );
 
 export default axiosClient;
