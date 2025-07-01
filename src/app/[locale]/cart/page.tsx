@@ -1,9 +1,16 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { Button } from "@/components/ui/button";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import {
 	Table,
 	TableBody,
@@ -12,6 +19,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { orderStatusOptions } from "@/constants/orderConstants";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
 import {
@@ -20,8 +28,11 @@ import {
 	removeFromCart,
 	updateCart,
 } from "@/services/carts.service";
-import { getProductVariations } from "@/services/product.service";
-import { CartLine } from "@/types/carts.types";
+import {
+	getProductVariations,
+	loadItemBalanceBatch,
+	WarehouseBatch,
+} from "@/services/product.service";
 import { Loader2, Minus, Plus, Trash } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -72,13 +83,29 @@ const CartPage = () => {
 		calculatedPrices,
 		isLoading,
 		updateQuantity,
+		updateWarehouse,
 		removeItem,
 	} = useAppContext();
 	const t = useTranslations();
-	const { status } = useSession() as {
-		data: any;
-		status: "loading" | "authenticated" | "unauthenticated";
-	};
+	const { status } = useSession();
+	const [warehouseBlance, setWarehouseBlance] = useState<WarehouseBatch[]>([]);
+
+	useEffect(() => {
+		async function loadWarehousesData() {
+			if (cartItems && cartItems.length > 0) {
+				console.log(cartItems, "cartitems");
+				const itemNumbers = cartItems.map((item) => item.itemNumber.toString());
+				const warehousesData = await loadItemBalanceBatch(itemNumbers);
+				const dataArray = Array.isArray(warehousesData) ? warehousesData : [];
+				setWarehouseBlance(dataArray);
+			} else {
+				setWarehouseBlance([]);
+			}
+		}
+		if (!isLoading) {
+			loadWarehousesData();
+		}
+	}, [cartItems, isLoading]);
 
 	const [openItems, setOpenItems] = React.useState<boolean[]>([]);
 	const [variations, setVariations] = React.useState<Record<string, any>>({});
@@ -117,10 +144,10 @@ const CartPage = () => {
 	if (status === "unauthenticated") {
 		return (
 			<div className="flex flex-col items-center justify-center gap-4 py-12">
-				<h1 className="text-2xl font-semibold">
-					{t("Please login to view your cart")}
-				</h1>
-				<Button onClick={() => router.push("/auth/login")}>{t("Login")}</Button>
+				<h1 className="text-2xl font-semibold">{t("Login.title")}</h1>
+				<Button onClick={() => router.push("/auth/login")}>
+					{t("Login.loginToViewCart")}
+				</Button>
 			</div>
 		);
 	}
@@ -155,6 +182,7 @@ const CartPage = () => {
 								<TableHead>Price</TableHead>
 								<TableHead>Quantity</TableHead>
 								<TableHead>Total</TableHead>
+								<TableHead>Warehouse</TableHead>
 								<TableHead className="text-right">Actions</TableHead>
 							</TableRow>
 						</TableHeader>
@@ -292,6 +320,60 @@ const CartPage = () => {
 												<TableCell>
 													{(calculatedPrices[item.itemNumber] ?? 0)?.toFixed(2)}
 													,- kr
+												</TableCell>
+												<TableCell>
+													<Select
+														onValueChange={async (e: string) => {
+															setLoadingItems((prev) => ({
+																...prev,
+																[item.itemNumber]: true,
+															}));
+															try {
+																await updateWarehouse(
+																	item.cartLine ?? 0,
+																	item.itemNumber,
+																	String(
+																		warehouseBlance
+																			?.find(
+																				(w) =>
+																					w.item_number === item.itemNumber,
+																			)
+																			?.warehouses?.find(
+																				(w) => w.warehouse_name === e,
+																			)?.warehouse_number,
+																	),
+																);
+															} finally {
+																setLoadingItems((prev) => ({
+																	...prev,
+																	[item.itemNumber]: false,
+																}));
+															}
+														}}
+														value={
+															warehouseBlance
+																.find((w) => w.item_number === item.itemNumber)
+																?.warehouses?.find(
+																	(w) =>
+																		w.warehouse_number === item.warehouseNumber,
+																)?.warehouse_name || ""
+														}>
+														<SelectTrigger className="w-full">
+															<SelectValue placeholder="Select Warehouse" />
+														</SelectTrigger>
+														<SelectContent>
+															{warehouseBlance
+																.find((w) => w.item_number === item.itemNumber)
+																?.warehouses?.map((warehouse) => (
+																	<SelectItem
+																		key={warehouse.warehouse_number}
+																		value={warehouse.warehouse_name}>
+																		{warehouse.warehouse_name} (
+																		{warehouse.balance})
+																	</SelectItem>
+																))}
+														</SelectContent>
+													</Select>
 												</TableCell>
 												<TableCell className="text-right">
 													<Button

@@ -3,17 +3,17 @@ import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
 
 export const { auth, handlers } = NextAuth({
 	providers: [
-MicrosoftEntraID({
-  clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID,
-  clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
-  issuer: process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER,
-  authorization: {
-    params: {
-      prompt: 'select_account',
-      scope: 'openid profile email',
-    },
-  },
-}),
+		MicrosoftEntraID({
+			clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID,
+			clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
+			issuer: process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER,
+			authorization: {
+				params: {
+					prompt: "select_account",
+					scope: "openid profile email",
+				},
+			},
+		}),
 	],
 	callbacks: {
 		async jwt({ token, account }: any) {

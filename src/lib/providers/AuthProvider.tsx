@@ -7,10 +7,7 @@ import { AxiosError } from "axios";
 import { SessionProvider, signOut, useSession } from "next-auth/react";
 
 function SyncSSOTokenAndFetchUser() {
-	const { data: session, status } = useSession() as {
-		data: any;
-		status: "loading" | "authenticated" | "unauthenticated";
-	};
+	const { data: session, status } = useSession();
 	useEffect(() => {
 		if (
 			status === "authenticated" &&

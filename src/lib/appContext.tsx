@@ -17,6 +17,7 @@ import {
 import { CartLine } from "@/types/carts.types";
 import { PriceResponse } from "@/types/search.types";
 import { useSession } from "next-auth/react";
+
 interface AppContextType {
 	isCartChanging: boolean;
 	setIsCartChanging: (value: boolean) => void;
@@ -29,6 +30,11 @@ interface AppContextType {
 		cartLine: number,
 		itemNumber: string,
 		newQuantity: number,
+	) => Promise<void>;
+	updateWarehouse: (
+		cartLine: number,
+		itemNumber: string,
+		warehouseNumber: string,
 	) => Promise<void>;
 	removeItem: (cartLine: number) => Promise<void>;
 }
@@ -45,10 +51,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const [isLoading, setIsLoading] = useState(false);
 	const { data: profile } = useGetProfileData();
 
-	const { status } = useSession() as {
-		data: any;
-		status: "loading" | "authenticated" | "unauthenticated";
-	};
+	const { status } = useSession();
 
 	const loadCartData = async () => {
 		try {
@@ -127,6 +130,23 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		}
 	};
 
+	const updateWarehouse = async (
+		cartLine: number,
+		itemNumber: string,
+		warehouseNumber: string,
+	) => {
+		try {
+			await updateCart(cartLine, {
+				itemNumber,
+				warehouseNumber,
+			});
+			setIsCartChanging(!isCartChanging);
+		} catch (error) {
+			console.error("Error updating cart quantity:", error);
+			throw error;
+		}
+	};
+
 	const removeItem = async (cartLine: number) => {
 		try {
 			await removeFromCart(cartLine);
@@ -148,6 +168,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				calculatedPrices,
 				isLoading,
 				updateQuantity,
+				updateWarehouse,
 				removeItem,
 			}}>
 			{children}
