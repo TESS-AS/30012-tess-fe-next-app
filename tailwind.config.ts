@@ -46,6 +46,8 @@ const config = {
 				ring: "hsl(var(--sidebar-ring))",
 			},
 			colors: {
+				main: "#0F1912",
+				lightGreen: "#00B84C",
 				common: "hsl(var(--common))",
 				azure: "hsl(var(--azure))",
 				lavender: "hsl(var(--lavender))",

@@ -3,10 +3,18 @@ import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
 
 export const { auth, handlers } = NextAuth({
 	providers: [
+		// Tenant User
 		MicrosoftEntraID({
-			clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID,
-			clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
-			issuer: process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER,
+			id: "microsoft-entra-id-tenant",
+			clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID_TENANT_USER,
+			clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET_TENANT_USER,
+			issuer: process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER_TENANT_USER,
+		}),
+		// SSO User
+		MicrosoftEntraID({
+			clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID_SSO_USER,
+			clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET_SSO_USER,
+			issuer: process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER_SSO_USER,
 			authorization: {
 				params: {
 					prompt: "select_account",
