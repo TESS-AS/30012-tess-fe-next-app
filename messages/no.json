@@ -94,5 +94,19 @@
 	"Login": {
 		"title": "Login",
 		"loginToViewCart": "Please login to view your cart"
+	},
+	"AuthDialog": {
+		"welcome": "Velkommen",
+		"welcomeDescription": "Velg hvordan du vil logge inn.",
+		"loginWithMicrosoft": "Logg inn med jobbkonto (SSO)",
+		"loginWithMicrosoftDescription": "For partnere og TESS-ansatte med organisasjonskonto",
+		"loginWithMicrosoftTenant": "Logg inn/Opprett e-handels konto",
+		"loginWithMicrosoftTenantDescription": "Kun for partnere uten organisasjonskonto",
+		"or": "eller",
+		"contactSupport": "Får du ikke logget inn?",
+		"contactSupportLink": "Kontakt support",
+		"copyright": "2025 TESS",
+		"honest": "Ærlig, pålitelig og profesjonell",
+		"honestDescription": "Hos TESS møter du fagfolk både foran og bak disken. Vi gir deg markedets beste tilgjengelighet med over 130 lokale servicesentre."
 	}
 }
