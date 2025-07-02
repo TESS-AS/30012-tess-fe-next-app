@@ -94,5 +94,19 @@
 	"Login": {
 		"title": "Login",
 		"loginToViewCart": "Please login to view your cart"
+	},
+	"AuthDialog": {
+		"welcome": "Welcome",
+		"welcomeDescription": "Select how you want to log in.",
+		"loginWithMicrosoft": "Log in with job account (SSO)",
+		"loginWithMicrosoftDescription": "For partners and TESS employees with organizational account",
+		"loginWithMicrosoftTenant": "Log in/Create e-commerce account",
+		"loginWithMicrosoftTenantDescription": "Only for partners without organizational account",
+		"or": "or",
+		"contactSupport": "Don't you log in?",
+		"contactSupportLink": "Contact support",
+		"copyright": "2025 TESS",
+		"honest": "Honest, reliable and professional",
+		"honestDescription": "At TESS you meet professionals both in front of and behind the desk. We give you the best accessibility in the market with over 130 local service centers."
 	}
 }

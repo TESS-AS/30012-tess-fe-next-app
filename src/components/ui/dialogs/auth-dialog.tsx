@@ -7,6 +7,7 @@ import { Separator } from "@radix-ui/react-select";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { useTranslations } from "next-intl";
 
 export default function AuthDialog({
 	isOpen,
@@ -16,6 +17,7 @@ export default function AuthDialog({
 	onOpenChange: (open: boolean) => void;
 }) {
 	const router = useRouter();
+	const t = useTranslations();
 
 	const closeDialog = () => {
 		const params = new URLSearchParams(window.location.search);
@@ -33,10 +35,10 @@ export default function AuthDialog({
 					<div className="flex h-full flex-col items-center justify-center bg-[#0F1912] p-10">
 						<div className="align-left flex w-full flex-col justify-start">
 							<p className="mb-4 text-left text-xl font-bold text-white">
-								Velkommen
+								{t("AuthDialog.welcome")}
 							</p>
 							<p className="text-left text-sm font-normal text-white">
-								Velg hvordan du vil logge inn.
+								{t("AuthDialog.welcomeDescription")}
 							</p>
 							<Button
 								variant="default"
@@ -51,37 +53,39 @@ export default function AuthDialog({
 									width={16}
 									height={16}
 								/>
-								Logg inn med jobbkonto (SSO)
+								{t("AuthDialog.loginWithMicrosoft")}
 							</Button>
 							<p className="mt-2 text-left text-xs text-white">
-								For partnere og TESS-ansatte med organisasjonskonto
+								{t("AuthDialog.loginWithMicrosoftDescription")}
 							</p>
 							<div className="mt-4 flex items-center gap-4">
 								<Separator className="h-[1px] flex-1 bg-[#5A615D]" />
-								<span className="text-sm text-[#5A615D]">eller</span>
+								<span className="text-sm text-[#5A615D]">
+									{t("AuthDialog.or")}
+								</span>
 								<Separator className="h-[1px] flex-1 bg-[#5A615D]" />
 							</div>
 							<Button
 								variant="outline"
 								className="mt-4 w-full"
 								onClick={() => signIn("microsoft-entra-id-tenant")}>
-								Logg inn/Opprett e-handels konto
+								{t("AuthDialog.loginWithMicrosoftTenant")}
 							</Button>
 							<p className="mt-2 text-left text-xs text-white">
-								Kun for partnere uten organisasjonskonto
+								{t("AuthDialog.loginWithMicrosoftTenantDescription")}
 							</p>
 							<p className="mt-4 text-left text-sm text-white">
-								Får du ikke logget inn?{" "}
+								{t("AuthDialog.contactSupport")}{" "}
 								<Link
 									className="text-[#1DC65A] underline"
 									href="/contact">
-									Kontakt support
+									{t("AuthDialog.contactSupportLink")}
 								</Link>
 							</p>
 						</div>
 
 						<p className="flex-end absolute bottom-4 text-center text-xs text-[#C1C4C2]">
-							2025 TESS
+							{t("AuthDialog.copyright")}
 						</p>
 					</div>
 					<div
@@ -109,7 +113,7 @@ export default function AuthDialog({
 							</div>
 							<div className="mt-2 mb-3 flex w-[330px] flex-col justify-end">
 								<p className="mb-2 text-2xl font-bold text-white">
-									Ærlig, pålitelig og profesjonell
+									{t("AuthDialog.honest")}
 								</p>
 								<Image
 									className="ml-auto text-right"
@@ -120,9 +124,7 @@ export default function AuthDialog({
 								/>
 							</div>
 							<p className="text-xs font-bold text-white">
-								Hos TESS møter du fagfolk både foran og bak disken. Vi gir deg
-								markedets beste tilgjengelighet med over 130 lokale
-								servicesentre.
+								{t("AuthDialog.honestDescription")}
 							</p>
 						</div>
 					</div>
