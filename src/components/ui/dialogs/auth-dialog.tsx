@@ -1,16 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Link } from "@/i18n/navigation";
 import { Separator } from "@radix-ui/react-select";
-import { LayoutGrid } from "lucide-react";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 
 export default function AuthDialog({
@@ -49,7 +44,13 @@ export default function AuthDialog({
 								onClick={() =>
 									signIn("microsoft-entra-id", { prompt: "select_account" })
 								}>
-								<LayoutGrid className="mr-1 h-4 w-4 text-white" />
+								<Image
+									src="/images/Microsoft.svg"
+									alt="Microsoft"
+									className="mr-1"
+									width={16}
+									height={16}
+								/>
 								Logg inn med jobbkonto (SSO)
 							</Button>
 							<p className="mt-2 text-left text-xs text-white">
@@ -79,7 +80,7 @@ export default function AuthDialog({
 							</p>
 						</div>
 
-						<p className="text-muted-foreground flex-end absolute bottom-4 text-center text-xs">
+						<p className="flex-end absolute bottom-4 text-center text-xs text-[#C1C4C2]">
 							2025 TESS
 						</p>
 					</div>
