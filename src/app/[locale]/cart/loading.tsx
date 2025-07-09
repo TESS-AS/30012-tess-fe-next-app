@@ -1,6 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@radix-ui/react-select";
-import { Button } from "@/components/ui/button";
 
 export default function CartSkeleton() {
 	return (
@@ -23,7 +22,9 @@ export default function CartSkeleton() {
 
 					{/* Cart items skeleton */}
 					{[...Array(3)].map((_, idx) => (
-						<div key={idx} className="rounded-xl border border-lightGray p-4">
+						<div
+							key={idx}
+							className="border-lightGray rounded-xl border p-4">
 							<div className="flex items-center justify-between">
 								<div className="flex items-center gap-4">
 									<Skeleton className="h-16 w-16 rounded" />
@@ -48,7 +49,7 @@ export default function CartSkeleton() {
 
 				{/* Order Summary */}
 				<div className="space-y-6">
-					<div className="bg-card rounded-xl border border-lightGray p-6">
+					<div className="bg-card border-lightGray rounded-xl border p-6">
 						<h2 className="text-xl font-semibold">
 							<Skeleton className="h-6 w-32" />
 						</h2>

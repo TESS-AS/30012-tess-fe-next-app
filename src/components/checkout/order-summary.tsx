@@ -91,15 +91,15 @@ export default function OrderSummary() {
 							onOpenChange={(open) =>
 								setOpenModalId(open ? product.productNumber : null)
 							}>
-								<ModalHeader>
-									<ModalTitle>
-										Product Variants - {product.productName}
-									</ModalTitle>
-								</ModalHeader>
-								<ProductVariantTable
-									variants={[]}
-									productNumber={product.productNumber}
-								/>
+							<ModalHeader>
+								<ModalTitle>
+									Product Variants - {product.productName}
+								</ModalTitle>
+							</ModalHeader>
+							<ProductVariantTable
+								variants={[]}
+								productNumber={product.productNumber}
+							/>
 						</Modal>
 					</div>
 				</div>

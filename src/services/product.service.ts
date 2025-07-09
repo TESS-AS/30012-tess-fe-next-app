@@ -182,13 +182,9 @@ export async function getProductPrice(
 	}
 }
 
-export async function getProductVariations(
-	productNumber: string
-) {
+export async function getProductVariations(productNumber: string) {
 	try {
-		const response = await axiosInstance.get(
-			`/item/variants/${productNumber}`,
-		);
+		const response = await axiosInstance.get(`/item/variants/${productNumber}`);
 		return response.data;
 	} catch (error) {
 		console.error("Error fetching product variations:", error);

@@ -5,7 +5,9 @@ import React, { useEffect, useState } from "react";
 import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
 import { NotificationCard } from "@/components/ui/notification-card";
+import QuantityButtons from "@/components/ui/quantity-buttons";
 import {
 	Select,
 	SelectContent,
@@ -15,7 +17,6 @@ import {
 } from "@/components/ui/select";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
-import { archiveCart } from "@/services/carts.service";
 import {
 	getProductVariations,
 	loadItemBalanceBatch,
@@ -28,9 +29,6 @@ import {
 	CircleAlert,
 	CircleCheck,
 	Loader2,
-	Minus,
-	Plus,
-	Search,
 	Trash2,
 } from "lucide-react";
 import Image from "next/image";
@@ -40,10 +38,6 @@ import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
 import CartSkeleton from "./loading";
-import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
-import QuantityButtons from "@/components/ui/quantity-buttons";
-import { Input } from "@/components/ui/input";
-
 
 const CartPage = () => {
 	const { data: profile } = useGetProfileData();
@@ -192,7 +186,9 @@ const CartPage = () => {
 												return newState;
 											});
 											try {
-												const productVariations = await getProductVariations(item.productNumber);
+												const productVariations = await getProductVariations(
+													item.productNumber,
+												);
 												setVariations((prev) => ({
 													...prev,
 													[item.productNumber]: productVariations,
@@ -201,7 +197,7 @@ const CartPage = () => {
 												console.error("Error fetching variations:", error);
 											}
 										}}
-										className="grid grid-cols-[70px_2fr_2fr_1fr_1fr_40px] items-center gap-4 rounded-md border border-lightGray p-6 transition-colors">
+										className="border-lightGray grid grid-cols-[70px_2fr_2fr_1fr_1fr_40px] items-center gap-4 rounded-md border p-6 transition-colors">
 										<div className="bg-muted relative h-17 w-17 rounded">
 											{item.mediaId?.[0]?.url ? (
 												<Image
@@ -215,10 +211,15 @@ const CartPage = () => {
 											)}
 										</div>
 										<div className="flex flex-col">
-											<span className="font-medium color-[#0F1912] mb-2">{item.productNumber}</span>
-											<p 
-												onClick={() => setOpenModalId(item.productNumber)} 
-												className="cursor-pointer color-[#5A615D] text-xs hover:text-[#009640] hover:underline flex items-center">{item.itemNumber}, 300mm, 3/8” <ChevronRight className="h-4 w-4" /></p>
+											<span className="color-[#0F1912] mb-2 font-medium">
+												{item.productNumber}
+											</span>
+											<p
+												onClick={() => setOpenModalId(item.productNumber)}
+												className="color-[#5A615D] flex cursor-pointer items-center text-xs hover:text-[#009640] hover:underline">
+												{item.itemNumber}, 300mm, 3/8”{" "}
+												<ChevronRight className="h-4 w-4" />
+											</p>
 										</div>
 										<Select
 											onValueChange={async (e: string) => {
@@ -252,8 +253,11 @@ const CartPage = () => {
 														(w) => w.warehouse_number === item.warehouseNumber,
 													)?.warehouse_name || ""
 											}>
-											<SelectTrigger className="w-[260px] p-1.5 h-[30px] flex justify-center cursor-pointer">
-												<SelectValue className="text-[#009640]" placeholder="Select Warehouse" />
+											<SelectTrigger className="flex h-[30px] w-[260px] cursor-pointer justify-center p-1.5">
+												<SelectValue
+													className="text-[#009640]"
+													placeholder="Select Warehouse"
+												/>
 											</SelectTrigger>
 											<SelectContent>
 												{warehouseBlance
@@ -262,17 +266,23 @@ const CartPage = () => {
 														<SelectItem
 															key={warehouse.warehouse_number}
 															value={warehouse.warehouse_name}>
-															<div className={`flex items-center justify-center text-xs p-0 ${warehouse.balance > 0 ? 'text-[#009640]' : 'text-[#0F1912]'}`}>
-																{warehouse.balance > 0 ? <CircleCheck className="w-4 h-4 mr-1" /> : <CircleAlert className="w-4 h-4 mr-1 text-[#E3A008]" />}
-																{warehouse.balance} tilgjengelig ({warehouse.warehouse_name})
+															<div
+																className={`flex items-center justify-center p-0 text-xs ${warehouse.balance > 0 ? "text-[#009640]" : "text-[#0F1912]"}`}>
+																{warehouse.balance > 0 ? (
+																	<CircleCheck className="mr-1 h-4 w-4" />
+																) : (
+																	<CircleAlert className="mr-1 h-4 w-4 text-[#E3A008]" />
+																)}
+																{warehouse.balance} tilgjengelig (
+																{warehouse.warehouse_name})
 															</div>
 														</SelectItem>
 													))}
 											</SelectContent>
 										</Select>
 
-										<QuantityButtons 
-											quantity={item.quantity} 
+										<QuantityButtons
+											quantity={item.quantity}
 											onIncrease={async (e) => {
 												e.stopPropagation();
 												setLoadingItems((prev) => ({
@@ -310,7 +320,7 @@ const CartPage = () => {
 														[item.itemNumber]: false,
 													}));
 												}
-											}} 
+											}}
 										/>
 										<p className="font-bold">
 											{(calculatedPrices[item.itemNumber] ?? 0)?.toFixed(2)}
@@ -349,29 +359,27 @@ const CartPage = () => {
 											setOpenModalId(open ? item.productNumber : null)
 										}
 										className="min-w-[75%]">
-											<ModalHeader>
-												<ModalTitle>
-												Velg produk§tvariant
-												</ModalTitle>
-											</ModalHeader>
-											<div className="space-y-4 p-4">
-												<div className="space-y-2">
-													<ProductVariantTable
-														hasSearch
-														variants={variations[item.productNumber] || []}
-														productNumber={item.productNumber}
-													/>
-												</div>
+										<ModalHeader>
+											<ModalTitle>Velg produk§tvariant</ModalTitle>
+										</ModalHeader>
+										<div className="space-y-4 p-4">
+											<div className="space-y-2">
+												<ProductVariantTable
+													hasSearch
+													variants={variations[item.productNumber] || []}
+													productNumber={item.productNumber}
+												/>
 											</div>
-										</Modal>
-									</React.Fragment>
+										</div>
+									</Modal>
+								</React.Fragment>
 							);
 						})}
 				</div>
 
 				{/* Order Summary */}
 				<div className="space-y-6">
-					<div className="bg-card rounded-xl border border-lightGray p-6">
+					<div className="bg-card border-lightGray rounded-xl border p-6">
 						<h2 className="text-xl font-semibold">Ordreoversikt</h2>
 						<div className="mt-4 space-y-4 text-sm">
 							<div className="flex justify-between">

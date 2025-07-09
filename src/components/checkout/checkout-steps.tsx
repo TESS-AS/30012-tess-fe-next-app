@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { companyFields, shippingFields } from "@/constants/checkout";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import {
 	getCustomerDimensions,
@@ -22,7 +23,7 @@ import {
 	formatUserDimensionsToHierarchy,
 } from "@/utils/dimensionFormaters";
 import { PayPalButtons } from "@paypal/react-paypal-js";
-import { CreditCard, FileDown } from "lucide-react";
+import { FileDown } from "lucide-react";
 import Image from "next/image";
 
 import styles from "./checkout-steps.module.css";
@@ -30,6 +31,7 @@ import { DimensionSearchInput } from "./dimension-search-input";
 import { FormField } from "./form-field";
 import { StepHeader } from "./step-header";
 import { Input } from "../ui/input";
+import { Modal, ModalHeader, ModalTitle } from "../ui/modal";
 import {
 	Select,
 	SelectContent,
@@ -38,14 +40,10 @@ import {
 	SelectValue,
 } from "../ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { toast } from "react-toastify";
-import { useRouter } from "@/i18n/navigation";
-import { Modal, ModalHeader, ModalTitle } from "../ui/modal";
 
 // Main component
 export default function CheckoutSteps() {
-
-	const router = useRouter()
+	const router = useRouter();
 	const { cartItems, calculatedPrices, handleArchiveCart } = useAppContext();
 
 	const { data: profile } = useGetProfileData();
@@ -95,7 +93,7 @@ export default function CheckoutSteps() {
 	>("manual");
 	const [checkoutModal, setCheckoutModal] = useState<boolean>(false);
 	const [successText, setSuccessText] = useState<string>("");
-	
+
 	const isPunchoutUser = profile?.punchout;
 
 	const customerDimensionsRef = useClickOutside<HTMLDivElement>(() => {
@@ -148,7 +146,8 @@ export default function CheckoutSteps() {
 			setOrderData((prev) => ({
 				...prev,
 				documentControl: {
-					companyCode: Number(profile?.defaultCompanyNumber) < 10
+					companyCode:
+						Number(profile?.defaultCompanyNumber) < 10
 							? `0${profile?.defaultCompanyNumber}`
 							: profile?.defaultCompanyNumber?.toString(),
 				},
@@ -167,7 +166,7 @@ export default function CheckoutSteps() {
 				})),
 			}));
 		}
-		console.log(orderData, "orderData")
+		console.log(orderData, "orderData");
 	}, [cartItems, profile]);
 
 	useEffect(() => {
@@ -251,63 +250,67 @@ export default function CheckoutSteps() {
 	};
 
 	const handleSubmit = async () => {
-			const payload: Order = {
-				...orderData,
-				salesOrderHeader: {
-					...orderData.salesOrderHeader,
-					customersOrderNumberEdifact: "EDIFACT123",
-					orderType: "zz",
-					customerNumber: "169999",
-					warehouseNumber: "W01",
-					termsOfDelivery: "DAP",
-					termsOfPayment: "NET",
-					dispatchDate: "2025-07-07",
-				},
-				salesOrderAddresses: orderData.salesOrderAddresses,
-				salesOrderLines: orderData.salesOrderLines,
-			};
-			try {
-				const response = await salesOrder(payload);
-	
-				if(!isPunchoutUser) {
-					setCheckoutModal(true);
-					if (typeof response === 'object' && response !== null && 'data' in response && response.data?.message) {
-						setSuccessText(response.data.message);
-					}
-					await handleArchiveCart();
-				} else {
-
-					const parser = new DOMParser();
-					const doc = parser.parseFromString(response as string, "text/html");
-		
-					const form = doc.getElementById("punchoutForm") as HTMLFormElement;
-		
-					if (form) {
-						const actionUrl = form.action;
-						const { method } = form;
-		
-						const submitForm = document.createElement("form");
-						submitForm.method = method;
-						submitForm.action = actionUrl;
-		
-						Array.from(form.getElementsByTagName("input")).forEach((input) => {
-							const newInput = document.createElement("input");
-							newInput.type = "hidden";
-							newInput.name = input.name;
-							newInput.value = input.value;
-							submitForm.appendChild(newInput);
-						});
-						document.body.appendChild(submitForm);
-						submitForm.submit();
-						document.body.removeChild(submitForm);
-					} else {
-						console.error("Punchout form not found in response");
-					}
-				}
-			} catch (error) {
-				console.error("Order submission failed:", error);
-			}
+		const payload: Order = {
+			...orderData,
+			salesOrderHeader: {
+				...orderData.salesOrderHeader,
+				customersOrderNumberEdifact: "EDIFACT123",
+				orderType: "zz",
+				customerNumber: "169999",
+				warehouseNumber: "W01",
+				termsOfDelivery: "DAP",
+				termsOfPayment: "NET",
+				dispatchDate: "2025-07-07",
+			},
+			salesOrderAddresses: orderData.salesOrderAddresses,
+			salesOrderLines: orderData.salesOrderLines,
 		};
+		try {
+			const response = await salesOrder(payload);
+
+			if (!isPunchoutUser) {
+				setCheckoutModal(true);
+				if (
+					typeof response === "object" &&
+					response !== null &&
+					"data" in response &&
+					response.data?.message
+				) {
+					setSuccessText(response.data.message);
+				}
+				await handleArchiveCart();
+			} else {
+				const parser = new DOMParser();
+				const doc = parser.parseFromString(response as string, "text/html");
+
+				const form = doc.getElementById("punchoutForm") as HTMLFormElement;
+
+				if (form) {
+					const actionUrl = form.action;
+					const { method } = form;
+
+					const submitForm = document.createElement("form");
+					submitForm.method = method;
+					submitForm.action = actionUrl;
+
+					Array.from(form.getElementsByTagName("input")).forEach((input) => {
+						const newInput = document.createElement("input");
+						newInput.type = "hidden";
+						newInput.name = input.name;
+						newInput.value = input.value;
+						submitForm.appendChild(newInput);
+					});
+					document.body.appendChild(submitForm);
+					submitForm.submit();
+					document.body.removeChild(submitForm);
+				} else {
+					console.error("Punchout form not found in response");
+				}
+			}
+		} catch (error) {
+			console.error("Order submission failed:", error);
+		}
+	};
 
 	const handleContinueToPayment = () => {
 		if (isPunchoutUser) {
@@ -895,14 +898,18 @@ export default function CheckoutSteps() {
 					)}
 				</div>
 			)}
-			<Modal open={checkoutModal} onOpenChange={setCheckoutModal}>
+			<Modal
+				open={checkoutModal}
+				onOpenChange={setCheckoutModal}>
 				<ModalHeader>
 					<ModalTitle>Order submitted successfully</ModalTitle>
 				</ModalHeader>
 				<div>
-					<p className="text-center py-8 text-lg font-medium">{successText}</p>
-					<div className="flex justify-between mt-4">
-						<Button variant="outline" onClick={() => router.push('/')}>
+					<p className="py-8 text-center text-lg font-medium">{successText}</p>
+					<div className="mt-4 flex justify-between">
+						<Button
+							variant="outline"
+							onClick={() => router.push("/")}>
 							Close
 						</Button>
 						<Button>

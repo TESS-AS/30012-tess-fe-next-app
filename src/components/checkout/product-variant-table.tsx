@@ -31,6 +31,7 @@ import { Minus, Plus, Loader2, Search, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
+
 import QuantityButtons from "../ui/quantity-buttons";
 
 interface Warehouse {
@@ -164,34 +165,57 @@ export default function ProductVariantTable({
 	}
 
 	return (
-		<div className="mt-4 w-full relative">
-			{hasSearch && <div className="flex items-center justify-between">
-				<div className="flex items-center relative">
-					<Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
-					<Input
-						type="search"
-						placeholder={t("Common.searchProducts")}
-						className="bg-[#F8F9F8] w-[350px] border-[#8A8F8C] color-[#8A8F8C] pl-8"
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
-					/>
+		<div className="relative mt-4 w-full">
+			{hasSearch && (
+				<div className="flex items-center justify-between">
+					<div className="relative flex items-center">
+						<Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
+						<Input
+							type="search"
+							placeholder={t("Common.searchProducts")}
+							className="color-[#8A8F8C] w-[350px] border-[#8A8F8C] bg-[#F8F9F8] pl-8"
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+						/>
+					</div>
+					<Button
+						variant="outline"
+						onClick={() => setSearchQuery("")}>
+						<Plus className="mr-2 h-4 w-4" />
+						Legg til attributt
+					</Button>
 				</div>
-				<Button variant="outline" onClick={() => setSearchQuery("")}>
-					<Plus className="mr-2 h-4 w-4" />Legg til attributt
-				</Button>
-			</div>}
-			<Table className="w-full rounded-md my-4">
+			)}
+			<Table className="my-4 w-full rounded-md">
 				<TableHeader className="bg-muted text-muted-foreground">
 					<TableRow>
-						<TableHead className="bg-[#F8F9F8] border-b-1 border-[#C1C4C2] color-[#5A615D]">Image</TableHead>
-						<TableHead className="bg-[#F8F9F8] border-b-1 border-[#C1C4C2] color-[#5A615D]">Parent Number</TableHead>
-						<TableHead className="bg-[#F8F9F8] border-b-1 border-[#C1C4C2] color-[#5A615D]">Item Number</TableHead>
-						<TableHead className="bg-[#F8F9F8] border-b-1 border-[#C1C4C2] color-[#5A615D]">UNSPSC</TableHead>
-						<TableHead className="bg-[#F8F9F8] border-b-1 border-[#C1C4C2] color-[#5A615D]">Unit</TableHead>
-						<TableHead className="bg-[#F8F9F8] border-b-1 border-[#C1C4C2] color-[#5A615D]">Price</TableHead>
-						<TableHead className="bg-[#F8F9F8] border-b-1 border-[#C1C4C2] color-[#5A615D]">Qty</TableHead>
-						<TableHead className="bg-[#F8F9F8] border-b-1 border-[#C1C4C2] color-[#5A615D]">Warehouse</TableHead>
-						<TableHead className="bg-[#F8F9F8] border-b-1 border-[#C1C4C2] color-[#5A615D]">Actions</TableHead>
+						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+							Image
+						</TableHead>
+						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+							Parent Number
+						</TableHead>
+						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+							Item Number
+						</TableHead>
+						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+							UNSPSC
+						</TableHead>
+						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+							Unit
+						</TableHead>
+						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+							Price
+						</TableHead>
+						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+							Qty
+						</TableHead>
+						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+							Warehouse
+						</TableHead>
+						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+							Actions
+						</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
@@ -200,7 +224,9 @@ export default function ProductVariantTable({
 						const selectedWarehouse = warehouse[variant.itemNumber];
 
 						return (
-							<TableRow className="hover:bg-[#F0FCF2]" key={variant.itemNumber}>
+							<TableRow
+								className="hover:bg-[#F0FCF2]"
+								key={variant.itemNumber}>
 								<TableCell>
 									{variant.mediaId?.[0]?.url ? (
 										<Image
@@ -338,13 +364,12 @@ export default function ProductVariantTable({
 												}));
 											}
 										}}>
-										{loading[variant.itemNumber] 
-											? (
+										{loading[variant.itemNumber] ? (
 											<>
 												<Loader2 className="inline h-4 w-4 animate-spin" />
 												{t("Product.adding")}
 											</>
-											) : (
+										) : (
 											<>
 												<ShoppingCart className="color-[#009640] h-4 w-4" />
 												{t("Product.addToCart")}

@@ -1,7 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { Link } from "@/i18n/navigation";
 import { Separator } from "@radix-ui/react-select";
 import Image from "next/image";
@@ -87,7 +92,7 @@ export default function AuthDialog({
 							</p>
 						</div>
 
-						<p className="flex-end absolute bottom-4 text-center text-xs text-lightGray">
+						<p className="flex-end text-lightGray absolute bottom-4 text-center text-xs">
 							{t("AuthDialog.copyright")}
 						</p>
 					</div>
