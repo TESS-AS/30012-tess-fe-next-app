@@ -39,7 +39,10 @@ const QuantityButtons = ({
                 variant="outline"
                 disabled={isDecrementDisabled}
                 className={cn("h-6 w-6 bg-[#E8EAE9]", buttonClassName)}
-                onClick={onDecrease}>
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onDecrease(e);
+                }}>
                 {isLoading ? (
                     <div className="border-t-primary h-4 w-4 animate-spin rounded-full border-2 border-gray-300" />
                 ) : (
@@ -54,7 +57,10 @@ const QuantityButtons = ({
                 variant="outline"
                 disabled={isIncrementDisabled}
                 className={cn("h-6 w-6 bg-[#E8EAE9]", buttonClassName)}
-                onClick={onIncrease}>
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onIncrease(e);
+                }}>
                 {isLoading ? (
                     <div className="border-t-primary h-4 w-4 animate-spin rounded-full border-2 border-gray-300" />
                 ) : (

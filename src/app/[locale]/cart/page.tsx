@@ -283,7 +283,7 @@ const CartPage = () => {
 													await updateQuantity(
 														item.cartLine ?? 0,
 														item.itemNumber,
-														item.quantity - 1,
+														item.quantity + 1,
 													);
 												} finally {
 													setLoadingItems((prev) => ({
@@ -302,7 +302,7 @@ const CartPage = () => {
 													await updateQuantity(
 														item.cartLine ?? 0,
 														item.itemNumber,
-														item.quantity + 1,
+														item.quantity - 1,
 													);
 												} finally {
 													setLoadingItems((prev) => ({
