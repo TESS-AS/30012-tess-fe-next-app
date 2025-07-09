@@ -9,7 +9,12 @@ import {
 } from "react";
 
 import { useGetProfileData } from "@/hooks/useGetProfileData";
-import { getCart, updateCart, removeFromCart } from "@/services/carts.service";
+import {
+	getCart,
+	updateCart,
+	removeFromCart,
+	archiveCart,
+} from "@/services/carts.service";
 import {
 	calculateItemPrice,
 	getProductPrice,
@@ -37,6 +42,7 @@ interface AppContextType {
 		warehouseNumber: string,
 	) => Promise<void>;
 	removeItem: (cartLine: number) => Promise<void>;
+	handleArchiveCart: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -157,6 +163,16 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		}
 	};
 
+	const handleArchiveCart = async () => {
+		try {
+			await archiveCart();
+			setIsCartChanging(!isCartChanging);
+		} catch (error) {
+			console.error("Error archiving cart:", error);
+			throw error;
+		}
+	};
+
 	return (
 		<AppContext.Provider
 			value={{
@@ -170,6 +186,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				updateQuantity,
 				updateWarehouse,
 				removeItem,
+				handleArchiveCart,
 			}}>
 			{children}
 		</AppContext.Provider>

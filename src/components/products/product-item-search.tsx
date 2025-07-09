@@ -2,12 +2,7 @@
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button"; // Adjust this import as needed
-import {
-	Modal,
-	ModalContent,
-	ModalHeader,
-	ModalTitle,
-} from "@/components/ui/modal"; // Adjust as needed
+import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal"; // Adjust as needed
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { Category, RawCategory } from "@/types/categories.types";
 import { IProductSearch } from "@/types/search.types";
@@ -140,17 +135,15 @@ export function ProductItem({
 						}));
 					}
 				}}>
-				<ModalContent className="sm:max-w-[900px]">
-					<ModalHeader>
-						<ModalTitle>Product Variants - {product.productName}</ModalTitle>
-					</ModalHeader>
-					<div className="max-h-[70vh] overflow-y-auto px-1">
-						<ProductVariantTable
-							variants={variations[product.productNumber]}
-							productNumber={product.productNumber}
-						/>
-					</div>
-				</ModalContent>
+				<ModalHeader>
+					<ModalTitle>Product Variants - {product.productName}</ModalTitle>
+				</ModalHeader>
+				<div className="max-h-[70vh] overflow-y-auto px-1">
+					<ProductVariantTable
+						variants={variations[product.productNumber]}
+						productNumber={product.productNumber}
+					/>
+				</div>
 			</Modal>
 		</div>
 	);

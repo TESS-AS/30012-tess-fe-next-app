@@ -182,15 +182,9 @@ export async function getProductPrice(
 	}
 }
 
-export async function getProductVariations(
-	productNumber: string,
-	warehouseNumber: string = "L01",
-	companyNumber: string = "01",
-) {
+export async function getProductVariations(productNumber: string) {
 	try {
-		const response = await axiosInstance.get(
-			`/item/variants/${productNumber}/${warehouseNumber}/${companyNumber}`,
-		);
+		const response = await axiosInstance.get(`/item/variants/${productNumber}`);
 		return response.data;
 	} catch (error) {
 		console.error("Error fetching product variations:", error);

@@ -3,7 +3,11 @@
 import React, { useEffect, useState } from "react";
 
 import ProductVariantTable from "@/components/checkout/product-variant-table";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
+import { NotificationCard } from "@/components/ui/notification-card";
+import QuantityButtons from "@/components/ui/quantity-buttons";
 import {
 	Select,
 	SelectContent,
@@ -11,29 +15,22 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
-import { orderStatusOptions } from "@/constants/orderConstants";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
-import {
-	archiveCart,
-	getCart,
-	removeFromCart,
-	updateCart,
-} from "@/services/carts.service";
 import {
 	getProductVariations,
 	loadItemBalanceBatch,
 	WarehouseBatch,
 } from "@/services/product.service";
-import { Loader2, Minus, Plus, Trash } from "lucide-react";
+import { Separator } from "@radix-ui/react-select";
+import {
+	ArrowRight,
+	ChevronRight,
+	CircleAlert,
+	CircleCheck,
+	Loader2,
+	Trash2,
+} from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -42,42 +39,10 @@ import { toast } from "react-toastify";
 
 import CartSkeleton from "./loading";
 
-const AnimatedTableRow = ({
-	isOpen,
-	children,
-}: {
-	isOpen: boolean;
-	children: React.ReactNode;
-}) => {
-	return (
-		<TableRow className={isOpen ? "border-b" : "border-none"}>
-			<TableCell
-				colSpan={5}
-				className="p-0">
-				<div className="grid">
-					<div
-						className={`grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out ${isOpen && "grid-rows-[1fr]"} `}>
-						<div className="overflow-hidden">
-							<div
-								className={`bg-muted/50 text-muted-foreground min-h-0 transform-gpu px-6 py-4 text-sm ${
-									isOpen ? "scale-y-100 opacity-100" : "scale-y-95 opacity-0"
-								} transition-all duration-300 ease-out`}>
-								{children}
-							</div>
-						</div>
-					</div>
-				</div>
-			</TableCell>
-		</TableRow>
-	);
-};
-
 const CartPage = () => {
 	const { data: profile } = useGetProfileData();
 	const router = useRouter();
 	const {
-		isCartChanging,
-		setIsCartChanging,
 		cartItems,
 		prices,
 		calculatedPrices,
@@ -85,10 +50,12 @@ const CartPage = () => {
 		updateQuantity,
 		updateWarehouse,
 		removeItem,
+		handleArchiveCart,
 	} = useAppContext();
 	const t = useTranslations();
 	const { status } = useSession();
 	const [warehouseBlance, setWarehouseBlance] = useState<WarehouseBatch[]>([]);
+	const [openModalId, setOpenModalId] = useState<string | null>(null);
 
 	useEffect(() => {
 		async function loadWarehousesData() {
@@ -126,10 +93,9 @@ const CartPage = () => {
 		router.push("/checkout");
 	};
 
-	const handleArchiveCart = async () => {
+	const archiveCart = async () => {
 		try {
-			await archiveCart();
-			setIsCartChanging(!isCartChanging);
+			await handleArchiveCart();
 			toast.success(t("Cart archived successfully"));
 		} catch (error) {
 			console.error("Error archiving cart:", error);
@@ -157,6 +123,38 @@ const CartPage = () => {
 			<div className="grid grid-cols-1 gap-10 md:grid-cols-3">
 				{/* Cart Items */}
 				<div className="space-y-6 md:col-span-2">
+					<Breadcrumb
+						items={[
+							{ href: "/", label: "Home" },
+							{ href: "/cart", label: "Cart" },
+						]}
+					/>
+					<div className="flex items-center justify-between">
+						<div className="flex w-[70%] items-center gap-2">
+							<p className="text-base font-normal">Vis lagerstatus for:</p>
+							<Select>
+								<SelectTrigger className="w-[40%]">
+									<SelectValue placeholder="Mitt lager: Kristiansand" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="warehouse1">Warehouse 1</SelectItem>
+									<SelectItem value="warehouse2">Warehouse 2</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+						<Button
+							variant="outline"
+							className="border-[#C81E1E] text-[#C81E1E]">
+							<Trash2 className="color-[#C81E1E] h-4 w-4" />
+						</Button>
+					</div>
+					<NotificationCard
+						className="bg-[#FDFDEA]"
+						icon={<CircleAlert className="h-4 w-4" />}
+						title="Noen varer er ikke på lager i ditt valgte varehus"
+						message="Noen varer er ikke på lager i ditt valgte varehus, og det kan ta opptil 3 dager ekstra å få dem levert. Endre lager per varelinje før du sender ordren dersom du ønsker raskere levering."
+						onClose={() => {}}
+					/>
 					<div className="flex items-center justify-between">
 						<h1 className="text-2xl font-semibold">
 							Your Cart ({cartItems?.length})
@@ -164,7 +162,7 @@ const CartPage = () => {
 						<div className="flex items-center gap-2">
 							<Button
 								variant="outline"
-								onClick={() => handleArchiveCart()}
+								onClick={() => archiveCart()}
 								className="mr-2">
 								Archive Cart
 							</Button>
@@ -175,259 +173,235 @@ const CartPage = () => {
 							</Button>
 						</div>
 					</div>
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead>Product</TableHead>
-								<TableHead>Price</TableHead>
-								<TableHead>Quantity</TableHead>
-								<TableHead>Total</TableHead>
-								<TableHead>Warehouse</TableHead>
-								<TableHead className="text-right">Actions</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{!isLoading &&
-								cartItems?.map((item, idx) => {
-									return (
-										<React.Fragment key={idx}>
-											<TableRow
-												onClick={async () => {
-													const willOpen = !openItems[idx];
-													setOpenItems((prev) => {
-														const newState = [...prev];
-														newState[idx] = willOpen;
-														return newState;
-													});
-
-													if (willOpen && !variations[item.productNumber]) {
-														try {
-															const productVariations =
-																await getProductVariations(
-																	item.productNumber,
-																	profile?.defaultWarehouseNumber || "",
-																	profile?.defaultCompanyNumber || "",
-																);
-															setVariations((prev) => ({
-																...prev,
-																[item.productNumber]: productVariations,
-															}));
-														} catch (error) {
-															console.error(
-																"Error fetching variations:",
-																error,
-															);
-														}
-													}
-												}}
-												className="hover:bg-muted/50 cursor-pointer transition-colors">
-												<TableCell>
-													<div className="flex items-center gap-4">
-														<div className="bg-muted relative h-16 w-16 rounded">
-															{item.mediaId?.[0]?.url ? (
-																<Image
-																	src={item.mediaId[0].url}
-																	alt={item.mediaId[0].filename || ""}
-																	fill
-																	className="object-contain"
-																/>
-															) : (
-																<div className="h-full w-full bg-gray-200" />
-															)}
-														</div>
-														<div className="flex flex-col">
-															<span className="font-medium">
-																{item.productNumber}
-															</span>
-															<span className="text-muted-foreground text-xs">
-																{item.itemNumber}
-															</span>
-														</div>
-													</div>
-												</TableCell>
-												<TableCell className="text-muted-foreground">
-													<div className="flex flex-col">
-														<span>
-															Unit: {prices[item.itemNumber]?.toFixed(2)},- kr
-														</span>
-													</div>
-												</TableCell>
-												<TableCell>
-													<div className="flex items-center gap-2">
-														<Button
-															size="icon"
-															variant="outline"
-															disabled={loadingItems[item.itemNumber]}
-															onClick={async (e) => {
-																e.stopPropagation();
-																setLoadingItems((prev) => ({
-																	...prev,
-																	[item.itemNumber]: true,
-																}));
-																try {
-																	await updateQuantity(
-																		item.cartLine ?? 0,
-																		item.itemNumber,
-																		item.quantity - 1,
-																	);
-																} finally {
-																	setLoadingItems((prev) => ({
-																		...prev,
-																		[item.itemNumber]: false,
-																	}));
-																}
-															}}>
-															{loadingItems[item.itemNumber] ? (
-																<div className="border-t-primary h-4 w-4 animate-spin rounded-full border-2 border-gray-300" />
-															) : (
-																<Minus className="h-4 w-4" />
-															)}
-														</Button>
-														<span className="w-6 text-center">
-															{item.quantity}
-														</span>
-														<Button
-															size="icon"
-															variant="outline"
-															disabled={loadingItems[item.itemNumber]}
-															onClick={async (e) => {
-																e.stopPropagation();
-																setLoadingItems((prev) => ({
-																	...prev,
-																	[item.itemNumber]: true,
-																}));
-																try {
-																	await updateQuantity(
-																		item.cartLine ?? 0,
-																		item.itemNumber,
-																		item.quantity + 1,
-																	);
-																} finally {
-																	setLoadingItems((prev) => ({
-																		...prev,
-																		[item.itemNumber]: false,
-																	}));
-																}
-															}}>
-															{loadingItems[item.itemNumber] ? (
-																<div className="border-t-primary h-4 w-4 animate-spin rounded-full border-2 border-gray-300" />
-															) : (
-																<Plus className="h-4 w-4" />
-															)}
-														</Button>
-													</div>
-												</TableCell>
-												<TableCell>
-													{(calculatedPrices[item.itemNumber] ?? 0)?.toFixed(2)}
-													,- kr
-												</TableCell>
-												<TableCell>
-													<Select
-														onValueChange={async (e: string) => {
-															setLoadingItems((prev) => ({
-																...prev,
-																[item.itemNumber]: true,
-															}));
-															try {
-																await updateWarehouse(
-																	item.cartLine ?? 0,
-																	item.itemNumber,
-																	String(
-																		warehouseBlance
-																			?.find(
-																				(w) =>
-																					w.item_number === item.itemNumber,
-																			)
-																			?.warehouses?.find(
-																				(w) => w.warehouse_name === e,
-																			)?.warehouse_number,
-																	),
-																);
-															} finally {
-																setLoadingItems((prev) => ({
-																	...prev,
-																	[item.itemNumber]: false,
-																}));
-															}
-														}}
-														value={
+					{!isLoading &&
+						cartItems?.map((item, idx) => {
+							return (
+								<React.Fragment key={idx}>
+									<div
+										onClick={async () => {
+											const willOpen = !openItems[idx];
+											setOpenItems((prev) => {
+												const newState = [...prev];
+												newState[idx] = willOpen;
+												return newState;
+											});
+											try {
+												const productVariations = await getProductVariations(
+													item.productNumber,
+												);
+												setVariations((prev) => ({
+													...prev,
+													[item.productNumber]: productVariations,
+												}));
+											} catch (error) {
+												console.error("Error fetching variations:", error);
+											}
+										}}
+										className="border-lightGray grid grid-cols-[70px_2fr_2fr_1fr_1fr_40px] items-center gap-4 rounded-md border p-6 transition-colors">
+										<div className="bg-muted relative h-17 w-17 rounded">
+											{item.mediaId?.[0]?.url ? (
+												<Image
+													src={item.mediaId[0].url}
+													alt={item.mediaId[0].filename || ""}
+													fill
+													className="object-contain"
+												/>
+											) : (
+												<div className="h-full w-full bg-gray-200" />
+											)}
+										</div>
+										<div className="flex flex-col">
+											<span className="color-[#0F1912] mb-2 font-medium">
+												{item.productNumber}
+											</span>
+											<p
+												onClick={() => setOpenModalId(item.productNumber)}
+												className="color-[#5A615D] flex cursor-pointer items-center text-xs hover:text-[#009640] hover:underline">
+												{item.itemNumber}, 300mm, 3/8”{" "}
+												<ChevronRight className="h-4 w-4" />
+											</p>
+										</div>
+										<Select
+											onValueChange={async (e: string) => {
+												setLoadingItems((prev) => ({
+													...prev,
+													[item.itemNumber]: true,
+												}));
+												try {
+													await updateWarehouse(
+														item.cartLine ?? 0,
+														item.itemNumber,
+														String(
 															warehouseBlance
-																.find((w) => w.item_number === item.itemNumber)
+																?.find((w) => w.item_number === item.itemNumber)
 																?.warehouses?.find(
-																	(w) =>
-																		w.warehouse_number === item.warehouseNumber,
-																)?.warehouse_name || ""
-														}>
-														<SelectTrigger className="w-full">
-															<SelectValue placeholder="Select Warehouse" />
-														</SelectTrigger>
-														<SelectContent>
-															{warehouseBlance
-																.find((w) => w.item_number === item.itemNumber)
-																?.warehouses?.map((warehouse) => (
-																	<SelectItem
-																		key={warehouse.warehouse_number}
-																		value={warehouse.warehouse_name}>
-																		{warehouse.warehouse_name} (
-																		{warehouse.balance})
-																	</SelectItem>
-																))}
-														</SelectContent>
-													</Select>
-												</TableCell>
-												<TableCell className="text-right">
-													<Button
-														size="icon"
-														variant="ghost"
-														disabled={removingItems[item.cartLine ?? 0]}
-														onClick={async (e) => {
-															e.stopPropagation();
-															setRemovingItems((prev) => ({
-																...prev,
-																[item.cartLine ?? 0]: true,
-															}));
-															try {
-																await removeItem(Number(item.cartLine));
-															} finally {
-																setRemovingItems((prev) => ({
-																	...prev,
-																	[item.cartLine ?? 0]: false,
-																}));
-															}
-														}}>
-														{removingItems[item.cartLine ?? 0] ? (
-															<div className="border-t-primary h-4 w-4 animate-spin rounded-full border-2 border-gray-300" />
-														) : (
-															<Trash className="text-muted-foreground h-4 w-4" />
-														)}
-													</Button>
-												</TableCell>
-											</TableRow>
-											<AnimatedTableRow isOpen={openItems[idx] || false}>
+																	(w) => w.warehouse_name === e,
+																)?.warehouse_number,
+														),
+													);
+												} finally {
+													setLoadingItems((prev) => ({
+														...prev,
+														[item.itemNumber]: false,
+													}));
+												}
+											}}
+											value={
+												warehouseBlance
+													.find((w) => w.item_number === item.itemNumber)
+													?.warehouses?.find(
+														(w) => w.warehouse_number === item.warehouseNumber,
+													)?.warehouse_name || ""
+											}>
+											<SelectTrigger className="flex h-[30px] w-[260px] cursor-pointer justify-center p-1.5">
+												<SelectValue
+													className="text-[#009640]"
+													placeholder="Select Warehouse"
+												/>
+											</SelectTrigger>
+											<SelectContent>
+												{warehouseBlance
+													.find((w) => w.item_number === item.itemNumber)
+													?.warehouses?.map((warehouse) => (
+														<SelectItem
+															key={warehouse.warehouse_number}
+															value={warehouse.warehouse_name}>
+															<div
+																className={`flex items-center justify-center p-0 text-xs ${warehouse.balance > 0 ? "text-[#009640]" : "text-[#0F1912]"}`}>
+																{warehouse.balance > 0 ? (
+																	<CircleCheck className="mr-1 h-4 w-4" />
+																) : (
+																	<CircleAlert className="mr-1 h-4 w-4 text-[#E3A008]" />
+																)}
+																{warehouse.balance} tilgjengelig (
+																{warehouse.warehouse_name})
+															</div>
+														</SelectItem>
+													))}
+											</SelectContent>
+										</Select>
+
+										<QuantityButtons
+											quantity={item.quantity}
+											onIncrease={async (e) => {
+												e.stopPropagation();
+												setLoadingItems((prev) => ({
+													...prev,
+													[item.itemNumber]: true,
+												}));
+												try {
+													await updateQuantity(
+														item.cartLine ?? 0,
+														item.itemNumber,
+														item.quantity + 1,
+													);
+												} finally {
+													setLoadingItems((prev) => ({
+														...prev,
+														[item.itemNumber]: false,
+													}));
+												}
+											}}
+											onDecrease={async (e) => {
+												e.stopPropagation();
+												setLoadingItems((prev) => ({
+													...prev,
+													[item.itemNumber]: true,
+												}));
+												try {
+													await updateQuantity(
+														item.cartLine ?? 0,
+														item.itemNumber,
+														item.quantity - 1,
+													);
+												} finally {
+													setLoadingItems((prev) => ({
+														...prev,
+														[item.itemNumber]: false,
+													}));
+												}
+											}}
+										/>
+										<p className="font-bold">
+											{(calculatedPrices[item.itemNumber] ?? 0)?.toFixed(2)}
+											,-
+										</p>
+										<Button
+											size="icon"
+											variant="ghost"
+											disabled={removingItems[item.cartLine ?? 0]}
+											onClick={async (e) => {
+												e.stopPropagation();
+												setRemovingItems((prev) => ({
+													...prev,
+													[item.cartLine ?? 0]: true,
+												}));
+												try {
+													await removeItem(Number(item.cartLine));
+												} finally {
+													setRemovingItems((prev) => ({
+														...prev,
+														[item.cartLine ?? 0]: false,
+													}));
+												}
+											}}>
+											{removingItems[item.cartLine ?? 0] ? (
+												<div className="border-t-primary h-4 w-4 animate-spin rounded-full border-2 border-gray-300" />
+											) : (
+												<Trash2 className="h-4 w-4 text-[#C81E1E]" />
+											)}
+										</Button>
+									</div>
+
+									<Modal
+										open={openModalId === item.productNumber}
+										onOpenChange={(open) =>
+											setOpenModalId(open ? item.productNumber : null)
+										}
+										className="min-w-[75%]">
+										<ModalHeader>
+											<ModalTitle>Velg produk§tvariant</ModalTitle>
+										</ModalHeader>
+										<div className="space-y-4 p-4">
+											<div className="space-y-2">
 												<ProductVariantTable
+													hasSearch
 													variants={variations[item.productNumber] || []}
 													productNumber={item.productNumber}
 												/>
-											</AnimatedTableRow>
-										</React.Fragment>
-									);
-								})}
-						</TableBody>
-					</Table>
+											</div>
+										</div>
+									</Modal>
+								</React.Fragment>
+							);
+						})}
 				</div>
 
 				{/* Order Summary */}
 				<div className="space-y-6">
-					<div className="bg-card rounded-xl border p-6 shadow">
-						<h2 className="text-xl font-semibold">Order Summary</h2>
+					<div className="bg-card border-lightGray rounded-xl border p-6">
+						<h2 className="text-xl font-semibold">Ordreoversikt</h2>
 						<div className="mt-4 space-y-4 text-sm">
 							<div className="flex justify-between">
-								<span>Subtotal</span>
+								<span className="text-[#5A615D]">Opprinnelig pris:</span>
 								<span>{subtotal.toFixed(2)},- kr</span>
 							</div>
 							<div className="flex justify-between">
-								<span>Shipping</span>
-								<span>Calculated at checkout</span>
+								<span className="text-[#5A615D]">Rabatter</span>
+								<span className="text-[#009640]">-999</span>
+							</div>
+							<div className="flex justify-between">
+								<span className="text-[#5A615D]">MVA(25%)</span>
+								<span>1212,12</span>
+							</div>
+							<Separator className="h-[1px] flex-1 bg-[#5A615D]" />
+							<div className="flex justify-between">
+								<span className="text-base font-bold text-[#0F1912]">
+									Totalt
+								</span>
+								<span className="text-base font-bold text-[#0F1912]">
+									1212,12
+								</span>
 							</div>
 						</div>
 						<Button
@@ -437,42 +411,37 @@ const CartPage = () => {
 							{isLoading ? (
 								<Loader2 className="h-4 w-4 animate-spin" />
 							) : (
-								"Continue to Checkout"
+								"Gå til checkout"
 							)}
 						</Button>
-					</div>
-
-					{/* Related Products */}
-					<div className="bg-card rounded-xl border p-6 shadow">
-						<h2 className="mb-4 text-lg font-semibold">Related Products</h2>
-						<div className="grid grid-cols-3 gap-4">
-							{[
-								{ src: "/images/helmet.jpg", name: "Helmet", price: "$12.00" },
-								{ src: "/images/gloves.jpg", name: "Gloves", price: "$24.50" },
-								{
-									src: "/images/welding.jpg",
-									name: "Welding Mask",
-									price: "$18.00",
-								},
-							].map((product, index) => (
-								<div
-									key={index}
-									className="text-center">
-									<div className="bg-muted relative h-24 w-full rounded">
-										<Image
-											src={product.src}
-											alt={product.name}
-											fill
-											className="object-contain"
-										/>
-									</div>
-									<p className="mt-2 text-sm">{product.name}</p>
-									<p className="text-muted-foreground text-sm">
-										{product.price}
-									</p>
-								</div>
-							))}
-						</div>
+						<Button
+							variant="outline"
+							className="mt-4 w-full border-[#009640] text-[#009640]"
+							disabled={cartItems?.length === 0 || isLoading}
+							onClick={handleCheckout}>
+							{isLoading ? (
+								<Loader2 className="h-4 w-4 animate-spin" />
+							) : (
+								"Overfør til eget system"
+							)}
+						</Button>
+						<Button
+							variant="link"
+							className="mt-4 w-full hover:no-underline"
+							disabled={cartItems?.length === 0 || isLoading}
+							onClick={handleCheckout}>
+							<>
+								{isLoading ? (
+									<Loader2 className="h-4 w-4 animate-spin" />
+								) : (
+									"eller"
+								)}
+								<span className="text-[#009640] underline">
+									Fortsett å handle
+								</span>{" "}
+								<ArrowRight className="h-4 w-4 font-bold text-[#009640]" />
+							</>
+						</Button>
 					</div>
 				</div>
 			</div>

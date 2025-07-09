@@ -2,12 +2,7 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-	Modal,
-	ModalContent,
-	ModalHeader,
-	ModalTitle,
-} from "@/components/ui/modal";
+import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
 import {
 	Select,
 	SelectContent,
@@ -95,109 +90,107 @@ export default function CustomerNumberSwitcher({
 			<Modal
 				open={isCustomerModalOpen}
 				onOpenChange={setIsCustomerModalOpen}>
-				<ModalContent className="sm:max-w-md">
-					<ModalHeader>
-						<ModalTitle>Customer Info</ModalTitle>
-					</ModalHeader>
-					<div className="space-y-4 p-4">
-						<div className="space-y-2">
-							<Label htmlFor="customerSelect">Customers</Label>
-							<Select
-								value={newCustomerNumber}
-								onValueChange={setNewCustomerNumber}>
-								<SelectTrigger
-									id="customerSelect"
-									className="w-full">
-									<SelectValue placeholder="Select customer number" />
-								</SelectTrigger>
-								<SelectContent
-									position="popper"
-									className="z-[9999]">
-									<SelectGroup>
-										<>
-											{customers.map((customer) => (
-												<SelectItem
-													key={customer.customerNumber}
-													value={customer.customerNumber}>
-													{customer.customerName} ({customer.customerNumber})
-												</SelectItem>
-											))}
-										</>
-									</SelectGroup>
-								</SelectContent>
-							</Select>
-						</div>
-						<div className="space-y-2">
-							<Label htmlFor="warehouseSelect">Warehouses</Label>
-							<Select
-								value={warehouses[0]?.id}
-								disabled={warehouses.length === 0}>
-								<SelectTrigger
-									id="warehouseSelect"
-									className="w-full">
-									<SelectValue
-										placeholder={
-											warehouses.length === 0
-												? "No warehouse available"
-												: "Select warehouse"
-										}
-									/>
-								</SelectTrigger>
-								<SelectContent className="z-[9999]">
-									<SelectGroup>
-										<>
-											{warehouses.length > 0 && (
-												<SelectItem value={warehouses[0].id}>
-													{warehouses[0].name} ({warehouses[0].id})
-												</SelectItem>
-											)}
-										</>
-									</SelectGroup>
-								</SelectContent>
-							</Select>
-						</div>
-
-						<div className="space-y-2">
-							<Label htmlFor="assortmentSelect">Assortments</Label>
-							<Select
-								value={selectedAssortment}
-								disabled={assortments.length === 0}
-								onValueChange={setSelectedAssortment}>
-								<SelectTrigger
-									id="assortmentSelect"
-									className="w-full">
-									<SelectValue
-										placeholder={
-											assortments.length === 0
-												? "No assortments available"
-												: "Select assortment"
-										}
-									/>
-								</SelectTrigger>
-								<SelectContent className="z-[9999]">
-									<SelectGroup>
-										<>
-											{assortments.map((a) => (
-												<SelectItem
-													key={a.assortmentnumber}
-													value={a.assortmentnumber}>
-													{a.assortmentname} ({a.assortmentnumber})
-												</SelectItem>
-											))}
-										</>
-									</SelectGroup>
-								</SelectContent>
-							</Select>
-						</div>
-
-						<Button
-							className="w-full"
-							disabled={isSaving}
-							onClick={handleSave}>
-							{isSaving ? "Saving..." : "Save"}
-						</Button>
+				<ModalHeader>
+					<ModalTitle>Customer Info</ModalTitle>
+				</ModalHeader>
+				<div className="space-y-4 p-4">
+					<div className="space-y-2">
+						<Label htmlFor="customerSelect">Customers</Label>
+						<Select
+							value={newCustomerNumber}
+							onValueChange={setNewCustomerNumber}>
+							<SelectTrigger
+								id="customerSelect"
+								className="w-full">
+								<SelectValue placeholder="Select customer number" />
+							</SelectTrigger>
+							<SelectContent
+								position="popper"
+								className="z-[9999]">
+								<SelectGroup>
+									<>
+										{customers.map((customer) => (
+											<SelectItem
+												key={customer.customerNumber}
+												value={customer.customerNumber}>
+												{customer.customerName} ({customer.customerNumber})
+											</SelectItem>
+										))}
+									</>
+								</SelectGroup>
+							</SelectContent>
+						</Select>
 					</div>
-				</ModalContent>
+					<div className="space-y-2">
+						<Label htmlFor="warehouseSelect">Warehouses</Label>
+						<Select
+							value={warehouses[0]?.id}
+							disabled={warehouses.length === 0}>
+							<SelectTrigger
+								id="warehouseSelect"
+								className="w-full">
+								<SelectValue
+									placeholder={
+										warehouses.length === 0
+											? "No warehouse available"
+											: "Select warehouse"
+									}
+								/>
+							</SelectTrigger>
+							<SelectContent className="z-[9999]">
+								<SelectGroup>
+									<>
+										{warehouses.length > 0 && (
+											<SelectItem value={warehouses[0].id}>
+												{warehouses[0].name} ({warehouses[0].id})
+											</SelectItem>
+										)}
+									</>
+								</SelectGroup>
+							</SelectContent>
+						</Select>
+					</div>
+
+					<div className="space-y-2">
+						<Label htmlFor="assortmentSelect">Assortments</Label>
+						<Select
+							value={selectedAssortment}
+							disabled={assortments.length === 0}
+							onValueChange={setSelectedAssortment}>
+							<SelectTrigger
+								id="assortmentSelect"
+								className="w-full">
+								<SelectValue
+									placeholder={
+										assortments.length === 0
+											? "No assortments available"
+											: "Select assortment"
+									}
+								/>
+							</SelectTrigger>
+							<SelectContent className="z-[9999]">
+								<SelectGroup>
+									<>
+										{assortments.map((a) => (
+											<SelectItem
+												key={a.assortmentnumber}
+												value={a.assortmentnumber}>
+												{a.assortmentname} ({a.assortmentnumber})
+											</SelectItem>
+										))}
+									</>
+								</SelectGroup>
+							</SelectContent>
+						</Select>
+					</div>
+
+					<Button
+						className="w-full"
+						disabled={isSaving}
+						onClick={handleSave}>
+						{isSaving ? "Saving..." : "Save"}
+					</Button>
+				</div>
 			</Modal>
 		</>
 	);

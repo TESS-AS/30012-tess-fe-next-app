@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,16 +23,16 @@ import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
 import { addToCart, getCart } from "@/services/carts.service";
 import {
-	getItemWarehouseBalance,
 	getProductPrice,
-	getProductWarehouseBalance,
 	loadItemBalanceBatch,
 } from "@/services/product.service";
 import { PriceResponse } from "@/types/search.types";
-import { Minus, Plus, Loader2 } from "lucide-react";
+import { Minus, Plus, Loader2, Search, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
+
+import QuantityButtons from "../ui/quantity-buttons";
 
 interface Warehouse {
 	warehouseNumber: string;
@@ -54,14 +54,18 @@ interface ProductVariant {
 interface ProductVariantTableProps {
 	variants: ProductVariant[];
 	productNumber: string;
+	hasSearch?: boolean;
 }
 
 export default function ProductVariantTable({
 	variants,
 	productNumber,
+	hasSearch,
 }: ProductVariantTableProps) {
 	const t = useTranslations();
 	const { data: profile } = useGetProfileData();
+
+	const [searchQuery, setSearchQuery] = useState<string>("");
 	const [quantities, setQuantities] = useState<Record<number, number>>({});
 	const [loading, setLoading] = useState<Record<number, boolean>>({});
 	const [warehouse, setWarehouse] = useState<Record<number, string>>({});
@@ -102,7 +106,7 @@ export default function ProductVariantTable({
 				console.log(warehousesData, "warehousedata");
 
 				const updatedVariants = variants.map((variant) => {
-					const variantWarehouses = warehousesData?.find(
+					const variantWarehouses = (warehousesData || [])?.find(
 						(w) => w.item_number === variant.itemNumber.toString(),
 					);
 
@@ -161,19 +165,57 @@ export default function ProductVariantTable({
 	}
 
 	return (
-		<div className="mt-4">
-			<Table className="rounded-md border">
+		<div className="relative mt-4 w-full">
+			{hasSearch && (
+				<div className="flex items-center justify-between">
+					<div className="relative flex items-center">
+						<Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
+						<Input
+							type="search"
+							placeholder={t("Common.searchProducts")}
+							className="color-[#8A8F8C] w-[350px] border-[#8A8F8C] bg-[#F8F9F8] pl-8"
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+						/>
+					</div>
+					<Button
+						variant="outline"
+						onClick={() => setSearchQuery("")}>
+						<Plus className="mr-2 h-4 w-4" />
+						Legg til attributt
+					</Button>
+				</div>
+			)}
+			<Table className="my-4 w-full rounded-md">
 				<TableHeader className="bg-muted text-muted-foreground">
 					<TableRow>
-						<TableHead>Image</TableHead>
-						<TableHead>Parent Number</TableHead>
-						<TableHead>Item Number</TableHead>
-						<TableHead>UNSPSC</TableHead>
-						<TableHead>Unit</TableHead>
-						<TableHead>Price</TableHead>
-						<TableHead>Qty</TableHead>
-						<TableHead>Warehouse</TableHead>
-						<TableHead>Actions</TableHead>
+						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+							Image
+						</TableHead>
+						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+							Parent Number
+						</TableHead>
+						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+							Item Number
+						</TableHead>
+						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+							UNSPSC
+						</TableHead>
+						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+							Unit
+						</TableHead>
+						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+							Price
+						</TableHead>
+						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+							Qty
+						</TableHead>
+						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+							Warehouse
+						</TableHead>
+						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+							Actions
+						</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
@@ -182,7 +224,9 @@ export default function ProductVariantTable({
 						const selectedWarehouse = warehouse[variant.itemNumber];
 
 						return (
-							<TableRow key={variant.itemNumber}>
+							<TableRow
+								className="hover:bg-[#F0FCF2]"
+								key={variant.itemNumber}>
 								<TableCell>
 									{variant.mediaId?.[0]?.url ? (
 										<Image
@@ -204,45 +248,21 @@ export default function ProductVariantTable({
 									{prices[variant.itemNumber]?.toFixed(2) || "0.00"},- kr
 								</TableCell>
 								<TableCell>
-									<div className="flex items-center gap-2">
-										<Button
-											size="icon"
-											variant="outline"
-											disabled={qty <= 1}
-											onClick={() =>
-												setQuantities((prev) => ({
-													...prev,
-													[variant.itemNumber]: Math.max(1, qty - 1),
-												}))
-											}>
-											<Minus className="h-4 w-4" />
-										</Button>
-										<Input
-											type="number"
-											value={qty}
-											className="w-16 text-center"
-											onChange={(e) =>
-												setQuantities((prev) => ({
-													...prev,
-													[variant.itemNumber]: Math.max(
-														1,
-														parseInt(e.target.value) || 1,
-													),
-												}))
-											}
-										/>
-										<Button
-											size="icon"
-											variant="outline"
-											onClick={() =>
-												setQuantities((prev) => ({
-													...prev,
-													[variant.itemNumber]: qty + 1,
-												}))
-											}>
-											<Plus className="h-4 w-4" />
-										</Button>
-									</div>
+									<QuantityButtons
+										quantity={qty}
+										onIncrease={async () =>
+											setQuantities((prev) => ({
+												...prev,
+												[variant.itemNumber]: qty + 1,
+											}))
+										}
+										onDecrease={async () =>
+											setQuantities((prev) => ({
+												...prev,
+												[variant.itemNumber]: Math.max(1, qty - 1),
+											}))
+										}
+									/>
 								</TableCell>
 								<TableCell>
 									<Select
@@ -270,7 +290,7 @@ export default function ProductVariantTable({
 								</TableCell>
 								<TableCell>
 									<Button
-										variant="ghost"
+										variant="outlineGreen"
 										size="sm"
 										disabled={loading[variant.itemNumber]}
 										className="relative"
@@ -346,11 +366,14 @@ export default function ProductVariantTable({
 										}}>
 										{loading[variant.itemNumber] ? (
 											<>
-												<Loader2 className="mr-2 inline h-4 w-4 animate-spin" />
+												<Loader2 className="inline h-4 w-4 animate-spin" />
 												{t("Product.adding")}
 											</>
 										) : (
-											t("Product.addToCart")
+											<>
+												<ShoppingCart className="color-[#009640] h-4 w-4" />
+												{t("Product.addToCart")}
+											</>
 										)}
 									</Button>
 								</TableCell>
