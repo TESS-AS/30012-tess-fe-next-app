@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Link } from "@/i18n/navigation";
 import { Separator } from "@radix-ui/react-select";
 import Image from "next/image";
@@ -31,6 +31,9 @@ export default function AuthDialog({
 			open={isOpen}
 			onOpenChange={closeDialog}>
 			<DialogContent className="h-[80vh] w-full max-w-[90vw] min-w-[960px] overflow-hidden rounded-xl border-none p-0 shadow-xl">
+				<DialogHeader className="hidden">
+					<DialogTitle></DialogTitle>
+				</DialogHeader>
 				<div className="grid h-full w-full grid-cols-1 md:grid-cols-2">
 					<div className="flex h-full flex-col items-center justify-center bg-[#0F1912] p-10">
 						<div className="align-left flex w-full flex-col justify-start">
@@ -67,7 +70,7 @@ export default function AuthDialog({
 							</div>
 							<Button
 								variant="outline"
-								className="mt-4 w-full"
+								className="mt-4 w-full text-white"
 								onClick={() => signIn("microsoft-entra-id-tenant")}>
 								{t("AuthDialog.loginWithMicrosoftTenant")}
 							</Button>
@@ -84,7 +87,7 @@ export default function AuthDialog({
 							</p>
 						</div>
 
-						<p className="flex-end absolute bottom-4 text-center text-xs text-[#C1C4C2]">
+						<p className="flex-end absolute bottom-4 text-center text-xs text-lightGray">
 							{t("AuthDialog.copyright")}
 						</p>
 					</div>

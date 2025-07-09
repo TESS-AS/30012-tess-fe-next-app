@@ -22,7 +22,7 @@ import {
 	formatUserDimensionsToHierarchy,
 } from "@/utils/dimensionFormaters";
 import { PayPalButtons } from "@paypal/react-paypal-js";
-import { CreditCard } from "lucide-react";
+import { CreditCard, FileDown } from "lucide-react";
 import Image from "next/image";
 
 import styles from "./checkout-steps.module.css";
@@ -38,10 +38,15 @@ import {
 	SelectValue,
 } from "../ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { toast } from "react-toastify";
+import { useRouter } from "@/i18n/navigation";
+import { Modal, ModalHeader, ModalTitle } from "../ui/modal";
 
 // Main component
 export default function CheckoutSteps() {
-	const { cartItems, calculatedPrices, prices } = useAppContext();
+
+	const router = useRouter()
+	const { cartItems, calculatedPrices, handleArchiveCart } = useAppContext();
 
 	const { data: profile } = useGetProfileData();
 	const [openStep, setOpenStep] = useState(1);
@@ -57,7 +62,7 @@ export default function CheckoutSteps() {
 			dispatchDate: "",
 			orderType: "",
 			customersOrderReference: "",
-			warehouseId: "",
+			warehouseNumber: "",
 			termsOfDelivery: "",
 			termsOfPayment: "",
 			paidAmount: 0,
@@ -88,6 +93,9 @@ export default function CheckoutSteps() {
 	const [useUserSearchInput, setUserSearchInput] = useState<
 		"search" | "select" | "manual"
 	>("manual");
+	const [checkoutModal, setCheckoutModal] = useState<boolean>(false);
+	const [successText, setSuccessText] = useState<string>("");
+	
 	const isPunchoutUser = profile?.punchout;
 
 	const customerDimensionsRef = useClickOutside<HTMLDivElement>(() => {
@@ -140,20 +148,18 @@ export default function CheckoutSteps() {
 			setOrderData((prev) => ({
 				...prev,
 				documentControl: {
-					companyCode:
-						Number(profile?.defaultCompanyNumber) < 10
+					companyCode: Number(profile?.defaultCompanyNumber) < 10
 							? `0${profile?.defaultCompanyNumber}`
 							: profile?.defaultCompanyNumber?.toString(),
 				},
-				salesOrderLines: cartItems.map((item) => ({
-					warehouseNumber:
-						`${profile?.defaultWarehouseNumber} ${profile?.defaultWarehosueName}` ||
-						"",
-					orderType: "",
+				salesOrderLines: cartItems.map((item, idx) => ({
+					customerOrderLine: idx + 1,
+					warehouseNumber: `${profile?.defaultWarehouseNumber}` || "",
+					orderType: "S2",
 					itemCode: item?.productNumber || "",
 					orderedQuantity: item.quantity,
 					salesPrice: calculatedPrices[item.itemNumber] || 0,
-					requestedDeliveryDate: "",
+					requestedDeliveryDate: "2025-07-07",
 					accountPart3: "", // Dimension 3
 					accountPart4: String(profile?.userId || ""), // userId
 					accountPart5: "",
@@ -161,6 +167,7 @@ export default function CheckoutSteps() {
 				})),
 			}));
 		}
+		console.log(orderData, "orderData")
 	}, [cartItems, profile]);
 
 	useEffect(() => {
@@ -244,47 +251,63 @@ export default function CheckoutSteps() {
 	};
 
 	const handleSubmit = async () => {
-		const payload: Order = {
-			...orderData,
-			salesOrderHeader: {
-				...orderData.salesOrderHeader,
-			},
-			salesOrderAddresses: orderData.salesOrderAddresses,
-			salesOrderLines: orderData.salesOrderLines,
-		};
-		try {
-			const response = await salesOrder(payload);
+			const payload: Order = {
+				...orderData,
+				salesOrderHeader: {
+					...orderData.salesOrderHeader,
+					customersOrderNumberEdifact: "EDIFACT123",
+					orderType: "zz",
+					customerNumber: "169999",
+					warehouseNumber: "W01",
+					termsOfDelivery: "DAP",
+					termsOfPayment: "NET",
+					dispatchDate: "2025-07-07",
+				},
+				salesOrderAddresses: orderData.salesOrderAddresses,
+				salesOrderLines: orderData.salesOrderLines,
+			};
+			try {
+				const response = await salesOrder(payload);
+	
+				if(!isPunchoutUser) {
+					setCheckoutModal(true);
+					if (typeof response === 'object' && response !== null && 'data' in response && response.data?.message) {
+						setSuccessText(response.data.message);
+					}
+					await handleArchiveCart();
+				} else {
 
-			const parser = new DOMParser();
-			const doc = parser.parseFromString(response, "text/html");
-
-			const form = doc.getElementById("punchoutForm") as HTMLFormElement;
-
-			if (form) {
-				const actionUrl = form.action;
-				const { method } = form;
-
-				const submitForm = document.createElement("form");
-				submitForm.method = method;
-				submitForm.action = actionUrl;
-
-				Array.from(form.getElementsByTagName("input")).forEach((input) => {
-					const newInput = document.createElement("input");
-					newInput.type = "hidden";
-					newInput.name = input.name;
-					newInput.value = input.value;
-					submitForm.appendChild(newInput);
-				});
-				document.body.appendChild(submitForm);
-				submitForm.submit();
-				document.body.removeChild(submitForm);
-			} else {
-				console.error("Punchout form not found in response");
+					const parser = new DOMParser();
+					const doc = parser.parseFromString(response as string, "text/html");
+		
+					const form = doc.getElementById("punchoutForm") as HTMLFormElement;
+		
+					if (form) {
+						const actionUrl = form.action;
+						const { method } = form;
+		
+						const submitForm = document.createElement("form");
+						submitForm.method = method;
+						submitForm.action = actionUrl;
+		
+						Array.from(form.getElementsByTagName("input")).forEach((input) => {
+							const newInput = document.createElement("input");
+							newInput.type = "hidden";
+							newInput.name = input.name;
+							newInput.value = input.value;
+							submitForm.appendChild(newInput);
+						});
+						document.body.appendChild(submitForm);
+						submitForm.submit();
+						document.body.removeChild(submitForm);
+					} else {
+						console.error("Punchout form not found in response");
+					}
+				}
+			} catch (error) {
+				console.error("Order submission failed:", error);
 			}
-		} catch (error) {
-			console.error("Order submission failed:", error);
-		}
-	};
+		};
 
 	const handleContinueToPayment = () => {
 		if (isPunchoutUser) {
@@ -756,7 +779,7 @@ export default function CheckoutSteps() {
 						value={paymentMethod}
 						onValueChange={(value: PaymentMethod) => setPaymentMethod(value)}
 						className="space-y-4">
-						<Card className="relative cursor-pointer rounded-md hover:bg-gray-50">
+						{/* <Card className="relative cursor-pointer rounded-md hover:bg-gray-50">
 							<RadioGroupItem
 								value="card"
 								id="card"
@@ -811,6 +834,20 @@ export default function CheckoutSteps() {
 									<span className="font-medium">PayPal</span>
 								</div>
 							</Label>
+						</Card> */}
+						<Card className="relative cursor-pointer rounded-md hover:bg-gray-50">
+							<RadioGroupItem
+								value="invoice"
+								id="invoice"
+								className="absolute top-4 right-4"
+							/>
+							<Label
+								htmlFor="invoice"
+								className="flex cursor-pointer items-center gap-4 p-4">
+								<div className="flex items-center gap-2">
+									<span className="font-medium">Invoice</span>
+								</div>
+							</Label>
 						</Card>
 					</RadioGroup>
 
@@ -819,7 +856,7 @@ export default function CheckoutSteps() {
 							className="w-full"
 							onClick={handleSubmit}
 							disabled={!isStepValid(2)}>
-							Pay with Card
+							Confirm Order
 						</Button>
 					) : (
 						<div className={styles.paypalWrapper}>
@@ -858,6 +895,22 @@ export default function CheckoutSteps() {
 					)}
 				</div>
 			)}
+			<Modal open={checkoutModal} onOpenChange={setCheckoutModal}>
+				<ModalHeader>
+					<ModalTitle>Order submitted successfully</ModalTitle>
+				</ModalHeader>
+				<div>
+					<p className="text-center py-8 text-lg font-medium">{successText}</p>
+					<div className="flex justify-between mt-4">
+						<Button variant="outline" onClick={() => router.push('/')}>
+							Close
+						</Button>
+						<Button>
+							<FileDown className="h-4 w-4" /> Download Receipt
+						</Button>
+					</div>
+				</div>
+			</Modal>
 		</div>
 	);
 }

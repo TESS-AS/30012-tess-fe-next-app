@@ -9,7 +9,8 @@ import { ExternalLink } from "lucide-react";
 import Image from "next/image";
 
 import ProductVariantTable from "./product-variant-table";
-import { Modal, ModalContent, ModalHeader, ModalTitle } from "../ui/modal";
+import { Modal, ModalHeader, ModalTitle } from "../ui/modal";
+import QuantityButtons from "../ui/quantity-buttons";
 
 export default function OrderSummary() {
 	const { cartItems, prices, calculatedPrices, updateQuantity } =
@@ -54,33 +55,25 @@ export default function OrderSummary() {
 								<p className="font-medium">{product.productNumber}</p>
 								<p className="text-muted-foreground">{product.itemNumber}</p>
 							</div>
-							<div className="mt-2 flex items-center gap-2">
-								<Button
-									size="icon"
-									variant="outline"
-									onClick={async () => {
-										await updateQuantity(
-											product.cartLine ?? 0,
-											product.itemNumber,
-											product.quantity - 1,
-										);
-									}}>
-									-
-								</Button>
-								<span>{product.quantity}</span>
-								<Button
-									size="icon"
-									variant="outline"
-									onClick={async () => {
-										await updateQuantity(
-											product.cartLine ?? 0,
-											product.itemNumber,
-											product.quantity + 1,
-										);
-									}}>
-									+
-								</Button>
-							</div>
+							<QuantityButtons
+								quantity={product.quantity}
+								onIncrease={async (e) => {
+									e.stopPropagation();
+									await updateQuantity(
+										product.cartLine ?? 0,
+										product.itemNumber,
+										product.quantity + 1,
+									);
+								}}
+								onDecrease={async (e) => {
+									e.stopPropagation();
+									await updateQuantity(
+										product.cartLine ?? 0,
+										product.itemNumber,
+										product.quantity - 1,
+									);
+								}}
+							/>
 							<p className="mt-1 font-medium">
 								{calculatedPrices[product.itemNumber]?.toFixed(2)},- kr
 							</p>
@@ -98,7 +91,6 @@ export default function OrderSummary() {
 							onOpenChange={(open) =>
 								setOpenModalId(open ? product.productNumber : null)
 							}>
-							<ModalContent>
 								<ModalHeader>
 									<ModalTitle>
 										Product Variants - {product.productName}
@@ -108,7 +100,6 @@ export default function OrderSummary() {
 									variants={[]}
 									productNumber={product.productNumber}
 								/>
-							</ModalContent>
 						</Modal>
 					</div>
 				</div>

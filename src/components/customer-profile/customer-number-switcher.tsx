@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
 	Modal,
-	ModalContent,
 	ModalHeader,
 	ModalTitle,
 } from "@/components/ui/modal";
@@ -95,7 +94,6 @@ export default function CustomerNumberSwitcher({
 			<Modal
 				open={isCustomerModalOpen}
 				onOpenChange={setIsCustomerModalOpen}>
-				<ModalContent className="sm:max-w-md">
 					<ModalHeader>
 						<ModalTitle>Customer Info</ModalTitle>
 					</ModalHeader>
@@ -197,7 +195,6 @@ export default function CustomerNumberSwitcher({
 							{isSaving ? "Saving..." : "Save"}
 						</Button>
 					</div>
-				</ModalContent>
 			</Modal>
 		</>
 	);

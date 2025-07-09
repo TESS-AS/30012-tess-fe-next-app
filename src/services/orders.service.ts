@@ -2,7 +2,23 @@ import { Order } from "@/types/orders.types";
 
 import axiosInstance from "./axiosClient";
 
-export async function salesOrder(payload: Order): Promise<string> {
+interface SalesOrderResponse {
+	data?: {
+		message: string;
+        data: {
+            data: {
+                resultCode: string;
+                messages: string[];
+            },
+            status: number;
+            statusText: string;
+            message: string;
+        }
+	};
+	confirmedOrder?: Order;
+}
+
+export async function salesOrder(payload: Order): Promise<SalesOrderResponse | string> {
 	try {
 		const response = await axiosInstance.post("/salesOrder", payload);
 		return response.data;

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button"; // Adjust this import as needed
 import {
 	Modal,
-	ModalContent,
 	ModalHeader,
 	ModalTitle,
 } from "@/components/ui/modal"; // Adjust as needed
@@ -140,7 +139,6 @@ export function ProductItem({
 						}));
 					}
 				}}>
-				<ModalContent className="sm:max-w-[900px]">
 					<ModalHeader>
 						<ModalTitle>Product Variants - {product.productName}</ModalTitle>
 					</ModalHeader>
@@ -150,7 +148,6 @@ export function ProductItem({
 							productNumber={product.productNumber}
 						/>
 					</div>
-				</ModalContent>
 			</Modal>
 		</div>
 	);

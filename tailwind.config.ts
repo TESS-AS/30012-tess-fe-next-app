@@ -48,6 +48,7 @@ const config = {
 			colors: {
 				main: "#0F1912",
 				lightGreen: "#00B84C",
+				lightGray: "#C1C4C2",
 				common: "hsl(var(--common))",
 				azure: "hsl(var(--azure))",
 				lavender: "hsl(var(--lavender))",

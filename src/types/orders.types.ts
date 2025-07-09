@@ -15,7 +15,7 @@ export interface SalesOrderHeader {
 	dispatchDate: string;
 	orderType: string;
 	customersOrderReference: string;
-	warehouseId: string;
+	warehouseNumber: string;
 	termsOfDelivery: string;
 	termsOfPayment: string;
 	paidAmount: number;
@@ -34,6 +34,7 @@ interface OrderLines {
 	accountPart4: string;
 	accountPart5: string;
 	text: string;
+	customerOrderLine?: number;
 }
 
 export interface Order {
@@ -45,4 +46,4 @@ export interface Order {
 	salesOrderLines: OrderLines[];
 }
 
-export type PaymentMethod = "card" | "paypal";
+export type PaymentMethod = "card" | "paypal" | "invoice";

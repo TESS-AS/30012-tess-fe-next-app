@@ -183,13 +183,11 @@ export async function getProductPrice(
 }
 
 export async function getProductVariations(
-	productNumber: string,
-	warehouseNumber: string = "L01",
-	companyNumber: string = "01",
+	productNumber: string
 ) {
 	try {
 		const response = await axiosInstance.get(
-			`/item/variants/${productNumber}/${warehouseNumber}/${companyNumber}`,
+			`/item/variants/${productNumber}`,
 		);
 		return response.data;
 	} catch (error) {
