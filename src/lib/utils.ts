@@ -14,8 +14,11 @@ export function mapCategoryTree(node: RawCategory, locale: string): Category {
 		name,
 		slug: name
 			.toLowerCase()
-			.replace(/\s+/g, "-")
-			.replace(/[^\w-]/g, ""),
+			.normalize('NFKD')
+			.replace(/\s+/g, '-')
+			.replace(/[^a-z0-9æøå-]/gi, '')
+			.replace(/-+/g, '-')
+			.replace(/^-|-$/g, ''),
 		groupId: node.groupId,
 		subcategories:
 			node.children?.map((child) => mapCategoryTree(child, locale)) ?? [],
@@ -23,12 +26,15 @@ export function mapCategoryTree(node: RawCategory, locale: string): Category {
 }
 
 export function formatUrlToDisplayName(urlString: string): string {
-	// Replace hyphens with spaces and decode URI components
-	const decodedString = decodeURIComponent(urlString?.replace(/-/g, " "));
-
-	// Capitalize first letter of each word
-	return decodedString
-		.split(" ")
-		.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-		.join(" ");
+	if (!urlString) return '';
+	const decodedString = decodeURIComponent(urlString);
+	const spacedString = decodedString.replace(/-/g, ' ');
+	
+	return spacedString
+		.split(' ')
+		.map(word => {
+			if (word.length === 0) return '';
+			return word[0].toUpperCase() + word.slice(1);
+		})
+		.join(' ');
 }

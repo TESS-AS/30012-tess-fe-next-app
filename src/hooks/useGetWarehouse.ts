@@ -21,8 +21,8 @@ export function useGetWarehouses(shouldFetch: boolean) {
 				const response = await axiosClient.get("/warehouse");
 				setWarehouses(
 					response.data.map((w: any) => ({
-						id: w.warehouseNumber,
-						name: w.name,
+						id: w.warehousenumber,
+						name: w.warehousename,
 					})),
 				);
 			} catch (err) {

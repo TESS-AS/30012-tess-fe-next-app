@@ -26,6 +26,7 @@ export default function CustomerNumberSwitcher({
 }: CustomerNumberSwitcherProps) {
 	const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
 	const [newCustomerNumber, setNewCustomerNumber] = useState("");
+	const [selectedWarehouse, setSelectedWarehouse] = useState("");
 	const [selectedAssortment, setSelectedAssortment] = useState("");
 	const [defaultCustomerNumber, setDefaultCustomerNumber] = useState("");
 	const [isSaving, setIsSaving] = useState(false);
@@ -33,8 +34,6 @@ export default function CustomerNumberSwitcher({
 	const { customers } = useGetCustomers(true);
 	const { warehouses } = useGetWarehouses(true);
 	const { assortments } = useGetAssortments(true);
-
-	console.log(assortments, "sss");
 
 	useEffect(() => {
 		if (
@@ -44,6 +43,7 @@ export default function CustomerNumberSwitcher({
 		) {
 			setNewCustomerNumber(profile.defaultCustomerNumber);
 			setDefaultCustomerNumber(profile.defaultCustomerNumber);
+			setSelectedWarehouse(profile.defaultWarehouseNumber);
 		}
 		if (
 			assortments.length &&
@@ -63,9 +63,9 @@ export default function CustomerNumberSwitcher({
 		setIsSaving(true);
 		try {
 			await axiosClient.post("/user/defaultVariables", {
-				companyNumber: profile.orgNumbers[0],
+				companyNumber: profile.defaultCompanyNumber,
 				customerNumber: newCustomerNumber,
-				warehouseNumber: warehouses[0]?.id,
+				warehouseNumber: selectedWarehouse,
 				assortmentId: selectedAssortment,
 			});
 			setDefaultCustomerNumber(newCustomerNumber);
@@ -124,7 +124,8 @@ export default function CustomerNumberSwitcher({
 					<div className="space-y-2">
 						<Label htmlFor="warehouseSelect">Warehouses</Label>
 						<Select
-							value={warehouses[0]?.id}
+							value={selectedWarehouse}
+							onValueChange={setSelectedWarehouse}
 							disabled={warehouses.length === 0}>
 							<SelectTrigger
 								id="warehouseSelect"
@@ -140,11 +141,11 @@ export default function CustomerNumberSwitcher({
 							<SelectContent className="z-[9999]">
 								<SelectGroup>
 									<>
-										{warehouses.length > 0 && (
-											<SelectItem value={warehouses[0].id}>
-												{warehouses[0].name} ({warehouses[0].id})
+										{warehouses.length > 0 && warehouses.map((warehouse) => (
+											<SelectItem value={warehouse.id}>
+												{warehouse.name} ({warehouse.id})
 											</SelectItem>
-										)}
+										))}
 									</>
 								</SelectGroup>
 							</SelectContent>

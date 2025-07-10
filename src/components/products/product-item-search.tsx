@@ -134,7 +134,8 @@ export function ProductItem({
 							[product.productNumber]: [],
 						}));
 					}
-				}}>
+				}}
+				className="min-w-[75%]">	
 				<ModalHeader>
 					<ModalTitle>Product Variants - {product.productName}</ModalTitle>
 				</ModalHeader>
