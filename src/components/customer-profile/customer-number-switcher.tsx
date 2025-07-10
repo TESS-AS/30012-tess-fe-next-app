@@ -141,11 +141,14 @@ export default function CustomerNumberSwitcher({
 							<SelectContent className="z-[9999]">
 								<SelectGroup>
 									<>
-										{warehouses.length > 0 && warehouses.map((warehouse) => (
-											<SelectItem value={warehouse.id}>
-												{warehouse.name} ({warehouse.id})
-											</SelectItem>
-										))}
+										{warehouses.length > 0 &&
+											warehouses.map((warehouse) => (
+												<SelectItem
+													key={warehouse.id}
+													value={warehouse.id}>
+													{warehouse.name} ({warehouse.id})
+												</SelectItem>
+											))}
 									</>
 								</SelectGroup>
 							</SelectContent>

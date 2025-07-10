@@ -236,7 +236,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 							<Button
 								variant="ghost"
 								size="icon"
-								className="hidden md:flex ml-2">
+								className="ml-2 hidden md:flex">
 								<Image
 									src={`/icons/${currentLocale === "en" ? "en" : "Flagg"}.svg`}
 									alt="Language"
@@ -251,8 +251,8 @@ export default function Header({ categories }: { categories: Category[] }) {
 									<Image
 										src="/icons/en.svg"
 										alt="English"
-									width={22}
-									height={22}
+										width={22}
+										height={22}
 									/>
 									English
 								</div>
@@ -262,8 +262,8 @@ export default function Header({ categories }: { categories: Category[] }) {
 									<Image
 										src="/icons/Flagg.svg"
 										alt="Norwegian"
-									width={22}
-									height={22}
+										width={22}
+										height={22}
 									/>
 									Norsk
 								</div>
