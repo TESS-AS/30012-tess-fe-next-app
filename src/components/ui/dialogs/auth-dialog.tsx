@@ -112,7 +112,7 @@ export default function AuthDialog({
 									height={200}
 								/>
 								<Image
-									src="/images/Flagg.svg"
+									src="/icons/Flagg.svg"
 									alt="Flagg"
 									width={32}
 									height={32}

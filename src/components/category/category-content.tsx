@@ -22,6 +22,7 @@ export default function CategoryContent({
 	segment,
 }: CategoryContentProps) {
 	const breadcrumbs = useBreadcrumbs(segment);
+	console.log(breadcrumbs, "breadcrumbs");
 	return (
 		<div className="py-8">
 			<div className="mb-6">

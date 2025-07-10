@@ -236,12 +236,12 @@ export default function Header({ categories }: { categories: Category[] }) {
 							<Button
 								variant="ghost"
 								size="icon"
-								className="hidden md:flex">
+								className="ml-2 hidden md:flex">
 								<Image
-									src={`/icons/${currentLocale === "en" ? "en" : "no"}.svg`}
+									src={`/icons/${currentLocale === "en" ? "en" : "Flagg"}.svg`}
 									alt="Language"
-									width={20}
-									height={20}
+									width={22}
+									height={22}
 								/>
 							</Button>
 						</DropdownMenuTrigger>
@@ -251,8 +251,8 @@ export default function Header({ categories }: { categories: Category[] }) {
 									<Image
 										src="/icons/en.svg"
 										alt="English"
-										width={20}
-										height={20}
+										width={22}
+										height={22}
 									/>
 									English
 								</div>
@@ -260,10 +260,10 @@ export default function Header({ categories }: { categories: Category[] }) {
 							<DropdownMenuItem onClick={() => handleLanguageChange("no")}>
 								<div className="flex items-center gap-2">
 									<Image
-										src="/icons/no.svg"
+										src="/icons/Flagg.svg"
 										alt="Norwegian"
-										width={20}
-										height={20}
+										width={22}
+										height={22}
 									/>
 									Norsk
 								</div>
