@@ -84,7 +84,7 @@ export default function CustomerNumberSwitcher({
 				variant="outline"
 				size="sm"
 				onClick={() => setIsCustomerModalOpen(true)}
-				className="hidden text-sm md:flex text-[#0F1912]">
+				className="hidden text-sm text-[#0F1912] md:flex">
 				<UserRoundCog /> Velg kunde/lager/sortilog
 				{/* {defaultCustomerNumber} */}
 			</Button>

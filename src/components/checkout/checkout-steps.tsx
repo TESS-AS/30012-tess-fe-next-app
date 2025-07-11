@@ -158,7 +158,7 @@ export default function CheckoutSteps() {
 					itemCode: item?.itemNumber || "",
 					orderedQuantity: item.quantity,
 					salesPrice: calculatedPrices[item.itemNumber] || 0,
-					requestedDeliveryDate: new Date().toISOString().split('T')[0],
+					requestedDeliveryDate: new Date().toISOString().split("T")[0],
 					accountPart3: "", // Dimension 3
 					accountPart4: String(profile?.userId || ""), // userId
 					accountPart5: "",
@@ -260,7 +260,7 @@ export default function CheckoutSteps() {
 				warehouseNumber: String(profile?.defaultWarehouseNumber),
 				termsOfDelivery: "DAP",
 				termsOfPayment: "NET",
-				dispatchDate: new Date().toISOString().split('T')[0],
+				dispatchDate: new Date().toISOString().split("T")[0],
 			},
 			salesOrderAddresses: orderData.salesOrderAddresses,
 			salesOrderLines: orderData.salesOrderLines,

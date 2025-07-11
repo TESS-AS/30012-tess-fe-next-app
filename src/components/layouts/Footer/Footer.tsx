@@ -1,9 +1,9 @@
 "use client";
 
 import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 
 const footerLinks = {
 	company: [
@@ -50,8 +50,8 @@ export function Footer() {
 	const t = useTranslations("Footer");
 
 	return (
-		<footer className="relative left-[calc(-50vw+50%)] pb-[60px] mt-20 w-[100vw] bg-[#222222] text-zinc-100">
-			<div className="container mx-auto py-12 relative">
+		<footer className="relative left-[calc(-50vw+50%)] mt-20 w-[100vw] bg-[#222222] pb-[60px] text-zinc-100">
+			<div className="relative container mx-auto py-12">
 				<div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-12">
 					<div className="lg:col-span-5">
 						<Link
@@ -67,7 +67,7 @@ export function Footer() {
 						<p className="mt-4 text-sm text-zinc-400">
 							{t("companyDescription")}
 						</p>
-						<div className="flex space-x-6 mt-8">
+						<div className="mt-8 flex space-x-6">
 							{socialLinks.map((item) => {
 								const Icon = item.icon;
 								return (
@@ -132,8 +132,8 @@ export function Footer() {
 				</div>
 
 				<div className="mt-28 border-t border-neutral-500 pt-6 pb-6">
-					<div className="flex items-center justify-center gap-4 md:flex-row h-[80px]">
-						<p className="text-[#C1C4C2] font-light">
+					<div className="flex h-[80px] items-center justify-center gap-4 md:flex-row">
+						<p className="font-light text-[#C1C4C2]">
 							&copy; {t("companyName")} {new Date().getFullYear()}
 						</p>
 					</div>
@@ -143,7 +143,7 @@ export function Footer() {
 					alt="Logo"
 					width={220}
 					height={220}
-					className="absolute bottom-0 right-0"
+					className="absolute right-0 bottom-0"
 				/>
 			</div>
 		</footer>

@@ -28,7 +28,15 @@ import { loadCategoryTree } from "@/services/categories.service";
 import { getProductVariations } from "@/services/product.service";
 import { Category } from "@/types/categories.types";
 import { IProductSearch, ISuggestions } from "@/types/search.types";
-import { Building, ChevronDown, Hotel, MessageSquareText, Search, ShoppingCart, User } from "lucide-react";
+import {
+	Building,
+	ChevronDown,
+	Hotel,
+	MessageSquareText,
+	Search,
+	ShoppingCart,
+	User,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
@@ -80,24 +88,37 @@ export default function Header({ categories }: { categories: Category[] }) {
 	};
 
 	return (
-		<header className="bg-background w-full border-b h-[182px]">
+		<header className="bg-background h-[182px] w-full border-b">
 			<div className="container m-auto flex h-16 items-center justify-between">
 				<div className="flex items-center gap-6">
-					<Button variant="ghost" className="text-sm px-0 font-medium hover:bg-transparent border-b border-[#013d1a] rounded-none pb-0 mb-2">
-						E-handel <Badge className="bg-[#003D1A] text-white text-xs -mb-1 rounded-[6px_6px_0_6px]">Beta</Badge>
+					<Button
+						variant="ghost"
+						className="mb-2 rounded-none border-b border-[#013d1a] px-0 pb-0 text-sm font-medium hover:bg-transparent">
+						E-handel{" "}
+						<Badge className="-mb-1 rounded-[6px_6px_0_6px] bg-[#003D1A] text-xs text-white">
+							Beta
+						</Badge>
 					</Button>
-					<Button variant="ghost" className="text-sm px-0 font-medium hover:bg-transparent">
+					<Button
+						variant="ghost"
+						className="px-0 text-sm font-medium hover:bg-transparent">
 						THM KundeWEB
 					</Button>
 				</div>
-				<div className="flex items-center gap-2 bg-[#FDFDEA] px-3 py-1.5 rounded-md">
-					<Button variant="ghost" className="font-medium text-sm text-[#003D1A] hover:bg-transparent">
-						<MessageSquareText className="w-4 h-4" /> Vær med på utviklingen
+				<div className="flex items-center gap-2 rounded-md bg-[#FDFDEA] px-3 py-1.5">
+					<Button
+						variant="ghost"
+						className="text-sm font-medium text-[#003D1A] hover:bg-transparent">
+						<MessageSquareText className="h-4 w-4" /> Vær med på utviklingen
 					</Button>
-					<Button className="text-xs" variant="darkGreen">Gi tilbakemelding</Button>
+					<Button
+						className="text-xs"
+						variant="darkGreen">
+						Gi tilbakemelding
+					</Button>
 				</div>
 			</div>
-			<div className="container m-auto flex h-16 items-center justify-between mb-1">
+			<div className="container m-auto mb-1 flex h-16 items-center justify-between">
 				<div className="flex items-center gap-2">
 					<Link
 						href="/"
@@ -111,7 +132,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 					</Link>
 					<form
 						onSubmit={handleSearch}
-						className="hidden w-[537px] h-[50px] px-4 md:flex">
+						className="hidden h-[50px] w-[537px] px-4 md:flex">
 						<div
 							className="relative w-[537px]"
 							ref={isModalIdOpen ? null : searchRef}>
@@ -119,11 +140,13 @@ export default function Header({ categories }: { categories: Category[] }) {
 							<Input
 								type="search"
 								placeholder={t("Common.searchProducts")}
-								className="bg-background w-[537px] h-[50px] border-[#001E00] color-[#5A615D] pl-8"
+								className="bg-background color-[#5A615D] h-[50px] w-[537px] border-[#001E00] pl-8"
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
 							/>
-							<Button variant="default" className="absolute top-[7px] right-[7px] font-medium text-xs">
+							<Button
+								variant="default"
+								className="absolute top-[7px] right-[7px] text-xs font-medium">
 								Søk
 							</Button>
 							{searchQuery && data && (
@@ -187,19 +210,19 @@ export default function Header({ categories }: { categories: Category[] }) {
 						</div>
 					</form>
 				</div>
-				<div className="flex items-center ">
+				<div className="flex items-center">
 					{profile && <CustomerNumberSwitcher profile={profile} />}
 					<Button
 						variant="ghost"
 						className="relative hover:bg-transparent"
 						onClick={() => router.push("/cart")}>
-						<div className="relative flex items-center mr-2">
+						<div className="relative mr-2 flex items-center">
 							<ShoppingCart className="h-5 w-5" />
-							<Badge className="absolute -top-2.5 -right-2.5 flex h-4 w-4 text-xs items-center justify-center bg-[#005522] rounded-full p-0">
+							<Badge className="absolute -top-2.5 -right-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#005522] p-0 text-xs">
 								{cartItems?.length}
 							</Badge>
 						</div>
-						{cartItems?.length > 0 ? '1049.50,-' : ''}
+						{cartItems?.length > 0 ? "1049.50,-" : ""}
 						<span className="sr-only">Cart</span>
 					</Button>
 					{profile ? (
@@ -207,8 +230,10 @@ export default function Header({ categories }: { categories: Category[] }) {
 							<DropdownMenuTrigger asChild>
 								<Button
 									variant="ghost"
-									className="font-medium hover:bg-transparent px-0 text-[#1A211C] gap-1">
-									<Building />{profile.firstName ?? "Profile"}<ChevronDown className="ml-1 h-4 w-4" />
+									className="gap-1 px-0 font-medium text-[#1A211C] hover:bg-transparent">
+									<Building />
+									{profile.firstName ?? "Profile"}
+									<ChevronDown className="ml-1 h-4 w-4" />
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
@@ -257,7 +282,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 						<DropdownMenuTrigger asChild>
 							<Button
 								variant="ghost"
-								className="hidden md:flex hover:bg-transparent">
+								className="hidden hover:bg-transparent md:flex">
 								<div className="flex items-center gap-1">
 									<Image
 										src={`/icons/${currentLocale === "en" ? "en" : "Flagg"}.svg`}
