@@ -59,7 +59,7 @@
 		},
 		"sort": "Sorter",
 		"search": "Søk",
-		"searchProducts": "Søk etter produkter..."
+		"searchProducts": "Søk etter slanger, utstyr, diameter, trykklasse..."
 	},
 	"Search": {
 		"suggestions": "Søkeforslag",
@@ -72,7 +72,7 @@
 	},
 	"Footer": {
 		"companyName": "TESS AS",
-		"companyDescription": "Your trusted partner in technical supplies and services since 1968.",
+		"companyDescription": "Din pålitelige partner innen teknisk utstyr og tjenester – siden 1968.",
 		"company": "Company",
 		"support": "Support",
 		"legal": "Legal",

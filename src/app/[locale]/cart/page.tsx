@@ -38,10 +38,16 @@ import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
 import CartSkeleton from "./loading";
+import { Link } from "@/i18n/navigation";
+import { loadCategoryTree } from "@/services/categories.service";
+import { RawCategory } from "@/types/categories.types";
+import { useLocale } from "next-intl";
 
 const CartPage = () => {
-	const { data: profile } = useGetProfileData();
+	const currentLocale = useLocale();
 	const router = useRouter();
+	const [categoryPaths, setCategoryPaths] = useState<{[key: string]: string[]}>({});
+
 	const {
 		cartItems,
 		prices,
@@ -52,6 +58,30 @@ const CartPage = () => {
 		removeItem,
 		handleArchiveCart,
 	} = useAppContext();
+
+	useEffect(() => {
+		const loadPaths = async () => {
+			if (!cartItems) return;
+
+			const newPaths: {[key: string]: string[]} = {};
+			for (const item of cartItems) {
+				try {
+					const categoryTree = await loadCategoryTree(item.productNumber);
+					const path = categoryTree
+						.slice(0, 3)
+						.map((category: RawCategory) =>
+							currentLocale === "en" ? category.nameEn : category.nameNo
+						);
+					newPaths[item.productNumber] = path;
+				} catch (error) {
+					console.error('Error loading category path:', error);
+				}
+			}
+			setCategoryPaths(newPaths);
+		};
+		loadPaths();
+	}, [cartItems, currentLocale]);
+
 	const t = useTranslations();
 	const { status } = useSession();
 	const [warehouseBlance, setWarehouseBlance] = useState<WarehouseBatch[]>([]);
@@ -175,6 +205,8 @@ const CartPage = () => {
 					</div>
 					{!isLoading &&
 						cartItems?.map((item, idx) => {
+
+							console.log(item,"item")
 							return (
 								<React.Fragment key={idx}>
 									<div
@@ -211,8 +243,10 @@ const CartPage = () => {
 											)}
 										</div>
 										<div className="flex flex-col">
-											<span className="color-[#0F1912] mb-2 font-medium">
-												{item.productNumber}
+											<span className="color-[#0F1912] hover:underline mb-2 font-medium">
+												<Link href={`/${categoryPaths[item.productNumber]?.join('/') || ''}/${item.productNumber}`}>
+													{item.productNumber}
+												</Link>
 											</span>
 											<p
 												onClick={() => setOpenModalId(item.productNumber)}

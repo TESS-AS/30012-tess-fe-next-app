@@ -28,7 +28,7 @@ import { loadCategoryTree } from "@/services/categories.service";
 import { getProductVariations } from "@/services/product.service";
 import { Category } from "@/types/categories.types";
 import { IProductSearch, ISuggestions } from "@/types/search.types";
-import { Search, ShoppingCart, User } from "lucide-react";
+import { Building, ChevronDown, Hotel, MessageSquareText, Search, ShoppingCart, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
@@ -80,102 +80,135 @@ export default function Header({ categories }: { categories: Category[] }) {
 	};
 
 	return (
-		<header className="bg-background w-full border-b">
+		<header className="bg-background w-full border-b h-[182px]">
 			<div className="container m-auto flex h-16 items-center justify-between">
-				<Link
-					href="/"
-					className="flex items-center gap-2">
-					<Image
-						src="/icons/TESSLogo.svg"
-						alt="Logo"
-						width={120}
-						height={120}
-					/>
-				</Link>
-				<form
-					onSubmit={handleSearch}
-					className="hidden w-[650px] px-4 md:flex">
-					<div
-						className="relative w-full"
-						ref={isModalIdOpen ? null : searchRef}>
-						<Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
-						<Input
-							type="search"
-							placeholder={t("Common.searchProducts")}
-							className="bg-background w-[650px] border-green-600 pl-8"
-							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
-						/>
-						{searchQuery && data && (
-							<div className="fixed top-16 left-1/2 z-[11] grid max-h-[80vh] w-[80vw] -translate-x-1/2 grid-cols-3 gap-4 overflow-y-auto border-t bg-white p-4 shadow-lg">
-								<div className="col-span-1 border-r border-gray-200 pr-4">
-									<h4 className="mb-2 text-sm font-semibold">
-										{t("Search.suggestions")}
-									</h4>
-									{data.searchSuggestions?.length ? (
-										data.searchSuggestions.map(
-											(s: ISuggestions, idx: number) => (
-												<Link
-													key={idx}
-													href={`/search?query=${encodeURIComponent(s.keyword)}`}
-													onClick={() => {
-														setSearchQuery("");
-														setIsSearchOpen(false);
-													}}
-													className="block rounded-md p-2 text-sm hover:bg-gray-100">
-													{s.keyword}
-												</Link>
-											),
-										)
-									) : (
-										<p className="text-sm text-green-600">
-											{t("Search.noSuggestions")}
-										</p>
-									)}
-								</div>
-
-								<div className="col-span-2">
-									{data.productRes?.length ? (
-										data.productRes.map((product: IProductSearch) => {
-											const attr = attributeResults.find(
-												(r) => r.productNumber === product.productNumber,
-											);
-											return (
-												<ProductItem
-													key={product.productNumber}
-													product={product}
-													attr={attr}
-													currentLocale={currentLocale}
-													loadCategoryTree={loadCategoryTree}
-													setSearchQuery={setSearchQuery}
-													isModalIdOpen={isModalIdOpen}
-													setIsModalIdOpen={setIsModalIdOpen}
-													getProductVariations={getProductVariations}
-													setVariations={setVariations}
-													variations={variations}
-												/>
-											);
-										})
-									) : (
-										<p className="text-opacity-30 text-sm text-green-600">
-											{t("Search.noProductsFound")}
-										</p>
-									)}
-								</div>
-							</div>
-						)}
-					</div>
-				</form>
-
+				<div className="flex items-center gap-6">
+					<Button variant="ghost" className="text-sm px-0 font-medium hover:bg-transparent border-b border-[#013d1a] rounded-none pb-0">
+						E-handel <Badge className="bg-[#003D1A] text-white text-xs -mb-1 rounded-[6px_6px_0_6px]">Beta</Badge>
+					</Button>
+					<Button variant="ghost" className="text-sm px-0 font-medium hover:bg-transparent">
+						THM KundeWEB
+					</Button>
+				</div>
+				<div className="flex items-center gap-2 bg-[#FDFDEA] px-3 py-1.5 rounded-md">
+					<Button variant="ghost" className="font-medium text-sm text-[#003D1A] hover:bg-transparent">
+						<MessageSquareText className="w-4 h-4" /> Vær med på utviklingen
+					</Button>
+					<Button className="text-xs" variant="darkGreen">Gi tilbakemelding</Button>
+				</div>
+			</div>
+			<div className="container m-auto flex h-16 items-center justify-between mb-1">
 				<div className="flex items-center gap-2">
+					<Link
+						href="/"
+						className="flex items-center gap-2">
+						<Image
+							src="/icons/TESSLogo.svg"
+							alt="Logo"
+							width={144}
+							height={144}
+						/>
+					</Link>
+					<form
+						onSubmit={handleSearch}
+						className="hidden w-[537px] h-[50px] px-4 md:flex">
+						<div
+							className="relative w-[537px]"
+							ref={isModalIdOpen ? null : searchRef}>
+							<Search className="text-muted-foreground absolute top-4.5 left-2.5 h-4 w-4" />
+							<Input
+								type="search"
+								placeholder={t("Common.searchProducts")}
+								className="bg-background w-[537px] h-[50px] border-[#001E00] color-[#5A615D] pl-8"
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+							/>
+							<Button variant="default" className="absolute top-[7px] right-[7px] font-medium text-xs">
+								Søk
+							</Button>
+							{searchQuery && data && (
+								<div className="fixed top-16 left-1/2 z-[11] grid max-h-[80vh] w-[80vw] -translate-x-1/2 grid-cols-3 gap-4 overflow-y-auto border-t bg-white p-4 shadow-lg">
+									<div className="col-span-1 border-r border-gray-200 pr-4">
+										<h4 className="mb-2 text-sm font-semibold">
+											{t("Search.suggestions")}
+										</h4>
+										{data.searchSuggestions?.length ? (
+											data.searchSuggestions.map(
+												(s: ISuggestions, idx: number) => (
+													<Link
+														key={idx}
+														href={`/search?query=${encodeURIComponent(s.keyword)}`}
+														onClick={() => {
+															setSearchQuery("");
+															setIsSearchOpen(false);
+														}}
+														className="block rounded-md p-2 text-sm hover:bg-gray-100">
+														{s.keyword}
+													</Link>
+												),
+											)
+										) : (
+											<p className="text-sm text-green-600">
+												{t("Search.noSuggestions")}
+											</p>
+										)}
+									</div>
+
+									<div className="col-span-2">
+										{data.productRes?.length ? (
+											data.productRes.map((product: IProductSearch) => {
+												const attr = attributeResults.find(
+													(r) => r.productNumber === product.productNumber,
+												);
+												return (
+													<ProductItem
+														key={product.productNumber}
+														product={product}
+														attr={attr}
+														currentLocale={currentLocale}
+														loadCategoryTree={loadCategoryTree}
+														setSearchQuery={setSearchQuery}
+														isModalIdOpen={isModalIdOpen}
+														setIsModalIdOpen={setIsModalIdOpen}
+														getProductVariations={getProductVariations}
+														setVariations={setVariations}
+														variations={variations}
+													/>
+												);
+											})
+										) : (
+											<p className="text-opacity-30 text-sm text-green-600">
+												{t("Search.noProductsFound")}
+											</p>
+										)}
+									</div>
+								</div>
+							)}
+						</div>
+					</form>
+				</div>
+				<div className="flex items-center ">
 					{profile && <CustomerNumberSwitcher profile={profile} />}
+					<Button
+						variant="ghost"
+						className="relative hover:bg-transparent"
+						onClick={() => router.push("/cart")}>
+						<div className="relative flex items-center mr-2">
+							<ShoppingCart className="h-5 w-5" />
+							<Badge className="absolute -top-2.5 -right-2.5 flex h-4 w-4 text-xs items-center justify-center bg-[#005522] rounded-full p-0">
+								{cartItems?.length}
+							</Badge>
+						</div>
+						{cartItems?.length > 0 ? '1049.50,-' : ''}
+						<span className="sr-only">Cart</span>
+					</Button>
 					{profile ? (
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button
 									variant="ghost"
-									className="px-3 font-medium">
-									{profile.firstName ?? "Profile"}
+									className="font-medium hover:bg-transparent px-0 text-[#1A211C] gap-1">
+									<Building />{profile.firstName ?? "Profile"}<ChevronDown className="ml-1 h-4 w-4" />
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
@@ -214,35 +247,26 @@ export default function Header({ categories }: { categories: Category[] }) {
 					) : (
 						<Button
 							variant="ghost"
-							size="icon"
+							className="hover:bg-transparent"
 							onClick={() => setIsAuthOpen(true)}>
 							<User className="h-5 w-5" />
 						</Button>
 					)}
 
-					<Button
-						variant="ghost"
-						size="icon"
-						className="relative"
-						onClick={() => router.push("/cart")}>
-						<ShoppingCart className="h-5 w-5" />
-						<Badge className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full p-0">
-							{cartItems?.length}
-						</Badge>
-						<span className="sr-only">Cart</span>
-					</Button>
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button
 								variant="ghost"
-								size="icon"
-								className="ml-2 hidden md:flex">
-								<Image
-									src={`/icons/${currentLocale === "en" ? "en" : "Flagg"}.svg`}
-									alt="Language"
-									width={22}
-									height={22}
-								/>
+								className="hidden md:flex hover:bg-transparent">
+								<div className="flex items-center gap-1">
+									<Image
+										src={`/icons/${currentLocale === "en" ? "en" : "Flagg"}.svg`}
+										alt="Language"
+										width={22}
+										height={22}
+									/>
+									<ChevronDown className="h-4 w-4" />
+								</div>
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end">
