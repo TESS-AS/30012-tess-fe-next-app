@@ -83,7 +83,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 		<header className="bg-background w-full border-b h-[182px]">
 			<div className="container m-auto flex h-16 items-center justify-between">
 				<div className="flex items-center gap-6">
-					<Button variant="ghost" className="text-sm px-0 font-medium hover:bg-transparent border-b border-[#013d1a] rounded-none pb-0">
+					<Button variant="ghost" className="text-sm px-0 font-medium hover:bg-transparent border-b border-[#013d1a] rounded-none pb-0 mb-2">
 						E-handel <Badge className="bg-[#003D1A] text-white text-xs -mb-1 rounded-[6px_6px_0_6px]">Beta</Badge>
 					</Button>
 					<Button variant="ghost" className="text-sm px-0 font-medium hover:bg-transparent">
