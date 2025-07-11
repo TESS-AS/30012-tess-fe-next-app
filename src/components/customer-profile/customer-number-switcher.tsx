@@ -16,6 +16,7 @@ import { useGetCustomers } from "@/hooks/useGetCustomers";
 import { useGetWarehouses } from "@/hooks/useGetWarehouse";
 import axiosClient from "@/services/axiosClient";
 import { ProfileUser } from "@/types/user.types";
+import { UserRoundCog } from "lucide-react";
 
 interface CustomerNumberSwitcherProps {
 	profile: ProfileUser;
@@ -83,8 +84,9 @@ export default function CustomerNumberSwitcher({
 				variant="outline"
 				size="sm"
 				onClick={() => setIsCustomerModalOpen(true)}
-				className="hidden text-sm md:flex">
-				Customer #: {defaultCustomerNumber}
+				className="hidden text-sm text-[#0F1912] md:flex">
+				<UserRoundCog /> Velg kunde/lager/sortilog
+				{/* {defaultCustomerNumber} */}
 			</Button>
 
 			<Modal

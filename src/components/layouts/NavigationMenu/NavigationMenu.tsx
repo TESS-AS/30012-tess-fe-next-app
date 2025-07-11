@@ -42,7 +42,7 @@ export default function CategoryNavigationMenu({
 									{category.name}
 								</NavigationMenuTrigger>
 								<NavigationMenuContent>
-									<ul className="grid max-h-[500px] w-[1250px] gap-6 overflow-y-auto p-6 md:grid-cols-2 lg:grid-cols-3">
+									<ul className="grid max-h-[500px] w-screen max-w-screen-xl min-w-screen gap-6 overflow-y-auto p-6 md:grid-cols-2 lg:grid-cols-3">
 										{category.subcategories.map((subcategory) => (
 											<li key={subcategory.slug}>
 												<div className="mb-2 text-sm font-semibold">

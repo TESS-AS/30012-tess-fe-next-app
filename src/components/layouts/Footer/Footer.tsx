@@ -1,6 +1,7 @@
 "use client";
 
 import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
@@ -49,17 +50,42 @@ export function Footer() {
 	const t = useTranslations("Footer");
 
 	return (
-		<footer className="relative left-[calc(-50vw+50%)] mt-20 w-[100vw] bg-[#222222] text-zinc-100">
-			<div className="container mx-auto py-12">
-				<div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
-					<div>
-						<h3 className="text-lg font-semibold">{t("companyName")}</h3>
+		<footer className="relative left-[calc(-50vw+50%)] mt-20 w-[100vw] bg-[#222222] pb-[60px] text-zinc-100">
+			<div className="relative container mx-auto py-12">
+				<div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-12">
+					<div className="lg:col-span-5">
+						<Link
+							href="/"
+							className="flex items-center gap-2">
+							<Image
+								src="/images/logo-white.svg"
+								alt="Logo"
+								width={144}
+								height={144}
+							/>
+						</Link>
 						<p className="mt-4 text-sm text-zinc-400">
 							{t("companyDescription")}
 						</p>
+						<div className="mt-8 flex space-x-6">
+							{socialLinks.map((item) => {
+								const Icon = item.icon;
+								return (
+									<Link
+										key={item.name}
+										href={item.href}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="text-white transition-colors hover:text-green-600">
+										<span className="sr-only">{item.name}</span>
+										<Icon className="h-4 w-4" />
+									</Link>
+								);
+							})}
+						</div>
 					</div>
 
-					<div>
+					<div className="lg:col-span-2">
 						<h3 className="text-lg font-semibold">Company</h3>
 						<ul className="mt-4 space-y-2">
 							{footerLinks.company.map((link) => (
@@ -74,7 +100,7 @@ export function Footer() {
 						</ul>
 					</div>
 
-					<div>
+					<div className="lg:col-span-2">
 						<h3 className="text-lg font-semibold">Support</h3>
 						<ul className="mt-4 space-y-2">
 							{footerLinks.support.map((link) => (
@@ -89,7 +115,7 @@ export function Footer() {
 						</ul>
 					</div>
 
-					<div>
+					<div className="lg:col-span-3">
 						<h3 className="text-lg font-semibold">Legal</h3>
 						<ul className="mt-4 space-y-2">
 							{footerLinks.legal.map((link) => (
@@ -105,30 +131,20 @@ export function Footer() {
 					</div>
 				</div>
 
-				<div className="mt-12 border-t border-neutral-500 pt-8">
-					<div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-						<div className="flex space-x-6">
-							{socialLinks.map((item) => {
-								const Icon = item.icon;
-								return (
-									<Link
-										key={item.name}
-										href={item.href}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="text-white transition-colors hover:text-green-600">
-										<span className="sr-only">{item.name}</span>
-										<Icon className="h-5 w-5" />
-									</Link>
-								);
-							})}
-						</div>
-						<p className="text-sm text-green-600">
-							&copy; {new Date().getFullYear()} {t("companyName")}.{" "}
-							{t("rights")}
+				<div className="mt-28 border-t border-neutral-500 pt-6 pb-6">
+					<div className="flex h-[80px] items-center justify-center gap-4 md:flex-row">
+						<p className="font-light text-[#C1C4C2]">
+							&copy; {t("companyName")} {new Date().getFullYear()}
 						</p>
 					</div>
 				</div>
+				<Image
+					src="/images/Parallellogram.svg"
+					alt="Logo"
+					width={220}
+					height={220}
+					className="absolute right-0 bottom-0"
+				/>
 			</div>
 		</footer>
 	);
