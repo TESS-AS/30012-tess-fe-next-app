@@ -150,7 +150,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 								Søk
 							</Button>
 							{searchQuery && data && (
-								<div className="fixed top-16 left-1/2 z-[11] grid max-h-[80vh] w-[80vw] -translate-x-1/2 grid-cols-3 gap-4 overflow-y-auto border-t bg-white p-4 shadow-lg">
+								<div className="fixed top-33 left-1/2 z-[11] grid max-h-[80vh] w-[80vw] -translate-x-1/2 grid-cols-3 gap-4 overflow-y-auto border-t bg-white p-4 shadow-lg">
 									<div className="col-span-1 border-r border-gray-200 pr-4">
 										<h4 className="mb-2 text-sm font-semibold">
 											{t("Search.suggestions")}
