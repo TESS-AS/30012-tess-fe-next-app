@@ -92,7 +92,6 @@ const CartPage = () => {
 	useEffect(() => {
 		async function loadWarehousesData() {
 			if (cartItems && cartItems.length > 0) {
-				console.log(cartItems, "cartitems");
 				const itemNumbers = cartItems.map((item) => item.itemNumber.toString());
 				const warehousesData = await loadItemBalanceBatch(itemNumbers);
 				const dataArray = Array.isArray(warehousesData) ? warehousesData : [];
@@ -207,7 +206,6 @@ const CartPage = () => {
 					</div>
 					{!isLoading &&
 						cartItems?.map((item, idx) => {
-							console.log(item, "item");
 							return (
 								<React.Fragment key={idx}>
 									<div

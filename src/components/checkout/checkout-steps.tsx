@@ -166,7 +166,6 @@ export default function CheckoutSteps() {
 				})),
 			}));
 		}
-		console.log(orderData, "orderData");
 	}, [cartItems, profile]);
 
 	useEffect(() => {

@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { FilterCategory } from "@/components/ui/filter";
+import { loadFilterParents } from "@/services/categories.service";
 import { searchProducts } from "@/services/product.service";
-import { FilterValues } from "@/types/filter.types";
+import {
+	CategoryFilterResponseItem,
+	FilterResponseItem,
+	FilterValues,
+} from "@/types/filter.types";
 import { IProduct } from "@/types/product.types";
 
 interface UseProductFilterProps {
@@ -10,9 +16,10 @@ interface UseProductFilterProps {
 }
 
 export function useProductFilter({
-	categoryNumber,
+	categoryNumber: initialCategoryNumber,
 	query,
 }: UseProductFilterProps) {
+	const [categoryNumber, setCategoryNumber] = useState(initialCategoryNumber);
 	const [products, setProducts] = useState<IProduct[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [currentPage, setCurrentPage] = useState(1);
@@ -59,7 +66,7 @@ export function useProductFilter({
 		return () => {
 			isMounted = false;
 		};
-	}, [categoryNumber, query]);
+	}, [categoryNumber, query, currentFilters, sort]);
 
 	const loadMore = useCallback(async () => {
 		if (!hasMore || isLoading) return;
@@ -132,6 +139,45 @@ export function useProductFilter({
 		[categoryNumber, query, sort],
 	);
 
+	const handleCategoryChange = useCallback(
+		async (
+			newCategoryNumber: string,
+			setFiltersFn: (filters: FilterCategory[]) => void,
+		) => {
+			setCategoryNumber(newCategoryNumber);
+			setCurrentPage(1);
+			setProducts([]);
+			setSelectedFilters({});
+			setCurrentFilters(null);
+
+			try {
+				const result = await loadFilterParents({
+					categoryNumber: newCategoryNumber,
+					searchTerm: query,
+				});
+
+				const normalized = result.map((item: CategoryFilterResponseItem) => ({
+					category: item.category,
+					categoryNumber: item.categoryNumber,
+					filters: item.filters.map((f) => ({
+						key: f.key,
+						values: [
+							{
+								value: f.key,
+								productcount: f.productCount,
+							},
+						],
+					})),
+				}));
+
+				setFiltersFn(normalized);
+			} catch (err) {
+				console.error("Failed to load parent filters", err);
+			}
+		},
+		[query],
+	);
+
 	const handleSortChange = useCallback(
 		async (newSort: string) => {
 			try {
@@ -186,5 +232,6 @@ export function useProductFilter({
 		loadMore,
 		selectedFilters,
 		removeFilter,
+		handleCategoryChange,
 	};
 }

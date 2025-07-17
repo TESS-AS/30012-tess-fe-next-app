@@ -33,6 +33,12 @@ interface ProductGridProps {
 	filters: FilterCategory[];
 	categoryNumber: string;
 	query: string | null;
+	categoryFilters?: {
+		assortmentNumber: string;
+		nameNo: string;
+		nameEn: string;
+		productCount: string;
+	}[];
 }
 
 const SORT_OPTIONS = [
@@ -49,6 +55,7 @@ export function ProductGrid({
 	filters,
 	categoryNumber,
 	query,
+	categoryFilters,
 }: ProductGridProps) {
 	const t = useTranslations();
 	const pathname = usePathname();
@@ -56,7 +63,7 @@ export function ProductGrid({
 	const [viewLayout, setViewLayout] = useState<string>("");
 	const observerTarget = useRef<HTMLDivElement>(null);
 	const [sort, setSort] = useState<string>("");
-
+	const [filtersState, setFiltersState] = useState(filters);
 	const {
 		products,
 		isLoading,
@@ -66,6 +73,7 @@ export function ProductGrid({
 		handleSortChange,
 		selectedFilters,
 		removeFilter,
+		handleCategoryChange,
 	} = useProductFilter({
 		categoryNumber,
 		query,
@@ -118,8 +126,7 @@ export function ProductGrid({
 
 	return (
 		<div className="flex flex-col gap-8 lg:flex-row">
-			{/* Sidebar */}
-			<aside className="lg:w-1/4">
+			<aside className="sticky top-4 h-[calc(100vh-2rem)] overflow-y-auto lg:w-1/4">
 				<Filter
 					filters={filters}
 					className="sticky top-4"
@@ -129,12 +136,16 @@ export function ProductGrid({
 						onFilterChange(newFilters);
 					}}
 					selectedFilters={selectedFilters}
+					categoryFilters={categoryFilters}
+					query={query}
+					categoryNumber={categoryNumber}
+					handleCategoryChange={(newCategoryNumber) =>
+						handleCategoryChange(newCategoryNumber, setFiltersState)
+					}
 				/>
 			</aside>
 
-			{/* Product Grid */}
 			<div className="flex-1">
-				{/* Active Filters */}
 				{Object.keys(selectedFilters).length > 0 && (
 					<div className="mb-4 flex flex-wrap gap-2">
 						{Object.entries(selectedFilters).map(([key, values]) =>

@@ -69,7 +69,6 @@ export default async function ProductPage({
 
 	const [productData] = _productData;
 
-	console.log("Product Data:", productData);
 	if (!productData) {
 		return notFound();
 	}

@@ -17,7 +17,6 @@ export default function OrderSummary() {
 		useAppContext();
 	const [openModalId, setOpenModalId] = useState<string | null>(null);
 
-	console.log(cartItems, "cartItems");
 	return (
 		<div className="h-fit w-full rounded-md border bg-white p-6 shadow-sm md:sticky md:top-6">
 			<div className="mb-4 flex items-center justify-between">
