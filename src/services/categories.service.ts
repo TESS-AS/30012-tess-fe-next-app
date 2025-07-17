@@ -50,7 +50,6 @@ export async function loadFilters({
 
 		const url = `/attributeFilter/${params.toString() ? `?${params.toString()}` : ""}`;
 		const response = await axiosInstance.get(url);
-		console.log(response, "response");
 
 		filtersCache[cacheKey] = {
 			data: response.data,
@@ -60,6 +59,78 @@ export async function loadFilters({
 		return response.data;
 	} catch (error) {
 		console.error("Error loading filters", error);
+		return [];
+	}
+}
+
+export async function loadFilterParents({
+	categoryNumber,
+	searchTerm,
+	language,
+}: {
+	categoryNumber?: string | null;
+	searchTerm?: string | null;
+	language?: string | null;
+}) {
+	try {
+		const cacheKey = `${categoryNumber || "none"}-${searchTerm || "none"}-${language || "none"}`;
+		const now = Date.now();
+
+		if (
+			filtersCache[cacheKey] &&
+			now - filtersCache[cacheKey].timestamp < FILTERS_CACHE_TTL
+		) {
+			return filtersCache[cacheKey].data;
+		}
+
+		const params = new URLSearchParams();
+		if (categoryNumber) params.append("categoryNumber", categoryNumber);
+		if (searchTerm) params.append("searchTerm", searchTerm);
+		if (language) params.append("language", language);
+
+		const url = `/filter/parent?${params.toString()}`;
+		const response = await axiosInstance.post(url, []);
+
+		const data = response.data;
+
+		filtersCache[cacheKey] = {
+			data,
+			timestamp: now,
+		};
+
+		return data;
+	} catch (error) {
+		console.error("Error loading filter parents", error);
+		return [];
+	}
+}
+
+export async function loadFilterChildren({
+	attributeKey,
+	categoryNumber,
+	searchTerm,
+	language,
+}: {
+	attributeKey: string;
+	categoryNumber?: string;
+	searchTerm?: string;
+	language?: string;
+}) {
+	try {
+		const params = new URLSearchParams();
+		if (categoryNumber) params.append("categoryNumber", categoryNumber);
+		if (searchTerm) params.append("searchTerm", searchTerm);
+		if (language) params.append("language", language);
+
+		const url = `/filter/child?${params.toString()}`;
+		const response = await axiosInstance.post(url, [], {
+			params: {
+				attributeKey,
+			},
+		});
+		return response.data;
+	} catch (error) {
+		console.error("Error loading child filters", error);
 		return [];
 	}
 }
