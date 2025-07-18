@@ -59,7 +59,7 @@ export default async function SegmentPage({ params }: SegmentPageProps) {
 		const filters = await loadFilterParents({
 			categoryNumber,
 			searchTerm: null,
-			language: locale,
+			language: "no",
 		});
 
 		return (

@@ -160,6 +160,7 @@ export function useProductFilter({
 				const result = await loadFilterParents({
 					categoryNumber: newCategoryNumber,
 					searchTerm: query,
+					language: "no",
 				});
 
 				const normalized = result.map((item: CategoryFilterResponseItem) => ({

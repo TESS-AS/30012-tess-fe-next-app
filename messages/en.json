@@ -59,6 +59,7 @@
 		},
 		"sort": "Sorter",
 		"search": "Search",
+		"searchAttribute": "Search attributes",
 		"searchProducts": "Search products..."
 	},
 	"Search": {

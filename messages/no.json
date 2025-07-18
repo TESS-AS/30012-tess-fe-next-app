@@ -59,6 +59,7 @@
 		},
 		"sort": "Sorter",
 		"search": "Søk",
+		"searchAttributes": "Søk etter attributter",
 		"searchProducts": "Søk etter slanger, utstyr, diameter, trykklasse..."
 	},
 	"Search": {

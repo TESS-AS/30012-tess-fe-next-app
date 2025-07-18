@@ -51,7 +51,7 @@ export default async function CategoryPage({
 		const filtersResponse = await loadFilterParents({
 			categoryNumber,
 			searchTerm: query || null,
-			language: locale,
+			language: "no",
 		});
 
 		const categoryFilters =

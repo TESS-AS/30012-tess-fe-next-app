@@ -229,11 +229,12 @@ export function Filter({
 					</ul>
 				</div>
 			)}
+			<h3 className="text-md mb-[-10px] font-semibold">Attributter</h3>
 			<div className="relative">
 				<Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
 				<Input
 					type="text"
-					placeholder={t("Common.search")}
+					placeholder={t("Common.searchAttributes")}
 					value={searchTerm}
 					onChange={(e) => setSearchTerm(e.target.value)}
 					className="pl-8"
@@ -258,8 +259,6 @@ export function Filter({
 					<div
 						key={filterCategory.category}
 						className="space-y-4">
-						<h3 className="text-lg font-semibold">{filterCategory.category}</h3>
-
 						<Accordion
 							type="multiple"
 							className="w-full">
