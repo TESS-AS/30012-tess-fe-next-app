@@ -12,6 +12,7 @@ import { IProduct } from "@/types/product.types";
 
 interface UseProductFilterProps {
 	categoryNumber: string;
+	categoryName: string;
 	query: string | null;
 }
 
@@ -142,12 +143,17 @@ export function useProductFilter({
 	const handleCategoryChange = useCallback(
 		async (
 			newCategoryNumber: string,
+			newCategoryName: string,
 			setFiltersFn: (filters: FilterCategory[]) => void,
 		) => {
 			setCategoryNumber(newCategoryNumber);
 			setCurrentPage(1);
 			setProducts([]);
-			setSelectedFilters({});
+			setCategoryNumber(newCategoryNumber);
+
+			setSelectedFilters({
+				category: [newCategoryName],
+			});
 			setCurrentFilters(null);
 
 			try {
@@ -208,15 +214,26 @@ export function useProductFilter({
 	const removeFilter = useCallback(
 		async (key: string, value: string) => {
 			const newFilters = selectedFilters[key].filter((v) => v !== value);
-			const filterArray: FilterValues[] = Object.entries({
+
+			const updatedSelectedFilters = {
 				...selectedFilters,
 				[key]: newFilters,
-			})
+			};
+
+			if (newFilters.length === 0) {
+				delete updatedSelectedFilters[key];
+			}
+
+			const filterArray: FilterValues[] = Object.entries(updatedSelectedFilters)
 				.filter(([, vals]) => vals.length > 0)
 				.map(([k, vals]) => ({
 					key: k,
 					values: vals,
 				}));
+
+			if (key === "category" && newFilters.length === 0) {
+				setCategoryNumber("");
+			}
 
 			await handleFilterChange(filterArray);
 		},

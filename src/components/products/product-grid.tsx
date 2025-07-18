@@ -32,6 +32,7 @@ interface ProductGridProps {
 	variant?: "default" | "compact";
 	filters: FilterCategory[];
 	categoryNumber: string;
+	categoryName: string;
 	query: string | null;
 	categoryFilters?: {
 		assortmentNumber: string;
@@ -54,6 +55,7 @@ export function ProductGrid({
 	variant = "default",
 	filters,
 	categoryNumber,
+	categoryName,
 	query,
 	categoryFilters,
 }: ProductGridProps) {
@@ -76,6 +78,7 @@ export function ProductGrid({
 		handleCategoryChange,
 	} = useProductFilter({
 		categoryNumber,
+		categoryName,
 		query,
 	});
 
@@ -139,8 +142,13 @@ export function ProductGrid({
 					categoryFilters={categoryFilters}
 					query={query}
 					categoryNumber={categoryNumber}
-					handleCategoryChange={(newCategoryNumber) =>
-						handleCategoryChange(newCategoryNumber, setFiltersState)
+					categoryName={categoryName}
+					handleCategoryChange={(newCategoryNumber, newCategoryName) =>
+						handleCategoryChange(
+							newCategoryNumber,
+							newCategoryName,
+							setFiltersState,
+						)
 					}
 				/>
 			</aside>
@@ -158,7 +166,7 @@ export function ProductGrid({
 											<TooltipTrigger asChild>
 												<div className="flex items-center gap-1">
 													<span className="max-w-[100px] truncate font-medium">
-														{key}:
+														{key === "category" ? "Kategori" : key}:
 													</span>
 													<span className="max-w-[100px] truncate">
 														{value}

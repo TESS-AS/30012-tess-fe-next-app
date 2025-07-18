@@ -79,17 +79,17 @@ export default async function CategoryPage({
 				return {
 					category: item.category,
 					categoryNumber: item.categoryNumber,
-					filters: (item.filter as { key: string; productCount: number }[]).map(
-						(f) => ({
-							key: f.key,
-							values: [
-								{
-									value: f.key,
-									productcount: f.productCount,
-								},
-							],
-						}),
-					),
+					filters: (
+						item.filters as { key: string; productCount: number }[]
+					).map((f) => ({
+						key: f.key,
+						values: [
+							{
+								value: f.key,
+								productcount: f.productCount,
+							},
+						],
+					})),
 				};
 			}
 		});

@@ -40,7 +40,10 @@ interface FilterProps
 		productCount: string;
 	}[];
 	query: string | null;
-	handleCategoryChange?: (newCategoryNumber: string) => void;
+	handleCategoryChange?: (
+		newCategoryNumber: string,
+		categoryName: string,
+	) => void;
 }
 
 const filterVariants = cva(
@@ -195,7 +198,7 @@ export function Filter({
 			{...props}>
 			{Array.isArray(categoryFilters) && categoryFilters.length > 0 && (
 				<div className="space-y-2">
-					<h3 className="text-lg font-semibold">Categories</h3>
+					<h3 className="text-lg font-semibold">Kategori</h3>
 					<ul className="space-y-1">
 						{categoryFilters?.length > 0 && (
 							<ul className="space-y-1 text-sm">
@@ -207,7 +210,10 @@ export function Filter({
 													key={cf.assortmentNumber}
 													className="flex cursor-pointer justify-between text-green-600 hover:underline"
 													onClick={() =>
-														handleCategoryChange?.(cf.assortmentNumber)
+														handleCategoryChange?.(
+															cf.assortmentNumber,
+															cf.nameNo,
+														)
 													}>
 													<span>{cf.nameNo}</span>
 													<span className="text-muted-foreground">
@@ -277,33 +283,39 @@ export function Filter({
 										</AccordionTrigger>
 										<AccordionContent className="pt-2">
 											{children ? (
-												<div className="space-y-2 pl-2">
-													{children.values.map((child) => (
-														<div
-															key={child.value}
-															className="flex items-center space-x-2">
-															<Checkbox
-																id={`${filter.key}-${child.value}`}
-																checked={
-																	selectedFilters[filter.key]?.includes(
-																		child.value,
-																	) || false
-																}
-																onCheckedChange={() =>
-																	handleFilterChange(filter.key, child.value)
-																}
-															/>
-															<label
-																htmlFor={`${filter.key}-${child.value}`}
-																className="cursor-pointer text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-																{child.value} ({child.productcount})
-															</label>
-														</div>
-													))}
-												</div>
+												children.values.length > 0 ? (
+													<div className="space-y-2 pl-2">
+														{children.values.map((child) => (
+															<div
+																key={child.value}
+																className="flex items-center space-x-2">
+																<Checkbox
+																	id={`${filter.key}-${child.value}`}
+																	checked={
+																		selectedFilters[filter.key]?.includes(
+																			child.value,
+																		) || false
+																	}
+																	onCheckedChange={() =>
+																		handleFilterChange(filter.key, child.value)
+																	}
+																/>
+																<label
+																	htmlFor={`${filter.key}-${child.value}`}
+																	className="cursor-pointer text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+																	{child.value} ({child.productcount})
+																</label>
+															</div>
+														))}
+													</div>
+												) : (
+													<div className="text-muted-foreground pl-2 text-sm italic">
+														Ingen alternativer tilgjengelig.
+													</div>
+												)
 											) : (
 												<div className="text-muted-foreground pl-2 text-sm">
-													Loading...
+													Laster...
 												</div>
 											)}
 										</AccordionContent>
