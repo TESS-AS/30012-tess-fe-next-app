@@ -105,7 +105,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 						THM KundeWEB
 					</Button>
 				</div>
-				<div className="flex items-center gap-2 rounded-md bg-[#FDFDEA] px-3 py-1.5">
+				{profile && <div className="flex items-center gap-2 rounded-md bg-[#FDFDEA] px-3 py-1.5">
 					<Button
 						variant="ghost"
 						className="text-sm font-medium text-[#003D1A] hover:bg-transparent">
@@ -116,7 +116,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 						variant="darkGreen">
 						Gi tilbakemelding
 					</Button>
-				</div>
+				</div>}
 			</div>
 			<div className="container m-auto mb-1 flex h-16 items-center justify-between">
 				<div className="flex items-center gap-2">

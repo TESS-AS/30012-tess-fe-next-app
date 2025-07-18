@@ -1,174 +1,84 @@
 "use client";
 
-import { useState } from "react";
-
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useAppContext } from "@/lib/appContext";
-import { ExternalLink } from "lucide-react";
-import Image from "next/image";
-
-import ProductVariantTable from "./product-variant-table";
-import { Modal, ModalHeader, ModalTitle } from "../ui/modal";
-import QuantityButtons from "../ui/quantity-buttons";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { Separator } from "@radix-ui/react-select";
+import { useRouter } from "next/navigation";
 
 export default function OrderSummary() {
-	const { cartItems, prices, calculatedPrices, updateQuantity } =
+	const router = useRouter();
+	const { cartItems, prices, calculatedPrices, isLoading } =
 		useAppContext();
-	const [openModalId, setOpenModalId] = useState<string | null>(null);
 
-	console.log(cartItems, "cartItems");
+	const subtotal = cartItems?.reduce(
+		(acc, item) =>
+			acc + (calculatedPrices[item.itemNumber] || prices[item.itemNumber] || 0),
+		0,
+	);
+
+
+	const handleCheckout = () => {
+		router.push("/checkout");
+	};
+	
 	return (
-		<div className="h-fit w-full rounded-md border bg-white p-6 shadow-sm md:sticky md:top-6">
-			<div className="mb-4 flex items-center justify-between">
-				<h2 className="text-lg font-semibold">Bag ({cartItems.length})</h2>
-				<span className="text-sm font-medium">
-					{cartItems
-						?.reduce(
-							(acc, item) =>
-								acc +
-								(calculatedPrices[item.itemNumber] ||
-									prices[item.itemNumber] ||
-									0),
-							0,
-						)
-						.toFixed(2)}
-					,- kr
-				</span>
-			</div>
-
-			{cartItems.map((product) => (
-				<div
-					key={product.productNumber}
-					className="mb-4 flex justify-between gap-4 border-b pb-4">
-					<div className="flex gap-4">
-						<div className="bg-muted relative h-32 w-34 overflow-hidden rounded border">
-							<Image
-								src={product.mediaId?.[0].url || ""}
-								alt="Product"
-								fill
-								className="object-contain"
-							/>
-						</div>
-						<div className="flex flex-col justify-between text-sm">
-							<div>
-								<p className="font-medium">{product.productNumber}</p>
-								<p className="text-muted-foreground">{product.itemNumber}</p>
-							</div>
-							<QuantityButtons
-								quantity={product.quantity}
-								onIncrease={async (e) => {
-									e.stopPropagation();
-									await updateQuantity(
-										product.cartLine ?? 0,
-										product.itemNumber,
-										product.quantity + 1,
-									);
-								}}
-								onDecrease={async (e) => {
-									e.stopPropagation();
-									await updateQuantity(
-										product.cartLine ?? 0,
-										product.itemNumber,
-										product.quantity - 1,
-									);
-								}}
-							/>
-							<p className="mt-1 font-medium">
-								{calculatedPrices[product.itemNumber]?.toFixed(2)},- kr
-							</p>
-						</div>
+		<div className="space-y-6">
+			<div className="bg-card border-lightGray rounded-lg border p-6">
+				<h2 className="text-xl font-semibold">Ordreoversikt</h2>
+				<div className="mt-4 space-y-2 text-sm">
+					<div className="flex justify-between">
+						<span className="text-[#5A615D]">Opprinnelig pris:</span>
+						<span className="font-medium">{subtotal.toFixed(2)},- kr</span>
 					</div>
-					<div className="flex-end flex">
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => setOpenModalId(product.productNumber)}>
-							<ExternalLink />
-						</Button>
-						<Modal
-							open={openModalId === product.productNumber}
-							onOpenChange={(open) =>
-								setOpenModalId(open ? product.productNumber : null)
-							}>
-							<ModalHeader>
-								<ModalTitle>
-									Product Variants - {product.productName}
-								</ModalTitle>
-							</ModalHeader>
-							<ProductVariantTable
-								variants={[]}
-								productNumber={product.productNumber}
-							/>
-						</Modal>
+					<div className="flex justify-between">
+						<span className="text-[#5A615D]">Rabatter</span>
+						<span className="text-[#009640] font-medium">-999.00 kr</span>
+					</div>
+					<div className="flex justify-between">
+						<span className="text-[#5A615D]">Sum etter rabatt (eks. mva.)</span>
+						<span className="font-medium">3199.00 kr</span>
+					</div>
+					<div className="flex justify-between">
+						<span className="text-[#5A615D]">MVA(25%)</span>
+						<span className="font-medium">1049.50 kr</span>
+					</div>
+					<Separator className="h-[1px] flex-1 bg-[#5A615D]" />
+					<div className="flex justify-between">
+						<span className="text-base font-bold text-[#0F1912]">
+							Total inkl. mva.
+						</span>
+						<span className="text-base font-bold text-[#0F1912]">
+							4248.50 kr
+						</span>
 					</div>
 				</div>
-			))}
-
-			<div className="my-4 space-y-2">
-				<Input placeholder="Gift or promo code" />
 				<Button
-					variant="outline"
-					className="w-full">
-					Apply
+					className="mt-6 w-full"
+					disabled={cartItems?.length === 0 || isLoading}
+					onClick={handleCheckout}>
+					{isLoading ? (
+						<Loader2 className="h-4 w-4 animate-spin" />
+					) : (
+						"Gå til checkout"
+					)}
 				</Button>
-			</div>
-
-			<div className="mb-4 space-y-1 text-sm">
-				<div className="flex justify-between">
-					<span>Subtotal</span>
-					<span>
-						{cartItems
-							?.reduce(
-								(acc, item) =>
-									acc +
-									(calculatedPrices[item.itemNumber] ||
-										prices[item.itemNumber] ||
-										0),
-								0,
-							)
-							.toFixed(2)}
-						,- kr
-					</span>
-				</div>
-				<div className="flex justify-between">
-					<span>Duties</span>
-					<span>$23.60</span>
-				</div>
-				<div className="flex justify-between">
-					<span>Estimated Tax</span>
-					<span>$46.74</span>
-				</div>
-				<div className="flex justify-between">
-					<span>Estimated Shipping</span>
-					<span>Free</span>
-				</div>
-				<hr className="my-2" />
-				<div className="flex justify-between font-semibold">
-					<span>Total</span>
-					<span>$306.34</span>
-				</div>
-			</div>
-
-			<div className="mb-4 rounded bg-yellow-50 p-3 text-xs text-yellow-800">
-				Duties, Tax, and Shipping are estimated totals until shipping step is
-				complete.
-			</div>
-
-			<div className="space-y-2 text-sm">
-				<p className="font-semibold">Save Your Info (Optional)</p>
-				<p className="text-muted-foreground">
-					Create a password for easy order review and faster checkout the next
-					time you shop.
-				</p>
-				<Input
-					type="password"
-					placeholder="Password"
-				/>
 				<Button
-					className="w-full bg-gray-300 text-white"
-					disabled>
-					Place Order
+					variant="link"
+					className="mt-2 w-full hover:no-underline"
+					disabled={cartItems?.length === 0 || isLoading}
+					onClick={handleCheckout}>
+					<>
+						{isLoading ? (
+							<Loader2 className="h-4 w-4 animate-spin" />
+						) : (
+							"eller"
+						)}
+						<span className="text-[#009640] underline">
+							Fortsett å handle
+						</span>{" "}
+						<ArrowRight className="h-4 w-4 font-bold text-[#009640]" />
+					</>
 				</Button>
 			</div>
 		</div>
