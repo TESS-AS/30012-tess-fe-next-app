@@ -32,6 +32,7 @@ interface FilterProps
 	onFilterChange: (filters: FilterValues[]) => void;
 	selectedFilters?: Record<string, string[]>;
 	categoryNumber?: string;
+	categoryName?: string;
 	language?: string;
 	categoryFilters?: {
 		assortmentNumber: string;
@@ -163,7 +164,7 @@ export function Filter({
 					attributeKey,
 					categoryNumber: effectiveCategoryNumber,
 					searchTerm: effectiveSearchTerm,
-					language,
+					language: "no",
 				});
 
 				const normalized =

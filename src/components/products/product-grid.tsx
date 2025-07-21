@@ -32,7 +32,7 @@ interface ProductGridProps {
 	variant?: "default" | "compact";
 	filters: FilterCategory[];
 	categoryNumber: string;
-	categoryName: string;
+	categoryName?: string;
 	query: string | null;
 	categoryFilters?: {
 		assortmentNumber: string;
@@ -62,7 +62,7 @@ export function ProductGrid({
 	const t = useTranslations();
 	const pathname = usePathname();
 	const [isFiltering, setIsFiltering] = useState(false);
-	const [viewLayout, setViewLayout] = useState<string>("");
+	const [viewLayout, setViewLayout] = useState<string>("grid");
 	const observerTarget = useRef<HTMLDivElement>(null);
 	const [sort, setSort] = useState<string>("");
 	const [filtersState, setFiltersState] = useState(filters);
@@ -131,7 +131,7 @@ export function ProductGrid({
 		<div className="flex flex-col gap-8 lg:flex-row">
 			<aside className="sticky top-4 h-[calc(100vh-2rem)] overflow-y-auto lg:w-1/4">
 				<Filter
-					filters={filters}
+					filters={filtersState}
 					className="sticky top-4"
 					variant="default"
 					size="default"
@@ -154,13 +154,78 @@ export function ProductGrid({
 			</aside>
 
 			<div className="flex-1">
-				{Object.keys(selectedFilters).length > 0 && (
-					<div className="mb-4 flex flex-wrap gap-2">
+				<div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+					<h2 className="text-2xl font-semibold">{query}</h2>
+
+					<div className="flex shrink-0 items-center gap-2">
+						<Select
+							value={sort}
+							onValueChange={onSortChange}>
+							<SelectTrigger className="out h-8 w-[90px] rounded-md border border-neutral-300 px-3 text-sm">
+								<SelectValue placeholder={t("Common.sort")} />
+							</SelectTrigger>
+							<SelectContent>
+								<>
+									{SORT_OPTIONS.map((option) => (
+										<SelectItem
+											key={option.value}
+											value={option.value}>
+											{option.label}
+										</SelectItem>
+									))}
+								</>
+							</SelectContent>
+						</Select>
+						<Button
+							variant="outline"
+							onClick={() => setViewLayout("list")}
+							size="icon"
+							className={cn(
+								"h-8 w-8 border",
+								viewLayout === "list"
+									? "border-neutral-800"
+									: "border-neutral-300",
+							)}>
+							<AlignJustify
+								className={cn(
+									"h-4 w-4",
+									viewLayout === "list"
+										? "text-neutral-800"
+										: "text-neutral-500",
+								)}
+							/>
+						</Button>
+
+						<Button
+							variant="outline"
+							onClick={() => setViewLayout("grid")}
+							size="icon"
+							className={cn(
+								"h-8 w-8 border",
+								viewLayout === "grid"
+									? "border-neutral-800"
+									: "border-neutral-300",
+							)}>
+							<LayoutGrid
+								className={cn(
+									"h-4 w-4",
+									viewLayout === "grid"
+										? "text-neutral-800"
+										: "text-neutral-500",
+								)}
+							/>
+						</Button>
+					</div>
+				</div>
+
+				{/* Controls */}
+				<div className="mb-4 flex items-center justify-between align-middle">
+					<div className="flex flex-wrap gap-2">
 						{Object.entries(selectedFilters).map(([key, values]) =>
 							values.map((value) => (
 								<div
 									key={`${key}-${value}`}
-									className="bg-primary/10 flex items-center gap-1 rounded-full px-3 py-1 text-sm">
+									className="bg-primary/10 flex items-center gap-1 rounded-md px-3 py-1 text-sm">
 									<TooltipProvider>
 										<Tooltip>
 											<TooltipTrigger asChild>
@@ -182,49 +247,12 @@ export function ProductGrid({
 									</TooltipProvider>
 									<button
 										onClick={() => removeFilter(key, value)}
-										className="hover:bg-primary/20 ml-1 rounded-full p-0.5">
+										className="hover:bg-primary/20 ml-1 rounded-md p-0.5">
 										<X className="h-3 w-3" />
 									</button>
 								</div>
 							)),
 						)}
-					</div>
-				)}
-
-				{/* Controls */}
-				<div className="mb-4 flex items-center justify-between">
-					<Select
-						value={sort}
-						onValueChange={onSortChange}>
-						<SelectTrigger className="w-[180px]">
-							<SelectValue placeholder={t("Common.sort")} />
-						</SelectTrigger>
-						<SelectContent>
-							{SORT_OPTIONS.map((option) => (
-								<SelectItem
-									key={option.value}
-									value={option.value}>
-									{option.label}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-
-					<div className="flex gap-2">
-						<Button
-							variant="outline"
-							onClick={() => setViewLayout("list")}
-							size="icon"
-							className="h-8 w-8">
-							<AlignJustify className="h-4 w-4" />
-						</Button>
-						<Button
-							variant="outline"
-							onClick={() => setViewLayout("grid")}
-							size="icon"
-							className="h-8 w-8">
-							<LayoutGrid className="h-4 w-4" />
-						</Button>
 					</div>
 				</div>
 				<div
