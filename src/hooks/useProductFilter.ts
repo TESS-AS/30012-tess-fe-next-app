@@ -12,7 +12,7 @@ import { IProduct } from "@/types/product.types";
 
 interface UseProductFilterProps {
 	categoryNumber: string;
-	categoryName: string;
+	categoryName?: string;
 	query: string | null;
 }
 
@@ -181,7 +181,7 @@ export function useProductFilter({
 				console.error("Failed to load parent filters", err);
 			}
 		},
-		[query],
+		[query, categoryNumber],
 	);
 
 	const handleSortChange = useCallback(

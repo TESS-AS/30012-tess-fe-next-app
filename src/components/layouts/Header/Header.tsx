@@ -88,7 +88,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 	};
 
 	return (
-		<header className="bg-background h-[182px] w-full border-b">
+		<header className="bg-background h-[182px] w-full border-t">
 			<div className="container m-auto flex h-16 items-center justify-between">
 				<div className="flex items-center gap-6">
 					<Button
