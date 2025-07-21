@@ -95,6 +95,7 @@ export const ContactPerson: React.FC<ContactPersonProps> = ({
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
+                disabled
               />
               <p className="text-xs text-muted-foreground mt-1">Eksempel: navn@navnesen.no</p>
             </div>

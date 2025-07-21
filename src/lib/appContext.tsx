@@ -43,11 +43,15 @@ interface AppContextType {
 	) => Promise<void>;
 	removeItem: (cartLine: number) => Promise<void>;
 	handleArchiveCart: () => Promise<void>;
+	currentStep: number;
+	setCurrentStep: (value: number) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppContextProvider = ({ children }: { children: ReactNode }) => {
+
+	const [currentStep, setCurrentStep] = useState(0);
 	const [isCartChanging, setIsCartChanging] = useState(false);
 	const [cartItems, setCartItems] = useState<CartLine[]>([]);
 	const [prices, setPrices] = useState<Record<string, number>>({});
@@ -187,6 +191,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				updateWarehouse,
 				removeItem,
 				handleArchiveCart,
+				currentStep,
+				setCurrentStep,
 			}}>
 			{children}
 		</AppContext.Provider>

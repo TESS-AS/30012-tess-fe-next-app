@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 
 export default function OrderSummary() {
 	const router = useRouter();
-	const { cartItems, prices, calculatedPrices, isLoading } =
+	const { cartItems, prices, calculatedPrices, isLoading, currentStep, setCurrentStep } =
 		useAppContext();
 
 	const subtotal = cartItems?.reduce(
@@ -19,7 +19,14 @@ export default function OrderSummary() {
 
 
 	const handleCheckout = () => {
-		router.push("/checkout");
+		if (currentStep === 0) {
+			setCurrentStep(1);
+		} else if (currentStep === 1) {
+			setCurrentStep(2);
+		} else {
+			// handle payment
+			router.push("/checkout");
+		}
 	};
 	
 	return (
