@@ -125,7 +125,7 @@ export function Filter({
 
 	const handleFilterChange = useCallback(
 		(filterKey: string, value: string) => {
-			const currentValues = selectedFilters[filterKey] || [];
+			const currentValues = selectedFilters?.[filterKey] || [];
 			let updatedValues: string[];
 
 			if (currentValues.includes(value)) {
@@ -143,12 +143,18 @@ export function Filter({
 				delete updatedFilters[filterKey];
 			}
 
-			const filterArray: FilterValues[] = Object.entries(updatedFilters).map(
-				([key, values]) => ({
+			const filterArray: FilterValues[] = Object.entries(updatedFilters)
+				.filter(
+					([key, values]) =>
+						key !== "category" &&
+						Array.isArray(values) &&
+						values.length > 0 &&
+						!values.includes(""),
+				)
+				.map(([key, values]) => ({
 					key,
 					values,
-				}),
-			);
+				}));
 
 			onFilterChange(filterArray);
 		},
