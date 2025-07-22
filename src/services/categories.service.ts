@@ -1,3 +1,4 @@
+import { FilterValues } from "@/types/filter.types";
 import { AxiosResponse } from "axios";
 
 import axiosInstance from "./axiosClient";
@@ -42,10 +43,12 @@ export async function loadFilterParents({
 	categoryNumber,
 	searchTerm,
 	language,
+	filters = [],
 }: {
 	categoryNumber?: string | null;
 	searchTerm?: string | null;
 	language?: string | null;
+	filters?: FilterValues[];
 }) {
 	try {
 		const params = new URLSearchParams();
@@ -54,7 +57,7 @@ export async function loadFilterParents({
 		if (language) params.append("language", language);
 
 		const url = `/filter/parent?${params.toString()}`;
-		const response = await axiosInstance.post(url, []);
+		const response = await axiosInstance.post(url, filters);
 
 		return response.data;
 	} catch (error) {

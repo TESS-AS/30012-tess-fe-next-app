@@ -11,7 +11,10 @@ import {
 } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { loadFilterChildren } from "@/services/categories.service";
+import {
+	loadFilterChildren,
+	loadFilterParents,
+} from "@/services/categories.service";
 import type { FilterValues } from "@/types/filter.types";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Search, X } from "lucide-react";
@@ -124,7 +127,7 @@ export function Filter({
 	};
 
 	const handleFilterChange = useCallback(
-		(filterKey: string, value: string) => {
+		async (filterKey: string, value: string) => {
 			const currentValues = selectedFilters?.[filterKey] || [];
 			let updatedValues: string[];
 
@@ -134,7 +137,7 @@ export function Filter({
 				updatedValues = [...currentValues, value];
 			}
 
-			const updatedFilters = {
+			const updatedFilters: Record<string, string[]> = {
 				...selectedFilters,
 				[filterKey]: updatedValues,
 			};
@@ -144,21 +147,22 @@ export function Filter({
 			}
 
 			const filterArray: FilterValues[] = Object.entries(updatedFilters)
-				.filter(
-					([key, values]) =>
-						key !== "category" &&
-						Array.isArray(values) &&
-						values.length > 0 &&
-						!values.includes(""),
-				)
+				.filter(([key, values]) => key !== "category" && values.length > 0)
 				.map(([key, values]) => ({
 					key,
 					values,
 				}));
 
+			await loadFilterParents({
+				categoryNumber,
+				searchTerm: query,
+				language: "no",
+				filters: filterArray,
+			});
+
 			onFilterChange(filterArray);
 		},
-		[onFilterChange, selectedFilters],
+		[onFilterChange, selectedFilters, categoryNumber, query],
 	);
 
 	const resetFilters = useCallback(() => {

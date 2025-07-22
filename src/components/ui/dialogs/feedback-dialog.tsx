@@ -11,8 +11,10 @@ import {
 	DialogClose,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { useFeedback } from "@/hooks/useFeedback";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { toast } from "react-toastify";
 
 interface FeedbackDialogProps {
 	open: boolean;
@@ -24,6 +26,22 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
 		"Ris" | "Ros" | "Forslag" | null
 	>(null);
 	const [message, setMessage] = React.useState("");
+
+	const { submitFeedback, loading } = useFeedback();
+
+	const handleSubmit = async () => {
+		if (!selectedType || !message.trim()) return;
+
+		try {
+			await submitFeedback(selectedType, message.trim());
+			toast.success("Tilbakemelding sendt!");
+			setSelectedType(null);
+			setMessage("");
+			onOpenChange(false);
+		} catch (err: any) {
+			toast.error("Noe gikk galt. Prøv igjen senere.");
+		}
+	};
 
 	return (
 		<Dialog
@@ -62,13 +80,13 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
 					<p className="text-sm font-medium text-black">Type tilbakemelding</p>
 
 					<div className="inline-flex w-full overflow-hidden rounded-md border text-sm font-medium">
-						{(["Ris", "Ros", "Forslag"] as const).map((type, index, array) => (
+						{(["Ris", "Ros", "Forslag"] as const).map((type) => (
 							<button
 								key={type}
 								onClick={() => setSelectedType(type)}
 								className={cn(
 									"w-full py-2 text-center transition-colors",
-									"border-r last:border-r-0", // border between buttons
+									"border-r last:border-r-0",
 									selectedType === type
 										? "bg-gray-100 font-semibold"
 										: "bg-white hover:bg-gray-50",
@@ -95,9 +113,10 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
 				</div>
 
 				<Button
-					disabled={!selectedType || !message.trim()}
-					className="mt-6 w-full bg-green-600 text-white hover:bg-green-700">
-					Send tilbakemelding
+					disabled={!selectedType || !message.trim() || loading}
+					className="mt-6 w-full bg-green-600 text-white hover:bg-green-700"
+					onClick={handleSubmit}>
+					{loading ? "Sender..." : "Send tilbakemelding"}
 				</Button>
 			</DialogContent>
 		</Dialog>
