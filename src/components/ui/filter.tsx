@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useCallback } from "react";
 
 import {
 	Accordion,
@@ -25,6 +26,13 @@ export interface FilterCategory {
 	categoryNumber?: string;
 }
 
+type CategoryFilterItem = {
+	assortmentNumber: string;
+	nameNo: string;
+	nameEn: string;
+	productCount: string;
+};
+
 interface FilterProps
 	extends React.HTMLAttributes<HTMLDivElement>,
 		VariantProps<typeof filterVariants> {
@@ -34,12 +42,7 @@ interface FilterProps
 	categoryNumber?: string;
 	categoryName?: string;
 	language?: string;
-	categoryFilters?: {
-		assortmentNumber: string;
-		nameNo: string;
-		nameEn: string;
-		productCount: string;
-	}[];
+	categoryFilters?: CategoryFilterItem[];
 	query: string | null;
 	handleCategoryChange?: (
 		newCategoryNumber: string,
@@ -84,6 +87,11 @@ export function Filter({
 }: FilterProps) {
 	const t = useTranslations();
 	const [searchTerm, setSearchTerm] = React.useState("");
+	const [showAllCategories, setShowAllCategories] = React.useState(false);
+	const [selectedCategory, setSelectedCategory] = React.useState<string | null>(
+		null,
+	);
+
 	const [loadedChildren, setLoadedChildren] = React.useState<
 		Record<
 			string,
@@ -93,52 +101,63 @@ export function Filter({
 			}
 		>
 	>({});
-	const [internalSelectedFilters, setInternalSelectedFilters] = React.useState<
-		Record<string, string[]>
-	>(externalSelectedFilters);
 
-	const selectedFilters = externalSelectedFilters || internalSelectedFilters;
+	const selectedFilters = externalSelectedFilters;
 
-	const handleFilterChange = React.useCallback(
+	React.useEffect(() => {
+		if (
+			!selectedFilters["category"] ||
+			selectedFilters["category"].length === 0
+		) {
+			setSelectedCategory(null);
+		}
+	}, [selectedFilters]);
+
+	const handleCategorySelect = (cf: CategoryFilterItem) => {
+		if (selectedCategory === cf.assortmentNumber) {
+			setSelectedCategory(null);
+			handleCategoryChange?.("", "");
+		} else {
+			setSelectedCategory(cf.assortmentNumber);
+			handleCategoryChange?.(cf.assortmentNumber, cf.nameNo);
+		}
+	};
+
+	const handleFilterChange = useCallback(
 		(filterKey: string, value: string) => {
-			const newFilters = { ...selectedFilters };
-			const currentValues = [...(newFilters[filterKey] || [])];
-			const valueIndex = currentValues.indexOf(value);
+			const currentValues = selectedFilters[filterKey] || [];
+			let updatedValues: string[];
 
-			if (valueIndex > -1) {
-				const updatedValues = currentValues.filter((v) => v !== value);
-				if (updatedValues.length === 0) {
-					delete newFilters[filterKey];
-				} else {
-					newFilters[filterKey] = updatedValues;
-				}
+			if (currentValues.includes(value)) {
+				updatedValues = currentValues.filter((v) => v !== value);
 			} else {
-				newFilters[filterKey] = [...currentValues, value];
+				updatedValues = [...currentValues, value];
 			}
 
-			const filterArray: FilterValues[] = Object.entries(newFilters)
-				.filter(([, vals]) => vals.length > 0)
-				.map(([key, values]) => ({
+			const updatedFilters = {
+				...selectedFilters,
+				[filterKey]: updatedValues,
+			};
+
+			if (updatedValues.length === 0) {
+				delete updatedFilters[filterKey];
+			}
+
+			const filterArray: FilterValues[] = Object.entries(updatedFilters).map(
+				([key, values]) => ({
 					key,
 					values,
-				}));
+				}),
+			);
 
-			setInternalSelectedFilters(newFilters);
 			onFilterChange(filterArray);
 		},
 		[onFilterChange, selectedFilters],
 	);
 
-	const resetFilters = React.useCallback(() => {
-		setInternalSelectedFilters({});
+	const resetFilters = useCallback(() => {
 		onFilterChange([]);
 	}, [onFilterChange]);
-
-	React.useEffect(() => {
-		if (Object.keys(externalSelectedFilters).length > 0) {
-			setInternalSelectedFilters(externalSelectedFilters);
-		}
-	}, [externalSelectedFilters]);
 
 	const selectedFilterCount = Object.values(selectedFilters).reduce(
 		(acc, values) => acc + values.length,
@@ -197,51 +216,78 @@ export function Filter({
 		<div
 			className={cn(filterVariants({ variant, size, className }), "space-y-4")}
 			{...props}>
-			{Array.isArray(categoryFilters) && categoryFilters.length > 0 && (
-				<div className="space-y-2">
-					<h3 className="text-lg font-semibold">Kategori</h3>
-					<ul className="space-y-1">
-						{categoryFilters?.length > 0 && (
+			{Array.isArray(categoryFilters) &&
+				categoryFilters.length > 0 &&
+				(!selectedCategory ||
+					categoryFilters.some(
+						(cf) => cf.assortmentNumber === selectedCategory,
+					)) && (
+					<div className="space-y-2">
+						<h3 className="text-md font-semibold">Kategori</h3>
+						<div className="rounded-lg bg-white px-4 py-3 shadow-md">
 							<ul className="space-y-1 text-sm">
-								{categoryFilters?.length > 0 && (
-									<div className="rounded-lg bg-white px-4 py-3 shadow-md">
-										<ul className="space-y-1 text-sm">
-											{categoryFilters?.map((cf) => (
-												<li
-													key={cf.assortmentNumber}
-													className="flex cursor-pointer justify-between text-green-600 hover:underline"
-													onClick={() =>
-														handleCategoryChange?.(
-															cf.assortmentNumber,
-															cf.nameNo,
-														)
-													}>
-													<span>{cf.nameNo}</span>
+								{(showAllCategories
+									? categoryFilters
+									: categoryFilters.slice(0, 5)
+								)
+									.filter(
+										(cf) =>
+											!selectedCategory ||
+											selectedCategory === cf.assortmentNumber,
+									)
+									.map((cf) => {
+										const isChecked = selectedCategory === cf.assortmentNumber;
+										return (
+											<li
+												key={cf.assortmentNumber}
+												className="flex items-center space-x-2">
+												<Checkbox
+													id={`category-${cf.assortmentNumber}`}
+													checked={isChecked}
+													onCheckedChange={() => handleCategorySelect(cf)}
+												/>
+												<label
+													htmlFor={`category-${cf.assortmentNumber}`}
+													className="cursor-pointer text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+													<span className="text-green-600 hover:underline">
+														{cf.nameNo}
+													</span>{" "}
 													<span className="text-muted-foreground">
 														({cf.productCount})
 													</span>
-												</li>
-											))}
-										</ul>
-									</div>
-								)}
+												</label>
+											</li>
+										);
+									})}
 							</ul>
-						)}
-					</ul>
-				</div>
-			)}
+
+							{categoryFilters.length > 5 && !selectedCategory && (
+								<Button
+									variant="link"
+									size="sm"
+									onClick={() => setShowAllCategories((prev) => !prev)}
+									className="text-primary mt-2 px-0 text-sm hover:underline">
+									{showAllCategories ? "Vis mindre" : "Vis mer"}
+								</Button>
+							)}
+						</div>
+					</div>
+				)}
+			<h3 className="text-md mb-[-10px] font-semibold">
+				{t("Common.attributes")}
+			</h3>
+
 			<div className="relative">
 				<Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
 				<Input
 					type="text"
-					placeholder={t("Common.search")}
+					placeholder={t("Common.searchAttributes")}
 					value={searchTerm}
 					onChange={(e) => setSearchTerm(e.target.value)}
 					className="pl-8"
 				/>
 			</div>
 
-			{/* Reset Filters Button */}
 			{selectedFilterCount > 0 && (
 				<div className="mb-4 flex justify-end">
 					<Button
@@ -254,13 +300,11 @@ export function Filter({
 				</div>
 			)}
 
-			<div className="h-[1120px] space-y-6 overflow-auto">
+			<div className="pr-2">
 				{filteredCategories.map((filterCategory) => (
 					<div
 						key={filterCategory.category}
 						className="space-y-4">
-						<h3 className="text-lg font-semibold">{filterCategory.category}</h3>
-
 						<Accordion
 							type="multiple"
 							className="w-full">
