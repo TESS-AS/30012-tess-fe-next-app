@@ -54,9 +54,6 @@ export default async function CategoryPage({
 			language: locale,
 		});
 
-		console.log(filtersResponse, "filter parent response");
-		console.log(categoryNumber, "category number in payload");
-
 		const categoryFilters =
 			Array.isArray(filtersResponse) && "categoryFilters" in filtersResponse[0]
 				? filtersResponse[0].categoryFilters

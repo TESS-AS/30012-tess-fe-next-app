@@ -59,7 +59,11 @@
 		},
 		"sort": "Sorter",
 		"search": "Search",
-		"searchProducts": "Search products..."
+		"searchProducts": "Search products...",
+		"searchAttributes": "Search for attributes",
+		"showMore": "Show more",
+		"showLess": "Show less",
+		"attributes": "Attributes"
 	},
 	"Search": {
 		"suggestions": "Søkeforslag",

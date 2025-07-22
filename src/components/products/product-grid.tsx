@@ -92,7 +92,12 @@ export function ProductGrid({
 	);
 
 	useEffect(() => {
-		// Reset isFiltering when loading is complete
+		if (filters.length > 0) {
+			setFiltersState(filters);
+		}
+	}, [filters, query]);
+
+	useEffect(() => {
 		if (!isLoading) {
 			setIsFiltering(false);
 		}
@@ -129,10 +134,9 @@ export function ProductGrid({
 
 	return (
 		<div className="flex flex-col gap-8 lg:flex-row">
-			<aside className="sticky top-4 h-[calc(100vh-2rem)] overflow-y-auto lg:w-1/4">
+			<aside className="w-full pr-4 lg:w-1/4">
 				<Filter
 					filters={filtersState}
-					className="sticky top-4"
 					variant="default"
 					size="default"
 					onFilterChange={(newFilters) => {
@@ -218,40 +222,41 @@ export function ProductGrid({
 					</div>
 				</div>
 
-				{/* Controls */}
 				<div className="mb-4 flex items-center justify-between align-middle">
 					<div className="flex flex-wrap gap-2">
 						{Object.entries(selectedFilters).map(([key, values]) =>
-							values.map((value) => (
-								<div
-									key={`${key}-${value}`}
-									className="bg-primary/10 flex items-center gap-1 rounded-md px-3 py-1 text-sm">
-									<TooltipProvider>
-										<Tooltip>
-											<TooltipTrigger asChild>
-												<div className="flex items-center gap-1">
-													<span className="max-w-[100px] truncate font-medium">
-														{key === "category" ? "Kategori" : key}:
-													</span>
-													<span className="max-w-[100px] truncate">
-														{value}
-													</span>
-												</div>
-											</TooltipTrigger>
-											<TooltipContent>
-												<p>
-													{key}: {value}
-												</p>
-											</TooltipContent>
-										</Tooltip>
-									</TooltipProvider>
-									<button
-										onClick={() => removeFilter(key, value)}
-										className="hover:bg-primary/20 ml-1 rounded-md p-0.5">
-										<X className="h-3 w-3" />
-									</button>
-								</div>
-							)),
+							values
+								.filter((value) => !!value)
+								.map((value) => (
+									<div
+										key={`${key}-${value}`}
+										className="bg-primary/10 flex items-center gap-1 rounded-md px-3 py-1 text-sm">
+										<TooltipProvider>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<div className="flex items-center gap-1">
+														<span className="text-md max-w-[100px] truncate">
+															{key === "category" ? "Kategori" : key}:
+														</span>
+														<span className="max-w-[100px] truncate">
+															{value}
+														</span>
+													</div>
+												</TooltipTrigger>
+												<TooltipContent>
+													<p>
+														{key}: {value}
+													</p>
+												</TooltipContent>
+											</Tooltip>
+										</TooltipProvider>
+										<button
+											onClick={() => removeFilter(key, value)}
+											className="hover:bg-primary/20 ml-1 rounded-md p-0.5">
+											<X className="h-3 w-3" />
+										</button>
+									</div>
+								)),
 						)}
 					</div>
 				</div>
