@@ -1,4 +1,8 @@
-import { FilterValues } from "@/types/filter.types";
+import {
+	CategoryFilterResponseItem,
+	FilterResponseItem,
+	FilterValues,
+} from "@/types/filter.types";
 import { AxiosResponse } from "axios";
 
 import axiosInstance from "./axiosClient";
@@ -39,31 +43,22 @@ export async function loadFilters({
 	}
 }
 
-export async function loadFilterParents({
-	categoryNumber,
-	searchTerm,
-	language,
-	filters = [],
-}: {
+export async function loadFilterParents(params: {
 	categoryNumber?: string | null;
 	searchTerm?: string | null;
 	language?: string | null;
 	filters?: FilterValues[];
-}) {
-	try {
-		const params = new URLSearchParams();
-		if (categoryNumber) params.append("categoryNumber", categoryNumber);
-		if (searchTerm) params.append("searchTerm", searchTerm);
-		if (language) params.append("language", language);
+}): Promise<any[]> {
+	const query = new URLSearchParams();
+	if (params.categoryNumber)
+		query.append("categoryNumber", params.categoryNumber);
+	if (params.searchTerm) query.append("searchTerm", params.searchTerm);
+	if (params.language) query.append("language", params.language);
 
-		const url = `/filter/parent?${params.toString()}`;
-		const response = await axiosInstance.post(url, filters);
+	const url = `/filter/parent?${query.toString()}`;
+	const response = await axiosInstance.post(url, params.filters ?? []);
 
-		return response.data;
-	} catch (error) {
-		console.error("Error loading filter parents", error);
-		return [];
-	}
+	return response.data;
 }
 
 export async function loadFilterChildren({

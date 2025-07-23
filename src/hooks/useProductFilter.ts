@@ -162,21 +162,40 @@ export function useProductFilter({
 					searchTerm: query,
 				});
 
-				const normalized = result.map((item: CategoryFilterResponseItem) => ({
-					category: item.category,
-					categoryNumber: item.categoryNumber,
-					filters: item.filters.map((f) => ({
-						key: f.key,
-						values: [
-							{
-								value: f.key,
-								productcount: f.productCount,
-							},
-						],
-					})),
-				}));
+				console.log("Raw result from loadFilterParents:", result);
 
-				setFiltersFn(normalized);
+				if (!Array.isArray(result))
+					throw new Error("Expected result to be array");
+
+				const normalized = result
+					.map((item: any) => {
+						if ("filters" in item) {
+							return {
+								category: item.category,
+								categoryNumber: item.categoryNumber,
+								filters: item.filters.map((f: any) => ({
+									key: f.key,
+									values: [{ value: f.key, productcount: f.productCount }],
+								})),
+							};
+						}
+
+						if ("filter" in item) {
+							return {
+								category: item.category,
+								categoryNumber: null,
+								filters: item.filter.map((f: any) => ({
+									key: f.key,
+									values: [{ value: f.key, productcount: f.productCount }],
+								})),
+							};
+						}
+						console.warn("Unexpected item in filter response", item);
+						return null;
+					})
+					.filter(Boolean);
+
+				setFiltersFn(normalized as any);
 			} catch (err) {
 				console.error("Failed to load parent filters", err);
 			}

@@ -178,36 +178,29 @@ export function Filter({
 		attributeKey: string,
 		categoryNumberFromCategory?: string,
 	) => {
-		if (!loadedChildren[attributeKey]) {
-			const effectiveCategoryNumber =
-				categoryNumberFromCategory || categoryNumber;
-			const effectiveSearchTerm = query || searchTerm;
+		const effectiveCategoryNumber =
+			categoryNumberFromCategory || categoryNumber;
+		const effectiveSearchTerm = query || searchTerm;
 
-			if (!effectiveCategoryNumber && !effectiveSearchTerm) {
-				console.warn("Missing categoryNumber or searchTerm");
-				return;
-			}
+		try {
+			const result = await loadFilterChildren({
+				attributeKey,
+				categoryNumber: effectiveCategoryNumber,
+				searchTerm: effectiveSearchTerm,
+				language: "no",
+			});
 
-			try {
-				const result = await loadFilterChildren({
-					attributeKey,
-					categoryNumber: effectiveCategoryNumber,
-					searchTerm: effectiveSearchTerm,
-					language: "no",
-				});
+			const normalized =
+				Array.isArray(result) && result.length === 0
+					? { attributeKey, values: [] }
+					: result;
 
-				const normalized =
-					Array.isArray(result) && result.length === 0
-						? { attributeKey, values: [] }
-						: result;
-
-				setLoadedChildren((prev) => ({
-					...prev,
-					[attributeKey]: normalized,
-				}));
-			} catch (error) {
-				console.error("Failed to load filter children:", error);
-			}
+			setLoadedChildren((prev) => ({
+				...prev,
+				[attributeKey]: normalized,
+			}));
+		} catch (error) {
+			console.error("Failed to load filter children:", error);
 		}
 	};
 
