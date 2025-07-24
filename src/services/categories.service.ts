@@ -66,29 +66,32 @@ export async function loadFilterChildren({
 	categoryNumber,
 	searchTerm,
 	language,
+	filters = [],
 }: {
 	attributeKey: string;
 	categoryNumber?: string;
 	searchTerm?: string;
 	language?: string;
+	filters?: FilterValues[];
 }) {
-	try {
-		const params = new URLSearchParams();
-		if (categoryNumber) params.append("categoryNumber", categoryNumber);
-		if (searchTerm) params.append("searchTerm", searchTerm);
-		if (language) params.append("language", language);
+	const params = new URLSearchParams();
+	if (categoryNumber) params.append("categoryNumber", categoryNumber);
+	if (searchTerm) params.append("searchTerm", searchTerm);
+	if (language) params.append("language", language);
 
-		const url = `/filter/child?${params.toString()}`;
-		const response = await axiosInstance.post(url, [], {
+	const url = `/filter/child?${params.toString()}`;
+
+	const response = await axiosInstance.post(
+		url,
+		{ filters },
+		{
 			params: {
 				attributeKey,
 			},
-		});
-		return response.data;
-	} catch (error) {
-		console.error("Error loading child filters", error);
-		return [];
-	}
+		},
+	);
+
+	return response.data;
 }
 
 interface ProductAttributeResponse {

@@ -10,6 +10,7 @@ import {
 	AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import {
 	loadFilterChildren,
@@ -94,6 +95,17 @@ export function Filter({
 	const [selectedCategory, setSelectedCategory] = React.useState<string | null>(
 		null,
 	);
+	const [localSelectedFilters, setLocalSelectedFilters] = React.useState<
+		Record<string, string[]>
+	>(externalSelectedFilters);
+
+	const [openAccordion, setOpenAccordion] = React.useState<string | undefined>(
+		undefined,
+	);
+
+	const [loadingChildrenKeys, setLoadingChildrenKeys] = React.useState<
+		Set<string>
+	>(new Set());
 
 	const [loadedChildren, setLoadedChildren] = React.useState<
 		Record<
@@ -116,6 +128,10 @@ export function Filter({
 		}
 	}, [selectedFilters]);
 
+	React.useEffect(() => {
+		setLocalSelectedFilters(externalSelectedFilters);
+	}, [externalSelectedFilters]);
+
 	const handleCategorySelect = (cf: CategoryFilterItem) => {
 		if (selectedCategory === cf.assortmentNumber) {
 			setSelectedCategory(null);
@@ -128,7 +144,7 @@ export function Filter({
 
 	const handleFilterChange = useCallback(
 		async (filterKey: string, value: string) => {
-			const currentValues = selectedFilters?.[filterKey] || [];
+			const currentValues = localSelectedFilters[filterKey] || [];
 			let updatedValues: string[];
 
 			if (currentValues.includes(value)) {
@@ -137,16 +153,18 @@ export function Filter({
 				updatedValues = [...currentValues, value];
 			}
 
-			const updatedFilters: Record<string, string[]> = {
-				...selectedFilters,
+			const optimisticFilters: Record<string, string[]> = {
+				...localSelectedFilters,
 				[filterKey]: updatedValues,
 			};
 
 			if (updatedValues.length === 0) {
-				delete updatedFilters[filterKey];
+				delete optimisticFilters[filterKey];
 			}
 
-			const filterArray: FilterValues[] = Object.entries(updatedFilters)
+			setLocalSelectedFilters(optimisticFilters);
+
+			const filterArray: FilterValues[] = Object.entries(optimisticFilters)
 				.filter(([key, values]) => key !== "category" && values.length > 0)
 				.map(([key, values]) => ({
 					key,
@@ -160,9 +178,11 @@ export function Filter({
 				filters: filterArray,
 			});
 
+			await loadChildrenForFilter(filterKey, categoryNumber, filterArray);
+
 			onFilterChange(filterArray);
 		},
-		[onFilterChange, selectedFilters, categoryNumber, query],
+		[onFilterChange, localSelectedFilters, categoryNumber, query],
 	);
 
 	const resetFilters = useCallback(() => {
@@ -177,10 +197,13 @@ export function Filter({
 	const loadChildrenForFilter = async (
 		attributeKey: string,
 		categoryNumberFromCategory?: string,
+		filters: FilterValues[] = [],
 	) => {
 		const effectiveCategoryNumber =
 			categoryNumberFromCategory || categoryNumber;
 		const effectiveSearchTerm = query || searchTerm;
+
+		setLoadingChildrenKeys((prev) => new Set(prev).add(attributeKey)); // Start loading
 
 		try {
 			const result = await loadFilterChildren({
@@ -188,6 +211,7 @@ export function Filter({
 				categoryNumber: effectiveCategoryNumber,
 				searchTerm: effectiveSearchTerm,
 				language: "no",
+				filters,
 			});
 
 			const normalized =
@@ -201,6 +225,12 @@ export function Filter({
 			}));
 		} catch (error) {
 			console.error("Failed to load filter children:", error);
+		} finally {
+			setLoadingChildrenKeys((prev) => {
+				const newSet = new Set(prev);
+				newSet.delete(attributeKey);
+				return newSet;
+			});
 		}
 	};
 
@@ -309,7 +339,10 @@ export function Filter({
 						key={filterCategory.category}
 						className="space-y-4">
 						<Accordion
-							type="multiple"
+							type="single"
+							collapsible
+							value={openAccordion}
+							onValueChange={(val) => setOpenAccordion(val)}
 							className="w-full">
 							{filterCategory.filters.map((filter) => {
 								const children = loadedChildren[filter.key];
@@ -321,16 +354,29 @@ export function Filter({
 										className="border-b">
 										<AccordionTrigger
 											className="text-sm font-medium hover:no-underline"
-											onClick={() =>
+											onClick={() => {
+												setOpenAccordion(filter.key);
 												loadChildrenForFilter(
 													filter.key,
 													filterCategory.categoryNumber,
-												)
-											}>
+													Object.entries(selectedFilters)
+														.filter(
+															([key, values]) =>
+																key !== "category" && values.length > 0,
+														)
+														.map(([key, values]) => ({ key, values })),
+												);
+											}}>
 											{filter.key}
 										</AccordionTrigger>
 										<AccordionContent className="pt-2">
-											{children ? (
+											{loadingChildrenKeys.has(filter.key) ? (
+												<>
+													<Skeleton className="mb-2 h-4 w-32" />
+													<Skeleton className="mb-2 h-4 w-32" />
+													<Skeleton className="mb-2 h-4 w-32" />
+												</>
+											) : children ? (
 												children.values.length > 0 ? (
 													<div className="space-y-2 pl-2">
 														{children.values.map((child) => (
@@ -340,7 +386,7 @@ export function Filter({
 																<Checkbox
 																	id={`${filter.key}-${child.value}`}
 																	checked={
-																		selectedFilters[filter.key]?.includes(
+																		localSelectedFilters[filter.key]?.includes(
 																			child.value,
 																		) || false
 																	}

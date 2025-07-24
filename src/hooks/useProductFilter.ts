@@ -179,17 +179,6 @@ export function useProductFilter({
 								})),
 							};
 						}
-
-						if ("filter" in item) {
-							return {
-								category: item.category,
-								categoryNumber: null,
-								filters: item.filter.map((f: any) => ({
-									key: f.key,
-									values: [{ value: f.key, productcount: f.productCount }],
-								})),
-							};
-						}
 						console.warn("Unexpected item in filter response", item);
 						return null;
 					})
