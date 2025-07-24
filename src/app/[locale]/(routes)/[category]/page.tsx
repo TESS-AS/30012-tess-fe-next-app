@@ -59,7 +59,7 @@ export default async function CategoryPage({
 				? filtersResponse[0].categoryFilters
 				: [];
 
-		const filters: FilterCategory[] = filtersResponse.map((item: any) => {
+		const filters: any[] = filtersResponse.map((item: any) => {
 			if ("categoryFilters" in item && "filter" in item) {
 				return {
 					category: item.category,
