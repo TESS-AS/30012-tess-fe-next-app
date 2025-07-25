@@ -1,15 +1,11 @@
+import {
+	CategoryFilterResponseItem,
+	FilterResponseItem,
+	FilterValues,
+} from "@/types/filter.types";
 import { AxiosResponse } from "axios";
 
 import axiosInstance from "./axiosClient";
-
-const filtersCache: {
-	[key: string]: {
-		data: any;
-		timestamp: number;
-	};
-} = {};
-
-const FILTERS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 export async function loadCategories(locale: string) {
 	try {
@@ -32,17 +28,6 @@ export async function loadFilters({
 	language?: string | null;
 }) {
 	try {
-		// Create cache key
-		const cacheKey = `${categoryNumber || "none"}-${searchTerm || "none"}-${language || "none"}`;
-		const now = Date.now();
-
-		if (
-			filtersCache[cacheKey] &&
-			now - filtersCache[cacheKey].timestamp < FILTERS_CACHE_TTL
-		) {
-			return filtersCache[cacheKey].data;
-		}
-
 		const params = new URLSearchParams();
 		if (categoryNumber) params.append("categoryNumber", categoryNumber);
 		if (searchTerm) params.append("searchTerm", searchTerm);
@@ -50,18 +35,63 @@ export async function loadFilters({
 
 		const url = `/attributeFilter/${params.toString() ? `?${params.toString()}` : ""}`;
 		const response = await axiosInstance.get(url);
-		console.log(response, "response");
-
-		filtersCache[cacheKey] = {
-			data: response.data,
-			timestamp: now,
-		};
 
 		return response.data;
 	} catch (error) {
 		console.error("Error loading filters", error);
 		return [];
 	}
+}
+
+export async function loadFilterParents(params: {
+	categoryNumber?: string | null;
+	searchTerm?: string | null;
+	language?: string | null;
+	filters?: FilterValues[];
+}): Promise<any[]> {
+	const query = new URLSearchParams();
+	if (params.categoryNumber)
+		query.append("categoryNumber", params.categoryNumber);
+	if (params.searchTerm) query.append("searchTerm", params.searchTerm);
+	if (params.language) query.append("language", params.language);
+
+	const url = `/filter/parent?${query.toString()}`;
+	const response = await axiosInstance.post(url, params.filters ?? []);
+
+	return response.data;
+}
+
+export async function loadFilterChildren({
+	attributeKey,
+	categoryNumber,
+	searchTerm,
+	language,
+	filters = [],
+}: {
+	attributeKey: string;
+	categoryNumber?: string;
+	searchTerm?: string;
+	language?: string;
+	filters?: FilterValues[];
+}) {
+	const params = new URLSearchParams();
+	if (categoryNumber) params.append("categoryNumber", categoryNumber);
+	if (searchTerm) params.append("searchTerm", searchTerm);
+	if (language) params.append("language", language);
+
+	const url = `/filter/child?${params.toString()}`;
+
+	const response = await axiosInstance.post(
+		url,
+		{ filters },
+		{
+			params: {
+				attributeKey,
+			},
+		},
+	);
+
+	return response.data;
 }
 
 interface ProductAttributeResponse {

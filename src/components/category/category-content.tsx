@@ -13,6 +13,12 @@ interface CategoryContentProps {
 	filters: FilterCategory[];
 	query?: string;
 	segment?: string;
+	categoryFilters?: {
+		assortmentNumber: string;
+		nameNo: string;
+		nameEn: string;
+		productCount: string;
+	}[];
 }
 
 export default function CategoryContent({
@@ -20,9 +26,9 @@ export default function CategoryContent({
 	filters,
 	query,
 	segment,
+	categoryFilters,
 }: CategoryContentProps) {
 	const breadcrumbs = useBreadcrumbs(segment);
-	console.log(breadcrumbs, "breadcrumbs");
 	return (
 		<div className="py-8">
 			<div className="mb-6">
@@ -30,6 +36,7 @@ export default function CategoryContent({
 			</div>
 			<ProductGrid
 				filters={filters}
+				categoryFilters={categoryFilters}
 				categoryNumber={categoryData?.groupId || ""}
 				query={query || null}
 			/>

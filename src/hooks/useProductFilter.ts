@@ -1,18 +1,26 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { FilterCategory } from "@/components/ui/filter";
+import { loadFilterParents } from "@/services/categories.service";
 import { searchProducts } from "@/services/product.service";
-import { FilterValues } from "@/types/filter.types";
+import {
+	CategoryFilterResponseItem,
+	FilterResponseItem,
+	FilterValues,
+} from "@/types/filter.types";
 import { IProduct } from "@/types/product.types";
 
 interface UseProductFilterProps {
 	categoryNumber: string;
+	categoryName?: string;
 	query: string | null;
 }
 
 export function useProductFilter({
-	categoryNumber,
+	categoryNumber: initialCategoryNumber,
 	query,
 }: UseProductFilterProps) {
+	const [categoryNumber, setCategoryNumber] = useState(initialCategoryNumber);
 	const [products, setProducts] = useState<IProduct[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [currentPage, setCurrentPage] = useState(1);
@@ -59,7 +67,7 @@ export function useProductFilter({
 		return () => {
 			isMounted = false;
 		};
-	}, [categoryNumber, query]);
+	}, [categoryNumber, query, currentFilters, sort]);
 
 	const loadMore = useCallback(async () => {
 		if (!hasMore || isLoading) return;
@@ -132,6 +140,58 @@ export function useProductFilter({
 		[categoryNumber, query, sort],
 	);
 
+	const handleCategoryChange = useCallback(
+		async (
+			newCategoryNumber: string,
+			newCategoryName: string,
+			setFiltersFn: (filters: FilterCategory[]) => void,
+		) => {
+			setCategoryNumber(newCategoryNumber);
+			setCurrentPage(1);
+			setProducts([]);
+			setCategoryNumber(newCategoryNumber);
+
+			setSelectedFilters({
+				category: [newCategoryName],
+			});
+			setCurrentFilters(null);
+
+			try {
+				const result = await loadFilterParents({
+					categoryNumber: newCategoryNumber,
+					searchTerm: query,
+				});
+
+				console.log("Raw result from loadFilterParents:", result);
+
+				if (!Array.isArray(result))
+					throw new Error("Expected result to be array");
+
+				const normalized = result
+					.map((item: any) => {
+						if ("filters" in item) {
+							return {
+								category: item.category,
+								categoryNumber: item.categoryNumber,
+								filters: item.filters.map((f: any) => ({
+									key: f.key,
+									values: [{ value: f.key, productcount: f.productCount }],
+								})),
+							};
+						}
+						console.warn("Unexpected item in filter response", item);
+						return null;
+					})
+					.filter(Boolean);
+
+				setFiltersFn(normalized as any);
+			} catch (err) {
+				console.error("Failed to load parent filters", err);
+			}
+		},
+		[query, categoryNumber],
+	);
+
 	const handleSortChange = useCallback(
 		async (newSort: string) => {
 			try {
@@ -162,15 +222,26 @@ export function useProductFilter({
 	const removeFilter = useCallback(
 		async (key: string, value: string) => {
 			const newFilters = selectedFilters[key].filter((v) => v !== value);
-			const filterArray: FilterValues[] = Object.entries({
+
+			const updatedSelectedFilters = {
 				...selectedFilters,
 				[key]: newFilters,
-			})
+			};
+
+			if (newFilters.length === 0) {
+				delete updatedSelectedFilters[key];
+			}
+
+			const filterArray: FilterValues[] = Object.entries(updatedSelectedFilters)
 				.filter(([, vals]) => vals.length > 0)
 				.map(([k, vals]) => ({
 					key: k,
 					values: vals,
 				}));
+
+			if (key === "category" && newFilters.length === 0) {
+				setCategoryNumber("");
+			}
 
 			await handleFilterChange(filterArray);
 		},
@@ -186,5 +257,6 @@ export function useProductFilter({
 		loadMore,
 		selectedFilters,
 		removeFilter,
+		handleCategoryChange,
 	};
 }

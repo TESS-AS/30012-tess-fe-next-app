@@ -1,9 +1,9 @@
 import CategoryContent from "@/components/category/category-content";
+import { FilterCategory } from "@/components/ui/filter";
 import { fetchCategories } from "@/lib/category-utils";
 import { getSeoMetadata } from "@/lib/seo";
 import { formatUrlToDisplayName } from "@/lib/utils";
-import { loadFilters } from "@/services/categories.service";
-import { searchProducts } from "@/services/product.service";
+import { loadFilterParents } from "@/services/categories.service";
 import { getLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 
@@ -43,22 +43,61 @@ export default async function CategoryPage({
 		const formattedCategory = formatUrlToDisplayName(category);
 
 		const categories = await fetchCategories(locale);
-
 		const categoryData = categories.find(
 			(cat) => formatUrlToDisplayName(cat.slug) === formattedCategory,
 		);
-
 		const categoryNumber = categoryData?.groupId || null;
 
-		const filters = await loadFilters({
+		const filtersResponse = await loadFilterParents({
 			categoryNumber,
 			searchTerm: query || null,
 			language: locale,
 		});
 
+		const categoryFilters =
+			Array.isArray(filtersResponse) && "categoryFilters" in filtersResponse[0]
+				? filtersResponse[0].categoryFilters
+				: [];
+
+		const filters: any[] = filtersResponse.map((item: any) => {
+			if ("categoryFilters" in item && "filter" in item) {
+				return {
+					category: item.category,
+					filters: (item.filter as { key: string; productCount: number }[]).map(
+						(f) => ({
+							key: f.key,
+							values: [
+								{
+									value: f.key,
+									productcount: f.productCount,
+								},
+							],
+						}),
+					),
+				};
+			} else {
+				return {
+					category: item.category,
+					categoryNumber: item.categoryNumber,
+					filters: (
+						item.filters as { key: string; productCount: number }[]
+					).map((f) => ({
+						key: f.key,
+						values: [
+							{
+								value: f.key,
+								productcount: f.productCount,
+							},
+						],
+					})),
+				};
+			}
+		});
+
 		return (
 			<CategoryContent
 				categoryData={categoryData}
+				categoryFilters={categoryFilters}
 				filters={filters}
 				query={query}
 			/>

@@ -29,12 +29,21 @@ export function useGetProfileData() {
 			session?.accessToken &&
 			session?.idToken
 		) {
-			fetchUserData();
+			let isMounted = true;
 
-			const timeout = setTimeout(fetchUserData, 1000);
-			return () => clearTimeout(timeout);
+			const load = async () => {
+				if (isMounted) await fetchUserData();
+			};
+
+			load();
+			const timeout = setTimeout(load, 1000);
+
+			return () => {
+				isMounted = false;
+				clearTimeout(timeout);
+			};
 		}
-	}, [status]);
+	}, [status, session]);
 
 	return { data, isLoading, error };
 }

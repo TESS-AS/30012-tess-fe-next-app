@@ -2,6 +2,7 @@ import MainCategorySection from "@/components/categories/main-categories";
 import { Quote } from "@/components/quote";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Search } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
@@ -20,31 +21,35 @@ export default function Home() {
 							className="object-cover"
 							priority
 						/>
+						<div className="absolute inset-0 z-1 bg-black/50" />
+						<div className="absolute inset-0 z-2 container mx-auto flex flex-col justify-center px-4">
+							<div className="max-w-2xl space-y-8 text-white">
+								<div className="space-y-4">
+									<h1 className="text-6xl leading-tight font-bold">
+										Hver jobb starter med riktig utstyr
+									</h1>
+									<p className="max-w-2xl text-xl leading-relaxed text-white/90">
+										Finn riktig slange, kobling eller utstyr – når du trenger
+										det.
+										<br />
+										Vi har over 130 servicesentre klare til å levere.
+									</p>
+								</div>
 
-						<div className="absolute inset-0 z-1 bg-black/40" />
-
-						<div className="absolute inset-0 z-2 container mx-auto flex items-center">
-							<div className="max-w-xl space-y-6 text-white">
-								<p className="text-sm tracking-wide text-white/80 uppercase">
-									Let’s get to work
-								</p>
-								<h1 className="text-4xl font-bold sm:text-5xl">
-									Honest, Trustworthy, And <br /> Professional.
-								</h1>
-								<p className="text-lg leading-relaxed text-white/90">
-									At TESS, you will meet professionals on both sides of the
-									counter and have access to the best market availability with
-									more than 130 local service centers.
-								</p>
-								<div className="flex flex-wrap items-center gap-4">
-									<Button className="rounded-full bg-green-600 px-6 py-2 hover:bg-green-800">
-										{t("seeCategories")}
-									</Button>
-									<Button
-										variant="outline"
-										className="rounded-full bg-white/90 px-6 py-2 text-black hover:bg-white">
-										{t("learnMore")}
-									</Button>
+								<div className="w-full">
+									<div className="flex items-center gap-2 rounded-lg bg-white p-1 shadow-lg">
+										<div className="flex flex-1 items-center gap-3 px-1 py-1">
+											<input
+												type="text"
+												placeholder="Søk etter slanger, utstyr, diameter, trykkklasse..."
+												className="flex-1 rounded-md border border-gray-300 bg-[#F8F9F8] px-2 py-[7px] text-base text-gray-700 placeholder-gray-500 outline-none"
+											/>
+										</div>
+										<Button className="mr-3 flex items-center gap-2 rounded-md bg-green-600 px-8 py-5 font-medium text-white hover:bg-green-700">
+											<Search className="h-4 w-4" />
+											Søk
+										</Button>
+									</div>
 								</div>
 							</div>
 						</div>

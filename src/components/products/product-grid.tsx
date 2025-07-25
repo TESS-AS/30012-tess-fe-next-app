@@ -32,7 +32,14 @@ interface ProductGridProps {
 	variant?: "default" | "compact";
 	filters: FilterCategory[];
 	categoryNumber: string;
+	categoryName?: string;
 	query: string | null;
+	categoryFilters?: {
+		assortmentNumber: string;
+		nameNo: string;
+		nameEn: string;
+		productCount: string;
+	}[];
 }
 
 const SORT_OPTIONS = [
@@ -48,15 +55,17 @@ export function ProductGrid({
 	variant = "default",
 	filters,
 	categoryNumber,
+	categoryName,
 	query,
+	categoryFilters,
 }: ProductGridProps) {
 	const t = useTranslations();
 	const pathname = usePathname();
 	const [isFiltering, setIsFiltering] = useState(false);
-	const [viewLayout, setViewLayout] = useState<string>("");
+	const [viewLayout, setViewLayout] = useState<string>("grid");
 	const observerTarget = useRef<HTMLDivElement>(null);
 	const [sort, setSort] = useState<string>("");
-
+	const [filtersState, setFiltersState] = useState(filters);
 	const {
 		products,
 		isLoading,
@@ -66,8 +75,10 @@ export function ProductGrid({
 		handleSortChange,
 		selectedFilters,
 		removeFilter,
+		handleCategoryChange,
 	} = useProductFilter({
 		categoryNumber,
+		categoryName,
 		query,
 	});
 
@@ -81,7 +92,12 @@ export function ProductGrid({
 	);
 
 	useEffect(() => {
-		// Reset isFiltering when loading is complete
+		if (filters.length > 0) {
+			setFiltersState(filters);
+		}
+	}, [filters, query]);
+
+	useEffect(() => {
 		if (!isLoading) {
 			setIsFiltering(false);
 		}
@@ -118,94 +134,130 @@ export function ProductGrid({
 
 	return (
 		<div className="flex flex-col gap-8 lg:flex-row">
-			{/* Sidebar */}
-			<aside className="lg:w-1/4">
+			<aside className="w-full pr-4 lg:w-1/4">
 				<Filter
-					filters={filters}
-					className="sticky top-4"
+					filters={filtersState}
 					variant="default"
 					size="default"
 					onFilterChange={(newFilters) => {
 						onFilterChange(newFilters);
 					}}
 					selectedFilters={selectedFilters}
+					categoryFilters={categoryFilters}
+					query={query}
+					categoryNumber={categoryNumber}
+					categoryName={categoryName}
+					handleCategoryChange={(newCategoryNumber, newCategoryName) =>
+						handleCategoryChange(
+							newCategoryNumber,
+							newCategoryName,
+							setFiltersState,
+						)
+					}
 				/>
 			</aside>
 
-			{/* Product Grid */}
 			<div className="flex-1">
-				{/* Active Filters */}
-				{Object.keys(selectedFilters).length > 0 && (
-					<div className="mb-4 flex flex-wrap gap-2">
-						{Object.entries(selectedFilters).map(([key, values]) =>
-							values.map((value) => (
-								<div
-									key={`${key}-${value}`}
-									className="bg-primary/10 flex items-center gap-1 rounded-full px-3 py-1 text-sm">
-									<TooltipProvider>
-										<Tooltip>
-											<TooltipTrigger asChild>
-												<div className="flex items-center gap-1">
-													<span className="max-w-[100px] truncate font-medium">
-														{key}:
-													</span>
-													<span className="max-w-[100px] truncate">
-														{value}
-													</span>
-												</div>
-											</TooltipTrigger>
-											<TooltipContent>
-												<p>
-													{key}: {value}
-												</p>
-											</TooltipContent>
-										</Tooltip>
-									</TooltipProvider>
-									<button
-										onClick={() => removeFilter(key, value)}
-										className="hover:bg-primary/20 ml-1 rounded-full p-0.5">
-										<X className="h-3 w-3" />
-									</button>
-								</div>
-							)),
-						)}
-					</div>
-				)}
+				<div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+					<h2 className="text-2xl font-semibold">{query}</h2>
 
-				{/* Controls */}
-				<div className="mb-4 flex items-center justify-between">
-					<Select
-						value={sort}
-						onValueChange={onSortChange}>
-						<SelectTrigger className="w-[180px]">
-							<SelectValue placeholder={t("Common.sort")} />
-						</SelectTrigger>
-						<SelectContent>
-							{SORT_OPTIONS.map((option) => (
-								<SelectItem
-									key={option.value}
-									value={option.value}>
-									{option.label}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-
-					<div className="flex gap-2">
+					<div className="flex shrink-0 items-center gap-2">
+						<Select
+							value={sort}
+							onValueChange={onSortChange}>
+							<SelectTrigger className="out h-8 w-[90px] rounded-md border border-neutral-300 px-3 text-sm">
+								<SelectValue placeholder={t("Common.sort")} />
+							</SelectTrigger>
+							<SelectContent>
+								<>
+									{SORT_OPTIONS.map((option) => (
+										<SelectItem
+											key={option.value}
+											value={option.value}>
+											{option.label}
+										</SelectItem>
+									))}
+								</>
+							</SelectContent>
+						</Select>
 						<Button
 							variant="outline"
 							onClick={() => setViewLayout("list")}
 							size="icon"
-							className="h-8 w-8">
-							<AlignJustify className="h-4 w-4" />
+							className={cn(
+								"h-8 w-8 border",
+								viewLayout === "list"
+									? "border-neutral-800"
+									: "border-neutral-300",
+							)}>
+							<AlignJustify
+								className={cn(
+									"h-4 w-4",
+									viewLayout === "list"
+										? "text-neutral-800"
+										: "text-neutral-500",
+								)}
+							/>
 						</Button>
+
 						<Button
 							variant="outline"
 							onClick={() => setViewLayout("grid")}
 							size="icon"
-							className="h-8 w-8">
-							<LayoutGrid className="h-4 w-4" />
+							className={cn(
+								"h-8 w-8 border",
+								viewLayout === "grid"
+									? "border-neutral-800"
+									: "border-neutral-300",
+							)}>
+							<LayoutGrid
+								className={cn(
+									"h-4 w-4",
+									viewLayout === "grid"
+										? "text-neutral-800"
+										: "text-neutral-500",
+								)}
+							/>
 						</Button>
+					</div>
+				</div>
+
+				<div className="mb-4 flex items-center justify-between align-middle">
+					<div className="flex flex-wrap gap-2">
+						{Object.entries(selectedFilters).map(([key, values]) =>
+							values
+								.filter((value) => !!value)
+								.map((value) => (
+									<div
+										key={`${key}-${value}`}
+										className="bg-primary/10 flex items-center gap-1 rounded-md px-3 py-1 text-sm">
+										<TooltipProvider>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<div className="flex items-center gap-1">
+														<span className="text-md max-w-[100px] truncate">
+															{key === "category" ? "Kategori" : key}:
+														</span>
+														<span className="max-w-[100px] truncate">
+															{value}
+														</span>
+													</div>
+												</TooltipTrigger>
+												<TooltipContent>
+													<p>
+														{key}: {value}
+													</p>
+												</TooltipContent>
+											</Tooltip>
+										</TooltipProvider>
+										<button
+											onClick={() => removeFilter(key, value)}
+											className="hover:bg-primary/20 ml-1 rounded-md p-0.5">
+											<X className="h-3 w-3" />
+										</button>
+									</div>
+								)),
+						)}
 					</div>
 				</div>
 				<div

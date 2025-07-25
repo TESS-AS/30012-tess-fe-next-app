@@ -6,7 +6,7 @@ import {
 } from "@/lib/category-utils";
 import { getSeoMetadata } from "@/lib/seo";
 import { formatUrlToDisplayName } from "@/lib/utils";
-import { loadFilters } from "@/services/categories.service";
+import { loadFilterParents, loadFilters } from "@/services/categories.service";
 import { getLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 
@@ -53,7 +53,7 @@ export default async function SubCategoryPage({
 
 		const categoryNumber = subCategoryData?.groupId || null;
 
-		const filters = await loadFilters({
+		const filters = await loadFilterParents({
 			categoryNumber,
 			searchTerm: null,
 			language: locale,

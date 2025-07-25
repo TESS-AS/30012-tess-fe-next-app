@@ -59,7 +59,11 @@
 		},
 		"sort": "Sorter",
 		"search": "Søk",
-		"searchProducts": "Søk etter slanger, utstyr, diameter, trykklasse..."
+		"searchProducts": "Søk etter slanger, utstyr, diameter, trykklasse...",
+		"searchAttributes": "Søk etter attributter",
+		"attributes": "Attributter",
+		"showMore": "Vis mer",
+		"showLess": "Vis mindre"
 	},
 	"Search": {
 		"suggestions": "Søkeforslag",
@@ -67,7 +71,7 @@
 		"noProductsFound": "Ingen produkter funnet"
 	},
 	"Seo": {
-		"defaultTitle": "TESS | Bygg- og sikkerhetsprodukter",
+		"defaultTitle": "TESS - Teknisk Faghandel | Netthandel",
 		"defaultDescription": "Tess er din pålitelige leverandør av byggematerialer, sikkerhetsutstyr og industrielle produkter. Handle trygt og raskt på nett."
 	},
 	"Footer": {

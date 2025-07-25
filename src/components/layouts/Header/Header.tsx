@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import AuthDialog from "@/components/ui/dialogs/auth-dialog";
+import { FeedbackDialog } from "@/components/ui/dialogs/feedback-dialog";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -21,6 +22,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useSearch } from "@/hooks/useProductSearch";
+import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import axiosClient from "@/services/axiosClient";
@@ -28,6 +30,7 @@ import { loadCategoryTree } from "@/services/categories.service";
 import { getProductVariations } from "@/services/product.service";
 import { Category } from "@/types/categories.types";
 import { IProductSearch, ISuggestions } from "@/types/search.types";
+import { ProfileUser } from "@/types/user.types";
 import {
 	Building,
 	ChevronDown,
@@ -46,7 +49,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const currentLocale = useLocale();
 	const t = useTranslations();
 	const router = useRouter();
-	const { data: profile, isLoading: isProfileLoading } = useGetProfileData();
+
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -54,6 +57,24 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const [variations, setVariations] = useState<Record<string, any>>({});
 	const { data, attributeResults, isLoading } = useSearch(searchQuery);
 	const { cartItems, totalPrice } = useAppContext();
+	const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
+
+	const [profile, setProfile] = useState<ProfileUser | null>(null);
+	const [, setIsLoading] = useState(true);
+
+	const { data: ssoProfile, isLoading: isSSOLoading } = useGetProfileData();
+	const { data: punchoutProfile, isLoading: isPunchoutLoading } =
+		usePunchoutProfile();
+
+	useEffect(() => {
+		if (punchoutProfile?.punchout === true) {
+			setProfile(punchoutProfile);
+			setIsLoading(isPunchoutLoading);
+		} else if (ssoProfile) {
+			setProfile(ssoProfile);
+			setIsLoading(isSSOLoading);
+		}
+	}, [ssoProfile, punchoutProfile, isSSOLoading, isPunchoutLoading]);
 
 	const searchRef = useClickOutside<HTMLDivElement>(() => {
 		setSearchQuery("");
@@ -88,7 +109,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 	};
 
 	return (
-		<header className="bg-background h-[182px] w-full border-b">
+		<header className="bg-background h-[182px] w-full border-t">
 			<div className="container m-auto flex h-16 items-center justify-between">
 				<div className="flex items-center gap-6">
 					<Button
@@ -112,8 +133,9 @@ export default function Header({ categories }: { categories: Category[] }) {
 						<MessageSquareText className="h-4 w-4" /> Vær med på utviklingen
 					</Button>
 					<Button
+						variant="darkGreen"
 						className="text-xs"
-						variant="darkGreen">
+						onClick={() => setIsFeedbackDialogOpen(true)}>
 						Gi tilbakemelding
 					</Button>
 				</div>}
@@ -363,6 +385,10 @@ export default function Header({ categories }: { categories: Category[] }) {
 			<AuthDialog
 				isOpen={isAuthOpen}
 				onOpenChange={setIsAuthOpen}
+			/>
+			<FeedbackDialog
+				open={isFeedbackDialogOpen}
+				onOpenChange={setIsFeedbackDialogOpen}
 			/>
 		</header>
 	);

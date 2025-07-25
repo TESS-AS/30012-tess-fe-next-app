@@ -5,7 +5,7 @@ import {
 } from "@/lib/category-utils";
 import { getSeoMetadata } from "@/lib/seo";
 import { formatUrlToDisplayName } from "@/lib/utils";
-import { loadFilters } from "@/services/categories.service";
+import { loadFilterParents, loadFilters } from "@/services/categories.service";
 import { getLocale, getTranslations } from "next-intl/server";
 
 export async function generateMetadata({
@@ -56,7 +56,7 @@ export default async function SegmentPage({ params }: SegmentPageProps) {
 
 		const categoryNumber = subCategoryData?.groupId || null;
 
-		const filters = await loadFilters({
+		const filters = await loadFilterParents({
 			categoryNumber,
 			searchTerm: null,
 			language: locale,
