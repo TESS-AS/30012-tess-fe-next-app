@@ -52,11 +52,10 @@ export default function Header({ categories }: { categories: Category[] }) {
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
-	const [isAuthOpen, setIsAuthOpen] = useState(false);
 	const [isModalIdOpen, setIsModalIdOpen] = useState<string | null>(null);
 	const [variations, setVariations] = useState<Record<string, any>>({});
 	const { data, attributeResults, isLoading } = useSearch(searchQuery);
-	const { cartItems } = useAppContext();
+	const { cartItems, totalPrice, isAuthOpen, setIsAuthOpen } = useAppContext();
 	const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
 
 	const [profile, setProfile] = useState<ProfileUser | null>(null);
@@ -116,7 +115,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 						variant="ghost"
 						className="mb-2 rounded-none border-b border-[#013d1a] px-0 pb-0 text-sm font-medium hover:bg-transparent">
 						E-handel{" "}
-						<Badge className="-mb-1 rounded-[6px_6px_0_6px] bg-[#003D1A] text-xs text-white">
+						<Badge className="-mb-1.5 rounded-[6px_6px_0_6px] bg-[#003D1A] text-xs text-white">
 							Beta
 						</Badge>
 					</Button>
@@ -126,19 +125,21 @@ export default function Header({ categories }: { categories: Category[] }) {
 						THM KundeWEB
 					</Button>
 				</div>
-				<div className="flex items-center gap-2 rounded-md bg-[#FDFDEA] px-3 py-1.5">
-					<Button
-						variant="ghost"
-						className="text-sm font-medium text-[#003D1A] hover:bg-transparent">
-						<MessageSquareText className="h-4 w-4" /> Vær med på utviklingen
-					</Button>
-					<Button
-						variant="darkGreen"
-						className="text-xs"
-						onClick={() => setIsFeedbackDialogOpen(true)}>
-						Gi tilbakemelding
-					</Button>
-				</div>
+				{profile && (
+					<div className="flex items-center gap-2 rounded-md bg-[#FDFDEA] px-3 py-1.5">
+						<Button
+							variant="ghost"
+							className="text-sm font-medium text-[#003D1A] hover:bg-transparent">
+							<MessageSquareText className="h-4 w-4" /> Vær med på utviklingen
+						</Button>
+						<Button
+							variant="darkGreen"
+							className="text-xs"
+							onClick={() => setIsFeedbackDialogOpen(true)}>
+							Gi tilbakemelding
+						</Button>
+					</div>
+				)}
 			</div>
 			<div className="container m-auto mb-1 flex h-16 items-center justify-between">
 				<div className="flex items-center gap-2">
@@ -244,7 +245,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 								{cartItems?.length}
 							</Badge>
 						</div>
-						{cartItems?.length > 0 ? "1049.50,-" : ""}
+						{cartItems?.length > 0 ? `${totalPrice.toFixed(2)},-` : ""}
 						<span className="sr-only">Cart</span>
 					</Button>
 					{profile ? (

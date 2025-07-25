@@ -35,4 +35,5 @@ export interface PriceResponse {
 	methodMatches: {};
 	bestPrice: number;
 	bestSource: string;
+	surCharge: number;
 }

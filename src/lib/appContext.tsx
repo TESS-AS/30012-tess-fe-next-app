@@ -5,6 +5,7 @@ import {
 	ReactNode,
 	useContext,
 	useEffect,
+	useMemo,
 	useState,
 } from "react";
 
@@ -43,15 +44,26 @@ interface AppContextType {
 	) => Promise<void>;
 	removeItem: (cartLine: number) => Promise<void>;
 	handleArchiveCart: () => Promise<void>;
+	currentStep: number;
+	setCurrentStep: (value: number) => void;
+	totalPrice: number;
+	surChargeTotalPrice: number;
+	isAuthOpen: boolean;
+	setIsAuthOpen: (value: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppContextProvider = ({ children }: { children: ReactNode }) => {
+	const [isAuthOpen, setIsAuthOpen] = useState(false);
+	const [currentStep, setCurrentStep] = useState(0);
 	const [isCartChanging, setIsCartChanging] = useState(false);
 	const [cartItems, setCartItems] = useState<CartLine[]>([]);
 	const [prices, setPrices] = useState<Record<string, number>>({});
 	const [calculatedPrices, setCalculatedPrices] = useState<
+		Record<string, number>
+	>({});
+	const [surChargePrices, setSurChargePrices] = useState<
 		Record<string, number>
 	>({});
 	const [isLoading, setIsLoading] = useState(false);
@@ -97,13 +109,33 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					profile?.defaultCustomerNumber,
 					profile?.defaultCompanyNumber,
 				);
+				console.log(priceResults, "priceResults");
+
 				const newPrices = priceResults.reduce(
 					(acc: Record<string, number>, item: PriceResponse) => ({
 						...acc,
-						[item.itemNumber]: item.basePriceTotal || 0,
+						[item.itemNumber]: item.bestPrice || 0,
 					}),
 					{} as Record<string, number>,
 				);
+
+				const surChargePrices = priceResults.reduce(
+					(acc: Record<string, number>, item: PriceResponse) => ({
+						...acc,
+						[item.itemNumber]: item.surCharge || 0,
+					}),
+					{} as Record<string, number>,
+				);
+
+				// const rabatterprices = priceResults.reduce(
+				// 	(acc: Record<string, number>, item: PriceResponse) => ({
+				// 		...acc,
+				// 		[item.itemNumber]: item.discount || 0,
+				// 	}),
+				// 	{} as Record<string, number>,
+				// );
+
+				setSurChargePrices(surChargePrices);
 				setCalculatedPrices(newPrices);
 			}
 		} catch (error) {
@@ -118,6 +150,17 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			loadCartData();
 		}
 	}, [status, isCartChanging]);
+	console.log(calculatedPrices, "prices");
+
+	const totalPrice = useMemo(() => {
+		return Object.values(calculatedPrices).reduce((sum, val) => sum + val, 0);
+	}, [calculatedPrices]);
+
+	const surChargeTotalPrice = useMemo(() => {
+		return Object.values(surChargePrices).reduce((sum, val) => sum + val, 0);
+	}, [surChargePrices]);
+
+	console.log(surChargeTotalPrice, "surChargeTotalPrice");
 
 	const updateQuantity = async (
 		cartLine: number,
@@ -187,6 +230,12 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				updateWarehouse,
 				removeItem,
 				handleArchiveCart,
+				currentStep,
+				setCurrentStep,
+				totalPrice,
+				surChargeTotalPrice,
+				isAuthOpen,
+				setIsAuthOpen,
 			}}>
 			{children}
 		</AppContext.Provider>

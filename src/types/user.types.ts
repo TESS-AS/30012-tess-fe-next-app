@@ -30,3 +30,16 @@ export interface UserAddress {
 	condition: string;
 	type: "personal" | "business" | "organization";
 }
+
+export interface DefaultAddress {
+	addressId: number;
+	addressName: string;
+	addressLine1: string;
+	addressLine2: string;
+	addressLine3: string;
+	deliveryId: number;
+	postalCode: string;
+	city: string;
+	deliveryCode: string;
+	condition: string;
+}

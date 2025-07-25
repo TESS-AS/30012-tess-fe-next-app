@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 
+import OrderSummary from "@/components/checkout/order-summary";
 import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,7 @@ const CartPage = () => {
 	const [categoryPaths, setCategoryPaths] = useState<{
 		[key: string]: string[];
 	}>({});
+	const { data: profile } = useGetProfileData();
 
 	const {
 		cartItems,
@@ -59,6 +61,8 @@ const CartPage = () => {
 		updateWarehouse,
 		removeItem,
 		handleArchiveCart,
+		isAuthOpen,
+		setIsAuthOpen,
 	} = useAppContext();
 
 	useEffect(() => {
@@ -120,10 +124,6 @@ const CartPage = () => {
 		0,
 	);
 
-	const handleCheckout = () => {
-		router.push("/checkout");
-	};
-
 	const archiveCart = async () => {
 		try {
 			await handleArchiveCart();
@@ -138,11 +138,11 @@ const CartPage = () => {
 		return <CartSkeleton />;
 	}
 
-	if (status === "unauthenticated") {
+	if (!profile) {
 		return (
 			<div className="flex flex-col items-center justify-center gap-4 py-12">
 				<h1 className="text-2xl font-semibold">{t("Login.title")}</h1>
-				<Button onClick={() => router.push("/auth/login")}>
+				<Button onClick={() => setIsAuthOpen(true)}>
 					{t("Login.loginToViewCart")}
 				</Button>
 			</div>
@@ -163,7 +163,7 @@ const CartPage = () => {
 					<div className="flex items-center justify-between">
 						<div className="flex w-[70%] items-center gap-2">
 							<p className="text-base font-normal">Vis lagerstatus for:</p>
-							<Select>
+							<Select disabled>
 								<SelectTrigger className="w-[40%]">
 									<SelectValue placeholder="Mitt lager: Kristiansand" />
 								</SelectTrigger>
@@ -412,72 +412,7 @@ const CartPage = () => {
 				</div>
 
 				{/* Order Summary */}
-				<div className="space-y-6">
-					<div className="bg-card border-lightGray rounded-xl border p-6">
-						<h2 className="text-xl font-semibold">Ordreoversikt</h2>
-						<div className="mt-4 space-y-4 text-sm">
-							<div className="flex justify-between">
-								<span className="text-[#5A615D]">Opprinnelig pris:</span>
-								<span>{subtotal.toFixed(2)},- kr</span>
-							</div>
-							<div className="flex justify-between">
-								<span className="text-[#5A615D]">Rabatter</span>
-								<span className="text-[#009640]">-999</span>
-							</div>
-							<div className="flex justify-between">
-								<span className="text-[#5A615D]">MVA(25%)</span>
-								<span>1212,12</span>
-							</div>
-							<Separator className="h-[1px] flex-1 bg-[#5A615D]" />
-							<div className="flex justify-between">
-								<span className="text-base font-bold text-[#0F1912]">
-									Totalt
-								</span>
-								<span className="text-base font-bold text-[#0F1912]">
-									1212,12
-								</span>
-							</div>
-						</div>
-						<Button
-							className="mt-6 w-full"
-							disabled={cartItems?.length === 0 || isLoading}
-							onClick={handleCheckout}>
-							{isLoading ? (
-								<Loader2 className="h-4 w-4 animate-spin" />
-							) : (
-								"Gå til checkout"
-							)}
-						</Button>
-						<Button
-							variant="outline"
-							className="mt-4 w-full border-[#009640] text-[#009640]"
-							disabled={cartItems?.length === 0 || isLoading}
-							onClick={handleCheckout}>
-							{isLoading ? (
-								<Loader2 className="h-4 w-4 animate-spin" />
-							) : (
-								"Overfør til eget system"
-							)}
-						</Button>
-						<Button
-							variant="link"
-							className="mt-4 w-full hover:no-underline"
-							disabled={cartItems?.length === 0 || isLoading}
-							onClick={handleCheckout}>
-							<>
-								{isLoading ? (
-									<Loader2 className="h-4 w-4 animate-spin" />
-								) : (
-									"eller"
-								)}
-								<span className="text-[#009640] underline">
-									Fortsett å handle
-								</span>{" "}
-								<ArrowRight className="h-4 w-4 font-bold text-[#009640]" />
-							</>
-						</Button>
-					</div>
-				</div>
+				<OrderSummary handleCheckout={() => router.push("/checkout")} />
 			</div>
 		</main>
 	);
