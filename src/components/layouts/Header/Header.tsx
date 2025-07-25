@@ -22,6 +22,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useSearch } from "@/hooks/useProductSearch";
+import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import axiosClient from "@/services/axiosClient";
@@ -29,6 +30,7 @@ import { loadCategoryTree } from "@/services/categories.service";
 import { getProductVariations } from "@/services/product.service";
 import { Category } from "@/types/categories.types";
 import { IProductSearch, ISuggestions } from "@/types/search.types";
+import { ProfileUser } from "@/types/user.types";
 import {
 	Building,
 	ChevronDown,
@@ -47,7 +49,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const currentLocale = useLocale();
 	const t = useTranslations();
 	const router = useRouter();
-	const { data: profile, isLoading: isProfileLoading } = useGetProfileData();
+
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -56,6 +58,23 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const { data, attributeResults, isLoading } = useSearch(searchQuery);
 	const { cartItems } = useAppContext();
 	const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
+
+	const [profile, setProfile] = useState<ProfileUser | null>(null);
+	const [, setIsLoading] = useState(true);
+
+	const { data: ssoProfile, isLoading: isSSOLoading } = useGetProfileData();
+	const { data: punchoutProfile, isLoading: isPunchoutLoading } =
+		usePunchoutProfile();
+
+	useEffect(() => {
+		if (punchoutProfile?.punchout === true) {
+			setProfile(punchoutProfile);
+			setIsLoading(isPunchoutLoading);
+		} else if (ssoProfile) {
+			setProfile(ssoProfile);
+			setIsLoading(isSSOLoading);
+		}
+	}, [ssoProfile, punchoutProfile, isSSOLoading, isPunchoutLoading]);
 
 	const searchRef = useClickOutside<HTMLDivElement>(() => {
 		setSearchQuery("");

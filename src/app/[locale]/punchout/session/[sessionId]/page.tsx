@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import axiosClient from "@/services/axiosClient";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 export default function PunchoutSessionPage() {
-	const router = useRouter();
 	const params = useParams();
 
 	const sessionId = Array.isArray(params.sessionId)
@@ -18,9 +19,10 @@ export default function PunchoutSessionPage() {
 	useEffect(() => {
 		if (!sessionId) return;
 
-		const validate = async () => {
+		const authenticatePunchOut = async () => {
 			try {
 				await axiosClient.post("/logout");
+				await signOut({ redirect: false });
 
 				await axiosClient.post(
 					"/login/validatepunchout",
@@ -33,14 +35,16 @@ export default function PunchoutSessionPage() {
 					},
 				);
 
-				router.replace("/");
+				await axiosClient.get("/user");
+
+				window.location.href = "/";
 			} catch (err) {
 				console.error("PunchOut token validation failed", err);
 				setError("Failed to authenticate PunchOut session.");
 			}
 		};
 
-		validate();
+		authenticatePunchOut();
 	}, [sessionId]);
 
 	return (
