@@ -12,7 +12,9 @@ export function useGetDefaultAddress() {
 		const fetchDefaultAddressData = async () => {
 			try {
 				setIsLoading(true);
-				const response = await axiosClient.get<DefaultAddress[]>("/address/defaultAddress");
+				const response = await axiosClient.get<DefaultAddress[]>(
+					"/address/defaultAddress",
+				);
 				setData(response.data ?? []);
 			} catch (err) {
 				setError(err);

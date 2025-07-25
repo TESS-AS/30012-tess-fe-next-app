@@ -48,12 +48,14 @@ interface AppContextType {
 	setCurrentStep: (value: number) => void;
 	totalPrice: number;
 	surChargeTotalPrice: number;
+	isAuthOpen: boolean;
+	setIsAuthOpen: (value: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppContextProvider = ({ children }: { children: ReactNode }) => {
-
+	const [isAuthOpen, setIsAuthOpen] = useState(false);
 	const [currentStep, setCurrentStep] = useState(0);
 	const [isCartChanging, setIsCartChanging] = useState(false);
 	const [cartItems, setCartItems] = useState<CartLine[]>([]);
@@ -107,7 +109,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					profile?.defaultCustomerNumber,
 					profile?.defaultCompanyNumber,
 				);
-				console.log(priceResults,"priceResults")
+				console.log(priceResults, "priceResults");
 
 				const newPrices = priceResults.reduce(
 					(acc: Record<string, number>, item: PriceResponse) => ({
@@ -133,7 +135,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				// 	{} as Record<string, number>,
 				// );
 
-
 				setSurChargePrices(surChargePrices);
 				setCalculatedPrices(newPrices);
 			}
@@ -149,7 +150,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			loadCartData();
 		}
 	}, [status, isCartChanging]);
-	console.log(calculatedPrices,"prices")
+	console.log(calculatedPrices, "prices");
 
 	const totalPrice = useMemo(() => {
 		return Object.values(calculatedPrices).reduce((sum, val) => sum + val, 0);
@@ -159,7 +160,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		return Object.values(surChargePrices).reduce((sum, val) => sum + val, 0);
 	}, [surChargePrices]);
 
-	console.log(surChargeTotalPrice,"surChargeTotalPrice")
+	console.log(surChargeTotalPrice, "surChargeTotalPrice");
 
 	const updateQuantity = async (
 		cartLine: number,
@@ -233,6 +234,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				setCurrentStep,
 				totalPrice,
 				surChargeTotalPrice,
+				isAuthOpen,
+				setIsAuthOpen,
 			}}>
 			{children}
 		</AppContext.Provider>

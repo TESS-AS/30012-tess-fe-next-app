@@ -52,11 +52,10 @@ export default function Header({ categories }: { categories: Category[] }) {
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
-	const [isAuthOpen, setIsAuthOpen] = useState(false);
 	const [isModalIdOpen, setIsModalIdOpen] = useState<string | null>(null);
 	const [variations, setVariations] = useState<Record<string, any>>({});
 	const { data, attributeResults, isLoading } = useSearch(searchQuery);
-	const { cartItems, totalPrice } = useAppContext();
+	const { cartItems, totalPrice, isAuthOpen, setIsAuthOpen } = useAppContext();
 	const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
 
 	const [profile, setProfile] = useState<ProfileUser | null>(null);
@@ -126,19 +125,21 @@ export default function Header({ categories }: { categories: Category[] }) {
 						THM KundeWEB
 					</Button>
 				</div>
-				{profile && <div className="flex items-center gap-2 rounded-md bg-[#FDFDEA] px-3 py-1.5">
-					<Button
-						variant="ghost"
-						className="text-sm font-medium text-[#003D1A] hover:bg-transparent">
-						<MessageSquareText className="h-4 w-4" /> Vær med på utviklingen
-					</Button>
-					<Button
-						variant="darkGreen"
-						className="text-xs"
-						onClick={() => setIsFeedbackDialogOpen(true)}>
-						Gi tilbakemelding
-					</Button>
-				</div>}
+				{profile && (
+					<div className="flex items-center gap-2 rounded-md bg-[#FDFDEA] px-3 py-1.5">
+						<Button
+							variant="ghost"
+							className="text-sm font-medium text-[#003D1A] hover:bg-transparent">
+							<MessageSquareText className="h-4 w-4" /> Vær med på utviklingen
+						</Button>
+						<Button
+							variant="darkGreen"
+							className="text-xs"
+							onClick={() => setIsFeedbackDialogOpen(true)}>
+							Gi tilbakemelding
+						</Button>
+					</div>
+				)}
 			</div>
 			<div className="container m-auto mb-1 flex h-16 items-center justify-between">
 				<div className="flex items-center gap-2">

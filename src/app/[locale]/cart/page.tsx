@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 
+import OrderSummary from "@/components/checkout/order-summary";
 import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
@@ -42,7 +43,6 @@ import { useLocale } from "next-intl";
 import { toast } from "react-toastify";
 
 import CartSkeleton from "./loading";
-import OrderSummary from "@/components/checkout/order-summary";
 
 const CartPage = () => {
 	const currentLocale = useLocale();
@@ -50,6 +50,7 @@ const CartPage = () => {
 	const [categoryPaths, setCategoryPaths] = useState<{
 		[key: string]: string[];
 	}>({});
+	const { data: profile } = useGetProfileData();
 
 	const {
 		cartItems,
@@ -60,6 +61,8 @@ const CartPage = () => {
 		updateWarehouse,
 		removeItem,
 		handleArchiveCart,
+		isAuthOpen,
+		setIsAuthOpen,
 	} = useAppContext();
 
 	useEffect(() => {
@@ -121,7 +124,6 @@ const CartPage = () => {
 		0,
 	);
 
-
 	const archiveCart = async () => {
 		try {
 			await handleArchiveCart();
@@ -136,11 +138,11 @@ const CartPage = () => {
 		return <CartSkeleton />;
 	}
 
-	if (status === "unauthenticated") {
+	if (!profile) {
 		return (
 			<div className="flex flex-col items-center justify-center gap-4 py-12">
 				<h1 className="text-2xl font-semibold">{t("Login.title")}</h1>
-				<Button onClick={() => router.push("/auth/login")}>
+				<Button onClick={() => setIsAuthOpen(true)}>
 					{t("Login.loginToViewCart")}
 				</Button>
 			</div>

@@ -2,15 +2,14 @@
 
 import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/lib/appContext";
-import { ArrowRight, Loader2 } from "lucide-react";
 import { Separator } from "@radix-ui/react-select";
+import { ArrowRight, Loader2 } from "lucide-react";
 
 interface OrderSummaryProps {
 	handleCheckout: () => void;
 }
 
 export default function OrderSummary({ handleCheckout }: OrderSummaryProps) {
-	
 	const { cartItems, isLoading, totalPrice, surChargeTotalPrice } =
 		useAppContext();
 
@@ -25,7 +24,7 @@ export default function OrderSummary({ handleCheckout }: OrderSummaryProps) {
 					</div>
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">Rabatter</span>
-						<span className="text-[#009640] font-medium">-0.00 kr</span>
+						<span className="font-medium text-[#009640]">-0.00 kr</span>
 					</div>
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">Sum etter rabatt (eks. mva.)</span>
@@ -33,11 +32,15 @@ export default function OrderSummary({ handleCheckout }: OrderSummaryProps) {
 					</div>
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">Leveringstillegg</span>
-						<span className="text-[#009640] font-medium">{surChargeTotalPrice.toFixed(2)},- kr</span>
+						<span className="font-medium text-[#009640]">
+							{surChargeTotalPrice.toFixed(2)},- kr
+						</span>
 					</div>
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">MVA(25%)</span>
-						<span className="font-medium">{(totalPrice + surChargeTotalPrice).toFixed(2)},- kr</span>
+						<span className="font-medium">
+							{(totalPrice + surChargeTotalPrice).toFixed(2)},- kr
+						</span>
 					</div>
 					<Separator className="h-[1px] flex-1 bg-[#5A615D]" />
 					<div className="flex justify-between">
@@ -65,11 +68,7 @@ export default function OrderSummary({ handleCheckout }: OrderSummaryProps) {
 					disabled={cartItems?.length === 0 || isLoading}
 					onClick={handleCheckout}>
 					<>
-						{isLoading ? (
-							<Loader2 className="h-4 w-4 animate-spin" />
-						) : (
-							"eller"
-						)}
+						{isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "eller"}
 						<span className="text-[#009640] underline">
 							Fortsett å handle
 						</span>{" "}
