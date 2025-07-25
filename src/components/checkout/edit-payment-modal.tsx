@@ -5,6 +5,9 @@ import { Label } from '../ui/label';
 import { Modal } from '../ui/modal';
 import { Wallet } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { Order } from '@/types/orders.types';
+import { InvoiceInfoCard } from './invoice-info-card';
+import { UserDimensionsInput } from './user-dimensions';
 
 interface EditPaymentModalProps {
   open: boolean;
@@ -16,13 +19,25 @@ interface EditPaymentModalProps {
     department?: string;
     category?: string;
   };
+  paymentMethod: string;
+  setPaymentMethod: (method: string) => void;
+  orderData: Order;
+  setOrderData: (data: any) => void;
+  dimensionInputMode: "select" | "search" | "manual";
+  setDimensionInputMode: (mode: "select" | "search" | "manual") => void;
 }
 
 export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
   open,
   onClose,
   onSave,
-  initialData
+  initialData,
+  paymentMethod,
+  setPaymentMethod,
+  orderData,
+  setOrderData,
+  dimensionInputMode,
+  setDimensionInputMode,
 }) => {
   return (
     <Modal open={open} onOpenChange={onClose}>
@@ -32,48 +47,35 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
       </div>
 
       <div className="space-y-6">
-        <RadioGroup defaultValue={initialData?.method || 'invoice'}>
+        <RadioGroup
+          value={paymentMethod}
+          onValueChange={setPaymentMethod}
+        >
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="invoice" id="invoice" />
-            <Label htmlFor="invoice">Faktura</Label>
+            <RadioGroupItem value="faktura" id="faktura" />
+            <Label htmlFor="faktura">Faktura</Label>
           </div>
         </RadioGroup>
 
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="project">Prosjekt</Label>
-            <Input
-              id="project"
-              placeholder="Prosjekt 123"
-              defaultValue={initialData?.project}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="department">Avdeling</Label>
-            <Input
-              id="department"
-              placeholder="Salg"
-              defaultValue={initialData?.department}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="category">Kategori</Label>
-            <Input
-              id="category"
-              placeholder="Kontor"
-              defaultValue={initialData?.category}
-            />
-          </div>
-        </div>
+        <UserDimensionsInput 
+          orderData={orderData} 
+          setOrderData={setOrderData}
+          dimensionInputMode={dimensionInputMode}
+          setDimensionInputMode={setDimensionInputMode}
+        />
       </div>
 
       <div className="flex justify-between mt-8">
         <Button variant="outline" onClick={onClose}>
           Avbryt
         </Button>
-        <Button variant="default" onClick={() => onSave(initialData)}>
+        <Button
+          variant="default"
+          onClick={() => onSave({
+            method: paymentMethod,
+            orderData,
+          })}
+        >
           Lagre betalingsmetode
         </Button>
       </div>

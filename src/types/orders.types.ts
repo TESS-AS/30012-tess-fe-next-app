@@ -1,3 +1,5 @@
+import { DefaultAddress } from "./user.types";
+
 export interface Address {
 	name: string;
 	addressLine1: string;
@@ -42,7 +44,7 @@ export interface Order {
 		companyCode: string;
 	};
 	salesOrderHeader: SalesOrderHeader;
-	salesOrderAddresses: Address[];
+	salesOrderAddresses: DefaultAddress[];
 	salesOrderLines: OrderLines[];
 }
 

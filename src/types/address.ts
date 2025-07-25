@@ -10,7 +10,7 @@ export interface SavedAddress {
 }
 
 export interface AddressFormState {
-  addressName: string
+  name: string
   street: string
   houseNumber: string
   extraInfo?: string

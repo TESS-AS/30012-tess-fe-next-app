@@ -10,8 +10,10 @@ import { MapPin, Pencil, Loader2, Plus, SquarePen } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { AddressSelector } from "./address-selector"
 import { SavedAddress, AddressFormState } from "../../types/address"
+import { getPostalCode } from "@/services/orders.service"
 
 interface AddressCardProps {
+  name: string
   label?: string
   street: string
   postalCode: string
@@ -26,6 +28,7 @@ interface AddressCardProps {
 const POSTAL_CODE_REGEX = /^\d{4}$/
 
 export const AddressCard: React.FC<AddressCardProps> = ({
+  name,
   label = "Hjemmeadresse",
   street,
   postalCode,
@@ -51,7 +54,7 @@ const savedAddresses: SavedAddress[] = [
 ]
 
 const [formData, setFormData] = useState<AddressFormState>({
-    addressName,
+    name,
     street,
     houseNumber,
     extraInfo,
@@ -76,7 +79,7 @@ const [formData, setFormData] = useState<AddressFormState>({
 
   const handleCancel = () => {
     setFormData({
-      addressName,
+      name,
       street,
       houseNumber,
       extraInfo,
@@ -87,30 +90,29 @@ const [formData, setFormData] = useState<AddressFormState>({
     setEditMode(false)
   }
 
+  const [cityReadOnly, setCityReadOnly] = useState(true);
+
   const fetchCityFromPostalCode = async (postalCode: string) => {
     if (!POSTAL_CODE_REGEX.test(postalCode)) {
       setFormData(prev => ({ ...prev, city: "" }))
+      setCityReadOnly(false)
       return
     }
 
     setIsLoading(true)
     try {
-      // Simulate API call with delay
-      await new Promise(resolve => setTimeout(resolve, 800))
-      
-      // Example postal codes for demo
-      const postalCodes: Record<string, string> = {
-        "0155": "Oslo",
-        "5020": "Bergen",
-        "7030": "Trondheim",
-        "4025": "Stavanger"
+      const postalCodeData = await getPostalCode(postalCode)
+      if (postalCodeData && postalCodeData.length > 0) {
+        setFormData(prev => ({ ...prev, city: postalCodeData[0].city }))
+        setCityReadOnly(true)
+      } else {
+        setFormData(prev => ({ ...prev, city: "" }))
+        setCityReadOnly(false)
       }
-
-      const city = postalCodes[postalCode]
-      setFormData(prev => ({ ...prev, city: city || "" }))
     } catch (error) {
       console.error("Error fetching city:", error)
       setFormData(prev => ({ ...prev, city: "" }))
+      setCityReadOnly(false)
     } finally {
       setIsLoading(false)
     }
@@ -166,7 +168,7 @@ const [formData, setFormData] = useState<AddressFormState>({
               <Label>Navn på adresse</Label>
               <Input
                 name="addressName"
-                value={formData.addressName}
+                value={formData.name}
                 onChange={handleChange}
                 placeholder="Legg til navn"
               />
@@ -208,11 +210,11 @@ const [formData, setFormData] = useState<AddressFormState>({
             {showExtra && (
               <div>
                 <Label>Tilleggsopplysninger (valgfri)</Label>
-                <Textarea
+                <Input
                   name="extraInfo"
                   value={formData.extraInfo}
                   onChange={handleChange}
-                  placeholder="Legg til adresseelementer som ikke passer i gatenavn eller husnummer."
+                  placeholder="Legg til husnummer"
                 />
                 <p className="text-xs text-muted-foreground mt-1 font-medium">Eksempel: c/o, etasje, oppgang osv.</p>
               </div>
@@ -242,8 +244,9 @@ const [formData, setFormData] = useState<AddressFormState>({
                 <Input
                   name="city"
                   value={formData.city}
-                  readOnly
-                  placeholder="(fylles automatisk etter postnummer er validert)"
+                  readOnly={cityReadOnly}
+                  onChange={handleChange}
+                  placeholder={cityReadOnly ? "(fylles automatisk etter postnummer er validert)" : "Skriv inn sted"}
                 />
               </div>
             </div>
@@ -272,7 +275,9 @@ const [formData, setFormData] = useState<AddressFormState>({
             size="sm" 
             variant="outline" 
             onClick={() => setEditMode(true)}
-            className="text-xs mt-4 border-[#C1C4C2] font-medium text-foreground">
+            className="text-xs mt-4 border-[#C1C4C2] font-medium text-foreground"
+            disabled={true}
+            >
             <Pencil className="w-3 h-3 mr-1" />
             Endre adresse
           </Button>

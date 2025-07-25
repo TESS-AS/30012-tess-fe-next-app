@@ -53,7 +53,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 	const [isModalIdOpen, setIsModalIdOpen] = useState<string | null>(null);
 	const [variations, setVariations] = useState<Record<string, any>>({});
 	const { data, attributeResults, isLoading } = useSearch(searchQuery);
-	const { cartItems } = useAppContext();
+	const { cartItems, totalPrice } = useAppContext();
 
 	const searchRef = useClickOutside<HTMLDivElement>(() => {
 		setSearchQuery("");
@@ -95,7 +95,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 						variant="ghost"
 						className="mb-2 rounded-none border-b border-[#013d1a] px-0 pb-0 text-sm font-medium hover:bg-transparent">
 						E-handel{" "}
-						<Badge className="-mb-1 rounded-[6px_6px_0_6px] bg-[#003D1A] text-xs text-white">
+						<Badge className="-mb-1.5 rounded-[6px_6px_0_6px] bg-[#003D1A] text-xs text-white">
 							Beta
 						</Badge>
 					</Button>
@@ -222,7 +222,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 								{cartItems?.length}
 							</Badge>
 						</div>
-						{cartItems?.length > 0 ? "1049.50,-" : ""}
+						{cartItems?.length > 0 ? `${totalPrice.toFixed(2)},-` : ""}
 						<span className="sr-only">Cart</span>
 					</Button>
 					{profile ? (

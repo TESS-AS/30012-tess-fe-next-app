@@ -4,6 +4,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Modal } from '../ui/modal';
 import { User2 } from 'lucide-react';
+import { updateUserProfile } from '@/services/user.service';
 
 interface ContactFormData {
   firstName: string;
@@ -40,6 +41,7 @@ export const EditContactModal: React.FC<EditContactModalProps> = ({
   const handleSave = () => {
     onSave(formData);
     onClose();
+    updateUserProfile(formData.firstName, formData.lastName, formData.phone)
   };
 
   return (

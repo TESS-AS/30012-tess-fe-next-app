@@ -1,10 +1,11 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { User2, SquarePen } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import Image from "next/image"
+import { updateUserProfile } from "@/services/user.service"
 
 interface ContactPersonProps {
   firstName: string
@@ -26,26 +27,32 @@ export const ContactPerson: React.FC<ContactPersonProps> = ({
   phone,
   onSave,
 }) => {
-  const [editMode, setEditMode] = useState(false)
+  const [editMode, setEditMode] = useState(false);
+  const [formData, setFormData] = useState({ firstName, lastName, email, phone });
   const [isSaved, setIsSaved] = useState(false)
-  const [formData, setFormData] = useState({ firstName, lastName, email, phone })
+
+  useEffect(() => {
+    setFormData({ firstName, lastName, email, phone });
+  }, [firstName, lastName, email, phone]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleCancel = () => {
-    setFormData({ firstName, lastName, email, phone })
-    setEditMode(false)
+    setFormData({ firstName, lastName, email, phone });
+    setEditMode(false);
     setIsSaved(false)
-  }
+  };
 
-  const handleSave = () => {
-    onSave?.(formData)
-    setEditMode(false)
+  const handleSave = async () => {
+    await onSave?.(formData);
+    setEditMode(false);
     setIsSaved(true)
-  }
+  };
+
+  console.log(formData,"formData")
 
   return (
     <Card className="rounded-lg shadow-none">
@@ -123,10 +130,10 @@ export const ContactPerson: React.FC<ContactPersonProps> = ({
         ) : (
           <div className="">
             <p className="text-sm text-foreground mb-1">
-              {firstName} {lastName}
+              {formData.firstName} {formData.lastName}
             </p>
-            <p className="text-sm text-foreground mb-1">{email}</p>
-            <p className="text-sm text-foreground">{phone}</p>
+            <p className="text-sm text-foreground mb-1">{formData.email}</p>
+            <p className="text-sm text-foreground">{formData.phone}</p>
           </div>
         )}
 

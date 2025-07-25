@@ -4,31 +4,16 @@ import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/lib/appContext";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { Separator } from "@radix-ui/react-select";
-import { useRouter } from "next/navigation";
 
-export default function OrderSummary() {
-	const router = useRouter();
-	const { cartItems, prices, calculatedPrices, isLoading, currentStep, setCurrentStep } =
+interface OrderSummaryProps {
+	handleCheckout: () => void;
+}
+
+export default function OrderSummary({ handleCheckout }: OrderSummaryProps) {
+	
+	const { cartItems, isLoading, totalPrice, surChargeTotalPrice } =
 		useAppContext();
 
-	const subtotal = cartItems?.reduce(
-		(acc, item) =>
-			acc + (calculatedPrices[item.itemNumber] || prices[item.itemNumber] || 0),
-		0,
-	);
-
-
-	const handleCheckout = () => {
-		if (currentStep === 0) {
-			setCurrentStep(1);
-		} else if (currentStep === 1) {
-			setCurrentStep(2);
-		} else {
-			// handle payment
-			router.push("/checkout");
-		}
-	};
-	
 	return (
 		<div className="space-y-6">
 			<div className="bg-card border-lightGray rounded-lg border p-6">
@@ -36,19 +21,23 @@ export default function OrderSummary() {
 				<div className="mt-4 space-y-2 text-sm">
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">Opprinnelig pris:</span>
-						<span className="font-medium">{subtotal.toFixed(2)},- kr</span>
+						<span className="font-medium">{totalPrice.toFixed(2)},- kr</span>
 					</div>
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">Rabatter</span>
-						<span className="text-[#009640] font-medium">-999.00 kr</span>
+						<span className="text-[#009640] font-medium">-0.00 kr</span>
 					</div>
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">Sum etter rabatt (eks. mva.)</span>
-						<span className="font-medium">3199.00 kr</span>
+						<span className="font-medium">{totalPrice.toFixed(2)},- kr</span>
+					</div>
+					<div className="flex justify-between">
+						<span className="text-[#5A615D]">Leveringstillegg</span>
+						<span className="text-[#009640] font-medium">{surChargeTotalPrice.toFixed(2)},- kr</span>
 					</div>
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">MVA(25%)</span>
-						<span className="font-medium">1049.50 kr</span>
+						<span className="font-medium">{(totalPrice + surChargeTotalPrice).toFixed(2)},- kr</span>
 					</div>
 					<Separator className="h-[1px] flex-1 bg-[#5A615D]" />
 					<div className="flex justify-between">
@@ -56,7 +45,7 @@ export default function OrderSummary() {
 							Total inkl. mva.
 						</span>
 						<span className="text-base font-bold text-[#0F1912]">
-							4248.50 kr
+							{(totalPrice + surChargeTotalPrice).toFixed(2)},- kr
 						</span>
 					</div>
 				</div>

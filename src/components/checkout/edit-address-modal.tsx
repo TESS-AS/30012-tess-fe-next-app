@@ -4,24 +4,15 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Modal } from '../ui/modal';
 import { MapPin, Plus, Loader2 } from 'lucide-react';
+import { getPostalCode } from "@/services/orders.service";
 import { Textarea } from '../ui/textarea';
 import { AddressSelector } from '@/components/ui/address-selector';
 import { Checkbox } from '../ui/checkbox';
 import { cn } from '@/lib/utils';
 
-type AddressFormData = {
+export interface SavedAddressData {
+  id?: string;
   addressName: string;
-  street: string;
-  houseNumber: string;
-  postalCode: string;
-  city: string;
-  extraInfo?: string;
-  isUserAddress: boolean;
-}
-
-interface SavedAddressData {
-  id: string;
-  name: string;
   street: string;
   houseNumber: string;
   postalCode: string;
@@ -33,8 +24,8 @@ interface SavedAddressData {
 interface EditAddressModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (data: AddressFormData) => void;
-  initialData?: Partial<AddressFormData>;
+  onSave: (data: SavedAddressData) => void;
+  initialData?: Partial<SavedAddressData>;
   savedAddresses?: SavedAddressData[];
 }
 
@@ -45,7 +36,7 @@ export const EditAddressModal: React.FC<EditAddressModalProps> = ({
   initialData,
   savedAddresses = []
 }) => {
-  const [formData, setFormData] = useState<AddressFormData>({
+  const [formData, setFormData] = useState<SavedAddressData>({
     addressName: initialData?.addressName || '',
     street: initialData?.street || '',
     houseNumber: initialData?.houseNumber || '',
@@ -59,20 +50,6 @@ export const EditAddressModal: React.FC<EditAddressModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-
-    // Simulate postal code validation
-    if (name === 'postalCode' && value.length === 4) {
-      setLoading(true);
-      setTimeout(() => {
-        setFormData(prev => ({ ...prev, city: 'Oslo' }));
-        setLoading(false);
-      }, 1000);
-    }
-  };
-
   const handleSave = () => {
     onSave(formData);
     onClose();
@@ -80,6 +57,37 @@ export const EditAddressModal: React.FC<EditAddressModalProps> = ({
 
   const handleCancel = () => {
     onClose();
+  };
+
+  const [cityReadOnly, setCityReadOnly] = useState(true);
+
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+
+    // Real postal code validation
+    if (name === 'postalCode') {
+      try {
+        setLoading(true);
+        const postalCodeData = await getPostalCode(value);
+        if (postalCodeData && postalCodeData.length > 0) {
+          setFormData(prev => ({
+            ...prev,
+            city: postalCodeData[0].city
+          }));
+          setCityReadOnly(true);
+        } else {
+          setFormData(prev => ({ ...prev, city: '' }));
+          setCityReadOnly(false);
+        }
+      } catch (error) {
+        console.error('Error fetching postal code:', error);
+        setFormData(prev => ({ ...prev, city: '' }));
+        setCityReadOnly(false);
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -110,7 +118,7 @@ export const EditAddressModal: React.FC<EditAddressModalProps> = ({
             onAddressSelect={(selectedAddress: SavedAddressData) => {
               setFormData(prev => ({
                 ...prev,
-                addressName: selectedAddress.name,
+                addressName: selectedAddress.addressName,
                 street: selectedAddress.street,
                 houseNumber: selectedAddress.houseNumber,
                 postalCode: selectedAddress.postalCode,
@@ -203,8 +211,9 @@ export const EditAddressModal: React.FC<EditAddressModalProps> = ({
             <Input
               name="city"
               value={formData.city}
-              readOnly
-              placeholder="(fylles automatisk etter postnummer er validert)"
+              readOnly={cityReadOnly}
+              onChange={handleChange}
+              placeholder={cityReadOnly ? "(fylles automatisk etter postnummer er validert)" : "Skriv inn sted"}
             />
           </div>
         </div>

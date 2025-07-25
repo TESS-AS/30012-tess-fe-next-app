@@ -162,7 +162,7 @@ const CartPage = () => {
 					<div className="flex items-center justify-between">
 						<div className="flex w-[70%] items-center gap-2">
 							<p className="text-base font-normal">Vis lagerstatus for:</p>
-							<Select>
+							<Select disabled>
 								<SelectTrigger className="w-[40%]">
 									<SelectValue placeholder="Mitt lager: Kristiansand" />
 								</SelectTrigger>
@@ -412,7 +412,7 @@ const CartPage = () => {
 				</div>
 
 				{/* Order Summary */}
-				<OrderSummary />
+				<OrderSummary handleCheckout={() => router.push("/checkout")} />
 			</div>
 		</main>
 	);

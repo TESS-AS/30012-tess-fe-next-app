@@ -3,20 +3,11 @@ import { Button } from './button';
 import { Plus } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from './radio-group';
 import { Label } from './label';
-
-export interface SavedAddress {
-  id: string;
-  name: string;
-  street: string;
-  houseNumber: string;
-  postalCode: string;
-  city: string;
-  extraInfo?: string;
-}
+import { SavedAddressData } from '../checkout/edit-address-modal';
 
 interface AddressSelectorProps {
-  savedAddresses: SavedAddress[];
-  onAddressSelect: (address: SavedAddress) => void;
+  savedAddresses: SavedAddressData[];
+  onAddressSelect: (address: SavedAddressData) => void;
   onAddNewClick: () => void;
 }
 
@@ -39,9 +30,9 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
         >
           {savedAddresses.map((address) => (
             <div key={address.id} className="flex items-center space-x-3">
-              <RadioGroupItem value={address.id} id={address.id} />
-              <Label htmlFor={address.id} className="font-normal">
-                {address.name} - {address.street} {address.houseNumber}, {address.postalCode} {address.city}
+              <RadioGroupItem value={address.id || ''} id={address.id || ''} />
+              <Label htmlFor={address.id || ''} className="font-normal">
+                {address.addressName} - {address.street} {address.houseNumber}, {address.postalCode} {address.city}
               </Label>
             </div>
           ))}
