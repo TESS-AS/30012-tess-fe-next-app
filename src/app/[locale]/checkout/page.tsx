@@ -19,17 +19,17 @@ import { useModals } from "@/hooks/useModals";
 import { useOrderStepper } from "@/hooks/useOrderStepper";
 import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { useAppContext } from "@/lib/appContext";
-import {
-	PayPalScriptProvider,
-	ReactPayPalScriptOptions,
-} from "@paypal/react-paypal-js";
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import type { PayPalScriptOptions } from "@paypal/paypal-js";
 import { useRouter } from "next/navigation";
+import { Order } from "@/types/orders.types";
 
-const initialOptions: ReactPayPalScriptOptions = {
+const initialOptions: PayPalScriptOptions = {
 	clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "",
 	components: "buttons",
 	currency: "USD",
 };
+
 
 const steps = ["Levering", "Betaling", "Bekreft"];
 
@@ -50,7 +50,7 @@ export default function CheckoutPage() {
 	const [showWarning, setShowWarning] = useState(true);
 	const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
 	const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-	const [submittedOrder, setSubmittedOrder] = useState(null);
+	const [submittedOrder, setSubmittedOrder] = useState<Order | null>(null);
 
 	const [orderData, setOrderData] = useCheckoutOrderData(
 		cartItems,
@@ -175,7 +175,7 @@ export default function CheckoutPage() {
 						/>
 						<OrderTrackingModal
 							open={false}
-							onClose={() => {}}
+							onClose={() => { }}
 							{...{
 								orderDate: "14 Mai 2025",
 								orderNumber: "76453857",
