@@ -59,7 +59,7 @@ export default function OrderSummary({ handleCheckout }: OrderSummaryProps) {
 					{isLoading ? (
 						<Loader2 className="h-4 w-4 animate-spin" />
 					) : (
-						"Gå til checkout"
+						"Gå til checkout (DEMO)"
 					)}
 				</Button>
 				<Button
