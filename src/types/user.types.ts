@@ -46,3 +46,13 @@ export interface DefaultAddress {
 	deliveryCode: string;
 	condition: string;
 }
+
+export interface SalesOrderAddress {
+	name: string;
+	addressLine1: string;
+	addressLine2: string;
+	addressLine4: string;
+	postalCode: string;
+	partyQualifier: string;
+	country: string;
+}

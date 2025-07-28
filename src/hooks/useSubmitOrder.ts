@@ -1,10 +1,11 @@
 import { salesOrder } from "@/services/orders.service";
 import { Order } from "@/types/orders.types";
+import { SalesOrderAddress } from "@/types/user.types";
 
 export const useSubmitOrder = (
 	isPunchoutUser: boolean,
 	profile: any,
-	selectedAddress: any,
+	selectedAddress: SalesOrderAddress,
 	handleArchiveCart: () => Promise<void>,
 ) => {
 	const submitOrder = async (orderData: Order): Promise<Order | null> => {

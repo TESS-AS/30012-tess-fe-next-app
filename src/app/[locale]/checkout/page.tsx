@@ -59,7 +59,15 @@ export default function CheckoutPage() {
 	const submitOrder = useSubmitOrder(
 		profile?.punchout || false,
 		profile,
-		selectedAddress,
+		{
+			name: "999",
+			addressLine1: selectedAddress?.addressLine1 || "",
+			addressLine2: selectedAddress?.addressLine2 || "",
+			addressLine4: selectedAddress?.city || "",
+			postalCode: selectedAddress?.postalCode || "",
+			partyQualifier: "DP",
+			country: "NO",
+		}, 
 		handleArchiveCart,
 	);
 
