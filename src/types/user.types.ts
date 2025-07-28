@@ -32,6 +32,7 @@ export interface UserAddress {
 }
 
 export interface DefaultAddress {
+	partyQualifier: string;
 	addressId: number;
 	name: string;
 	country: string;
