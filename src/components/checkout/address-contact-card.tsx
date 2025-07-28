@@ -363,8 +363,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 						variant="outline"
 						onClick={() => setEditMode(true)}
 						className="text-foreground mt-4 border-[#C1C4C2] text-xs font-medium"
-						// disabled={true}
-					>
+						disabled={true}>
 						<Pencil className="mr-1 h-3 w-3" />
 						Endre adresse
 					</Button>

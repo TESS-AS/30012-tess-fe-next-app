@@ -16,7 +16,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { useCheckoutOrderData } from "@/hooks/useCheckoutOrderData";
+import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
+import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { Link } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import { loadCategoryTree } from "@/services/categories.service";
@@ -26,15 +28,7 @@ import {
 	WarehouseBatch,
 } from "@/services/product.service";
 import { RawCategory } from "@/types/categories.types";
-import { Separator } from "@radix-ui/react-select";
-import {
-	ArrowRight,
-	ChevronRight,
-	CircleAlert,
-	CircleCheck,
-	Loader2,
-	Trash2,
-} from "lucide-react";
+import { ChevronRight, CircleAlert, CircleCheck, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -50,8 +44,7 @@ const CartPage = () => {
 	const [categoryPaths, setCategoryPaths] = useState<{
 		[key: string]: string[];
 	}>({});
-	const { data: profile } = useGetProfileData();
-
+	const { data: profile } = usePunchoutProfile();
 	const {
 		cartItems,
 		prices,
@@ -61,9 +54,30 @@ const CartPage = () => {
 		updateWarehouse,
 		removeItem,
 		handleArchiveCart,
-		isAuthOpen,
 		setIsAuthOpen,
+		setShowFeedbackModal,
+		setSubmittedOrder,
+		setShowOrderConfirmation,
 	} = useAppContext();
+	const [orderData, setOrderData] = useCheckoutOrderData(
+		cartItems,
+		profile,
+		calculatedPrices,
+	);
+	const submitOrder = useSubmitOrder(
+		profile?.punchout || false,
+		profile,
+		{
+			name: "999",
+			addressLine1: "",
+			addressLine2: "",
+			addressLine4: "",
+			postalCode: "",
+			partyQualifier: "DP",
+			country: "NO",
+		},
+		handleArchiveCart,
+	);
 
 	useEffect(() => {
 		const loadPaths = async () => {
@@ -148,6 +162,20 @@ const CartPage = () => {
 			</div>
 		);
 	}
+
+	const handleCheckout = async () => {
+		if (profile?.punchout) {
+			const result = await submitOrder(orderData);
+			handleArchiveCart();
+			if (result) {
+				setSubmittedOrder(result);
+				setShowOrderConfirmation(true);
+				setTimeout(() => setShowFeedbackModal(true), 2000);
+			}
+		} else {
+			router.push("/checkout");
+		}
+	};
 
 	return (
 		<main className="container min-h-screen py-10">
@@ -412,7 +440,7 @@ const CartPage = () => {
 				</div>
 
 				{/* Order Summary */}
-				<OrderSummary handleCheckout={() => router.push("/checkout")} />
+				<OrderSummary handleCheckout={handleCheckout} />
 			</div>
 		</main>
 	);

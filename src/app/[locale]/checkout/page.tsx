@@ -13,19 +13,17 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 import Stepper from "@/components/ui/stepper";
 import { useCheckoutOrderData } from "@/hooks/useCheckoutOrderData";
 import { useContactPerson } from "@/hooks/useContactPerson";
+import { useFeedback } from "@/hooks/useFeedback";
 import { useGetDefaultAddress } from "@/hooks/useGetDefaultAddress";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useModals } from "@/hooks/useModals";
 import { useOrderStepper } from "@/hooks/useOrderStepper";
 import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { useAppContext } from "@/lib/appContext";
-import {
-	PayPalScriptProvider,
-	ReactPayPalScriptOptions,
-} from "@paypal/react-paypal-js";
-import { useRouter } from "next/navigation";
+import type { PayPalScriptOptions } from "@paypal/paypal-js";
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 
-const initialOptions: ReactPayPalScriptOptions = {
+const initialOptions: PayPalScriptOptions = {
 	clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "",
 	components: "buttons",
 	currency: "USD",
@@ -34,10 +32,22 @@ const initialOptions: ReactPayPalScriptOptions = {
 const steps = ["Levering", "Betaling", "Bekreft"];
 
 export default function CheckoutPage() {
-	const router = useRouter();
-	const { cartItems, calculatedPrices, handleArchiveCart } = useAppContext();
+	const {
+		cartItems,
+		calculatedPrices,
+		handleArchiveCart,
+		showFeedbackModal,
+		setShowFeedbackModal,
+		submittedOrder,
+		setSubmittedOrder,
+		showOrderConfirmation,
+		setShowOrderConfirmation,
+	} = useAppContext();
 	const { data: profile } = useGetProfileData();
 	const { data: defaultAddress } = useGetDefaultAddress();
+
+	const { submitFeedback, loading } = useFeedback();
+
 	const selectedAddress = defaultAddress?.[0];
 
 	const { contactPerson, handleSave: handleContactPersonSave } =
@@ -48,9 +58,6 @@ export default function CheckoutPage() {
 	const [paymentMethod, setPaymentMethod] = useState("faktura");
 	const [dimensionInputMode, setDimensionInputMode] = useState("select");
 	const [showWarning, setShowWarning] = useState(true);
-	const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
-	const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-	const [submittedOrder, setSubmittedOrder] = useState(null);
 
 	const [orderData, setOrderData] = useCheckoutOrderData(
 		cartItems,
@@ -60,7 +67,15 @@ export default function CheckoutPage() {
 	const submitOrder = useSubmitOrder(
 		profile?.punchout || false,
 		profile,
-		selectedAddress,
+		{
+			name: "999",
+			addressLine1: selectedAddress?.addressLine1 || "",
+			addressLine2: selectedAddress?.addressLine2 || "",
+			addressLine4: selectedAddress?.city || "",
+			postalCode: selectedAddress?.postalCode || "",
+			partyQualifier: "DP",
+			country: "NO",
+		},
 		handleArchiveCart,
 	);
 
@@ -108,21 +123,31 @@ export default function CheckoutPage() {
 	};
 
 	const handleCheckout = async () => {
-		if (currentStep < 2) {
-			goToNext();
-			return;
-		}
-
-		try {
-			const result = await submitOrder(orderData);
-			if (result) {
-				setSubmittedOrder(result);
-				setShowOrderConfirmation(true);
-				setTimeout(() => setShowFeedbackModal(true), 2000);
+		if (!profile?.punchout) {
+			if (currentStep < 2) {
+				goToNext();
+				return;
 			}
-		} catch (error) {
-			console.error("Order submission failed:", error);
+
+			try {
+				const result = await submitOrder(orderData);
+				if (result) {
+					setSubmittedOrder(result);
+					setShowOrderConfirmation(true);
+					setTimeout(() => setShowFeedbackModal(true), 1000);
+				}
+			} catch (error) {
+				console.error("Order submission failed:", error);
+			}
 		}
+	};
+
+	const ratingValues: Record<number, string> = {
+		1: "1 - Veldig dårlig",
+		2: "2 - Dårlig",
+		3: "3 - Helt grei",
+		4: "4 - Bra",
+		5: "5 - Veldig bra",
 	};
 
 	return (
@@ -171,6 +196,10 @@ export default function CheckoutPage() {
 							onSubmit={(rating, comment) => {
 								console.log("Feedback:", { rating, comment });
 								setShowFeedbackModal(false);
+								submitFeedback(
+									"Checkout",
+									`Vurdering: ${ratingValues[rating]}, Kommentar: ${comment}`,
+								);
 							}}
 						/>
 						<OrderTrackingModal

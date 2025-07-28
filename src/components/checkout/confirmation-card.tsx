@@ -27,7 +27,8 @@ export const ConfirmationCard = ({
 			<Button
 				variant="ghost"
 				className="p-0 text-base font-medium text-[#00A862] transition-colors hover:bg-transparent hover:text-[#008F53]"
-				onClick={onEdit}>
+				onClick={onEdit}
+				disabled={title === "Adresse"}>
 				Endre
 			</Button>
 		</div>

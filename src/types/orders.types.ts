@@ -1,4 +1,4 @@
-import { DefaultAddress } from "./user.types";
+import { SalesOrderAddress } from "./user.types";
 
 export interface Address {
 	name: string;
@@ -44,7 +44,7 @@ export interface Order {
 		companyCode: string;
 	};
 	salesOrderHeader: SalesOrderHeader;
-	salesOrderAddresses: DefaultAddress[];
+	salesOrderAddresses: SalesOrderAddress[];
 	salesOrderLines: OrderLines[];
 }
 

@@ -47,7 +47,7 @@ export const DimensionSearchInput = ({
 
 	const handleSelect = (dimension: SearchDimensionResponse) => {
 		onSelect(dimension);
-		setResults([]); // Clear results on selection
+		setResults([]);
 	};
 
 	return (
@@ -60,7 +60,7 @@ export const DimensionSearchInput = ({
 			/>
 			{isVisible && value !== "" && results.length > 0 && (
 				<div className="absolute z-[999999] mt-1 h-[160px] w-full overflow-auto rounded-md border bg-white shadow">
-					{results.map((dimension) => (
+					{(results ?? []).map((dimension) => (
 						<div
 							key={dimension.dimensionId}
 							className="cursor-pointer p-2 hover:bg-gray-100"

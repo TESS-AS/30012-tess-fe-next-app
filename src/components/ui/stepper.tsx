@@ -1,5 +1,6 @@
 import React from "react";
 
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import Image from "next/image";
 
 interface StepperProps {
@@ -13,6 +14,7 @@ const Stepper: React.FC<StepperProps> = ({
 	currentStep,
 	onStepClick,
 }) => {
+	const { data: profile } = useGetProfileData();
 	return (
 		<div className="flex w-full items-center justify-between py-6">
 			{steps.map((step, index) => (
@@ -20,7 +22,11 @@ const Stepper: React.FC<StepperProps> = ({
 					key={index}
 					className="flex flex-1 items-center last:flex-none">
 					<button
-						onClick={() => onStepClick(index)}
+						onClick={() => {
+							if (!profile?.punchout) {
+								onStepClick(index);
+							}
+						}}
 						className={`flex cursor-pointer items-center text-[#003D1A] transition-colors focus:outline-none ${
 							index === currentStep
 								? "font-[900] text-[#003D1A]"

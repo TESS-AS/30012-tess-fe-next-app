@@ -21,6 +21,7 @@ import {
 	getProductPrice,
 } from "@/services/product.service";
 import { CartLine } from "@/types/carts.types";
+import { Order } from "@/types/orders.types";
 import { PriceResponse } from "@/types/search.types";
 import { useSession } from "next-auth/react";
 
@@ -50,11 +51,19 @@ interface AppContextType {
 	surChargeTotalPrice: number;
 	isAuthOpen: boolean;
 	setIsAuthOpen: (value: boolean) => void;
+	showFeedbackModal: boolean;
+	setShowFeedbackModal: (value: boolean) => void;
+	submittedOrder: Order | null;
+	setSubmittedOrder: (value: Order | null) => void;
+	showOrderConfirmation: boolean;
+	setShowOrderConfirmation: (value: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppContextProvider = ({ children }: { children: ReactNode }) => {
+	const { data: profile } = useGetProfileData();
+
 	const [isAuthOpen, setIsAuthOpen] = useState(false);
 	const [currentStep, setCurrentStep] = useState(0);
 	const [isCartChanging, setIsCartChanging] = useState(false);
@@ -67,13 +76,16 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		Record<string, number>
 	>({});
 	const [isLoading, setIsLoading] = useState(false);
-	const { data: profile } = useGetProfileData();
+	const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+	const [submittedOrder, setSubmittedOrder] = useState<Order | null>(null);
+	const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
 
 	const { status } = useSession();
 
 	const loadCartData = async () => {
 		try {
 			const cart = await getCart();
+			console.log(cart, "Cart");
 			if (!cart) {
 				return;
 			}
@@ -146,10 +158,10 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	};
 
 	useEffect(() => {
-		if (status === "authenticated") {
+		if (profile) {
 			loadCartData();
 		}
-	}, [status, isCartChanging]);
+	}, [profile, isCartChanging]);
 	console.log(calculatedPrices, "prices");
 
 	const totalPrice = useMemo(() => {
@@ -236,6 +248,12 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				surChargeTotalPrice,
 				isAuthOpen,
 				setIsAuthOpen,
+				showFeedbackModal,
+				setShowFeedbackModal,
+				submittedOrder,
+				setSubmittedOrder,
+				showOrderConfirmation,
+				setShowOrderConfirmation,
 			}}>
 			{children}
 		</AppContext.Provider>
