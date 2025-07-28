@@ -33,6 +33,8 @@ export interface UserAddress {
 
 export interface DefaultAddress {
 	addressId: number;
+	name: string;
+	country: string;
 	addressName: string;
 	addressLine1: string;
 	addressLine2: string;
