@@ -65,7 +65,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 	useEffect(() => {
 		const loadDimensions = async () => {
 			const dims = await getUserDimensions();
-			setUserDimensions(dims);
+			setUserDimensions(dims ?? []);
 		};
 		loadDimensions();
 	}, []);
