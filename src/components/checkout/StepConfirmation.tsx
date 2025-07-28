@@ -34,12 +34,12 @@ export default function StepConfirmation({
 				title="Adresse"
 				icon={<MapPin className="h-5 w-5" />}
 				onEdit={() => modals.setAddressOpen(true)}>
-				<p>{selectedAddress.addressName}</p>
+				<p>{selectedAddress?.addressName}</p>
 				<p>
-					{selectedAddress.addressLine1} {selectedAddress.addressLine2}
+					{selectedAddress?.addressLine1} {selectedAddress?.addressLine2}
 				</p>
 				<p>
-					{selectedAddress.postalCode} {selectedAddress.city}
+					{selectedAddress?.postalCode} {selectedAddress?.city}
 				</p>
 			</ConfirmationCard>
 

@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import axiosClient from "@/services/axiosClient";
 
-export type FeedbackType = "Ris" | "Ros" | "Forslag";
+export type FeedbackType = "Ris" | "Ros" | "Forslag" | "Checkout";
 
 export function useFeedback(): {
 	success: boolean;

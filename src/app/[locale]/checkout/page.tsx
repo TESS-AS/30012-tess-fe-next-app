@@ -23,6 +23,7 @@ import { Order } from "@/types/orders.types";
 import type { PayPalScriptOptions } from "@paypal/paypal-js";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { useRouter } from "next/navigation";
+import { useFeedback } from "@/hooks/useFeedback";
 
 const initialOptions: PayPalScriptOptions = {
 	clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "",
@@ -33,10 +34,22 @@ const initialOptions: PayPalScriptOptions = {
 const steps = ["Levering", "Betaling", "Bekreft"];
 
 export default function CheckoutPage() {
-	const router = useRouter();
-	const { cartItems, calculatedPrices, handleArchiveCart } = useAppContext();
+	const { 
+		cartItems, 
+		calculatedPrices, 
+		handleArchiveCart, 
+		showFeedbackModal, 
+		setShowFeedbackModal, 
+		submittedOrder, 
+		setSubmittedOrder, 
+		showOrderConfirmation, 
+		setShowOrderConfirmation 
+	} = useAppContext();
 	const { data: profile } = useGetProfileData();
 	const { data: defaultAddress } = useGetDefaultAddress();
+
+	const { submitFeedback, loading } = useFeedback();
+	
 	const selectedAddress = defaultAddress?.[0];
 
 	const { contactPerson, handleSave: handleContactPersonSave } =
@@ -47,9 +60,6 @@ export default function CheckoutPage() {
 	const [paymentMethod, setPaymentMethod] = useState("faktura");
 	const [dimensionInputMode, setDimensionInputMode] = useState("select");
 	const [showWarning, setShowWarning] = useState(true);
-	const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
-	const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-	const [submittedOrder, setSubmittedOrder] = useState<Order | null>(null);
 
 	const [orderData, setOrderData] = useCheckoutOrderData(
 		cartItems,
@@ -115,22 +125,32 @@ export default function CheckoutPage() {
 	};
 
 	const handleCheckout = async () => {
-		if (currentStep < 2) {
-			goToNext();
-			return;
-		}
-
-		try {
-			const result = await submitOrder(orderData);
-			if (result) {
-				setSubmittedOrder(result);
-				setShowOrderConfirmation(true);
-				setTimeout(() => setShowFeedbackModal(true), 2000);
+		if(!profile?.punchout) {
+			if (currentStep < 2) {
+				goToNext();
+				return;
 			}
-		} catch (error) {
-			console.error("Order submission failed:", error);
+
+			try {
+				const result = await submitOrder(orderData);
+				if (result) {
+					setSubmittedOrder(result);
+					setShowOrderConfirmation(true);
+					setTimeout(() => setShowFeedbackModal(true), 1000);
+				}
+			} catch (error) {
+				console.error("Order submission failed:", error);
+			}
 		}
 	};
+
+	const ratingValues: Record<number, string> = {
+		1: "1 - Veldig dårlig",
+		2: "2 - Dårlig",
+		3: "3 - Helt grei",
+		4: "4 - Bra",
+		5: "5 - Veldig bra"
+	}
 
 	return (
 		<PayPalScriptProvider options={initialOptions}>
@@ -178,6 +198,7 @@ export default function CheckoutPage() {
 							onSubmit={(rating, comment) => {
 								console.log("Feedback:", { rating, comment });
 								setShowFeedbackModal(false);
+								submitFeedback("Checkout", `Vurdering: ${ratingValues[rating]}, Kommentar: ${comment}`);
 							}}
 						/>
 						<OrderTrackingModal

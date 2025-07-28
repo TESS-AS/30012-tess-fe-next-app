@@ -43,6 +43,9 @@ import { useLocale } from "next-intl";
 import { toast } from "react-toastify";
 
 import CartSkeleton from "./loading";
+import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
+import { useCheckoutOrderData } from "@/hooks/useCheckoutOrderData";
+import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 
 const CartPage = () => {
 	const currentLocale = useLocale();
@@ -50,8 +53,7 @@ const CartPage = () => {
 	const [categoryPaths, setCategoryPaths] = useState<{
 		[key: string]: string[];
 	}>({});
-	const { data: profile } = useGetProfileData();
-
+	const { data: profile } = usePunchoutProfile();
 	const {
 		cartItems,
 		prices,
@@ -61,9 +63,31 @@ const CartPage = () => {
 		updateWarehouse,
 		removeItem,
 		handleArchiveCart,
-		isAuthOpen,
 		setIsAuthOpen,
+		setShowFeedbackModal,
+		setSubmittedOrder,
+		setShowOrderConfirmation,
 	} = useAppContext();
+	const [orderData, setOrderData] = useCheckoutOrderData(
+		cartItems,
+		profile,
+		calculatedPrices,
+	);
+	const submitOrder = useSubmitOrder(
+		profile?.punchout || false,
+		profile,
+		{
+			name: "999",
+			addressLine1: "",
+			addressLine2: "",
+			addressLine4: "",
+			postalCode: "",
+			partyQualifier: "DP",
+			country: "NO",
+		}, 
+		handleArchiveCart,
+	);
+
 
 	useEffect(() => {
 		const loadPaths = async () => {
@@ -137,7 +161,7 @@ const CartPage = () => {
 	if (isLoading) {
 		return <CartSkeleton />;
 	}
-
+	
 	if (!profile) {
 		return (
 			<div className="flex flex-col items-center justify-center gap-4 py-12">
@@ -147,6 +171,21 @@ const CartPage = () => {
 				</Button>
 			</div>
 		);
+	}
+
+	const handleCheckout = async () => {
+		if (profile?.punchout) {
+			
+			const result = await submitOrder(orderData);
+			handleArchiveCart();
+			if (result) {
+				setSubmittedOrder(result);
+				setShowOrderConfirmation(true);
+				setTimeout(() => setShowFeedbackModal(true), 2000);
+			}
+		} else {
+			router.push("/checkout");
+		}
 	}
 
 	return (
@@ -412,7 +451,7 @@ const CartPage = () => {
 				</div>
 
 				{/* Order Summary */}
-				<OrderSummary handleCheckout={() => router.push("/checkout")} />
+				<OrderSummary handleCheckout={handleCheckout} />
 			</div>
 		</main>
 	);

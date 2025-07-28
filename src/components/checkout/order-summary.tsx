@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useAppContext } from "@/lib/appContext";
 import { Separator } from "@radix-ui/react-select";
 import { ArrowRight, Loader2 } from "lucide-react";
@@ -10,8 +11,11 @@ interface OrderSummaryProps {
 }
 
 export default function OrderSummary({ handleCheckout }: OrderSummaryProps) {
+	const { data: profile } = usePunchoutProfile()
 	const { cartItems, isLoading, totalPrice, surChargeTotalPrice } =
 		useAppContext();
+
+		console.log(profile,"profile")
 
 	return (
 		<div className="space-y-6">
@@ -52,16 +56,29 @@ export default function OrderSummary({ handleCheckout }: OrderSummaryProps) {
 						</span>
 					</div>
 				</div>
-				<Button
-					className="mt-6 w-full"
-					disabled={cartItems?.length === 0 || isLoading}
-					onClick={handleCheckout}>
-					{isLoading ? (
-						<Loader2 className="h-4 w-4 animate-spin" />
-					) : (
-						"Gå til checkout (DEMO)"
-					)}
-				</Button>
+				{!profile?.punchout 
+					? <Button
+						className="mt-6 w-full"
+						disabled={cartItems?.length === 0 || isLoading}
+						onClick={handleCheckout}>
+						{isLoading ? (
+							<Loader2 className="h-4 w-4 animate-spin" />
+						) : (
+							"Fortsett til betaling"
+						)}
+					</Button>
+					: <Button
+						variant="outlineGreen"
+						className="mt-6 w-full text-[#009640]"
+						disabled={cartItems?.length === 0 || isLoading}
+						onClick={handleCheckout}>
+						{isLoading ? (
+							<Loader2 className="h-4 w-4 animate-spin" />
+						) : (
+							"Punchout Handlekurv"
+						)}
+					</Button>
+				}
 				<Button
 					variant="link"
 					className="mt-2 w-full hover:no-underline"

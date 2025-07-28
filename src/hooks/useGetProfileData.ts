@@ -15,7 +15,7 @@ export function useGetProfileData() {
 		try {
 			setIsLoading(true);
 			const response = await axiosClient.get<ProfileUser[]>("/user");
-			setData(response.data[0] ?? null);
+			setData(response.data[0]);
 		} catch (err) {
 			setError(err);
 		} finally {
@@ -24,26 +24,8 @@ export function useGetProfileData() {
 	};
 
 	useEffect(() => {
-		if (
-			status === "authenticated" &&
-			session?.accessToken &&
-			session?.idToken
-		) {
-			let isMounted = true;
-
-			const load = async () => {
-				if (isMounted) await fetchUserData();
-			};
-
-			load();
-			const timeout = setTimeout(load, 1000);
-
-			return () => {
-				isMounted = false;
-				clearTimeout(timeout);
-			};
-		}
-	}, [status, session]);
+		fetchUserData();
+	}, []);
 
 	return { data, isLoading, error };
 }
