@@ -3,7 +3,11 @@ import { EditAddressModal } from "@/components/checkout/edit-address-modal";
 import { EditContactModal } from "@/components/checkout/edit-contact-modal";
 import { EditDeliveryModal } from "@/components/checkout/edit-delivery-modal";
 import { EditPaymentModal } from "@/components/checkout/edit-payment-modal";
+import { useAppContext } from "@/lib/appContext";
 import { MapPin, Truck, User2, Wallet } from "lucide-react";
+import Image from "next/image";
+
+import { Card } from "../ui/card";
 
 export default function StepConfirmation({
 	contactPerson,
@@ -17,6 +21,8 @@ export default function StepConfirmation({
 	setDimensionInputMode,
 	handleContactPersonSave,
 }: any) {
+	const { cartItems, calculatedPrices } = useAppContext();
+
 	return (
 		<div className="grid grid-cols-4 gap-6">
 			<ConfirmationCard
@@ -99,6 +105,46 @@ export default function StepConfirmation({
 				dimensionInputMode={dimensionInputMode}
 				setDimensionInputMode={setDimensionInputMode}
 			/>
+
+			<div className="col-span-4 flex flex-col">
+				<h2 className="mb-4 text-xl font-semibold">Dine varer</h2>
+				<div className="flex flex-col space-y-4">
+					{cartItems?.map((item: any) => (
+						<Card
+							key={item.itemNumber}
+							className="rounded-lg border border-gray-200 p-6 shadow-none">
+							<div className="flex items-center justify-between">
+								<div className="flex items-center gap-6">
+									<div className="relative h-16 w-16 rounded bg-[#F7F7F7] p-2">
+										{item.mediaId?.[0]?.url ? (
+											<Image
+												src={item.mediaId[0].url}
+												alt={item.mediaId[0].filename || ""}
+												fill
+												className="object-contain p-1"
+											/>
+										) : (
+											<div className="h-full w-full rounded bg-gray-100" />
+										)}
+									</div>
+									<div className="flex flex-col gap-0.5">
+										<p className="text-base text-[#0F1912]">
+											{item.productNumber}
+										</p>
+										<p className="text-sm text-[#5A615D]">{item.itemNumber}</p>
+									</div>
+								</div>
+								<div className="flex items-center gap-50">
+									<p className="font-medium text-[#0F1912]">x{item.quantity}</p>
+									<p className="text-lg font-bold whitespace-nowrap">
+										{calculatedPrices[item.itemNumber].toFixed(2)},–
+									</p>
+								</div>
+							</div>
+						</Card>
+					))}
+				</div>
+			</div>
 		</div>
 	);
 }
