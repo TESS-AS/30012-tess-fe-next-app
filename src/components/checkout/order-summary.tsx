@@ -11,11 +11,11 @@ interface OrderSummaryProps {
 }
 
 export default function OrderSummary({ handleCheckout }: OrderSummaryProps) {
-	const { data: profile } = usePunchoutProfile()
+	const { data: profile } = usePunchoutProfile();
 	const { cartItems, isLoading, totalPrice, surChargeTotalPrice } =
 		useAppContext();
 
-		console.log(profile,"profile")
+	console.log(profile, "profile");
 
 	return (
 		<div className="space-y-6">
@@ -56,8 +56,8 @@ export default function OrderSummary({ handleCheckout }: OrderSummaryProps) {
 						</span>
 					</div>
 				</div>
-				{!profile?.punchout 
-					? <Button
+				{!profile?.punchout ? (
+					<Button
 						className="mt-6 w-full"
 						disabled={cartItems?.length === 0 || isLoading}
 						onClick={handleCheckout}>
@@ -67,7 +67,8 @@ export default function OrderSummary({ handleCheckout }: OrderSummaryProps) {
 							"Fortsett til betaling"
 						)}
 					</Button>
-					: <Button
+				) : (
+					<Button
 						variant="outlineGreen"
 						className="mt-6 w-full text-[#009640]"
 						disabled={cartItems?.length === 0 || isLoading}
@@ -78,7 +79,7 @@ export default function OrderSummary({ handleCheckout }: OrderSummaryProps) {
 							"Punchout Handlekurv"
 						)}
 					</Button>
-				}
+				)}
 				<Button
 					variant="link"
 					className="mt-2 w-full hover:no-underline"

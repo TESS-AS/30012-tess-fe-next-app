@@ -1,4 +1,5 @@
 import React from "react";
+
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import Image from "next/image";
 

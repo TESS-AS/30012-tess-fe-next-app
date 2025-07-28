@@ -52,15 +52,15 @@ export const UserDimensionsInput: React.FC<Props> = ({
 				orderData.salesOrderHeader.customerReference,
 				orderData.salesOrderLines?.[0]?.accountPart3,
 			]
-			.filter(Boolean)
-			.join("<");
+				.filter(Boolean)
+				.join("<");
 
-		setUserDimension(dimensionSelectString);
-		setUserDimensionOne(
-			orderData.salesOrderHeader.customersOrderReference || "",
-		);
-		setUserDimensionTwo(orderData.salesOrderHeader.customerReference || "");
-		setUserDimensionThree(orderData.salesOrderLines?.[0]?.accountPart3 || "");
+			setUserDimension(dimensionSelectString);
+			setUserDimensionOne(
+				orderData.salesOrderHeader.customersOrderReference || "",
+			);
+			setUserDimensionTwo(orderData.salesOrderHeader.customerReference || "");
+			setUserDimensionThree(orderData.salesOrderLines?.[0]?.accountPart3 || "");
 		}
 	}, [orderData]);
 
@@ -240,7 +240,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 						value={userDimension}
 						onChange={(e) => {
 							setUserDimension(e.target.value);
-							console.log(e.target.value,"target")
+							console.log(e.target.value, "target");
 							setOrderData((prev) => ({
 								...prev,
 								salesOrderHeader: {

@@ -21,9 +21,9 @@ import {
 	getProductPrice,
 } from "@/services/product.service";
 import { CartLine } from "@/types/carts.types";
+import { Order } from "@/types/orders.types";
 import { PriceResponse } from "@/types/search.types";
 import { useSession } from "next-auth/react";
-import { Order } from "@/types/orders.types";
 
 interface AppContextType {
 	isCartChanging: boolean;
@@ -62,7 +62,6 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppContextProvider = ({ children }: { children: ReactNode }) => {
-	
 	const { data: profile } = useGetProfileData();
 
 	const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -81,13 +80,12 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const [submittedOrder, setSubmittedOrder] = useState<Order | null>(null);
 	const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
 
-
 	const { status } = useSession();
 
 	const loadCartData = async () => {
 		try {
 			const cart = await getCart();
-			console.log(cart,"Cart")
+			console.log(cart, "Cart");
 			if (!cart) {
 				return;
 			}

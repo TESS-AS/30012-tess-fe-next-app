@@ -13,17 +13,15 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 import Stepper from "@/components/ui/stepper";
 import { useCheckoutOrderData } from "@/hooks/useCheckoutOrderData";
 import { useContactPerson } from "@/hooks/useContactPerson";
+import { useFeedback } from "@/hooks/useFeedback";
 import { useGetDefaultAddress } from "@/hooks/useGetDefaultAddress";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useModals } from "@/hooks/useModals";
 import { useOrderStepper } from "@/hooks/useOrderStepper";
 import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { useAppContext } from "@/lib/appContext";
-import { Order } from "@/types/orders.types";
 import type { PayPalScriptOptions } from "@paypal/paypal-js";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
-import { useRouter } from "next/navigation";
-import { useFeedback } from "@/hooks/useFeedback";
 
 const initialOptions: PayPalScriptOptions = {
 	clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "",
@@ -34,22 +32,22 @@ const initialOptions: PayPalScriptOptions = {
 const steps = ["Levering", "Betaling", "Bekreft"];
 
 export default function CheckoutPage() {
-	const { 
-		cartItems, 
-		calculatedPrices, 
-		handleArchiveCart, 
-		showFeedbackModal, 
-		setShowFeedbackModal, 
-		submittedOrder, 
-		setSubmittedOrder, 
-		showOrderConfirmation, 
-		setShowOrderConfirmation 
+	const {
+		cartItems,
+		calculatedPrices,
+		handleArchiveCart,
+		showFeedbackModal,
+		setShowFeedbackModal,
+		submittedOrder,
+		setSubmittedOrder,
+		showOrderConfirmation,
+		setShowOrderConfirmation,
 	} = useAppContext();
 	const { data: profile } = useGetProfileData();
 	const { data: defaultAddress } = useGetDefaultAddress();
 
 	const { submitFeedback, loading } = useFeedback();
-	
+
 	const selectedAddress = defaultAddress?.[0];
 
 	const { contactPerson, handleSave: handleContactPersonSave } =
@@ -77,7 +75,7 @@ export default function CheckoutPage() {
 			postalCode: selectedAddress?.postalCode || "",
 			partyQualifier: "DP",
 			country: "NO",
-		}, 
+		},
 		handleArchiveCart,
 	);
 
@@ -125,7 +123,7 @@ export default function CheckoutPage() {
 	};
 
 	const handleCheckout = async () => {
-		if(!profile?.punchout) {
+		if (!profile?.punchout) {
 			if (currentStep < 2) {
 				goToNext();
 				return;
@@ -149,8 +147,8 @@ export default function CheckoutPage() {
 		2: "2 - Dårlig",
 		3: "3 - Helt grei",
 		4: "4 - Bra",
-		5: "5 - Veldig bra"
-	}
+		5: "5 - Veldig bra",
+	};
 
 	return (
 		<PayPalScriptProvider options={initialOptions}>
@@ -198,7 +196,10 @@ export default function CheckoutPage() {
 							onSubmit={(rating, comment) => {
 								console.log("Feedback:", { rating, comment });
 								setShowFeedbackModal(false);
-								submitFeedback("Checkout", `Vurdering: ${ratingValues[rating]}, Kommentar: ${comment}`);
+								submitFeedback(
+									"Checkout",
+									`Vurdering: ${ratingValues[rating]}, Kommentar: ${comment}`,
+								);
 							}}
 						/>
 						<OrderTrackingModal

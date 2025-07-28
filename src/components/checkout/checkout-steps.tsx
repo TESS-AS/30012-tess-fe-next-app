@@ -210,15 +210,15 @@ export default function CheckoutSteps() {
 		if (step === 1) {
 			if (!orderData.salesOrderAddresses?.[0]) return false;
 
-			const hasValidShippingFields = shippingFields
-				.filter((f) => f.required)
-				.every((f) => {
-					const value =
-						orderData.salesOrderAddresses[0][f.field as keyof Address];
-					return value !== undefined && value !== null && value !== "";
-				});
+			// const hasValidShippingFields = shippingFields
+			// 	.filter((f) => f.required)
+			// 	.every((f) => {
+			// 		const value =
+			// 			orderData.salesOrderAddresses[0][f.field as keyof Address];
+			// 		return value !== undefined && value !== null && value !== "";
+			// 	});
 
-			return hasValidShippingFields;
+			// return hasValidShippingFields;
 
 			// if (activeTab === "customer") {
 			// 	if (!useCustomerSearchInput) {
@@ -344,7 +344,7 @@ export default function CheckoutSteps() {
 								onChange={() => {}}
 							/>
 						))}
-						{shippingFields.map((field) => (
+						{/* {shippingFields.map((field) => (
 							<FormField
 								key={field.id}
 								{...field}
@@ -357,7 +357,7 @@ export default function CheckoutSteps() {
 									handleAddressChange(field.field as keyof Address, value)
 								}
 							/>
-						))}
+						))} */}
 					</div>
 					<div className="space-y-4">
 						<Tabs

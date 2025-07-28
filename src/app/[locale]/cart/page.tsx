@@ -16,7 +16,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { useCheckoutOrderData } from "@/hooks/useCheckoutOrderData";
+import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
+import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { Link } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import { loadCategoryTree } from "@/services/categories.service";
@@ -26,15 +28,7 @@ import {
 	WarehouseBatch,
 } from "@/services/product.service";
 import { RawCategory } from "@/types/categories.types";
-import { Separator } from "@radix-ui/react-select";
-import {
-	ArrowRight,
-	ChevronRight,
-	CircleAlert,
-	CircleCheck,
-	Loader2,
-	Trash2,
-} from "lucide-react";
+import { ChevronRight, CircleAlert, CircleCheck, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -43,9 +37,6 @@ import { useLocale } from "next-intl";
 import { toast } from "react-toastify";
 
 import CartSkeleton from "./loading";
-import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
-import { useCheckoutOrderData } from "@/hooks/useCheckoutOrderData";
-import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 
 const CartPage = () => {
 	const currentLocale = useLocale();
@@ -84,10 +75,9 @@ const CartPage = () => {
 			postalCode: "",
 			partyQualifier: "DP",
 			country: "NO",
-		}, 
+		},
 		handleArchiveCart,
 	);
-
 
 	useEffect(() => {
 		const loadPaths = async () => {
@@ -161,7 +151,7 @@ const CartPage = () => {
 	if (isLoading) {
 		return <CartSkeleton />;
 	}
-	
+
 	if (!profile) {
 		return (
 			<div className="flex flex-col items-center justify-center gap-4 py-12">
@@ -175,7 +165,6 @@ const CartPage = () => {
 
 	const handleCheckout = async () => {
 		if (profile?.punchout) {
-			
 			const result = await submitOrder(orderData);
 			handleArchiveCart();
 			if (result) {
@@ -186,7 +175,7 @@ const CartPage = () => {
 		} else {
 			router.push("/checkout");
 		}
-	}
+	};
 
 	return (
 		<main className="container min-h-screen py-10">
