@@ -3,7 +3,7 @@ import { Order } from "@/types/orders.types";
 import axiosInstance from "./axiosClient";
 
 interface SalesOrderResponse {
-	data?: string;
+	data?: any;
 	order?: Order;
 }
 
