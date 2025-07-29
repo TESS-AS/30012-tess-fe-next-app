@@ -135,6 +135,10 @@ export default function CheckoutPage() {
 	const handleCheckout = async () => {
 		if (!profile?.punchout) {
 			if (currentStep < 2) {
+				if (!selectedAddress?.addressLine1 && !updatedAddress?.street) {
+					toast.error("Please select an address");
+					return;
+				}
 				goToNext();
 				return;
 			}
