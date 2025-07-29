@@ -3,6 +3,7 @@ import { EditAddressModal } from "@/components/checkout/edit-address-modal";
 import { EditContactModal } from "@/components/checkout/edit-contact-modal";
 import { EditDeliveryModal } from "@/components/checkout/edit-delivery-modal";
 import { EditPaymentModal } from "@/components/checkout/edit-payment-modal";
+import { useAppContext } from "@/lib/appContext";
 import { MapPin, Truck, User2, Wallet } from "lucide-react";
 
 export default function StepConfirmation({
@@ -17,6 +18,8 @@ export default function StepConfirmation({
 	setDimensionInputMode,
 	handleContactPersonSave,
 }: any) {
+	const { setUpdatedAddress } = useAppContext();
+
 	return (
 		<div className="grid grid-cols-4 gap-6">
 			<ConfirmationCard
@@ -36,7 +39,7 @@ export default function StepConfirmation({
 				onEdit={() => modals.setAddressOpen(true)}>
 				<p>{selectedAddress?.addressName}</p>
 				<p>
-					{selectedAddress?.addressLine1} {selectedAddress?.addressLine2}
+					{selectedAddress?.street} {selectedAddress?.houseNumber}
 				</p>
 				<p>
 					{selectedAddress?.postalCode} {selectedAddress?.city}
@@ -73,7 +76,7 @@ export default function StepConfirmation({
 			<EditAddressModal
 				open={modals.addressOpen}
 				onClose={() => modals.setAddressOpen(false)}
-				onSave={() => {}}
+				onSave={setUpdatedAddress}
 				initialData={selectedAddress}
 			/>
 			<EditDeliveryModal

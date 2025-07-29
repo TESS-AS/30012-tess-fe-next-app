@@ -41,10 +41,11 @@ import CartSkeleton from "./loading";
 const CartPage = () => {
 	const currentLocale = useLocale();
 	const router = useRouter();
+	const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
 	const [categoryPaths, setCategoryPaths] = useState<{
 		[key: string]: string[];
 	}>({});
-	const { data: profile } = usePunchoutProfile();
+	const { data: profile, isLoading: isLoadingProfile } = usePunchoutProfile();
 	const {
 		cartItems,
 		prices,
@@ -71,6 +72,7 @@ const CartPage = () => {
 			name: "999",
 			addressLine1: "",
 			addressLine2: "",
+			addressLine3: "",
 			addressLine4: "",
 			postalCode: "",
 			partyQualifier: "DP",
@@ -148,7 +150,26 @@ const CartPage = () => {
 		}
 	};
 
-	if (isLoading) {
+	const handleCheckout = async () => {
+		setIsCheckoutLoading(true);
+		try {
+			if (profile?.punchout) {
+				const result = await submitOrder(orderData);
+				handleArchiveCart();
+				if (result) {
+					setSubmittedOrder(result);
+					setShowOrderConfirmation(true);
+					setTimeout(() => setShowFeedbackModal(true), 2000);
+				}
+			} else {
+				router.push("/checkout");
+			}
+		} finally {
+			setIsCheckoutLoading(false);
+		}
+	};
+
+	if (isLoadingProfile) {
 		return <CartSkeleton />;
 	}
 
@@ -162,20 +183,6 @@ const CartPage = () => {
 			</div>
 		);
 	}
-
-	const handleCheckout = async () => {
-		if (profile?.punchout) {
-			const result = await submitOrder(orderData);
-			handleArchiveCart();
-			if (result) {
-				setSubmittedOrder(result);
-				setShowOrderConfirmation(true);
-				setTimeout(() => setShowFeedbackModal(true), 2000);
-			}
-		} else {
-			router.push("/checkout");
-		}
-	};
 
 	return (
 		<main className="container min-h-screen py-10">
@@ -440,7 +447,7 @@ const CartPage = () => {
 				</div>
 
 				{/* Order Summary */}
-				<OrderSummary handleCheckout={handleCheckout} />
+				<OrderSummary handleCheckout={handleCheckout} isCheckoutLoading={isCheckoutLoading} />
 			</div>
 		</main>
 	);

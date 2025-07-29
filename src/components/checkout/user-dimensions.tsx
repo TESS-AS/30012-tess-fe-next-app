@@ -46,7 +46,6 @@ export const UserDimensionsInput: React.FC<Props> = ({
 	});
 
 	useEffect(() => {
-		if (dimensionInputMode === "select") {
 			const dimensionSelectString = [
 				orderData.salesOrderHeader.customersOrderReference,
 				orderData.salesOrderHeader.customerReference,
@@ -61,7 +60,6 @@ export const UserDimensionsInput: React.FC<Props> = ({
 			);
 			setUserDimensionTwo(orderData.salesOrderHeader.customerReference || "");
 			setUserDimensionThree(orderData.salesOrderLines?.[0]?.accountPart3 || "");
-		}
 	}, [orderData]);
 
 	useEffect(() => {
@@ -72,6 +70,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 		loadDimensions();
 	}, []);
 
+	console.log(formatUserDimensionsToHierarchy(userDimensions), "userDimensions");
 	useEffect(() => {
 		setUserDimension("");
 		setUserDimensionOne("");
@@ -138,11 +137,14 @@ export const UserDimensionsInput: React.FC<Props> = ({
 					<Select
 						value={userDimension}
 						onValueChange={(value) => {
-							if (dimensionInputMode === "select") {
-								const parts = value.split("<");
-								setUserDimension(value);
-								updateOrderData(parts);
-							}
+							const parts = value.split("<");
+							const paddedParts = [
+								parts[0] || "",
+								parts[1] || "",
+								parts[2] || ""
+							];
+							setUserDimension(value);
+							updateOrderData(paddedParts);
 						}}>
 						<SelectTrigger>
 							<SelectValue placeholder="Select User Dimension" />

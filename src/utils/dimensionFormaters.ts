@@ -30,25 +30,42 @@ export function formatCustomerDimensionsToHierarchy(
 export function formatUserDimensionsToHierarchy(
 	dimensions: UserDimensionItem[],
 ): Array<{ label: string; value: string }> {
-	return dimensions.flatMap((dim) => {
-		const results = [
-			{ label: dim.dimension1.label, value: dim.dimension1.label },
-		];
+	const uniqueValues = new Set<string>();
 
-		if (dim.dimension2.label) {
+	const results = dimensions.flatMap((dim) => {
+		const results = [];
+		if (!uniqueValues.has(dim.dimension1.label)) {
+			uniqueValues.add(dim.dimension1.label);
 			results.push({
-				label: `${dim.dimension1.label}<${dim.dimension2.label}`,
-				value: `${dim.dimension1.label}<${dim.dimension2.label}`,
+				label: dim.dimension1.label,
+				value: dim.dimension1.label,
 			});
 		}
 
+		if (dim.dimension2.label) {
+			const value = `${dim.dimension1.label}<${dim.dimension2.label}`;
+			if (!uniqueValues.has(value)) {
+				uniqueValues.add(value);
+				results.push({
+					label: value,
+					value: value,
+				});
+			}
+		}
+
 		if (dim.dimension3.label) {
-			results.push({
-				label: `${dim.dimension1.label}<${dim.dimension2.label}<${dim.dimension3.label}`,
-				value: `${dim.dimension1.label}<${dim.dimension2.label}<${dim.dimension3.label}`,
-			});
+			const value = `${dim.dimension1.label}<${dim.dimension2.label}<${dim.dimension3.label}`;
+			if (!uniqueValues.has(value)) {
+				uniqueValues.add(value);
+				results.push({
+					label: value,
+					value: value,
+				});
+			}
 		}
 
 		return results;
 	});
+
+	return results;
 }

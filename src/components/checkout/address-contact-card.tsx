@@ -6,12 +6,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useSavedAddresses } from "@/hooks/useSavedAddresses";
 import { cn } from "@/lib/utils";
 import { getPostalCode } from "@/services/orders.service";
 import { MapPin, Pencil, Loader2, Plus, SquarePen } from "lucide-react";
 
 import { AddressSelector } from "./address-selector";
-import { SavedAddress, AddressFormState } from "../../types/address";
+import { AddressFormState } from "../../types/address";
 
 interface AddressCardProps {
 	name: string;
@@ -40,78 +41,14 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 	isUserAddress = false,
 	onSave,
 }) => {
+	const savedAddresses = useSavedAddresses();
+
 	const [editMode, setEditMode] = useState(false);
 	const [showExtra, setShowExtra] = useState(!!extraInfo);
 	const [isLoading, setIsLoading] = useState(false);
-	// Mock data - replace with actual data from your tables
-	const savedAddresses: SavedAddress[] = [
-		{
-			id: "b1",
-			type: "bruker",
-			name: "Adresse 1",
-			street: "Storgata",
-			houseNumber: "1",
-			postalCode: "0155",
-			city: "Oslo",
-		},
-		{
-			id: "b2",
-			type: "bruker",
-			name: "Adresse 2",
-			street: "Lillegata",
-			houseNumber: "2",
-			postalCode: "0156",
-			city: "Oslo",
-		},
-		{
-			id: "k1",
-			type: "kunde",
-			name: "Adresse 1",
-			street: "Kundegata",
-			houseNumber: "10",
-			postalCode: "5020",
-			city: "Bergen",
-		},
-		{
-			id: "k2",
-			type: "kunde",
-			name: "Adresse 2",
-			street: "Bedriftsvei",
-			houseNumber: "20",
-			postalCode: "5021",
-			city: "Bergen",
-		},
-		{
-			id: "k3",
-			type: "kunde",
-			name: "Adresse 3",
-			street: "Næringsveien",
-			houseNumber: "30",
-			postalCode: "5022",
-			city: "Bergen",
-		},
-		{
-			id: "o1",
-			type: "organisasjon",
-			name: "Adresse 1",
-			street: "Orggata",
-			houseNumber: "100",
-			postalCode: "7030",
-			city: "Trondheim",
-		},
-		{
-			id: "o2",
-			type: "organisasjon",
-			name: "Adresse 2",
-			street: "Firmagata",
-			houseNumber: "200",
-			postalCode: "7031",
-			city: "Trondheim",
-		},
-	];
 
 	const [formData, setFormData] = useState<AddressFormState>({
-		name,
+		addressName,
 		street,
 		houseNumber,
 		extraInfo,
@@ -137,15 +74,6 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 	};
 
 	const handleCancel = () => {
-		setFormData({
-			name,
-			street,
-			houseNumber,
-			extraInfo,
-			postalCode,
-			city,
-			isUserAddress,
-		});
 		setEditMode(false);
 	};
 
@@ -198,6 +126,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 				{!editMode ? (
 					<div>
 						<p className="text-foreground mb-1 text-sm">{label}</p>
+						<p className="text-foreground text-sm">{addressName}</p>
 						<p className="text-foreground text-sm">
 							{street} {houseNumber}
 						</p>
@@ -224,7 +153,6 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 								}}
 								onAddNewClick={() => {
 									// Handle new address creation
-									console.log("Add new address");
 								}}
 							/>
 						</div>
@@ -233,7 +161,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 							<Label>Navn på adresse</Label>
 							<Input
 								name="addressName"
-								value={formData.name}
+								value={formData.addressName}
 								onChange={handleChange}
 								placeholder="Legg til navn"
 							/>
@@ -269,7 +197,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 							</div>
 						</div>
 
-						{!showExtra && (
+						{!formData.extraInfo && !showExtra && (
 							<Button
 								variant="outline"
 								className="text-foreground border-[#C1C4C2] text-sm font-medium"
@@ -278,7 +206,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 								Legg til tilleggsopplysninger
 							</Button>
 						)}
-						{showExtra && (
+						{(formData.extraInfo || showExtra) && (
 							<div>
 								<Label>Tilleggsopplysninger (valgfri)</Label>
 								<Input
@@ -363,7 +291,8 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 						variant="outline"
 						onClick={() => setEditMode(true)}
 						className="text-foreground mt-4 border-[#C1C4C2] text-xs font-medium"
-						disabled={true}>
+						// disabled={true}
+					>
 						<Pencil className="mr-1 h-3 w-3" />
 						Endre adresse
 					</Button>

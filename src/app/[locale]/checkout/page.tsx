@@ -22,6 +22,7 @@ import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { useAppContext } from "@/lib/appContext";
 import type { PayPalScriptOptions } from "@paypal/paypal-js";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { toast } from "react-toastify";
 
 const initialOptions: PayPalScriptOptions = {
 	clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "",
@@ -42,6 +43,8 @@ export default function CheckoutPage() {
 		setSubmittedOrder,
 		showOrderConfirmation,
 		setShowOrderConfirmation,
+		updatedAddress,
+		setUpdatedAddress,
 	} = useAppContext();
 	const { data: profile } = useGetProfileData();
 	const { data: defaultAddress } = useGetDefaultAddress();
@@ -58,6 +61,7 @@ export default function CheckoutPage() {
 	const [paymentMethod, setPaymentMethod] = useState("faktura");
 	const [dimensionInputMode, setDimensionInputMode] = useState("select");
 	const [showWarning, setShowWarning] = useState(true);
+	const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
 
 	const [orderData, setOrderData] = useCheckoutOrderData(
 		cartItems,
@@ -69,10 +73,15 @@ export default function CheckoutPage() {
 		profile,
 		{
 			name: "999",
-			addressLine1: selectedAddress?.addressLine1 || "",
-			addressLine2: selectedAddress?.addressLine2 || "",
-			addressLine4: selectedAddress?.city || "",
-			postalCode: selectedAddress?.postalCode || "",
+			addressLine1:
+				updatedAddress?.street || selectedAddress?.addressLine1 || "",
+			addressLine2:
+				updatedAddress?.houseNumber || selectedAddress?.addressLine2 || "",
+			addressLine3:
+				updatedAddress?.extraInfo || selectedAddress?.addressLine3 || "",
+			addressLine4: updatedAddress?.city || selectedAddress?.city || "",
+			postalCode:
+				updatedAddress?.postalCode || selectedAddress?.postalCode || "",
 			partyQualifier: "DP",
 			country: "NO",
 		},
@@ -86,9 +95,10 @@ export default function CheckoutPage() {
 					<StepContactDelivery
 						contactPerson={contactPerson}
 						handleContactPersonSave={handleContactPersonSave}
-						selectedAddress={selectedAddress}
+						selectedAddress={selectedAddress || updatedAddress}
 						showWarning={showWarning}
 						setShowWarning={setShowWarning}
+						onSave={setUpdatedAddress}
 					/>
 				);
 			case 1:
@@ -106,7 +116,7 @@ export default function CheckoutPage() {
 				return (
 					<StepConfirmation
 						contactPerson={contactPerson}
-						selectedAddress={selectedAddress}
+						selectedAddress={selectedAddress || updatedAddress}
 						orderData={orderData}
 						modals={modals}
 						paymentMethod={paymentMethod}
@@ -129,6 +139,8 @@ export default function CheckoutPage() {
 				return;
 			}
 
+			setIsCheckoutLoading(true);
+
 			try {
 				const result = await submitOrder(orderData);
 				if (result) {
@@ -138,6 +150,9 @@ export default function CheckoutPage() {
 				}
 			} catch (error) {
 				console.error("Order submission failed:", error);
+				toast.error("Order submission failed");
+			} finally {
+				setIsCheckoutLoading(false);
 			}
 		}
 	};
@@ -181,7 +196,10 @@ export default function CheckoutPage() {
 
 						{currentStep === 2 && (
 							<div className="col-span-12">
-								<OrderSummary handleCheckout={handleCheckout} />
+								<OrderSummary
+									handleCheckout={handleCheckout}
+									isCheckoutLoading={isCheckoutLoading}
+								/>
 							</div>
 						)}
 					</>

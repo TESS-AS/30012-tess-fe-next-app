@@ -11,7 +11,7 @@ import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Modal } from "../ui/modal";
-import { Textarea } from "../ui/textarea";
+import { useSavedAddresses } from "@/hooks/useSavedAddresses";
 
 export interface SavedAddressData {
 	id?: string;
@@ -37,73 +37,8 @@ export const EditAddressModal: React.FC<EditAddressModalProps> = ({
 	onSave,
 	initialData,
 }) => {
-	// Mock data - replace with actual data from your tables
-	const savedAddresses: SavedAddress[] = [
-		{
-			id: "b1",
-			type: "bruker",
-			name: "Adresse 1",
-			street: "Storgata",
-			houseNumber: "1",
-			postalCode: "0155",
-			city: "Oslo",
-		},
-		{
-			id: "b2",
-			type: "bruker",
-			name: "Adresse 2",
-			street: "Lillegata",
-			houseNumber: "2",
-			postalCode: "0156",
-			city: "Oslo",
-		},
-		{
-			id: "k1",
-			type: "kunde",
-			name: "Adresse 1",
-			street: "Kundegata",
-			houseNumber: "10",
-			postalCode: "5020",
-			city: "Bergen",
-		},
-		{
-			id: "k2",
-			type: "kunde",
-			name: "Adresse 2",
-			street: "Bedriftsvei",
-			houseNumber: "20",
-			postalCode: "5021",
-			city: "Bergen",
-		},
-		{
-			id: "k3",
-			type: "kunde",
-			name: "Adresse 3",
-			street: "Næringsveien",
-			houseNumber: "30",
-			postalCode: "5022",
-			city: "Bergen",
-		},
-		{
-			id: "o1",
-			type: "organisasjon",
-			name: "Adresse 1",
-			street: "Orggata",
-			houseNumber: "100",
-			postalCode: "7030",
-			city: "Trondheim",
-		},
-		{
-			id: "o2",
-			type: "organisasjon",
-			name: "Adresse 2",
-			street: "Firmagata",
-			houseNumber: "200",
-			postalCode: "7031",
-			city: "Trondheim",
-		},
-	];
 
+	const savedAddresses = useSavedAddresses();
 	const [formData, setFormData] = useState<SavedAddressData>({
 		addressName: initialData?.addressName || "",
 		street: initialData?.street || "",

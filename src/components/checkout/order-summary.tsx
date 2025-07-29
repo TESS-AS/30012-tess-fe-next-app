@@ -8,14 +8,16 @@ import { ArrowRight, Loader2 } from "lucide-react";
 
 interface OrderSummaryProps {
 	handleCheckout: () => void;
+	isCheckoutLoading?: boolean;
 }
 
-export default function OrderSummary({ handleCheckout }: OrderSummaryProps) {
+export default function OrderSummary({
+	handleCheckout,
+	isCheckoutLoading,
+}: OrderSummaryProps) {
 	const { data: profile } = usePunchoutProfile();
 	const { cartItems, isLoading, totalPrice, surChargeTotalPrice } =
 		useAppContext();
-
-	console.log(profile, "profile");
 
 	return (
 		<div className="space-y-6">
@@ -59,9 +61,9 @@ export default function OrderSummary({ handleCheckout }: OrderSummaryProps) {
 				{!profile?.punchout ? (
 					<Button
 						className="mt-6 w-full"
-						disabled={cartItems?.length === 0 || isLoading}
+						disabled={cartItems?.length === 0 || isLoading || isCheckoutLoading}
 						onClick={handleCheckout}>
-						{isLoading ? (
+						{isCheckoutLoading || isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
 						) : (
 							"Fortsett til betaling"
@@ -71,9 +73,9 @@ export default function OrderSummary({ handleCheckout }: OrderSummaryProps) {
 					<Button
 						variant="outlineGreen"
 						className="mt-6 w-full text-[#009640]"
-						disabled={cartItems?.length === 0 || isLoading}
+						disabled={cartItems?.length === 0 || isLoading || isCheckoutLoading}
 						onClick={handleCheckout}>
-						{isLoading ? (
+						{isCheckoutLoading || isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
 						) : (
 							"Punchout Handlekurv"
@@ -83,10 +85,10 @@ export default function OrderSummary({ handleCheckout }: OrderSummaryProps) {
 				<Button
 					variant="link"
 					className="mt-2 w-full hover:no-underline"
-					disabled={cartItems?.length === 0 || isLoading}
+					disabled={cartItems?.length === 0 || isLoading || isCheckoutLoading}
 					onClick={handleCheckout}>
 					<>
-						{isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "eller"}
+						{isCheckoutLoading || isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "eller"}
 						<span className="text-[#009640] underline">
 							Fortsett å handle
 						</span>{" "}
