@@ -12,11 +12,13 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { useGetAssortments } from "@/hooks/useGetAssortments";
+import { useGetCompanies } from "@/hooks/useGetCompanies";
 import { useGetCustomers } from "@/hooks/useGetCustomers";
 import { useGetWarehouses } from "@/hooks/useGetWarehouse";
 import axiosClient from "@/services/axiosClient";
 import { ProfileUser } from "@/types/user.types";
 import { UserRoundCog } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface CustomerNumberSwitcherProps {
 	profile: ProfileUser;
@@ -25,18 +27,23 @@ interface CustomerNumberSwitcherProps {
 export default function CustomerNumberSwitcher({
 	profile,
 }: CustomerNumberSwitcherProps) {
+	const t = useTranslations();
+
 	const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
 	const [newCustomerNumber, setNewCustomerNumber] = useState("");
 	const [selectedWarehouse, setSelectedWarehouse] = useState("");
 	const [selectedAssortment, setSelectedAssortment] = useState("");
+	const [selectedCompanyNumber, setSelectedCompanyNumber] = useState("");
 	const [defaultCustomerNumber, setDefaultCustomerNumber] = useState("");
 	const [isSaving, setIsSaving] = useState(false);
 
 	const { customers } = useGetCustomers(true);
 	const { warehouses } = useGetWarehouses(true);
 	const { assortments } = useGetAssortments(true);
+	const { companies } = useGetCompanies(true);
 
 	useEffect(() => {
+		// Preselect default customer, warehouse, and assortment
 		if (
 			customers.length &&
 			!newCustomerNumber &&
@@ -46,6 +53,7 @@ export default function CustomerNumberSwitcher({
 			setDefaultCustomerNumber(profile.defaultCustomerNumber);
 			setSelectedWarehouse(profile.defaultWarehouseNumber);
 		}
+
 		if (
 			assortments.length &&
 			!selectedAssortment &&
@@ -58,13 +66,19 @@ export default function CustomerNumberSwitcher({
 				setSelectedAssortment(match.assortmentnumber);
 			}
 		}
-	}, [customers, assortments, profile]);
+
+		if (!selectedCompanyNumber && profile?.defaultCompanyNumber) {
+			setSelectedCompanyNumber(profile.defaultCompanyNumber);
+		}
+	}, [customers, assortments, profile, companies]);
+
+	console.log(profile.defaultCompanyNumber);
 
 	const handleSave = async () => {
 		setIsSaving(true);
 		try {
 			await axiosClient.post("/user/defaultVariables", {
-				companyNumber: profile.defaultCompanyNumber,
+				companyNumber: selectedCompanyNumber || profile.defaultCompanyNumber,
 				customerNumber: newCustomerNumber,
 				warehouseNumber: selectedWarehouse,
 				assortmentId: selectedAssortment,
@@ -93,18 +107,22 @@ export default function CustomerNumberSwitcher({
 				open={isCustomerModalOpen}
 				onOpenChange={setIsCustomerModalOpen}>
 				<ModalHeader>
-					<ModalTitle>Customer Info</ModalTitle>
+					<ModalTitle>{t("CustomerSwitcher.title")}</ModalTitle>
 				</ModalHeader>
 				<div className="space-y-4 p-4">
 					<div className="space-y-2">
-						<Label htmlFor="customerSelect">Customers</Label>
+						<Label htmlFor="customerSelect">
+							{t("CustomerSwitcher.selectCustomerLabel")}
+						</Label>
 						<Select
 							value={newCustomerNumber}
 							onValueChange={setNewCustomerNumber}>
 							<SelectTrigger
 								id="customerSelect"
 								className="w-full">
-								<SelectValue placeholder="Select customer number" />
+								<SelectValue
+									placeholder={t("CustomerSwitcher.selectCustomerPlaceholder")}
+								/>
 							</SelectTrigger>
 							<SelectContent
 								position="popper"
@@ -124,7 +142,9 @@ export default function CustomerNumberSwitcher({
 						</Select>
 					</div>
 					<div className="space-y-2">
-						<Label htmlFor="warehouseSelect">Warehouses</Label>
+						<Label htmlFor="warehouseSelect">
+							{t("CustomerSwitcher.selectWarehouseLabel")}
+						</Label>
 						<Select
 							value={selectedWarehouse}
 							onValueChange={setSelectedWarehouse}
@@ -135,8 +155,8 @@ export default function CustomerNumberSwitcher({
 								<SelectValue
 									placeholder={
 										warehouses.length === 0
-											? "No warehouse available"
-											: "Select warehouse"
+											? t("CustomerSwitcher.noWarehousesAvailable")
+											: t("CustomerSwitcher.selectWarehousePlaceholder")
 									}
 								/>
 							</SelectTrigger>
@@ -158,7 +178,9 @@ export default function CustomerNumberSwitcher({
 					</div>
 
 					<div className="space-y-2">
-						<Label htmlFor="assortmentSelect">Assortments</Label>
+						<Label htmlFor="assortmentSelect">
+							{t("CustomerSwitcher.selectAssortmentLabel")}
+						</Label>
 						<Select
 							value={selectedAssortment}
 							disabled={assortments.length === 0}
@@ -169,8 +191,8 @@ export default function CustomerNumberSwitcher({
 								<SelectValue
 									placeholder={
 										assortments.length === 0
-											? "No assortments available"
-											: "Select assortment"
+											? t("CustomerSwitcher.noAssortmentsAvailable")
+											: t("CustomerSwitcher.selectAssortmentPlaceholder")
 									}
 								/>
 							</SelectTrigger>
@@ -190,11 +212,57 @@ export default function CustomerNumberSwitcher({
 						</Select>
 					</div>
 
+					<div className="space-y-2">
+						<Label htmlFor="companySelect">
+							{t("CustomerSwitcher.selectCompanyLabel")}
+						</Label>
+						<Select
+							value={selectedCompanyNumber}
+							onValueChange={setSelectedCompanyNumber}
+							disabled={companies.length === 0}>
+							<SelectTrigger
+								id="companySelect"
+								className="w-full">
+								<SelectValue
+									placeholder={
+										companies.length === 0
+											? t("CustomerSwitcher.noCompaniesAvailable")
+											: t("CustomerSwitcher.selectCompanyPlaceholder")
+									}
+								/>
+							</SelectTrigger>
+							<SelectContent className="z-[9999]">
+								<SelectGroup>
+									<>
+										{companies.length > 0 ? (
+											companies.map((company) => (
+												<SelectItem
+													key={company.companyNumber}
+													value={String(company.companyNumber)}>
+													{company.companyName} ({company.companyNumber})
+												</SelectItem>
+											))
+										) : (
+											<SelectItem
+												key={profile.defaultCompanyNumber}
+												value={profile.defaultCompanyNumber}
+												disabled>
+												{`${profile.defaultCompanyName} (${profile.defaultCompanyNumber})`}
+											</SelectItem>
+										)}
+									</>
+								</SelectGroup>
+							</SelectContent>
+						</Select>
+					</div>
+
 					<Button
 						className="w-full"
 						disabled={isSaving}
 						onClick={handleSave}>
-						{isSaving ? "Saving..." : "Save"}
+						{isSaving
+							? t("CustomerSwitcher.saving")
+							: t("CustomerSwitcher.save")}
 					</Button>
 				</div>
 			</Modal>

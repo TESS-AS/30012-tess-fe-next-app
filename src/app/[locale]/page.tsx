@@ -1,4 +1,5 @@
 import MainCategorySection from "@/components/categories/main-categories";
+import { CustomerWebPromo } from "@/components/customer-web-promo";
 import { Quote } from "@/components/quote";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -59,6 +60,7 @@ export default function Home() {
 			<div className="flex flex-col justify-between gap-5">
 				<Quote />
 				<MainCategorySection />
+				<CustomerWebPromo />
 			</div>
 		</div>
 	);

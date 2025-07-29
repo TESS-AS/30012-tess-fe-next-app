@@ -1,4 +1,5 @@
 export interface ProfileUser {
+	defaultCompanyName: string;
 	userId: number;
 	firstName: string;
 	lastName: string;
