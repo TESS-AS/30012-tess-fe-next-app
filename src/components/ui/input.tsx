@@ -11,12 +11,16 @@ export const inputStyles = cva(
 );
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-	({ className, type, ...props }, ref) => {
+	({ className, type, value, defaultValue, onChange, ...props }, ref) => {
+		const inputProps =
+			value !== undefined ? { value, onChange } : { defaultValue };
+
 		return (
 			<input
 				type={type}
 				className={cn(inputStyles(), className)}
 				ref={ref}
+				{...inputProps}
 				{...props}
 			/>
 		);

@@ -51,6 +51,7 @@ export interface SalesOrderAddress {
 	name: string;
 	addressLine1: string;
 	addressLine2: string;
+	addressLine3: string;
 	addressLine4: string;
 	postalCode: string;
 	partyQualifier: string;

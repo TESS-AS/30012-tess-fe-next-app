@@ -5,43 +5,55 @@ import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useAppContext } from "@/lib/appContext";
 import { Separator } from "@radix-ui/react-select";
 import { ArrowRight, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface OrderSummaryProps {
 	handleCheckout: () => void;
+	isCheckoutLoading?: boolean;
 }
 
-export default function OrderSummary({ handleCheckout }: OrderSummaryProps) {
+export default function OrderSummary({
+	handleCheckout,
+	isCheckoutLoading,
+}: OrderSummaryProps) {
+	const t = useTranslations();
 	const { data: profile } = usePunchoutProfile();
 	const { cartItems, isLoading, totalPrice, surChargeTotalPrice } =
 		useAppContext();
 
-	console.log(profile, "profile");
-
 	return (
 		<div className="space-y-6">
 			<div className="bg-card border-lightGray rounded-lg border p-6">
-				<h2 className="text-xl font-semibold">Ordreoversikt</h2>
+				<h2 className="text-xl font-semibold">{t("OrderSummary.title")}</h2>
 				<div className="mt-4 space-y-2 text-sm">
 					<div className="flex justify-between">
-						<span className="text-[#5A615D]">Opprinnelig pris:</span>
+						<span className="text-[#5A615D]">
+							{t("OrderSummary.originalPrice")}
+						</span>
 						<span className="font-medium">{totalPrice.toFixed(2)},- kr</span>
 					</div>
 					<div className="flex justify-between">
-						<span className="text-[#5A615D]">Rabatter</span>
+						<span className="text-[#5A615D]">
+							{t("OrderSummary.discounts")}
+						</span>
 						<span className="font-medium text-[#009640]">-0.00 kr</span>
 					</div>
 					<div className="flex justify-between">
-						<span className="text-[#5A615D]">Sum etter rabatt (eks. mva.)</span>
+						<span className="text-[#5A615D]">
+							{t("OrderSummary.sumAfterDiscount")}
+						</span>
 						<span className="font-medium">{totalPrice.toFixed(2)},- kr</span>
 					</div>
 					<div className="flex justify-between">
-						<span className="text-[#5A615D]">Leveringstillegg</span>
+						<span className="text-[#5A615D]">
+							{t("OrderSummary.deliverySurcharge")}
+						</span>
 						<span className="font-medium text-[#009640]">
 							{surChargeTotalPrice.toFixed(2)},- kr
 						</span>
 					</div>
 					<div className="flex justify-between">
-						<span className="text-[#5A615D]">MVA(25%)</span>
+						<span className="text-[#5A615D]">{t("OrderSummary.vat")}</span>
 						<span className="font-medium">
 							{(totalPrice + surChargeTotalPrice).toFixed(2)},- kr
 						</span>
@@ -49,7 +61,7 @@ export default function OrderSummary({ handleCheckout }: OrderSummaryProps) {
 					<Separator className="h-[1px] flex-1 bg-[#5A615D]" />
 					<div className="flex justify-between">
 						<span className="text-base font-bold text-[#0F1912]">
-							Total inkl. mva.
+							{t("OrderSummary.totalIncVat")}
 						</span>
 						<span className="text-base font-bold text-[#0F1912]">
 							{(totalPrice + surChargeTotalPrice).toFixed(2)},- kr
@@ -59,36 +71,40 @@ export default function OrderSummary({ handleCheckout }: OrderSummaryProps) {
 				{!profile?.punchout ? (
 					<Button
 						className="mt-6 w-full"
-						disabled={cartItems?.length === 0 || isLoading}
+						disabled={cartItems?.length === 0 || isLoading || isCheckoutLoading}
 						onClick={handleCheckout}>
-						{isLoading ? (
+						{isCheckoutLoading || isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
 						) : (
-							"Fortsett til betaling"
+							t("OrderSummary.continueToPayment")
 						)}
 					</Button>
 				) : (
 					<Button
 						variant="outlineGreen"
 						className="mt-6 w-full text-[#009640]"
-						disabled={cartItems?.length === 0 || isLoading}
+						disabled={cartItems?.length === 0 || isLoading || isCheckoutLoading}
 						onClick={handleCheckout}>
-						{isLoading ? (
+						{isCheckoutLoading || isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
 						) : (
-							"Punchout Handlekurv"
+							t("OrderSummary.punchoutCart")
 						)}
 					</Button>
 				)}
 				<Button
 					variant="link"
 					className="mt-2 w-full hover:no-underline"
-					disabled={cartItems?.length === 0 || isLoading}
+					disabled={cartItems?.length === 0 || isLoading || isCheckoutLoading}
 					onClick={handleCheckout}>
 					<>
-						{isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "eller"}
+						{isCheckoutLoading || isLoading ? (
+							<Loader2 className="h-4 w-4 animate-spin" />
+						) : (
+							t("OrderSummary.or")
+						)}
 						<span className="text-[#009640] underline">
-							Fortsett å handle
+							{t("OrderSummary.continueShopping")}
 						</span>{" "}
 						<ArrowRight className="h-4 w-4 font-bold text-[#009640]" />
 					</>

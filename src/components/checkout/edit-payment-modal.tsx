@@ -2,6 +2,7 @@ import React from "react";
 
 import { Order } from "@/types/orders.types";
 import { Wallet } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { UserDimensionsInput } from "./user-dimensions";
 import { Button } from "../ui/button";
@@ -39,13 +40,14 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
 	dimensionInputMode,
 	setDimensionInputMode,
 }) => {
+	const t = useTranslations("Checkout.modals.payment");
 	return (
 		<Modal
 			open={open}
 			onOpenChange={onClose}>
 			<div className="mb-6 flex items-center gap-2">
 				<Wallet className="h-5 w-5" />
-				<h2 className="text-xl font-semibold">Betalingsmetode</h2>
+				<h2 className="text-xl font-semibold">{t("title")}</h2>
 			</div>
 
 			<div className="space-y-6">
@@ -57,7 +59,7 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
 							value="faktura"
 							id="faktura"
 						/>
-						<Label htmlFor="faktura">Faktura</Label>
+						<Label htmlFor="faktura">{t("invoice")}</Label>
 					</div>
 				</RadioGroup>
 
@@ -73,7 +75,7 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
 				<Button
 					variant="outline"
 					onClick={onClose}>
-					Avbryt
+					{t("cancel")}
 				</Button>
 				<Button
 					variant="default"
@@ -83,7 +85,7 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
 							orderData,
 						})
 					}>
-					Lagre betalingsmetode
+					{t("save")}
 				</Button>
 			</div>
 		</Modal>

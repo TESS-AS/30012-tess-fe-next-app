@@ -39,12 +39,14 @@ import { toast } from "react-toastify";
 import CartSkeleton from "./loading";
 
 const CartPage = () => {
+	const t = useTranslations();
 	const currentLocale = useLocale();
 	const router = useRouter();
+	const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
 	const [categoryPaths, setCategoryPaths] = useState<{
 		[key: string]: string[];
 	}>({});
-	const { data: profile } = usePunchoutProfile();
+	const { data: profile, isLoading: isLoadingProfile } = usePunchoutProfile();
 	const {
 		cartItems,
 		prices,
@@ -59,7 +61,7 @@ const CartPage = () => {
 		setSubmittedOrder,
 		setShowOrderConfirmation,
 	} = useAppContext();
-	const [orderData, setOrderData] = useCheckoutOrderData(
+	const [orderData] = useCheckoutOrderData(
 		cartItems,
 		profile,
 		calculatedPrices,
@@ -71,6 +73,7 @@ const CartPage = () => {
 			name: "999",
 			addressLine1: "",
 			addressLine2: "",
+			addressLine3: "",
 			addressLine4: "",
 			postalCode: "",
 			partyQualifier: "DP",
@@ -78,6 +81,10 @@ const CartPage = () => {
 		},
 		handleArchiveCart,
 	);
+
+	const [warehouseBlance, setWarehouseBlance] = useState<WarehouseBatch[]>([]);
+	const [openModalId, setOpenModalId] = useState<string | null>(null);
+	const [outOfStock, setOutOfStock] = useState<boolean>(true);
 
 	useEffect(() => {
 		const loadPaths = async () => {
@@ -101,11 +108,6 @@ const CartPage = () => {
 		};
 		loadPaths();
 	}, [cartItems, currentLocale]);
-
-	const t = useTranslations();
-	const { status } = useSession();
-	const [warehouseBlance, setWarehouseBlance] = useState<WarehouseBatch[]>([]);
-	const [openModalId, setOpenModalId] = useState<string | null>(null);
 
 	useEffect(() => {
 		async function loadWarehousesData() {
@@ -148,7 +150,26 @@ const CartPage = () => {
 		}
 	};
 
-	if (isLoading) {
+	const handleCheckout = async () => {
+		setIsCheckoutLoading(true);
+		try {
+			if (profile?.punchout) {
+				const result = await submitOrder(orderData);
+				handleArchiveCart();
+				if (result) {
+					setSubmittedOrder(result);
+					setShowOrderConfirmation(true);
+					setTimeout(() => setShowFeedbackModal(true), 2000);
+				}
+			} else {
+				router.push("/checkout");
+			}
+		} finally {
+			setIsCheckoutLoading(false);
+		}
+	};
+
+	if (isLoadingProfile) {
 		return <CartSkeleton />;
 	}
 
@@ -163,20 +184,6 @@ const CartPage = () => {
 		);
 	}
 
-	const handleCheckout = async () => {
-		if (profile?.punchout) {
-			const result = await submitOrder(orderData);
-			handleArchiveCart();
-			if (result) {
-				setSubmittedOrder(result);
-				setShowOrderConfirmation(true);
-				setTimeout(() => setShowFeedbackModal(true), 2000);
-			}
-		} else {
-			router.push("/checkout");
-		}
-	};
-
 	return (
 		<main className="container min-h-screen py-10">
 			<div className="grid grid-cols-1 gap-10 md:grid-cols-3">
@@ -184,13 +191,15 @@ const CartPage = () => {
 				<div className="space-y-6 md:col-span-2">
 					<Breadcrumb
 						items={[
-							{ href: "/", label: "Home" },
-							{ href: "/cart", label: "Cart" },
+							{ href: "/", label: t("BreadCrumbs.home") },
+							{ href: "/cart", label: t("BreadCrumbs.cart") },
 						]}
 					/>
 					<div className="flex items-center justify-between">
 						<div className="flex w-[70%] items-center gap-2">
-							<p className="text-base font-normal">Vis lagerstatus for:</p>
+							<p className="text-base font-normal">
+								{t("Cart.showStockStatus")}
+							</p>
 							<Select disabled>
 								<SelectTrigger className="w-[40%]">
 									<SelectValue placeholder="Mitt lager: Kristiansand" />
@@ -207,28 +216,30 @@ const CartPage = () => {
 							<Trash2 className="color-[#C81E1E] h-4 w-4" />
 						</Button>
 					</div>
-					<NotificationCard
-						className="bg-[#FDFDEA]"
-						icon={<CircleAlert className="h-4 w-4" />}
-						title="Noen varer er ikke på lager i ditt valgte varehus"
-						message="Noen varer er ikke på lager i ditt valgte varehus, og det kan ta opptil 3 dager ekstra å få dem levert. Endre lager per varelinje før du sender ordren dersom du ønsker raskere levering."
-						onClose={() => {}}
-					/>
+					{outOfStock && (
+						<NotificationCard
+							className="bg-[#FDFDEA]"
+							icon={<CircleAlert className="h-4 w-4" />}
+							title={t("Cart.outOfStock")}
+							message={t("Cart.outOfStockMessage")}
+							onClose={() => setOutOfStock(false)}
+						/>
+					)}
 					<div className="flex items-center justify-between">
 						<h1 className="text-2xl font-semibold">
-							Your Cart ({cartItems?.length})
+							{t("Cart.yourCart")} ({cartItems?.length})
 						</h1>
 						<div className="flex items-center gap-2">
 							<Button
 								variant="outline"
 								onClick={() => archiveCart()}
 								className="mr-2">
-								Archive Cart
+								{t("Cart.archiveCart")}
 							</Button>
 							<Button
 								variant="outline"
 								onClick={() => router.push("/cart/history")}>
-								View Cart History
+								{t("Cart.viewCartHistory")}
 							</Button>
 						</div>
 					</div>
@@ -440,7 +451,10 @@ const CartPage = () => {
 				</div>
 
 				{/* Order Summary */}
-				<OrderSummary handleCheckout={handleCheckout} />
+				<OrderSummary
+					handleCheckout={handleCheckout}
+					isCheckoutLoading={isCheckoutLoading}
+				/>
 			</div>
 		</main>
 	);

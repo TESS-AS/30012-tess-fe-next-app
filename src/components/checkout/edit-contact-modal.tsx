@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 import { updateUserProfile } from "@/services/user.service";
 import { User2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -28,6 +29,7 @@ export const EditContactModal: React.FC<EditContactModalProps> = ({
 	onSave,
 	initialData,
 }) => {
+	const t = useTranslations("Checkout.modals.contact");
 	const [formData, setFormData] = useState<ContactFormData>(
 		initialData || {
 			firstName: "",
@@ -54,12 +56,12 @@ export const EditContactModal: React.FC<EditContactModalProps> = ({
 			onOpenChange={onClose}>
 			<div className="mb-6 flex items-center gap-2">
 				<User2 className="h-5 w-5" />
-				<h2 className="text-xl font-semibold">Kontaktperson</h2>
+				<h2 className="text-xl font-semibold">{t("title")}</h2>
 			</div>
 
-			<div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
+			<div className="space-y-4">
 				<div>
-					<Label htmlFor="firstName">Fornavn</Label>
+					<Label htmlFor="firstName">{t("firstName")}</Label>
 					<Input
 						id="firstName"
 						name="firstName"
@@ -67,9 +69,8 @@ export const EditContactModal: React.FC<EditContactModalProps> = ({
 						onChange={handleChange}
 					/>
 				</div>
-
 				<div>
-					<Label htmlFor="lastName">Etternavn</Label>
+					<Label htmlFor="lastName">{t("lastName")}</Label>
 					<Input
 						id="lastName"
 						name="lastName"
@@ -77,9 +78,8 @@ export const EditContactModal: React.FC<EditContactModalProps> = ({
 						onChange={handleChange}
 					/>
 				</div>
-
 				<div>
-					<Label htmlFor="email">E-post</Label>
+					<Label htmlFor="email">{t("email")}</Label>
 					<Input
 						id="email"
 						name="email"
@@ -92,9 +92,8 @@ export const EditContactModal: React.FC<EditContactModalProps> = ({
 						Eksempel: navn@navnesen.no
 					</p>
 				</div>
-
 				<div>
-					<Label htmlFor="phone">Telefonnummer</Label>
+					<Label htmlFor="phone">{t("phone")}</Label>
 					<Input
 						id="phone"
 						name="phone"
@@ -105,21 +104,19 @@ export const EditContactModal: React.FC<EditContactModalProps> = ({
 						Eksempel: +47 123 45 678
 					</p>
 				</div>
+			</div>
 
-				<div className="col-span-full flex gap-4 pt-2">
-					<Button
-						onClick={handleSave}
-						variant="outlineGreen"
-						className="font-medium">
-						Lagre kontaktperson
-					</Button>
-					<Button
-						onClick={onClose}
-						variant="outline"
-						className="text-foreground font-medium">
-						Avbryt
-					</Button>
-				</div>
+			<div className="mt-8 flex justify-between">
+				<Button
+					variant="outline"
+					onClick={onClose}>
+					{t("cancel")}
+				</Button>
+				<Button
+					variant="default"
+					onClick={handleSave}>
+					{t("save")}
+				</Button>
 			</div>
 		</Modal>
 	);

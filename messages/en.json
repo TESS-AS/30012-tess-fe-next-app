@@ -49,6 +49,13 @@
 		"selectWarehouseFirst": "Please select a warehouse",
 		"noBalanceForWarehouse": "No balance available for this warehouse"
 	},
+	"BreadCrumbs": {
+		"home": "Home",
+		"category": "Category",
+		"product": "Product",
+		"cart": "Cart",
+		"checkout": "Checkout"
+	},
 	"Common": {
 		"reset": "Nullstill",
 		"error": {
@@ -93,7 +100,13 @@
 	},
 	"Cart": {
 		"archived": "Cart archived",
-		"errorArchiving": "Error archiving cart"
+		"errorArchiving": "Error archiving cart",
+		"showStockStatus": "Show stock status for:",
+		"yourCart": "Your Cart",
+		"archiveCart": "Archive Cart",
+		"viewCartHistory": "View Cart History",
+		"outOfStock": "Some items are out of stock at your selected warehouse",
+		"outOfStockMessage": "Some items are out of stock at your selected warehouse, and it may take up to 3 extra days to deliver them. Change the warehouse per item before placing the order if you want faster delivery."
 	},
 	"Login": {
 		"title": "Login",
@@ -112,5 +125,212 @@
 		"copyright": "2025 TESS",
 		"honest": "Honest, reliable and professional",
 		"honestDescription": "At TESS you meet professionals both in front of and behind the desk. We give you the best accessibility in the market with over 130 local service centers."
+	},
+	"OrderSummary": {
+		"title": "Order Summary",
+		"originalPrice": "Original Price:",
+		"discounts": "Discounts",
+		"sumAfterDiscount": "Sum after discount (excl. VAT)",
+		"deliverySurcharge": "Delivery surcharge",
+		"vat": "VAT(25%)",
+		"totalIncVat": "Total incl. VAT",
+		"continueToPayment": "Continue to payment",
+		"punchoutCart": "Punchout Cart",
+		"or": "or",
+		"continueShopping": "Continue shopping"
+	},
+	"Checkout": {
+		"modals": {
+			"feedback": {
+				"title": "Purchase Feedback",
+				"description": "We would love to hear about your purchase experience. Your feedback helps us improve.",
+				"question": "How was your purchase experience?",
+				"ratings": {
+					"1": "1 - Very poor",
+					"2": "2 - Poor",
+					"3": "3 - Okay",
+					"4": "4 - Good",
+					"5": "5 - Very good"
+				},
+				"commentLabel": "Any comments? (optional)",
+				"commentPlaceholder": "Tell us what worked well or what we can improve",
+				"submit": "Send feedback"
+			},
+			"tracking": {
+				"title": "Track delivery of order #{orderNumber}",
+				"orderDate": "Order Date",
+				"email": "Email",
+				"phone": "Phone",
+				"paymentMethod": "Payment Method",
+				"deliveryAddress": "Delivery Address",
+				"totalPrice": "Total Price",
+				"currency": "NOK",
+				"status": {
+					"paymentReceived": "Payment received",
+					"orderPlaced": "Order placed",
+					"viaInvoice": "Via invoice"
+				},
+				"buttons": {
+					"orderDetails": "Order Details",
+					"cancelOrder": "Cancel Order"
+				}
+			},
+			"contact": {
+				"title": "Contact Person",
+				"firstName": "First Name",
+				"lastName": "Last Name",
+				"email": "Email",
+				"phone": "Phone",
+				"save": "Save Contact Person",
+				"cancel": "Cancel"
+			},
+			"payment": {
+				"title": "Payment Method",
+				"invoice": "Invoice",
+				"save": "Save Payment Method",
+				"cancel": "Cancel"
+			},
+			"delivery": {
+				"title": "Choose Delivery Method",
+				"addressDelivery": "Delivery to Address",
+				"estimatedTime": "Estimated delivery time: 2 to 7 business days",
+				"save": "Save Delivery Method",
+				"cancel": "Cancel"
+			},
+			"address": {
+				"selector": {
+					"placeholder": "Select a saved address",
+					"user": "User",
+					"customer": "Customer",
+					"organization": "Organization",
+					"addAddress": "Add address"
+				},
+				"title": "Your Address",
+				"save": "Use Address",
+				"cancel": "Cancel",
+				"savedAddresses": "Saved Addresses",
+				"addressName": "Address Name",
+				"addressNameExample": "Example: Home, Work, Office",
+				"street": "Street Name",
+				"streetExample": "Example: Main Street",
+				"houseNumber": "House Number",
+				"houseNumberExample": "Example: 15",
+				"addExtra": "Add Additional Information",
+				"extraInfo": "Additional Information (optional)",
+				"extraInfoExample": "Example: c/o, floor, entrance, etc.",
+				"postalCode": "Postal Code",
+				"postalCodeExample": "Example: 0155",
+				"city": "City",
+				"cityPlaceholderAuto": "(will be filled automatically after postal code is validated)",
+				"cityPlaceholderManual": "Enter city",
+				"saveAsUserAddress": "Save as user address"
+			}
+		},
+		"steps": {
+			"delivery": "Delivery",
+			"payment": "Payment",
+			"confirm": "Confirm"
+		},
+		"confirmation": {
+			"yourItems": "Your items",
+			"contactPerson": "Contact Person",
+			"address": "Address",
+			"delivery": "Delivery",
+			"payment": "Payment",
+			"deliveryMethod": "Delivery to Address",
+			"deliveryTime": "Estimated delivery time: 2 to 7 business days",
+			"invoice": "Invoice",
+			"cardPayment": "Card Payment",
+			"project": "Project",
+			"department": "Department",
+			"category": "Category",
+			"notSpecified": "–"
+		},
+		"errors": {
+			"selectAddress": "Please select an address",
+			"orderSubmissionFailed": "Order submission failed"
+		},
+		"feedback": {
+			"rating": "Rating",
+			"comment": "Comment",
+			"ratings": {
+				"1": "1 - Very poor",
+				"2": "2 - Poor",
+				"3": "3 - Fair",
+				"4": "4 - Good",
+				"5": "5 - Very good"
+			}
+		},
+		"contactPerson": {
+			"title": "Contact Person",
+			"edit": "Edit Contact Person",
+			"firstName": "First Name",
+			"lastName": "Last Name",
+			"email": "Email",
+			"phone": "Phone Number",
+			"emailExample": "Example: name@example.com",
+			"phoneExample": "Example: +47 123 45 678",
+			"save": "Save Contact Person",
+			"cancel": "Cancel",
+			"fetchedFromProfile": "Fetched from profile"
+		},
+		"address": {
+			"title": "Your Address",
+			"edit": "Edit Address",
+			"savedAddresses": "Saved Addresses",
+			"addressName": "Address Name",
+			"addressNameExample": "Example: Home, Work, Office",
+			"street": "Street Name",
+			"streetExample": "Example: Main Street",
+			"houseNumber": "House Number",
+			"houseNumberExample": "Example: 15",
+			"addExtra": "Add Additional Information",
+			"extraInfo": "Additional Information (optional)",
+			"extraInfoExample": "Example: c/o, floor, entrance, etc.",
+			"postalCode": "Postal Code",
+			"postalCodeExample": "Example: 0155",
+			"city": "City",
+			"cityPlaceholderAuto": "(filled automatically after postal code validation)",
+			"cityPlaceholderManual": "Enter city",
+			"saveAsUserAddress": "Save as User Address",
+			"useAddress": "Use Address",
+			"cancel": "Cancel",
+			"homeAddress": "Home Address"
+		},
+		"delivery": {
+			"title": "Choose Delivery Method",
+			"warning": {
+				"title": "Some items are not in stock at your selected store",
+				"message": "Some items are not in stock at your selected store, and it may take up to 3 extra days for delivery.",
+				"closeLabel": "Close warning"
+			},
+			"options": {
+				"address": {
+					"title": "Delivery to Address",
+					"estimate": "Estimated delivery time: 2 to 7 business days"
+				}
+			}
+		},
+		"payment": {
+			"title": "Choose Payment Method",
+			"invoice": "Invoice"
+		},
+		"invoice": {
+			"title": "Additional Information for Invoice",
+			"description": "The information appears on the invoice and helps the finance department with correct accounting."
+		},
+		"dimensions": {
+			"label": "User Dimension Input:",
+			"selectLabel": "User Dimensions",
+			"selectPlaceholder": "Select User Dimension",
+			"dimension1": "User Dimension 1",
+			"dimension2": "User Dimension 2",
+			"dimension3": "User Dimension 3",
+			"modes": {
+				"select": "Select",
+				"search": "Search",
+				"manual": "Manual"
+			}
+		}
 	}
 }

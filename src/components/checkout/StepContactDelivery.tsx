@@ -8,6 +8,7 @@ export default function StepContactDelivery({
 	selectedAddress,
 	showWarning,
 	setShowWarning,
+	onSave,
 }: any) {
 	return (
 		<div className="flex flex-col gap-4">
@@ -19,7 +20,7 @@ export default function StepContactDelivery({
 				{...selectedAddress}
 				label="Leveringsadresse"
 				isUserAddress={false}
-				onSave={() => {}}
+				onSave={onSave}
 			/>
 			<DeliveryMethodCard
 				showWarning={showWarning}

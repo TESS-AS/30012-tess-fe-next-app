@@ -22,6 +22,8 @@ import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { useAppContext } from "@/lib/appContext";
 import type { PayPalScriptOptions } from "@paypal/paypal-js";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { useTranslations } from "next-intl";
+import { toast } from "react-toastify";
 
 const initialOptions: PayPalScriptOptions = {
 	clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "",
@@ -29,9 +31,8 @@ const initialOptions: PayPalScriptOptions = {
 	currency: "USD",
 };
 
-const steps = ["Levering", "Betaling", "Bekreft"];
-
 export default function CheckoutPage() {
+	const t = useTranslations("");
 	const {
 		cartItems,
 		calculatedPrices,
@@ -42,6 +43,8 @@ export default function CheckoutPage() {
 		setSubmittedOrder,
 		showOrderConfirmation,
 		setShowOrderConfirmation,
+		updatedAddress,
+		setUpdatedAddress,
 	} = useAppContext();
 	const { data: profile } = useGetProfileData();
 	const { data: defaultAddress } = useGetDefaultAddress();
@@ -58,6 +61,7 @@ export default function CheckoutPage() {
 	const [paymentMethod, setPaymentMethod] = useState("faktura");
 	const [dimensionInputMode, setDimensionInputMode] = useState("select");
 	const [showWarning, setShowWarning] = useState(true);
+	const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
 
 	const [orderData, setOrderData] = useCheckoutOrderData(
 		cartItems,
@@ -69,15 +73,26 @@ export default function CheckoutPage() {
 		profile,
 		{
 			name: "999",
-			addressLine1: selectedAddress?.addressLine1 || "",
-			addressLine2: selectedAddress?.addressLine2 || "",
-			addressLine4: selectedAddress?.city || "",
-			postalCode: selectedAddress?.postalCode || "",
+			addressLine1:
+				updatedAddress?.street || selectedAddress?.addressLine1 || "",
+			addressLine2:
+				updatedAddress?.houseNumber || selectedAddress?.addressLine2 || "",
+			addressLine3:
+				updatedAddress?.extraInfo || selectedAddress?.addressLine3 || "",
+			addressLine4: updatedAddress?.city || selectedAddress?.city || "",
+			postalCode:
+				updatedAddress?.postalCode || selectedAddress?.postalCode || "",
 			partyQualifier: "DP",
 			country: "NO",
 		},
 		handleArchiveCart,
 	);
+
+	const steps = [
+		t("Checkout.steps.delivery"),
+		t("Checkout.steps.payment"),
+		t("Checkout.steps.confirm"),
+	];
 
 	const renderStepContent = () => {
 		switch (currentStep) {
@@ -86,9 +101,10 @@ export default function CheckoutPage() {
 					<StepContactDelivery
 						contactPerson={contactPerson}
 						handleContactPersonSave={handleContactPersonSave}
-						selectedAddress={selectedAddress}
+						selectedAddress={selectedAddress || updatedAddress}
 						showWarning={showWarning}
 						setShowWarning={setShowWarning}
+						onSave={setUpdatedAddress}
 					/>
 				);
 			case 1:
@@ -106,7 +122,7 @@ export default function CheckoutPage() {
 				return (
 					<StepConfirmation
 						contactPerson={contactPerson}
-						selectedAddress={selectedAddress}
+						selectedAddress={selectedAddress || updatedAddress}
 						orderData={orderData}
 						modals={modals}
 						paymentMethod={paymentMethod}
@@ -125,9 +141,15 @@ export default function CheckoutPage() {
 	const handleCheckout = async () => {
 		if (!profile?.punchout) {
 			if (currentStep < 2) {
+				if (!selectedAddress?.addressLine1 && !updatedAddress?.street) {
+					toast.error(t("Checkout.errors.selectAddress"));
+					return;
+				}
 				goToNext();
 				return;
 			}
+
+			setIsCheckoutLoading(true);
 
 			try {
 				const result = await submitOrder(orderData);
@@ -138,16 +160,19 @@ export default function CheckoutPage() {
 				}
 			} catch (error) {
 				console.error("Order submission failed:", error);
+				toast.error(t("Checkout.errors.orderSubmissionFailed"));
+			} finally {
+				setIsCheckoutLoading(false);
 			}
 		}
 	};
 
 	const ratingValues: Record<number, string> = {
-		1: "1 - Veldig dårlig",
-		2: "2 - Dårlig",
-		3: "3 - Helt grei",
-		4: "4 - Bra",
-		5: "5 - Veldig bra",
+		1: t("Checkout.feedback.ratings.1"),
+		2: t("Checkout.feedback.ratings.2"),
+		3: t("Checkout.feedback.ratings.3"),
+		4: t("Checkout.feedback.ratings.4"),
+		5: t("Checkout.feedback.ratings.5"),
 	};
 
 	return (
@@ -157,8 +182,8 @@ export default function CheckoutPage() {
 					<>
 						<Breadcrumb
 							items={[
-								{ href: "/", label: "Home" },
-								{ href: "/checkout", label: "Checkout" },
+								{ href: "/", label: t("BreadCrumbs.home") },
+								{ href: "/checkout", label: t("BreadCrumbs.checkout") },
 							]}
 						/>
 						<Stepper
@@ -181,7 +206,10 @@ export default function CheckoutPage() {
 
 						{currentStep === 2 && (
 							<div className="col-span-12">
-								<OrderSummary handleCheckout={handleCheckout} />
+								<OrderSummary
+									handleCheckout={handleCheckout}
+									isCheckoutLoading={isCheckoutLoading}
+								/>
 							</div>
 						)}
 					</>
@@ -198,7 +226,7 @@ export default function CheckoutPage() {
 								setShowFeedbackModal(false);
 								submitFeedback(
 									"Checkout",
-									`Vurdering: ${ratingValues[rating]}, Kommentar: ${comment}`,
+									`${t("Checkout.feedback.rating")}: ${ratingValues[rating]}, ${t("Checkout.feedback.comment")}: ${comment}`,
 								);
 							}}
 						/>

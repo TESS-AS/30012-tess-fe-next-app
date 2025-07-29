@@ -1,7 +1,7 @@
-// components/DeliveryMethodCard.tsx
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AlertCircle, Truck, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface DeliveryMethodCardProps {
 	showWarning?: boolean;
@@ -12,6 +12,7 @@ export const DeliveryMethodCard: React.FC<DeliveryMethodCardProps> = ({
 	showWarning = true,
 	onDismissWarning,
 }) => {
+	const t = useTranslations("Checkout.delivery");
 	return (
 		<Card className="rounded-lg shadow-none">
 			<CardContent className="p-6">
@@ -19,7 +20,7 @@ export const DeliveryMethodCard: React.FC<DeliveryMethodCardProps> = ({
 				<div className="mb-2 flex items-center gap-2">
 					<Truck className="text-foreground h-5 w-5" />
 					<h2 className="text-foreground text-lg font-semibold">
-						Velg leveringsmåte
+						{t("title")}
 					</h2>
 				</div>
 
@@ -29,19 +30,14 @@ export const DeliveryMethodCard: React.FC<DeliveryMethodCardProps> = ({
 						<div className="flex items-start gap-2">
 							<AlertCircle className="mt-0.5 h-5 w-5" />
 							<div>
-								<p className="font-bold">
-									Noen varer er ikke på lager i ditt valgte varehus
-								</p>
+								<p className="font-bold">{t("warning.title")}</p>
 							</div>
 						</div>
-						<p className="mt-1 text-sm">
-							Noen varer er ikke på lager i ditt valgte varehus, og det kan ta
-							opptil 3 dager ekstra å få dem levert.
-						</p>
+						<p className="mt-1 text-sm">{t("warning.message")}</p>
 						<button
 							className="absolute top-3 right-3 cursor-pointer hover:text-yellow-700"
 							onClick={onDismissWarning}
-							aria-label="Lukk varsel">
+							aria-label={t("warning.closeLabel")}>
 							<X className="h-4 w-4" />
 						</button>
 					</div>
@@ -58,10 +54,10 @@ export const DeliveryMethodCard: React.FC<DeliveryMethodCardProps> = ({
 						/>
 						<div>
 							<p className="text-foreground text-sm font-medium">
-								Levering til adresse
+								{t("options.address.title")}
 							</p>
 							<p className="text-muted-foreground text-xs">
-								Estimert leveringstid: 2 til 7 virkedager
+								{t("options.address.estimate")}
 							</p>
 						</div>
 					</div>

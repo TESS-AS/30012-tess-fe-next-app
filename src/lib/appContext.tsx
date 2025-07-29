@@ -20,10 +20,10 @@ import {
 	calculateItemPrice,
 	getProductPrice,
 } from "@/services/product.service";
+import { AddressFormState } from "@/types/address";
 import { CartLine } from "@/types/carts.types";
 import { Order } from "@/types/orders.types";
 import { PriceResponse } from "@/types/search.types";
-import { useSession } from "next-auth/react";
 
 interface AppContextType {
 	isCartChanging: boolean;
@@ -57,6 +57,8 @@ interface AppContextType {
 	setSubmittedOrder: (value: Order | null) => void;
 	showOrderConfirmation: boolean;
 	setShowOrderConfirmation: (value: boolean) => void;
+	updatedAddress: AddressFormState | null;
+	setUpdatedAddress: (addr: AddressFormState | null) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -79,9 +81,11 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 	const [submittedOrder, setSubmittedOrder] = useState<Order | null>(null);
 	const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
+	const [updatedAddress, setUpdatedAddress] = useState<AddressFormState | null>(
+		null,
+	);
 
-	const { status } = useSession();
-
+	console.log(updatedAddress, "updatedAddress");
 	const loadCartData = async () => {
 		try {
 			const cart = await getCart();
@@ -254,6 +258,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				setSubmittedOrder,
 				showOrderConfirmation,
 				setShowOrderConfirmation,
+				updatedAddress,
+				setUpdatedAddress,
 			}}>
 			{children}
 		</AppContext.Provider>

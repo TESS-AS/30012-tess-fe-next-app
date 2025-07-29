@@ -1,6 +1,7 @@
 import React from "react";
 
-import { Loader2, Check, File, MapPin } from "lucide-react";
+import { File, MapPin } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "../ui/button";
 import { Modal } from "../ui/modal";
@@ -34,6 +35,7 @@ export const OrderTrackingModal: React.FC<OrderTrackingModalProps> = ({
 	orderReceived = false,
 	invoiceSent = false,
 }) => {
+	const t = useTranslations("Checkout.modals.tracking");
 	return (
 		<Modal
 			open={open}
@@ -41,41 +43,45 @@ export const OrderTrackingModal: React.FC<OrderTrackingModalProps> = ({
 			<div className="space-y-6">
 				<div className="flex items-center justify-between border-b border-[#C1C4C2] pb-2">
 					<h2 className="text-lg font-semibold">
-						Spor leveringen av bestilling #{orderNumber}
+						{t("title", { orderNumber })}
 					</h2>
 				</div>
 
 				<div className="grid grid-cols-2 gap-4 pb-20">
 					<div className="space-y-4">
 						<div className="flex justify-between border-b border-[#C1C4C2] pb-2 text-sm">
-							<span className="text-base font-medium">Bestillingsdato</span>
+							<span className="text-base font-medium">{t("orderDate")}</span>
 							<span className="text-base">{orderDate}</span>
 						</div>
 
 						<div className="flex justify-between border-b border-[#C1C4C2] pb-2 text-sm">
-							<span className="text-base font-medium">E-post</span>
+							<span className="text-base font-medium">{t("email")}</span>
 							<span className="text-base">{email}</span>
 						</div>
 
 						<div className="flex justify-between border-b border-[#C1C4C2] pb-2 text-sm">
-							<span className="text-base font-medium">Telefon</span>
+							<span className="text-base font-medium">{t("phone")}</span>
 							<span className="text-base">{phone}</span>
 						</div>
 
 						<div className="flex justify-between border-b border-[#C1C4C2] pb-2 text-sm">
-							<span className="text-base font-medium">Betalingsmåte</span>
+							<span className="text-base font-medium">
+								{t("paymentMethod")}
+							</span>
 							<span className="text-base">{paymentMethod}</span>
 						</div>
 
 						<div className="flex justify-between border-b border-[#C1C4C2] pb-2 text-sm">
-							<span className="text-base font-medium">Leveringsadresse</span>
+							<span className="text-base font-medium">
+								{t("deliveryAddress")}
+							</span>
 							<span className="text-base">{address}</span>
 						</div>
 
 						<div className="flex justify-between border-b border-[#C1C4C2] pb-2 text-sm">
-							<span className="text-base font-medium">Totalpris</span>
+							<span className="text-base font-medium">{t("totalPrice")}</span>
 							<span className="text-lg font-bold text-[#0F1912]">
-								{totalAmount} NOK
+								{totalAmount} {t("currency")}
 							</span>
 						</div>
 					</div>
@@ -84,7 +90,7 @@ export const OrderTrackingModal: React.FC<OrderTrackingModalProps> = ({
 						<div className="ml-[-11px] flex items-start gap-3">
 							<MapPin className="mt-1 h-5 w-5 bg-white text-[#009640]" />
 							<div className="flex-1">
-								<p className="font-[600]">Betaling mottatt</p>
+								<p className="font-[600]">{t("status.paymentReceived")}</p>
 								<p className="text-sm text-[#5A615D]">{orderDate}, 10:47</p>
 							</div>
 						</div>
@@ -92,7 +98,7 @@ export const OrderTrackingModal: React.FC<OrderTrackingModalProps> = ({
 						<div className="ml-[-11px] flex items-start gap-3">
 							<MapPin className="mt-1 h-5 w-5 bg-white text-[#009640]" />
 							<div className="flex-1">
-								<p className="font-[600]">Bestilling lagt inn</p>
+								<p className="font-[600]">{t("status.orderPlaced")}</p>
 								<p className="text-sm text-[#5A615D]">{orderDate}, 10:45</p>
 							</div>
 						</div>
@@ -101,19 +107,19 @@ export const OrderTrackingModal: React.FC<OrderTrackingModalProps> = ({
 							<Button
 								variant="outline"
 								className="ml-8 font-medium text-[#0F1912]">
-								<File className="h-4 w-4" /> Via faktura
+								<File className="h-4 w-4" /> {t("status.viaInvoice")}
 							</Button>
 						)}
 					</div>
 				</div>
 
 				<div className="flex gap-4 border-t border-[#C1C4C2] pt-4">
-					<Button variant="default">Bestillingsdetaljer</Button>
+					<Button variant="default">{t("buttons.orderDetails")}</Button>
 					<Button
 						variant="outline"
 						className="font-medium"
 						onClick={onClose}>
-						Kanseller bestilling
+						{t("buttons.cancelOrder")}
 					</Button>
 				</div>
 			</div>
