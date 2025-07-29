@@ -22,6 +22,7 @@ import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { useAppContext } from "@/lib/appContext";
 import type { PayPalScriptOptions } from "@paypal/paypal-js";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
 const initialOptions: PayPalScriptOptions = {
@@ -30,9 +31,8 @@ const initialOptions: PayPalScriptOptions = {
 	currency: "USD",
 };
 
-const steps = ["Levering", "Betaling", "Bekreft"];
-
 export default function CheckoutPage() {
+	const t = useTranslations("");
 	const {
 		cartItems,
 		calculatedPrices,
@@ -88,6 +88,12 @@ export default function CheckoutPage() {
 		handleArchiveCart,
 	);
 
+	const steps = [
+		t("Checkout.steps.delivery"),
+		t("Checkout.steps.payment"),
+		t("Checkout.steps.confirm"),
+	];
+
 	const renderStepContent = () => {
 		switch (currentStep) {
 			case 0:
@@ -136,7 +142,7 @@ export default function CheckoutPage() {
 		if (!profile?.punchout) {
 			if (currentStep < 2) {
 				if (!selectedAddress?.addressLine1 && !updatedAddress?.street) {
-					toast.error("Please select an address");
+					toast.error(t("Checkout.errors.selectAddress"));
 					return;
 				}
 				goToNext();
@@ -154,7 +160,7 @@ export default function CheckoutPage() {
 				}
 			} catch (error) {
 				console.error("Order submission failed:", error);
-				toast.error("Order submission failed");
+				toast.error(t("Checkout.errors.orderSubmissionFailed"));
 			} finally {
 				setIsCheckoutLoading(false);
 			}
@@ -162,11 +168,11 @@ export default function CheckoutPage() {
 	};
 
 	const ratingValues: Record<number, string> = {
-		1: "1 - Veldig dårlig",
-		2: "2 - Dårlig",
-		3: "3 - Helt grei",
-		4: "4 - Bra",
-		5: "5 - Veldig bra",
+		1: t("Checkout.feedback.ratings.1"),
+		2: t("Checkout.feedback.ratings.2"),
+		3: t("Checkout.feedback.ratings.3"),
+		4: t("Checkout.feedback.ratings.4"),
+		5: t("Checkout.feedback.ratings.5"),
 	};
 
 	return (
@@ -176,8 +182,8 @@ export default function CheckoutPage() {
 					<>
 						<Breadcrumb
 							items={[
-								{ href: "/", label: "Home" },
-								{ href: "/checkout", label: "Checkout" },
+								{ href: "/", label: t("BreadCrumbs.home") },
+								{ href: "/checkout", label: t("BreadCrumbs.checkout") },
 							]}
 						/>
 						<Stepper
@@ -220,7 +226,7 @@ export default function CheckoutPage() {
 								setShowFeedbackModal(false);
 								submitFeedback(
 									"Checkout",
-									`Vurdering: ${ratingValues[rating]}, Kommentar: ${comment}`,
+									`${t("Checkout.feedback.rating")}: ${ratingValues[rating]}, ${t("Checkout.feedback.comment")}: ${comment}`,
 								);
 							}}
 						/>

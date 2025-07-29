@@ -1,15 +1,18 @@
-// hooks/useSavedAddresses.ts
-import { useGetUserAdresses } from "@/hooks/useGetUserAdresses";
+import { useMemo } from "react";
+
 import { useGetBusinessAddresses } from "@/hooks/useGetBusinessAddresses";
 import { useGetOrganizationAddresses } from "@/hooks/useGetOrganizationAddresses";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
-import { useMemo } from "react";
+import { useGetUserAdresses } from "@/hooks/useGetUserAdresses";
 import { SavedAddress } from "@/types/address";
 
 export const useSavedAddresses = () => {
 	const { data: profile } = useGetProfileData();
 	const { data: personalAddresses } = useGetUserAdresses();
-	const { data: businessAddresses } = useGetBusinessAddresses(profile?.customerNumbers?.[0], true);
+	const { data: businessAddresses } = useGetBusinessAddresses(
+		profile?.customerNumbers?.[0],
+		true,
+	);
 	const { data: orgAddresses } = useGetOrganizationAddresses("980386996");
 
 	const savedAddresses: SavedAddress[] = useMemo(() => {

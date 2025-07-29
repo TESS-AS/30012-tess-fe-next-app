@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User2, SquarePen } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 interface ContactPersonProps {
 	firstName: string;
@@ -27,6 +28,7 @@ export const ContactPerson: React.FC<ContactPersonProps> = ({
 	phone,
 	onSave,
 }) => {
+	const t = useTranslations("Checkout.contactPerson");
 	const [editMode, setEditMode] = useState(false);
 	const [formData, setFormData] = useState({
 		firstName,
@@ -57,8 +59,6 @@ export const ContactPerson: React.FC<ContactPersonProps> = ({
 		setIsSaved(true);
 	};
 
-	console.log(formData, "formData");
-
 	return (
 		<Card className="rounded-lg shadow-none">
 			<CardContent className="flex flex-col items-start p-6">
@@ -66,14 +66,14 @@ export const ContactPerson: React.FC<ContactPersonProps> = ({
 					<div className="flex items-start gap-2">
 						<User2 className="mt-1 h-5 w-5" />
 						<h2 className="text-foreground text-lg font-semibold">
-							Kontaktperson
+							{t("title")}
 						</h2>
 					</div>
 
 					{editMode && (
 						<div className="flex items-center gap-1 rounded bg-[#FDFDEA] px-3 py-2 text-xs font-bold text-[#633112] hover:bg-transparent">
 							<SquarePen className="h-4 w-4" />
-							Endre kontaktperson
+							{t("edit")}
 						</div>
 					)}
 				</div>
@@ -81,7 +81,7 @@ export const ContactPerson: React.FC<ContactPersonProps> = ({
 				{editMode ? (
 					<div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
 						<div>
-							<Label htmlFor="firstName">Fornavn</Label>
+							<Label htmlFor="firstName">{t("firstName")}</Label>
 							<Input
 								id="firstName"
 								name="firstName"
@@ -91,7 +91,7 @@ export const ContactPerson: React.FC<ContactPersonProps> = ({
 						</div>
 
 						<div>
-							<Label htmlFor="lastName">Etternavn</Label>
+							<Label htmlFor="lastName">{t("lastName")}</Label>
 							<Input
 								id="lastName"
 								name="lastName"
@@ -102,7 +102,7 @@ export const ContactPerson: React.FC<ContactPersonProps> = ({
 
 						{/* E-post */}
 						<div>
-							<Label htmlFor="email">E-post</Label>
+							<Label htmlFor="email">{t("email")}</Label>
 							<Input
 								id="email"
 								name="email"
@@ -112,12 +112,12 @@ export const ContactPerson: React.FC<ContactPersonProps> = ({
 								disabled
 							/>
 							<p className="text-muted-foreground mt-1 text-xs">
-								Eksempel: navn@navnesen.no
+								{t("emailExample")}
 							</p>
 						</div>
 
 						<div>
-							<Label htmlFor="phone">Telefonnummer</Label>
+							<Label htmlFor="phone">{t("phone")}</Label>
 							<Input
 								id="phone"
 								name="phone"
@@ -125,7 +125,7 @@ export const ContactPerson: React.FC<ContactPersonProps> = ({
 								onChange={handleChange}
 							/>
 							<p className="text-muted-foreground mt-1 text-xs">
-								Eksempel: +47 123 45 678
+								{t("phoneExample")}
 							</p>
 						</div>
 
@@ -134,13 +134,13 @@ export const ContactPerson: React.FC<ContactPersonProps> = ({
 								onClick={handleSave}
 								variant="outlineGreen"
 								className="font-medium">
-								Lagre kontaktperson
+								{t("save")}
 							</Button>
 							<Button
 								onClick={handleCancel}
 								variant="outline"
 								className="text-foreground font-medium">
-								Avbryt
+								{t("cancel")}
 							</Button>
 						</div>
 					</div>
@@ -162,7 +162,7 @@ export const ContactPerson: React.FC<ContactPersonProps> = ({
 							width={10}
 							height={10}
 						/>
-						Hentet fra profil
+						{t("fetchedFromProfile")}
 					</div>
 				)}
 				{!editMode && (
@@ -172,7 +172,7 @@ export const ContactPerson: React.FC<ContactPersonProps> = ({
 						onClick={() => setEditMode(true)}
 						className="text-foreground mt-4 border-[#C1C4C2] text-xs font-medium">
 						<SquarePen className="mr-1 h-1 w-1" />
-						Endre kontaktperson
+						{t("edit")}
 					</Button>
 				)}
 			</CardContent>

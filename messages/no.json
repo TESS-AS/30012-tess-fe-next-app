@@ -49,6 +49,13 @@
 		"selectWarehouseFirst": "Vennligst velg en lagerstasjon først",
 		"noBalanceForWarehouse": "Ingen balanse tilgjengelig for denne lagerstasjonen"
 	},
+	"BreadCrumbs": {
+		"home": "Hjem",
+		"category": "Kategori",
+		"product": "Produkt",
+		"cart": "Handlekurv",
+		"checkout": "Kassen"
+	},
 	"Common": {
 		"reset": "Nullstill",
 		"error": {
@@ -93,7 +100,13 @@
 	},
 	"Cart": {
 		"archived": "Cart archived",
-		"errorArchiving": "Error archiving cart"
+		"errorArchiving": "Error archiving cart",
+		"showStockStatus": "Vis lagerstatus for:",
+		"yourCart": "Din handlekurv",
+		"archiveCart": "Arkiver handlekurv",
+		"viewCartHistory": "Vis handlekurvhistorikk",
+		"outOfStock": "Noen varer er ikke på lager i ditt valgte varehus",
+		"outOfStockMessage": "Noen varer er ikke på lager i ditt valgte varehus, og det kan ta opptil 3 dager ekstra å få dem levert. Endre lager per varelinje før du sender ordren dersom du ønsker raskere levering."
 	},
 	"Login": {
 		"title": "Login",
@@ -112,5 +125,211 @@
 		"copyright": "2025 TESS",
 		"honest": "Ærlig, pålitelig og profesjonell",
 		"honestDescription": "Hos TESS møter du fagfolk både foran og bak disken. Vi gir deg markedets beste tilgjengelighet med over 130 lokale servicesentre."
+	},
+	"OrderSummary": {
+		"title": "Ordreoversikt",
+		"originalPrice": "Opprinnelig pris:",
+		"discounts": "Rabatter",
+		"sumAfterDiscount": "Sum etter rabatt (eks. mva.)",
+		"deliverySurcharge": "Leveringstillegg",
+		"vat": "MVA(25%)",
+		"totalIncVat": "Total inkl. mva.",
+		"continueToPayment": "Fortsett til betaling",
+		"punchoutCart": "Punchout Handlekurv",
+		"or": "eller",
+		"continueShopping": "Fortsett å handle"
+	},
+	"Checkout": {
+		"modals": {
+			"feedback": {
+				"title": "Tilbakemelding etter kjøp",
+				"description": "Vi vil gjerne høre hvordan kjøpsopplevelsen din var. Din tilbakemelding hjelper oss å bli enda bedre.",
+				"question": "Hvordan opplevde du kjøpet?",
+				"ratings": {
+					"1": "1 - Veldig dårlig",
+					"2": "2 - Dårlig",
+					"3": "3 - Helt grei",
+					"4": "4 - Bra",
+					"5": "5 - Veldig bra"
+				},
+				"commentLabel": "Har du kommentarer? (valgfritt)",
+				"commentPlaceholder": "Fortell oss gjerne hva som fungerte bra, eller hva vi kan forbedre",
+				"submit": "Send tilbakemelding"
+			},
+			"tracking": {
+				"title": "Spor leveringen av bestilling #{orderNumber}",
+				"orderDate": "Bestillingsdato",
+				"email": "E-post",
+				"phone": "Telefon",
+				"paymentMethod": "Betalingsmåte",
+				"deliveryAddress": "Leveringsadresse",
+				"totalPrice": "Totalpris",
+				"currency": "NOK",
+				"status": {
+					"paymentReceived": "Betaling mottatt",
+					"orderPlaced": "Bestilling lagt inn",
+					"viaInvoice": "Via faktura"
+				},
+				"buttons": {
+					"orderDetails": "Bestillingsdetaljer",
+					"cancelOrder": "Kanseller bestilling"
+				}
+			},
+			"contact": {
+				"title": "Kontaktperson",
+				"firstName": "Fornavn",
+				"lastName": "Etternavn",
+				"email": "E-post",
+				"phone": "Telefon",
+				"save": "Lagre kontaktperson",
+				"cancel": "Avbryt"
+			},
+			"payment": {
+				"title": "Betalingsmetode",
+				"invoice": "Faktura",
+				"save": "Lagre betalingsmetode",
+				"cancel": "Avbryt"
+			},
+			"delivery": {
+				"title": "Velg leveringsmetode",
+				"addressDelivery": "Levering til adresse",
+				"estimatedTime": "Estimert leveringstid: 2 til 7 virkedager",
+				"save": "Lagre leveringsmetode",
+				"cancel": "Avbryt"
+			},
+			"address": {
+				"selector": {
+					"placeholder": "Velg en lagret adresse",
+					"user": "Bruker",
+					"customer": "Kunde",
+					"organization": "Organisasjon",
+					"addAddress": "Legg til adresse"
+				},
+				"title": "Din adresse",
+				"save": "Bruk adresse",
+				"cancel": "Avbryt",
+				"savedAddresses": "Lagrede adresser",
+				"addressName": "Navn på adresse",
+				"addressNameExample": "Eksempel: Hjem, Jobb, Kontor",
+				"street": "Gatenavn",
+				"streetExample": "Eksempel: Storgata",
+				"houseNumber": "Husnummer",
+				"houseNumberExample": "Eksempel: 15",
+				"addExtra": "Legg til tilleggsopplysninger",
+				"extraInfo": "Tilleggsopplysninger (valgfri)",
+				"extraInfoExample": "Eksempel: c/o, etasje, oppgang osv.",
+				"postalCode": "Postnummer",
+				"postalCodeExample": "Eksempel: 0155",
+				"city": "Sted",
+				"cityPlaceholderAuto": "(fylles automatisk etter postnummer er validert)",
+				"cityPlaceholderManual": "Skriv inn sted",
+				"saveAsUserAddress": "Lagre som brukeradresse"
+			}
+		},
+		"steps": {
+			"delivery": "Levering",
+			"payment": "Betaling",
+			"confirm": "Bekreft"
+		},
+		"confirmation": {
+			"contactPerson": "Kontaktperson",
+			"address": "Adresse",
+			"delivery": "Levering",
+			"payment": "Betaling",
+			"deliveryMethod": "Levering til adresse",
+			"deliveryTime": "Estimert leveringstid: 2 til 7 virkedager",
+			"invoice": "Faktura",
+			"cardPayment": "Kortbetaling",
+			"project": "Prosjekt",
+			"department": "Avdeling",
+			"category": "Kategori",
+			"notSpecified": "–"
+		},
+		"errors": {
+			"selectAddress": "Vennligst velg en adresse",
+			"orderSubmissionFailed": "Bestillingen kunne ikke sendes"
+		},
+		"feedback": {
+			"rating": "Vurdering",
+			"comment": "Kommentar",
+			"ratings": {
+				"1": "1 - Veldig dårlig",
+				"2": "2 - Dårlig",
+				"3": "3 - Middels",
+				"4": "4 - Bra",
+				"5": "5 - Veldig bra"
+			}
+		},
+		"contactPerson": {
+			"title": "Kontaktperson",
+			"edit": "Endre kontaktperson",
+			"firstName": "Fornavn",
+			"lastName": "Etternavn",
+			"email": "E-post",
+			"phone": "Telefonnummer",
+			"emailExample": "Eksempel: navn@eksempel.no",
+			"phoneExample": "Eksempel: +47 123 45 678",
+			"save": "Lagre kontaktperson",
+			"cancel": "Avbryt",
+			"fetchedFromProfile": "Hentet fra profil"
+		},
+		"address": {
+			"title": "Din adresse",
+			"edit": "Endre adresse",
+			"savedAddresses": "Lagrede adresser",
+			"addressName": "Adressenavn",
+			"addressNameExample": "Eksempel: Hjem, Jobb, Kontor",
+			"street": "Gatenavn",
+			"streetExample": "Eksempel: Hovedgata",
+			"houseNumber": "Husnummer",
+			"houseNumberExample": "Eksempel: 15",
+			"addExtra": "Legg til tilleggsinformasjon",
+			"extraInfo": "Tilleggsinformasjon (valgfritt)",
+			"extraInfoExample": "Eksempel: c/o, etasje, inngang, osv.",
+			"postalCode": "Postnummer",
+			"postalCodeExample": "Eksempel: 0155",
+			"city": "Sted",
+			"cityPlaceholderAuto": "(fylles ut automatisk etter postnummervalidering)",
+			"cityPlaceholderManual": "Skriv inn sted",
+			"saveAsUserAddress": "Lagre som brukeradresse",
+			"useAddress": "Bruk adresse",
+			"cancel": "Avbryt",
+			"homeAddress": "Hjemmeadresse"
+		},
+		"delivery": {
+			"title": "Velg leveringsmåte",
+			"warning": {
+				"title": "Noen varer er ikke på lager i ditt valgte varehus",
+				"message": "Noen varer er ikke på lager i ditt valgte varehus, og det kan ta opptil 3 dager ekstra å få dem levert.",
+				"closeLabel": "Lukk varsel"
+			},
+			"options": {
+				"address": {
+					"title": "Levering til adresse",
+					"estimate": "Estimert leveringstid: 2 til 7 virkedager"
+				}
+			}
+		},
+		"payment": {
+			"title": "Velg betalingsmåte",
+			"invoice": "Faktura"
+		},
+		"invoice": {
+			"title": "Tilleggsinformasjon for faktura",
+			"description": "Opplysningene vises på fakturaen og hjelper økonomiavdelingen med riktig bokføring."
+		},
+		"dimensions": {
+			"label": "Brukerdimensjon inndata:",
+			"selectLabel": "Brukerdimensjoner",
+			"selectPlaceholder": "Velg brukerdimensjon",
+			"dimension1": "Brukerdimensjon 1",
+			"dimension2": "Brukerdimensjon 2",
+			"dimension3": "Brukerdimensjon 3",
+			"modes": {
+				"select": "Velg",
+				"search": "Søk",
+				"manual": "Manuell"
+			}
+		}
 	}
 }

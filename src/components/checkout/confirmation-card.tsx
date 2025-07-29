@@ -29,7 +29,7 @@ export const ConfirmationCard = ({
 				className="p-0 text-base font-medium text-[#00A862] transition-colors hover:bg-transparent hover:text-[#008F53]"
 				onClick={onEdit}
 				// disabled={title === "Adresse"}
-				>
+			>
 				Endre
 			</Button>
 		</div>

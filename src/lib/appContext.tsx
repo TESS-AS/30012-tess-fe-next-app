@@ -20,11 +20,10 @@ import {
 	calculateItemPrice,
 	getProductPrice,
 } from "@/services/product.service";
+import { AddressFormState } from "@/types/address";
 import { CartLine } from "@/types/carts.types";
 import { Order } from "@/types/orders.types";
 import { PriceResponse } from "@/types/search.types";
-import { useSession } from "next-auth/react";
-import { AddressFormState } from "@/types/address";
 
 interface AppContextType {
 	isCartChanging: boolean;
@@ -82,9 +81,11 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 	const [submittedOrder, setSubmittedOrder] = useState<Order | null>(null);
 	const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
-	const [updatedAddress, setUpdatedAddress] = useState<AddressFormState | null>(null);
+	const [updatedAddress, setUpdatedAddress] = useState<AddressFormState | null>(
+		null,
+	);
 
-	console.log(updatedAddress,"updatedAddress")
+	console.log(updatedAddress, "updatedAddress");
 	const loadCartData = async () => {
 		try {
 			const cart = await getCart();

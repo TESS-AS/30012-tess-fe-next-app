@@ -5,6 +5,7 @@ import { EditDeliveryModal } from "@/components/checkout/edit-delivery-modal";
 import { EditPaymentModal } from "@/components/checkout/edit-payment-modal";
 import { useAppContext } from "@/lib/appContext";
 import { MapPin, Truck, User2, Wallet } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function StepConfirmation({
 	contactPerson,
@@ -19,11 +20,12 @@ export default function StepConfirmation({
 	handleContactPersonSave,
 }: any) {
 	const { setUpdatedAddress } = useAppContext();
+	const t = useTranslations("Checkout.confirmation");
 
 	return (
 		<div className="grid grid-cols-4 gap-6">
 			<ConfirmationCard
-				title="Kontaktperson"
+				title={t("contactPerson")}
 				icon={<User2 className="h-5 w-5" />}
 				onEdit={() => modals.setContactOpen(true)}>
 				<p>
@@ -34,7 +36,7 @@ export default function StepConfirmation({
 			</ConfirmationCard>
 
 			<ConfirmationCard
-				title="Adresse"
+				title={t("address")}
 				icon={<MapPin className="h-5 w-5" />}
 				onEdit={() => modals.setAddressOpen(true)}>
 				<p>{selectedAddress?.addressName}</p>
@@ -47,23 +49,31 @@ export default function StepConfirmation({
 			</ConfirmationCard>
 
 			<ConfirmationCard
-				title="Levering"
+				title={t("delivery")}
 				icon={<Truck className="h-5 w-5" />}
 				onEdit={() => modals.setDeliveryOpen(true)}>
-				<p>Levering til adresse</p>
-				<p>Estimert leveringstid: 2 til 7 virkedager</p>
+				<p>{t("deliveryMethod")}</p>
+				<p>{t("deliveryTime")}</p>
 			</ConfirmationCard>
 
 			<ConfirmationCard
-				title="Betaling"
+				title={t("payment")}
 				icon={<Wallet className="h-5 w-5" />}
 				onEdit={() => modals.setPaymentOpen(true)}>
-				<p>{paymentMethod === "faktura" ? "Faktura" : "Kortbetaling"}</p>
+				<p>{paymentMethod === "faktura" ? t("invoice") : t("cardPayment")}</p>
 				<p>
-					Prosjekt: {orderData.salesOrderHeader.customersOrderReference || "–"}
+					{t("project")}:{" "}
+					{orderData.salesOrderHeader.customersOrderReference ||
+						t("notSpecified")}
 				</p>
-				<p>Avdeling: {orderData.salesOrderHeader.customerReference || "–"}</p>
-				<p>Kategori: {orderData.salesOrderLines[0]?.accountPart3 || "–"}</p>
+				<p>
+					{t("department")}:{" "}
+					{orderData.salesOrderHeader.customerReference || t("notSpecified")}
+				</p>
+				<p>
+					{t("category")}:{" "}
+					{orderData.salesOrderLines[0]?.accountPart3 || t("notSpecified")}
+				</p>
 			</ConfirmationCard>
 
 			{/* Modals */}

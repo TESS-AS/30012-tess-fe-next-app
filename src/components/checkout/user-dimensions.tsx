@@ -5,6 +5,7 @@ import { getUserDimensions } from "@/services/dimensions.service";
 import { UserDimensionItem } from "@/types/dimensions.types";
 import { Order } from "@/types/orders.types";
 import { formatUserDimensionsToHierarchy } from "@/utils/dimensionFormaters";
+import { useTranslations } from "next-intl";
 
 import { DimensionSearchInput } from "./dimension-search-input";
 import { Input } from "../ui/input";
@@ -31,6 +32,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 	dimensionInputMode,
 	setDimensionInputMode,
 }) => {
+	const t = useTranslations("Checkout.dimensions");
 	const [userDimensions, setUserDimensions] = useState<UserDimensionItem[]>([]);
 	const [userDimension, setUserDimension] = useState("");
 	const [userDimensionOne, setUserDimensionOne] = useState("");
@@ -38,29 +40,50 @@ export const UserDimensionsInput: React.FC<Props> = ({
 	const [userDimensionThree, setUserDimensionThree] = useState("");
 	const [activeDimension, setActiveDimension] = useState<number | null>(null);
 
-	const userDimensionsRef = useClickOutside<HTMLDivElement>(() => {
-		setUserDimensionOne("");
-		setUserDimensionTwo("");
-		setUserDimensionThree("");
-		setActiveDimension(null);
-	});
-
 	useEffect(() => {
-			const dimensionSelectString = [
-				orderData.salesOrderHeader.customersOrderReference,
-				orderData.salesOrderHeader.customerReference,
-				orderData.salesOrderLines?.[0]?.accountPart3,
-			]
-				.filter(Boolean)
-				.join("<");
+		const prevMode = localStorage.getItem("prevDimensionMode");
+		if (!prevMode || prevMode === dimensionInputMode) {
+			if (dimensionInputMode === "select") {
+				const dimensionSelectString = [
+					orderData.salesOrderHeader.customersOrderReference,
+					orderData.salesOrderHeader.customerReference,
+					orderData.salesOrderLines?.[0]?.accountPart3,
+				]
+					.filter(Boolean)
+					.join("<");
 
-			setUserDimension(dimensionSelectString);
+				setUserDimension(dimensionSelectString);
+			}
 			setUserDimensionOne(
 				orderData.salesOrderHeader.customersOrderReference || "",
 			);
 			setUserDimensionTwo(orderData.salesOrderHeader.customerReference || "");
 			setUserDimensionThree(orderData.salesOrderLines?.[0]?.accountPart3 || "");
-	}, [orderData]);
+		}
+	}, [orderData, dimensionInputMode]);
+
+	useEffect(() => {
+		const prevMode = localStorage.getItem("prevDimensionMode");
+		if (prevMode && prevMode !== dimensionInputMode) {
+			setUserDimension("");
+			setUserDimensionOne("");
+			setUserDimensionTwo("");
+			setUserDimensionThree("");
+			setActiveDimension(null);
+			setOrderData((prev: Order) => {
+				const updated = { ...prev };
+				updated.salesOrderHeader.customersOrderReference = "";
+				updated.salesOrderHeader.customersOrderReference = "";
+				updated.salesOrderHeader.customerReference = "";
+				updated.salesOrderLines = updated.salesOrderLines.map((line) => ({
+					...line,
+					accountPart3: "",
+				}));
+				return updated;
+			});
+		}
+		localStorage.setItem("prevDimensionMode", dimensionInputMode);
+	}, [dimensionInputMode]);
 
 	useEffect(() => {
 		const loadDimensions = async () => {
@@ -69,15 +92,6 @@ export const UserDimensionsInput: React.FC<Props> = ({
 		};
 		loadDimensions();
 	}, []);
-
-	console.log(formatUserDimensionsToHierarchy(userDimensions), "userDimensions");
-	useEffect(() => {
-		setUserDimension("");
-		setUserDimensionOne("");
-		setUserDimensionTwo("");
-		setUserDimensionThree("");
-		setActiveDimension(null);
-	}, [dimensionInputMode]);
 
 	const updateOrderData = (parts: string[]) => {
 		setOrderData((prev: Order) => {
@@ -102,7 +116,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 	return (
 		<div className="space-y-4">
 			<div className="mb-4 flex items-center gap-4">
-				<Label className="text-sm">User Dimension Input:</Label>
+				<Label className="text-sm">{t("label")}</Label>
 				<RadioGroup
 					defaultValue={dimensionInputMode}
 					onValueChange={(value) => setDimensionInputMode(value as any)}
@@ -112,28 +126,28 @@ export const UserDimensionsInput: React.FC<Props> = ({
 							value="select"
 							id="select"
 						/>
-						<Label htmlFor="select">Select</Label>
+						<Label htmlFor="select">{t("modes.select")}</Label>
 					</div>
 					<div className="flex items-center gap-1">
 						<RadioGroupItem
 							value="search"
 							id="search"
 						/>
-						<Label htmlFor="search">Search</Label>
+						<Label htmlFor="search">{t("modes.search")}</Label>
 					</div>
 					<div className="flex items-center gap-1">
 						<RadioGroupItem
 							value="manual"
 							id="manual"
 						/>
-						<Label htmlFor="manual">Manual</Label>
+						<Label htmlFor="manual">{t("modes.manual")}</Label>
 					</div>
 				</RadioGroup>
 			</div>
 
 			{dimensionInputMode === "select" && (
 				<>
-					<Label>User Dimensions</Label>
+					<Label>{t("selectLabel")}</Label>
 					<Select
 						value={userDimension}
 						onValueChange={(value) => {
@@ -141,13 +155,13 @@ export const UserDimensionsInput: React.FC<Props> = ({
 							const paddedParts = [
 								parts[0] || "",
 								parts[1] || "",
-								parts[2] || ""
+								parts[2] || "",
 							];
 							setUserDimension(value);
 							updateOrderData(paddedParts);
 						}}>
 						<SelectTrigger>
-							<SelectValue placeholder="Select User Dimension" />
+							<SelectValue placeholder={t("selectPlaceholder")} />
 						</SelectTrigger>
 						<SelectContent>
 							{formatUserDimensionsToHierarchy(userDimensions).map(
@@ -165,23 +179,25 @@ export const UserDimensionsInput: React.FC<Props> = ({
 			)}
 
 			{dimensionInputMode === "search" && (
-				<div ref={userDimensionsRef}>
+				<div>
 					<DimensionSearchInput
 						level={1}
 						value={userDimensionOne}
 						onChange={(value) => {
+							console.log(value, "dimensioni value");
 							setUserDimensionOne(value);
 							setActiveDimension(value ? 1 : null);
 						}}
-						placeholder="User Dimension 1"
+						placeholder={t("dimension1")}
 						onSelect={(dim) => {
+							console.log(dim, "dimensioni");
 							setUserDimensionOne(dim.dimensionName);
 							setActiveDimension(null);
 							setOrderData((prev) => ({
 								...prev,
 								salesOrderHeader: {
 									...prev.salesOrderHeader,
-									customersOrderReference: dim.customerNumber,
+									customersOrderReference: dim.dimensionName,
 								},
 							}));
 						}}
@@ -195,7 +211,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 							setUserDimensionTwo(value);
 							setActiveDimension(value ? 2 : null);
 						}}
-						placeholder="User Dimension 2"
+						placeholder={t("dimension2")}
 						onSelect={(dim) => {
 							setUserDimensionTwo(dim.dimensionName);
 							setActiveDimension(null);
@@ -203,7 +219,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 								...prev,
 								salesOrderHeader: {
 									...prev.salesOrderHeader,
-									customerReference: dim.customerNumber,
+									customerReference: dim.dimensionName,
 								},
 							}));
 						}}
@@ -217,7 +233,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 							setUserDimensionThree(value);
 							setActiveDimension(value ? 3 : null);
 						}}
-						placeholder="User Dimension 3"
+						placeholder={t("dimension3")}
 						onSelect={(dim) => {
 							setUserDimensionThree(dim.dimensionName);
 							setActiveDimension(null);
@@ -225,7 +241,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 								...prev,
 								salesOrderLines: prev.salesOrderLines.map((line) => ({
 									...line,
-									accountPart3: dim.customerNumber,
+									accountPart3: dim.dimensionName,
 								})),
 							}));
 						}}
@@ -238,10 +254,10 @@ export const UserDimensionsInput: React.FC<Props> = ({
 				<>
 					<Input
 						type="text"
-						placeholder="User Dimension 1"
-						value={userDimension}
+						placeholder={t("dimension1")}
+						value={userDimensionOne}
 						onChange={(e) => {
-							setUserDimension(e.target.value);
+							setUserDimensionOne(e.target.value);
 							console.log(e.target.value, "target");
 							setOrderData((prev) => ({
 								...prev,
@@ -254,7 +270,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 					/>
 					<Input
 						type="text"
-						placeholder="User Dimension 2"
+						placeholder={t("dimension2")}
 						value={userDimensionTwo}
 						onChange={(e) => {
 							setUserDimensionTwo(e.target.value);
@@ -269,7 +285,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 					/>
 					<Input
 						type="text"
-						placeholder="User Dimension 3"
+						placeholder={t("dimension3")}
 						value={userDimensionThree}
 						onChange={(e) => {
 							setUserDimensionThree(e.target.value);

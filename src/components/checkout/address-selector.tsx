@@ -6,6 +6,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import type { SavedAddress } from "../../types/address";
 
@@ -20,6 +21,7 @@ export const AddressSelector = ({
 	onAddressSelect,
 	onAddNewClick,
 }: AddressSelectorProps) => {
+	const t = useTranslations("Checkout.modals.address.selector");
 	return (
 		<Select
 			onValueChange={(value) => {
@@ -31,11 +33,11 @@ export const AddressSelector = ({
 				}
 			}}>
 			<SelectTrigger className="w-full">
-				<SelectValue placeholder="Velg en lagret adresse" />
+				<SelectValue placeholder={t("placeholder")} />
 			</SelectTrigger>
 			<SelectContent className="p-2">
 				<div className="flex items-center justify-between px-1 py-2 text-sm font-medium text-[#009640]">
-					<span>Bruker</span>
+					<span>{t("user")}</span>
 				</div>
 				{savedAddresses
 					.filter((addr) => addr.type === "bruker")
@@ -48,7 +50,7 @@ export const AddressSelector = ({
 								{addr.name} - {addr.street} {addr.houseNumber}
 							</span>
 							<span className="absolute top-1/2 right-2 -translate-y-1/2 rounded bg-[#DEF7EC] px-2 py-0.5 text-xs font-medium text-[#005522]">
-								Bruker
+								{t("user")}
 							</span>
 						</SelectItem>
 					))}
@@ -61,11 +63,11 @@ export const AddressSelector = ({
 						onAddNewClick();
 					}}>
 					<Plus className="h-4 w-4" />
-					<span>Legg til adresse</span>
+					<span>{t("addAddress")}</span>
 				</button>
 
 				<div className="mt-2 flex items-center justify-between border-t px-1 py-2 text-sm font-medium text-[#009640]">
-					<span>Kunde</span>
+					<span>{t("customer")}</span>
 				</div>
 				{savedAddresses
 					.filter((addr) => addr.type === "kunde")
@@ -78,13 +80,13 @@ export const AddressSelector = ({
 								{addr.name} - {addr.street} {addr.houseNumber}
 							</span>
 							<span className="absolute top-1/2 right-2 -translate-y-1/2 rounded bg-[#DEF7EC] px-2 py-0.5 text-xs font-medium text-[#005522]">
-								Kunde
+								{t("customer")}
 							</span>
 						</SelectItem>
 					))}
 
 				<div className="mt-2 flex items-center justify-between border-t px-1 py-2 text-sm font-medium text-[#009640]">
-					<span>Organisasjon</span>
+					<span>{t("organization")}</span>
 				</div>
 				{savedAddresses
 					.filter((addr) => addr.type === "organisasjon")
@@ -97,7 +99,7 @@ export const AddressSelector = ({
 								{addr.name} - {addr.street} {addr.houseNumber}
 							</span>
 							<span className="absolute top-1/2 right-2 -translate-y-1/2 rounded bg-[#DEF7EC] px-2 py-0.5 text-xs font-medium text-[#005522]">
-								Organisasjon
+								{t("organization")}
 							</span>
 						</SelectItem>
 					))}

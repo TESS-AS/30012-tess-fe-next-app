@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+import { useTranslations } from "next-intl";
+
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Modal } from "../ui/modal";
@@ -17,6 +19,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
 	onClose,
 	onSubmit,
 }) => {
+	const t = useTranslations("Checkout.modals.feedback");
 	const [rating, setRating] = useState<number>(0);
 	const [comment, setComment] = useState("");
 	const [showComment, setShowComment] = useState(false);
@@ -39,30 +42,27 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
 			<div className="space-y-6">
 				<>
 					<div>
-						<h2 className="mb-2 text-xl font-semibold">
-							Tilbakemelding etter kjøp
-						</h2>
+						<h2 className="mb-2 text-xl font-semibold">{t("title")}</h2>
 						<p className="text-muted-foreground font-medium">
-							Vi vil gjerne høre hvordan kjøpsopplevelsen din var. Din
-							tilbakemelding hjelper oss å bli enda bedre.
+							{t("description")}
 						</p>
 					</div>
 
 					<div className="space-y-4">
 						<div>
 							<p className="text-muted-foreground mb-4 font-medium">
-								Hvordan opplevde du kjøpet?
+								{t("question")}
 							</p>
 							<RadioGroup
 								value={rating.toString()}
 								onValueChange={(value) => setRating(parseInt(value))}
 								className="flex flex-col gap-3">
 								{[
-									{ value: "1", label: "1 - Veldig dårlig" },
-									{ value: "2", label: "2 - Dårlig" },
-									{ value: "3", label: "3 - Helt grei" },
-									{ value: "4", label: "4 - Bra" },
-									{ value: "5", label: "5 - Veldig bra" },
+									{ value: "1", label: t("ratings.1") },
+									{ value: "2", label: t("ratings.2") },
+									{ value: "3", label: t("ratings.3") },
+									{ value: "4", label: t("ratings.4") },
+									{ value: "5", label: t("ratings.5") },
 								].map((option) => (
 									<div
 										key={option.value}
@@ -81,11 +81,11 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
 
 						{rating > 0 && (
 							<div>
-								<Label>Har du kommentarer? (valgfritt)</Label>
+								<Label>{t("commentLabel")}</Label>
 								<Textarea
 									value={comment}
 									onChange={(e) => setComment(e.target.value)}
-									placeholder="Fortell oss gjerne hva som fungerte bra, eller hva vi kan forbedre"
+									placeholder={t("commentPlaceholder")}
 									className="mt-2"
 								/>
 							</div>
@@ -96,7 +96,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
 						onClick={handleSubmit}
 						disabled={rating === 0}
 						variant="default">
-						Send tilbakemelding
+						{t("submit")}
 					</Button>
 				</>
 			</div>
