@@ -1,7 +1,11 @@
 import React from "react";
 
+import { useGetDefaultAddress } from "@/hooks/useGetDefaultAddress";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { useAppContext } from "@/lib/appContext";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { toast } from "react-toastify";
 
 interface StepperProps {
 	steps: string[];
@@ -14,6 +18,12 @@ const Stepper: React.FC<StepperProps> = ({
 	currentStep,
 	onStepClick,
 }) => {
+	const t = useTranslations("");
+	const { updatedAddress } = useAppContext();
+	const { data: defaultAddress } = useGetDefaultAddress();
+
+	const selectedAddress = defaultAddress?.[0];
+
 	const { data: profile } = useGetProfileData();
 	return (
 		<div className="flex w-full items-center justify-between py-6">
@@ -23,6 +33,10 @@ const Stepper: React.FC<StepperProps> = ({
 					className="flex flex-1 items-center last:flex-none">
 					<button
 						onClick={() => {
+							if (!selectedAddress?.addressLine1 && !updatedAddress?.street) {
+								toast.error(t("Checkout.errors.selectAddress"));
+								return;
+							}
 							if (!profile?.punchout) {
 								onStepClick(index);
 							}
