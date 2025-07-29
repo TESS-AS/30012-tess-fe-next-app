@@ -232,6 +232,7 @@
 			"confirm": "Confirm"
 		},
 		"confirmation": {
+			"yourItems": "Your items",
 			"contactPerson": "Contact Person",
 			"address": "Address",
 			"delivery": "Delivery",

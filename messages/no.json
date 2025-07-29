@@ -232,6 +232,7 @@
 			"confirm": "Bekreft"
 		},
 		"confirmation": {
+			"yourItems": "Dine varer",
 			"contactPerson": "Kontaktperson",
 			"address": "Adresse",
 			"delivery": "Levering",
