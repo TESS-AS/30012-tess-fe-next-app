@@ -25,6 +25,7 @@ import { useSearch } from "@/hooks/useProductSearch";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
+import { useCategories } from "@/lib/CategoriesProvider";
 import axiosClient from "@/services/axiosClient";
 import { loadCategoryTree } from "@/services/categories.service";
 import { getProductVariations } from "@/services/product.service";
@@ -34,7 +35,6 @@ import { ProfileUser } from "@/types/user.types";
 import {
 	Building,
 	ChevronDown,
-	Hotel,
 	MessageSquareText,
 	Search,
 	ShoppingCart,
@@ -45,7 +45,9 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 
-export default function Header({ categories }: { categories: Category[] }) {
+export default function Header() {
+	const { categories, loading, error } = useCategories();
+
 	const currentLocale = useLocale();
 	const t = useTranslations();
 	const router = useRouter();
@@ -379,7 +381,10 @@ export default function Header({ categories }: { categories: Category[] }) {
 
 			<div className="border-t">
 				<div className="container m-auto flex h-12 w-full items-center justify-between gap-4">
-					<CategoryNavigationMenu categories={categories} />
+					<CategoryNavigationMenu
+						categories={categories as Category[]}
+						loading={loading}
+					/>
 				</div>
 			</div>
 

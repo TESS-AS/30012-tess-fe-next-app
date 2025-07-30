@@ -15,6 +15,7 @@ import { useGetAssortments } from "@/hooks/useGetAssortments";
 import { useGetCompanies } from "@/hooks/useGetCompanies";
 import { useGetCustomers } from "@/hooks/useGetCustomers";
 import { useGetWarehouses } from "@/hooks/useGetWarehouse";
+import { useCategories } from "@/lib/CategoriesProvider";
 import axiosClient from "@/services/axiosClient";
 import { ProfileUser } from "@/types/user.types";
 import { UserRoundCog } from "lucide-react";
@@ -28,6 +29,7 @@ export default function CustomerNumberSwitcher({
 	profile,
 }: CustomerNumberSwitcherProps) {
 	const t = useTranslations();
+	const { refetch: refetchCategories } = useCategories();
 
 	const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
 	const [newCustomerNumber, setNewCustomerNumber] = useState("");
@@ -81,9 +83,10 @@ export default function CustomerNumberSwitcher({
 				companyNumber: selectedCompanyNumber || profile.defaultCompanyNumber,
 				customerNumber: newCustomerNumber,
 				warehouseNumber: selectedWarehouse,
-				assortmentId: selectedAssortment,
+				assortmentNumber: selectedAssortment,
 			});
 			setDefaultCustomerNumber(newCustomerNumber);
+			await refetchCategories();
 			setIsCustomerModalOpen(false);
 		} catch (err) {
 			console.error("Failed to update default customer number", err);

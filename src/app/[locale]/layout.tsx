@@ -3,11 +3,9 @@ import { ReactNode } from "react";
 import { Footer } from "@/components/layouts/Footer/Footer";
 import Main from "@/components/layouts/Main/Main";
 import { AppContextProvider } from "@/lib/appContext";
+import { CategoriesProvider } from "@/lib/CategoriesProvider";
 import { AuthProvider } from "@/lib/providers/AuthProvider";
 import { getSeoMetadata } from "@/lib/seo";
-import { mapCategoryTree } from "@/lib/utils";
-import axiosServer from "@/services/axiosServer";
-import type { Category, RawCategory } from "@/types/categories.types";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { ToastContainer } from "react-toastify";
@@ -45,13 +43,6 @@ export default async function LocaleLayout({
 		notFound();
 	}
 
-	const res = await axiosServer.get("/categories");
-	const raw: RawCategory[] = res.data;
-
-	const categories: Category[] = raw.map((node) =>
-		mapCategoryTree(node, locale),
-	);
-
 	return (
 		<html lang={locale}>
 			<body className="overflow-hidden">
@@ -60,21 +51,23 @@ export default async function LocaleLayout({
 					messages={messages}>
 					<AuthProvider>
 						<AppContextProvider>
-							<ToastContainer
-								position="top-right"
-								autoClose={5000}
-								hideProgressBar
-								newestOnTop
-								closeOnClick
-								rtl={false}
-								pauseOnFocusLoss
-								draggable
-								pauseOnHover
-							/>
-							<Main categories={categories}>
-								{children}
-								<Footer />
-							</Main>
+							<CategoriesProvider>
+								<ToastContainer
+									position="top-right"
+									autoClose={5000}
+									hideProgressBar
+									newestOnTop
+									closeOnClick
+									rtl={false}
+									pauseOnFocusLoss
+									draggable
+									pauseOnHover
+								/>
+								<Main>
+									{children}
+									<Footer />
+								</Main>
+							</CategoriesProvider>
 						</AppContextProvider>
 					</AuthProvider>
 				</NextIntlClientProvider>
