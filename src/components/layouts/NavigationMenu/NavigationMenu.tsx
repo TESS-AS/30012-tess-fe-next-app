@@ -24,10 +24,13 @@ export default function CategoryNavigationMenu({
 }) {
 	const t = useTranslations();
 	const [query, setQuery] = useState("");
-	const { data, isLoading } = useSearch(query);
+	const [openMenu, setOpenMenu] = useState<any>(false);
 
 	return (
-		<NavigationMenu className="hidden w-full justify-between md:flex">
+		<NavigationMenu
+			value={openMenu}
+			onValueChange={setOpenMenu}
+			className="hidden w-full justify-between md:flex">
 			<NavigationMenuList className="flex w-full max-w-full justify-between gap-2 px-0">
 				{categories.slice(0, 7).map((category) => (
 					<NavigationMenuItem key={category.slug}>
@@ -47,6 +50,7 @@ export default function CategoryNavigationMenu({
 											<li key={subcategory.slug}>
 												<div className="mb-2 text-sm font-semibold">
 													<Link
+														onClick={() => setOpenMenu(false)}
 														href={`/${category.slug}/${subcategory.slug}`}
 														className="hover:underline">
 														{subcategory.name}
@@ -59,6 +63,7 @@ export default function CategoryNavigationMenu({
 															{subcategory.subcategories.map((child) => (
 																<li key={child.slug}>
 																	<Link
+																		onClick={() => setOpenMenu(false)}
 																		href={`/${category.slug}/${subcategory.slug}/${child.slug}`}
 																		className="text-muted-foreground hover:text-foreground text-sm transition-colors">
 																		{child.name}
