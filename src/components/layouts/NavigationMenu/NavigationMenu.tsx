@@ -11,7 +11,7 @@ import {
 	NavigationMenuList,
 	NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import { useSearch } from "@/hooks/useProductSearch";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type { Category } from "@/types/categories.types";
 import Link from "next/link";
@@ -19,8 +19,10 @@ import { useTranslations } from "next-intl";
 
 export default function CategoryNavigationMenu({
 	categories,
+	loading,
 }: {
 	categories: Category[];
+	loading: boolean;
 }) {
 	const t = useTranslations();
 	const [query, setQuery] = useState("");
@@ -32,72 +34,78 @@ export default function CategoryNavigationMenu({
 			onValueChange={setOpenMenu}
 			className="hidden w-full justify-between md:flex">
 			<NavigationMenuList className="flex w-full max-w-full justify-between gap-2 px-0">
-				{categories.slice(0, 7).map((category) => (
-					<NavigationMenuItem key={category.slug}>
-						{category.subcategories?.length ? (
-							<>
-								<NavigationMenuTrigger
-									onClick={(e) => {
-										e.preventDefault();
-										window.location.href = `/${category.slug}`;
-									}}
-									className="hover:bg-accent hover:text-accent-foreground flex items-center gap-1 rounded-md px-4 py-2 text-sm font-medium transition-colors">
-									{category.name}
-								</NavigationMenuTrigger>
-								<NavigationMenuContent>
-									<ul className="grid max-h-[500px] w-screen max-w-screen-xl min-w-screen gap-6 overflow-y-auto p-6 md:grid-cols-2 lg:grid-cols-3">
-										{category.subcategories.map((subcategory) => (
-											<li key={subcategory.slug}>
-												<div className="mb-2 text-sm font-semibold">
-													<Link
-														onClick={() => setOpenMenu(false)}
-														href={`/${category.slug}/${subcategory.slug}`}
-														className="hover:underline">
-														{subcategory.name}
-													</Link>
-												</div>
-
-												{Array.isArray(subcategory.subcategories) &&
-													subcategory.subcategories.length > 0 && (
-														<ul className="ml-2 space-y-1">
-															{subcategory.subcategories.map((child) => (
-																<li key={child.slug}>
-																	<Link
-																		onClick={() => setOpenMenu(false)}
-																		href={`/${category.slug}/${subcategory.slug}/${child.slug}`}
-																		className="text-muted-foreground hover:text-foreground text-sm transition-colors">
-																		{child.name}
-																	</Link>
-																</li>
-															))}
-														</ul>
-													)}
-											</li>
-										))}
-									</ul>
-								</NavigationMenuContent>
-							</>
-						) : (
-							<NavigationMenuLink asChild>
-								<Link
-									href={`/${category.slug}`}
-									className="hover:bg-accent hover:text-accent-foreground block rounded-md px-4 py-2 text-sm font-medium transition-colors">
-									{category.name}
-								</Link>
-							</NavigationMenuLink>
-						)}
+				{loading
+					? Array.from({ length: 7 }).map((_, i) => (
+							<NavigationMenuItem key={i}>
+								<Skeleton className="h-8 w-24 rounded-md" />
+							</NavigationMenuItem>
+						))
+					: categories?.slice(0, 7).map((category) => (
+							<NavigationMenuItem key={category.slug}>
+								{category.subcategories?.length ? (
+									<>
+										<NavigationMenuTrigger
+											onClick={(e) => {
+												e.preventDefault();
+												window.location.href = `/${category.slug}`;
+											}}
+											className="hover:bg-accent hover:text-accent-foreground flex items-center gap-1 rounded-md px-4 py-2 text-sm font-medium transition-colors">
+											{category.name}
+										</NavigationMenuTrigger>
+										<NavigationMenuContent>
+											<ul className="grid max-h-[500px] w-screen max-w-screen-xl min-w-screen gap-6 overflow-y-auto p-6 md:grid-cols-2 lg:grid-cols-3">
+												{category.subcategories.map((subcategory) => (
+													<li key={subcategory.slug}>
+														<div className="mb-2 text-sm font-semibold">
+															<Link
+																onClick={() => setOpenMenu(false)}
+																href={`/${category.slug}/${subcategory.slug}`}
+																className="hover:underline">
+																{subcategory.name}
+															</Link>
+														</div>
+														{Array.isArray(subcategory.subcategories) &&
+															subcategory.subcategories.length > 0 && (
+																<ul className="ml-2 space-y-1">
+																	{subcategory.subcategories.map((child) => (
+																		<li key={child.slug}>
+																			<Link
+																				onClick={() => setOpenMenu(false)}
+																				href={`/${category.slug}/${subcategory.slug}/${child.slug}`}
+																				className="text-muted-foreground hover:text-foreground text-sm transition-colors">
+																				{child.name}
+																			</Link>
+																		</li>
+																	))}
+																</ul>
+															)}
+													</li>
+												))}
+											</ul>
+										</NavigationMenuContent>
+									</>
+								) : (
+									<NavigationMenuLink asChild>
+										<Link
+											href={`/${category.slug}`}
+											className="hover:bg-accent hover:text-accent-foreground block rounded-md px-4 py-2 text-sm font-medium transition-colors">
+											{category.name}
+										</Link>
+									</NavigationMenuLink>
+								)}
+							</NavigationMenuItem>
+						))}
+				{!loading && categories?.length > 0 && (
+					<NavigationMenuItem>
+						<NavigationMenuLink asChild>
+							<Link
+								href="/categories"
+								className="hover:bg-accent hover:text-accent-foreground block rounded-md px-4 py-2 text-sm font-medium transition-colors">
+								{t("Category.viewAll")}
+							</Link>
+						</NavigationMenuLink>
 					</NavigationMenuItem>
-				))}
-
-				<NavigationMenuItem>
-					<NavigationMenuLink asChild>
-						<Link
-							href="/categories"
-							className="hover:bg-accent hover:text-accent-foreground block rounded-md px-4 py-2 text-sm font-medium transition-colors">
-							{t("Category.viewAll")}
-						</Link>
-					</NavigationMenuLink>
-				</NavigationMenuItem>
+				)}
 			</NavigationMenuList>
 		</NavigationMenu>
 	);
