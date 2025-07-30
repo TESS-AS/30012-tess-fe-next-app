@@ -78,9 +78,9 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const [surChargePrices, setSurChargePrices] = useState<
 		Record<string, number>
 	>({});
-	const [rabatterPrices, setRabatterPrices] = useState<
-		Record<string, number>
-	>({});
+	const [rabatterPrices, setRabatterPrices] = useState<Record<string, number>>(
+		{},
+	);
 	const [isLoading, setIsLoading] = useState(false);
 	const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 	const [submittedOrder, setSubmittedOrder] = useState<Order | null>(null);
@@ -167,7 +167,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	};
 
 	useEffect(() => {
-		console.log(profile,"profile")
+		console.log(profile, "profile");
 		if (profile) {
 			loadCartData();
 		}

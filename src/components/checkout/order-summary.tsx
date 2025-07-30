@@ -2,8 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { PriceDisplay } from "@/components/ui/price-display";
-import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useOrderSummary } from "@/hooks/useOrderSummary";
+import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useAppContext } from "@/lib/appContext";
 import { Separator } from "@radix-ui/react-select";
 import { ArrowRight, Loader2 } from "lucide-react";
@@ -38,7 +38,10 @@ export default function OrderSummary({
 						<span className="text-[#5A615D]">
 							{t("OrderSummary.discounts")}
 						</span>
-						<PriceDisplay amount={prices.discounts} isPositive />
+						<PriceDisplay
+							amount={prices.discounts}
+							isPositive
+						/>
 					</div>
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">
@@ -50,7 +53,10 @@ export default function OrderSummary({
 						<span className="text-[#5A615D]">
 							{t("OrderSummary.deliverySurcharge")}
 						</span>
-						<PriceDisplay amount={prices.deliverySurcharge} isPositive />
+						<PriceDisplay
+							amount={prices.deliverySurcharge}
+							isPositive
+						/>
 					</div>
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">{t("OrderSummary.vat")}</span>
@@ -61,7 +67,10 @@ export default function OrderSummary({
 						<span className="text-base font-bold text-[#0F1912]">
 							{t("OrderSummary.totalIncVat")}
 						</span>
-						<PriceDisplay amount={prices.totalIncVat} className="text-base font-bold text-[#0F1912]" />
+						<PriceDisplay
+							amount={prices.totalIncVat}
+							className="text-base font-bold text-[#0F1912]"
+						/>
 					</div>
 				</div>
 				{!profile?.punchout ? (

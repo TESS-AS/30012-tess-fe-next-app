@@ -183,7 +183,7 @@ const CartPage = () => {
 			</div>
 		);
 	}
-	console.log(warehouseBlance,"warehouseBlance")
+	console.log(warehouseBlance, "warehouseBlance");
 
 	return (
 		<main className="container min-h-screen py-10">
@@ -305,7 +305,7 @@ const CartPage = () => {
 													await updateWarehouse(
 														item.cartLine ?? 0,
 														item.itemNumber,
-														warehouseNumber
+														warehouseNumber,
 													);
 												} finally {
 													setLoadingItems((prev) => ({

@@ -13,9 +13,8 @@ export const inputStyles = cva(
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
 	({ className, type, value, defaultValue, onChange, ...props }, ref) => {
 		// Handle controlled vs uncontrolled state
-		const inputProps = value === undefined
-			? { defaultValue }
-			: { value: value ?? '', onChange };
+		const inputProps =
+			value === undefined ? { defaultValue } : { value: value ?? "", onChange };
 
 		return (
 			<input

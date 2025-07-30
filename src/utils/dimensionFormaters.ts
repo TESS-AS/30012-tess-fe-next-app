@@ -53,7 +53,11 @@ export function formatUserDimensionsToHierarchy(
 			}
 		}
 
-		if (dim.dimension1?.label && dim.dimension2?.label && dim.dimension3?.label) {
+		if (
+			dim.dimension1?.label &&
+			dim.dimension2?.label &&
+			dim.dimension3?.label
+		) {
 			const value = `${dim.dimension1.label}<${dim.dimension2.label}<${dim.dimension3.label}`;
 			if (!uniqueValues.has(value)) {
 				uniqueValues.add(value);

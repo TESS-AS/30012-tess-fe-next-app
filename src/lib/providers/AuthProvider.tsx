@@ -11,15 +11,19 @@ function SyncSSOTokenAndFetchUser() {
 	const [isTokenSynced, setIsTokenSynced] = useState(false);
 
 	useEffect(() => {
-		if (status === "authenticated" && session?.accessToken && session?.idToken) {
+		if (
+			status === "authenticated" &&
+			session?.accessToken &&
+			session?.idToken
+		) {
 			(async () => {
 				try {
-					console.log('Syncing SSO token...');
+					console.log("Syncing SSO token...");
 					await axiosClient.post("/login/cookie", {
 						idToken: session.idToken,
 						accessToken: session.accessToken,
 					});
-					console.log('SSO token synced successfully');
+					console.log("SSO token synced successfully");
 					setIsTokenSynced(true);
 				} catch (err) {
 					const axiosError = err as AxiosError;
