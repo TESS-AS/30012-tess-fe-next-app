@@ -1,6 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { PriceDisplay } from "@/components/ui/price-display";
+import { useOrderSummary } from "@/hooks/useOrderSummary";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useAppContext } from "@/lib/appContext";
 import { Separator } from "@radix-ui/react-select";
@@ -18,8 +20,8 @@ export default function OrderSummary({
 }: OrderSummaryProps) {
 	const t = useTranslations();
 	const { data: profile } = usePunchoutProfile();
-	const { cartItems, isLoading, totalPrice, surChargeTotalPrice } =
-		useAppContext();
+	const { cartItems, isLoading } = useAppContext();
+	const prices = useOrderSummary();
 
 	return (
 		<div className="space-y-6">
@@ -30,42 +32,45 @@ export default function OrderSummary({
 						<span className="text-[#5A615D]">
 							{t("OrderSummary.originalPrice")}
 						</span>
-						<span className="font-medium">{totalPrice.toFixed(2)},- kr</span>
+						<PriceDisplay amount={prices.originalPrice} />
 					</div>
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">
 							{t("OrderSummary.discounts")}
 						</span>
-						<span className="font-medium text-[#009640]">-0.00 kr</span>
+						<PriceDisplay
+							amount={prices.discounts}
+							isPositive
+						/>
 					</div>
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">
 							{t("OrderSummary.sumAfterDiscount")}
 						</span>
-						<span className="font-medium">{totalPrice.toFixed(2)},- kr</span>
+						<PriceDisplay amount={prices.originalPrice} />
 					</div>
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">
 							{t("OrderSummary.deliverySurcharge")}
 						</span>
-						<span className="font-medium text-[#009640]">
-							{surChargeTotalPrice.toFixed(2)},- kr
-						</span>
+						<PriceDisplay
+							amount={prices.deliverySurcharge}
+							isPositive
+						/>
 					</div>
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">{t("OrderSummary.vat")}</span>
-						<span className="font-medium">
-							{(totalPrice + surChargeTotalPrice).toFixed(2)},- kr
-						</span>
+						<PriceDisplay amount={prices.vat} />
 					</div>
 					<Separator className="h-[1px] flex-1 bg-[#5A615D]" />
 					<div className="flex justify-between">
 						<span className="text-base font-bold text-[#0F1912]">
 							{t("OrderSummary.totalIncVat")}
 						</span>
-						<span className="text-base font-bold text-[#0F1912]">
-							{(totalPrice + surChargeTotalPrice).toFixed(2)},- kr
-						</span>
+						<PriceDisplay
+							amount={prices.totalIncVat}
+							className="text-base font-bold text-[#0F1912]"
+						/>
 					</div>
 				</div>
 				{!profile?.punchout ? (

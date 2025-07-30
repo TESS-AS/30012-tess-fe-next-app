@@ -183,6 +183,7 @@ const CartPage = () => {
 			</div>
 		);
 	}
+	console.log(warehouseBlance, "warehouseBlance");
 
 	return (
 		<main className="container min-h-screen py-10">
@@ -295,7 +296,7 @@ const CartPage = () => {
 											</p>
 										</div>
 										<Select
-											onValueChange={async (e: string) => {
+											onValueChange={async (warehouseNumber: string) => {
 												setLoadingItems((prev) => ({
 													...prev,
 													[item.itemNumber]: true,
@@ -304,13 +305,7 @@ const CartPage = () => {
 													await updateWarehouse(
 														item.cartLine ?? 0,
 														item.itemNumber,
-														String(
-															warehouseBlance
-																?.find((w) => w.item_number === item.itemNumber)
-																?.warehouses?.find(
-																	(w) => w.warehouse_name === e,
-																)?.warehouse_number,
-														),
+														warehouseNumber,
 													);
 												} finally {
 													setLoadingItems((prev) => ({
@@ -319,13 +314,7 @@ const CartPage = () => {
 													}));
 												}
 											}}
-											value={
-												warehouseBlance
-													.find((w) => w.item_number === item.itemNumber)
-													?.warehouses?.find(
-														(w) => w.warehouse_number === item.warehouseNumber,
-													)?.warehouse_name || ""
-											}>
+											value={item.warehouseNumber || ""}>
 											<SelectTrigger className="flex h-[30px] w-[260px] cursor-pointer justify-center p-1.5">
 												<SelectValue
 													className="text-[#009640]"
@@ -338,7 +327,7 @@ const CartPage = () => {
 													?.warehouses?.map((warehouse) => (
 														<SelectItem
 															key={warehouse.warehouse_number}
-															value={warehouse.warehouse_name}>
+															value={warehouse.warehouse_number}>
 															<div
 																className={`flex items-center justify-center p-0 text-xs ${warehouse.balance > 0 ? "text-[#009640]" : "text-[#0F1912]"}`}>
 																{warehouse.balance > 0 ? (

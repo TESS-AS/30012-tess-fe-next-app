@@ -43,7 +43,7 @@ export const AddressSelector = ({
 					.filter((addr) => addr.type === "bruker")
 					.map((addr) => (
 						<SelectItem
-							key={addr.id}
+							key={`${addr.type}-${addr.id}`}
 							value={addr.id}
 							className="relative pr-24 pl-6">
 							<span className="block truncate">
@@ -73,7 +73,7 @@ export const AddressSelector = ({
 					.filter((addr) => addr.type === "kunde")
 					.map((addr) => (
 						<SelectItem
-							key={addr.id}
+							key={`${addr.type}-${addr.id}`}
 							value={addr.id}
 							className="relative pr-24 pl-6">
 							<span className="block truncate">
@@ -92,7 +92,7 @@ export const AddressSelector = ({
 					.filter((addr) => addr.type === "organisasjon")
 					.map((addr) => (
 						<SelectItem
-							key={addr.id}
+							key={`${addr.type}-${addr.id}`}
 							value={addr.id}
 							className="relative pr-32 pl-6">
 							<span className="block truncate">
