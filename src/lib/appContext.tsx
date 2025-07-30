@@ -59,6 +59,7 @@ interface AppContextType {
 	setShowOrderConfirmation: (value: boolean) => void;
 	updatedAddress: AddressFormState | null;
 	setUpdatedAddress: (addr: AddressFormState | null) => void;
+	rabatterTotalPrice: number;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -75,6 +76,9 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		Record<string, number>
 	>({});
 	const [surChargePrices, setSurChargePrices] = useState<
+		Record<string, number>
+	>({});
+	const [rabatterPrices, setRabatterPrices] = useState<
 		Record<string, number>
 	>({});
 	const [isLoading, setIsLoading] = useState(false);
@@ -143,16 +147,17 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					{} as Record<string, number>,
 				);
 
-				// const rabatterprices = priceResults.reduce(
-				// 	(acc: Record<string, number>, item: PriceResponse) => ({
-				// 		...acc,
-				// 		[item.itemNumber]: item.discount || 0,
-				// 	}),
-				// 	{} as Record<string, number>,
-				// );
+				const rabatterPrices = priceResults.reduce(
+					(acc: Record<string, number>, item: PriceResponse) => ({
+						...acc,
+						[item.itemNumber]: item.flatDiscount || 0,
+					}),
+					{} as Record<string, number>,
+				);
 
 				setSurChargePrices(surChargePrices);
 				setCalculatedPrices(newPrices);
+				setRabatterPrices(rabatterPrices);
 			}
 		} catch (error) {
 			console.error("Error fetching cart:", error);
@@ -162,6 +167,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	};
 
 	useEffect(() => {
+		console.log(profile,"profile")
 		if (profile) {
 			loadCartData();
 		}
@@ -176,7 +182,12 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		return Object.values(surChargePrices).reduce((sum, val) => sum + val, 0);
 	}, [surChargePrices]);
 
+	const rabatterTotalPrice = useMemo(() => {
+		return Object.values(rabatterPrices).reduce((sum, val) => sum + val, 0);
+	}, [rabatterPrices]);
+
 	console.log(surChargeTotalPrice, "surChargeTotalPrice");
+	console.log(rabatterTotalPrice, "rabatterTotalPrice");
 
 	const updateQuantity = async (
 		cartLine: number,
@@ -260,6 +271,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				setShowOrderConfirmation,
 				updatedAddress,
 				setUpdatedAddress,
+				rabatterTotalPrice,
 			}}>
 			{children}
 		</AppContext.Provider>

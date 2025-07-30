@@ -36,4 +36,5 @@ export interface PriceResponse {
 	bestPrice: number;
 	bestSource: string;
 	surCharge: number;
+	flatDiscount: number;
 }

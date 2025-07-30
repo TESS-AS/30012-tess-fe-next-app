@@ -131,7 +131,7 @@
 		"originalPrice": "Original Price:",
 		"discounts": "Discounts",
 		"sumAfterDiscount": "Sum after discount (excl. VAT)",
-		"deliverySurcharge": "Delivery surcharge",
+		"deliverySurcharge": "Surcharge",
 		"vat": "VAT(25%)",
 		"totalIncVat": "Total incl. VAT",
 		"continueToPayment": "Continue to payment",

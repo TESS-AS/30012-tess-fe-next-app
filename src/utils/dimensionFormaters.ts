@@ -34,7 +34,7 @@ export function formatUserDimensionsToHierarchy(
 
 	const results = dimensions.flatMap((dim) => {
 		const results = [];
-		if (!uniqueValues.has(dim.dimension1.label)) {
+		if (dim.dimension1?.label && !uniqueValues.has(dim.dimension1.label)) {
 			uniqueValues.add(dim.dimension1.label);
 			results.push({
 				label: dim.dimension1.label,
@@ -42,7 +42,7 @@ export function formatUserDimensionsToHierarchy(
 			});
 		}
 
-		if (dim.dimension2.label) {
+		if (dim.dimension1?.label && dim.dimension2?.label) {
 			const value = `${dim.dimension1.label}<${dim.dimension2.label}`;
 			if (!uniqueValues.has(value)) {
 				uniqueValues.add(value);
@@ -53,7 +53,7 @@ export function formatUserDimensionsToHierarchy(
 			}
 		}
 
-		if (dim.dimension3.label) {
+		if (dim.dimension1?.label && dim.dimension2?.label && dim.dimension3?.label) {
 			const value = `${dim.dimension1.label}<${dim.dimension2.label}<${dim.dimension3.label}`;
 			if (!uniqueValues.has(value)) {
 				uniqueValues.add(value);
