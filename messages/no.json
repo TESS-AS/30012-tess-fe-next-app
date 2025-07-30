@@ -72,6 +72,44 @@
 		"showMore": "Vis mer",
 		"showLess": "Vis mindre"
 	},
+	"CustomerSwitcher": {
+		"title": "Kundeinformasjon",
+		"selectCustomerLabel": "Kunder",
+		"selectCustomerPlaceholder": "Velg kundenummer",
+		"selectWarehouseLabel": "Lager",
+		"selectWarehousePlaceholder": "Velg lager",
+		"noWarehousesAvailable": "Ingen lager tilgjengelig",
+		"selectAssortmentLabel": "Sortiment",
+		"selectAssortmentPlaceholder": "Velg sortiment",
+		"noAssortmentsAvailable": "Ingen sortimenter tilgjengelig",
+		"selectCompanyLabel": "Selskap",
+		"selectCompanyPlaceholder": "Velg selskap",
+		"noCompaniesAvailable": "Ingen selskaper tilgjengelig",
+		"defaultCompanyFallback": "Standardselskap ({companyNumber})",
+		"save": "Lagre",
+		"saving": "Lagrer..."
+	},
+	"CustomerWebPromo": {
+		"switcher": {
+			"news": "Nyhet",
+			"future": "Fremtidens kundeweb"
+		},
+		"customerWeb": {
+			"title": "Fremtidens kundeweb for THM sammen former vi løsningen",
+			"description": "Vi bygger nå neste generasjon kundeweb for TESS Hose Management (THM). Dette er mer enn en oppdatering – vi utvikler en moderne plattform som kombinerer e-handel og avansert beslutningsstøtte, slik at du får full oversikt og kontroll over slanger og utstyr.",
+			"feedbackPrompt": "Har du ønsker eller forslag?",
+			"feedbackSubtext": "Legg igjen en tilbakemelding – din erfaring er viktig for oss.",
+			"feedbackButton": "Gi tilbakemelding"
+		},
+		"otherSection": {
+			"title": "En annen seksjon – eksempeltekst",
+			"description": "Denne visningen viser innholdet når brukeren velger alternativet “Fremtidens kundeweb”.",
+			"cta": "Les mer"
+		},
+		"imageAlt": "THM kundeweb promo",
+		"imageCaption": "Eksempelbilde. Faktisk løsning kan avvike."
+	},
+
 	"Search": {
 		"suggestions": "Søkeforslag",
 		"noSuggestions": "Ingen søkeforslag funnet",

@@ -145,31 +145,32 @@ export function Filter({
 	const handleFilterChange = useCallback(
 		async (filterKey: string, value: string) => {
 			const currentValues = localSelectedFilters[filterKey] || [];
-			let updatedValues: string[];
+			const updatedValues = currentValues.includes(value)
+				? currentValues.filter((v) => v !== value)
+				: [...currentValues, value];
 
-			if (currentValues.includes(value)) {
-				updatedValues = currentValues.filter((v) => v !== value);
-			} else {
-				updatedValues = [...currentValues, value];
-			}
-
-			const optimisticFilters: Record<string, string[]> = {
+			const updatedFilters = {
 				...localSelectedFilters,
 				[filterKey]: updatedValues,
 			};
 
 			if (updatedValues.length === 0) {
-				delete optimisticFilters[filterKey];
+				delete updatedFilters[filterKey];
 			}
 
-			setLocalSelectedFilters(optimisticFilters);
+			setLocalSelectedFilters(updatedFilters);
 
-			const filterArray: FilterValues[] = Object.entries(optimisticFilters)
-				.filter(([key, values]) => key !== "category" && values.length > 0)
-				.map(([key, values]) => ({
-					key,
-					values,
-				}));
+			const filterArray: FilterValues[] = Object.entries(updatedFilters)
+				.filter(([_, values]) => values.length > 0)
+				.map(([key, values]) => ({ key, values }));
+
+			// 🔐 Include category manually if selected
+			if (selectedCategory) {
+				filterArray.unshift({
+					key: "category",
+					values: [selectedCategory],
+				});
+			}
 
 			await loadFilterParents({
 				categoryNumber,
@@ -178,11 +179,21 @@ export function Filter({
 				filters: filterArray,
 			});
 
-			await loadChildrenForFilter(filterKey, categoryNumber, filterArray);
-
+			await loadChildrenForFilter(filterKey, categoryNumber, [
+				...(selectedCategory
+					? [{ key: "category", values: [selectedCategory] }]
+					: []),
+				...filterArray,
+			]);
 			onFilterChange(filterArray);
 		},
-		[onFilterChange, localSelectedFilters, categoryNumber, query],
+		[
+			onFilterChange,
+			localSelectedFilters,
+			categoryNumber,
+			query,
+			selectedCategory,
+		],
 	);
 
 	const resetFilters = useCallback(() => {
@@ -203,7 +214,7 @@ export function Filter({
 			categoryNumberFromCategory || categoryNumber;
 		const effectiveSearchTerm = query || searchTerm;
 
-		setLoadingChildrenKeys((prev) => new Set(prev).add(attributeKey)); // Start loading
+		setLoadingChildrenKeys((prev) => new Set(prev).add(attributeKey));
 
 		try {
 			const result = await loadFilterChildren({
@@ -359,12 +370,22 @@ export function Filter({
 												loadChildrenForFilter(
 													filter.key,
 													filterCategory.categoryNumber,
-													Object.entries(selectedFilters)
-														.filter(
-															([key, values]) =>
-																key !== "category" && values.length > 0,
-														)
-														.map(([key, values]) => ({ key, values })),
+													[
+														...(selectedCategory
+															? [
+																	{
+																		key: "category",
+																		values: [selectedCategory],
+																	},
+																]
+															: []),
+														...Object.entries(selectedFilters)
+															.filter(
+																([key, values]) =>
+																	key !== "category" && values.length > 0,
+															)
+															.map(([key, values]) => ({ key, values })),
+													],
 												);
 											}}>
 											{filter.key}

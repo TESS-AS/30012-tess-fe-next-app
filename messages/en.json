@@ -77,9 +77,47 @@
 		"noSuggestions": "Ingen søkeforslag funnet",
 		"noProductsFound": "Ingen produkter funnet"
 	},
+
 	"Seo": {
 		"defaultTitle": "TESS - Teknisk Faghandel | Netthandel",
 		"defaultDescription": "Tess er din pålitelige leverandør av byggematerialer, sikkerhetsutstyr og industrielle produkter. Handle trygt og raskt på nett."
+	},
+	"CustomerSwitcher": {
+		"title": "Customer Information",
+		"selectCustomerLabel": "Customers",
+		"selectCustomerPlaceholder": "Select customer number",
+		"selectWarehouseLabel": "Warehouses",
+		"selectWarehousePlaceholder": "Select warehouse",
+		"noWarehousesAvailable": "No warehouses available",
+		"selectAssortmentLabel": "Assortments",
+		"selectAssortmentPlaceholder": "Select assortment",
+		"noAssortmentsAvailable": "No assortments available",
+		"selectCompanyLabel": "Company",
+		"selectCompanyPlaceholder": "Select company",
+		"noCompaniesAvailable": "No companies available",
+		"defaultCompanyFallback": "Default company ({companyNumber})",
+		"save": "Save",
+		"saving": "Saving..."
+	},
+	"CustomerWebPromo": {
+		"switcher": {
+			"news": "News",
+			"future": "Future Customer Web"
+		},
+		"customerWeb": {
+			"title": "The future customer web for THM – shaping the solution together",
+			"description": "We are now building the next-generation customer web for TESS Hose Management (THM). This is more than just an update – we are developing a modern platform that combines e-commerce with advanced decision support, giving you full insight and control over hoses and equipment.",
+			"feedbackPrompt": "Do you have wishes or suggestions?",
+			"feedbackSubtext": "Leave us feedback – your experience is important to us.",
+			"feedbackButton": "Give feedback"
+		},
+		"otherSection": {
+			"title": "Another section – sample text",
+			"description": "This view shows the content when the user selects the “Future Customer Web” option.",
+			"cta": "Read more"
+		},
+		"imageAlt": "THM customer web promo",
+		"imageCaption": "Sample image. Actual solution may vary."
 	},
 	"Footer": {
 		"companyName": "TESS AS",
