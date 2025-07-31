@@ -27,49 +27,34 @@ export function formatCustomerDimensionsToHierarchy(
 	});
 }
 
-export function formatUserDimensionsToHierarchy(
-	dimensions: UserDimensionItem[],
-): Array<{ label: string; value: string }> {
-	const uniqueValues = new Set<string>();
+export function extractUniqueDimensions(
+	dimensions: UserDimensionItem[]
+): {
+	dimension1Options: { label: string; value: string }[];
+	dimension2Options: { label: string; value: string }[];
+	dimension3Options: { label: string; value: string }[];
+} {
+	const dim1Map = new Map<string, string>();
+	const dim2Map = new Map<string, string>();
+	const dim3Map = new Map<string, string>();
 
-	const results = dimensions.flatMap((dim) => {
-		const results = [];
-		if (dim.dimension1?.label && !uniqueValues.has(dim.dimension1.label)) {
-			uniqueValues.add(dim.dimension1.label);
-			results.push({
-				label: dim.dimension1.label,
-				value: dim.dimension1.label,
-			});
-		}
+	for (const item of dimensions) {
+		const { dimension1, dimension2, dimension3 } = item.hierarchy;
 
-		if (dim.dimension1?.label && dim.dimension2?.label) {
-			const value = `${dim.dimension1.label}<${dim.dimension2.label}`;
-			if (!uniqueValues.has(value)) {
-				uniqueValues.add(value);
-				results.push({
-					label: value,
-					value: value,
-				});
-			}
-		}
+		if (dimension1?.name && dimension1?.label)
+			dim1Map.set(dimension1.name, dimension1.label);
+		if (dimension2?.name && dimension2?.label)
+			dim2Map.set(dimension2.name, dimension2.label);
+		if (dimension3?.name && dimension3?.label)
+			dim3Map.set(dimension3.name, dimension3.label);
+	}
 
-		if (
-			dim.dimension1?.label &&
-			dim.dimension2?.label &&
-			dim.dimension3?.label
-		) {
-			const value = `${dim.dimension1.label}<${dim.dimension2.label}<${dim.dimension3.label}`;
-			if (!uniqueValues.has(value)) {
-				uniqueValues.add(value);
-				results.push({
-					label: value,
-					value: value,
-				});
-			}
-		}
+	const toArray = (map: Map<string, string>) =>
+		Array.from(map.entries()).map(([value, label]) => ({ value, label }));
 
-		return results;
-	});
-
-	return results;
+	return {
+		dimension1Options: toArray(dim1Map),
+		dimension2Options: toArray(dim2Map),
+		dimension3Options: toArray(dim3Map),
+	};
 }

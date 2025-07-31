@@ -29,26 +29,27 @@ export type CustomerDimensionItem = {
 	d3_name: string | null;
 };
 
-export type UserDimensionItem = {
+export interface UserDimensionItem {
 	userId: number;
-	customerId: number;
 	customerNumber: string;
-	dimension1: {
-		ids: number[];
-		label: string;
-		mode: boolean;
+	hierarchy: {
+		dimension1?: {
+			label: string;
+			name: string;
+			mode: boolean;
+		};
+		dimension2?: {
+			label: string;
+			name: string;
+			mode: boolean;
+		};
+		dimension3?: {
+			label: string;
+			name: string;
+			mode: boolean;
+		};
 	};
-	dimension2: {
-		ids: number[];
-		label: string;
-		mode: boolean;
-	};
-	dimension3: {
-		ids: number[];
-		label: string;
-		mode: boolean;
-	};
-};
+}
 
 export interface SearchDimensionResponse {
 	dimensionId: number;

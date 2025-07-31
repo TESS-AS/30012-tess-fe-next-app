@@ -105,3 +105,29 @@ export async function getArchiveCart(
 		};
 	}
 }
+
+
+export async function updateWarehouseForCart({
+	warehouseNumber,
+	companyNumber,
+	cartLines,
+}: {
+	warehouseNumber: string;
+	companyNumber: string;
+	cartLines: number[];
+}): Promise<{ message: string }> {
+	try {
+		const url = `/cart/updateWarehouse`;
+		const response: AxiosResponse<{ message: string }> =
+			await axiosClient.put(url, {
+				warehouseNumber,
+				companyNumber,
+				cartLines,
+			});
+		return response.data;
+	} catch (error) {
+		console.error("Error updating warehouse", error);
+		return { message: "Error updating warehouse" };
+	}
+}
+	

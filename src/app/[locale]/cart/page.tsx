@@ -37,6 +37,8 @@ import { useLocale } from "next-intl";
 import { toast } from "react-toastify";
 
 import CartSkeleton from "./loading";
+import { useGetWarehouses } from "@/hooks/useGetWarehouse";
+import { updateWarehouseForCart } from "@/services/carts.service";
 
 const CartPage = () => {
 	const t = useTranslations();
@@ -54,6 +56,7 @@ const CartPage = () => {
 		isLoading,
 		updateQuantity,
 		updateWarehouse,
+		updateWarehouseForAllItems,
 		removeItem,
 		handleArchiveCart,
 		setIsAuthOpen,
@@ -81,6 +84,7 @@ const CartPage = () => {
 		},
 		handleArchiveCart,
 	);
+	const { warehouses } = useGetWarehouses(true);
 
 	const [warehouseBlance, setWarehouseBlance] = useState<WarehouseBatch[]>([]);
 	const [openModalId, setOpenModalId] = useState<string | null>(null);
@@ -183,7 +187,14 @@ const CartPage = () => {
 			</div>
 		);
 	}
-	console.log(warehouseBlance, "warehouseBlance");
+	
+	const handleWarehouseChange = async (warehouseNumber: string) => {
+		try {
+			await updateWarehouseForAllItems(warehouseNumber);
+		} catch (error) {
+			toast.error(t("Cart.warehouseUpdateError"));
+		}
+	};
 
 	return (
 		<main className="container min-h-screen py-10">
@@ -201,13 +212,16 @@ const CartPage = () => {
 							<p className="text-base font-normal">
 								{t("Cart.showStockStatus")}
 							</p>
-							<Select disabled>
+							<Select onValueChange={handleWarehouseChange}>
 								<SelectTrigger className="w-[40%]">
-									<SelectValue placeholder="Mitt lager: Kristiansand" />
+									<SelectValue placeholder={t("Product.selectWarehouse")} />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="warehouse1">Warehouse 1</SelectItem>
-									<SelectItem value="warehouse2">Warehouse 2</SelectItem>
+									{warehouses.map((warehouse) => (
+										<SelectItem key={warehouse.id} value={warehouse.id}>
+											{warehouse.name}
+										</SelectItem>
+									))}
 								</SelectContent>
 							</Select>
 						</div>
