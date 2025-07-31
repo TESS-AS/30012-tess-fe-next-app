@@ -120,19 +120,12 @@ export function Filter({
 	const selectedFilters = externalSelectedFilters;
 
 	React.useEffect(() => {
-		if (
-			!selectedFilters["category"] ||
-			selectedFilters["category"].length === 0
-		) {
-			setSelectedCategory(null);
-		}
-	}, [selectedFilters]);
-
-	React.useEffect(() => {
 		setLocalSelectedFilters(externalSelectedFilters);
 	}, [externalSelectedFilters]);
 
 	const handleCategorySelect = (cf: CategoryFilterItem) => {
+		setOpenAccordion(undefined);
+
 		if (selectedCategory === cf.assortmentNumber) {
 			setSelectedCategory(null);
 			handleCategoryChange?.("", "");
@@ -161,30 +154,23 @@ export function Filter({
 			setLocalSelectedFilters(updatedFilters);
 
 			const filterArray: FilterValues[] = Object.entries(updatedFilters)
-				.filter(([_, values]) => values.length > 0)
+				// ✅ Explicitly skip the 'category' key
+				.filter(([key, values]) => key !== "category" && values.length > 0)
 				.map(([key, values]) => ({ key, values }));
 
-			// 🔐 Include category manually if selected
-			if (selectedCategory) {
-				filterArray.unshift({
-					key: "category",
-					values: [selectedCategory],
-				});
-			}
-
 			await loadFilterParents({
-				categoryNumber,
+				categoryNumber: selectedCategory || categoryNumber,
 				searchTerm: query,
 				language: "no",
 				filters: filterArray,
 			});
 
-			await loadChildrenForFilter(filterKey, categoryNumber, [
-				...(selectedCategory
-					? [{ key: "category", values: [selectedCategory] }]
-					: []),
-				...filterArray,
-			]);
+			await loadChildrenForFilter(
+				filterKey,
+				selectedCategory || categoryNumber,
+				filterArray,
+			);
+
 			onFilterChange(filterArray);
 		},
 		[
@@ -369,23 +355,13 @@ export function Filter({
 												setOpenAccordion(filter.key);
 												loadChildrenForFilter(
 													filter.key,
-													filterCategory.categoryNumber,
-													[
-														...(selectedCategory
-															? [
-																	{
-																		key: "category",
-																		values: [selectedCategory],
-																	},
-																]
-															: []),
-														...Object.entries(selectedFilters)
-															.filter(
-																([key, values]) =>
-																	key !== "category" && values.length > 0,
-															)
-															.map(([key, values]) => ({ key, values })),
-													],
+													selectedCategory || categoryNumber,
+													Object.entries(selectedFilters)
+														.filter(
+															([key, values]) =>
+																key !== "category" && values.length > 0,
+														)
+														.map(([key, values]) => ({ key, values })),
 												);
 											}}>
 											{filter.key}
