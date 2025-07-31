@@ -1,9 +1,10 @@
 "use client";
 
 import { ReactNode } from "react";
-import { SessionProvider, useSession } from "next-auth/react";
+
 import { useSyncSSOToken } from "@/hooks/useSyncSSOToken";
-import { Loader2 } from "lucide-react";	
+import { Loader2 } from "lucide-react";
+import { SessionProvider, useSession } from "next-auth/react";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
 	return (

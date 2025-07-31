@@ -1,7 +1,8 @@
-import { useSession, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
+
 import axiosClient from "@/services/axiosClient";
 import { AxiosError } from "axios";
+import { useSession, signOut } from "next-auth/react";
 
 export function useSyncSSOToken() {
 	const { data: session, status } = useSession();

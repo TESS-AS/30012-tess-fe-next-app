@@ -27,9 +27,7 @@ export function formatCustomerDimensionsToHierarchy(
 	});
 }
 
-export function extractUniqueDimensions(
-	dimensions: UserDimensionItem[]
-): {
+export function extractUniqueDimensions(dimensions: UserDimensionItem[]): {
 	dimension1Options: { label: string; value: string }[];
 	dimension2Options: { label: string; value: string }[];
 	dimension3Options: { label: string; value: string }[];

@@ -17,6 +17,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { useCheckoutOrderData } from "@/hooks/useCheckoutOrderData";
+import { useGetWarehouses } from "@/hooks/useGetWarehouse";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { Link } from "@/i18n/navigation";
@@ -31,14 +32,11 @@ import { RawCategory } from "@/types/categories.types";
 import { ChevronRight, CircleAlert, CircleCheck, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { toast } from "react-toastify";
 
 import CartSkeleton from "./loading";
-import { useGetWarehouses } from "@/hooks/useGetWarehouse";
-import { updateWarehouseForCart } from "@/services/carts.service";
 
 const CartPage = () => {
 	const t = useTranslations();
@@ -187,7 +185,7 @@ const CartPage = () => {
 			</div>
 		);
 	}
-	
+
 	const handleWarehouseChange = async (warehouseNumber: string) => {
 		try {
 			await updateWarehouseForAllItems(warehouseNumber);
@@ -218,7 +216,9 @@ const CartPage = () => {
 								</SelectTrigger>
 								<SelectContent>
 									{warehouses.map((warehouse) => (
-										<SelectItem key={warehouse.id} value={warehouse.id}>
+										<SelectItem
+											key={warehouse.id}
+											value={warehouse.id}>
 											{warehouse.name}
 										</SelectItem>
 									))}

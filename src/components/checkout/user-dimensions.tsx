@@ -98,7 +98,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 			const dims = await getUserDimensions();
 			console.log(dims, "dims");
 			setUserDimensions(dims ?? []);
-	
+
 			const { dimension1Options, dimension2Options, dimension3Options } =
 				extractUniqueDimensions(dims ?? []);
 			setDimension1Options(dimension1Options);
@@ -180,7 +180,9 @@ export const UserDimensionsInput: React.FC<Props> = ({
 						</SelectTrigger>
 						<SelectContent>
 							{dimension1Options.map((opt) => (
-								<SelectItem key={opt.value} value={opt.value}>
+								<SelectItem
+									key={opt.value}
+									value={opt.value}>
 									{opt.label} - {opt.value}
 								</SelectItem>
 							))}
@@ -205,7 +207,9 @@ export const UserDimensionsInput: React.FC<Props> = ({
 						</SelectTrigger>
 						<SelectContent>
 							{dimension2Options.map((opt) => (
-								<SelectItem key={opt.value} value={opt.value}>
+								<SelectItem
+									key={opt.value}
+									value={opt.value}>
 									{opt.label} - {opt.value}
 								</SelectItem>
 							))}
@@ -230,7 +234,9 @@ export const UserDimensionsInput: React.FC<Props> = ({
 						</SelectTrigger>
 						<SelectContent>
 							{dimension3Options.map((opt) => (
-								<SelectItem key={opt.value} value={opt.value}>
+								<SelectItem
+									key={opt.value}
+									value={opt.value}>
 									{opt.label} - {opt.value}
 								</SelectItem>
 							))}
