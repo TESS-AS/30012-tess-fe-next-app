@@ -15,6 +15,7 @@ import {
 	updateCart,
 	removeFromCart,
 	archiveCart,
+	updateWarehouseForCart,
 } from "@/services/carts.service";
 import {
 	calculateItemPrice,
@@ -43,6 +44,7 @@ interface AppContextType {
 		itemNumber: string,
 		warehouseNumber: string,
 	) => Promise<void>;
+	updateWarehouseForAllItems: (warehouseNumber: string) => Promise<void>;
 	removeItem: (cartLine: number) => Promise<void>;
 	handleArchiveCart: () => Promise<void>;
 	currentStep: number;
@@ -218,8 +220,25 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			});
 			setIsCartChanging(!isCartChanging);
 		} catch (error) {
-			console.error("Error updating cart quantity:", error);
+			console.error("Error updating cart warehouse:", error);
 			throw error;
+		}
+	};
+
+	const updateWarehouseForAllItems = async (warehouseNumber: string) => {
+		try {
+			setIsLoading(true);
+			await updateWarehouseForCart({
+				warehouseNumber,
+				companyNumber: String(profile?.defaultCompanyNumber) || "",
+				cartLines: cartItems.map((item) => Number(item.cartLine)),
+			});
+			await loadCartData();
+		} catch (error) {
+			console.error("Error updating warehouse for all items:", error);
+			throw error;
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
@@ -255,6 +274,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				isLoading,
 				updateQuantity,
 				updateWarehouse,
+				updateWarehouseForAllItems,
 				removeItem,
 				handleArchiveCart,
 				currentStep,

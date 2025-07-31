@@ -1,10 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
-import { useClickOutside } from "@/hooks/useClickOutside";
 import { getUserDimensions } from "@/services/dimensions.service";
 import { UserDimensionItem } from "@/types/dimensions.types";
 import { Order } from "@/types/orders.types";
-import { formatUserDimensionsToHierarchy } from "@/utils/dimensionFormaters";
+import { extractUniqueDimensions } from "@/utils/dimensionFormaters";
 import { useTranslations } from "next-intl";
 
 import { DimensionSearchInput } from "./dimension-search-input";
@@ -39,6 +38,15 @@ export const UserDimensionsInput: React.FC<Props> = ({
 	const [userDimensionTwo, setUserDimensionTwo] = useState("");
 	const [userDimensionThree, setUserDimensionThree] = useState("");
 	const [activeDimension, setActiveDimension] = useState<number | null>(null);
+	const [dimension1Options, setDimension1Options] = useState<
+		{ label: string; value: string }[]
+	>([]);
+	const [dimension2Options, setDimension2Options] = useState<
+		{ label: string; value: string }[]
+	>([]);
+	const [dimension3Options, setDimension3Options] = useState<
+		{ label: string; value: string }[]
+	>([]);
 
 	useEffect(() => {
 		const prevMode = localStorage.getItem("prevDimensionMode");
@@ -90,6 +98,12 @@ export const UserDimensionsInput: React.FC<Props> = ({
 			const dims = await getUserDimensions();
 			console.log(dims, "dims");
 			setUserDimensions(dims ?? []);
+
+			const { dimension1Options, dimension2Options, dimension3Options } =
+				extractUniqueDimensions(dims ?? []);
+			setDimension1Options(dimension1Options);
+			setDimension2Options(dimension2Options);
+			setDimension3Options(dimension3Options);
 		};
 		loadDimensions();
 	}, []);
@@ -148,32 +162,84 @@ export const UserDimensionsInput: React.FC<Props> = ({
 
 			{dimensionInputMode === "select" && (
 				<>
-					<Label>{t("selectLabel")}</Label>
+					<Label>{dimension1Options?.[0]?.label || t("dimension1")}</Label>
 					<Select
-						value={userDimension}
+						value={userDimensionOne}
 						onValueChange={(value) => {
-							const parts = value.split("<");
-							const paddedParts = [
-								parts[0] || "",
-								parts[1] || "",
-								parts[2] || "",
-							];
-							setUserDimension(value);
-							updateOrderData(paddedParts);
+							setUserDimensionOne(value);
+							setOrderData((prev) => ({
+								...prev,
+								salesOrderHeader: {
+									...prev.salesOrderHeader,
+									customersOrderReference: value,
+								},
+							}));
 						}}>
 						<SelectTrigger>
 							<SelectValue placeholder={t("selectPlaceholder")} />
 						</SelectTrigger>
 						<SelectContent>
-							{formatUserDimensionsToHierarchy(userDimensions).map(
-								(dim, index) => (
-									<SelectItem
-										key={`${dim.value}-${index}`}
-										value={dim.value}>
-										{dim.label}
-									</SelectItem>
-								),
-							)}
+							{dimension1Options.map((opt) => (
+								<SelectItem
+									key={opt.value}
+									value={opt.value}>
+									{opt.label} - {opt.value}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+
+					<Label>{dimension2Options?.[0]?.label || t("dimension2")}</Label>
+					<Select
+						value={userDimensionTwo}
+						onValueChange={(value) => {
+							setUserDimensionTwo(value);
+							setOrderData((prev) => ({
+								...prev,
+								salesOrderHeader: {
+									...prev.salesOrderHeader,
+									customerReference: value,
+								},
+							}));
+						}}>
+						<SelectTrigger>
+							<SelectValue placeholder={t("selectPlaceholder")} />
+						</SelectTrigger>
+						<SelectContent>
+							{dimension2Options.map((opt) => (
+								<SelectItem
+									key={opt.value}
+									value={opt.value}>
+									{opt.label} - {opt.value}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+
+					<Label>{dimension3Options?.[0]?.label || t("dimension3")}</Label>
+					<Select
+						value={userDimensionThree}
+						onValueChange={(value) => {
+							setUserDimensionThree(value);
+							setOrderData((prev) => ({
+								...prev,
+								salesOrderLines: prev.salesOrderLines.map((line) => ({
+									...line,
+									accountPart3: value,
+								})),
+							}));
+						}}>
+						<SelectTrigger>
+							<SelectValue placeholder={t("selectPlaceholder")} />
+						</SelectTrigger>
+						<SelectContent>
+							{dimension3Options.map((opt) => (
+								<SelectItem
+									key={opt.value}
+									value={opt.value}>
+									{opt.label} - {opt.value}
+								</SelectItem>
+							))}
 						</SelectContent>
 					</Select>
 				</>
