@@ -154,7 +154,6 @@ export function Filter({
 			setLocalSelectedFilters(updatedFilters);
 
 			const filterArray: FilterValues[] = Object.entries(updatedFilters)
-				// ✅ Explicitly skip the 'category' key
 				.filter(([key, values]) => key !== "category" && values.length > 0)
 				.map(([key, values]) => ({ key, values }));
 
