@@ -7,18 +7,24 @@ export interface OrderSummaryPrices {
 	deliverySurcharge: number;
 	vat: number;
 	totalIncVat: number;
+	orderSummaryTotalPriceFromAppContext: number;
 }
 
 export const useOrderSummary = (): OrderSummaryPrices => {
-	const { totalPrice, surChargeTotalPrice, rabatterTotalPrice } =
-		useAppContext();
+	const {
+		totalPrice,
+		surChargeTotalPrice,
+		rabatterTotalPrice,
+		orderSummaryTotalPriceFinal,
+	} = useAppContext();
 
-	const originalPrice = totalPrice; // basePriceTotal
-	const discounts = -rabatterTotalPrice; // -flatDiscount
-	const sumAfterDiscount = totalPrice - rabatterTotalPrice; // bestPrice - flatDiscount
-	const deliverySurcharge = surChargeTotalPrice; // surcharge
-	const vat = (totalPrice - rabatterTotalPrice) * 0.25; // (Sum etter rabatt)*0,25
-	const totalIncVat = totalPrice - rabatterTotalPrice + ((totalPrice - rabatterTotalPrice) * 0.25) + surChargeTotalPrice; // bestPrice+MVA(25%)+Surcharge
+	const originalPrice = totalPrice;
+	const discounts = rabatterTotalPrice;
+	const sumAfterDiscount = totalPrice;
+	const deliverySurcharge = surChargeTotalPrice;
+	const vat = totalPrice + surChargeTotalPrice - rabatterTotalPrice;
+	const totalIncVat = totalPrice + surChargeTotalPrice - rabatterTotalPrice;
+	const orderSummaryTotalPriceFromAppContext = orderSummaryTotalPriceFinal;
 
 	return {
 		originalPrice,
@@ -27,5 +33,6 @@ export const useOrderSummary = (): OrderSummaryPrices => {
 		deliverySurcharge,
 		vat,
 		totalIncVat,
+		orderSummaryTotalPriceFromAppContext,
 	};
 };
