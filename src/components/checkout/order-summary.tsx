@@ -79,7 +79,7 @@ export default function OrderSummary({
 							Total inkl. mva.
 						</span>
 						<PriceDisplay
-							amount={totalIncVat + originalPrice + deliverySurcharge}
+							amount={totalIncVat}
 							className="text-base font-bold text-[#0F1912]"
 						/>
 					</div>
