@@ -30,28 +30,27 @@ export default function OrderSummary({
 				<div className="mt-4 space-y-2 text-sm">
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">
-							{t("OrderSummary.originalPrice")}
+							Opprinnelig pris
 						</span>
 						<PriceDisplay amount={prices.originalPrice} />
 					</div>
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">
-							{t("OrderSummary.discounts")}
+							Rabatter
 						</span>
 						<PriceDisplay
 							amount={prices.discounts}
-							isPositive
 						/>
 					</div>
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">
-							{t("OrderSummary.sumAfterDiscount")}
+							Sum etter rabatt (eks. mva.)
 						</span>
-						<PriceDisplay amount={prices.originalPrice} />
+						<PriceDisplay amount={prices.sumAfterDiscount} />
 					</div>
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">
-							{t("OrderSummary.deliverySurcharge")}
+							Tilleggsavgift
 						</span>
 						<PriceDisplay
 							amount={prices.deliverySurcharge}
@@ -59,13 +58,13 @@ export default function OrderSummary({
 						/>
 					</div>
 					<div className="flex justify-between">
-						<span className="text-[#5A615D]">{t("OrderSummary.vat")}</span>
+						<span className="text-[#5A615D]">MVA(25%)</span>
 						<PriceDisplay amount={prices.vat} />
 					</div>
 					<Separator className="h-[1px] flex-1 bg-[#5A615D]" />
 					<div className="flex justify-between">
 						<span className="text-base font-bold text-[#0F1912]">
-							{t("OrderSummary.totalIncVat")}
+							Total inkl. mva.
 						</span>
 						<PriceDisplay
 							amount={prices.totalIncVat}

@@ -86,7 +86,7 @@ export default function ProductVariantTable({
 			priceData.map((item: PriceResponse) => {
 				setPrices((prev) => ({
 					...prev,
-					[item.itemNumber]: item.basePrice || 0,
+					[item.itemNumber]: item.bestPrice || 0,
 				}));
 			});
 		};
