@@ -248,6 +248,15 @@ export function useProductFilter({
 		[handleFilterChange, selectedFilters],
 	);
 
+	useEffect(() => {
+		if (!query) return;
+
+		setCategoryNumber("");
+		setSelectedFilters({});
+		setCurrentFilters(null);
+		setCurrentPage(1);
+	}, [query]);
+
 	return {
 		products,
 		isLoading,
