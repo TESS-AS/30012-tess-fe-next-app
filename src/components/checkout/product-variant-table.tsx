@@ -69,6 +69,7 @@ export default function ProductVariantTable({
 	const [quantities, setQuantities] = useState<Record<number, number>>({});
 	const [loading, setLoading] = useState<Record<number, boolean>>({});
 	const [warehouse, setWarehouse] = useState<Record<number, string>>({});
+	const { calculatedPrices } = useAppContext();
 	const [isLoading, setIsLoading] = useState(true);
 	const [variantsWithWarehouses, setVariantsWithWarehouses] = useState<
 		ProductVariant[]
@@ -86,7 +87,7 @@ export default function ProductVariantTable({
 			priceData.map((item: PriceResponse) => {
 				setPrices((prev) => ({
 					...prev,
-					[item.itemNumber]: item.basePrice || 0,
+					[item.itemNumber]: item.bestPrice,
 				}));
 			});
 		};
@@ -244,7 +245,8 @@ export default function ProductVariantTable({
 								<TableCell>{variant.unspsc || "-"}</TableCell>
 								<TableCell>{variant.contentUnit}</TableCell>
 								<TableCell>
-									{prices[variant.itemNumber]?.toFixed(2) || "0.00"},- kr
+									{calculatedPrices[variant.itemNumber]?.toFixed(2) || "0.00"},-
+									kr
 								</TableCell>
 								<TableCell>
 									<QuantityButtons

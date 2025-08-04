@@ -91,11 +91,9 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		null,
 	);
 
-	console.log(updatedAddress, "updatedAddress");
 	const loadCartData = async () => {
 		try {
 			const cart = await getCart();
-			console.log(cart, "Cart");
 			if (!cart) {
 				return;
 			}
@@ -131,7 +129,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					profile?.defaultCustomerNumber,
 					profile?.defaultCompanyNumber,
 				);
-				console.log(priceResults, "priceResults");
 
 				const newPrices = priceResults.reduce(
 					(acc: Record<string, number>, item: PriceResponse) => ({
@@ -169,12 +166,10 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	};
 
 	useEffect(() => {
-		console.log(profile, "profile");
 		if (profile) {
 			loadCartData();
 		}
 	}, [profile, isCartChanging]);
-	console.log(calculatedPrices, "prices");
 
 	const totalPrice = useMemo(() => {
 		return Object.values(calculatedPrices).reduce((sum, val) => sum + val, 0);
@@ -187,9 +182,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const rabatterTotalPrice = useMemo(() => {
 		return Object.values(rabatterPrices).reduce((sum, val) => sum + val, 0);
 	}, [rabatterPrices]);
-
-	console.log(surChargeTotalPrice, "surChargeTotalPrice");
-	console.log(rabatterTotalPrice, "rabatterTotalPrice");
 
 	const updateQuantity = async (
 		cartLine: number,

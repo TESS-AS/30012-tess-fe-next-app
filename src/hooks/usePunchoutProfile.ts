@@ -12,7 +12,6 @@ export function usePunchoutProfile() {
 		const fetchUserData = async () => {
 			try {
 				const response = await axiosClient.get<ProfileUser[]>("/user");
-				console.log(response.data[0], "res");
 				setData(response.data[0]);
 			} catch (err) {
 				setError(err);

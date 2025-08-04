@@ -162,8 +162,6 @@ export function useProductFilter({
 					searchTerm: query,
 				});
 
-				console.log("Raw result from loadFilterParents:", result);
-
 				if (!Array.isArray(result))
 					throw new Error("Expected result to be array");
 
