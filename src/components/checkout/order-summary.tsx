@@ -21,7 +21,29 @@ export default function OrderSummary({
 	const t = useTranslations();
 	const { data: profile } = usePunchoutProfile();
 	const { cartItems, isLoading } = useAppContext();
-	const prices = useOrderSummary();
+	const isCartEmpty = !cartItems || cartItems.length === 0 || isLoading;
+
+	const summary = useOrderSummary();
+
+	const {
+		originalPrice,
+		discounts,
+		sumAfterDiscount,
+		deliverySurcharge,
+		vat,
+		totalIncVat,
+		orderSummaryTotalPriceFromAppContext,
+	} = isCartEmpty
+		? {
+				originalPrice: 0,
+				discounts: 0,
+				sumAfterDiscount: 0,
+				deliverySurcharge: 0,
+				vat: 0,
+				totalIncVat: 0,
+				orderSummaryTotalPriceFromAppContext: 0,
+			}
+		: summary;
 
 	return (
 		<div className="space-y-6">
@@ -29,54 +51,44 @@ export default function OrderSummary({
 				<h2 className="text-xl font-semibold">{t("OrderSummary.title")}</h2>
 				<div className="mt-4 space-y-2 text-sm">
 					<div className="flex justify-between">
-						<span className="text-[#5A615D]">
-							{t("OrderSummary.originalPrice")}
-						</span>
-						<PriceDisplay amount={prices.originalPrice} />
+						<span className="text-[#5A615D]">Opprinnelig pris</span>
+						<PriceDisplay amount={orderSummaryTotalPriceFromAppContext} />
 					</div>
 					<div className="flex justify-between">
-						<span className="text-[#5A615D]">
-							{t("OrderSummary.discounts")}
-						</span>
+						<span className="text-[#5A615D]">Rabatter</span>
+						<PriceDisplay amount={discounts} />
+					</div>
+					<div className="flex justify-between">
+						<span className="text-[#5A615D]">Sum etter rabatt (eks. mva.)</span>
+						<PriceDisplay amount={sumAfterDiscount} />
+					</div>
+					<div className="flex justify-between">
+						<span className="text-[#5A615D]">Tilleggsavgift</span>
 						<PriceDisplay
-							amount={prices.discounts}
+							amount={deliverySurcharge}
 							isPositive
 						/>
 					</div>
 					<div className="flex justify-between">
-						<span className="text-[#5A615D]">
-							{t("OrderSummary.sumAfterDiscount")}
-						</span>
-						<PriceDisplay amount={prices.originalPrice} />
-					</div>
-					<div className="flex justify-between">
-						<span className="text-[#5A615D]">
-							{t("OrderSummary.deliverySurcharge")}
-						</span>
-						<PriceDisplay
-							amount={prices.deliverySurcharge}
-							isPositive
-						/>
-					</div>
-					<div className="flex justify-between">
-						<span className="text-[#5A615D]">{t("OrderSummary.vat")}</span>
-						<PriceDisplay amount={prices.vat} />
+						<span className="text-[#5A615D]">MVA(25%)</span>
+						<PriceDisplay amount={vat} />
 					</div>
 					<Separator className="h-[1px] flex-1 bg-[#5A615D]" />
 					<div className="flex justify-between">
 						<span className="text-base font-bold text-[#0F1912]">
-							{t("OrderSummary.totalIncVat")}
+							Total inkl. mva.
 						</span>
 						<PriceDisplay
-							amount={prices.totalIncVat}
+							amount={totalIncVat + originalPrice + deliverySurcharge}
 							className="text-base font-bold text-[#0F1912]"
 						/>
 					</div>
 				</div>
+
 				{!profile?.punchout ? (
 					<Button
 						className="mt-6 w-full"
-						disabled={cartItems?.length === 0 || isLoading || isCheckoutLoading}
+						disabled={isCartEmpty || isCheckoutLoading}
 						onClick={handleCheckout}>
 						{isCheckoutLoading || isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
@@ -88,7 +100,7 @@ export default function OrderSummary({
 					<Button
 						variant="outlineGreen"
 						className="mt-6 w-full text-[#009640]"
-						disabled={cartItems?.length === 0 || isLoading || isCheckoutLoading}
+						disabled={isCartEmpty || isCheckoutLoading}
 						onClick={handleCheckout}>
 						{isCheckoutLoading || isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
@@ -97,10 +109,11 @@ export default function OrderSummary({
 						)}
 					</Button>
 				)}
+
 				<Button
 					variant="link"
 					className="mt-2 w-full hover:no-underline"
-					disabled={cartItems?.length === 0 || isLoading || isCheckoutLoading}
+					disabled={isCartEmpty || isCheckoutLoading}
 					onClick={handleCheckout}>
 					<>
 						{isCheckoutLoading || isLoading ? (
@@ -110,7 +123,7 @@ export default function OrderSummary({
 						)}
 						<span className="text-[#009640] underline">
 							{t("OrderSummary.continueShopping")}
-						</span>{" "}
+						</span>
 						<ArrowRight className="h-4 w-4 font-bold text-[#009640]" />
 					</>
 				</Button>

@@ -109,7 +109,7 @@ const CartHistoryPage = () => {
 							{archiveData?.data.map((item, idx) => {
 								const total = item.cart.reduce((acc, cartItem) => {
 									const productPrices = prices[cartItem.productNumber] || [];
-									const price = productPrices[0]?.basePriceTotal || 0;
+									const price = productPrices[0]?.bestPrice || 0;
 									return acc + price * cartItem.quantity;
 								}, 0);
 
