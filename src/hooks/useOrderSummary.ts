@@ -23,7 +23,7 @@ export const useOrderSummary = (): OrderSummaryPrices => {
 	const sumAfterDiscount = totalPrice;
 	const deliverySurcharge = surChargeTotalPrice;
 	const vat = sumAfterDiscount*0.25;
-	const totalIncVat = totalPrice + surChargeTotalPrice + vat - rabatterTotalPrice;
+	const totalIncVat = (orderSummaryTotalPriceFinal-discounts)+vat+deliverySurcharge;
 	const orderSummaryTotalPriceFromAppContext = orderSummaryTotalPriceFinal;
 
 	return {
