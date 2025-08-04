@@ -16,12 +16,10 @@ export function useSyncSSOToken() {
 				session?.idToken
 			) {
 				try {
-					console.log("Syncing SSO tokens...");
 					await axiosClient.post("/login/cookie", {
 						idToken: session.idToken,
 						accessToken: session.accessToken,
 					});
-					console.log("Fetching user...");
 					await axiosClient.get("/user");
 					setIsReady(true);
 				} catch (err) {

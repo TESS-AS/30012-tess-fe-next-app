@@ -162,8 +162,6 @@ export function useProductFilter({
 					searchTerm: query,
 				});
 
-				console.log("Raw result from loadFilterParents:", result);
-
 				if (!Array.isArray(result))
 					throw new Error("Expected result to be array");
 
@@ -247,6 +245,15 @@ export function useProductFilter({
 		},
 		[handleFilterChange, selectedFilters],
 	);
+
+	useEffect(() => {
+		if (!query) return;
+
+		setCategoryNumber("");
+		setSelectedFilters({});
+		setCurrentFilters(null);
+		setCurrentPage(1);
+	}, [query]);
 
 	return {
 		products,

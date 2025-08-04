@@ -74,8 +74,6 @@ export default function CustomerNumberSwitcher({
 		}
 	}, [customers, assortments, profile, companies]);
 
-	console.log(profile.defaultCompanyNumber);
-
 	const handleSave = async () => {
 		setIsSaving(true);
 		try {

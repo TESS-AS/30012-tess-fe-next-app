@@ -222,7 +222,6 @@ export default function CheckoutPage() {
 							open={showFeedbackModal}
 							onClose={() => setShowFeedbackModal(false)}
 							onSubmit={(rating, comment) => {
-								console.log("Feedback:", { rating, comment });
 								setShowFeedbackModal(false);
 								submitFeedback(
 									"Checkout",

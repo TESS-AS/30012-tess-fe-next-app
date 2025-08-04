@@ -123,6 +123,14 @@ export function Filter({
 		setLocalSelectedFilters(externalSelectedFilters);
 	}, [externalSelectedFilters]);
 
+	React.useEffect(() => {
+		// Reset filters when query changes
+		setLocalSelectedFilters({});
+		setSelectedCategory(null);
+		setOpenAccordion(undefined);
+		setLoadedChildren({});
+	}, [query]);
+
 	const handleCategorySelect = (cf: CategoryFilterItem) => {
 		setOpenAccordion(undefined);
 

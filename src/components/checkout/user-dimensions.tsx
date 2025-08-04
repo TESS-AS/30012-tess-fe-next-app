@@ -96,7 +96,6 @@ export const UserDimensionsInput: React.FC<Props> = ({
 	useEffect(() => {
 		const loadDimensions = async () => {
 			const dims = await getUserDimensions();
-			console.log(dims, "dims");
 			setUserDimensions(dims ?? []);
 
 			const { dimension1Options, dimension2Options, dimension3Options } =
@@ -251,13 +250,11 @@ export const UserDimensionsInput: React.FC<Props> = ({
 						level={1}
 						value={userDimensionOne}
 						onChange={(value) => {
-							console.log(value, "dimensioni value");
 							setUserDimensionOne(value);
 							setActiveDimension(value ? 1 : null);
 						}}
 						placeholder={t("dimension1")}
 						onSelect={(dim) => {
-							console.log(dim, "dimensioni");
 							setUserDimensionOne(dim.dimensionName);
 							setActiveDimension(null);
 							setOrderData((prev) => ({
@@ -325,7 +322,6 @@ export const UserDimensionsInput: React.FC<Props> = ({
 						value={userDimensionOne}
 						onChange={(e) => {
 							setUserDimensionOne(e.target.value);
-							console.log(e.target.value, "target");
 							setOrderData((prev) => ({
 								...prev,
 								salesOrderHeader: {
