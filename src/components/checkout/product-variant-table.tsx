@@ -23,7 +23,7 @@ import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
 import { addToCart, getCart } from "@/services/carts.service";
 import {
-	getProductPrice,
+	calculateItemPrice,
 	loadItemBalanceBatch,
 } from "@/services/product.service";
 import { PriceResponse } from "@/types/search.types";
@@ -79,21 +79,33 @@ export default function ProductVariantTable({
 
 	useEffect(() => {
 		const loadPrices = async () => {
-			const priceData = await getProductPrice(
+			if (!variants?.length) return;
+
+			const priceRequests = variants.map((variant) => ({
+				itemNumber: variant.itemNumber.toString(),
+				quantity: 1,
+				warehouseNumber: profile?.defaultWarehouseNumber || "",
+			}));
+
+			const priceResults = await calculateItemPrice(
+				priceRequests,
 				profile?.defaultCustomerNumber,
 				profile?.defaultCompanyNumber,
-				productNumber,
 			);
-			priceData.map((item: PriceResponse) => {
+
+			priceResults.forEach((item: PriceResponse) => {
+				console.log(item,"item")
+			});
+
+			priceResults.forEach((item: PriceResponse) => {
 				setPrices((prev) => ({
 					...prev,
-					[item.itemNumber]: item.bestPrice,
 					[item.itemNumber]: item.bestPrice || 0,
 				}));
 			});
 		};
 		loadPrices();
-	}, []);
+	}, [variants, profile]);
 
 	useEffect(() => {
 		const loadWarehousesData = async () => {
@@ -246,7 +258,7 @@ export default function ProductVariantTable({
 								<TableCell>{variant.unspsc || "-"}</TableCell>
 								<TableCell>{variant.contentUnit}</TableCell>
 								<TableCell>
-									{calculatedPrices[variant.itemNumber]?.toFixed(2) || "0.00"},-
+									{prices[variant.itemNumber]?.toFixed(2) || "0.00"},-
 									kr
 								</TableCell>
 								<TableCell>
