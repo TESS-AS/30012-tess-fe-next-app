@@ -3,34 +3,107 @@
 import OrdersTab from "@/app/[locale]/profile/(components)/tabs/OrdersTab/OrdersTab";
 import PersonalInfoTab from "@/app/[locale]/profile/(components)/tabs/PersonalInfoTab";
 import UserAddressesTab from "@/app/[locale]/profile/(components)/tabs/UserAdresses/UserAddressesTab";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { SidebarNav } from "./(components)/sidebar-nav";
+import { ShoppingCart, ArrowRight, Folder, User, Settings, LogOut, ClipboardList, FileText } from "lucide-react";
 import { profileTabs } from "@/constants/profileTabs";
+import { useState } from "react";
 
 export default function ProfilePage() {
+  const [activeMode, setActiveMode] = useState<"hose" | "ehandel">("ehandel");
+
 	return (
-		<main className="mt-6 min-h-screen bg-white">
+		<main className="mt-6 min-h-screen ">
 			<div className="mx-auto flex gap-6">
 				<Tabs
 					defaultValue="personal-info"
 					className="flex w-full gap-5">
-					<TabsList className="flex h-fit w-1/4 flex-col gap-2 rounded-md border bg-white p-4">
-						<>
-							{profileTabs.map(({ value, label, icon: Icon }) => (
-								<TabsTrigger
-									key={value}
-									value={value}
-									className="mt-2 w-full justify-start gap-2 hover:text-green-600 data-[state=active]:text-green-600">
-									<Icon className="h-4 w-4" />
-									{label}
-								</TabsTrigger>
-							))}
-						</>
-					</TabsList>
+					<div className="h-full">
+						<SidebarNav 
+						activeMode={activeMode}
+						onModeChange={setActiveMode}
+						items={activeMode === "ehandel" 
+							? [
+								{
+									href: "/orders",
+									label: "Ordre",
+									icon: ShoppingCart,
+									subitems: [
+										{
+											href: "/my-orders",
+											label: "Mine bestillinger"
+										},
+										{
+											href: "/order-history",
+											label: "Ordrehistorikk"
+										}
+									]
+								},
+								{
+									href: "/dimensions",
+									label: "Dimensjoner",
+									icon: Folder
+								},
+								{
+									href: "/usage",
+									label: "Forbruk",
+									icon: User
+								},
+								{
+									href: "/users",
+									label: "Brukere",
+									icon: User
+								},
+								{
+									href: "/catalog",
+									label: "Katalog",
+									icon: User
+								},
+								{
+									href: "/settings",
+									label: "Innstillinger",
+									icon: Settings
+								},
+								{
+									href: "/settings-alt",
+									label: "Innstillinger",
+									icon: Settings
+								},
+								{
+									href: "/logout",
+									label: "Log out",
+									icon: LogOut,
+									variant: "logout"
+								}
+							] : [
+								{
+									href: "/hose/orders",
+									label: "Orders",
+									icon: ClipboardList
+								},
+								{
+									href: "/hose/reports",
+									label: "Reports",
+									icon: FileText
+								},
+								{
+									href: "/hose/settings",
+									label: "Settings",
+									icon: Settings
+								},
+								{
+									href: "/logout",
+									label: "Log out",
+									icon: LogOut,
+									variant: "logout"
+								}
+							]} />
+					</div>
 
 					<div className="w-3/4">
 						<TabsContent
 							value="personal-info"
-							className="mt-0">
+							className="mt-0 bg-white">
 							<PersonalInfoTab />
 						</TabsContent>
 
