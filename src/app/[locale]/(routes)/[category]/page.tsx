@@ -1,109 +1,105 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+
 import CategoryContent from "@/components/category/category-content";
-import { FilterCategory } from "@/components/ui/filter";
-import { fetchCategories } from "@/lib/category-utils";
-import { getSeoMetadata } from "@/lib/seo";
+import type { FilterCategory } from "@/components/ui/filter";
+import { useCategories } from "@/lib/CategoriesProvider";
 import { formatUrlToDisplayName } from "@/lib/utils";
 import { loadFilterParents } from "@/services/categories.service";
-import { getLocale } from "next-intl/server";
-import { getTranslations } from "next-intl/server";
+import type { Category } from "@/types/categories.types";
+import { useLocale } from "next-intl";
 
-export async function generateMetadata({
-	params,
-}: {
-	params: Promise<{ category: string; locale: string }>;
-}) {
-	const { category, locale } = await params;
-	const t = await getTranslations({ locale, namespace: "Category" });
+export default function CategoryPage({ params, searchParams }: any) {
+	const { category } = params;
+	const { query } = searchParams;
+	const locale = useLocale();
 
-	return await getSeoMetadata({
-		title: category,
-		description: t("viewAll"),
-		path: `/category/${category}`,
-		locale,
-	});
-}
+	const { categories } = useCategories();
 
-interface CategoryPageProps {
-	params: Promise<{
-		category: string;
-	}>;
-	searchParams: Promise<{
-		query?: string;
-	}>;
-}
+	const [filters, setFilters] = useState<FilterCategory[]>([]);
+	const [categoryFilters, setCategoryFilters] = useState<any[]>([]);
+	const [categoryData, setCategoryData] = useState<Category | null>(null);
 
-export default async function CategoryPage({
-	params,
-	searchParams,
-}: CategoryPageProps) {
-	try {
-		const { category } = await params;
-		const { query } = await searchParams;
-		const locale = await getLocale();
-		const formattedCategory = formatUrlToDisplayName(category);
+	const formattedCategory = useMemo(
+		() => formatUrlToDisplayName(category),
+		[category],
+	);
 
-		const categories = await fetchCategories(locale);
-		const categoryData = categories.find(
+	useEffect(() => {
+		if (!categories) return;
+
+		const matchedCategory = categories.find(
 			(cat) => formatUrlToDisplayName(cat.slug) === formattedCategory,
 		);
-		const categoryNumber = categoryData?.groupId || null;
 
-		const filtersResponse = await loadFilterParents({
+		setCategoryData(matchedCategory || null);
+
+		const categoryNumber = matchedCategory?.groupId || null;
+
+		loadFilterParents({
 			categoryNumber,
 			searchTerm: query || null,
 			language: locale,
-		});
+		})
+			.then((filtersResponse) => {
+				const categoryFilters =
+					Array.isArray(filtersResponse) &&
+					"categoryFilters" in filtersResponse[0]
+						? filtersResponse[0].categoryFilters
+						: [];
+				setCategoryFilters(categoryFilters);
 
-		const categoryFilters =
-			Array.isArray(filtersResponse) && "categoryFilters" in filtersResponse[0]
-				? filtersResponse[0].categoryFilters
-				: [];
+				const mappedFilters: any[] = filtersResponse.map((item: any) => {
+					if ("categoryFilters" in item && "filter" in item) {
+						return {
+							category: item.category,
+							filters: (
+								item.filter as { key: string; productCount: number }[]
+							).map((f) => ({
+								key: f.key,
+								values: [
+									{
+										value: f.key,
+										productcount: f.productCount,
+									},
+								],
+							})),
+						};
+					} else {
+						return {
+							category: item.category,
+							categoryNumber: item.categoryNumber,
+							filters: (
+								item.filters as { key: string; productCount: number }[]
+							).map((f) => ({
+								key: f.key,
+								values: [
+									{
+										value: f.key,
+										productcount: f.productCount,
+									},
+								],
+							})),
+						};
+					}
+				});
 
-		const filters: any[] = filtersResponse.map((item: any) => {
-			if ("categoryFilters" in item && "filter" in item) {
-				return {
-					category: item.category,
-					filters: (item.filter as { key: string; productCount: number }[]).map(
-						(f) => ({
-							key: f.key,
-							values: [
-								{
-									value: f.key,
-									productcount: f.productCount,
-								},
-							],
-						}),
-					),
-				};
-			} else {
-				return {
-					category: item.category,
-					categoryNumber: item.categoryNumber,
-					filters: (
-						item.filters as { key: string; productCount: number }[]
-					).map((f) => ({
-						key: f.key,
-						values: [
-							{
-								value: f.key,
-								productcount: f.productCount,
-							},
-						],
-					})),
-				};
-			}
-		});
+				setFilters(mappedFilters);
+			})
+			.catch((error) => {
+				console.error("Error loading filters:", error);
+				setCategoryFilters([]);
+				setFilters([]);
+			});
+	}, [categories, formattedCategory, query, locale]);
 
-		return (
-			<CategoryContent
-				categoryData={categoryData}
-				categoryFilters={categoryFilters}
-				filters={filters}
-				query={query}
-			/>
-		);
-	} catch (error) {
-		console.error("Error in CategoryPage:", error);
-		throw error;
-	}
+	return (
+		<CategoryContent
+			categoryData={categoryData as Category}
+			categoryFilters={categoryFilters}
+			filters={filters}
+			query={query}
+		/>
+	);
 }
