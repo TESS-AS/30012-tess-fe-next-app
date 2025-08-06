@@ -3,7 +3,13 @@
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, MoreVertical, Eye, ShoppingCart, Truck, CircleX } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Column<T> {
   key: string;
@@ -66,7 +72,34 @@ export function DataTable<T>({
                   </td>
                 ))}
                 <td className="py-4 px-4 text-right">
-                  <button className="text-gray-400 hover:text-gray-600">•••</button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="h-8 w-8 p-0 text-[#5A615D] hover:text-[#0F1912]"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-[200px]">
+                      <DropdownMenuItem className="flex items-center gap-3 text-xs">
+                        <Eye className="h-4 w-4" />
+                        <span>Vis ordre</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="flex items-center gap-3 text-xs">
+                        <ShoppingCart className="h-4 w-4" />
+                        <span>Legg til varer i ny handlekurv</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="flex items-center gap-3 text-xs">
+                        <Truck className="h-4 w-4" />
+                        <span>Spor bestillingen</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="flex items-center gap-3 text-xs">
+                        <CircleX className="h-4 w-4" />
+                        <span>Kanseller bestilling</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </td>
               </tr>
             ))}
