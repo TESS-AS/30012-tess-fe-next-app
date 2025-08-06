@@ -2,27 +2,42 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { LucideIcon, ArrowRight, ChevronRight, ChevronLeft, ClipboardList, ShoppingCart } from "lucide-react";
+import { LucideIcon, ArrowRight, ChevronRight, ChevronLeft } from "lucide-react";
+import Image from "next/image";
+import CartSvg from "../../../../../public/icons/profile/cart.svg";
+import ClipboardSvg from "../../../../../public/icons/profile/clipboard-check.svg";
 
-interface SidebarNavProps {
-  items: {
-    href: string;
-    label: string;
-    icon: LucideIcon;
-    variant?: "default" | "logout";
-    subitems?: {
-      href: string;
-      label: string;
-    }[];
-  }[];
-  activeMode: "hose" | "ehandel";
-  onModeChange: (mode: "hose" | "ehandel") => void;
+interface SubItem {
+  href: string;
+  label: string;
 }
 
-export function SidebarNav({ items, activeMode, onModeChange }: SidebarNavProps) {
+interface SidebarNavItem {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  variant?: "default" | "logout";
+  subitems?: SubItem[];
+}
+
+interface SidebarNavProps {
+  items: SidebarNavItem[];
+  activeMode: "hose" | "ehandel";
+  onModeChange: (mode: "hose" | "ehandel") => void;
+  onTabChange?: (tab: string) => void;
+  onCollapse?: (isCollapsed: boolean) => void;
+}
+
+export function SidebarNav({ items, activeMode, onModeChange, onTabChange, onCollapse }: SidebarNavProps) {
   const pathname = usePathname();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const toggleCollapse = () => {
+    const newCollapsed = !isCollapsed;
+    setIsCollapsed(newCollapsed);
+    onCollapse?.(newCollapsed);
+  };
 
   const toggleItem = (href: string) => {
     setExpandedItems((prev: string[]) =>
@@ -45,12 +60,17 @@ export function SidebarNav({ items, activeMode, onModeChange }: SidebarNavProps)
               "flex flex-col items-center gap-1 rounded-md p-1 text-[10px] font-medium transition-colors w-16 cursor-pointer"
             )}
           >
-            <ClipboardList className={cn(
-              "w-[40px] h-[40px] p-2 rounded",
-              activeMode === "hose"
-                ? "bg-[#DCF7E0]"
-                : "hover:bg-transparent"
-            )} />
+            <div className={cn(
+              "w-[40px] h-[40px] rounded flex items-center justify-center",
+              activeMode === "hose" && "bg-[#DCF7E0]"
+            )}>
+              <Image
+                src={ClipboardSvg}
+                alt="Hose Management"
+                width={24}
+                height={24}
+              />
+            </div>
             <span>Hose Management</span>
           </button>
           <button
@@ -59,12 +79,17 @@ export function SidebarNav({ items, activeMode, onModeChange }: SidebarNavProps)
               "flex flex-col items-center gap-1 rounded-md p-1 text-[10px] font-medium transition-colors w-16 cursor-pointer"
             )}
           >
-            <ShoppingCart className={cn(
-              "w-[40px] h-[40px] p-2 rounded",
-              activeMode === "ehandel"
-                ? "bg-[#DCF7E0]"
-                : "hover:bg-transparent"
-            )} />
+            <div className={cn(
+              "w-[40px] h-[40px] rounded flex items-center justify-center",
+              activeMode === "ehandel" && "bg-[#DCF7E0]"
+            )}>
+              <Image
+                src={CartSvg}
+                alt="E-handel"
+                width={24}
+                height={24}
+              />
+            </div>
             <span>E-handel</span>
           </button>
         </div>
@@ -84,7 +109,13 @@ export function SidebarNav({ items, activeMode, onModeChange }: SidebarNavProps)
                       isLastTwoItems && index === items.length - 2 && "mt-4 border-t pt-4"
                     )}>
                       <button
-                        onClick={() => item.subitems && toggleItem(item.href)}
+                        onClick={() => {
+                          if (item.subitems) {
+                            toggleItem(item.href);
+                          } else if (onTabChange) {
+                            onTabChange(item.href);
+                          }
+                        }}
                         className={cn(
                           "flex w-full items-center justify-between rounded-md p-2 text-base font-medium transition-colors mb-2",
                           isActive
@@ -115,7 +146,8 @@ export function SidebarNav({ items, activeMode, onModeChange }: SidebarNavProps)
                           {item.subitems.map((subitem) => (
                             <Link
                               key={subitem.href}
-                              href={subitem.href}
+                              href="#"
+                              onClick={() => onTabChange?.(subitem.href)}
                               className={cn(
                                 "flex items-center justify-between rounded-md px-3 py-1.5 text-sm transition-colors mb-1",
                                 pathname === subitem.href
@@ -138,7 +170,7 @@ export function SidebarNav({ items, activeMode, onModeChange }: SidebarNavProps)
             </div> 
           )}
           <button
-            onClick={() => setIsCollapsed(prev => !prev)}
+              onClick={toggleCollapse}
             className="flex w-16 items-center justify-center rounded-md absolute bottom-4 right-2 cursor-pointer"
           >
             <ChevronLeft className={cn(
