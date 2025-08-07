@@ -29,6 +29,13 @@ export default function CategoryContent({
 	categoryFilters,
 }: CategoryContentProps) {
 	const breadcrumbs = useBreadcrumbs(segment);
+
+	const hasValidInput = !!categoryData?.groupId || !!query;
+
+	if (!hasValidInput) {
+		return null;
+	}
+
 	return (
 		<div className="py-8">
 			<div className="mb-6">
