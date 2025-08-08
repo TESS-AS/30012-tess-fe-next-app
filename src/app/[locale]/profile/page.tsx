@@ -10,11 +10,14 @@ import { ShoppingCart, ArrowRight, Folder, User, Settings, LogOut, ClipboardList
 import { profileTabs } from "@/constants/profileTabs";
 import { useState } from "react";
 import { MineBestillinger } from "./(components)/mine-bestillinger";
+import { OrdreDetaljer } from "./(components)/ordre-detaljer";
+import { OrdreHistorikk } from "./(components)/ordre-historikk";
 
 export default function ProfilePage() {
   const [activeMode, setActiveMode] = useState<"hose" | "ehandel">("ehandel");
   const [activeTab, setActiveTab] = useState("mine-bestillinger");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
 	return (
 		<main className="mt-6 min-h-screen ">
@@ -120,7 +123,17 @@ export default function ProfilePage() {
 						<TabsContent
 							value="mine-bestillinger"
 							className="mt-0">
-							<MineBestillinger />
+							{selectedOrderId ? (
+								<OrdreDetaljer orderId={selectedOrderId} onBack={() => setSelectedOrderId(null)} />
+							) : (
+								<MineBestillinger onOrderClick={(orderId) => setSelectedOrderId(orderId)} />
+							)}
+						</TabsContent>
+
+						<TabsContent
+							value="ordrehistorikk"
+							className="mt-0">
+							<OrdreHistorikk />
 						</TabsContent>
 
 						<TabsContent value="addresses">

@@ -17,7 +17,11 @@ interface Order {
   status: "Mottatt" | "Bekreftet" | "Plukket" | "Under transport" | "Levert" | "Kansellert";
 }
 
-export function MineBestillinger() {
+interface MineBestillingerProps {
+  onOrderClick: (orderId: string) => void;
+}
+
+export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("Alle");
   const [currentPage, setCurrentPage] = useState(1);
@@ -122,7 +126,7 @@ export function MineBestillinger() {
       <div className="flex items-baseline justify-between">
         <div className="flex items-center">
           <h1 className="text-2xl font-semibold">Mine bestillinger</h1>
-          <p className="text-gray-500 ml-4">Dine utførte bestillinger her i e-handelen.</p>
+          <p className="text-[#5A615D] ml-4">Dine utførte bestillinger her i e-handelen.</p>
         </div>
       </div>
 
@@ -182,6 +186,7 @@ export function MineBestillinger() {
             totalItems={1000}
             itemsPerPage={10}
             onPageChange={setCurrentPage}
+            onOrderClick={onOrderClick}
           />
         </div>
       </div>

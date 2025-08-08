@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, MoreVertical, Eye, ShoppingCart, Truck, CircleX } from "lucide-react";
 import {
   DropdownMenu,
@@ -19,6 +20,7 @@ interface Column<T> {
 }
 
 interface DataTableProps<T> {
+  onOrderClick?: (orderId: string) => void;
   data: T[];
   columns: Column<T>[];
   currentPage?: number;
@@ -28,7 +30,7 @@ interface DataTableProps<T> {
   className?: string;
 }
 
-export function DataTable<T>({
+export function DataTable<T extends { orderId: string }>({ onOrderClick,
   data,
   columns,
   currentPage = 1,
@@ -82,7 +84,10 @@ export function DataTable<T>({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-[200px]">
-                      <DropdownMenuItem className="flex items-center gap-3 text-xs">
+                      <DropdownMenuItem 
+                        className="flex items-center gap-3 text-xs"
+                        onClick={() => onOrderClick?.(item.orderId)}
+                      >
                         <Eye className="h-4 w-4" />
                         <span>Vis ordre</span>
                       </DropdownMenuItem>
