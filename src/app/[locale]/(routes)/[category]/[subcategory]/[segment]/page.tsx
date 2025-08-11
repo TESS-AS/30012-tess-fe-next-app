@@ -6,6 +6,7 @@ import {
 import { getSeoMetadata } from "@/lib/seo";
 import { formatUrlToDisplayName } from "@/lib/utils";
 import { loadFilterParents, loadFilters } from "@/services/categories.service";
+import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 
 export async function generateMetadata({
@@ -51,7 +52,7 @@ export default async function SegmentPage({ params }: SegmentPageProps) {
 		);
 
 		if (!subCategoryData) {
-			throw new Error("Segment not found");
+			notFound();
 		}
 
 		const categoryNumber = subCategoryData?.groupId || null;
