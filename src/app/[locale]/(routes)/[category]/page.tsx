@@ -8,6 +8,7 @@ import { useCategories } from "@/lib/CategoriesProvider";
 import { formatUrlToDisplayName } from "@/lib/utils";
 import { loadFilterParents } from "@/services/categories.service";
 import type { Category } from "@/types/categories.types";
+import { notFound } from "next/navigation";
 import { useLocale } from "next-intl";
 
 export default function CategoryPage({ params, searchParams }: any) {
@@ -27,7 +28,7 @@ export default function CategoryPage({ params, searchParams }: any) {
 	);
 
 	useEffect(() => {
-		if (!categories) return;
+		if (!categories) notFound();
 
 		const matchedCategory = categories.find(
 			(cat) => formatUrlToDisplayName(cat.slug) === formattedCategory,
