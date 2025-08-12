@@ -10,6 +10,7 @@ import { ShoppingCart, ArrowRight, Folder, User, Settings, LogOut, ClipboardList
 import { profileTabs } from "@/constants/profileTabs";
 import { useState } from "react";
 import { MineBestillinger } from "./(components)/mine-bestillinger";
+import { Rekvisisjoner } from "./(components)/rekvisisjoner";
 import { OrdreDetaljer } from "./(components)/ordre-detaljer";
 import { OrdreHistorikk } from "./(components)/ordre-historikk";
 
@@ -41,6 +42,10 @@ const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 											{
 												href: "mine-bestillinger",
 												label: "Mine bestillinger"
+											},
+											{
+												href: "rekvisisjoner",
+												label: "Rekvisisjoner"
 											},
 											{
 												href: "ordrehistorikk",
@@ -120,14 +125,15 @@ const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 							<PersonalInfoTab />
 						</TabsContent>
 
-						<TabsContent
-							value="mine-bestillinger"
-							className="mt-0">
+						<TabsContent value="mine-bestillinger" className="mt-0">
 							{selectedOrderId ? (
 								<OrdreDetaljer orderId={selectedOrderId} onBack={() => setSelectedOrderId(null)} />
 							) : (
-								<MineBestillinger onOrderClick={(orderId) => setSelectedOrderId(orderId)} />
+								<MineBestillinger onOrderClick={setSelectedOrderId} />
 							)}
+						</TabsContent>
+						<TabsContent value="rekvisisjoner" className="mt-0">
+							<Rekvisisjoner />
 						</TabsContent>
 
 						<TabsContent
