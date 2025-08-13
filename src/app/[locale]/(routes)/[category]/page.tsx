@@ -28,7 +28,7 @@ export default function CategoryPage({ params, searchParams }: any) {
 	);
 
 	useEffect(() => {
-		if (!categories) notFound();
+		if (!categories) return;
 
 		const matchedCategory = categories.find(
 			(cat) => formatUrlToDisplayName(cat.slug) === formattedCategory,
