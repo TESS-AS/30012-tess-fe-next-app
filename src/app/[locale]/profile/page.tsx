@@ -13,6 +13,7 @@ import { MineBestillinger } from "./(components)/mine-bestillinger";
 import { Rekvisisjoner } from "./(components)/rekvisisjoner";
 import { OrdreDetaljer } from "./(components)/ordre-detaljer";
 import { OrdreHistorikk } from "./(components)/ordre-historikk";
+import { Dimensions } from "./(components)/dimensions";
 
 export default function ProfilePage() {
   const [activeMode, setActiveMode] = useState<"hose" | "ehandel">("ehandel");
@@ -144,6 +145,10 @@ const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
 						<TabsContent value="addresses">
 							<UserAddressesTab />
+						</TabsContent>
+
+						<TabsContent value="dimensions">
+							<Dimensions />
 						</TabsContent>
 
 						<TabsContent value="orders">

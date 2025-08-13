@@ -50,7 +50,7 @@ export function DataTable<T extends { orderId: string }>({
   return (
     <>
       <div className={className}>
-        <div className="rounded-md border overflow-hidden">
+        <div className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px]">
               <thead className="border-b">
