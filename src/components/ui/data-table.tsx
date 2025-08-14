@@ -150,8 +150,8 @@ export function DataTable<T extends { orderId: string }>({
                   </td>
                 </tr>
                 {isExpandable && expandedRows.includes(index) && expandableContent && (
-                  <tr className="border-b border-[#C1C4C2] bg-[#F8F9F8] animate-in fade-in-0 zoom-in-95 duration-200">
-                    <td colSpan={columns.length + 2} className="p-6 border-t border-[#E5E7E6]">
+                  <tr className="border-b border-[#C1C4C2] bg-[#F3FAF7] animate-in fade-in-0 zoom-in-95 duration-200">
+                    <td colSpan={columns.length + 2} className="py-6 pl-16 border-t border-[#E5E7E6]">
                       {expandableContent(item)}
                     </td>
                   </tr>

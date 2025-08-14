@@ -3,12 +3,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { DataTable } from "@/components/ui/data-table";
-import { Search, X, ChevronDown as ChevronDownIcon } from "lucide-react";
+import { Search, X, ChevronDown as ChevronDownIcon, CircleX, CircleCheck } from "lucide-react";
 import { Label } from "@radix-ui/react-label";
 import { cn } from "@/lib/utils";
 import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { getStatusIcons } from "./mine-bestillinger";
 
 type Status = "Alle" | "Venter godkjenning" | "Godkjent" | "Avvist";
 
@@ -173,6 +174,19 @@ const mockRekvisisjoner: Rekvisisjon[] = [
   }
 ];
 
+export const getStatusChipColor = (status: string) => {
+  switch (status) {
+    case "Godkjent":
+      return "bg-[#DCF7E0] text-[#005522]";
+    case "Venter godkjenning":
+      return "bg-[#FDF6B2] text-[#723B13]";
+    case "Avvist":
+      return "bg-[#FDE8E8] text-[#9B1C1C]";
+    default:
+      return "bg-gray-100 text-gray-600";
+  }
+};
+
 export function Rekvisisjoner() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
@@ -182,16 +196,16 @@ export function Rekvisisjoner() {
   const [selectedOrder, setSelectedOrder] = useState<Rekvisisjon | null>(null);
   const [showAllItems, setShowAllItems] = useState(false);
 
-  const getStatusStyle = (status: Status) => {
+  const getRadioStatusStyle = (status: Status) => {
     switch (status) {
       case "Venter godkjenning":
-        return "bg-[#FEF9C3] text-[#854D0E]";
+        return "bg-[#C27803]";
       case "Godkjent":
-        return "bg-[#DCF7E0] text-[#1C6D2C]";
+        return "bg-[#1C6D2C]";
       case "Avvist":
-        return "bg-[#FEE2E2] text-[#9B1C1C]";
+        return "bg-[#9B1C1C]";
       default:
-        return "bg-gray-100 text-gray-600";
+        return "bg-gray-100";
     }
   };
 
@@ -228,16 +242,8 @@ export function Rekvisisjoner() {
       key: "status",
       header: "STATUS",
       cell: (rekvisisjon: Rekvisisjon) => (
-        <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded ${getStatusStyle(rekvisisjon.status)}`}>
-          {rekvisisjon.status === "Godkjent" && (
-            <Image
-              src="/icons/check-filled.svg"
-              alt="Check"
-              width={16}
-              height={16}
-            />
-          )}
-          {rekvisisjon.status === "Avvist" && <X className="h-4 w-4" />}
+        <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md ${getStatusChipColor(rekvisisjon.status)}`}>
+           {getStatusIcons(rekvisisjon.status)}
           <span>{rekvisisjon.status}</span>
         </div>
       ),
@@ -252,7 +258,7 @@ export function Rekvisisjoner() {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-[#1C6D2C] text-[#1C6D2C] hover:bg-[#DCF7E0] hover:text-[#1C6D2C]"
+                className="border-[#009640] text-[#009640] hover:text-white hover:bg-[#005522] hover:border-[#005522]"
                 onClick={() => {
                   setSelectedOrder(rekvisisjon);
                   setShowAllItems(false);
@@ -260,13 +266,15 @@ export function Rekvisisjoner() {
                 }}
               >
                 Godkjenn
+                <CircleCheck />
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                className="border-[#9B1C1C] text-[#9B1C1C] hover:bg-[#FEE2E2] hover:text-[#9B1C1C]"
+                className="border-[#C81E1E] text-[#C81E1E] hover:bg-[#9B1C1C] hover:text-white hover:border-[#9B1C1C]"
               >
                 Avvis
+                <CircleX />
               </Button>
             </>
           )}
@@ -274,7 +282,7 @@ export function Rekvisisjoner() {
             <Button
               variant="outline"
               size="sm"
-              className="border-[#6B7280] text-[#6B7280] hover:bg-gray-100"
+              className="border-[#C1C4C2] text-[#0F1912] hover:bg-[#E8EAE9] hover:text-[#009640]"
             >
               Gjenopprett
             </Button>
@@ -313,13 +321,13 @@ export function Rekvisisjoner() {
                 <div className="flex items-center gap-3 border-t border-[#C1C4C2] pt-6">
                     <p className="text-sm font-bold text-[#0F1912]">Status:</p>
                     <RadioGroup
-                    value={selectedStatus}
-                    onValueChange={setSelectedStatus}
-                    className="flex flex-wrap gap-3"
+                      value={selectedStatus}
+                      onValueChange={setSelectedStatus}
+                      className="flex flex-wrap gap-3"
                     >
                     {statuses.map((status) => {
                       const count = getStatusCount(status, mockRekvisisjoner);
-                      const badgeStyle = getStatusStyle(status);
+                      const badgeStyle = getRadioStatusStyle(status);
                       return (
                         <div key={status} className="flex items-center">
                           <div className="flex items-center space-x-2">
@@ -341,7 +349,7 @@ export function Rekvisisjoner() {
                             </Label>
                           </div>
                           {status !== "Alle" && count > 0 && (
-                            <span className={cn("ml-2 px-1.5 rounded text-sm", badgeStyle)}>
+                            <span className={cn("ml-2 w-5 h-5 flex items-center justify-center rounded-full text-xs text-white", badgeStyle)}>
                               {count}
                             </span>
                           )}
@@ -361,36 +369,37 @@ export function Rekvisisjoner() {
                 onPageChange={setCurrentPage}
                 isExpandable
                 expandableContent={(rekvisisjon) => (
-                  <div className="space-y-4">
-                    <h3 className="font-semibold text-[#0F1912]">Enheter</h3>
-                    <div className="space-y-2">
-                      {rekvisisjon.items.map((item, index) => (
-                        <div key={index} className="grid grid-cols-4 gap-4 text-sm">
-                          <div>
-                            <p className="text-[#5A615D]">Produktnummer</p>
-                            <p className="font-medium text-[#0F1912]">{item.name}</p>
-                          </div>
-                          <div>
-                            <p className="text-[#5A615D]">Varenummer</p>
-                            <p className="font-medium text-[#0F1912]">{item.sku}</p>
-                          </div>
-                          <div>
-                            <p className="text-[#5A615D]">Antall</p>
-                            <p className="font-medium text-[#0F1912]">{item.quantity}</p>
-                          </div>
-                          <div>
-                            <p className="text-[#5A615D]">Pris</p>
-                            <p className="font-medium text-[#0F1912]">{item.price}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                  <div>
+                    <table className="w-[70%]">
+                      <thead>
+                        <tr>
+                          <th className="text-left text-xs font-bold text-[#5A615D] pb-4 w-[60%]">ENHETER</th>
+                          <th className="text-left text-xs font-bold text-[#5A615D] pb-4 w-[20%]">ANTALL</th>
+                          <th className="text-left text-xs font-bold text-[#5A615D] pb-4 w-[20%]">PRIS</th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-sm">
+                        {rekvisisjon.items.map((item, index) => (
+                          <tr key={index} className="border-t border-[#E5E7E6]">
+                            <td className="py-4">
+                              <div className="space-y-1">
+                                <p className="font-medium text-[#0F1912]">{item.name}</p>
+                                <p className="text-[#5A615D]">{item.sku}</p>
+                              </div>
+                            </td>
+                            <td className="py-4">{item.quantity}</td>
+                            <td className="py-4">{item.price},-</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
+
             />
         </div>
 
-        <Modal open={approvalModalOpen} onOpenChange={setApprovalModalOpen}>
+        <Modal className="max-w-[400px]" open={approvalModalOpen} onOpenChange={setApprovalModalOpen}>
           <div>
             <ModalHeader>
               <ModalTitle className="flex items-center gap-2">

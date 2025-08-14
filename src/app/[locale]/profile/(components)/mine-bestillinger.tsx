@@ -21,6 +21,30 @@ interface MineBestillingerProps {
   onOrderClick: (orderId: string) => void;
 }
 
+export const getStatusIcons = (status: string) => {
+  switch (status) {
+    case "Mottatt":
+      return <Image src="/icons/profile/table/like.svg" alt="Like" width={12} height={12} />;
+    case "Godkjent":
+      return <Image src="/icons/profile/table/tick.svg" alt="Tick" width={12} height={12} />;
+    case "Bekreftet":
+      return <Image src="/icons/profile/table/tick.svg" alt="Tick" width={12} height={12} />;
+    case "Plukket":
+      return <Image src="/icons/profile/table/tick.svg" alt="Tick" width={12} height={12} />;
+    case "Under transport":
+      return <Image src="/icons/profile/table/truck.svg" alt="Truck" width={12} height={12} />;
+    case "Levert":
+      return <Image src="/icons/profile/table/tick.svg" alt="Tick" width={12} height={12} className="[filter:brightness(0)_invert(1)]" />;
+    case "Kansellert":
+      return <Image src="/icons/profile/table/x.svg" alt="X" width={12} height={12} />;
+    case "Avvist":
+      return <Image src="/icons/profile/table/x.svg" alt="X" width={12} height={12} />;
+    case "Venter godkjenning":
+      return;
+    default:
+      return "bg-gray-100 text-gray-600";
+  }
+};
 export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("Alle");
@@ -60,24 +84,6 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
   };
 
 
-  const getStatusIcons = (status: string) => {
-    switch (status) {
-      case "Mottatt":
-        return <Image src="/icons/profile/table/like.svg" alt="Like" width={12} height={12} />;
-      case "Bekreftet":
-        return <Image src="/icons/profile/table/tick.svg" alt="Tick" width={12} height={12} />;
-      case "Plukket":
-        return <Image src="/icons/profile/table/tick.svg" alt="Tick" width={12} height={12} />;
-      case "Under transport":
-        return <Image src="/icons/profile/table/truck.svg" alt="Truck" width={12} height={12} />;
-      case "Levert":
-        return <Image src="/icons/profile/table/tick.svg" alt="Tick" width={12} height={12} className="[filter:brightness(0)_invert(1)]" />;
-      case "Kansellert":
-        return <Image src="/icons/profile/table/x.svg" alt="X" width={12} height={12} />;
-      default:
-        return "bg-gray-100 text-gray-600";
-    }
-  };
 
   const filteredOrders = orders.filter(order => {
     const matchesSearch = order.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
