@@ -111,9 +111,12 @@
 	},
 
 	"Search": {
+		"categories": "Kategori",
 		"suggestions": "Søkeforslag",
 		"noSuggestions": "Ingen søkeforslag funnet",
-		"noProductsFound": "Ingen produkter funnet"
+		"noProductsFound": "Ingen produkter funnet",
+		"seeMoreCategories": "Se flere kategorier",
+		"resultsTitle": "Dine treff"
 	},
 	"Seo": {
 		"defaultTitle": "TESS - Teknisk Faghandel | Netthandel",

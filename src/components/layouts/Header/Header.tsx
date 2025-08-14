@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import CustomerNumberSwitcher from "@/components/customer-profile/customer-number-switcher";
 import CategoryNavigationMenu from "@/components/layouts/NavigationMenu/NavigationMenu";
 import { ProductItem } from "@/components/products/product-item-search";
+import SearchAside, { CategoryLink } from "@/components/search-aside";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,12 +28,16 @@ import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import { useCategories } from "@/lib/CategoriesProvider";
 import axiosClient from "@/services/axiosClient";
-import { loadCategoryTree } from "@/services/categories.service";
+import {
+	loadCategoryTree,
+	loadFilterParents,
+} from "@/services/categories.service";
 import { getProductVariations } from "@/services/product.service";
 import { Category } from "@/types/categories.types";
 import { IProductSearch, ISuggestions } from "@/types/search.types";
 import { ProfileUser } from "@/types/user.types";
 import {
+	ArrowRight,
 	Building,
 	ChevronDown,
 	MessageSquareText,
@@ -59,7 +64,7 @@ export default function Header() {
 	const { data, attributeResults, isLoading } = useSearch(searchQuery);
 	const { cartItems, totalPrice, isAuthOpen, setIsAuthOpen } = useAppContext();
 	const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
-
+	const [searchCategories, setSearchCategories] = useState<CategoryLink[]>([]);
 	const [profile, setProfile] = useState<ProfileUser | null>(null);
 	const [, setIsLoading] = useState(true);
 
@@ -76,6 +81,30 @@ export default function Header() {
 			setIsLoading(isSSOLoading);
 		}
 	}, [ssoProfile, punchoutProfile, isSSOLoading, isPunchoutLoading]);
+
+	useEffect(() => {
+		if (searchQuery.trim()) {
+			loadFilterParents({
+				categoryNumber: null,
+				searchTerm: searchQuery,
+				language: currentLocale,
+			})
+				.then((res) => {
+					const cats =
+						Array.isArray(res) && res[0]?.categoryFilters
+							? res[0].categoryFilters.map((c: any) => ({
+									id: c.assortmentNumber,
+									name: c.nameNo,
+									count: c.productCount,
+								}))
+							: [];
+					setSearchCategories(cats);
+				})
+				.catch(() => setSearchCategories([]));
+		} else {
+			setSearchCategories([]);
+		}
+	}, [searchQuery, currentLocale]);
 
 	const searchRef = useClickOutside<HTMLDivElement>(() => {
 		setSearchQuery("");
@@ -98,6 +127,12 @@ export default function Header() {
 
 	const handleLanguageChange = (locale: string) => {
 		router.replace("/", { locale });
+	};
+
+	const handlePick = (href: string) => {
+		router.push(href);
+		setSearchQuery("");
+		setIsSearchOpen(false);
 	};
 
 	const handleLogout = async () => {
@@ -176,33 +211,26 @@ export default function Header() {
 							</Button>
 							{searchQuery && data && (
 								<div className="fixed top-33 left-1/2 z-[11] grid max-h-[80vh] w-[80vw] -translate-x-1/2 grid-cols-3 gap-4 overflow-y-auto border-t bg-white p-4 shadow-lg">
-									<div className="col-span-1 border-r border-gray-200 pr-4">
-										<h4 className="mb-2 text-sm font-semibold">
-											{t("Search.suggestions")}
-										</h4>
-										{data.searchSuggestions?.length ? (
-											data.searchSuggestions.map(
-												(s: ISuggestions, idx: number) => (
-													<Link
-														key={idx}
-														href={`/search?query=${encodeURIComponent(s.keyword)}`}
-														onClick={() => {
-															setSearchQuery("");
-															setIsSearchOpen(false);
-														}}
-														className="block rounded-md p-2 text-sm hover:bg-gray-100">
-														{s.keyword}
-													</Link>
-												),
-											)
-										) : (
-											<p className="text-sm text-green-600">
-												{t("Search.noSuggestions")}
-											</p>
-										)}
+									<div className="col-span-1 space-y-4 pr-4">
+										<SearchAside
+											suggestions={
+												(data?.searchSuggestions ?? []) as { keyword: string }[]
+											}
+											categories={searchCategories}
+											query={searchQuery}
+											onPick={handlePick}
+										/>
 									</div>
-
 									<div className="col-span-2">
+										<div className="mb-3 flex items-center justify-between">
+											<h3 className="text-lg font-semibold">
+												{t("Search.resultsTitle", { default: "Dine treff" })}
+											</h3>
+											<span className="text-sm text-gray-500">
+												5 / {data.productRes.length} produkter
+											</span>
+										</div>
+
 										{data.productRes?.length ? (
 											data.productRes.map((product: IProductSearch) => {
 												const attr = attributeResults.find(
@@ -221,6 +249,7 @@ export default function Header() {
 														getProductVariations={getProductVariations}
 														setVariations={setVariations}
 														variations={variations}
+														searchQuery={searchQuery}
 													/>
 												);
 											})
