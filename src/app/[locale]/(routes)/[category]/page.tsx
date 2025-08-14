@@ -51,8 +51,6 @@ export default function CategoryPage({ params, searchParams }: any) {
 						: [];
 				setCategoryFilters(categoryFilters);
 
-				console.log(categoryFilters, "catoo");
-
 				const mappedFilters: any[] = filtersResponse.map((item: any) => {
 					if ("categoryFilters" in item && "filter" in item) {
 						return {
