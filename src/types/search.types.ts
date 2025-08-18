@@ -1,4 +1,5 @@
 export interface IProductSearch {
+	itemVariantCount: number;
 	attributes: ProductAttributes;
 	productName: string;
 	productNumber: string;
