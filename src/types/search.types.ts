@@ -1,7 +1,14 @@
 export interface IProductSearch {
+	attributes: ProductAttributes;
 	productName: string;
 	productNumber: string;
 	media: string;
+}
+
+export interface ProductAttributes {
+	brandName?: string | null;
+	material?: string | null;
+	[key: string]: string | number | boolean | null | undefined;
 }
 
 export interface ISuggestions {

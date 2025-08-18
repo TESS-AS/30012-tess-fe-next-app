@@ -114,14 +114,26 @@ export function ProductItem({
 						<div className="h-32 w-32 rounded bg-gray-300" />
 					)}
 				</div>
-				<Link
-					className="flex flex-1 flex-col justify-center"
-					href={`/${categoryPath}/${product.productNumber}`}
-					onClick={() => setSearchQuery("")}>
-					<span className="text-base font-medium">
-						{highlightParts(product.productName, matchedAttributes)}
-					</span>
-				</Link>
+				<div className="flex flex-1 flex-col justify-center gap-2">
+					<Link
+						className="w-fit"
+						href={`/${categoryPath}/${product.productNumber}`}
+						onClick={() => setSearchQuery("")}>
+						<span className="text-base font-medium">
+							{highlightParts(product.productName, matchedAttributes)}
+						</span>
+					</Link>
+					<div className="flex max-w-xs flex-col gap-2">
+						{["brandName", "material"].map((k) => (
+							<div
+								key={k}
+								className="flex h-6 items-center justify-center rounded-sm border border-gray-300 bg-white px-3 text-[12px] text-gray-800">
+								{product.attributes?.[k] ?? "-"}
+							</div>
+						))}
+					</div>
+				</div>
+
 				<Button
 					type="button"
 					onClick={async (e) => {
@@ -137,7 +149,7 @@ export function ProductItem({
 							[product.productNumber]: productVariations,
 						}));
 					}}
-					className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
+					className="mt-2 ml-auto self-center rounded-md bg-green-600 px-5 py-2 text-sm font-medium text-white hover:bg-green-700">
 					Se produktvarianter ({variations[product.productNumber]?.length || 0})
 					→
 				</Button>
@@ -154,10 +166,10 @@ export function ProductItem({
 					}
 				}}
 				className="min-w-[75%]">
-				<ModalHeader>
-					<ModalTitle>Product Variants - {product.productName}</ModalTitle>
+				<ModalHeader className="border-b border-gray-200 pb-5">
+					<ModalTitle>Velg produktvariant - {product.productName}</ModalTitle>
 				</ModalHeader>
-				<div className="max-h-[70vh] overflow-y-auto px-1">
+				<div className="">
 					<ProductVariantTable
 						variants={variations[product.productNumber]}
 						productNumber={product.productNumber}
