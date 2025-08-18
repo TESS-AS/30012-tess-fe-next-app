@@ -22,26 +22,20 @@ interface MineBestillingerProps {
 
 export const getStatusIcons = (status: string) => {
   switch (status) {
-    case "Mottatt":
+    case "Mottatt": // Written
       return <Image src="/icons/profile/table/like.svg" alt="Like" width={12} height={12} />;
-    case "Godkjent":
+    case "Bekreftet": // Confirmed
       return <Image src="/icons/profile/table/tick.svg" alt="Tick" width={12} height={12} />;
-    case "Bekreftet":
+    case "Plukket": // Picked
       return <Image src="/icons/profile/table/tick.svg" alt="Tick" width={12} height={12} />;
-    case "Plukket":
-      return <Image src="/icons/profile/table/tick.svg" alt="Tick" width={12} height={12} />;
-    case "Under transport":
+    case "Under transport": // Shipped
       return <Image src="/icons/profile/table/truck.svg" alt="Truck" width={12} height={12} />;
-    case "Levert":
+    case "Levert": // Invoiced
       return <Image src="/icons/profile/table/tick.svg" alt="Tick" width={12} height={12} className="[filter:brightness(0)_invert(1)]" />;
-    case "Kansellert":
+    case "Kansellert": // Something Wrong
       return <Image src="/icons/profile/table/x.svg" alt="X" width={12} height={12} />;
-    case "Avvist":
-      return <Image src="/icons/profile/table/x.svg" alt="X" width={12} height={12} />;
-    case "Venter godkjenning":
-      return;
     default:
-      return;
+      return null;
   }
 };
 export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
@@ -77,29 +71,31 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
 
   const getStatusNumber = (status: string): number | undefined => {
     switch (status) {
-      case "Mottatt": return 1;
-      case "Bekreftet": return 2;
-      case "Plukket": return 3;
-      case "Under transport": return 4;
-      case "Levert": return 5;
-      case "Kansellert": return 6;
+      case "Mottatt": return 10; // Written
+      case "Bekreftet": return 20; // Confirmed
+      case "Plukket": return 30; // Picked
+      case "Under transport": return 45; // Shipped
+      case "Levert": return 60; // Invoiced
+      case "Kansellert": return 0; // Something Wrong
       default: return undefined;
     }
   };
+  
+  console.log(orders,"orders test")
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Mottatt":
+      case "Mottatt": // Written
         return "bg-[#DCF7E0] text-[#005522]";
-      case "Bekreftet":
+      case "Bekreftet": // Confirmed
         return "bg-[#DCF7E0] text-[#005522]";
-      case "Plukket":
+      case "Plukket": // Picked
         return "bg-[#E5EDFF] text-[#42389D]";
-      case "Under transport":
+      case "Under transport": // Shipped
         return "bg-[#FDF6B2] text-[#723B13]";
-      case "Levert":
+      case "Levert": // Invoiced
         return "bg-[#009640] text-white";
-      case "Kansellert":
+      case "Kansellert": // Something Wrong
         return "bg-[#FDE8E8] text-[#9B1C1C]";
       default:
         return "bg-gray-100 text-gray-600";

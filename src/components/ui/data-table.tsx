@@ -3,10 +3,8 @@
 import { cn } from "@/lib/utils";
 import React, { useState } from "react";
 import { Button } from "./button";
-import { Check, X, RotateCcw, ChevronDown as ChevronDownIcon } from "lucide-react";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, MoreVertical, Eye, ShoppingCart, Truck, CircleX, ChevronDown } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./dropdown-menu";
 
@@ -44,6 +42,7 @@ export function DataTable<T extends { orderId: string }>({
 }: DataTableProps<T>) {
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
   const totalPages = Math.ceil(totalItems / itemsPerPage);
+  console.log(totalPages,"totalPages")
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
@@ -167,23 +166,55 @@ export function DataTable<T extends { orderId: string }>({
           <p className="text-sm text-gray-700">
             Viser {startItem} til {endItem} av {totalItems} resultater
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center">
             <Button
               variant="outline"
               size="sm"
               onClick={() => onPageChange?.(currentPage - 1)}
               disabled={currentPage <= 1}
+              className="h-8 w-8 p-0 border-[#8A8F8C] rounded-none rounded-l-md"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="text-sm text-gray-600 px-2">
-              Side {currentPage} av {totalPages || 1}
-            </span>
+
+            <div className="flex items-center">
+              {Array.from({ length: totalPages }).map((_, index) => {
+                const pageNumber = index + 1;
+                const shouldShow =
+                  pageNumber === 1 ||
+                  pageNumber === totalPages ||
+                  Math.abs(pageNumber - currentPage) <= 1;
+
+                if (shouldShow) {
+                  return (
+                    <Button
+                      key={pageNumber}
+                      variant="outline"
+                      size="sm"
+                      className={`h-8 w-8 p-0 border-l-0 border-r-[0.5px] border-[#8A8F8C] rounded-none text-[#5A615D] font-medium ${pageNumber === currentPage 
+                        && "bg-[#DCF7E0] border-[#8A8F8C] text-[#009640] hover:bg-[#DCF7E0] hover:text-[#009640]" 
+                        }`}
+                      onClick={() => onPageChange?.(pageNumber)}
+                    >
+                      {pageNumber}
+                    </Button>
+                  );
+                } else if (
+                  (pageNumber === 2 && currentPage > 3) ||
+                  (pageNumber === totalPages - 1 && currentPage < totalPages - 2)
+                ) {
+                  return <span key={pageNumber} className="px-1 text-gray-400">...</span>;
+                }
+                return null;
+              })}
+            </div>
+
             <Button
               variant="outline"
               size="sm"
               onClick={() => onPageChange?.(currentPage + 1)}
-              disabled={!totalPages || currentPage >= totalPages}
+              disabled={totalPages === 0 || currentPage >= totalPages}
+              className="h-8 w-8 p-0 border-[#8A8F8C] rounded-none rounded-r-md border-l-0"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
