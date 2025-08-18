@@ -57,3 +57,18 @@ export interface SearchDimensionResponse {
 	customerId: number;
 	customerNumber: string;
 }
+
+export interface Dimension {
+	id: string;
+	name: string;
+	type: string;
+	budget: string;
+	children?: Dimension[];
+	isExpanded?: boolean;
+  }
+  
+export interface DimensionType {
+	dimension: string;
+	type: string;
+	active: boolean;
+}
