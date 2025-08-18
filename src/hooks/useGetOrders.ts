@@ -9,6 +9,16 @@ import {
 	OrderResponse,
 } from "@/types/orderHistory.types";
 
+interface OrdersApiResponse {
+	data: OrderResponse[];
+	meta: {
+		page: number;
+		pageSize: number;
+		totalPages: number;
+		totalItems: number;
+	}
+}
+
 export interface OrderFilters {
 	orderNumber?: number;
 	invoiceNumber?: string;
@@ -23,10 +33,10 @@ export function useGetOrders(
 	filters: OrderFilters = {},
 ) {
 	const { data: profile, isLoading: isProfileLoading } = useGetProfileData();
-	const [allOrders, setAllOrders] = useState<OrderItems[]>([]);
 	const [data, setData] = useState<OrderItems[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [totalPages, setTotalPages] = useState(1);
+	const [totalItems, setTotalItems] = useState(0);
 
 	useEffect(() => {
 		if (isProfileLoading || !profile?.customerNumbers?.length) return;
@@ -35,6 +45,8 @@ export function useGetOrders(
 		setIsLoading(true);
 
 		const params = {
+			page,
+			pageSize: perPage,
 			ordernumber: filters.orderNumber,
 			invoicenumber: filters.invoiceNumber,
 			fromDate: filters.fromDate,
@@ -43,9 +55,9 @@ export function useGetOrders(
 		};
 
 		axiosClient
-			.get<OrderResponse[]>(`/order/${customerNumber}`, { params })
+			.get<OrdersApiResponse>(`/order/${customerNumber}`, { params })
 			.then((res) => {
-				const mapped: OrderItems[] = res.data.map((order) => {
+				const mapped: OrderItems[] = res.data.data.map((order) => {
 					const maxStatus = Math.max(
 						...order.orderLines.map((line) => line.lineStatus),
 					);
@@ -57,29 +69,25 @@ export function useGetOrders(
 						items: order.orderLines,
 					};
 				});
-				setAllOrders(mapped);
-				setTotalPages(Math.ceil(mapped.length / perPage));
+				setData(mapped);
+				setTotalPages(res.data.meta.totalPages);
+				setTotalItems(res.data.meta.totalItems);
 			})
 			.catch((err) => {
 				console.error("Failed to fetch orders:", err);
-				setAllOrders([]);
+				setData([]);
 				setTotalPages(0);
+				setTotalItems(0);
 			})
 			.finally(() => {
 				setIsLoading(false);
 			});
-	}, [profile, isProfileLoading, filters]);
-
-	useEffect(() => {
-		// Client-side pagination
-		const start = (page - 1) * perPage;
-		const end = start + perPage;
-		setData(allOrders.slice(start, end));
-	}, [page, perPage, allOrders]);
+	}, [page, perPage, profile, isProfileLoading, filters]);
 
 	return {
 		data,
 		isLoading,
 		totalPages,
+		totalItems,
 	};
 }

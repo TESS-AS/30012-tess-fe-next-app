@@ -21,10 +21,12 @@ interface DataTableProps<T> {
   isExpandable?: boolean;
   data: T[];
   columns: Column<T>[];
-  currentPage?: number;
-  itemsPerPage: number;
+  currentPage: number;
+  totalPages: number;
   totalItems: number;
+  itemsPerPage: number;
   onPageChange?: (page: number) => void;
+  isLoading?: boolean;
   className?: string;
 }
 
@@ -34,15 +36,15 @@ export function DataTable<T extends { orderId: string }>({
   isExpandable = false,
   data,
   columns,
-  currentPage = 1,
-  itemsPerPage = 10,
-  totalItems = 0,
+  currentPage,
+  totalPages,
+  totalItems,
+  itemsPerPage,
   onPageChange,
+  isLoading,
   className
 }: DataTableProps<T>) {
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  console.log(totalPages,"totalPages")
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
@@ -164,7 +166,7 @@ export function DataTable<T extends { orderId: string }>({
       {totalItems > 0 && (
         <div className="flex items-center justify-between px-2 py-4">
           <p className="text-sm text-gray-700">
-            Viser {startItem} til {endItem} av {totalItems} resultater
+            Viser {((currentPage - 1) * itemsPerPage) + 1} til {Math.min(currentPage * itemsPerPage, totalItems)} av {totalItems} resultater
           </p>
           <div className="flex items-center justify-center">
             <Button
@@ -203,7 +205,7 @@ export function DataTable<T extends { orderId: string }>({
                   (pageNumber === 2 && currentPage > 3) ||
                   (pageNumber === totalPages - 1 && currentPage < totalPages - 2)
                 ) {
-                  return <span key={pageNumber} className="px-1 text-gray-400">...</span>;
+                  return <span key={pageNumber} className="h-8 w-8 p-0 flex items-center justify-center text-[#5A615D] font-medium border-l-0 border-1 border-[#8A8F8C]">...</span>;
                 }
                 return null;
               })}

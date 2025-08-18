@@ -52,11 +52,11 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
 
   const ITEMS_PER_PAGE = 10;
 
-  const {
-    data: orders,
-    isLoading,
-    totalPages
-  } = useGetOrders(currentPage, ITEMS_PER_PAGE, filters);
+  const { data: orders, isLoading, totalPages, totalItems } = useGetOrders(
+    currentPage,
+    ITEMS_PER_PAGE,
+    filters
+  );
 
   useEffect(() => {
     const orderNumber = searchQuery ? parseInt(searchQuery.replace(/#/g, "")) : undefined;
@@ -119,7 +119,17 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
     {
       key: "date",
       header: "BESTILLINGSDATO",
-      cell: (order: Order) => <span className="">{order.date}</span>,
+      cell: (order: Order) => {
+        const date = new Date(order.date);
+        const formattedDate = date.toLocaleDateString('no', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).replace(',', '');
+        return <span className="">{formattedDate}</span>;
+      },
       sortable: true
     },
     {
@@ -203,16 +213,17 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
 
         <div className="">
           <DataTable
-            data={isLoading ? [] : filteredOrders}
+            data={filteredOrders}
             columns={columns}
             currentPage={currentPage}
-            totalItems={totalPages * ITEMS_PER_PAGE}
+            totalPages={totalPages}
+            totalItems={totalItems}
             itemsPerPage={ITEMS_PER_PAGE}
             onPageChange={(page) => {
               setCurrentPage(page);
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            onOrderClick={onOrderClick}
+            isLoading={isLoading}
           />
         </div>
       </div>
