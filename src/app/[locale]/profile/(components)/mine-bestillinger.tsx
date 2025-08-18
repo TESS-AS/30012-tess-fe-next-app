@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,13 +9,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Search } from "lucide-react";
 import Image from "next/image";
+import { OrderFilters, useGetOrders } from "@/hooks/useGetOrders";
+import { OrderItems } from "@/types/orderHistory.types";
 
-interface Order {
-  orderId: string;
-  date: string;
-  price: string;
-  status: "Mottatt" | "Bekreftet" | "Plukket" | "Under transport" | "Levert" | "Kansellert";
-}
+type Order = OrderItems & {
+  orderId: string; // For backward compatibility with DataTable
+};
 
 interface MineBestillingerProps {
   onOrderClick: (orderId: string) => void;
@@ -42,27 +41,51 @@ export const getStatusIcons = (status: string) => {
     case "Venter godkjenning":
       return;
     default:
-      return "bg-gray-100 text-gray-600";
+      return;
   }
 };
 export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("Alle");
   const [currentPage, setCurrentPage] = useState(1);
+  const [filters, setFilters] = useState<OrderFilters>({
+    orderNumber: undefined,
+    invoiceNumber: "",
+    fromDate: "",
+    toDate: "",
+    status: undefined
+  });
 
-  const orders: Order[] = [
-    { orderId: "#FWB127364372", date: "09 Mar 2025", price: "466,00,-", status: "Mottatt" },
-    { orderId: "#FWB125467980", date: "12 Mar 2025", price: "245,00,-", status: "Bekreftet" },
-    { orderId: "#FWB133485607", date: "19 Mar 2025", price: "2000,00,-", status: "Plukket" },
-    { orderId: "#FWB137364371", date: "23 Apr 2025", price: "90,00,-", status: "Plukket" },
-    { orderId: "#FWB148273645", date: "20 Apr 2025", price: "3040,00,-", status: "Under transport" },
-    { orderId: "#FWB145967376", date: "09 May 2025", price: "1870,00,-", status: "Under transport" },
-    { orderId: "#FWB148756352", date: "05 Jun 2025", price: "5067,00,-", status: "Levert" },
-    { orderId: "#FWB159873546", date: "31 May 2025", price: "60,00,-", status: "Levert" },
-    { orderId: "#FWB156475937", date: "24 Jun 2025", price: "78,00,-", status: "Kansellert" },
-  ];
+  const ITEMS_PER_PAGE = 10;
+
+  const {
+    data: orders,
+    isLoading,
+    totalPages
+  } = useGetOrders(currentPage, ITEMS_PER_PAGE, filters);
+
+  useEffect(() => {
+    const orderNumber = searchQuery ? parseInt(searchQuery.replace(/#/g, "")) : undefined;
+    setFilters(prev => ({
+      ...prev,
+      orderNumber: orderNumber || undefined,
+      status: selectedStatus === "Alle" ? undefined : getStatusNumber(selectedStatus)
+    }));
+  }, [searchQuery, selectedStatus]);
 
   const statuses = ["Alle", "Mottatt", "Bekreftet", "Plukket", "Under transport", "Levert", "Kansellert"];
+
+  const getStatusNumber = (status: string): number | undefined => {
+    switch (status) {
+      case "Mottatt": return 1;
+      case "Bekreftet": return 2;
+      case "Plukket": return 3;
+      case "Under transport": return 4;
+      case "Levert": return 5;
+      case "Kansellert": return 6;
+      default: return undefined;
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -85,18 +108,16 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
 
 
 
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         searchQuery.toLowerCase().includes(order.orderId.toLowerCase().replace("#", ""));
-    const matchesStatus = selectedStatus === "Alle" || order.status === selectedStatus;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredOrders = (orders || []).map(order => ({
+    ...order,
+    orderId: order.id.toString() // Map id to orderId for DataTable compatibility
+  }));
 
   const columns = [
     {
-      key: "orderId",
+      key: "id",
       header: "ORDRE ID",
-      cell: (order: Order) => <span className="">{order.orderId}</span>,
+      cell: (order: Order) => <span className="">#{order.id}</span>,
       sortable: true
     },
     {
@@ -106,9 +127,9 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
       sortable: true
     },
     {
-      key: "price",
+      key: "total",
       header: "PRIS",
-      cell: (order: Order) => order.price,
+      cell: (order: Order) => `${order.total?.toFixed(2)},-`,
       sortable: true
     },
     {
@@ -186,12 +207,15 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
 
         <div className="">
           <DataTable
-            data={filteredOrders}
+            data={isLoading ? [] : filteredOrders}
             columns={columns}
             currentPage={currentPage}
-            totalItems={1000}
-            itemsPerPage={10}
-            onPageChange={setCurrentPage}
+            totalItems={totalPages * ITEMS_PER_PAGE}
+            itemsPerPage={ITEMS_PER_PAGE}
+            onPageChange={(page) => {
+              setCurrentPage(page);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
             onOrderClick={onOrderClick}
           />
         </div>

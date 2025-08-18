@@ -172,15 +172,18 @@ export function DataTable<T extends { orderId: string }>({
               variant="outline"
               size="sm"
               onClick={() => onPageChange?.(currentPage - 1)}
-              disabled={currentPage === 1}
+              disabled={currentPage <= 1}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
+            <span className="text-sm text-gray-600 px-2">
+              Side {currentPage} av {totalPages || 1}
+            </span>
             <Button
               variant="outline"
               size="sm"
               onClick={() => onPageChange?.(currentPage + 1)}
-              disabled={currentPage === totalPages}
+              disabled={!totalPages || currentPage >= totalPages}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
