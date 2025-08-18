@@ -150,8 +150,7 @@ export function ProductItem({
 						}));
 					}}
 					className="mt-2 ml-auto self-center rounded-md bg-green-600 px-5 py-2 text-sm font-medium text-white hover:bg-green-700">
-					Se produktvarianter ({variations[product.productNumber]?.length || 0})
-					→
+					Se produktvarianter ({product.itemVariantCount || 0}) →
 				</Button>
 			</div>
 			<Modal
