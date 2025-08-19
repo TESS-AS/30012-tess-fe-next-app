@@ -7,6 +7,7 @@ import {
 import { getSeoMetadata } from "@/lib/seo";
 import { formatUrlToDisplayName } from "@/lib/utils";
 import { loadFilterParents, loadFilters } from "@/services/categories.service";
+import { notFound } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { getTranslations } from "next-intl/server";
 
@@ -48,7 +49,7 @@ export default async function SubCategoryPage({
 		);
 
 		if (!subCategoryData) {
-			throw new Error("Subcategory not found");
+			notFound();
 		}
 
 		const categoryNumber = subCategoryData?.groupId || null;

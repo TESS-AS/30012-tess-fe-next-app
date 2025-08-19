@@ -1,8 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuCheckboxItem,
+	DropdownMenuContent,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -19,6 +25,12 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import {
+	ColumnKey,
+	columnLabels,
+	dropdownOrder,
+	lockedCols,
+} from "@/constants/productVariantTable";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
 import { addToCart, getCart } from "@/services/carts.service";
@@ -27,7 +39,15 @@ import {
 	loadItemBalanceBatch,
 } from "@/services/product.service";
 import { PriceResponse } from "@/types/search.types";
-import { Minus, Plus, Loader2, Search, ShoppingCart } from "lucide-react";
+import {
+	Plus,
+	Loader2,
+	Search,
+	ShoppingCart,
+	ChevronUp,
+	ChevronDown,
+	Check,
+} from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
@@ -60,7 +80,7 @@ interface ProductVariantTableProps {
 export default function ProductVariantTable({
 	variants,
 	productNumber,
-	hasSearch,
+	hasSearch = true,
 }: ProductVariantTableProps) {
 	const t = useTranslations();
 	const { data: profile } = useGetProfileData();
@@ -69,13 +89,44 @@ export default function ProductVariantTable({
 	const [quantities, setQuantities] = useState<Record<number, number>>({});
 	const [loading, setLoading] = useState<Record<number, boolean>>({});
 	const [warehouse, setWarehouse] = useState<Record<number, string>>({});
-	const { calculatedPrices } = useAppContext();
 	const [isLoading, setIsLoading] = useState(true);
 	const [variantsWithWarehouses, setVariantsWithWarehouses] = useState<
 		ProductVariant[]
 	>([]);
 	const [prices, setPrices] = useState<Record<number, number>>({});
 	const { isCartChanging, setIsCartChanging } = useAppContext();
+
+	const [visibleCols, setVisibleCols] = useState<Record<ColumnKey, boolean>>({
+		image: true,
+		itemNumber: true,
+		unspsc: true,
+		contentUnit: true,
+		price: true,
+		quantity: true,
+		warehouse: true,
+		cart: true,
+	});
+
+	const filteredVariants = variantsWithWarehouses.filter((v) => {
+		const q = searchQuery.trim().toLowerCase();
+		if (!q) return true;
+
+		const tokens = q.split(/[,\s]+/).filter(Boolean);
+
+		return tokens.every((tok) => {
+			const item = v.itemNumber.toString().toLowerCase();
+			const uns = (v.unspsc ?? "").toLowerCase();
+			if (tok.startsWith("vn:") || tok.startsWith("varenummer:")) {
+				const val = tok.replace(/^(vn:|varenummer:)/, "");
+				return item.includes(val);
+			}
+			if (tok.startsWith("unspsc:")) {
+				const val = tok.replace(/^unspsc:/, "");
+				return uns.includes(val);
+			}
+			return item.includes(tok) || uns.includes(tok);
+		});
+	});
 
 	useEffect(() => {
 		const loadPrices = async () => {
@@ -92,10 +143,6 @@ export default function ProductVariantTable({
 				profile?.defaultCustomerNumber,
 				profile?.defaultCompanyNumber,
 			);
-
-			priceResults.forEach((item: PriceResponse) => {
-				console.log(item, "item");
-			});
 
 			priceResults.forEach((item: PriceResponse) => {
 				setPrices((prev) => ({
@@ -191,210 +238,286 @@ export default function ProductVariantTable({
 							onChange={(e) => setSearchQuery(e.target.value)}
 						/>
 					</div>
-					<Button
-						variant="outline"
-						onClick={() => setSearchQuery("")}>
-						<Plus className="mr-2 h-4 w-4" />
-						Legg til attributt
-					</Button>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant="outline"
+								className="group h-9 rounded-md border border-[#C1C4C2] bg-white px-2 py-1 text-[#5A615D] shadow-none hover:border-[#005522] hover:bg-[#005522] hover:text-white focus-visible:ring-0 data-[state=open]:border-[#005522] data-[state=open]:bg-[#005522] data-[state=open]:text-white">
+								<Plus className="mr-2 h-5 w-4" />
+								Legg til attributt
+								<ChevronDown className="ml-2 inline h-5 w-5 group-data-[state=open]:hidden" />
+								<ChevronUp className="ml-2 hidden h-5 w-5 group-data-[state=open]:inline" />
+							</Button>
+						</DropdownMenuTrigger>
+
+						<DropdownMenuContent
+							align="end"
+							className="w-64 rounded-2xl border-0 bg-white p-2 shadow-lg">
+							<>
+								{dropdownOrder.map((key) => {
+									const locked = lockedCols.includes(key);
+									return (
+										<DropdownMenuCheckboxItem
+											key={key}
+											checked={locked ? true : visibleCols[key]}
+											disabled={locked}
+											onSelect={(e) => e.preventDefault()} // <-- crucial: prevents close
+											onCheckedChange={
+												locked
+													? undefined
+													: (checked) =>
+															setVisibleCols((prev) => ({
+																...prev,
+																[key]: !!checked,
+															}))
+											}
+											className={`group relative flex items-center rounded-md px-3 py-2 pl-10 text-[15px] select-none ${
+												locked
+													? "cursor-not-allowed text-[#8A8F8C] opacity-60"
+													: "text-[#1B1E1C]"
+											} focus:bg-[#F4FBF7] focus:outline-none`}>
+											<span className="absolute top-1/2 left-2 flex h-4 w-4 -translate-y-1/2 items-center justify-center rounded-xs border border-gray-400 group-data-[state=checked]:border-[#009640] group-data-[state=checked]:bg-[#009640]">
+												<Check className="h-3 w-3 text-white opacity-0 group-data-[state=checked]:opacity-100" />
+											</span>
+											{columnLabels[key]}
+										</DropdownMenuCheckboxItem>
+									);
+								})}
+							</>
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</div>
 			)}
-			<Table className="my-4 w-full rounded-md">
-				<TableHeader className="bg-muted text-muted-foreground">
-					<TableRow>
-						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
-							Image
-						</TableHead>
-						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
-							Parent Number
-						</TableHead>
-						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
-							Item Number
-						</TableHead>
-						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
-							UNSPSC
-						</TableHead>
-						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
-							Unit
-						</TableHead>
-						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
-							Price
-						</TableHead>
-						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
-							Qty
-						</TableHead>
-						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
-							Warehouse
-						</TableHead>
-						<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
-							Actions
-						</TableHead>
-					</TableRow>
-				</TableHeader>
-				<TableBody>
-					{variantsWithWarehouses.map((variant) => {
-						const qty = quantities[variant.itemNumber] || 1;
-						const selectedWarehouse = warehouse[variant.itemNumber];
+			<div className="mt-5 max-h-[70vh] overflow-y-auto">
+				<Table className="w-full rounded-md">
+					<TableHeader className="bg-muted text-muted-foreground">
+						<TableRow>
+							<>
+								{visibleCols.image && (
+									<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+										BILDE
+									</TableHead>
+								)}
+								{visibleCols.itemNumber && (
+									<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+										VARENUMMER
+									</TableHead>
+								)}
+								{visibleCols.unspsc && (
+									<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+										UNSPSC
+									</TableHead>
+								)}
+								{visibleCols.contentUnit && (
+									<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+										STYKK
+									</TableHead>
+								)}
+								{visibleCols.price && (
+									<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+										PRIS
+									</TableHead>
+								)}
+								{visibleCols.quantity && (
+									<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+										ANTALL
+									</TableHead>
+								)}
+								{visibleCols.warehouse && (
+									<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+										LAGER
+									</TableHead>
+								)}
+								{visibleCols.cart && (
+									<TableHead className="color-[#5A615D] border-b-1 border-[#C1C4C2] bg-[#F8F9F8]">
+										HANDLEKURV
+									</TableHead>
+								)}
+							</>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{filteredVariants.map((variant) => {
+							const qty = quantities[variant.itemNumber] || 1;
+							const selectedWarehouse = warehouse[variant.itemNumber];
 
-						return (
-							<TableRow
-								className="hover:bg-[#F0FCF2]"
-								key={variant.itemNumber}>
-								<TableCell>
-									{variant.mediaId?.[0]?.url ? (
-										<Image
-											src={variant.mediaId[0].url}
-											alt={variant.itemNumber.toString()}
-											width={60}
-											height={60}
-											className="object-contain"
-										/>
-									) : (
-										<div className="bg-muted h-[60px] w-[60px]" />
+							return (
+								<TableRow
+									className="hover:bg-[#F0FCF2]"
+									key={variant.itemNumber}>
+									{visibleCols.image && (
+										<TableCell>
+											{variant.mediaId?.[0]?.url ? (
+												<Image
+													src={variant.mediaId[0].url}
+													alt={variant.itemNumber.toString()}
+													width={60}
+													height={60}
+													className="object-contain"
+												/>
+											) : (
+												<div className="bg-muted h-[60px] w-[60px]" />
+											)}
+										</TableCell>
 									)}
-								</TableCell>
-								<TableCell>{variant.parentProdNumber}</TableCell>
-								<TableCell>{variant.itemNumber}</TableCell>
-								<TableCell>{variant.unspsc || "-"}</TableCell>
-								<TableCell>{variant.contentUnit}</TableCell>
-								<TableCell>
-									{prices[variant.itemNumber]?.toFixed(2) || "0.00"},- kr
-								</TableCell>
-								<TableCell>
-									<QuantityButtons
-										quantity={qty}
-										onIncrease={async () =>
-											setQuantities((prev) => ({
-												...prev,
-												[variant.itemNumber]: qty + 1,
-											}))
-										}
-										onDecrease={async () =>
-											setQuantities((prev) => ({
-												...prev,
-												[variant.itemNumber]: Math.max(1, qty - 1),
-											}))
-										}
-									/>
-								</TableCell>
-								<TableCell>
-									<Select
-										value={selectedWarehouse || ""}
-										onValueChange={(value) =>
-											setWarehouse((prev) => ({
-												...prev,
-												[variant.itemNumber]: value,
-											}))
-										}>
-										<SelectTrigger className="w-[180px]">
-											<SelectValue placeholder={t("Product.selectWarehouse")} />
-										</SelectTrigger>
-										<SelectContent>
-											{variant.warehouses?.map((w, index) => (
-												<SelectItem
-													key={`${variant.itemNumber}-${w.warehouseNumber}-${index}`}
-													value={w.warehouseNumber}>
-													{w.warehouseName} - {w.warehouseNumber}
-													{w.balance !== undefined ? ` (${w.balance})` : ""}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-								</TableCell>
-								<TableCell>
-									<Button
-										variant="outlineGreen"
-										size="sm"
-										disabled={loading[variant.itemNumber]}
-										className="relative"
-										onClick={async () => {
-											if (!selectedWarehouse) {
-												toast(t("Product.selectWarehouseFirst"), {
-													type: "warning",
-													position: "bottom-right",
-													autoClose: 2000,
-												});
-												return;
-											}
-
-											// Check if the selected warehouse has a balance
-											const selectedWarehouseData = variant.warehouses?.find(
-												(w) => w.warehouseNumber === selectedWarehouse,
-											);
-											if (
-												selectedWarehouseData?.balance === undefined ||
-												selectedWarehouseData.balance === null
-											) {
-												toast(t("Product.noBalanceForWarehouse"), {
-													type: "warning",
-													position: "bottom-right",
-													autoClose: 2000,
-												});
-												return;
-											}
-
-											setLoading((prev) => ({
-												...prev,
-												[variant.itemNumber]: true,
-											}));
-
-											try {
-												const response = await addToCart({
-													productNumber,
-													itemNumber: variant.itemNumber.toString(),
-													quantity: qty,
-													warehouseNumber: selectedWarehouse,
-													companyNumber: "1",
-												});
-												setIsCartChanging(!isCartChanging);
-
-												if (response.message === "Error adding to cart") {
-													throw new Error(response.message);
+									{visibleCols.itemNumber && (
+										<TableCell>{variant.itemNumber}</TableCell>
+									)}
+									{visibleCols.unspsc && (
+										<TableCell>{variant.unspsc || "-"}</TableCell>
+									)}
+									{visibleCols.contentUnit && (
+										<TableCell>{variant.contentUnit}</TableCell>
+									)}
+									{visibleCols.price && (
+										<TableCell>
+											{prices[variant.itemNumber]?.toFixed(2) || "0.00"},- kr
+										</TableCell>
+									)}
+									{visibleCols.quantity && (
+										<TableCell>
+											<QuantityButtons
+												quantity={qty}
+												onIncrease={async () =>
+													setQuantities((prev) => ({
+														...prev,
+														[variant.itemNumber]: qty + 1,
+													}))
 												}
+												onDecrease={async () =>
+													setQuantities((prev) => ({
+														...prev,
+														[variant.itemNumber]: Math.max(1, qty - 1),
+													}))
+												}
+											/>
+										</TableCell>
+									)}
+									{visibleCols.warehouse && (
+										<TableCell>
+											<Select
+												value={selectedWarehouse || ""}
+												onValueChange={(value) =>
+													setWarehouse((prev) => ({
+														...prev,
+														[variant.itemNumber]: value,
+													}))
+												}>
+												<SelectTrigger className="w-[180px]">
+													<SelectValue
+														placeholder={t("Product.selectWarehouse")}
+													/>
+												</SelectTrigger>
+												<SelectContent>
+													{variant.warehouses?.map((w, index) => (
+														<SelectItem
+															key={`${variant.itemNumber}-${w.warehouseNumber}-${index}`}
+															value={w.warehouseNumber}>
+															{w.warehouseName} - {w.warehouseNumber}
+															{w.balance !== undefined ? ` (${w.balance})` : ""}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+										</TableCell>
+									)}
+									{visibleCols.cart && (
+										<TableCell>
+											<Button
+												variant="outlineGreen"
+												size="sm"
+												disabled={loading[variant.itemNumber]}
+												className="relative"
+												onClick={async () => {
+													if (!selectedWarehouse) {
+														toast(t("Product.selectWarehouseFirst"), {
+															type: "warning",
+															position: "bottom-right",
+															autoClose: 2000,
+														});
+														return;
+													}
 
-												toast(t("Product.addedToCart"), {
-													type: "success",
-													position: "bottom-right",
-													autoClose: 2000,
-												});
+													const selectedWarehouseData =
+														variant.warehouses?.find(
+															(w) => w.warehouseNumber === selectedWarehouse,
+														);
+													if (
+														selectedWarehouseData?.balance === undefined ||
+														selectedWarehouseData.balance === null
+													) {
+														toast(t("Product.noBalanceForWarehouse"), {
+															type: "warning",
+															position: "bottom-right",
+															autoClose: 2000,
+														});
+														return;
+													}
 
-												setQuantities((prev) => ({
-													...prev,
-													[variant.itemNumber]: 1,
-												}));
-												await getCart();
-											} catch (err) {
-												console.error("Error adding to cart:", err);
-												toast(t("Product.errorAddingToCart"), {
-													type: "error",
-													position: "bottom-right",
-													autoClose: 2000,
-												});
-											} finally {
-												setLoading((prev) => ({
-													...prev,
-													[variant.itemNumber]: false,
-												}));
-											}
-										}}>
-										{loading[variant.itemNumber] ? (
-											<>
-												<Loader2 className="inline h-4 w-4 animate-spin" />
-												{t("Product.adding")}
-											</>
-										) : (
-											<>
-												<ShoppingCart className="color-[#009640] h-4 w-4" />
-												{t("Product.addToCart")}
-											</>
-										)}
-									</Button>
-								</TableCell>
-							</TableRow>
-						);
-					})}
-				</TableBody>
-			</Table>
+													setLoading((prev) => ({
+														...prev,
+														[variant.itemNumber]: true,
+													}));
+
+													try {
+														const response = await addToCart({
+															productNumber,
+															itemNumber: variant.itemNumber.toString(),
+															quantity: qty,
+															warehouseNumber: selectedWarehouse,
+															companyNumber: "1",
+														});
+														setIsCartChanging(!isCartChanging);
+
+														if (response.message === "Error adding to cart") {
+															throw new Error(response.message);
+														}
+
+														toast(t("Product.addedToCart"), {
+															type: "success",
+															position: "bottom-right",
+															autoClose: 2000,
+														});
+
+														setQuantities((prev) => ({
+															...prev,
+															[variant.itemNumber]: 1,
+														}));
+														await getCart();
+													} catch (err) {
+														console.error("Error adding to cart:", err);
+														toast(t("Product.errorAddingToCart"), {
+															type: "error",
+															position: "bottom-right",
+															autoClose: 2000,
+														});
+													} finally {
+														setLoading((prev) => ({
+															...prev,
+															[variant.itemNumber]: false,
+														}));
+													}
+												}}>
+												{loading[variant.itemNumber] ? (
+													<>
+														<Loader2 className="inline h-4 w-4 animate-spin" />
+														{t("Product.adding")}
+													</>
+												) : (
+													<>
+														<ShoppingCart className="color-[#009640] h-4 w-4" />
+														{t("Product.addToCart")}
+													</>
+												)}
+											</Button>
+										</TableCell>
+									)}
+								</TableRow>
+							);
+						})}
+					</TableBody>
+				</Table>
+			</div>
 		</div>
 	);
 }

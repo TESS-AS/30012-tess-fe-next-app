@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +21,7 @@ import { useCategories } from "@/lib/CategoriesProvider";
 import axiosClient from "@/services/axiosClient";
 import { ProfileUser } from "@/types/user.types";
 import { UserRoundCog } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 interface CustomerNumberSwitcherProps {
@@ -30,6 +33,7 @@ export default function CustomerNumberSwitcher({
 }: CustomerNumberSwitcherProps) {
 	const t = useTranslations();
 	const { refetch: refetchCategories } = useCategories();
+	const router = useRouter();
 
 	const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
 	const [newCustomerNumber, setNewCustomerNumber] = useState("");
@@ -45,7 +49,6 @@ export default function CustomerNumberSwitcher({
 	const { companies } = useGetCompanies(true);
 
 	useEffect(() => {
-		// Preselect default customer, warehouse, and assortment
 		if (
 			customers.length &&
 			!newCustomerNumber &&
@@ -69,10 +72,27 @@ export default function CustomerNumberSwitcher({
 			}
 		}
 
-		if (!selectedCompanyNumber && profile?.defaultCompanyNumber) {
-			setSelectedCompanyNumber(profile.defaultCompanyNumber);
+		if (
+			companies.length &&
+			!selectedCompanyNumber &&
+			profile?.defaultCompanyNumber
+		) {
+			const match = companies.find(
+				(c) => String(c.companyNumber) === String(profile.defaultCompanyNumber),
+			);
+			if (match) {
+				setSelectedCompanyNumber(String(match.companyNumber));
+			}
 		}
-	}, [customers, assortments, profile, companies]);
+	}, [
+		customers,
+		assortments,
+		companies,
+		profile,
+		newCustomerNumber,
+		selectedAssortment,
+		selectedCompanyNumber,
+	]);
 
 	const handleSave = async () => {
 		setIsSaving(true);
@@ -86,6 +106,7 @@ export default function CustomerNumberSwitcher({
 			setDefaultCustomerNumber(newCustomerNumber);
 			await refetchCategories();
 			setIsCustomerModalOpen(false);
+			router.push("/");
 		} catch (err) {
 			console.error("Failed to update default customer number", err);
 		} finally {
@@ -101,7 +122,6 @@ export default function CustomerNumberSwitcher({
 				onClick={() => setIsCustomerModalOpen(true)}
 				className="hidden text-sm text-[#0F1912] md:flex">
 				<UserRoundCog /> Velg kunde/lager/sortilog
-				{/* {defaultCustomerNumber} */}
 			</Button>
 
 			<Modal
@@ -142,6 +162,7 @@ export default function CustomerNumberSwitcher({
 							</SelectContent>
 						</Select>
 					</div>
+
 					<div className="space-y-2">
 						<Label htmlFor="warehouseSelect">
 							{t("CustomerSwitcher.selectWarehouseLabel")}
@@ -164,14 +185,13 @@ export default function CustomerNumberSwitcher({
 							<SelectContent className="z-[9999]">
 								<SelectGroup>
 									<>
-										{warehouses.length > 0 &&
-											warehouses.map((warehouse) => (
-												<SelectItem
-													key={warehouse.id}
-													value={warehouse.id}>
-													{warehouse.name} ({warehouse.id})
-												</SelectItem>
-											))}
+										{warehouses.map((warehouse) => (
+											<SelectItem
+												key={warehouse.id}
+												value={warehouse.id}>
+												{warehouse.name} ({warehouse.id})
+											</SelectItem>
+										))}
 									</>
 								</SelectGroup>
 							</SelectContent>
@@ -235,22 +255,13 @@ export default function CustomerNumberSwitcher({
 							<SelectContent className="z-[9999]">
 								<SelectGroup>
 									<>
-										{companies.length > 0 ? (
-											companies.map((company) => (
-												<SelectItem
-													key={company.companyNumber}
-													value={String(company.companyNumber)}>
-													{company.companyName} ({company.companyNumber})
-												</SelectItem>
-											))
-										) : (
+										{companies.map((company) => (
 											<SelectItem
-												key={profile.defaultCompanyNumber}
-												value={profile.defaultCompanyNumber}
-												disabled>
-												{`${profile.defaultCompanyName} (${profile.defaultCompanyNumber})`}
+												key={company.companyNumber}
+												value={String(company.companyNumber)}>
+												{company.companyName} ({company.companyNumber})
 											</SelectItem>
-										)}
+										))}
 									</>
 								</SelectGroup>
 							</SelectContent>

@@ -1,12 +1,11 @@
 // ProductItem.tsx
 import { useEffect, useState } from "react";
 
-import { Button } from "@/components/ui/button"; // Adjust this import as needed
-import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal"; // Adjust as needed
+import { Button } from "@/components/ui/button";
+import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { Category, RawCategory } from "@/types/categories.types";
 import { IProductSearch } from "@/types/search.types";
-import { ShoppingCartIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -31,11 +30,11 @@ interface Props {
 	) => Promise<any[]>;
 	setVariations: (variations: Record<string, any>) => void;
 	variations: Record<string, any>;
+	searchQuery: string;
 }
 
 export function ProductItem({
 	product,
-	attr,
 	currentLocale,
 	loadCategoryTree,
 	setSearchQuery,
@@ -44,6 +43,7 @@ export function ProductItem({
 	getProductVariations,
 	setVariations,
 	variations,
+	searchQuery,
 }: Props) {
 	const { data: profile } = useGetProfileData();
 	const [categoryPath, setCategoryPath] = useState("");
@@ -62,68 +62,97 @@ export function ProductItem({
 		loadCategory();
 	}, [product.productNumber, currentLocale]);
 
+	const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	const highlightParts = (text: string, matches: string[] = []) => {
+		if (!text || !matches.length) return text;
+		const lower = matches.map((m) => m.toLowerCase());
+		const re = new RegExp(`(${matches.map(escapeRe).join("|")})`, "gi");
+		return text.split(re).map((part, i) =>
+			lower.includes(part.toLowerCase()) ? (
+				<span
+					key={i}
+					className="rounded bg-emerald-100 px-1 font-semibold">
+					{part}
+				</span>
+			) : (
+				part
+			),
+		);
+	};
+
+	const matchedAttributes: string[] = (() => {
+		const q = (searchQuery || "").trim().toLowerCase();
+		if (!q) return [];
+		const set = new Set<string>();
+
+		if (product.productName?.toLowerCase().includes(q)) set.add(searchQuery);
+
+		(product as any)?.attributes?.forEach?.((a: any) => {
+			const k = String(a?.key ?? "").toLowerCase();
+			const v = String(a?.value ?? "").toLowerCase();
+			if (k && k.includes(q) && a.key) set.add(a.key);
+			if (v && v.includes(q) && a.value) set.add(a.value);
+		});
+
+		return Array.from(set);
+	})();
+
 	return (
 		<div key={product.productNumber}>
-			<div className="flex w-full items-center justify-between gap-4 border-b p-3 hover:bg-gray-100">
-				<Link
-					className="flex flex-[0.8] items-center justify-between gap-4"
-					href={`/${categoryPath}/${product.productNumber}`}
-					onClick={() => setSearchQuery("")}>
-					<div className="flex flex-col justify-center">
-						<span className="text-base font-medium">{product.productName}</span>
-						<span className="text-muted-foreground text-sm">
-							{product.productNumber}
+			<div className="mb-3 flex w-full items-center gap-4 rounded-md border border-gray-200 p-3 hover:border-gray-400">
+				<div className="flex h-32 w-32 min-w-32 items-center justify-center overflow-hidden rounded-md">
+					{product.media ? (
+						<Image
+							src={product.media}
+							alt={product.productName}
+							unoptimized
+							width={128}
+							height={128}
+							className="max-h-23 max-w-32 object-contain"
+						/>
+					) : (
+						<div className="h-32 w-32 rounded bg-gray-300" />
+					)}
+				</div>
+				<div className="flex flex-1 flex-col justify-center gap-2">
+					<Link
+						className="w-fit"
+						href={`/${categoryPath}/${product.productNumber}`}
+						onClick={() => setSearchQuery("")}>
+						<span className="text-base font-medium">
+							{highlightParts(product.productName, matchedAttributes)}
 						</span>
-						{attr && attr.matchedAttributes.length > 0 && (
-							<div className="mt-2 flex flex-wrap gap-1">
-								{attr.matchedAttributes.map((a, i) => (
-									<span
-										key={i}
-										className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-xs font-medium">
-										{a}
-									</span>
-								))}
+					</Link>
+					<div className="flex max-w-xs flex-col gap-2">
+						{["brandName", "material"].map((k) => (
+							<div
+								key={k}
+								className="flex h-6 items-center justify-center rounded-sm border border-gray-300 bg-white px-3 text-[12px] text-gray-800">
+								{product.attributes?.[k] ?? "-"}
 							</div>
-						)}
-					</div>
-				</Link>
-				<div className="flex items-center gap-6">
-					<Button
-						variant="outline"
-						size="sm"
-						type="button"
-						onClick={async (e) => {
-							e.preventDefault();
-							setIsModalIdOpen(product.productNumber);
-							const productVariations = await getProductVariations(
-								product.productNumber,
-								profile?.defaultWarehouseNumber || "",
-								profile?.defaultCompanyNumber || "",
-							);
-							setVariations((prev: Record<string, any>) => ({
-								...prev,
-								[product.productNumber]: productVariations,
-							}));
-						}}>
-						<ShoppingCartIcon className="h-2 w-2" />
-					</Button>
-					<div className="flex h-32 w-32 min-w-32 items-center justify-center overflow-hidden rounded-md">
-						{product.media ? (
-							<Image
-								src={product.media}
-								alt={product.productName}
-								unoptimized
-								width={128}
-								height={128}
-								className="max-h-23 max-w-32 object-contain"
-							/>
-						) : (
-							<div className="h-32 w-32 rounded bg-gray-300" />
-						)}
+						))}
 					</div>
 				</div>
-			</div>
 
+				<Button
+					type="button"
+					onClick={async (e) => {
+						e.preventDefault();
+						setIsModalIdOpen(product.productNumber);
+						const productVariations = await getProductVariations(
+							product.productNumber,
+							profile?.defaultWarehouseNumber || "",
+							profile?.defaultCompanyNumber || "",
+						);
+						setVariations((prev: Record<string, any>) => ({
+							...prev,
+							[product.productNumber]: productVariations,
+						}));
+					}}
+					className="mt-2 ml-auto self-center rounded-md bg-green-600 px-5 py-2 text-sm font-medium text-white hover:bg-green-700">
+					Se produktvarianter ({product.itemVariantCount || 0}) →
+				</Button>
+			</div>
 			<Modal
 				open={isModalIdOpen === product.productNumber}
 				onOpenChange={(open) => {
@@ -136,10 +165,10 @@ export function ProductItem({
 					}
 				}}
 				className="min-w-[75%]">
-				<ModalHeader>
-					<ModalTitle>Product Variants - {product.productName}</ModalTitle>
+				<ModalHeader className="border-b border-gray-200 pb-5">
+					<ModalTitle>Velg produktvariant - {product.productName}</ModalTitle>
 				</ModalHeader>
-				<div className="max-h-[70vh] overflow-y-auto px-1">
+				<div className="">
 					<ProductVariantTable
 						variants={variations[product.productNumber]}
 						productNumber={product.productNumber}

@@ -73,11 +73,13 @@
 		"attributes": "Attributes"
 	},
 	"Search": {
-		"suggestions": "Søkeforslag",
-		"noSuggestions": "Ingen søkeforslag funnet",
-		"noProductsFound": "Ingen produkter funnet"
+		"categories": "Categories",
+		"suggestions": "Suggestions",
+		"noSuggestions": "No Suggestions found",
+		"noProductsFound": "No products found",
+		"seeMoreCategories": "See more categories",
+		"resultsTitle": "Search results"
 	},
-
 	"Seo": {
 		"defaultTitle": "TESS - Teknisk Faghandel | Netthandel",
 		"defaultDescription": "Tess er din pålitelige leverandør av byggematerialer, sikkerhetsutstyr og industrielle produkter. Handle trygt og raskt på nett."
