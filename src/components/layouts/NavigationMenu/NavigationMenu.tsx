@@ -14,9 +14,9 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type { Category } from "@/types/categories.types";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { ChevronRight } from "lucide-react";
 
 export default function CategoryNavigationMenu({
 	categories,
