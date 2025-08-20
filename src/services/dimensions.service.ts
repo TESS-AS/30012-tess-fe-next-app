@@ -98,13 +98,26 @@ export const updateUserDimensions = async (
 };
 
 export const searchDimensions = async (
-	type: number,
-	search: string,
+	dimType: number,
+	searchTerm?: string,
+	parentId?: string
 ): Promise<SearchDimensionResponse[]> => {
 	try {
-		const response = await axiosInstance.get(
-			`/dimension/dimensionSearch/${type}/${search}`,
-		);
+		const params = {
+			dimType,
+			searchTerm,
+			parentId,
+		};
+
+		const response = await axiosInstance.get('/dimension/dimensionSearch', { 
+			params,
+			paramsSerializer: (params) => {
+				return Object.entries(params)
+					.filter(([_, value]) => value !== undefined)
+					.map(([key, value]) => `${key}=${encodeURIComponent(value!)}`)
+					.join('&');
+			}
+		});
 		return response.data;
 	} catch (error) {
 		console.error("Error searching dimensions:", error);

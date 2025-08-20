@@ -14,6 +14,7 @@ interface Props {
 	onChange: (value: string) => void;
 	placeholder?: string;
 	isVisible?: boolean;
+	parentId?: string;
 }
 
 export const DimensionSearchInput = ({
@@ -23,20 +24,25 @@ export const DimensionSearchInput = ({
 	onChange,
 	placeholder = "",
 	isVisible = true,
+	parentId,
 }: Props) => {
 	const [results, setResults] = useState<SearchDimensionResponse[]>([]);
+	const [isFocused, setIsFocused] = useState(false);
 
 	const debouncedSearch = useCallback(
 		debounce(async (level: number, query: string) => {
-			if (!query.trim()) return;
 			try {
-				const response = await searchDimensions(level, query);
+				const response = await searchDimensions(
+					level,
+					query.trim() || undefined,
+					level > 1 ? parentId : undefined
+				);
 				setResults(response || []);
 			} catch (error) {
 				console.error("Search error:", error);
 			}
 		}, 300),
-		[],
+		[parentId],
 	);
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,8 +63,13 @@ export const DimensionSearchInput = ({
 				value={value}
 				placeholder={placeholder}
 				onChange={handleInputChange}
+				onFocus={() => setIsFocused(true)}
+				onBlur={() => {
+					setTimeout(() => setIsFocused(false), 200);
+				}}
 			/>
-			{isVisible && value !== "" && results.length > 0 && (
+			{isVisible && isFocused && value !== "" && (
+				results.length > 0 ? (
 				<div className="absolute z-[999999] mt-1 h-[160px] w-full overflow-auto rounded-md border bg-white shadow">
 					{(results ?? []).map((dimension) => (
 						<div
@@ -69,6 +80,11 @@ export const DimensionSearchInput = ({
 						</div>
 					))}
 				</div>
+				) : (
+					<div className="absolute z-[999999] mt-1 w-full rounded-md border bg-white p-4 text-center text-gray-500 shadow">
+						Ingen resultater funnet
+					</div>
+				)
 			)}
 		</div>
 	);

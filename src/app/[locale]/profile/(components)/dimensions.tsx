@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useCustomerDimensions } from "@/hooks/useCustomerDimensions";
 import type { ReactElement } from "react";
 import { Button } from "@/components/ui/button";
 import { Info, PlusIcon, SquarePen } from "lucide-react";
@@ -21,9 +22,17 @@ const projects = [
 ];
 
 export function Dimensions(): ReactElement {
-  const [showEmptyState, setShowEmptyState] = useState(true);
-  const [dimensions, setDimensions] = useState<Dimension[]>([]);
+  const { dimensions: fetchedDimensions, isLoading, error } = useCustomerDimensions();
   const [selectedProject, setSelectedProject] = useState(projects[0]);
+  const [localDimensions, setLocalDimensions] = useState<Dimension[]>([]);
+  const [showEmptyState, setShowEmptyState] = useState(!isLoading && localDimensions.length === 0);
+
+  // Keep local state in sync with fetched data
+  useEffect(() => {
+    if (fetchedDimensions) {
+      setLocalDimensions(fetchedDimensions);
+    }
+  }, [fetchedDimensions]);
 
   // delete dialog
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -89,7 +98,7 @@ export function Dimensions(): ReactElement {
   };
 
   const toggleExpand = (dimensionId: string) => {
-    setDimensions((prev) =>
+    setLocalDimensions((prev) =>
       prev.map((dim) => {
         if (dim.id === dimensionId) return { ...dim, isExpanded: !dim.isExpanded };
         if (dim.children) return { ...dim, children: collapseIfNeeded(dim.children, dimensionId) };
@@ -104,6 +113,27 @@ export function Dimensions(): ReactElement {
       if (d.children) return { ...d, children: collapseIfNeeded(d.children, id) };
       return d;
     });
+
+  const handleEditDimension = (updatedDim: Dimension) => {
+    setLocalDimensions((prev: Dimension[]) => {
+      return prev.map((dim) => (dim.id === updatedDim.id ? updatedDim : dim));
+    });
+  };
+
+  const handleCreateDimension = (newDim: Dimension) => {
+    setLocalDimensions((dims: Dimension[]) => [...dims, newDim]);
+  };
+
+  const handleDeleteDimension = () => {
+    if (dimensionToDelete) {
+      setLocalDimensions((prev: Dimension[]) => {
+        const dims = prev.filter((dim) => dim.id !== dimensionToDelete.id);
+        return dims;
+      });
+      setDimensionToDelete(null);
+      setShowDeleteModal(false);
+    }
+  };
 
   /** Create */
   const addSubcategory = (path: string[]) => {
@@ -122,7 +152,7 @@ export function Dimensions(): ReactElement {
         budget: `${newDimension.budget}${newDimension.cents ? "," + newDimension.cents : ""}`,
         children: [],
       };
-      setDimensions((dims) => updateDimensionAtPath(dims, createAtPath || [], newItem));
+      setLocalDimensions((dims) => updateDimensionAtPath(dims, createAtPath || [], newItem));
       setNewDimension({ name: "", type: "", budget: "", cents: "" });
       setIsCreating(false);
       setCreateAtPath(null);
@@ -159,17 +189,9 @@ export function Dimensions(): ReactElement {
         return dim.children ? { ...dim, children: updateDimensionInTree(dim.children) } : dim;
       });
 
-    setDimensions((prev) => updateDimensionInTree(prev));
+    setLocalDimensions((prev) => updateDimensionInTree(prev));
     setEditingDimension(null);
     setEditDimensionData({ name: "", type: "", budget: "", cents: "" });
-  };
-
-  const deleteDimension = (id: string, _path: string[]) => {
-    const deleteRecursively = (dims: Dimension[], targetId: string): Dimension[] =>
-      dims
-        .map((dim) => ({ ...dim, children: dim.children ? deleteRecursively(dim.children, targetId) : undefined }))
-        .filter((dim) => dim.id !== targetId);
-    setDimensions((prev) => deleteRecursively(prev, id));
   };
 
   /** Type modal (shared) */
@@ -342,7 +364,7 @@ export function Dimensions(): ReactElement {
                 />
               )}
 
-              {dimensions.map((dimension) => (
+              {localDimensions.map((dimension) => (
                 <DimensionRow
                   key={dimension.id}
                   dimension={dimension}
@@ -392,13 +414,7 @@ export function Dimensions(): ReactElement {
         open={showDeleteModal}
         onOpenChange={setShowDeleteModal}
         name={dimensionToDelete?.name}
-        onConfirm={() => {
-          if (dimensionToDelete) {
-            deleteDimension(dimensionToDelete.id, dimensionToDelete.path);
-            setShowDeleteModal(false);
-            setDimensionToDelete(null);
-          }
-        }}
+        onConfirm={handleDeleteDimension}
       />
     </div>
   );

@@ -38,7 +38,7 @@ export default function TypeModal({
       <ModalHeader>
         <ModalTitle>Sett dimensjonstyper</ModalTitle>
       </ModalHeader>
-      <div className="space-y-8 p-6">
+      <div className="space-y-8">
         {dimensionTypes.map((dim, index) => (
           <div key={dim.dimension} className="space-y-2">
             <div className="grid grid-cols-2 gap-4">

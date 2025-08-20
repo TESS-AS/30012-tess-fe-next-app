@@ -45,8 +45,6 @@ export function DataTable<T extends { orderId: string }>({
   className
 }: DataTableProps<T>) {
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
-  const startItem = (currentPage - 1) * itemsPerPage + 1;
-  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   return (
     <>
