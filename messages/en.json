@@ -47,7 +47,14 @@
 		"errorAddingToCart": "Error adding to cart",
 		"selectWarehouse": "Select warehouse",
 		"selectWarehouseFirst": "Please select a warehouse",
-		"noBalanceForWarehouse": "No balance available for this warehouse"
+		"noBalanceForWarehouse": "No balance available for this warehouse",
+		"noDescriptionAvailable": "No description is available for this product.",
+		"variantTitle": "Variants",
+		"stockInfo": "Items not in stock can still be ordered – 3 extra days delivery time.",
+		"documentsTitle": "Documentation",
+		"noDocumentsAvailable": "No documents are available for this product.",
+		"noRelatedProducts": "No related products are available for this product."
+
 	},
 	"BreadCrumbs": {
 		"home": "Home",

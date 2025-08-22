@@ -66,7 +66,7 @@ export function ProductGallery({ images, className }: ProductGalleryProps) {
 						className={cn(
 							"relative aspect-square h-20 w-20 w-full border-2 p-0",
 							selectedImage.filename === image.filename
-								? "border-primary"
+								? "border-[#009640]"
 								: "border-transparent",
 						)}>
 						{!loadedImages[index] && (
@@ -89,13 +89,12 @@ export function ProductGallery({ images, className }: ProductGalleryProps) {
 				))}
 			</div>
 
-			{/* Main Image with Zoom */}
-			<div className="col-span-10">
+			<div className="col-span-10 p-2 shadow-sm">
 				<ZoomImage
 					src={selectedImage.url}
 					alt={selectedImage.filename}
-					width={800}
-					height={800}
+					width={550}
+					height={400}
 					className="aspect-square"
 				/>
 			</div>
