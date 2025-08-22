@@ -41,13 +41,19 @@
 		"users": "Brukere",
 		"remarks": "Merknader",
 		"description": "Beskrivelse",
-		"details": "Detaljer",
+		"details": "Produktdetaljer",
 		"noVariants": "Ingen varianter funnet",
 		"addedToCart": "Legget til i kassen",
 		"errorAddingToCart": "Kunne ikke legge til i kassen",
 		"selectWarehouse": "Vennligst velg en lagerstasjon",
 		"selectWarehouseFirst": "Vennligst velg en lagerstasjon først",
-		"noBalanceForWarehouse": "Ingen balanse tilgjengelig for denne lagerstasjonen"
+		"noBalanceForWarehouse": "Ingen balanse tilgjengelig for denne lagerstasjonen",
+		"noDescriptionAvailable": "Ingen beskrivelse er tilgjengelig for dette produktet.",
+		"variantTitle": "Varianter",
+		"stockInfo": "Varer ikke på lager kan fortsatt bestilles – 3 dager ekstra leveringstid.",
+		"documentsTitle": "Dokumentasjon",
+		"noDocumentsAvailable": "Ingen dokumenter er tilgjengelige for dette produktet.",
+		"noRelatedProducts": "Ingen relaterte produkter er tilgjengelige for dette produktet."
 	},
 	"BreadCrumbs": {
 		"home": "Hjem",

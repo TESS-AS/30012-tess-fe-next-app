@@ -97,7 +97,7 @@ export default function ProductVariantTable({
 	const { isCartChanging, setIsCartChanging } = useAppContext();
 
 	const [visibleCols, setVisibleCols] = useState<Record<ColumnKey, boolean>>({
-		image: true,
+		image: false,
 		itemNumber: true,
 		unspsc: true,
 		contentUnit: true,

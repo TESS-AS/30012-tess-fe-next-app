@@ -1,7 +1,10 @@
 "use client";
 
+import { useCallback } from "react";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IAttribute } from "@/types/product.types";
+import { Clipboard } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 interface ProductDetailsProps {
@@ -11,11 +14,12 @@ interface ProductDetailsProps {
 	application?: string;
 	users?: string;
 	remarks?: string;
+	productNumber?: string;
 }
 
 export function ProductDetails({
 	description,
-	attributes,
+	productNumber,
 	technicalInfo,
 	application,
 	users,
@@ -23,90 +27,90 @@ export function ProductDetails({
 }: ProductDetailsProps) {
 	const t = useTranslations();
 
+	const handleCopyGtin = useCallback(() => {
+		if (productNumber) navigator.clipboard.writeText(productNumber);
+	}, [productNumber]);
+
 	return (
-		<Tabs
-			defaultValue="description"
-			className="mt-6">
-			<TabsList className="grid w-full grid-cols-3">
-				<TabsTrigger
+		<div className="mt-1">
+			<Tabs
+				defaultValue="description"
+				className="w-full">
+				<div className="flex items-center justify-between">
+					<TabsList className="ring-muted/40 grid max-h-[33px] max-w-[210px] grid-cols-2 gap-0 rounded-sm bg-[#E8EAE9] ring-1">
+						<TabsTrigger
+							value="description"
+							className="text-muted-foreground rounded-md p-1 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-green-900 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 data-[state=active]:bg-green-900 data-[state=active]:text-white data-[state=active]:shadow-none">
+							{t("Product.description")}
+						</TabsTrigger>
+
+						<TabsTrigger
+							value="details"
+							disabled={!technicalInfo && !application && !users && !remarks}
+							className="text-muted-foreground rounded-md p-1 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-green-900 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 data-[state=active]:bg-green-900 data-[state=active]:text-white data-[state=active]:shadow-none">
+							{t("Product.details")}
+						</TabsTrigger>
+					</TabsList>
+					{productNumber && (
+						<button
+							type="button"
+							onClick={handleCopyGtin}
+							className="group ml-2 inline-flex items-center gap-1.5 text-[14px] font-light focus:outline-none">
+							<span className="uppercase">GTIN:</span>
+							<span className="font-light">{productNumber}</span>
+							<Clipboard className="h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
+						</button>
+					)}
+				</div>
+
+				<TabsContent
 					value="description"
-					disabled={!description}>
-					{t("Product.description")}
-				</TabsTrigger>
-				<TabsTrigger
-					value="specifications"
-					disabled={!attributes?.length}>
-					{t("Product.specifications")}
-				</TabsTrigger>
-				<TabsTrigger
+					className="mt-4">
+					{description ? (
+						<div className="prose max-w-none">
+							<p className="text-sm">{description}</p>
+						</div>
+					) : (
+						<p className="text-sm">{t("Product.noDescriptionAvailable")}</p>
+					)}
+				</TabsContent>
+
+				<TabsContent
 					value="details"
-					disabled={!technicalInfo && !application && !users && !remarks}>
-					{t("Product.details")}
-				</TabsTrigger>
-			</TabsList>
+					className="mt-4 space-y-1">
+					{technicalInfo && (
+						<p className="text-sm">
+							<span className="font-semibold">
+								{t("Product.technicalInfo")}:{" "}
+							</span>
+							<span>{technicalInfo}</span>
+						</p>
+					)}
 
-			<TabsContent
-				value="description"
-				className="mt-4">
-				{description && (
-					<div className="prose max-w-none">
-						<p className="text-muted-foreground">{description}</p>
-					</div>
-				)}
-			</TabsContent>
+					{application && (
+						<p className="text-sm">
+							<span className="font-semibold">
+								{t("Product.application")}:{" "}
+							</span>
+							<span>{application}</span>
+						</p>
+					)}
 
-			<TabsContent
-				value="specifications"
-				className="mt-4">
-				{attributes && (
-					<div className="flex flex-wrap gap-2">
-						{attributes.map((item, idx) => (
-							<div
-								key={idx}
-								className="bg-card text-card-foreground inline-flex items-center rounded-lg border shadow-sm">
-								<div className="bg-muted border-r px-3 py-2">
-									<span className="text-sm font-medium">{item.name}</span>
-								</div>
-								<div className="px-3 py-2">
-									<span className="text-sm">{item.valueDef}</span>
-								</div>
-							</div>
-						))}
-					</div>
-				)}
-			</TabsContent>
+					{users && (
+						<p className="text-sm">
+							<span className="font-semibold">{t("Product.users")}: </span>
+							<span>{users}</span>
+						</p>
+					)}
 
-			<TabsContent
-				value="details"
-				className="mt-4 space-y-6">
-				{technicalInfo && (
-					<div>
-						<h3 className="mb-2 font-semibold">{t("Product.technicalInfo")}</h3>
-						<p className="text-muted-foreground">{technicalInfo}</p>
-					</div>
-				)}
-
-				{application && (
-					<div>
-						<h3 className="mb-2 font-semibold">{t("Product.application")}</h3>
-						<p className="text-muted-foreground">{application}</p>
-					</div>
-				)}
-
-				{users && (
-					<div>
-						<h3 className="mb-2 font-semibold">{t("Product.users")}</h3>
-						<p className="text-muted-foreground">{users}</p>
-					</div>
-				)}
-
-				{remarks && (
-					<div>
-						<h3 className="mb-2 font-semibold">{t("Product.remarks")}</h3>
-						<p className="text-muted-foreground">{remarks}</p>
-					</div>
-				)}
-			</TabsContent>
-		</Tabs>
+					{remarks && (
+						<p className="text-sm">
+							<span className="font-semibold">{t("Product.remarks")}: </span>
+							<span>{remarks}</span>
+						</p>
+					)}
+				</TabsContent>
+			</Tabs>
+		</div>
 	);
 }
