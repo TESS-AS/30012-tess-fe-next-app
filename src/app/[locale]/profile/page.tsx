@@ -33,7 +33,7 @@ export default function ProfilePage() {
 	const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
 	return (
-		<main className="mt-6 min-h-screen">
+		<main className="my-6 min-h-screen">
 			<div className="mx-auto flex gap-6">
 				<Tabs
 					value={activeTab}
