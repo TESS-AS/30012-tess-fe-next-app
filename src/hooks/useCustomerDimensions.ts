@@ -30,10 +30,9 @@ export function useCustomerDimensions() {
           if (!dimensionMap.has(d1Key)) {
             dimensionMap.set(d1Key, {
               id: dim.d1_id.toString(),
-              name: `${dim.d1_name} (${dim.d1_id})`, // Add ID to name
-              type: dim.d1_name || '', // Use name as type
-
-              budget: '0',
+              name: dim.d1_name,
+              type: dim.d1_type || '', 
+              budget: dim.d1_budget?.toString().replace('.', ',') || '0',
               children: [] as Dimension[]
             });
           }
@@ -48,10 +47,9 @@ export function useCustomerDimensions() {
             if (!existingChild && dim.d2_id && dim.d2_name) {
               const d2Child = {
                 id: dim.d2_id.toString(),
-                name: `${dim.d2_name} (${dim.d2_id})`,
-                type: dim.d2_name || '',
-
-                budget: '0',
+                name: dim.d2_name,
+                type: dim.d2_type || '',
+                budget: dim.d2_budget?.toString().replace('.', ',') || '0',
                 children: [] as Dimension[]
               };
               d1Dim.children.push(d2Child);
@@ -60,10 +58,9 @@ export function useCustomerDimensions() {
               if (dim.d3_id) {
                 d2Child.children.push({
                   id: dim.d3_id.toString(),
-                  name: `${dim.d3_name} (${dim.d3_id})`,
-                  type: dim.d3_name || '',
-
-                  budget: '0',
+                  name: dim.d3_name?.toString() || '',
+                  type: dim.d3_type || '',
+                  budget: dim.d3_budget?.toString().replace('.', ',') || '0',
                   children: [] as Dimension[]
                 });
               }

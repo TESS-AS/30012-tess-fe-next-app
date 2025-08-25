@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "react-toastify";
+import { createDimension, deleteCustomerDimensions, updateDimension } from "@/services/dimensions.service";
 import { useCustomerDimensions } from "@/hooks/useCustomerDimensions";
 import type { ReactElement } from "react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +15,8 @@ import NewRow from "./dimensions/newRow";
 import TypeModal from "./dimensions/typeModal";
 import DeleteConfirmModal from "./dimensions/deleteConfirmModal";
 import ProjectPicker from "./dimensions/projectPicker";
+import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
+import { getUserDimensions } from "@/services/dimensions.service";
 
 const projects = [
   { value: "all", label: "Alle" },
@@ -22,12 +26,36 @@ const projects = [
 ];
 
 export function Dimensions(): ReactElement {
+
+  const { data: profile } = usePunchoutProfile();
   const { dimensions: fetchedDimensions, isLoading, error } = useCustomerDimensions();
   const [selectedProject, setSelectedProject] = useState(projects[0]);
   const [localDimensions, setLocalDimensions] = useState<Dimension[]>([]);
   const [showEmptyState, setShowEmptyState] = useState(!isLoading && localDimensions.length === 0);
 
   // Keep local state in sync with fetched data
+  useEffect(() => {
+    const loadDimensionTypes = async () => {
+      if (profile?.customerNumbers[0]) {
+        try {
+          const userDimensions = await getUserDimensions(profile.customerNumbers[0]);
+          if (userDimensions[0]?.hierarchy) {
+            const hierarchy = userDimensions[0].hierarchy;
+            setDimensionTypes([
+              { dimension: "1", type: hierarchy.dimension1?.label || "Department", active: false },
+              { dimension: "2", type: hierarchy.dimension2?.label || "Project", active: false },
+              { dimension: "3", type: hierarchy.dimension3?.label || "Workorder", active: false },
+            ]);
+          }
+        } catch (error) {
+          console.error('Error loading dimension types:', error);
+        }
+      }
+    };
+
+    loadDimensionTypes();
+  }, [profile?.customerNumbers]);
+
   useEffect(() => {
     if (fetchedDimensions) {
       setLocalDimensions(fetchedDimensions);
@@ -36,7 +64,7 @@ export function Dimensions(): ReactElement {
 
   // delete dialog
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [dimensionToDelete, setDimensionToDelete] = useState<{ id: string; name: string; path: string[] } | null>(null);
+  const [dimensionToDelete, setDimensionToDelete] = useState<{ id: string; name: string; level: string; path: string[] } | null>(null);
 
   // edit existing
   const [editingDimension, setEditingDimension] = useState<{ id: string; path: string[] } | null>(null);
@@ -49,10 +77,11 @@ export function Dimensions(): ReactElement {
 
   // type modal
   const [showTypeModal, setShowTypeModal] = useState(false);
+  const [currentLevel, setCurrentLevel] = useState(0);
   const [dimensionTypes, setDimensionTypes] = useState<DimensionType[]>([
-    { dimension: "1", type: "", active: false },
-    { dimension: "2", type: "", active: false },
-    { dimension: "3", type: "", active: false },
+    { dimension: "1", type: "Department", active: false },
+    { dimension: "2", type: "Project", active: false },
+    { dimension: "3", type: "Workorder", active: false },
   ]);
 
   // new row data
@@ -114,49 +143,113 @@ export function Dimensions(): ReactElement {
       return d;
     });
 
-  const handleEditDimension = (updatedDim: Dimension) => {
-    setLocalDimensions((prev: Dimension[]) => {
-      return prev.map((dim) => (dim.id === updatedDim.id ? updatedDim : dim));
-    });
-  };
 
-  const handleCreateDimension = (newDim: Dimension) => {
-    setLocalDimensions((dims: Dimension[]) => [...dims, newDim]);
-  };
-
-  const handleDeleteDimension = () => {
+  const handleDeleteDimension = async () => {
     if (dimensionToDelete) {
-      setLocalDimensions((prev: Dimension[]) => {
-        const dims = prev.filter((dim) => dim.id !== dimensionToDelete.id);
-        return dims;
-      });
-      setDimensionToDelete(null);
-      setShowDeleteModal(false);
+      try {
+        await deleteCustomerDimensions(profile?.customerNumbers[0] || "", dimensionToDelete.id, dimensionToDelete.level);
+        
+        setLocalDimensions((prev: Dimension[]) => {
+          const dims = prev.filter((dim) => dim.id !== dimensionToDelete.id);
+          return dims;
+        });
+
+        toast.success('Dimensjonen ble slettet');
+        setDimensionToDelete(null);
+        setShowDeleteModal(false);
+      } catch (error) {
+        console.error('Error deleting dimension:', error);
+        toast.error('Kunne ikke slette dimensjonen. Vennligst prøv igjen.');
+      }
     }
   };
 
-  /** Create */
   const addSubcategory = (path: string[]) => {
+    const level = path.length;
+    console.log('Creating dimension at level:', level + 1);
+    
+    // Reset all dimension types to inactive
+    setDimensionTypes(prev => prev.map(d => ({ ...d, active: false })));
+    
     setIsCreating(true);
     setCreateAtPath(path);
     setNewDimension({ name: "", type: "", budget: "", cents: "" });
     setShowEmptyState(false);
   };
 
-  const handleAddDimension = () => {
-    if (newDimension.name && newDimension.type && newDimension.budget) {
-      const newItem: Dimension = {
-        id: `dim_${Date.now()}`,
-        name: newDimension.name,
-        type: newDimension.type,
-        budget: `${newDimension.budget}${newDimension.cents ? "," + newDimension.cents : ""}`,
-        children: [],
-      };
-      setLocalDimensions((dims) => updateDimensionAtPath(dims, createAtPath || [], newItem));
-      setNewDimension({ name: "", type: "", budget: "", cents: "" });
-      setIsCreating(false);
-      setCreateAtPath(null);
-      setShowEmptyState(false);
+  const findParentDimensionId = (path: string[] | null): string | undefined => {
+    if (!path || path.length === 0) return undefined;
+
+    let current = localDimensions;
+    let parentId: string | undefined;
+
+    for (let i = 0; i < path.length; i++) {
+      const dimension = current.find(d => d.id === path[i]);
+      if (dimension) {
+        parentId = dimension.id;
+        current = dimension.children || [];
+      }
+    }
+
+    return parentId;
+  };
+
+  const handleAddDimension = async () => {
+    if (!newDimension.name?.trim()) {
+      toast.error('Vennligst fyll ut navn');
+      return;
+    }
+    if (!newDimension.type?.trim()) {
+      toast.error('Vennligst velg type');
+      return;
+    }
+    if (!newDimension.budget?.trim()) {
+      toast.error('Vennligst fyll ut budsjett');
+      return;
+    }
+
+    try {
+      const activeDimensionIndex = dimensionTypes.findIndex(d => d.active);
+      if (activeDimensionIndex === -1) {
+        toast.error('Vennligst velg en dimensjonstype');
+        return;
+      }
+
+      const parentId = findParentDimensionId(createAtPath);
+      
+      const response = await createDimension(
+        {
+          customerNumber: profile?.customerNumbers[0] || '',
+          dimensionName: newDimension.name,
+          dimensionType: `dimension_${activeDimensionIndex + 1}`,
+          budget: Number(newDimension.budget + "." + (newDimension.cents || "0")),
+          parentDimension: parentId,
+        },
+      );
+
+
+      if (response.success) {
+        const newItem: Dimension = {
+          id: (response.data as any).dimension_id?.toString(),
+          name: newDimension.name,
+          type: newDimension.type,
+          budget: (response.data as any).budget?.toString().replace(".", ",") || 
+                 `${newDimension.budget}${newDimension.cents ? "," + newDimension.cents : ""}`,
+          children: [],
+        };
+
+        setLocalDimensions((dims) => updateDimensionAtPath(dims, createAtPath || [], newItem));
+        setNewDimension({ name: "", type: "", budget: "", cents: "" });
+        setIsCreating(false);
+        setCreateAtPath(null);
+        setShowEmptyState(false);
+        setDimensionTypes(prev => prev.map(d => ({ ...d, active: false })));
+        
+        toast.success('Dimensjon opprettet');
+      }
+    } catch (error) {
+      console.error('Error creating dimension:', error);
+      toast.error('Kunne ikke opprette dimensjon. Vennligst prøv igjen.');
     }
   };
 
@@ -173,25 +266,41 @@ export function Dimensions(): ReactElement {
     setEditingDimension({ id: dimension.id, path });
   };
 
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (!editingDimension) return;
 
-    const updateDimensionInTree = (dims: Dimension[]): Dimension[] =>
-      dims.map((dim) => {
-        if (dim.id === editingDimension.id) {
-          return {
-            ...dim,
-            name: editDimensionData.name,
-            type: editDimensionData.type,
-            budget: `${editDimensionData.budget}${editDimensionData.cents ? "," + editDimensionData.cents : ""}`,
-          };
-        }
-        return dim.children ? { ...dim, children: updateDimensionInTree(dim.children) } : dim;
+    try {
+      const response = await updateDimension({
+        customerNumber: profile?.customerNumbers[0] || '',
+        dimensionName: editDimensionData.name,
+        dimensionType: editDimensionData.type,
+        dimensionValue: editingDimension.id,
+        budget: Number(editDimensionData.budget + "." + (editDimensionData.cents || "0")),
       });
 
-    setLocalDimensions((prev) => updateDimensionInTree(prev));
-    setEditingDimension(null);
-    setEditDimensionData({ name: "", type: "", budget: "", cents: "" });
+      if (response.success) {
+        const updateDimensionInTree = (dims: Dimension[]): Dimension[] =>
+          dims.map((dim) => {
+            if (dim.id === editingDimension.id) {
+              return {
+                ...dim,
+                name: editDimensionData.name,
+                type: editDimensionData.type,
+                budget: `${editDimensionData.budget}${editDimensionData.cents ? "," + editDimensionData.cents : ""}`,
+              };
+            }
+            return dim.children ? { ...dim, children: updateDimensionInTree(dim.children) } : dim;
+          });
+
+        setLocalDimensions((prev) => updateDimensionInTree(prev));
+        setEditingDimension(null);
+        setEditDimensionData({ name: "", type: "", budget: "", cents: "" });
+        toast.success('Dimensjon oppdatert');
+      }
+    } catch (error) {
+      console.error('Error updating dimension:', error);
+      toast.error('Det oppstod en feil ved oppdatering av dimensjon');
+    }
   };
 
   /** Type modal (shared) */
@@ -211,14 +320,28 @@ export function Dimensions(): ReactElement {
       return next;
     });
   };
+console.log(dimensionTypes,"dimensionTypes");
+  const handleOpenTypeModal = () => {
+    const level = createAtPath?.length || 0;
+    setCurrentLevel(level);
+    
+    // Reset all dimension types and only set the current level active
+    setDimensionTypes(prev => prev.map((d, i) => ({
+      ...d,
+      active: i === level
+    })));
+    
+    setShowTypeModal(true);
+  };
 
   const handleSaveDimensionTypes = () => {
-    const activeTypes = dimensionTypes.filter((d) => d.active).map((d) => d.type).join(" < ");
+    const activeType = dimensionTypes.find(d => d.active)?.type || '';
     if (editingDimension) {
-      setEditDimensionData((prev) => ({ ...prev, type: activeTypes }));
+      setEditDimensionData((prev) => ({ ...prev, type: activeType }));
     } else if (isCreating) {
-      setNewDimension((prev) => ({ ...prev, type: activeTypes }));
+      setNewDimension((prev) => ({ ...prev, type: activeType }));
     }
+    
     setShowTypeModal(false);
     setTimeout(returnFocusAfterTypePick, 0);
   };
@@ -247,11 +370,13 @@ export function Dimensions(): ReactElement {
             <div className="flex justify-start">
               <Button
                 variant="green"
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setShowEmptyState(false);
                   setIsCreating(true);
                   setCreateAtPath([]);
                   setNewDimension({ name: "", type: "", budget: "", cents: "" });
+                  setCurrentLevel(0)
                 }}
               >
                 <PlusIcon className="h-4 w-4" />
@@ -287,6 +412,7 @@ export function Dimensions(): ReactElement {
                     setIsCreating(true);
                     setCreateAtPath([]);
                     setNewDimension({ name: "", type: "", budget: "", cents: "" });
+                    setCurrentLevel(0)
                   }}
                   className="text-[#0F1912] hover:text-[#0F1912] hover:bg-[#F3FAF7] border-[#C1C4C2]"
                 >
@@ -360,7 +486,7 @@ export function Dimensions(): ReactElement {
                   handleAddDimension={handleAddDimension}
                   cancelNew={cancelNew}
                   inputRef={newNameRef}
-                  onOpenTypeModal={() => setShowTypeModal(true)}
+                  onOpenTypeModal={handleOpenTypeModal}
                 />
               )}
 
@@ -392,7 +518,7 @@ export function Dimensions(): ReactElement {
                   handleAddDimension={handleAddDimension}
                   cancelNew={cancelNew}
                   newNameRef={newNameRef}
-                  onOpenTypeModal={() => setShowTypeModal(true)}
+                  onOpenTypeModal={handleOpenTypeModal}
                 />
               ))}
             </tbody>
@@ -408,6 +534,7 @@ export function Dimensions(): ReactElement {
         handleTypeChange={handleTypeChange}
         onSave={handleSaveDimensionTypes}
         onAfterCloseFocus={returnFocusAfterTypePick}
+        currentLevel={currentLevel}
       />
 
       <DeleteConfirmModal

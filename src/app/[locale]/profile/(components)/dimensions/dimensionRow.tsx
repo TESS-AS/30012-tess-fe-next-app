@@ -38,7 +38,7 @@ type Props = {
   saveEdit: () => void;
   addSubcategory: (path: string[]) => void;
   setShowDeleteModal: (v: boolean) => void;
-  setDimensionToDelete: (v: { id: string; name: string; path: string[] } | null) => void;
+  setDimensionToDelete: (v: { id: string; name: string; level: string; path: string[] } | null) => void;
 
   isCreating: boolean;
   createAtPath: string[] | null;
@@ -81,6 +81,8 @@ export default function DimensionRow(props: Props): ReactElement {
   } = props;
 
   const isEditingThis = editingDimension?.id === dimension.id;
+
+  console.log("dimension", dimension)
 
   return (
     <Fragment key={dimension.id}>
@@ -197,7 +199,7 @@ export default function DimensionRow(props: Props): ReactElement {
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button
+                      {level < 2 && <button
                         className="p-0.5 border border-[#5A615D] rounded-full cursor-pointer hover:bg-[#E8EAE9] hover:border-[#C1C4C2] hover:text-[#009640]"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -205,7 +207,7 @@ export default function DimensionRow(props: Props): ReactElement {
                         }}
                       >
                         <PlusIcon className="h-4 w-4" />
-                      </button>
+                      </button>}
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>Legg til underkategori</p>
@@ -237,7 +239,7 @@ export default function DimensionRow(props: Props): ReactElement {
                     <DropdownMenuItem
                       className="gap-2 text-sm cursor-pointer hover:bg-[#F3FAF7] text-[#C81E1E] hover:text-[#C81E1E]"
                       onClick={() => {
-                        setDimensionToDelete({ id: dimension.id, name: dimension.name, path });
+                        setDimensionToDelete({ id: dimension.id, name: dimension.name, level: (level + 1).toString(), path });
                         setShowDeleteModal(true);
                       }}
                     >
