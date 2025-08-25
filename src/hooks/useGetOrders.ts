@@ -16,7 +16,7 @@ interface OrdersApiResponse {
 		pageSize: number;
 		totalPages: number;
 		totalItems: number;
-	}
+	};
 }
 
 export interface OrderFilters {

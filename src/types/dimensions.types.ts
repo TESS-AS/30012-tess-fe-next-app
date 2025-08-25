@@ -73,8 +73,8 @@ export interface Dimension {
 	budget: string;
 	children?: Dimension[];
 	isExpanded?: boolean;
-  }
-  
+}
+
 export interface DimensionType {
 	dimension: string;
 	type: string;

@@ -1,139 +1,162 @@
 "use client";
 
+import { useState } from "react";
+
 import OrdersTab from "@/app/[locale]/profile/(components)/tabs/OrdersTab/OrdersTab";
 import PersonalInfoTab from "@/app/[locale]/profile/(components)/tabs/PersonalInfoTab";
 import UserAddressesTab from "@/app/[locale]/profile/(components)/tabs/UserAdresses/UserAddressesTab";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
-import { SidebarNav } from "./(components)/sidebar-nav";
-import { ShoppingCart, ArrowRight, Folder, User, Settings, LogOut, ClipboardList, FileText } from "lucide-react";
 import { profileTabs } from "@/constants/profileTabs";
-import { useState } from "react";
+import { cn } from "@/lib/utils";
+import {
+	ShoppingCart,
+	ArrowRight,
+	Folder,
+	User,
+	Settings,
+	LogOut,
+	ClipboardList,
+	FileText,
+} from "lucide-react";
+
+import { Dimensions } from "./(components)/dimensions";
 import { MineBestillinger } from "./(components)/mine-bestillinger";
-import { Rekvisisjoner } from "./(components)/rekvisisjoner";
 import { OrdreDetaljer } from "./(components)/ordre-detaljer";
 import { OrdreHistorikk } from "./(components)/ordre-historikk";
-import { Dimensions } from "./(components)/dimensions";
+import { Rekvisisjoner } from "./(components)/rekvisisjoner";
+import { SidebarNav } from "./(components)/sidebar-nav";
 
 export default function ProfilePage() {
-  const [activeMode, setActiveMode] = useState<"hose" | "ehandel">("ehandel");
-  const [activeTab, setActiveTab] = useState("mine-bestillinger");
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+	const [activeMode, setActiveMode] = useState<"hose" | "ehandel">("ehandel");
+	const [activeTab, setActiveTab] = useState("mine-bestillinger");
+	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+	const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
 	return (
-		<main className="mt-6 min-h-screen ">
+		<main className="mt-6 min-h-screen">
 			<div className="mx-auto flex gap-6">
 				<Tabs
 					value={activeTab}
 					className="flex w-full gap-5">
 					<div className="h-full">
-						<SidebarNav 
+						<SidebarNav
 							activeMode={activeMode}
 							onModeChange={setActiveMode}
 							onTabChange={setActiveTab}
 							onCollapse={setIsSidebarCollapsed}
-							items={activeMode === "ehandel" 
-								? [
-									{
-										href: "#",
-										label: "Ordre",
-										icon: ShoppingCart,
-										subitems: [
+							items={
+								activeMode === "ehandel"
+									? [
 											{
-												href: "mine-bestillinger",
-												label: "Mine bestillinger"
+												href: "#",
+												label: "Ordre",
+												icon: ShoppingCart,
+												subitems: [
+													{
+														href: "mine-bestillinger",
+														label: "Mine bestillinger",
+													},
+													{
+														href: "rekvisisjoner",
+														label: "Rekvisisjoner",
+													},
+													{
+														href: "ordrehistorikk",
+														label: "Ordrehistorikk",
+													},
+												],
 											},
 											{
-												href: "rekvisisjoner",
-												label: "Rekvisisjoner"
+												href: "dimensions",
+												label: "Dimensjoner",
+												icon: Folder,
 											},
 											{
-												href: "ordrehistorikk",
-												label: "Ordrehistorikk"
-											}
+												href: "usage",
+												label: "Forbruk",
+												icon: User,
+											},
+											{
+												href: "users",
+												label: "Brukere",
+												icon: User,
+											},
+											{
+												href: "catalog",
+												label: "Katalog",
+												icon: User,
+											},
+											{
+												href: "settings",
+												label: "Innstillinger",
+												icon: Settings,
+											},
+											{
+												href: "settings-alt",
+												label: "Innstillinger",
+												icon: Settings,
+											},
+											{
+												href: "logout",
+												label: "Log out",
+												icon: LogOut,
+												variant: "logout",
+											},
 										]
-									},
-									{
-										href: "dimensions",
-										label: "Dimensjoner",
-										icon: Folder
-									},
-									{
-										href: "usage",
-										label: "Forbruk",
-										icon: User
-									},
-									{
-										href: "users",
-										label: "Brukere",
-										icon: User
-									},
-									{
-										href: "catalog",
-										label: "Katalog",
-										icon: User
-									},
-									{
-										href: "settings",
-										label: "Innstillinger",
-										icon: Settings
-									},
-									{
-										href: "settings-alt",
-										label: "Innstillinger",
-										icon: Settings
-									},
-									{
-										href: "logout",
-										label: "Log out",
-										icon: LogOut,
-										variant: "logout"
-									}
-								] : [
-									{
-										href: "hose-orders",
-										label: "Orders",
-										icon: ClipboardList
-									},
-									{
-										href: "hose-reports",
-										label: "Reports",
-										icon: FileText
-									},
-									{
-										href: "hose-settings",
-										label: "Settings",
-										icon: Settings
-									},
-									{
-										href: "logout",
-										label: "Log out",
-										icon: LogOut,
-										variant: "logout"
-									}
-								]
-							} 
+									: [
+											{
+												href: "hose-orders",
+												label: "Orders",
+												icon: ClipboardList,
+											},
+											{
+												href: "hose-reports",
+												label: "Reports",
+												icon: FileText,
+											},
+											{
+												href: "hose-settings",
+												label: "Settings",
+												icon: Settings,
+											},
+											{
+												href: "logout",
+												label: "Log out",
+												icon: LogOut,
+												variant: "logout",
+											},
+										]
+							}
 						/>
 					</div>
 
-					<div className={cn(
-						isSidebarCollapsed ? "w-[calc(100%-80px)]" : "w-[calc(100%-350px)]"
-					)}>
+					<div
+						className={cn(
+							isSidebarCollapsed
+								? "w-[calc(100%-80px)]"
+								: "w-[calc(100%-350px)]",
+						)}>
 						<TabsContent
 							value="personal-info"
 							className="mt-0">
 							<PersonalInfoTab />
 						</TabsContent>
 
-						<TabsContent value="mine-bestillinger" className="mt-0">
+						<TabsContent
+							value="mine-bestillinger"
+							className="mt-0">
 							{selectedOrderId ? (
-								<OrdreDetaljer orderId={selectedOrderId} onBack={() => setSelectedOrderId(null)} />
+								<OrdreDetaljer
+									orderId={selectedOrderId}
+									onBack={() => setSelectedOrderId(null)}
+								/>
 							) : (
 								<MineBestillinger onOrderClick={setSelectedOrderId} />
 							)}
 						</TabsContent>
-						<TabsContent value="rekvisisjoner" className="mt-0">
+						<TabsContent
+							value="rekvisisjoner"
+							className="mt-0">
 							<Rekvisisjoner />
 						</TabsContent>
 

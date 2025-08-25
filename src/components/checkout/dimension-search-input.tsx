@@ -35,7 +35,7 @@ export const DimensionSearchInput = ({
 				const response = await searchDimensions(
 					level,
 					query.trim() || undefined,
-					level > 1 ? parentId : undefined
+					level > 1 ? parentId : undefined,
 				);
 				setResults(response || []);
 			} catch (error) {
@@ -68,24 +68,25 @@ export const DimensionSearchInput = ({
 					setTimeout(() => setIsFocused(false), 200);
 				}}
 			/>
-			{isVisible && isFocused && value !== "" && (
-				results.length > 0 ? (
-				<div className="absolute z-[999999] mt-1 h-[160px] w-full overflow-auto rounded-md border bg-white shadow">
-					{(results ?? []).map((dimension) => (
-						<div
-							key={dimension.dimensionId}
-							className="cursor-pointer p-2 hover:bg-gray-100"
-							onClick={() => handleSelect(dimension)}>
-							{dimension.dimensionName} ({dimension.customerNumber})
-						</div>
-					))}
-				</div>
+			{isVisible &&
+				isFocused &&
+				value !== "" &&
+				(results.length > 0 ? (
+					<div className="absolute z-[999999] mt-1 h-[160px] w-full overflow-auto rounded-md border bg-white shadow">
+						{(results ?? []).map((dimension) => (
+							<div
+								key={dimension.dimensionId}
+								className="cursor-pointer p-2 hover:bg-gray-100"
+								onClick={() => handleSelect(dimension)}>
+								{dimension.dimensionName} ({dimension.customerNumber})
+							</div>
+						))}
+					</div>
 				) : (
 					<div className="absolute z-[999999] mt-1 w-full rounded-md border bg-white p-4 text-center text-gray-500 shadow">
 						Ingen resultater funnet
 					</div>
-				)
-			)}
+				))}
 		</div>
 	);
 };

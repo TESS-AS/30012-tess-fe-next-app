@@ -9,7 +9,7 @@ import {
 import axiosInstance from "./axiosClient";
 
 export async function createDimension(
-	payload: CreateCustomerDimensions
+	payload: CreateCustomerDimensions,
 ): Promise<{ success: boolean; data: object }> {
 	try {
 		const response = await axiosInstance.post(
@@ -24,16 +24,16 @@ export async function createDimension(
 }
 
 export const updateDimension = async (payload: {
-	dimensionName: string;
+	oldDimensionName: string;
 	dimensionType: string;
-	dimensionValue: string;
+	dimensionName: string;
 	budget: number;
 	customerNumber: string;
 }): Promise<{ success: boolean; data: object }> => {
 	try {
 		const response = await axiosInstance.put(
-			'/dimension/updateDimension',
-			payload
+			"/dimension/updateDimension",
+			payload,
 		);
 		return response.data;
 	} catch (error) {
@@ -41,7 +41,6 @@ export const updateDimension = async (payload: {
 		throw error;
 	}
 };
-
 
 export async function createUserDimensions(
 	payload: CreateUserDimensions,
@@ -71,7 +70,7 @@ export const deleteCustomerDimensions = async (
 					dimensionId,
 					type: Number(type),
 				},
-			}
+			},
 		);
 		return response.data;
 	} catch (error) {
@@ -128,7 +127,7 @@ export const updateUserDimensions = async (
 export const searchDimensions = async (
 	dimType: number,
 	searchTerm?: string,
-	parentId?: string
+	parentId?: string,
 ): Promise<SearchDimensionResponse[]> => {
 	try {
 		const params = {
@@ -137,14 +136,14 @@ export const searchDimensions = async (
 			parentId,
 		};
 
-		const response = await axiosInstance.get('/dimension/dimensionSearch', { 
+		const response = await axiosInstance.get("/dimension/dimensionSearch", {
 			params,
 			paramsSerializer: (params) => {
 				return Object.entries(params)
 					.filter(([_, value]) => value !== undefined)
 					.map(([key, value]) => `${key}=${encodeURIComponent(value!)}`)
-					.join('&');
-			}
+					.join("&");
+			},
 		});
 		return response.data;
 	} catch (error) {
