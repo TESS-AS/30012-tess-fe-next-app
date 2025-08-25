@@ -8,12 +8,12 @@ import {
 
 import axiosInstance from "./axiosClient";
 
-export async function createCustomerDimensions(
+export async function createDimension(
 	payload: CreateCustomerDimensions,
 ): Promise<{ success: boolean; data: object }> {
 	try {
 		const response = await axiosInstance.post(
-			"/dimension/createCustomerDimension",
+			`/dimension/createDimension`,
 			payload,
 		);
 		return response.data;
@@ -22,6 +22,25 @@ export async function createCustomerDimensions(
 		throw error;
 	}
 }
+
+export const updateDimension = async (payload: {
+	oldDimensionName: string;
+	dimensionType: string;
+	dimensionName: string;
+	budget: number;
+	customerNumber: string;
+}): Promise<{ success: boolean; data: object }> => {
+	try {
+		const response = await axiosInstance.put(
+			"/dimension/updateDimension",
+			payload,
+		);
+		return response.data;
+	} catch (error) {
+		console.error("Error updating dimension:", error);
+		throw error;
+	}
+};
 
 export async function createUserDimensions(
 	payload: CreateUserDimensions,
@@ -40,10 +59,18 @@ export async function createUserDimensions(
 
 export const deleteCustomerDimensions = async (
 	customerNumber: string,
-): Promise<{ dimensionId: number; type: number }> => {
+	dimensionId: string,
+	type: string,
+): Promise<{ message: string }> => {
 	try {
 		const response = await axiosInstance.delete(
 			`/dimension/deleteCustomerDimension/${customerNumber}`,
+			{
+				data: {
+					dimensionId,
+					type: Number(type),
+				},
+			},
 		);
 		return response.data;
 	} catch (error) {
@@ -98,13 +125,26 @@ export const updateUserDimensions = async (
 };
 
 export const searchDimensions = async (
-	type: number,
-	search: string,
+	dimType: number,
+	searchTerm?: string,
+	parentId?: string,
 ): Promise<SearchDimensionResponse[]> => {
 	try {
-		const response = await axiosInstance.get(
-			`/dimension/dimensionSearch/${type}/${search}`,
-		);
+		const params = {
+			dimType,
+			searchTerm,
+			parentId,
+		};
+
+		const response = await axiosInstance.get("/dimension/dimensionSearch", {
+			params,
+			paramsSerializer: (params) => {
+				return Object.entries(params)
+					.filter(([_, value]) => value !== undefined)
+					.map(([key, value]) => `${key}=${encodeURIComponent(value!)}`)
+					.join("&");
+			},
+		});
 		return response.data;
 	} catch (error) {
 		console.error("Error searching dimensions:", error);

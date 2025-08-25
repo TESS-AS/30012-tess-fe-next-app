@@ -37,6 +37,9 @@ export const UserDimensionsInput: React.FC<Props> = ({
 	const [userDimensionOne, setUserDimensionOne] = useState("");
 	const [userDimensionTwo, setUserDimensionTwo] = useState("");
 	const [userDimensionThree, setUserDimensionThree] = useState("");
+	const [userDimensionOneId, setUserDimensionOneId] = useState("");
+	const [userDimensionTwoId, setUserDimensionTwoId] = useState("");
+	const [userDimensionThreeId, setUserDimensionThreeId] = useState("");
 	const [activeDimension, setActiveDimension] = useState<number | null>(null);
 	const [dimension1Options, setDimension1Options] = useState<
 		{ label: string; value: string }[]
@@ -250,12 +253,14 @@ export const UserDimensionsInput: React.FC<Props> = ({
 						level={1}
 						value={userDimensionOne}
 						onChange={(value) => {
+							console.log(value, "value");
 							setUserDimensionOne(value);
 							setActiveDimension(value ? 1 : null);
 						}}
 						placeholder={t("dimension1")}
 						onSelect={(dim) => {
 							setUserDimensionOne(dim.dimensionName);
+							setUserDimensionOneId(dim.dimensionId.toString());
 							setActiveDimension(null);
 							setOrderData((prev) => ({
 								...prev,
@@ -278,6 +283,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 						placeholder={t("dimension2")}
 						onSelect={(dim) => {
 							setUserDimensionTwo(dim.dimensionName);
+							setUserDimensionTwoId(dim.dimensionId.toString());
 							setActiveDimension(null);
 							setOrderData((prev) => ({
 								...prev,
@@ -288,6 +294,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 							}));
 						}}
 						isVisible={activeDimension === null || activeDimension === 2}
+						parentId={userDimensionOneId}
 					/>
 
 					<DimensionSearchInput
@@ -300,6 +307,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 						placeholder={t("dimension3")}
 						onSelect={(dim) => {
 							setUserDimensionThree(dim.dimensionName);
+							setUserDimensionThreeId(dim.dimensionId.toString());
 							setActiveDimension(null);
 							setOrderData((prev) => ({
 								...prev,
@@ -310,6 +318,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 							}));
 						}}
 						isVisible={activeDimension === null || activeDimension === 3}
+						parentId={userDimensionTwoId}
 					/>
 				</div>
 			)}

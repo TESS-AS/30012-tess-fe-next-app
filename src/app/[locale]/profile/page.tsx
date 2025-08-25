@@ -1,41 +1,177 @@
 "use client";
 
+import { useState } from "react";
+
 import OrdersTab from "@/app/[locale]/profile/(components)/tabs/OrdersTab/OrdersTab";
 import PersonalInfoTab from "@/app/[locale]/profile/(components)/tabs/PersonalInfoTab";
 import UserAddressesTab from "@/app/[locale]/profile/(components)/tabs/UserAdresses/UserAddressesTab";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { profileTabs } from "@/constants/profileTabs";
+import { cn } from "@/lib/utils";
+import {
+	ShoppingCart,
+	ArrowRight,
+	Folder,
+	User,
+	Settings,
+	LogOut,
+	ClipboardList,
+	FileText,
+} from "lucide-react";
+
+import { Dimensions } from "./(components)/dimensions";
+import { MineBestillinger } from "./(components)/mine-bestillinger";
+import { OrdreDetaljer } from "./(components)/ordre-detaljer";
+import { OrdreHistorikk } from "./(components)/ordre-historikk";
+import { Rekvisisjoner } from "./(components)/rekvisisjoner";
+import { SidebarNav } from "./(components)/sidebar-nav";
 
 export default function ProfilePage() {
+	const [activeMode, setActiveMode] = useState<"hose" | "ehandel">("ehandel");
+	const [activeTab, setActiveTab] = useState("mine-bestillinger");
+	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+	const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+
 	return (
-		<main className="mt-6 min-h-screen bg-white">
+		<main className="my-6 min-h-screen">
 			<div className="mx-auto flex gap-6">
 				<Tabs
-					defaultValue="personal-info"
+					value={activeTab}
 					className="flex w-full gap-5">
-					<TabsList className="flex h-fit w-1/4 flex-col gap-2 rounded-md border bg-white p-4">
-						<>
-							{profileTabs.map(({ value, label, icon: Icon }) => (
-								<TabsTrigger
-									key={value}
-									value={value}
-									className="mt-2 w-full justify-start gap-2 hover:text-green-600 data-[state=active]:text-green-600">
-									<Icon className="h-4 w-4" />
-									{label}
-								</TabsTrigger>
-							))}
-						</>
-					</TabsList>
+					<div className="h-full">
+						<SidebarNav
+							activeMode={activeMode}
+							onModeChange={setActiveMode}
+							onTabChange={setActiveTab}
+							onCollapse={setIsSidebarCollapsed}
+							items={
+								activeMode === "ehandel"
+									? [
+											{
+												href: "#",
+												label: "Ordre",
+												icon: ShoppingCart,
+												subitems: [
+													{
+														href: "mine-bestillinger",
+														label: "Mine bestillinger",
+													},
+													{
+														href: "rekvisisjoner",
+														label: "Rekvisisjoner",
+													},
+													{
+														href: "ordrehistorikk",
+														label: "Ordrehistorikk",
+													},
+												],
+											},
+											{
+												href: "dimensions",
+												label: "Dimensjoner",
+												icon: Folder,
+											},
+											{
+												href: "usage",
+												label: "Forbruk",
+												icon: User,
+											},
+											{
+												href: "users",
+												label: "Brukere",
+												icon: User,
+											},
+											{
+												href: "catalog",
+												label: "Katalog",
+												icon: User,
+											},
+											{
+												href: "settings",
+												label: "Innstillinger",
+												icon: Settings,
+											},
+											{
+												href: "settings-alt",
+												label: "Innstillinger",
+												icon: Settings,
+											},
+											{
+												href: "logout",
+												label: "Log out",
+												icon: LogOut,
+												variant: "logout",
+											},
+										]
+									: [
+											{
+												href: "hose-orders",
+												label: "Orders",
+												icon: ClipboardList,
+											},
+											{
+												href: "hose-reports",
+												label: "Reports",
+												icon: FileText,
+											},
+											{
+												href: "hose-settings",
+												label: "Settings",
+												icon: Settings,
+											},
+											{
+												href: "logout",
+												label: "Log out",
+												icon: LogOut,
+												variant: "logout",
+											},
+										]
+							}
+						/>
+					</div>
 
-					<div className="w-3/4">
+					<div
+						className={cn(
+							isSidebarCollapsed
+								? "w-[calc(100%-80px)]"
+								: "w-[calc(100%-350px)]",
+						)}>
 						<TabsContent
 							value="personal-info"
 							className="mt-0">
 							<PersonalInfoTab />
 						</TabsContent>
 
+						<TabsContent
+							value="mine-bestillinger"
+							className="mt-0">
+							{selectedOrderId ? (
+								<OrdreDetaljer
+									orderId={selectedOrderId}
+									onBack={() => setSelectedOrderId(null)}
+								/>
+							) : (
+								<MineBestillinger onOrderClick={setSelectedOrderId} />
+							)}
+						</TabsContent>
+						<TabsContent
+							value="rekvisisjoner"
+							className="mt-0">
+							<Rekvisisjoner />
+						</TabsContent>
+
+						<TabsContent
+							value="ordrehistorikk"
+							className="mt-0">
+							<OrdreHistorikk />
+						</TabsContent>
+
 						<TabsContent value="addresses">
 							<UserAddressesTab />
+						</TabsContent>
+
+						<TabsContent value="dimensions">
+							<Dimensions />
 						</TabsContent>
 
 						<TabsContent value="orders">

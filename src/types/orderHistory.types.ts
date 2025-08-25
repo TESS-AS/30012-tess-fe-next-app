@@ -1,73 +1,76 @@
 export type OrderStatus =
-	| "Something Wrong"
-	| "Written"
-	| "Confirmed"
-	| "Picked"
-	| "Packed"
-	| "Shipped"
-	| "Invoiced";
+	| "Kansellert"
+	| "Mottatt"
+	| "Bekreftet"
+	| "Plukket"
+	| "Pakket"
+	| "Under transport"
+	| "Levert";
 
 export const mapLineStatusToOrderStatus = (status: number): OrderStatus => {
 	switch (status) {
 		case 0:
-			return "Something Wrong";
+			return "Kansellert";
 		case 10:
-			return "Written";
+			return "Mottatt";
 		case 20:
-			return "Confirmed";
+			return "Bekreftet";
 		case 30:
-			return "Picked";
+			return "Plukket";
 		case 40:
-			return "Packed";
+			return "Pakket";
 		case 45:
-			return "Shipped";
+			return "Under transport";
 		case 50:
 		case 60:
-			return "Invoiced";
+			return "Levert";
 		default:
-			return "Something Wrong";
+			return "Kansellert";
 	}
 };
 
 export function getStatusBadgeProps(status: OrderStatus) {
 	switch (status) {
-		case "Invoiced":
+		case "Levert":
 			return {
 				variant: "secondary" as const,
 				className: "text-green-600 border-green-600 bg-green-100",
 			};
-		case "Packed":
+		case "Pakket":
 			return {
 				variant: "default" as const,
 				className: "text-yellow-700 border-yellow-700 bg-yellow-100",
 			};
-		case "Shipped":
+		case "Under transport":
 			return {
 				variant: "default" as const,
 				className: "text-indigo-700 border-indigo-700 bg-indigo-100",
 			};
-		case "Picked":
+		case "Plukket":
 			return {
 				variant: "default" as const,
 				className: "text-purple-700 border-purple-700 bg-purple-100",
 			};
-		case "Confirmed":
+		case "Bekreftet":
 			return {
 				variant: "default" as const,
 				className: "text-blue-700 border-blue-700 bg-blue-100",
 			};
-		case "Written":
+		case "Mottatt":
 			return {
 				variant: "default" as const,
-				className: "text-sky-700 border-sky-700 bg-sky-100",
+				className: "text-green-700 border-green-700 bg-green-100",
 			};
-		case "Something Wrong":
+		case "Kansellert":
 			return {
 				variant: "destructive" as const,
 				className: "text-red-700 border-red-700 bg-red-100",
 			};
 		default:
-			return { variant: "outline" as const };
+			return {
+				variant: "default" as const,
+				className: "text-gray-700 border-gray-700 bg-gray-100",
+			};
 	}
 }
 

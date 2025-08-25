@@ -9,6 +9,16 @@ import {
 	OrderResponse,
 } from "@/types/orderHistory.types";
 
+interface OrdersApiResponse {
+	data: OrderResponse[];
+	meta: {
+		page: number;
+		pageSize: number;
+		totalPages: number;
+		totalItems: number;
+	};
+}
+
 export interface OrderFilters {
 	orderNumber?: number;
 	invoiceNumber?: string;
@@ -19,13 +29,14 @@ export interface OrderFilters {
 
 export function useGetOrders(
 	page: number,
-	perPage: number = 3,
+	perPage: number = 10,
 	filters: OrderFilters = {},
 ) {
 	const { data: profile, isLoading: isProfileLoading } = useGetProfileData();
 	const [data, setData] = useState<OrderItems[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [totalPages, setTotalPages] = useState(1);
+	const [totalItems, setTotalItems] = useState(0);
 
 	useEffect(() => {
 		if (isProfileLoading || !profile?.customerNumbers?.length) return;
@@ -44,9 +55,9 @@ export function useGetOrders(
 		};
 
 		axiosClient
-			.get<OrderResponse[]>(`/order/${customerNumber}`, { params })
+			.get<OrdersApiResponse>(`/order/${customerNumber}`, { params })
 			.then((res) => {
-				const mapped: OrderItems[] = res.data.map((order) => {
+				const mapped: OrderItems[] = res.data.data.map((order) => {
 					const maxStatus = Math.max(
 						...order.orderLines.map((line) => line.lineStatus),
 					);
@@ -59,11 +70,14 @@ export function useGetOrders(
 					};
 				});
 				setData(mapped);
-				setTotalPages(Math.ceil(res.data.length / perPage));
+				setTotalPages(res.data.meta.totalPages);
+				setTotalItems(res.data.meta.totalItems);
 			})
 			.catch((err) => {
 				console.error("Failed to fetch orders:", err);
 				setData([]);
+				setTotalPages(0);
+				setTotalItems(0);
 			})
 			.finally(() => {
 				setIsLoading(false);
@@ -74,5 +88,6 @@ export function useGetOrders(
 		data,
 		isLoading,
 		totalPages,
+		totalItems,
 	};
 }
