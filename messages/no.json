@@ -45,7 +45,7 @@
 		"noVariants": "Ingen varianter funnet",
 		"addedToCart": "Legget til i kassen",
 		"errorAddingToCart": "Kunne ikke legge til i kassen",
-		"selectWarehouse": "Vennligst velg en lagerstasjon",
+		"selectWarehouse": "Velg lager",
 		"selectWarehouseFirst": "Vennligst velg en lagerstasjon først",
 		"noBalanceForWarehouse": "Ingen balanse tilgjengelig for denne lagerstasjonen",
 		"noDescriptionAvailable": "Ingen beskrivelse er tilgjengelig for dette produktet.",

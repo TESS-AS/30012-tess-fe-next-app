@@ -371,7 +371,7 @@ export default function ProductVariantTable({
 									)}
 									{visibleCols.price && (
 										<TableCell>
-											{prices[variant.itemNumber]?.toFixed(2) || "0.00"},- kr
+											{prices[variant.itemNumber]?.toFixed(2) || "0.00"} kr
 										</TableCell>
 									)}
 									{visibleCols.quantity && (

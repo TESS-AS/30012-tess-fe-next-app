@@ -49,68 +49,68 @@ const mockRekvisisjoner: Rekvisisjon[] = [
 		orderId: "#FWB127364372",
 		bestiller: "Lars Hansen",
 		opprettet: "09 Mar 2025",
-		pris: "466.00,-",
+		pris: "466.00",
 		status: "Venter godkjenning",
 		items: [
 			{
 				name: "TESSGULL-GULLSLANGE BLÅ",
 				sku: "P_65033",
 				quantity: 5,
-				price: "133.00,-",
+				price: "133.00",
 			},
 			{
 				name: "TESSGULL-GULLSLANGE BLÅ",
 				sku: "P_65033",
 				quantity: 5,
-				price: "133.00,-",
+				price: "133.00",
 			},
 			{
 				name: "TESSGULL-GULLSLANGE BLÅ",
 				sku: "P_65033",
 				quantity: 5,
-				price: "133.00,-",
+				price: "133.00",
 			},
 			{
 				name: "TESSGULL-GULLSLANGE BLÅ",
 				sku: "P_65033",
 				quantity: 5,
-				price: "133.00,-",
+				price: "133.00",
 			},
 			{
 				name: "TESSGULL-GULLSLANGE BLÅ",
 				sku: "P_65033",
 				quantity: 5,
-				price: "133.00,-",
+				price: "133.00",
 			},
 			{
 				name: "TESSGULL-GULLSLANGE BLÅ",
 				sku: "P_65033",
 				quantity: 5,
-				price: "133.00,-",
+				price: "133.00",
 			},
 			{
 				name: "TESSGULL-GULLSLANGE BLÅ",
 				sku: "P_65033",
 				quantity: 5,
-				price: "133.00,-",
+				price: "133.00",
 			},
 			{
 				name: "TESSGULL-GULLSLANGE BLÅ",
 				sku: "P_65033",
 				quantity: 5,
-				price: "133.00,-",
+				price: "133.00",
 			},
 			{
 				name: "TESSGULL-GULLSLANGE BLÅ",
 				sku: "P_65033",
 				quantity: 5,
-				price: "133.00,-",
+				price: "133.00",
 			},
 			{
 				name: "TESSGULL-GULLSLANGE BLÅ",
 				sku: "P_65033",
 				quantity: 5,
-				price: "133.00,-",
+				price: "133.00",
 			},
 		],
 	},
@@ -118,14 +118,14 @@ const mockRekvisisjoner: Rekvisisjon[] = [
 		orderId: "#FWB125467980",
 		bestiller: "Kari Nordahl",
 		opprettet: "12 Mar 2025",
-		pris: "245.00,-",
+		pris: "245.00",
 		status: "Venter godkjenning",
 		items: [
 			{
 				name: "TESSGULL-GULLSLANGE BLÅ",
 				sku: "P_65033",
 				quantity: 5,
-				price: "133.00,-",
+				price: "133.00",
 			},
 		],
 	},
@@ -133,14 +133,14 @@ const mockRekvisisjoner: Rekvisisjon[] = [
 		orderId: "#FWB139485607",
 		bestiller: "Erik Johansen",
 		opprettet: "19 Mar 2025",
-		pris: "2000.00,-",
+		pris: "2000.00",
 		status: "Godkjent",
 		items: [
 			{
 				name: "TESSGULL-GULLSLANGE HVIT",
 				sku: "P_65034",
 				quantity: 3,
-				price: "133.00,-",
+				price: "133.00",
 			},
 		],
 	},
@@ -148,14 +148,14 @@ const mockRekvisisjoner: Rekvisisjon[] = [
 		orderId: "#FWB137364371",
 		bestiller: "Lars Hansen",
 		opprettet: "23 Apr 2025",
-		pris: "90.00,-",
+		pris: "90.00",
 		status: "Godkjent",
 		items: [
 			{
 				name: "TESSGULL-GULLSLANGE HVIT",
 				sku: "P_65034",
 				quantity: 3,
-				price: "133.00,-",
+				price: "133.00",
 			},
 		],
 	},
@@ -163,20 +163,20 @@ const mockRekvisisjoner: Rekvisisjon[] = [
 		orderId: "#FWB148273645",
 		bestiller: "Lars Hansen",
 		opprettet: "20 Apr 2025",
-		pris: "3040.00,-",
+		pris: "3040.00",
 		status: "Avvist",
 		items: [
 			{
 				name: "TESSGULL-GULLSLANGE BLÅ",
 				sku: "P_65033",
 				quantity: 5,
-				price: "133.00,-",
+				price: "133.00",
 			},
 			{
 				name: "TESSGULL-GULLSLANGE HVIT",
 				sku: "P_65034",
 				quantity: 5,
-				price: "133.00,-",
+				price: "133.00",
 			},
 		],
 	},
@@ -411,7 +411,7 @@ export function Rekvisisjoner() {
 												</div>
 											</td>
 											<td className="py-4">{item.quantity}</td>
-											<td className="py-4">{item.price},-</td>
+											<td className="py-4">{item.price}</td>
 										</tr>
 									))}
 								</tbody>

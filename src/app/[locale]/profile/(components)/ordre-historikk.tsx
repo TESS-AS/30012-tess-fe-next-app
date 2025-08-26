@@ -190,7 +190,7 @@ export function OrdreHistorikk() {
 		{
 			key: "total",
 			header: "PRIS",
-			cell: (order: Order) => `${order.total?.toFixed(2)},-`,
+			cell: (order: Order) => `${order.total?.toFixed(2)}`,
 			sortable: true,
 		},
 		{

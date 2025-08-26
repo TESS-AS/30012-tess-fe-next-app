@@ -276,7 +276,7 @@ export default function Header() {
 								{cartItems?.length}
 							</Badge>
 						</div>
-						{cartItems?.length > 0 ? `${totalPrice.toFixed(2)},-` : ""}
+						{cartItems?.length > 0 ? `${totalPrice.toFixed(2)}` : ""}
 						<span className="sr-only">Cart</span>
 					</Button>
 					{profile ? (
