@@ -122,7 +122,23 @@
 		"noSuggestions": "Ingen søkeforslag funnet",
 		"noProductsFound": "Ingen produkter funnet",
 		"seeMoreCategories": "Se flere kategorier",
-		"resultsTitle": "Dine treff"
+		"resultsTitle": "Dine treff",
+        "noResults": {
+          "title": "Ingen resultater funnet",
+          "description": "Beklager. Vi fant ingen produkter som matcher søket \"{query}\"",
+          "tipsTitle": "Tips for bedre søkeresultater:",
+          "tips": {
+            "checkSpelling": "Sjekk stave måten og prøv alternative skrivemåter",
+            "useFewerWords": "Bruk færre eller mer generelle søkeord",
+            "searchByType": "Søk på produkttype eller kategori i stedet",
+            "searchBySpec": "Prøv å søke på tekniske spesifikasjoner"
+          },
+          "help": {
+            "title": "Mangler du vare?",
+            "description": "Våre eksperter hjelper deg med å finne riktige produkter for dine behov.",
+            "email": "E-post: tess@tess.no"
+          }
+        }
 	},
 	"Seo": {
 		"defaultTitle": "TESS - Teknisk Faghandel | Netthandel",

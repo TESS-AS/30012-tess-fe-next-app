@@ -1,9 +1,10 @@
 "use client";
 
-import type React from "react";
+import React, { useRef } from "react";
 import { useEffect, useState } from "react";
 
 import CustomerNumberSwitcher from "@/components/customer-profile/customer-number-switcher";
+import { NoResults } from "@/components/empty-search-result";
 import CategoryNavigationMenu from "@/components/layouts/NavigationMenu/NavigationMenu";
 import { ProductItem } from "@/components/products/product-item-search";
 import SearchAside, { CategoryLink } from "@/components/search-aside";
@@ -34,10 +35,9 @@ import {
 } from "@/services/categories.service";
 import { getProductVariations } from "@/services/product.service";
 import { Category } from "@/types/categories.types";
-import { IProductSearch, ISuggestions } from "@/types/search.types";
+import { IProductSearch } from "@/types/search.types";
 import { ProfileUser } from "@/types/user.types";
 import {
-	ArrowRight,
 	Building,
 	ChevronDown,
 	MessageSquareText,
@@ -49,6 +49,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
+import { useSearchStore } from "@/lib/searchStore";
 
 export default function Header() {
 	const { categories, loading, error } = useCategories();
@@ -67,6 +68,8 @@ export default function Header() {
 	const [searchCategories, setSearchCategories] = useState<CategoryLink[]>([]);
 	const [profile, setProfile] = useState<ProfileUser | null>(null);
 	const [, setIsLoading] = useState(true);
+	const inputRef = useRef<HTMLInputElement>(null);
+	const { shouldFocus, resetFocus } = useSearchStore();
 
 	const { data: ssoProfile, isLoading: isSSOLoading } = useGetProfileData();
 	const { data: punchoutProfile, isLoading: isPunchoutLoading } =
@@ -81,6 +84,13 @@ export default function Header() {
 			setIsLoading(isSSOLoading);
 		}
 	}, [ssoProfile, punchoutProfile, isSSOLoading, isPunchoutLoading]);
+
+	useEffect(() => {
+		if (shouldFocus) {
+			inputRef.current?.focus();
+			resetFocus();
+		}
+	}, [shouldFocus, resetFocus]);
 
 	useEffect(() => {
 		if (searchQuery.trim()) {
@@ -202,6 +212,7 @@ export default function Header() {
 								placeholder={t("Common.searchProducts")}
 								className="bg-background color-[#5A615D] h-[50px] w-[537px] border-[#001E00] pl-8"
 								value={searchQuery}
+								ref={inputRef}
 								onChange={(e) => setSearchQuery(e.target.value)}
 							/>
 							<Button
@@ -227,7 +238,8 @@ export default function Header() {
 												{t("Search.resultsTitle", { default: "Dine treff" })}
 											</h3>
 											<span className="text-sm text-gray-500">
-												5 / {data.productRes.length} produkter
+												{data.productRes?.length} / {data.productRes.length}{" "}
+												produkter
 											</span>
 										</div>
 
@@ -254,9 +266,7 @@ export default function Header() {
 												);
 											})
 										) : (
-											<p className="text-opacity-30 text-sm text-green-600">
-												{t("Search.noProductsFound")}
-											</p>
+											<NoResults query={searchQuery} />
 										)}
 									</div>
 								</div>
