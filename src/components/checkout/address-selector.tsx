@@ -41,9 +41,9 @@ export const AddressSelector = ({
 				</div>
 				{savedAddresses
 					.filter((addr) => addr.type === "bruker")
-					.map((addr) => (
+					.map((addr, index) => (
 						<SelectItem
-							key={`${addr.type}-${addr.id}`}
+							key={`${addr.type}-${addr.id}-${addr.street}-${addr.houseNumber}-${index}`}
 							value={addr.id}
 							className="relative pr-24 pl-6">
 							<span className="block truncate">
@@ -71,9 +71,9 @@ export const AddressSelector = ({
 				</div>
 				{savedAddresses
 					.filter((addr) => addr.type === "kunde")
-					.map((addr) => (
+					.map((addr, index) => (
 						<SelectItem
-							key={`${addr.type}-${addr.id}`}
+							key={`${addr.type}-${addr.id}-${addr.street}-${addr.houseNumber}-${index}`}
 							value={addr.id}
 							className="relative pr-24 pl-6">
 							<span className="block truncate">
@@ -90,9 +90,9 @@ export const AddressSelector = ({
 				</div>
 				{savedAddresses
 					.filter((addr) => addr.type === "organisasjon")
-					.map((addr) => (
+					.map((addr, index) => (
 						<SelectItem
-							key={`${addr.type}-${addr.id}`}
+							key={`${addr.type}-${addr.id}-${addr.street}-${addr.houseNumber}-${index}`}
 							value={addr.id}
 							className="relative pr-32 pl-6">
 							<span className="block truncate">

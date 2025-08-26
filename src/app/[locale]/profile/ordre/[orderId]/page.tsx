@@ -5,7 +5,7 @@ import Link from "next/link";
 export default function OrderDetails({
 	params,
 }: {
-	params: { orderId: string };
+	params: Promise<{ orderId: string }>;
 }) {
 	// Mock data - replace with real data fetching
 	const orderDetails = {
@@ -38,14 +38,14 @@ export default function OrderDetails({
 				name: "HYLSE COBRATES",
 				sku: "P_65033",
 				quantity: 1,
-				price: "1049.50,-",
+				price: "1049.50",
 			},
 			{
 				image: "/path/to/product-image.jpg",
 				name: "HYLSE COBRATES",
 				sku: "P_65033",
 				quantity: 1,
-				price: "1049.50,-",
+				price: "1049.50",
 			},
 		],
 		summary: {
