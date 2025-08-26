@@ -145,6 +145,16 @@ export default function CheckoutPage() {
 					toast.error(t("Checkout.errors.selectAddress"));
 					return;
 				}
+
+				if (currentStep === 1) {
+					const { customersOrderReference, customerReference } = orderData.salesOrderHeader;
+					const accountPart3 = orderData.salesOrderLines?.[0]?.accountPart3;
+
+					if (!customersOrderReference) {
+						toast.error(t("Checkout.errors.dimensionsRequired"));
+						return;
+					}
+				}
 				goToNext();
 				return;
 			}
@@ -199,7 +209,7 @@ export default function CheckoutPage() {
 							</div>
 							{currentStep !== 2 && (
 								<div className="col-span-4">
-									<OrderSummary handleCheckout={handleCheckout} />
+									<OrderSummary handleCheckout={handleCheckout} currentStep={currentStep} />
 								</div>
 							)}
 						</div>
@@ -209,6 +219,7 @@ export default function CheckoutPage() {
 								<OrderSummary
 									handleCheckout={handleCheckout}
 									isCheckoutLoading={isCheckoutLoading}
+									currentStep={currentStep}
 								/>
 							</div>
 						)}

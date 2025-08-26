@@ -153,7 +153,22 @@
 		"archiveCart": "Archive Cart",
 		"viewCartHistory": "View Cart History",
 		"outOfStock": "Some items are out of stock at your selected warehouse",
-		"outOfStockMessage": "Some items are out of stock at your selected warehouse, and it may take up to 3 extra days to deliver them. Change the warehouse per item before placing the order if you want faster delivery."
+		"outOfStockMessage": "Some items are out of stock at your selected warehouse, and it may take up to 3 extra days to deliver them. Change the warehouse per item before placing the order if you want faster delivery.",
+		"cartHistory": "Cart History",
+		"date": "Date",
+		"userId": "User Id",
+		"article": "Articles",
+		"total": "Total Amount",
+		"view": "View",
+		"hide": "Hide",
+		"image": "Image",
+		"productNumber": "Product Number",
+		"itemNumber": "Item Number",
+		"quantity": "Quantity",
+		"warehouse": "Warehouse",
+		"company": "Company",
+		"page": "Page",
+		"of": "of"
 	},
 	"Login": {
 		"title": "Login",
@@ -181,8 +196,11 @@
 		"deliverySurcharge": "Surcharge",
 		"vat": "VAT(25%)",
 		"totalIncVat": "Total incl. VAT",
-		"continueToPayment": "Continue to payment",
+		"continueToPayment": "Continue to delivery",
 		"punchoutCart": "Punchout Cart",
+		"punchoutCartStep1": "Continue to payment",
+		"punchoutCartStep2": "Complete order",
+		"punchoutCartStep3": "Confirm",
 		"or": "or",
 		"continueShopping": "Continue shopping"
 	},
@@ -295,7 +313,8 @@
 		},
 		"errors": {
 			"selectAddress": "Please select an address",
-			"orderSubmissionFailed": "Order submission failed"
+			"orderSubmissionFailed": "Order submission failed",
+			"dimensionsRequired": "Please fill in all required dimension fields"
 		},
 		"feedback": {
 			"rating": "Rating",
@@ -369,10 +388,11 @@
 		"dimensions": {
 			"label": "User Dimension Input:",
 			"selectLabel": "User Dimensions",
-			"selectPlaceholder": "Select User Dimension",
-			"dimension1": "User Dimension 1",
-			"dimension2": "User Dimension 2",
-			"dimension3": "User Dimension 3",
+			"selectPlaceholder": "Select",
+			"reference": "Reference",
+			"dimension1": "Reference 1",
+			"dimension2": "Reference 2",
+			"dimension3": "Reference 3",
 			"modes": {
 				"select": "Select",
 				"search": "Search",

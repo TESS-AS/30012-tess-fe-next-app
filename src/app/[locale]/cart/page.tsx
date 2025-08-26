@@ -42,6 +42,7 @@ const CartPage = () => {
 	const t = useTranslations();
 	const currentLocale = useLocale();
 	const router = useRouter();
+	
 	const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
 	const [categoryPaths, setCategoryPaths] = useState<{
 		[key: string]: string[];
@@ -260,6 +261,7 @@ const CartPage = () => {
 					</div>
 					{!isLoading &&
 						cartItems?.map((item, idx) => {
+							console.log(item.productName)
 							return (
 								<React.Fragment key={idx}>
 									<div
@@ -299,7 +301,7 @@ const CartPage = () => {
 											<span className="color-[#0F1912] mb-2 font-medium hover:underline">
 												<Link
 													href={`/${categoryPaths[item.productNumber]?.join("/") || ""}/${item.productNumber}`}>
-													{item.productNumber}
+													{item.productName}
 												</Link>
 											</span>
 											<p
@@ -457,6 +459,7 @@ const CartPage = () => {
 				<OrderSummary
 					handleCheckout={handleCheckout}
 					isCheckoutLoading={isCheckoutLoading}
+					currentStep={null}
 				/>
 			</div>
 		</main>

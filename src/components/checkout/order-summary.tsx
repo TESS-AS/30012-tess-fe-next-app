@@ -2,8 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { PriceDisplay } from "@/components/ui/price-display";
+
 import { useOrderSummary } from "@/hooks/useOrderSummary";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
+import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import { Separator } from "@radix-ui/react-select";
 import { ArrowRight, Loader2 } from "lucide-react";
@@ -12,13 +14,17 @@ import { useTranslations } from "next-intl";
 interface OrderSummaryProps {
 	handleCheckout: () => void;
 	isCheckoutLoading?: boolean;
+	currentStep: number | null;
 }
 
 export default function OrderSummary({
 	handleCheckout,
 	isCheckoutLoading,
+	currentStep,
 }: OrderSummaryProps) {
+	const router = useRouter()
 	const t = useTranslations();
+
 	const { data: profile } = usePunchoutProfile();
 	const { cartItems, isLoading } = useAppContext();
 	const isCartEmpty = !cartItems || cartItems.length === 0 || isLoading;
@@ -44,7 +50,7 @@ export default function OrderSummary({
 				orderSummaryTotalPriceFromAppContext: 0,
 			}
 		: summary;
-
+console.log(currentStep,"currentStep")
 	return (
 		<div className="space-y-6">
 			<div className="bg-card border-lightGray rounded-lg border p-6">
@@ -93,7 +99,9 @@ export default function OrderSummary({
 						{isCheckoutLoading || isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
 						) : (
-							t("OrderSummary.continueToPayment")
+							t(currentStep === null
+							? "OrderSummary.continueToPayment"
+							: `OrderSummary.punchoutCartStep${currentStep + 1}`)
 						)}
 					</Button>
 				) : (
@@ -104,9 +112,7 @@ export default function OrderSummary({
 						onClick={handleCheckout}>
 						{isCheckoutLoading || isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
-						) : (
-							t("OrderSummary.punchoutCart")
-						)}
+						) : ("OrderSummary.punchoutCart")}
 					</Button>
 				)}
 
@@ -114,7 +120,7 @@ export default function OrderSummary({
 					variant="link"
 					className="mt-2 w-full hover:no-underline"
 					disabled={isCartEmpty || isCheckoutLoading}
-					onClick={handleCheckout}>
+					onClick={() => router.push('/')}>
 					<>
 						{isCheckoutLoading || isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
