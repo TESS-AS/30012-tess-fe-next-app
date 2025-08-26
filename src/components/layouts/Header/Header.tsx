@@ -28,6 +28,7 @@ import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import { useCategories } from "@/lib/CategoriesProvider";
+import { useSearchStore } from "@/lib/searchStore";
 import axiosClient from "@/services/axiosClient";
 import {
 	loadCategoryTree,
@@ -49,7 +50,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
-import { useSearchStore } from "@/lib/searchStore";
 
 export default function Header() {
 	const { categories, loading, error } = useCategories();
