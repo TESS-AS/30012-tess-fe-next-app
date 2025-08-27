@@ -149,7 +149,7 @@ export default function StepConfirmation({
 								<div className="flex items-center gap-50">
 									<p className="font-medium text-[#0F1912]">x{item.quantity}</p>
 									<p className="text-lg font-bold whitespace-nowrap">
-										{calculatedPrices[item.itemNumber].toFixed(2)},–
+										{calculatedPrices[item?.itemNumber]?.toFixed(2) || 0}
 									</p>
 								</div>
 							</div>

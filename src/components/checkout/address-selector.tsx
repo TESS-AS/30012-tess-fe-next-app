@@ -41,9 +41,9 @@ export const AddressSelector = ({
 				</div>
 				{savedAddresses
 					.filter((addr) => addr.type === "bruker")
-					.map((addr) => (
+					.map((addr, key) => (
 						<SelectItem
-							key={`${addr.type}-${addr.id}`}
+							key={`${addr.type}-${addr.id}-${key}`}
 							value={addr.id}
 							className="relative pr-24 pl-6">
 							<span className="block truncate">
