@@ -95,9 +95,8 @@ export default async function ProductPage({
 			locale === "en" ? productData.applicationEn : productData.applicationNo,
 		users: locale === "en" ? productData.usersEn : productData.usersNo,
 		remarks: locale === "en" ? productData.remarksEn : productData.remarksNo,
+		usp: productData.usp,
 	};
-
-	console.log(productData, "pooo");
 
 	return (
 		<div className="container mx-auto space-y-12 px-4 py-8">
@@ -128,6 +127,7 @@ export default async function ProductPage({
 						application={localizedContent.application}
 						users={localizedContent.users}
 						remarks={localizedContent.remarks}
+						usp={localizedContent.usp}
 					/>
 				</div>
 			</div>

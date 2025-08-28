@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IAttribute } from "@/types/product.types";
@@ -15,15 +15,16 @@ interface ProductDetailsProps {
 	users?: string;
 	remarks?: string;
 	productNumber?: string;
+	usp?: Record<string, string>;
 }
 
 export function ProductDetails({
-	description,
 	productNumber,
 	technicalInfo,
 	application,
 	users,
 	remarks,
+	usp,
 }: ProductDetailsProps) {
 	const t = useTranslations();
 
@@ -31,15 +32,20 @@ export function ProductDetails({
 		if (productNumber) navigator.clipboard.writeText(productNumber);
 	}, [productNumber]);
 
+	const uspList = useMemo(() => {
+		if (!usp) return [];
+		return Object.values(usp).filter((val) => val && val.trim() !== "");
+	}, [usp]);
+
 	return (
 		<div className="mt-1">
 			<Tabs
-				defaultValue="description"
+				defaultValue="usp"
 				className="w-full">
 				<div className="flex items-center justify-between">
 					<TabsList className="ring-muted/40 grid max-h-[33px] max-w-[210px] grid-cols-2 gap-0 rounded-sm bg-[#E8EAE9] ring-1">
 						<TabsTrigger
-							value="description"
+							value="usp"
 							className="text-muted-foreground rounded-md p-1 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-green-900 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 data-[state=active]:bg-green-900 data-[state=active]:text-white data-[state=active]:shadow-none">
 							{t("Product.description")}
 						</TabsTrigger>
@@ -64,12 +70,18 @@ export function ProductDetails({
 				</div>
 
 				<TabsContent
-					value="description"
+					value="usp"
 					className="mt-4">
-					{description ? (
-						<div className="prose max-w-none">
-							<p className="text-sm">{description}</p>
-						</div>
+					{uspList.length > 0 ? (
+						<ul className="list-disc space-y-1 pl-4">
+							{uspList.map((point, idx) => (
+								<li
+									key={idx}
+									className="text-sm">
+									{point}
+								</li>
+							))}
+						</ul>
 					) : (
 						<p className="text-sm">{t("Product.noDescriptionAvailable")}</p>
 					)}

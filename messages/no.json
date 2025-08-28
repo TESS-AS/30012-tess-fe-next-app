@@ -161,6 +161,44 @@
 		"cookies": "Cookie Policy",
 		"rights": "All rights reserved."
 	},
+    "Faq": {
+      "title": "Vanlige spørsmål (FAQ)",
+      "questions": {
+        "openingHours": "Åpningstider?",
+        "delivery": "Leveranser fra TESS?",
+        "forgotPassword": "Glemt passord?",
+        "addToOrder": "Jeg ønsker å legge til en vare på ordren. Er det mulig?",
+        "notFound": "Jeg finner ikke svar på det jeg vil vite. Hva gjør jeg?",
+        "missingProduct": "Jeg finner ikke varen jeg ønsker å kjøpe. Hva gjør jeg?",
+        "contactErrors": "Hvem kontakter jeg om feil eller mangler i nettbutikken?",
+        "specificProduct": "Jeg vil vite mer om en spesifikk vare. Hvem kontakter jeg?"
+      },
+      "answers": {
+        "openingHours": "Vår nettbutikk er åpen 24 timer i døgnet. De fleste servicesentre holder åpent fra 07:00 til 16:00. Finn ditt nærmeste TESS <link>servicesenter</link>.",
+        "delivery": "Kontakt din lokale selger eller ditt nærmeste TESS <link>kundesenter</link>. Du kan også henvende deg til vårt sentrale kundesenter.",
+        "forgotPassword": "Trykk på «glemt passord» på login siden. Passordlink sendes til e-posten din som du kan bruke for å lage nytt passord.",
+        "addToOrder": "Nei, det er ikke mulig. Det må legges ny bestilling.",
+        "notFound": "Benytt vår chat-tjeneste eller ta kontakt med din kundekontakt.",
+        "missingProduct": "Benytt vår chat-tjeneste eller ta kontakt med din kundekontakt.",
+        "contactErrors": "Send feil eller mangler du finner til: <email>netthandel@tess.no</email>.",
+        "specificProduct": "Kontakt din lokale selger eller nærmeste TESS <link>servicesenter</link>."
+      },
+      "feedback": {
+        "question": "Fant du det du lette etter?",
+        "yes": "Ja",
+        "no": "Nei",
+        "thanks": "Takk for tilbakemeldingen!",
+        "closing": "Da håper vi du fant det du trengte. Ha en fin dag!",
+        "helpText": "Kontakt oss, så gjør vi vårt beste for å hjelpe deg. I tillegg bruker vi spørsmålene til å forbedre FAQ-siden.",
+        "whatWereYouLookingFor": "Hva lette du etter?",
+        "placeholder": "Fortell hva du lurer på",
+        "contactQuestion": "Vil du bli kontaktet angående svaret? Vi kontakter deg på din registrerte e-post.",
+        "send": "Send melding",
+        "submittedMessage": "Takk! Din tilbakemelding er sendt."
+      },
+      "servicesenter": "servicesenter",
+      "kundesenter": "kundesenter"
+    },
 	"Cart": {
 		"archived": "Cart archived",
 		"errorArchiving": "Error archiving cart",
