@@ -84,7 +84,23 @@
 		"noSuggestions": "No Suggestions found",
 		"noProductsFound": "No products found",
 		"seeMoreCategories": "See more categories",
-		"resultsTitle": "Search results"
+		"resultsTitle": "Search results",
+        "noResults": {
+          "title": "No results found",
+          "description": "Sorry. We couldn’t find any products matching \"{query}\"",
+          "tipsTitle": "Tips for better search results:",
+          "tips": {
+            "checkSpelling": "Check the spelling or try alternative spellings",
+            "useFewerWords": "Use fewer or more general keywords",
+            "searchByType": "Try searching by product type or category",
+            "searchBySpec": "Try searching by technical specifications"
+          },
+          "help": {
+            "title": "Missing an item?",
+            "description": "Our experts will help you find the right products for your needs.",
+            "email": "Email: tess@tess.no"
+          }
+        }
 	},
 	"Seo": {
 		"defaultTitle": "TESS - Teknisk Faghandel | Netthandel",
@@ -144,6 +160,44 @@
 		"cookies": "Cookie Policy",
 		"rights": "All rights reserved."
 	},
+    "Faq": {
+      "title": "Frequently Asked Questions (FAQ)",
+      "questions": {
+        "openingHours": "Opening hours?",
+        "delivery": "Deliveries from TESS?",
+        "forgotPassword": "Forgot password?",
+        "addToOrder": "Can I add an item to the order?",
+        "notFound": "I can't find the answer I'm looking for. What should I do?",
+        "missingProduct": "I can't find the product I want to buy. What should I do?",
+        "contactErrors": "Who do I contact about errors or missing items in the webshop?",
+        "specificProduct": "I want to know more about a specific product. Who do I contact?"
+      },
+      "answers": {
+        "openingHours": "Our webshop is open 24/7. Most service centers are open from 07:00 to 16:00. Find your nearest TESS <link>service center</link>.",
+        "delivery": "Contact your local sales representative or your nearest TESS <link>customer center</link>. You can also contact our central customer center.",
+        "forgotPassword": "Click on 'forgot password' on the login page. A password link will be sent to your email to reset your password.",
+        "addToOrder": "No, this is not possible. A new order must be placed.",
+        "notFound": "Use our chat service or contact your customer representative.",
+        "missingProduct": "Use our chat service or contact your customer representative.",
+        "contactErrors": "Send errors or missing items you find to: <email>netthandel@tess.no</email>.",
+        "specificProduct": "Contact your local sales representative or the nearest TESS <link>service center</link>."
+      },
+      "feedback": {
+        "question": "Did you find what you were looking for?",
+        "yes": "Yes",
+        "no": "No",
+        "thanks": "Thanks for your feedback!",
+        "closing": "We hope you found what you needed. Have a great day!",
+        "helpText": "Contact us and we’ll do our best to help you. We also use your input to improve the FAQ page.",
+        "whatWereYouLookingFor": "What were you looking for?",
+        "placeholder": "Tell us what you were looking for",
+        "contactQuestion": "Would you like to be contacted regarding the answer? We will contact you via your registered email.",
+        "send": "Send message",
+        "submittedMessage": "Thank you! Your feedback has been submitted."
+      },
+      "servicesenter": "service center",
+      "kundesenter": "customer service"
+    },
 	"Cart": {
 		"archived": "Cart archived",
 		"errorArchiving": "Error archiving cart",

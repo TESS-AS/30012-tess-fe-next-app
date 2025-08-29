@@ -202,7 +202,7 @@ const CartPage = () => {
 								{t("Cart.showStockStatus")}
 							</p>
 							<Select onValueChange={handleWarehouseChange}>
-								<SelectTrigger className="w-[40%]">
+								<SelectTrigger className="w-[40%] border-[#C1C4C2] text-[#5A615D] bg-white w-[170px]">
 									<SelectValue placeholder={t("Product.selectWarehouse")} />
 								</SelectTrigger>
 								<SelectContent>
@@ -293,8 +293,9 @@ const CartPage = () => {
 										</div>
 
 										<div className="flex flex-col">
-											<span className="mb-2 font-medium text-[#0F1912] hover:underline">
+											<span className="mb-2 font-medium text-[#0F1912] hover:underline max-w-[170px] block">
 												<Link
+													className="block truncate"
 													href={`/${categoryPaths[item.productNumber]?.join("/") || ""}/${item.productNumber}`}>
 													{item.itemName}
 												</Link>
@@ -403,7 +404,7 @@ const CartPage = () => {
 										/>
 
 										<p className="font-bold">
-											{(calculatedPrices[item.itemNumber] ?? 0)?.toFixed(2)},-
+											{(calculatedPrices[item.itemNumber] ?? 0)?.toFixed(2)}
 										</p>
 
 										<Button

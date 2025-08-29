@@ -101,7 +101,7 @@ const NewRow = memo(function NewRow({
 							setNewDimension((p) => ({ ...p, cents: value }));
 						}}
 					/>
-					<span>,- kr</span>
+					<span> kr</span>
 				</div>
 			</td>
 			<td className="px-4 py-2">

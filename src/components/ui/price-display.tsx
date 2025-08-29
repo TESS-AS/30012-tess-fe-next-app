@@ -14,7 +14,7 @@ export const PriceDisplay = ({
 	const truncated = Math.floor(amount * 100) / 100;
 	const [whole, decimal = "00"] = truncated.toString().split(".");
 
-	const formattedAmount = `${whole},${decimal.padEnd(2, "0")},- kr`;
+	const formattedAmount = `${whole},${decimal.padEnd(2, "0")} kr`;
 
 	return (
 		<span

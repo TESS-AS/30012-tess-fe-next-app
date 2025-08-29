@@ -31,7 +31,7 @@ export function useCheckoutOrderData(
 		if (!cartItems?.length || !profile) return;
 
 		const companyCode =
-			Number(profile.defaultCompanyNumber) < 10
+			Number(profile.defaultCompanyNumber) < 10 && profile.defaultCompanyNumber !== null && profile.defaultCompanyNumber !== undefined
 				? `0${profile.defaultCompanyNumber}`
 				: profile.defaultCompanyNumber?.toString();
 

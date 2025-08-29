@@ -213,12 +213,12 @@ export default function DimensionRow(props: Props): ReactElement {
 								}}
 								className="h-8 w-[60px] border-[#C1C4C2] px-2 text-right hover:border-[#009640] focus:border-[#009640] focus:ring-1 focus:ring-[#009640]"
 							/>
-							<span>,- kr</span>
+							<span> kr</span>
 						</div>
 					) : (
 						<div className="flex items-center gap-1">
 							<span>{dimension.budget}</span>
-							{dimension.budget && <span>,- kr</span>}
+							{dimension.budget && <span> kr</span>}
 						</div>
 					)}
 				</td>
