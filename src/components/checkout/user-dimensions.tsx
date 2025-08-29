@@ -133,7 +133,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 	return (
 		<div className="space-y-4">
 			<div className="mb-4 flex items-center gap-4">
-				<Label className="text-sm">{t("label")}</Label>
+				{/* <Label className="text-sm">{t("label")}</Label> */}
 				<RadioGroup
 					defaultValue={dimensionInputMode}
 					onValueChange={(value) => setDimensionInputMode(value as any)}
@@ -152,13 +152,13 @@ export const UserDimensionsInput: React.FC<Props> = ({
 						/>
 						<Label htmlFor="search">{t("modes.search")}</Label>
 					</div>
-					<div className="flex items-center gap-1">
+					{/* <div className="flex items-center gap-1">
 						<RadioGroupItem
 							value="manual"
 							id="manual"
 						/>
 						<Label htmlFor="manual">{t("modes.manual")}</Label>
-					</div>
+					</div> */}
 				</RadioGroup>
 			</div>
 
@@ -178,14 +178,21 @@ export const UserDimensionsInput: React.FC<Props> = ({
 							}));
 						}}>
 						<SelectTrigger>
-							<SelectValue placeholder={t("selectPlaceholder")} />
+							<SelectValue
+								placeholder={
+									t("selectPlaceholder") +
+									" " +
+									(dimension1Options?.[0]?.label ?? t("reference"))
+								}
+							/>
 						</SelectTrigger>
 						<SelectContent>
 							{dimension1Options.map((opt) => (
 								<SelectItem
 									key={opt.value}
 									value={opt.value}>
-									{opt.label} - {opt.value}
+									{/* {opt.label} -  */}
+									{opt.value}
 								</SelectItem>
 							))}
 						</SelectContent>
@@ -205,14 +212,20 @@ export const UserDimensionsInput: React.FC<Props> = ({
 							}));
 						}}>
 						<SelectTrigger>
-							<SelectValue placeholder={t("selectPlaceholder")} />
+							<SelectValue
+								placeholder={
+									t("selectPlaceholder") +
+									" " +
+									(dimension2Options?.[0]?.label ?? t("reference"))
+								}
+							/>
 						</SelectTrigger>
 						<SelectContent>
 							{dimension2Options.map((opt) => (
 								<SelectItem
 									key={opt.value}
 									value={opt.value}>
-									{opt.label} - {opt.value}
+									{opt.value}
 								</SelectItem>
 							))}
 						</SelectContent>
@@ -232,14 +245,20 @@ export const UserDimensionsInput: React.FC<Props> = ({
 							}));
 						}}>
 						<SelectTrigger>
-							<SelectValue placeholder={t("selectPlaceholder")} />
+							<SelectValue
+								placeholder={
+									t("selectPlaceholder") +
+									" " +
+									(dimension3Options?.[0]?.label ?? t("reference"))
+								}
+							/>
 						</SelectTrigger>
 						<SelectContent>
 							{dimension3Options.map((opt) => (
 								<SelectItem
 									key={opt.value}
 									value={opt.value}>
-									{opt.label} - {opt.value}
+									{opt.value}
 								</SelectItem>
 							))}
 						</SelectContent>
@@ -323,7 +342,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 				</div>
 			)}
 
-			{dimensionInputMode === "manual" && (
+			{/* {dimensionInputMode === "manual" && (
 				<>
 					<Input
 						type="text"
@@ -371,7 +390,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 						}}
 					/>
 				</>
-			)}
+			)} */}
 		</div>
 	);
 };

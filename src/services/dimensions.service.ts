@@ -1,9 +1,10 @@
 import {
 	CreateCustomerDimensions,
-	CreateUserDimensions,
 	CustomerDimension,
 	SearchDimensionResponse,
 	UserDimensionItem,
+	DimensionLabel,
+	CreateUserDimensions,
 } from "@/types/dimensions.types";
 
 import axiosInstance from "./axiosClient";
@@ -108,14 +109,13 @@ export const getUserDimensions = async (
 };
 
 export const updateUserDimensions = async (
-	userId: number,
 	customerNumber: string,
-	payload: Partial<CreateUserDimensions>,
+	dimensionLabels: DimensionLabel,
 ): Promise<{ success: boolean; data: object }> => {
 	try {
 		const response = await axiosInstance.put(
-			`/dimension/updateUserDimension/${userId}/${customerNumber}`,
-			payload,
+			`/dimension/updateUserDimension/${customerNumber}`,
+			dimensionLabels,
 		);
 		return response.data;
 	} catch (error) {

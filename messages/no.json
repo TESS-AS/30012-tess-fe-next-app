@@ -207,7 +207,22 @@
 		"archiveCart": "Arkiver handlekurv",
 		"viewCartHistory": "Vis handlekurvhistorikk",
 		"outOfStock": "Noen varer er ikke på lager i ditt valgte varehus",
-		"outOfStockMessage": "Noen varer er ikke på lager i ditt valgte varehus, og det kan ta opptil 3 dager ekstra å få dem levert. Endre lager per varelinje før du sender ordren dersom du ønsker raskere levering."
+		"outOfStockMessage": "Noen varer er ikke på lager i ditt valgte varehus, og det kan ta opptil 3 dager ekstra å få dem levert. Endre lager per varelinje før du sender ordren dersom du ønsker raskere levering.",
+		"cartHistory": "Handlekurv historikk",
+		"date": "Dato",
+		"userId": "Bruker Id",
+		"article": "Varer",
+		"total": "Totalsum",
+		"view": "Vis",
+		"hide": "Skjul",
+		"image": "Bilde",
+		"productNumber": "Produktnummer",
+		"itemNumber": "Varenummer",
+		"quantity": "Antall",
+		"warehouse": "Lager",
+		"company": "Selskap",
+		"page": "Side",
+		"of": "av"
 	},
 	"Login": {
 		"title": "Login",
@@ -235,8 +250,11 @@
 		"deliverySurcharge": "Tilleggsavgift",
 		"vat": "MVA(25%)",
 		"totalIncVat": "Total inkl. mva.",
-		"continueToPayment": "Fortsett til betaling",
+		"continueToPayment": "Fortsett til levering",
 		"punchoutCart": "Punchout Handlekurv",
+		"punchoutCartStep1": "Fortsett til betaling",
+		"punchoutCartStep2": "Fullfør ordre",
+		"punchoutCartStep3": "Bekreft",
 		"or": "eller",
 		"continueShopping": "Fortsett å handle"
 	},
@@ -349,7 +367,8 @@
 		},
 		"errors": {
 			"selectAddress": "Vennligst velg en adresse",
-			"orderSubmissionFailed": "Bestillingen kunne ikke sendes"
+			"orderSubmissionFailed": "Bestillingen kunne ikke sendes",
+			"dimensionsRequired": "Vennligst fyll ut alle påkrevde dimensjonsfelt"
 		},
 		"feedback": {
 			"rating": "Vurdering",
@@ -423,10 +442,11 @@
 		"dimensions": {
 			"label": "Brukerdimensjon inndata:",
 			"selectLabel": "Brukerdimensjoner",
-			"selectPlaceholder": "Velg brukerdimensjon",
-			"dimension1": "Brukerdimensjon 1",
-			"dimension2": "Brukerdimensjon 2",
-			"dimension3": "Brukerdimensjon 3",
+			"selectPlaceholder": "Velg",
+			"reference": "Referanse",
+			"dimension1": "Referanse 1",
+			"dimension2": "Referanse 2",
+			"dimension3": "Referanse 3",
 			"modes": {
 				"select": "Velg",
 				"search": "Søk",

@@ -2,6 +2,7 @@ export interface CartLine {
 	userId?: number;
 	cartLine?: number;
 	productNumber: string;
+	itemName?: string;
 	productName?: string;
 	itemNumber: string;
 	quantity: number;

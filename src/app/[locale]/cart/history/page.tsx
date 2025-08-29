@@ -19,8 +19,10 @@ import { PriceResponse } from "@/types/search.types";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const CartHistoryPage = () => {
+	const t = useTranslations("Cart");
 	const params = useParams();
 	const { data: profile } = useGetProfileData();
 	const locale = params.locale as string;
@@ -86,7 +88,7 @@ const CartHistoryPage = () => {
 	return (
 		<div className="container py-10">
 			<div className="mb-6 flex items-center justify-between">
-				<h1 className="text-2xl font-semibold">Cart History</h1>
+				<h1 className="text-2xl font-semibold">{t("cartHistory")}</h1>
 			</div>
 
 			{isLoading ? (
@@ -98,10 +100,10 @@ const CartHistoryPage = () => {
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead className="w-[180px]">Date</TableHead>
-								<TableHead>User Id</TableHead>
-								<TableHead className="text-right">Items</TableHead>
-								<TableHead className="text-right">Total Amount</TableHead>
+								<TableHead className="w-[180px]">{t("date")}</TableHead>
+								<TableHead>{t("userId")}</TableHead>
+								<TableHead className="text-right">{t("article")}</TableHead>
+								<TableHead className="text-right">{t("total")}</TableHead>
 								<TableHead className="w-[100px]"></TableHead>
 							</TableRow>
 						</TableHeader>
@@ -142,7 +144,7 @@ const CartHistoryPage = () => {
 													onClick={() =>
 														setExpandedRow(expandedRow === idx ? null : idx)
 													}>
-													{expandedRow === idx ? "Hide" : "View"}
+													{expandedRow === idx ? t("hide") : t("view")}
 												</Button>
 											</TableCell>
 										</TableRow>
@@ -156,17 +158,17 @@ const CartHistoryPage = () => {
 															<TableHeader>
 																<TableRow>
 																	<TableHead className="w-[180px]">
-																		Image
+																		{t("image")}
 																	</TableHead>
 																	<TableHead className="w-[180px]">
-																		Product Number
+																		{t("productNumber")}
 																	</TableHead>
-																	<TableHead>Item Number</TableHead>
+																	<TableHead>{t("itemNumber")}</TableHead>
 																	<TableHead className="text-right">
-																		Quantity
+																		{t("quantity")}
 																	</TableHead>
-																	<TableHead>Warehouse</TableHead>
-																	<TableHead>Company</TableHead>
+																	<TableHead>{t("warehouse")}</TableHead>
+																	<TableHead>{t("company")}</TableHead>
 																</TableRow>
 															</TableHeader>
 															<TableBody>
@@ -225,7 +227,7 @@ const CartHistoryPage = () => {
 							<ChevronLeft className="h-4 w-4" />
 						</Button>
 						<span className="text-muted-foreground text-sm">
-							Page {currentPage} of {archiveData?.totalPages || 1}
+							{t("page")} {currentPage} {t("of")} {archiveData?.totalPages || 1}
 						</span>
 						<Button
 							variant="outline"

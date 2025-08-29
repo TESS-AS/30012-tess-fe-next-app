@@ -1,9 +1,9 @@
-// === pages/CheckoutPage.tsx ===
 "use client";
 
 import { useState } from "react";
 
 import { FeedbackModal } from "@/components/checkout/feedback-modal";
+import { OrderConfirmation } from "@/components/checkout/order-confirmation";
 import OrderSummary from "@/components/checkout/order-summary";
 import { OrderTrackingModal } from "@/components/checkout/order-tracking-modal";
 import StepConfirmation from "@/components/checkout/StepConfirmation";
@@ -20,6 +20,7 @@ import { useModals } from "@/hooks/useModals";
 import { useOrderStepper } from "@/hooks/useOrderStepper";
 import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { useAppContext } from "@/lib/appContext";
+import { Order, OrderResponse } from "@/types/orders.types";
 import type { PayPalScriptOptions } from "@paypal/paypal-js";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { useTranslations } from "next-intl";
@@ -33,21 +34,10 @@ const initialOptions: PayPalScriptOptions = {
 
 export default function CheckoutPage() {
 	const t = useTranslations("");
-	const {
-		cartItems,
-		calculatedPrices,
-		handleArchiveCart,
-		showFeedbackModal,
-		setShowFeedbackModal,
-		submittedOrder,
-		setSubmittedOrder,
-		showOrderConfirmation,
-		setShowOrderConfirmation,
-		updatedAddress,
-		setUpdatedAddress,
-	} = useAppContext();
-	const { data: profile } = useGetProfileData();
-	const { data: defaultAddress } = useGetDefaultAddress();
+	const { cartItems, calculatedPrices, handleArchiveCart } = useAppContext();
+	const { data: profile, isLoading: isProfileLoading } = useGetProfileData();
+	const { data: defaultAddress, isLoading: isAddressLoading } =
+		useGetDefaultAddress();
 
 	const { submitFeedback, loading } = useFeedback();
 
@@ -60,8 +50,16 @@ export default function CheckoutPage() {
 
 	const [paymentMethod, setPaymentMethod] = useState("faktura");
 	const [dimensionInputMode, setDimensionInputMode] = useState("select");
+	const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+	const [showTrackingModal, setShowTrackingModal] = useState(false);
+	const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
 	const [showWarning, setShowWarning] = useState(true);
 	const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+	const [submittedOrder, setSubmittedOrder] = useState<OrderResponse | null>(
+		null,
+	);
+
+	const [updatedAddress, setUpdatedAddress] = useState<any>(null);
 
 	const [orderData, setOrderData] = useCheckoutOrderData(
 		cartItems,
@@ -97,6 +95,13 @@ export default function CheckoutPage() {
 	const renderStepContent = () => {
 		switch (currentStep) {
 			case 0:
+				if (isProfileLoading || isAddressLoading) {
+					return (
+						<div className="flex h-[400px] items-center justify-center">
+							<div className="h-8 w-8 animate-spin rounded-full border-4 border-[#009640] border-r-transparent" />
+						</div>
+					);
+				}
 				return (
 					<StepContactDelivery
 						contactPerson={contactPerson}
@@ -145,6 +150,17 @@ export default function CheckoutPage() {
 					toast.error(t("Checkout.errors.selectAddress"));
 					return;
 				}
+
+				if (currentStep === 1) {
+					const { customersOrderReference, customerReference } =
+						orderData.salesOrderHeader;
+					const accountPart3 = orderData.salesOrderLines?.[0]?.accountPart3;
+
+					if (!customersOrderReference) {
+						toast.error(t("Checkout.errors.dimensionsRequired"));
+						return;
+					}
+				}
 				goToNext();
 				return;
 			}
@@ -154,7 +170,7 @@ export default function CheckoutPage() {
 			try {
 				const result = await submitOrder(orderData);
 				if (result) {
-					setSubmittedOrder(result);
+					setSubmittedOrder(result as unknown as OrderResponse);
 					setShowOrderConfirmation(true);
 					setTimeout(() => setShowFeedbackModal(true), 1000);
 				}
@@ -199,7 +215,10 @@ export default function CheckoutPage() {
 							</div>
 							{currentStep !== 2 && (
 								<div className="col-span-4">
-									<OrderSummary handleCheckout={handleCheckout} />
+									<OrderSummary
+										handleCheckout={handleCheckout}
+										currentStep={currentStep}
+									/>
 								</div>
 							)}
 						</div>
@@ -209,15 +228,33 @@ export default function CheckoutPage() {
 								<OrderSummary
 									handleCheckout={handleCheckout}
 									isCheckoutLoading={isCheckoutLoading}
+									currentStep={currentStep}
 								/>
 							</div>
 						)}
 					</>
 				) : (
 					<>
-						<pre className="max-h-[500px] overflow-auto rounded-lg bg-gray-50 p-4 text-sm">
-							{JSON.stringify(submittedOrder, null, 2)}
-						</pre>
+						<OrderConfirmation
+							orderNumber={
+								submittedOrder?.order?.Ordrebekreftelse?.Ordrenummer || ""
+							}
+							date={submittedOrder?.order?.Ordrebekreftelse?.Dato || ""}
+							paymentMethod="Faktura"
+							name={
+								submittedOrder?.order?.Ordrebekreftelse?.[
+									"Navn (Kontaktperson)"
+								] || ""
+							}
+							company={submittedOrder?.order?.Ordrebekreftelse?.Firma || ""}
+							address={
+								submittedOrder?.order?.Ordrebekreftelse?.Addresse?.[0]
+									?.addressLine1 || ""
+							}
+							phone=""
+							email={submittedOrder?.order?.Ordrebekreftelse?.["E-post"] || ""}
+							onTrackOrder={() => setShowTrackingModal(true)}
+						/>
 						<FeedbackModal
 							open={showFeedbackModal}
 							onClose={() => setShowFeedbackModal(false)}

@@ -1,9 +1,13 @@
 "use client";
 
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { PriceDisplay } from "@/components/ui/price-display";
 import { useOrderSummary } from "@/hooks/useOrderSummary";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
+import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import { Separator } from "@radix-ui/react-select";
 import { ArrowRight, Loader2 } from "lucide-react";
@@ -12,13 +16,18 @@ import { useTranslations } from "next-intl";
 interface OrderSummaryProps {
 	handleCheckout: () => void;
 	isCheckoutLoading?: boolean;
+	currentStep: number | null;
 }
 
 export default function OrderSummary({
 	handleCheckout,
 	isCheckoutLoading,
+	currentStep,
 }: OrderSummaryProps) {
+	const router = useRouter();
+	const [acceptedTerms, setAcceptedTerms] = useState(false);
 	const t = useTranslations();
+
 	const { data: profile } = usePunchoutProfile();
 	const { cartItems, isLoading } = useAppContext();
 	const isCartEmpty = !cartItems || cartItems.length === 0 || isLoading;
@@ -44,7 +53,7 @@ export default function OrderSummary({
 				orderSummaryTotalPriceFromAppContext: 0,
 			}
 		: summary;
-
+	console.log(currentStep, "currentStep");
 	return (
 		<div className="space-y-6">
 			<div className="bg-card border-lightGray rounded-lg border p-6">
@@ -83,29 +92,56 @@ export default function OrderSummary({
 							className="text-base font-bold text-[#0F1912]"
 						/>
 					</div>
+
+					<div className="mt-3 flex items-start gap-2">
+						<Checkbox
+							id="terms"
+							checked={acceptedTerms}
+							onCheckedChange={(checked) =>
+								setAcceptedTerms(checked as boolean)
+							}
+						/>
+						<label
+							htmlFor="terms"
+							className="cursor-pointer text-sm text-[#0F1912]">
+							{t("Jeg godtar ")}
+							<a
+								href="/vilkar"
+								className="text-[#009640] underline hover:text-[#009640]/80"
+								target="_blank"
+								rel="noopener noreferrer">
+								{t("vilkårene")}
+							</a>
+							{t(" for kjøp")}
+						</label>
+					</div>
 				</div>
 
 				{!profile?.punchout ? (
 					<Button
 						className="mt-6 w-full"
-						disabled={isCartEmpty || isCheckoutLoading}
+						disabled={isCartEmpty || isCheckoutLoading || !acceptedTerms}
 						onClick={handleCheckout}>
 						{isCheckoutLoading || isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
 						) : (
-							t("OrderSummary.continueToPayment")
+							t(
+								currentStep === null
+									? "OrderSummary.continueToPayment"
+									: `OrderSummary.punchoutCartStep${currentStep + 1}`,
+							)
 						)}
 					</Button>
 				) : (
 					<Button
 						variant="outlineGreen"
 						className="mt-6 w-full text-[#009640]"
-						disabled={isCartEmpty || isCheckoutLoading}
+						disabled={isCartEmpty || isCheckoutLoading || !acceptedTerms}
 						onClick={handleCheckout}>
 						{isCheckoutLoading || isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
 						) : (
-							t("OrderSummary.punchoutCart")
+							"OrderSummary.punchoutCart"
 						)}
 					</Button>
 				)}
@@ -113,8 +149,8 @@ export default function OrderSummary({
 				<Button
 					variant="link"
 					className="mt-2 w-full hover:no-underline"
-					disabled={isCartEmpty || isCheckoutLoading}
-					onClick={handleCheckout}>
+					disabled={isCartEmpty || isCheckoutLoading || !acceptedTerms}
+					onClick={() => router.push("/")}>
 					<>
 						{isCheckoutLoading || isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />

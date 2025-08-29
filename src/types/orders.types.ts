@@ -19,7 +19,7 @@ export interface SalesOrderHeader {
 	customersOrderReference: string;
 	warehouseNumber: string;
 	termsOfDelivery: string;
-	termsOfPayment: string;
+	// termsOfPayment: string;
 	paidAmount: number;
 	cashRegister: string;
 	text: string;
@@ -46,6 +46,35 @@ export interface Order {
 	salesOrderHeader: SalesOrderHeader;
 	salesOrderAddresses: SalesOrderAddress[];
 	salesOrderLines: OrderLines[];
+}
+
+export interface OrderResponse {
+	data: string;
+	order: {
+		Ordrebekreftelse: {
+			Ordrenummer: string;
+			Dato: string;
+			"Navn (Kontaktperson)": string;
+			Firma: string | null;
+			Addresse: Array<{
+				name: string;
+				addressLine1: string;
+				addressLine2: string;
+				addressLine4: string;
+				postalCode: string;
+				partyQualifier: string;
+				country: string;
+			}>;
+			"E-post": string;
+			Varelinjer: Array<{
+				Varenummer: string;
+				Varenavn: { itemName: string };
+				Antall: number;
+				Pris: number;
+				"Dimensjon 3": string;
+			}>;
+		};
+	};
 }
 
 export type PaymentMethod = "card" | "paypal" | "invoice";

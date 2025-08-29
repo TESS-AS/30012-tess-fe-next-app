@@ -123,6 +123,7 @@ export function Dimensions(): ReactElement {
 
 	// type modal
 	const [showTypeModal, setShowTypeModal] = useState(false);
+	const [isEditingTypes, setIsEditingTypes] = useState(false);
 	const [currentLevel, setCurrentLevel] = useState(0);
 	const [dimensionTypes, setDimensionTypes] = useState<DimensionType[]>([
 		{ dimension: "1", type: "Department", active: false },
@@ -549,7 +550,10 @@ export function Dimensions(): ReactElement {
 								<Button
 									variant="outline"
 									className="border-[#C1C4C2] text-[#0F1912] hover:bg-[#F3FAF7] hover:text-[#0F1912]"
-									onClick={() => setShowTypeModal(true)}>
+									onClick={() => {
+										setIsEditingTypes(true);
+										setShowTypeModal(true);
+									}}>
 									<SquarePen className="h-4 w-4" />
 									Endre dimensjonstyper
 								</Button>
@@ -565,6 +569,7 @@ export function Dimensions(): ReactElement {
 											cents: "",
 										});
 										setCurrentLevel(0);
+										setIsEditingTypes(false);
 									}}
 									className="border-[#C1C4C2] text-[#0F1912] hover:bg-[#F3FAF7] hover:text-[#0F1912]">
 									<PlusIcon className="h-4 w-4" />
@@ -681,13 +686,19 @@ export function Dimensions(): ReactElement {
 
 			<TypeModal
 				open={showTypeModal}
-				onOpenChange={setShowTypeModal}
+				onOpenChange={(open) => {
+					setShowTypeModal(open);
+					if (!open) {
+						setIsEditingTypes(false);
+					}
+				}}
 				dimensionTypes={dimensionTypes}
 				handleActiveChange={handleActiveChange}
 				handleTypeChange={handleTypeChange}
-				onSave={handleSaveDimensionTypes}
+				customerNumber={profile?.customerNumbers[0] || ""}
 				onAfterCloseFocus={returnFocusAfterTypePick}
 				currentLevel={currentLevel}
+				editAll={isEditingTypes}
 			/>
 
 			<DeleteConfirmModal
