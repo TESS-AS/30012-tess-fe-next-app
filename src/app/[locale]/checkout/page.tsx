@@ -3,8 +3,8 @@
 import { useState } from "react";
 
 import { FeedbackModal } from "@/components/checkout/feedback-modal";
-import OrderSummary from "@/components/checkout/order-summary";
 import { OrderConfirmation } from "@/components/checkout/order-confirmation";
+import OrderSummary from "@/components/checkout/order-summary";
 import { OrderTrackingModal } from "@/components/checkout/order-tracking-modal";
 import StepConfirmation from "@/components/checkout/StepConfirmation";
 import StepContactDelivery from "@/components/checkout/StepContactDelivery";
@@ -16,11 +16,11 @@ import { useContactPerson } from "@/hooks/useContactPerson";
 import { useFeedback } from "@/hooks/useFeedback";
 import { useGetDefaultAddress } from "@/hooks/useGetDefaultAddress";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
-import { Order, OrderResponse } from "@/types/orders.types";
 import { useModals } from "@/hooks/useModals";
 import { useOrderStepper } from "@/hooks/useOrderStepper";
 import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { useAppContext } from "@/lib/appContext";
+import { Order, OrderResponse } from "@/types/orders.types";
 import type { PayPalScriptOptions } from "@paypal/paypal-js";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { useTranslations } from "next-intl";
@@ -34,13 +34,10 @@ const initialOptions: PayPalScriptOptions = {
 
 export default function CheckoutPage() {
 	const t = useTranslations("");
-	const {
-		cartItems,
-		calculatedPrices,
-		handleArchiveCart,
-	} = useAppContext();
+	const { cartItems, calculatedPrices, handleArchiveCart } = useAppContext();
 	const { data: profile, isLoading: isProfileLoading } = useGetProfileData();
-	const { data: defaultAddress, isLoading: isAddressLoading } = useGetDefaultAddress();
+	const { data: defaultAddress, isLoading: isAddressLoading } =
+		useGetDefaultAddress();
 
 	const { submitFeedback, loading } = useFeedback();
 
@@ -58,8 +55,10 @@ export default function CheckoutPage() {
 	const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
 	const [showWarning, setShowWarning] = useState(true);
 	const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
-	const [submittedOrder, setSubmittedOrder] = useState<OrderResponse | null>(null);
-	
+	const [submittedOrder, setSubmittedOrder] = useState<OrderResponse | null>(
+		null,
+	);
+
 	const [updatedAddress, setUpdatedAddress] = useState<any>(null);
 
 	const [orderData, setOrderData] = useCheckoutOrderData(
@@ -153,7 +152,8 @@ export default function CheckoutPage() {
 				}
 
 				if (currentStep === 1) {
-					const { customersOrderReference, customerReference } = orderData.salesOrderHeader;
+					const { customersOrderReference, customerReference } =
+						orderData.salesOrderHeader;
 					const accountPart3 = orderData.salesOrderLines?.[0]?.accountPart3;
 
 					if (!customersOrderReference) {
@@ -215,7 +215,10 @@ export default function CheckoutPage() {
 							</div>
 							{currentStep !== 2 && (
 								<div className="col-span-4">
-									<OrderSummary handleCheckout={handleCheckout} currentStep={currentStep} />
+									<OrderSummary
+										handleCheckout={handleCheckout}
+										currentStep={currentStep}
+									/>
 								</div>
 							)}
 						</div>
@@ -233,14 +236,23 @@ export default function CheckoutPage() {
 				) : (
 					<>
 						<OrderConfirmation
-							orderNumber={submittedOrder?.order?.Ordrebekreftelse?.Ordrenummer || ''}
-							date={submittedOrder?.order?.Ordrebekreftelse?.Dato || ''}
+							orderNumber={
+								submittedOrder?.order?.Ordrebekreftelse?.Ordrenummer || ""
+							}
+							date={submittedOrder?.order?.Ordrebekreftelse?.Dato || ""}
 							paymentMethod="Faktura"
-							name={submittedOrder?.order?.Ordrebekreftelse?.['Navn (Kontaktperson)'] || ''}
-							company={submittedOrder?.order?.Ordrebekreftelse?.Firma || ''}
-							address={submittedOrder?.order?.Ordrebekreftelse?.Addresse?.[0]?.addressLine1 || ''}
+							name={
+								submittedOrder?.order?.Ordrebekreftelse?.[
+									"Navn (Kontaktperson)"
+								] || ""
+							}
+							company={submittedOrder?.order?.Ordrebekreftelse?.Firma || ""}
+							address={
+								submittedOrder?.order?.Ordrebekreftelse?.Addresse?.[0]
+									?.addressLine1 || ""
+							}
 							phone=""
-							email={submittedOrder?.order?.Ordrebekreftelse?.['E-post'] || ''}
+							email={submittedOrder?.order?.Ordrebekreftelse?.["E-post"] || ""}
 							onTrackOrder={() => setShowTrackingModal(true)}
 						/>
 						<FeedbackModal

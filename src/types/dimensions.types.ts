@@ -7,7 +7,7 @@ export interface CreateCustomerDimensions {
 }
 
 export interface DimensionLabel {
-	[key: string]: string
+	[key: string]: string;
 }
 
 export interface CreateUserDimensions {

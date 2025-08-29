@@ -178,7 +178,13 @@ export const UserDimensionsInput: React.FC<Props> = ({
 							}));
 						}}>
 						<SelectTrigger>
-							<SelectValue placeholder={t("selectPlaceholder") + " " + (dimension1Options?.[0]?.label ?? t("reference"))} />
+							<SelectValue
+								placeholder={
+									t("selectPlaceholder") +
+									" " +
+									(dimension1Options?.[0]?.label ?? t("reference"))
+								}
+							/>
 						</SelectTrigger>
 						<SelectContent>
 							{dimension1Options.map((opt) => (
@@ -206,7 +212,13 @@ export const UserDimensionsInput: React.FC<Props> = ({
 							}));
 						}}>
 						<SelectTrigger>
-							<SelectValue placeholder={t("selectPlaceholder") + " " + (dimension2Options?.[0]?.label ?? t("reference"))} />
+							<SelectValue
+								placeholder={
+									t("selectPlaceholder") +
+									" " +
+									(dimension2Options?.[0]?.label ?? t("reference"))
+								}
+							/>
 						</SelectTrigger>
 						<SelectContent>
 							{dimension2Options.map((opt) => (
@@ -233,7 +245,13 @@ export const UserDimensionsInput: React.FC<Props> = ({
 							}));
 						}}>
 						<SelectTrigger>
-							<SelectValue placeholder={t("selectPlaceholder") + " " + (dimension3Options?.[0]?.label ?? t("reference"))} />
+							<SelectValue
+								placeholder={
+									t("selectPlaceholder") +
+									" " +
+									(dimension3Options?.[0]?.label ?? t("reference"))
+								}
+							/>
 						</SelectTrigger>
 						<SelectContent>
 							{dimension3Options.map((opt) => (

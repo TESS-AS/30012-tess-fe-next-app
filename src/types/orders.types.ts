@@ -54,7 +54,7 @@ export interface OrderResponse {
 		Ordrebekreftelse: {
 			Ordrenummer: string;
 			Dato: string;
-			'Navn (Kontaktperson)': string;
+			"Navn (Kontaktperson)": string;
 			Firma: string | null;
 			Addresse: Array<{
 				name: string;
@@ -65,13 +65,13 @@ export interface OrderResponse {
 				partyQualifier: string;
 				country: string;
 			}>;
-			'E-post': string;
+			"E-post": string;
 			Varelinjer: Array<{
 				Varenummer: string;
 				Varenavn: { itemName: string };
 				Antall: number;
 				Pris: number;
-				'Dimensjon 3': string;
+				"Dimensjon 3": string;
 			}>;
 		};
 	};

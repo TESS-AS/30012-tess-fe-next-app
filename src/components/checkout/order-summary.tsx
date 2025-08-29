@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PriceDisplay } from "@/components/ui/price-display";
-
 import { useOrderSummary } from "@/hooks/useOrderSummary";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useRouter } from "@/i18n/navigation";
@@ -11,7 +12,6 @@ import { useAppContext } from "@/lib/appContext";
 import { Separator } from "@radix-ui/react-select";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 
 interface OrderSummaryProps {
 	handleCheckout: () => void;
@@ -53,7 +53,7 @@ export default function OrderSummary({
 				orderSummaryTotalPriceFromAppContext: 0,
 			}
 		: summary;
-console.log(currentStep,"currentStep")
+	console.log(currentStep, "currentStep");
 	return (
 		<div className="space-y-6">
 			<div className="bg-card border-lightGray rounded-lg border p-6">
@@ -97,12 +97,14 @@ console.log(currentStep,"currentStep")
 						<Checkbox
 							id="terms"
 							checked={acceptedTerms}
-							onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
+							onCheckedChange={(checked) =>
+								setAcceptedTerms(checked as boolean)
+							}
 						/>
 						<label
 							htmlFor="terms"
-							className="text-sm text-[#0F1912] cursor-pointer">
-							{t("Jeg godtar ")} 
+							className="cursor-pointer text-sm text-[#0F1912]">
+							{t("Jeg godtar ")}
 							<a
 								href="/vilkar"
 								className="text-[#009640] underline hover:text-[#009640]/80"
@@ -123,9 +125,11 @@ console.log(currentStep,"currentStep")
 						{isCheckoutLoading || isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
 						) : (
-							t(currentStep === null
-							? "OrderSummary.continueToPayment"
-							: `OrderSummary.punchoutCartStep${currentStep + 1}`)
+							t(
+								currentStep === null
+									? "OrderSummary.continueToPayment"
+									: `OrderSummary.punchoutCartStep${currentStep + 1}`,
+							)
 						)}
 					</Button>
 				) : (
@@ -136,7 +140,9 @@ console.log(currentStep,"currentStep")
 						onClick={handleCheckout}>
 						{isCheckoutLoading || isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
-						) : ("OrderSummary.punchoutCart")}
+						) : (
+							"OrderSummary.punchoutCart"
+						)}
 					</Button>
 				)}
 
@@ -144,7 +150,7 @@ console.log(currentStep,"currentStep")
 					variant="link"
 					className="mt-2 w-full hover:no-underline"
 					disabled={isCartEmpty || isCheckoutLoading || !acceptedTerms}
-					onClick={() => router.push('/')}>
+					onClick={() => router.push("/")}>
 					<>
 						{isCheckoutLoading || isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />

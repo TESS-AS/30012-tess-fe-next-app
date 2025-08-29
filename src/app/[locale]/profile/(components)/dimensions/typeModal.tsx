@@ -5,8 +5,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
 import { cn } from "@/lib/utils";
-import type { DimensionLabel, DimensionType } from "@/types/dimensions.types";
 import { updateUserDimensions } from "@/services/dimensions.service";
+import type { DimensionLabel, DimensionType } from "@/types/dimensions.types";
 import { toast } from "react-toastify";
 
 interface Props {
@@ -58,7 +58,6 @@ export default function TypeModal({
 								<Input
 									value={dim.dimension}
 									className="border-[#C1C4C2] bg-[#F8F9F8]"
-									
 								/>
 								<div className="flex items-center gap-2 pt-1">
 									<Checkbox
@@ -86,7 +85,6 @@ export default function TypeModal({
 									value={dim.type}
 									onClick={(e) => e.stopPropagation()}
 									onChange={(e) => handleTypeChange(index, e.target.value)}
-									
 									disabled={!editAll && index !== currentLevel}
 								/>
 								{index === 0 && (
@@ -107,23 +105,25 @@ export default function TypeModal({
 				))}
 				<Button
 					onClick={async () => {
-					try {
-						const activeDimensions = dimensionTypes.filter(d => d.active);
-						const payload: DimensionLabel = {};
-						activeDimensions.forEach((dim, idx) => {
-							payload[`dimension_${idx + 1}_label`] = dim.type;
-						});
-						await updateUserDimensions(customerNumber, payload);
-						toast.success('Dimensjonstyper oppdatert');
-						onOpenChange(false);
-					} catch (error) {
-						console.error('Error updating dimension types:', error);
-						toast.error('Kunne ikke oppdatere dimensjonstyper');
-					}
-				}}
+						try {
+							const activeDimensions = dimensionTypes.filter((d) => d.active);
+							const payload: DimensionLabel = {};
+							activeDimensions.forEach((dim, idx) => {
+								payload[`dimension_${idx + 1}_label`] = dim.type;
+							});
+							await updateUserDimensions(customerNumber, payload);
+							toast.success("Dimensjonstyper oppdatert");
+							onOpenChange(false);
+						} catch (error) {
+							console.error("Error updating dimension types:", error);
+							toast.error("Kunne ikke oppdatere dimensjonstyper");
+						}
+					}}
 					className={cn("w-fit text-white", {
-						"bg-[#009640] hover:bg-[#005522]": editAll || dimensionTypes.some((d) => d.active),
-						"cursor-not-allowed bg-gray-400": !editAll && !dimensionTypes.some((d) => d.active),
+						"bg-[#009640] hover:bg-[#005522]":
+							editAll || dimensionTypes.some((d) => d.active),
+						"cursor-not-allowed bg-gray-400":
+							!editAll && !dimensionTypes.some((d) => d.active),
 					})}
 					disabled={!editAll && !dimensionTypes.some((d) => d.active)}>
 					Lagre dimensjonstyper

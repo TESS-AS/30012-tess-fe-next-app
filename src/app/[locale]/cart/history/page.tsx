@@ -22,8 +22,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 const CartHistoryPage = () => {
-
-	const t = useTranslations('Cart')
+	const t = useTranslations("Cart");
 	const params = useParams();
 	const { data: profile } = useGetProfileData();
 	const locale = params.locale as string;
@@ -89,7 +88,7 @@ const CartHistoryPage = () => {
 	return (
 		<div className="container py-10">
 			<div className="mb-6 flex items-center justify-between">
-				<h1 className="text-2xl font-semibold">{t('cartHistory')}</h1>
+				<h1 className="text-2xl font-semibold">{t("cartHistory")}</h1>
 			</div>
 
 			{isLoading ? (
@@ -101,10 +100,10 @@ const CartHistoryPage = () => {
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead className="w-[180px]">{t('date')}</TableHead>
-								<TableHead>{t('userId')}</TableHead>
-								<TableHead className="text-right">{t('article')}</TableHead>
-								<TableHead className="text-right">{t('total')}</TableHead>
+								<TableHead className="w-[180px]">{t("date")}</TableHead>
+								<TableHead>{t("userId")}</TableHead>
+								<TableHead className="text-right">{t("article")}</TableHead>
+								<TableHead className="text-right">{t("total")}</TableHead>
 								<TableHead className="w-[100px]"></TableHead>
 							</TableRow>
 						</TableHeader>
@@ -145,7 +144,7 @@ const CartHistoryPage = () => {
 													onClick={() =>
 														setExpandedRow(expandedRow === idx ? null : idx)
 													}>
-													{expandedRow === idx ? t('hide') : t('view')}
+													{expandedRow === idx ? t("hide") : t("view")}
 												</Button>
 											</TableCell>
 										</TableRow>
@@ -159,17 +158,17 @@ const CartHistoryPage = () => {
 															<TableHeader>
 																<TableRow>
 																	<TableHead className="w-[180px]">
-																		{t('image')}
+																		{t("image")}
 																	</TableHead>
 																	<TableHead className="w-[180px]">
-																		{t('productNumber')}
+																		{t("productNumber")}
 																	</TableHead>
-																	<TableHead>{t('itemNumber')}</TableHead>
+																	<TableHead>{t("itemNumber")}</TableHead>
 																	<TableHead className="text-right">
-																		{t('quantity')}
+																		{t("quantity")}
 																	</TableHead>
-																	<TableHead>{t('warehouse')}</TableHead>
-																	<TableHead>{t('company')}</TableHead>
+																	<TableHead>{t("warehouse")}</TableHead>
+																	<TableHead>{t("company")}</TableHead>
 																</TableRow>
 															</TableHeader>
 															<TableBody>
@@ -228,7 +227,7 @@ const CartHistoryPage = () => {
 							<ChevronLeft className="h-4 w-4" />
 						</Button>
 						<span className="text-muted-foreground text-sm">
-							{t('page')} {currentPage} {t('of')} {archiveData?.totalPages || 1}
+							{t("page")} {currentPage} {t("of")} {archiveData?.totalPages || 1}
 						</span>
 						<Button
 							variant="outline"

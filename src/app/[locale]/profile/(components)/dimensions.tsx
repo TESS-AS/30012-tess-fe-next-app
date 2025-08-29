@@ -560,17 +560,17 @@ export function Dimensions(): ReactElement {
 								<Button
 									variant="outline"
 									onClick={() => {
-									setIsCreating(true);
-									setCreateAtPath([]);
-									setNewDimension({
-										name: "",
-										type: "",
-										budget: "",
-										cents: "",
-									});
-									setCurrentLevel(0);
-									setIsEditingTypes(false);
-								}}
+										setIsCreating(true);
+										setCreateAtPath([]);
+										setNewDimension({
+											name: "",
+											type: "",
+											budget: "",
+											cents: "",
+										});
+										setCurrentLevel(0);
+										setIsEditingTypes(false);
+									}}
 									className="border-[#C1C4C2] text-[#0F1912] hover:bg-[#F3FAF7] hover:text-[#0F1912]">
 									<PlusIcon className="h-4 w-4" />
 									Lag ny dimensjon
@@ -695,7 +695,7 @@ export function Dimensions(): ReactElement {
 				dimensionTypes={dimensionTypes}
 				handleActiveChange={handleActiveChange}
 				handleTypeChange={handleTypeChange}
-				customerNumber={profile?.customerNumbers[0] || ''}
+				customerNumber={profile?.customerNumbers[0] || ""}
 				onAfterCloseFocus={returnFocusAfterTypePick}
 				currentLevel={currentLevel}
 				editAll={isEditingTypes}
