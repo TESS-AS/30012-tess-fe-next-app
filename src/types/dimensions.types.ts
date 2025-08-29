@@ -6,6 +6,10 @@ export interface CreateCustomerDimensions {
 	parentDimension?: string;
 }
 
+export interface DimensionLabel {
+	[key: string]: string
+}
+
 export interface CreateUserDimensions {
 	userId: number;
 	customerNumber: string;

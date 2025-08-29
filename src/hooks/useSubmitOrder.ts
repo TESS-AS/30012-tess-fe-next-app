@@ -14,11 +14,11 @@ export const useSubmitOrder = (
 			salesOrderHeader: {
 				...orderData.salesOrderHeader,
 				customersOrderNumberEdifact: "EDIFACT123",
-				orderType: "zz",
+				orderType: "KM",
 				customerNumber: "169999",
 				warehouseNumber: String(profile.defaultWarehouseNumber),
 				termsOfDelivery: "DAP",
-				termsOfPayment: "NET",
+				// termsOfPayment: "NET",
 				dispatchDate: new Date().toISOString().split("T")[0],
 			},
 			salesOrderAddresses: [selectedAddress],

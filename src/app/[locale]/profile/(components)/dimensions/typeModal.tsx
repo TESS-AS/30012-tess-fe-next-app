@@ -5,7 +5,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
 import { cn } from "@/lib/utils";
-import type { DimensionType } from "@/types/dimensions.types";
+import type { DimensionLabel, DimensionType } from "@/types/dimensions.types";
+import { updateUserDimensions } from "@/services/dimensions.service";
+import { toast } from "react-toastify";
 
 interface Props {
 	open: boolean;
@@ -13,9 +15,10 @@ interface Props {
 	dimensionTypes: DimensionType[];
 	handleActiveChange: (index: number, checked: boolean) => void;
 	handleTypeChange: (index: number, value: string) => void;
-	onSave: () => void;
+	customerNumber: string;
 	onAfterCloseFocus?: () => void;
 	currentLevel: number;
+	editAll?: boolean;
 }
 
 export default function TypeModal({
@@ -24,9 +27,10 @@ export default function TypeModal({
 	dimensionTypes,
 	handleActiveChange,
 	handleTypeChange,
-	onSave,
+	customerNumber,
 	onAfterCloseFocus,
 	currentLevel,
+	editAll = false,
 }: Props) {
 	return (
 		<Modal
@@ -47,14 +51,14 @@ export default function TypeModal({
 						className="space-y-2">
 						<div
 							className={cn("grid grid-cols-2 gap-4", {
-								"opacity-50": index !== currentLevel,
+								"opacity-50": !editAll && index !== currentLevel,
 							})}>
 							<div className="space-y-2">
 								<p className="text-sm">Dimensjon</p>
 								<Input
 									value={dim.dimension}
 									className="border-[#C1C4C2] bg-[#F8F9F8]"
-									readOnly
+									
 								/>
 								<div className="flex items-center gap-2 pt-1">
 									<Checkbox
@@ -63,7 +67,7 @@ export default function TypeModal({
 										onCheckedChange={(checked) =>
 											handleActiveChange(index, checked as boolean)
 										}
-										disabled={index !== currentLevel}
+										disabled={!editAll && index !== currentLevel}
 									/>
 									<label
 										htmlFor={`active-${dim.dimension}`}
@@ -82,8 +86,8 @@ export default function TypeModal({
 									value={dim.type}
 									onClick={(e) => e.stopPropagation()}
 									onChange={(e) => handleTypeChange(index, e.target.value)}
-									readOnly
-									disabled={index !== currentLevel}
+									
+									disabled={!editAll && index !== currentLevel}
 								/>
 								{index === 0 && (
 									<p className="text-xs text-[#6B7280]">
@@ -102,16 +106,26 @@ export default function TypeModal({
 					</div>
 				))}
 				<Button
-					onClick={onSave}
+					onClick={async () => {
+					try {
+						const activeDimensions = dimensionTypes.filter(d => d.active);
+						const payload: DimensionLabel = {};
+						activeDimensions.forEach((dim, idx) => {
+							payload[`dimension_${idx + 1}_label`] = dim.type;
+						});
+						await updateUserDimensions(customerNumber, payload);
+						toast.success('Dimensjonstyper oppdatert');
+						onOpenChange(false);
+					} catch (error) {
+						console.error('Error updating dimension types:', error);
+						toast.error('Kunne ikke oppdatere dimensjonstyper');
+					}
+				}}
 					className={cn("w-fit text-white", {
-						"bg-[#009640] hover:bg-[#005522]": dimensionTypes.some(
-							(d) => d.active,
-						),
-						"cursor-not-allowed bg-gray-400": !dimensionTypes.some(
-							(d) => d.active,
-						),
+						"bg-[#009640] hover:bg-[#005522]": editAll || dimensionTypes.some((d) => d.active),
+						"cursor-not-allowed bg-gray-400": !editAll && !dimensionTypes.some((d) => d.active),
 					})}
-					disabled={!dimensionTypes.some((d) => d.active)}>
+					disabled={!editAll && !dimensionTypes.some((d) => d.active)}>
 					Lagre dimensjonstyper
 				</Button>
 			</div>

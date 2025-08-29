@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { PriceDisplay } from "@/components/ui/price-display";
 
 import { useOrderSummary } from "@/hooks/useOrderSummary";
@@ -10,6 +11,7 @@ import { useAppContext } from "@/lib/appContext";
 import { Separator } from "@radix-ui/react-select";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 interface OrderSummaryProps {
 	handleCheckout: () => void;
@@ -22,7 +24,8 @@ export default function OrderSummary({
 	isCheckoutLoading,
 	currentStep,
 }: OrderSummaryProps) {
-	const router = useRouter()
+	const router = useRouter();
+	const [acceptedTerms, setAcceptedTerms] = useState(false);
 	const t = useTranslations();
 
 	const { data: profile } = usePunchoutProfile();
@@ -89,12 +92,33 @@ console.log(currentStep,"currentStep")
 							className="text-base font-bold text-[#0F1912]"
 						/>
 					</div>
+
+					<div className="mt-3 flex items-start gap-2">
+						<Checkbox
+							id="terms"
+							checked={acceptedTerms}
+							onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
+						/>
+						<label
+							htmlFor="terms"
+							className="text-sm text-[#0F1912] cursor-pointer">
+							{t("Jeg godtar ")} 
+							<a
+								href="/vilkar"
+								className="text-[#009640] underline hover:text-[#009640]/80"
+								target="_blank"
+								rel="noopener noreferrer">
+								{t("vilkårene")}
+							</a>
+							{t(" for kjøp")}
+						</label>
+					</div>
 				</div>
 
 				{!profile?.punchout ? (
 					<Button
 						className="mt-6 w-full"
-						disabled={isCartEmpty || isCheckoutLoading}
+						disabled={isCartEmpty || isCheckoutLoading || !acceptedTerms}
 						onClick={handleCheckout}>
 						{isCheckoutLoading || isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
@@ -108,7 +132,7 @@ console.log(currentStep,"currentStep")
 					<Button
 						variant="outlineGreen"
 						className="mt-6 w-full text-[#009640]"
-						disabled={isCartEmpty || isCheckoutLoading}
+						disabled={isCartEmpty || isCheckoutLoading || !acceptedTerms}
 						onClick={handleCheckout}>
 						{isCheckoutLoading || isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
@@ -119,7 +143,7 @@ console.log(currentStep,"currentStep")
 				<Button
 					variant="link"
 					className="mt-2 w-full hover:no-underline"
-					disabled={isCartEmpty || isCheckoutLoading}
+					disabled={isCartEmpty || isCheckoutLoading || !acceptedTerms}
 					onClick={() => router.push('/')}>
 					<>
 						{isCheckoutLoading || isLoading ? (

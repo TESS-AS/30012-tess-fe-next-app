@@ -270,7 +270,7 @@ const CartPage = () => {
                         <Link
                           href={`/${categoryPaths[item.productNumber]?.join("/") || ""}/${item.productNumber}`}
                         >
-                          {item.productName}
+                          {item.itemName}
                         </Link>
                       </span>
                       <p

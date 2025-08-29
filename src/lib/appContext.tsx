@@ -138,6 +138,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
           profile?.defaultCustomerNumber,
           profile?.defaultCompanyNumber
         );
+        console.log(priceResults,"priceresults")
 
         const newSummary = priceResults.reduce((acc: Record<string, number>, it: PriceResponse) => {
           acc[it.itemNumber] = it.basePriceTotal || 0;

@@ -1,10 +1,10 @@
-// === pages/CheckoutPage.tsx ===
 "use client";
 
 import { useState } from "react";
 
 import { FeedbackModal } from "@/components/checkout/feedback-modal";
 import OrderSummary from "@/components/checkout/order-summary";
+import { OrderConfirmation } from "@/components/checkout/order-confirmation";
 import { OrderTrackingModal } from "@/components/checkout/order-tracking-modal";
 import StepConfirmation from "@/components/checkout/StepConfirmation";
 import StepContactDelivery from "@/components/checkout/StepContactDelivery";
@@ -16,6 +16,7 @@ import { useContactPerson } from "@/hooks/useContactPerson";
 import { useFeedback } from "@/hooks/useFeedback";
 import { useGetDefaultAddress } from "@/hooks/useGetDefaultAddress";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { Order, OrderResponse } from "@/types/orders.types";
 import { useModals } from "@/hooks/useModals";
 import { useOrderStepper } from "@/hooks/useOrderStepper";
 import { useSubmitOrder } from "@/hooks/useSubmitOrder";
@@ -37,17 +38,9 @@ export default function CheckoutPage() {
 		cartItems,
 		calculatedPrices,
 		handleArchiveCart,
-		showFeedbackModal,
-		setShowFeedbackModal,
-		submittedOrder,
-		setSubmittedOrder,
-		showOrderConfirmation,
-		setShowOrderConfirmation,
-		updatedAddress,
-		setUpdatedAddress,
 	} = useAppContext();
-	const { data: profile } = useGetProfileData();
-	const { data: defaultAddress } = useGetDefaultAddress();
+	const { data: profile, isLoading: isProfileLoading } = useGetProfileData();
+	const { data: defaultAddress, isLoading: isAddressLoading } = useGetDefaultAddress();
 
 	const { submitFeedback, loading } = useFeedback();
 
@@ -60,8 +53,14 @@ export default function CheckoutPage() {
 
 	const [paymentMethod, setPaymentMethod] = useState("faktura");
 	const [dimensionInputMode, setDimensionInputMode] = useState("select");
+	const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+	const [showTrackingModal, setShowTrackingModal] = useState(false);
+	const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
 	const [showWarning, setShowWarning] = useState(true);
 	const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+	const [submittedOrder, setSubmittedOrder] = useState<OrderResponse | null>(null);
+	
+	const [updatedAddress, setUpdatedAddress] = useState<any>(null);
 
 	const [orderData, setOrderData] = useCheckoutOrderData(
 		cartItems,
@@ -97,6 +96,13 @@ export default function CheckoutPage() {
 	const renderStepContent = () => {
 		switch (currentStep) {
 			case 0:
+				if (isProfileLoading || isAddressLoading) {
+					return (
+						<div className="flex h-[400px] items-center justify-center">
+							<div className="h-8 w-8 animate-spin rounded-full border-4 border-[#009640] border-r-transparent" />
+						</div>
+					);
+				}
 				return (
 					<StepContactDelivery
 						contactPerson={contactPerson}
@@ -164,7 +170,7 @@ export default function CheckoutPage() {
 			try {
 				const result = await submitOrder(orderData);
 				if (result) {
-					setSubmittedOrder(result);
+					setSubmittedOrder(result as unknown as OrderResponse);
 					setShowOrderConfirmation(true);
 					setTimeout(() => setShowFeedbackModal(true), 1000);
 				}
@@ -226,9 +232,17 @@ export default function CheckoutPage() {
 					</>
 				) : (
 					<>
-						<pre className="max-h-[500px] overflow-auto rounded-lg bg-gray-50 p-4 text-sm">
-							{JSON.stringify(submittedOrder, null, 2)}
-						</pre>
+						<OrderConfirmation
+							orderNumber={submittedOrder?.order?.Ordrebekreftelse?.Ordrenummer || ''}
+							date={submittedOrder?.order?.Ordrebekreftelse?.Dato || ''}
+							paymentMethod="Faktura"
+							name={submittedOrder?.order?.Ordrebekreftelse?.['Navn (Kontaktperson)'] || ''}
+							company={submittedOrder?.order?.Ordrebekreftelse?.Firma || ''}
+							address={submittedOrder?.order?.Ordrebekreftelse?.Addresse?.[0]?.addressLine1 || ''}
+							phone=""
+							email={submittedOrder?.order?.Ordrebekreftelse?.['E-post'] || ''}
+							onTrackOrder={() => setShowTrackingModal(true)}
+						/>
 						<FeedbackModal
 							open={showFeedbackModal}
 							onClose={() => setShowFeedbackModal(false)}

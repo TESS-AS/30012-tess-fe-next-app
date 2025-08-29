@@ -18,7 +18,7 @@ export function useCheckoutOrderData(
 			customersOrderReference: "",
 			warehouseNumber: "",
 			termsOfDelivery: "",
-			termsOfPayment: "",
+			// termsOfPayment: "",
 			paidAmount: 0,
 			cashRegister: "",
 			text: "",
