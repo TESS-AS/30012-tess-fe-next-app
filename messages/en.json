@@ -198,7 +198,44 @@
       "servicesenter": "service center",
       "kundesenter": "customer service"
     },
-	"Cart": {
+    "Kjopsbetingelser": {
+      "title": "Terms and Conditions for the Customer (e-commerce)",
+      "sections": {
+        "customerTerms": {
+          "title": "Customer Terms",
+          "content": "For contract customers of TESS, conditions defined in the individual agreement apply."
+        },
+        "salesTerms": {
+          "title": "Sales Terms",
+          "content": "Prices are net excl. VAT. Delivery terms are ExW TESS according to Incoterms 2010 or NL09."
+        },
+        "deliveries": {
+          "title": "Deliveries",
+          "content": "At the customer’s expense."
+        },
+        "ownership": {
+          "title": "Ownership",
+          "content": "The seller retains ownership of the sold goods until the purchase price, including interest and costs, has been paid in full (ref: The Mortgage Act, in particular §3-15). Invoicing fee: NOK 65,- + VAT."
+        },
+        "returns": {
+          "title": "Returns",
+          "content": "Returns are accepted by agreement with your local TESS representative. If you are not connected to a local TESS branch, returns must be agreed with the Customer Center at TESS headquarters. See email and phone number in the footer. Cut hoses, assembled units, discontinued or custom-made products are normally not accepted for return. Unless otherwise agreed, the buyer covers the direct costs of returning goods. Direct costs will be shipping or transport costs, and any other direct costs such as purchase of new packaging. The term does not cover any administrative costs the return may have for the business."
+        },
+        "payment": {
+          "title": "Payment with Visa or Mastercard",
+          "content": "When you pay with Visa or Mastercard, the entire purchase amount is reserved on the card when the order is registered, but only charged upon shipment of the goods. If we cannot deliver an item line, we will not charge this amount from the card."
+        },
+        "disclaimer": {
+          "title": "Disclaimer",
+          "content": "Further reservations are made for documented changes from subcontractors, changed raw material prices, possible currency fluctuations, and typographical errors. Alloy surcharges, raw material surcharges, and possible environmental fees may apply to certain product groups."
+        },
+        "form": {
+          "title": "Form",
+          "content": "You can find the withdrawal form <link>here</link>."
+        }
+      }
+    },
+  "Cart": {
 		"archived": "Cart archived",
 		"errorArchiving": "Error archiving cart",
 		"showStockStatus": "Show stock status for:",
