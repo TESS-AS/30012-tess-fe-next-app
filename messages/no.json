@@ -199,7 +199,44 @@
       "servicesenter": "servicesenter",
       "kundesenter": "kundesenter"
     },
-	"Cart": {
+    "Kjopsbetingelser": {
+      "title": "Kjøpsbetingelser for kunden (e-handel)",
+      "sections": {
+        "customerTerms": {
+          "title": "Betingelser for kunden",
+          "content": "For avtalekunder av TESS gjelder betingelser definert i egen avtale."
+        },
+        "salesTerms": {
+          "title": "Salgsbetingelser",
+          "content": "Prisene er netto eks. mva. Leveringsbetingelser er ExW TESS iht Incoterms 2010 eller NL09."
+        },
+        "deliveries": {
+          "title": "Forsendelser",
+          "content": "For kundens regning."
+        },
+        "ownership": {
+          "title": "Eiendomsrett",
+          "content": "Selger har eiendomsretten til de solgte varene inntil kjøpesummen med tillegg av renter og omkostninger i sin helhet er betalt (kfr: Panteloven, spesielt §3-15). Faktureringsgebyr: kr 65,- +mva."
+        },
+        "returns": {
+          "title": "Retur av varer",
+          "content": "Retur godkjennes etter avtale med din lokale TESS representant. Om du ikke er tilknyttet en lokal TESS-avdeling avtales retur med Kundesenteret på TESS hovedkontor. Se e-post og telefonnummer i bunnmeny. Kappede slanger, monterte enheter, utgåtte eller spesialproduserte produkter tas normalt ikke i retur. Med mindre annet er avtalt, dekker kjøper de direkte kostnadene ved å returnere varen. Direkte kostnader vil være forsendelses- eller transportkostnader, og eventuelle andre direkte kostnader som eksempelvis innkjøp av ny frakt emballasje. Begrepet dekker ikke eventuelle administrative kostnader returen har for den næringsdrivende."
+        },
+        "payment": {
+          "title": "Betaling med Visa eller Mastercard",
+          "content": "Når du har betalt med Visa eller Mastercard reserves hele kjøpesummen på kortet ved registrering av bestillingen, men belastes først ved sending av varene. Dersom vi ikke kan levere en varelinje vil vi ikke trekke dette beløpet fra kortet."
+        },
+        "disclaimer": {
+          "title": "Forbehold",
+          "content": "Det tas ytterligere forbehold for dokumenterbare endringer fra underleverandører, endrede råvarepriser, eventuelle valutasvingninger og trykkfeil. Legeringstillegg, råvaretillegg og eventuelle miljøavgifter kan forekomme for enkelte varegrupper."
+        },
+        "form": {
+          "title": "Skjema",
+          "content": "Angrerettskjema finner du <link>her</link>."
+        }
+      }
+    },
+  "Cart": {
 		"archived": "Cart archived",
 		"errorArchiving": "Error archiving cart",
 		"showStockStatus": "Vis lagerstatus for:",
