@@ -115,14 +115,12 @@ export default function CategoryNavigationMenu({
 				{!loading && categories?.length > 0 && (
 					<NavigationMenuItem className="flex items-center">
 						<NavigationMenuLink asChild>
-							<>
-								<Link
-									href="/categories"
-									className="text-foreground hover:text-foreground group flex items-center gap-2 !rounded-none rounded-none border-b-2 border-transparent bg-transparent px-4 py-2 text-sm font-medium transition-all duration-300 ease-out hover:border-emerald-500 hover:bg-transparent focus:bg-transparent">
-									{t("Category.viewAll")}
-								</Link>
+							<Link
+								href="/categories"
+								className="text-foreground hover:text-foreground group flex items-center gap-2 !rounded-none rounded-none border-b-2 border-transparent bg-transparent px-4 py-2 text-sm font-medium transition-all duration-300 ease-out hover:border-emerald-500 hover:bg-transparent focus:bg-transparent">
+								{t("Category.viewAll")}
 								<ChevronRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5" />
-							</>
+							</Link>
 						</NavigationMenuLink>
 					</NavigationMenuItem>
 				)}

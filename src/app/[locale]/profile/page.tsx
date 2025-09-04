@@ -21,6 +21,7 @@ import {
 
 import { Dimensions } from "./(components)/dimensions";
 import { MineBestillinger } from "./(components)/mine-bestillinger";
+import { HoseOrders } from "./(components)/hose-orders";
 import { OrdreDetaljer } from "./(components)/ordre-detaljer";
 import { OrdreHistorikk } from "./(components)/ordre-historikk";
 import { Rekvisisjoner } from "./(components)/rekvisisjoner";
@@ -29,6 +30,15 @@ import { SidebarNav } from "./(components)/sidebar-nav";
 export default function ProfilePage() {
 	const [activeMode, setActiveMode] = useState<"hose" | "ehandel">("ehandel");
 	const [activeTab, setActiveTab] = useState("mine-bestillinger");
+
+	const handleModeChange = (mode: "hose" | "ehandel") => {
+		setActiveMode(mode);
+		if (mode === "ehandel") {
+			setActiveTab("mine-bestillinger");
+		} else if (mode === "hose") {
+			setActiveTab("hose-orders");
+		}
+	};
 	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 	const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
@@ -41,7 +51,7 @@ export default function ProfilePage() {
 					<div className="h-full">
 						<SidebarNav
 							activeMode={activeMode}
-							onModeChange={setActiveMode}
+							onModeChange={handleModeChange}
 							onTabChange={setActiveTab}
 							onCollapse={setIsSidebarCollapsed}
 							items={
@@ -110,16 +120,6 @@ export default function ProfilePage() {
 												icon: ClipboardList,
 											},
 											{
-												href: "hose-reports",
-												label: "Reports",
-												icon: FileText,
-											},
-											{
-												href: "hose-settings",
-												label: "Settings",
-												icon: Settings,
-											},
-											{
 												href: "logout",
 												label: "Log out",
 												icon: LogOut,
@@ -172,6 +172,10 @@ export default function ProfilePage() {
 
 						<TabsContent value="dimensions">
 							<Dimensions />
+						</TabsContent>
+
+						<TabsContent value="hose-orders" className="mt-0">
+							<HoseOrders />
 						</TabsContent>
 
 						<TabsContent value="orders">

@@ -289,6 +289,7 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
 							window.scrollTo({ top: 0, behavior: "smooth" });
 						}}
 						isLoading={isLoading}
+						isDropdownColumn
 					/>
 				</div>
 			</div>

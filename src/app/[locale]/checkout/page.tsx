@@ -34,7 +34,8 @@ const initialOptions: PayPalScriptOptions = {
 
 export default function CheckoutPage() {
 	const t = useTranslations("");
-	const { cartItems, calculatedPrices, handleArchiveCart } = useAppContext();
+	const { cartItems, calculatedPrices, handleArchiveCart, updatedAddress, setUpdatedAddress } = useAppContext();
+
 	const { data: profile, isLoading: isProfileLoading } = useGetProfileData();
 	const { data: defaultAddress, isLoading: isAddressLoading } =
 		useGetDefaultAddress();
@@ -59,7 +60,6 @@ export default function CheckoutPage() {
 		null,
 	);
 
-	const [updatedAddress, setUpdatedAddress] = useState<any>(null);
 
 	const [orderData, setOrderData] = useCheckoutOrderData(
 		cartItems,

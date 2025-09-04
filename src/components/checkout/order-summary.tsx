@@ -93,7 +93,7 @@ export default function OrderSummary({
 						/>
 					</div>
 
-					<div className="mt-3 flex items-start gap-2">
+					{currentStep === 2 && <div className="mt-3 flex items-start gap-2">
 						<Checkbox
 							id="terms"
 							checked={acceptedTerms}
@@ -114,13 +114,13 @@ export default function OrderSummary({
 							</a>
 							{t(" for kjøp")}
 						</label>
-					</div>
+					</div>}
 				</div>
 
 				{!profile?.punchout ? (
 					<Button
 						className="mt-6 w-full"
-						disabled={isCartEmpty || isCheckoutLoading || !acceptedTerms}
+						disabled={isCartEmpty || isCheckoutLoading || (!acceptedTerms && currentStep === 2)}
 						onClick={handleCheckout}>
 						{isCheckoutLoading || isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
@@ -136,7 +136,7 @@ export default function OrderSummary({
 					<Button
 						variant="outlineGreen"
 						className="mt-6 w-full text-[#009640]"
-						disabled={isCartEmpty || isCheckoutLoading || !acceptedTerms}
+						disabled={isCartEmpty || isCheckoutLoading || (!acceptedTerms && currentStep === 2)}
 						onClick={handleCheckout}>
 						{isCheckoutLoading || isLoading ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
@@ -149,7 +149,7 @@ export default function OrderSummary({
 				<Button
 					variant="link"
 					className="mt-2 w-full hover:no-underline"
-					disabled={isCartEmpty || isCheckoutLoading || !acceptedTerms}
+					disabled={isCartEmpty || isCheckoutLoading || (!acceptedTerms && currentStep === 2)}
 					onClick={() => router.push("/")}>
 					<>
 						{isCheckoutLoading || isLoading ? (
