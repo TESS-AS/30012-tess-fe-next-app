@@ -26,7 +26,7 @@ import {
 
 interface Column<T> {
 	key: string;
-	header: string;
+	header: string | (() => React.ReactElement) | React.ReactElement;
 	cell: (item: T) => React.ReactNode;
 	sortable?: boolean;
 }
@@ -44,6 +44,7 @@ interface DataTableProps<T> {
 	onPageChange?: (page: number) => void;
 	isLoading?: boolean;
 	className?: string;
+	isDropdownColumn?: boolean;
 }
 
 export function DataTable<T extends { orderId: string }>({
@@ -59,6 +60,7 @@ export function DataTable<T extends { orderId: string }>({
 	onPageChange,
 	isLoading,
 	className,
+	isDropdownColumn,
 }: DataTableProps<T>) {
 	const [expandedRows, setExpandedRows] = useState<number[]>([]);
 
@@ -68,7 +70,31 @@ export function DataTable<T extends { orderId: string }>({
 				<div className="overflow-hidden">
 					<div className="overflow-x-auto">
 						<table className="w-full min-w-[800px]">
-							<thead className="border-b">
+							{isLoading ? (
+								<tbody>
+									{[...Array(5)].map((_, index) => (
+										<tr key={index} className="animate-pulse">
+											{isExpandable && (
+												<td className="w-10 min-w-[40px] border-b border-[#C1C4C2] px-4 py-4">
+													<div className="h-4 w-4 rounded bg-gray-200" />
+												</td>
+											)}
+											{columns.map((column) => (
+												<td key={column.key} className="border-b border-[#C1C4C2] px-4 py-4">
+													<div className="h-4 w-full rounded bg-gray-200" />
+												</td>
+											))}
+											{isDropdownColumn && (
+												<td className="sticky right-0 w-20 min-w-[80px] border-b border-[#C1C4C2] px-4 py-4">
+													<div className="h-4 w-4 rounded bg-gray-200 ml-auto" />
+												</td>
+											)}
+										</tr>
+									))}
+								</tbody>
+							) : (
+								<>
+									<thead className="border-b">
 								<tr>
 									{isExpandable && (
 										<th className="w-10 min-w-[40px] border-b border-[#C1C4C2] bg-[#F8F9F8] px-4 py-4"></th>
@@ -86,8 +112,16 @@ export function DataTable<T extends { orderId: string }>({
 													"min-w-[180px]": column.key === "status",
 												},
 											)}>
-											{column.header}
-											{column.sortable && (
+											{(() => {
+												if (typeof column.header === 'string') {
+													return column.header;
+												} else if (typeof column.header === 'function') {
+													return column.header();
+												} else {
+													return column.header;
+												}
+											})()}
+											{column.sortable && typeof column.header === 'string' && (
 												<button className="ml-1 text-gray-400">
 													<Image
 														src="/icons/toggle-caret.svg"
@@ -99,7 +133,7 @@ export function DataTable<T extends { orderId: string }>({
 											)}
 										</th>
 									))}
-									<th className="sticky right-0 w-20 min-w-[80px] border-b border-[#C1C4C2] bg-[#F8F9F8] px-4 py-4"></th>
+									{isDropdownColumn && <th className="sticky right-0 w-20 min-w-[80px] border-b border-[#C1C4C2] bg-[#F8F9F8] px-4 py-4"></th>}
 								</tr>
 							</thead>
 							<tbody>
@@ -137,7 +171,7 @@ export function DataTable<T extends { orderId: string }>({
 													{column.cell(item)}
 												</td>
 											))}
-											<td className="sticky right-0 bg-white px-4 py-4 text-right group-hover:bg-[#F8F9F8]">
+											{isDropdownColumn && <td className="sticky right-0 bg-white px-4 py-4 text-right group-hover:bg-[#F8F9F8]">
 												<DropdownMenu>
 													<DropdownMenuTrigger asChild>
 														<Button
@@ -169,7 +203,7 @@ export function DataTable<T extends { orderId: string }>({
 														</DropdownMenuItem>
 													</DropdownMenuContent>
 												</DropdownMenu>
-											</td>
+											</td>}
 										</tr>
 										{isExpandable &&
 											expandedRows.includes(index) &&
@@ -185,6 +219,8 @@ export function DataTable<T extends { orderId: string }>({
 									</React.Fragment>
 								))}
 							</tbody>
+							</>
+							)}
 						</table>
 					</div>
 				</div>

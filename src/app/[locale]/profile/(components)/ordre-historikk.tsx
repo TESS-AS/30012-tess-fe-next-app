@@ -84,7 +84,7 @@ export function OrdreHistorikk() {
 		status: undefined,
 	};
 
-	const { data: orders, isLoading } = useGetOrders(1, 9999, neutralFilters);
+	const { data: orders, isLoading } = useGetOrders(currentPage, ITEMS_PER_PAGE, neutralFilters);
 
 	const statuses = [
 		"Alle",
@@ -286,6 +286,7 @@ export function OrdreHistorikk() {
 							window.scrollTo({ top: 0, behavior: "smooth" });
 						}}
 						isLoading={isLoading}
+						isDropdownColumn
 					/>
 				</div>
 			</div>

@@ -24,6 +24,8 @@ const Stepper: React.FC<StepperProps> = ({
 
 	const selectedAddress = defaultAddress?.[0];
 
+
+	console.log(selectedAddress,"selectedAddress")
 	const { data: profile } = useGetProfileData();
 	return (
 		<div className="flex w-full items-center justify-between py-6">
