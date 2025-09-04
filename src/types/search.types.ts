@@ -4,12 +4,14 @@ export interface IProductSearch {
 	productName: string;
 	productNumber: string;
 	thumbnail: string;
+	attribute1?: string | null;
+	attribute2?: string | null;
 }
 
 export interface ProductAttributes {
-	brandName?: string | null;
-	material?: string | null;
-	[key: string]: string | number | boolean | null | undefined;
+	attribute1?: string | null;
+	attribute2?: string | null;
+	[k: string]: string | number | boolean | null | undefined;
 }
 
 export interface ISuggestions {

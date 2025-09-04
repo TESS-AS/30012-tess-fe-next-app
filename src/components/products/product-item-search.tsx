@@ -124,11 +124,11 @@ export function ProductItem({
 						</span>
 					</Link>
 					<div className="flex max-w-xs flex-col gap-2">
-						{["brandName", "material"].map((k) => (
+						{["attribute1", "attribute2"].map((k) => (
 							<div
 								key={k}
 								className="flex h-6 items-center justify-center rounded-sm border border-gray-300 bg-white px-3 text-[12px] text-gray-800">
-								{product.attributes?.[k] ?? "-"}
+								{(product as unknown as Record<string, any>)?.[k] ?? "-"}
 							</div>
 						))}
 					</div>
