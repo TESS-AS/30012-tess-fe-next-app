@@ -104,17 +104,15 @@ export function ProductGrid({
 	}, [isLoading]);
 
 	useEffect(() => {
-		const observer = new IntersectionObserver(
-			(entries) => {
-				if (entries[0].isIntersecting && hasMore && !isLoading) {
+		const observer = new IntersectionObserver((entries) => {
+			if (entries[0].isIntersecting && hasMore && !isLoading) {
+				const timer = setTimeout(() => {
 					loadMore();
-				}
-			},
-			{
-				rootMargin: "200px",
-				threshold: 0.1,
-			},
-		);
+				}, 500);
+
+				return () => clearTimeout(timer);
+			}
+		});
 
 		if (observerTarget.current) {
 			observer.observe(observerTarget.current);
@@ -122,7 +120,7 @@ export function ProductGrid({
 
 		return () => {
 			if (observerTarget.current) {
-				observer.unobserve(observerTarget?.current);
+				observer.unobserve(observerTarget.current);
 			}
 		};
 	}, [hasMore, isLoading, loadMore]);
@@ -309,42 +307,63 @@ export function ProductGrid({
 						</div>
 					)}
 				</div>
-
 				<div
 					ref={observerTarget}
-					className={cn("min-h-0", hasMore && "min-h-[400px]")}>
-					{isLoading && hasMore && !isFiltering && (
-						<div
-							className={cn(
-								"mt-6 grid gap-6",
-								variant === "compact"
-									? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
-									: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-								viewLayout === "list" && "lg:grid-cols-1",
-							)}>
-							{[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-								<div
-									key={i}
-									className="group relative space-y-4">
-									<Skeleton className="aspect-square w-full rounded-lg" />
-
-									<div className="space-y-2">
-										<Skeleton className="h-4 w-3/4" />
-										<Skeleton className="h-4 w-1/2" />
-										<Skeleton className="h-4 w-1/4" />
-									</div>
-								</div>
-							))}
-						</div>
+					className="flex h-[500px] items-center justify-center">
+					{hasMore ? (
+						isLoading && !isFiltering ? (
+							<div className="text-muted-foreground flex items-start gap-2 pt-3">
+								<svg
+									fill="#00b84c"
+									viewBox="0 0 24 24"
+									xmlns="http://www.w3.org/2000/svg"
+									className="h-6 w-6">
+									<path
+										d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+										opacity=".25"
+									/>
+									<path d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z">
+										<animateTransform
+											attributeName="transform"
+											type="rotate"
+											dur="0.75s"
+											values="0 12 12;360 12 12"
+											repeatCount="indefinite"
+										/>
+									</path>
+								</svg>
+							</div>
+						) : (
+							<div className="text-muted-foreground flex h-[500px] items-start gap-2 pt-3">
+								<svg
+									fill="#00b84c"
+									viewBox="0 0 24 24"
+									xmlns="http://www.w3.org/2000/svg"
+									className="h-10 w-10">
+									<path
+										d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+										opacity=".25"
+									/>
+									<path d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z">
+										<animateTransform
+											attributeName="transform"
+											type="rotate"
+											dur="0.75s"
+											values="0 12 12;360 12 12"
+											repeatCount="indefinite"
+										/>
+									</path>
+								</svg>
+							</div>
+						)
+					) : (
+						products.length > 9 && (
+							<div className="text-muted-foreground text-center">
+								{t("Category.noResults")}
+							</div>
+						)
 					)}
 				</div>
-
-				{/* No more products message */}
-				{!isLoading && !hasMore && products.length > 9 && (
-					<div className="text-muted-foreground mt-8 text-center">
-						No more products to load
-					</div>
-				)}
 			</div>
 		</div>
 	);

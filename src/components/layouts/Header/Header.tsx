@@ -225,7 +225,7 @@ export default function Header() {
 									<div className="col-span-1 space-y-4 pr-4">
 										<SearchAside
 											suggestions={
-												(data?.searchSuggestions ?? []) as { keyword: string }[]
+												(data?.suggestions ?? []) as unknown as string[]
 											}
 											categories={searchCategories}
 											query={searchQuery}

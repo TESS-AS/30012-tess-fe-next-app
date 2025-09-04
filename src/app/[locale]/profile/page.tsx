@@ -6,22 +6,19 @@ import OrdersTab from "@/app/[locale]/profile/(components)/tabs/OrdersTab/Orders
 import PersonalInfoTab from "@/app/[locale]/profile/(components)/tabs/PersonalInfoTab";
 import UserAddressesTab from "@/app/[locale]/profile/(components)/tabs/UserAdresses/UserAddressesTab";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { profileTabs } from "@/constants/profileTabs";
 import { cn } from "@/lib/utils";
 import {
 	ShoppingCart,
-	ArrowRight,
 	Folder,
 	User,
 	Settings,
 	LogOut,
 	ClipboardList,
-	FileText,
 } from "lucide-react";
 
 import { Dimensions } from "./(components)/dimensions";
-import { MineBestillinger } from "./(components)/mine-bestillinger";
 import { HoseOrders } from "./(components)/hose-orders";
+import { MineBestillinger } from "./(components)/mine-bestillinger";
 import { OrdreDetaljer } from "./(components)/ordre-detaljer";
 import { OrdreHistorikk } from "./(components)/ordre-historikk";
 import { Rekvisisjoner } from "./(components)/rekvisisjoner";
@@ -174,7 +171,9 @@ export default function ProfilePage() {
 							<Dimensions />
 						</TabsContent>
 
-						<TabsContent value="hose-orders" className="mt-0">
+						<TabsContent
+							value="hose-orders"
+							className="mt-0">
 							<HoseOrders />
 						</TabsContent>
 

@@ -239,15 +239,28 @@ export function Filter({
 	};
 
 	const filteredCategories = React.useMemo(() => {
+		if (!searchTerm) return filters;
+
 		return filters
-			.map((filterCategory) => ({
-				...filterCategory,
-				filters: filterCategory.filters.filter((filter) =>
-					filter.key.toLowerCase().includes(searchTerm.toLowerCase()),
-				),
-			}))
+			.map((filterCategory) => {
+				const filteredFilters = filterCategory.filters.filter((filter) => {
+					const children = loadedChildren[filter.key]?.values || [];
+
+					const matchesKey = filter.key
+						.toLowerCase()
+						.includes(searchTerm.toLowerCase());
+
+					const matchesChild = children.some((child) =>
+						child.value.toLowerCase().includes(searchTerm.toLowerCase()),
+					);
+
+					return matchesKey || matchesChild;
+				});
+
+				return { ...filterCategory, filters: filteredFilters };
+			})
 			.filter((category) => category.filters.length > 0);
-	}, [filters, searchTerm]);
+	}, [filters, searchTerm, loadedChildren]);
 
 	return (
 		<div

@@ -101,9 +101,9 @@ export function ProductItem({
 		<div key={product.productNumber}>
 			<div className="mb-3 flex w-full items-center gap-4 rounded-md border border-gray-200 p-3 hover:border-gray-400">
 				<div className="flex h-32 w-32 min-w-32 items-center justify-center overflow-hidden rounded-md">
-					{product.media ? (
+					{product.thumbnail ? (
 						<Image
-							src={product.media}
+							src={product.thumbnail}
 							alt={product.productName}
 							unoptimized
 							width={128}
