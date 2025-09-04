@@ -3,7 +3,7 @@
 import { Search, ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-export type Suggestion = { keyword: string };
+export type Suggestion = string;
 export type CategoryLink = { id: string | number; name: string; count: number };
 
 export default function SearchAside({
@@ -11,7 +11,8 @@ export default function SearchAside({
 	categories,
 	onPick,
 	maxCategories = 5,
-	buildSuggestionHref = (s) => `/search?query=${encodeURIComponent(s.keyword)}`,
+	buildSuggestionHref = (suggestion) =>
+		`/search?query=${encodeURIComponent(suggestion)}`,
 	buildCategoryHref = (c) =>
 		`/category/${encodeURIComponent(c.name.toLowerCase().replace(/\s+/g, "-"))}`,
 	seeMoreHref = `/categories`,
@@ -39,11 +40,11 @@ export default function SearchAside({
 				<div className={card}>
 					{suggestions?.length ? (
 						<ul>
-							{suggestions.map((s, idx) => {
-								const href = buildSuggestionHref(s);
+							{suggestions.map((suggestion, idx) => {
+								const href = buildSuggestionHref(suggestion);
 								return (
 									<li
-										key={`${s.keyword}-${idx}`}
+										key={`${suggestion}-${idx}`}
 										className="flex items-center">
 										<button
 											type="button"
@@ -51,7 +52,7 @@ export default function SearchAside({
 											className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-gray-50">
 											<Search className="h-4 w-4 text-gray-400" />
 											<span className="text-[#0A7A3F] hover:underline">
-												{s.keyword}
+												{suggestion}
 											</span>
 										</button>
 									</li>

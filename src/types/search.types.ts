@@ -3,7 +3,7 @@ export interface IProductSearch {
 	attributes: ProductAttributes;
 	productName: string;
 	productNumber: string;
-	media: string;
+	thumbnail: string;
 }
 
 export interface ProductAttributes {
@@ -29,7 +29,7 @@ export interface SearchArray {
 }
 
 export interface SearchResponse {
-	searchSuggestions: ISuggestions[];
+	suggestions: ISuggestions[];
 	productRes: IProductSearch[];
 }
 

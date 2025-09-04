@@ -54,7 +54,7 @@ export function ProductCard({
 								? "250px"
 								: "(min-width: 1280px) 256px, (min-width: 1024px) 192px, (min-width: 768px) 256px, (min-width: 640px) 384px, calc(100vw - 48px)"
 						}
-						quality={75}
+						quality={100}
 						className={cn(
 							"object-contain",
 							"transition-all duration-300",
@@ -78,7 +78,7 @@ export function ProductCard({
 									? "250px"
 									: "(min-width: 1280px) 256px, (min-width: 1024px) 192px, (min-width: 768px) 256px, (min-width: 640px) 384px, calc(100vw - 48px)"
 							}
-							quality={75}
+							quality={100}
 							className={cn(
 								"object-contain",
 								"transition-all duration-300",
