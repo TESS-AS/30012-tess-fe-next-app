@@ -23,8 +23,17 @@ import { OrdreDetaljer } from "./(components)/ordre-detaljer";
 import { OrdreHistorikk } from "./(components)/ordre-historikk";
 import { Rekvisisjoner } from "./(components)/rekvisisjoner";
 import { SidebarNav } from "./(components)/sidebar-nav";
+import { useAppContext } from "@/lib/appContext";
+import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
+import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 export default function ProfilePage() {
+
+	const { setIsAuthOpen } = useAppContext();
+	const { data: profile } = usePunchoutProfile();
+	const t = useTranslations();
+	
 	const [activeMode, setActiveMode] = useState<"hose" | "ehandel">("ehandel");
 	const [activeTab, setActiveTab] = useState("mine-bestillinger");
 
@@ -38,6 +47,17 @@ export default function ProfilePage() {
 	};
 	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 	const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+
+	if (!profile) {
+		return (
+			<div className="flex flex-col items-center justify-center gap-4 py-12">
+				<h1 className="text-2xl font-semibold">{t("Login.title")}</h1>
+				<Button onClick={() => setIsAuthOpen(true)}>
+					{t("Login.loginToViewCart")}
+				</Button>
+			</div>
+		);
+	}
 
 	return (
 		<main className="my-6 min-h-screen">
