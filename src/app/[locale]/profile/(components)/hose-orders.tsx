@@ -4,7 +4,6 @@
 import * as React from "react";
 import { useMemo, useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import {
@@ -36,10 +35,14 @@ import {
 	Trash2,
 	CreditCard,
 	CheckSquare,
+	MapPin,
 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "react-toastify";
-import { useGetWarehouses } from "@/hooks/useGetWarehouse";
+import { addToCart } from "@/services/carts.service";
+import { Button } from "@/components/ui/button";
+import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 export interface HoseOrder {
@@ -66,13 +69,20 @@ interface HoseOrdersProps {
 
 export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 	const { data: profile } = usePunchoutProfile();
+	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
+		undefined,
+	);
 	const {
 		assets = [],
 		pagination,
 		loading,
 		fetchAssets,
-	} = useGetAssets(profile?.customerNumbers?.[3]);
-	const { warehouses = [] } = useGetWarehouses(true) || {};
+	} = useGetAssets(
+		// Use customer number only if no S1 code is selected
+		selectedS1Code ? undefined : profile?.customerNumbers?.[3],
+		selectedS1Code,
+	);
+	const { s1Codes = [], s1CodesPagination, fetchS1Codes } = useGetAssets();
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedColumns, setSelectedColumns] = useState<string[]>([
@@ -130,8 +140,68 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		);
 	};
 
-	const handleBulkAction = (action: string): void => {
-		console.log(`Bulk action ${action} for rows:`, selectedRows);
+	const [isAddingToCart, setIsAddingToCart] = useState(false);
+	const [cartModalOpen, setCartModalOpen] = useState(false);
+	const [showAllItems, setShowAllItems] = useState(false);
+	const [selectedItems, setSelectedItems] = useState<HoseOrder[]>([]);
+	const router = useRouter();
+
+	const handleAddToCart = async (items: HoseOrder[]) => {
+		setIsAddingToCart(true);
+		try {
+			let successCount = 0;
+			let failureCount = 0;
+
+			for (const asset of items) {
+				try {
+					await addToCart({
+						productNumber: asset.id,
+						itemNumber: asset.id,
+						quantity: 1,
+						warehouseNumber: asset.warehouse,
+						companyNumber: asset.kunde_id,
+						itemName: asset.beskrivelse,
+					});
+					successCount++;
+				} catch (e) {
+					failureCount++;
+				}
+			}
+
+			if (successCount > 0) {
+				setCartModalOpen(true);
+			}
+			if (failureCount > 0) {
+				toast.error(
+					`Kunne ikke legge til ${failureCount} element${failureCount > 1 ? "er" : ""} i handlekurven`,
+				);
+			}
+
+			// Clear selection after adding to cart
+			setSelectedRows([]);
+		} catch (e) {
+			toast.error("Kunne ikke legge til elementer i handlekurven");
+		} finally {
+			setIsAddingToCart(false);
+		}
+	};
+
+	const handleBulkAction = async (action: string): Promise<void> => {
+		if (action === "cart") {
+			const selectedAssets = transformedAssets.filter((asset) =>
+				selectedRows.includes(asset.orderId),
+			);
+
+			if (selectedAssets.length === 0) {
+				toast.error("Vennligst velg elementer å legge til i handlekurven");
+				return;
+			}
+
+			setSelectedItems(selectedAssets);
+			await handleAddToCart(selectedAssets);
+		} else {
+			console.log(`Bulk action ${action} for rows:`, selectedRows);
+		}
 	};
 
 	const handlePageChange = (page: number) => {
@@ -263,56 +333,68 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 					<DropdownMenuContent
 						align="start"
-						className="w-[240px]">
+						className="w-[300px]">
 						<div className="text-muted-foreground px-3 pt-1 pb-2 text-xs">
 							Valgt: {selectedRows.length}
 						</div>
 
 						<DropdownMenuItem
 							onClick={() => handleBulkAction("cart")}
-							className="p-3">
+							disabled={selectedRows.length === 0 || isAddingToCart}
+							className={cn("", {
+								"cursor-not-allowed opacity-50":
+									selectedRows.length === 0 || isAddingToCart,
+							})}>
 							<ShoppingCart className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>Legg til i handlekurv</span>
+							<span>
+								{isAddingToCart ? "Legger til..." : "Legg til i handlekurv"}
+							</span>
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={() => handleBulkAction("support")}
-							className="p-3">
+							className="">
 							<Mail className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Kontakt TESS support</span>
 						</DropdownMenuItem>
 						<DropdownMenuItem
+							onClick={() => handleBulkAction("sendmail")}
+							className="">
+							<Mail className="mr-3 h-4 w-4 text-[#005522]" />
+							<span>Send forespørsel om tilbud (RFQ)</span>
+						</DropdownMenuItem>
+						<DropdownMenuItem
 							onClick={() => handleBulkAction("report")}
-							className="p-3">
+							className="">
 							<FileText className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Rapporter slangebytter</span>
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={() => handleBulkAction("discard")}
-							className="p-3">
+							className="">
 							<Trash2 className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Kasser utstyr</span>
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={() => handleBulkAction("print-cert")}
-							className="p-3">
+							className="">
 							<Printer className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Skriv ut TESS trykktest-sertifikat</span>
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={() => handleBulkAction("print-id")}
-							className="p-3">
+							className="">
 							<Printer className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Skriv ut visuelle ID-merker (strekkode)</span>
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={() => handleBulkAction("print-certs")}
-							className="p-3">
+							className="">
 							<Printer className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Skriv ut trykktest-sertifikater</span>
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={() => handleBulkAction("export")}
-							className="p-3">
+							className="">
 							<CreditCard className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Eksporter oversiktsdata til Excel</span>
 						</DropdownMenuItem>
@@ -324,7 +406,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 									!(selectedRows.length === transformedAssets.length),
 								)
 							}
-							className="border-t p-3">
+							className="rounded-none border-t">
 							<CheckSquare className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>
 								{selectedRows.length === transformedAssets.length
@@ -335,7 +417,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 						{/* Select/Deselect this page */}
 						<DropdownMenuItem
 							onClick={() => handleSelectAllOnPage(!allSelectedOnPage)}
-							className="p-3">
+							className="">
 							<CheckSquare className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>
 								{allSelectedOnPage
@@ -355,7 +437,6 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		},
 	};
 
-	// Build columns with Handling pinned to the end (if enabled)
 	const activeColumns = useMemo(() => {
 		const nonHandling = selectedColumns.filter((n) => n !== "Handling");
 		const cols: Column<HoseOrder>[] = nonHandling
@@ -363,10 +444,10 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 			.filter(Boolean) as Column<HoseOrder>[];
 
 		if (selectedColumns.includes("Handling")) {
-			cols.push(allColumns["Handling"]); // always last
+			cols.push(allColumns["Handling"]);
 		}
 		return cols;
-	}, [selectedColumns, selectedRows]); // include selectedRows so checkbox state updates
+	}, [selectedColumns, selectedRows]);
 
 	const handleColumnChange = (value: string): void => {
 		setSelectedColumns((prev) =>
@@ -382,41 +463,128 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		);
 	};
 
-	const handleUpdateWarehouseForAllItems = async (warehouseNumber: string) => {
+	const handleUpdateS1ForAllItems = async (s1Code: string) => {
 		try {
-			console.log("Update warehouse for all items to:", warehouseNumber);
+			setSelectedS1Code(s1Code || undefined);
+			await fetchAssets(1, pagination.pageSize);
 		} catch (e) {
-			toast.error("Cart.warehouseUpdateError");
+			toast.error("Error updating S1 code");
 		}
 	};
 
 	return (
-		<div className="space-y-6">
-			<div className="flex items-baseline space-x-6">
-				<div className="flex items-center">
-					<h1 className="text-2xl font-semibold">Slanger og utstyr</h1>
-				</div>
-				<div className="flex w-[240px] items-center gap-2">
-					<p className="text-base font-normal text-[#5A615D]">Lokasjon:</p>
-					<Select onValueChange={handleUpdateWarehouseForAllItems}>
-						<SelectTrigger className="w-[170px] border-[#C1C4C2] bg-white font-medium text-[#0F1912]">
-							<SelectValue placeholder="Lokasjon" />
-						</SelectTrigger>
-						<SelectContent>
-							{warehouses.map((warehouse: { id: string; name: string }) => (
-								<SelectItem
-									key={warehouse.id}
-									value={warehouse.id}>
-									{warehouse.name}
-								</SelectItem>
+		<>
+			<Modal
+				className="max-w-[400px]"
+				open={cartModalOpen}
+				onOpenChange={setCartModalOpen}>
+				<div>
+					<ModalHeader>
+						<ModalTitle className="flex items-center gap-2">
+							<Image
+								src="/icons/check-filled.svg"
+								alt="Check"
+								width={20}
+								height={20}
+							/>
+							<span>{selectedItems.length} varer lagt til i handlekurv</span>
+						</ModalTitle>
+					</ModalHeader>
+					<div className="space-y-2 py-4">
+						{selectedItems
+							.slice(0, showAllItems ? undefined : 5)
+							.map((item, index) => (
+								<div key={index} className="text-sm text-gray-600">
+									1 × {item.beskrivelse}
+								</div>
 							))}
-						</SelectContent>
-					</Select>
+						{selectedItems.length > 5 && (
+							<button
+								onClick={() => setShowAllItems(!showAllItems)}
+								className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
+								{showAllItems ? (
+									<>
+										Vis færre <ChevronDown className="h-4 w-4 rotate-180 transform" />
+									</>
+								) : (
+									<>
+										Vis alle <ChevronDown className="h-4 w-4" />
+									</>
+								)}
+							</button>
+						)}
+					</div>
+					<div className="flex">
+						<Button
+							variant="default"
+							className="w-full bg-[#1C6D2C] text-white hover:bg-[#164B1F]"
+							onClick={() => {
+								setCartModalOpen(false);
+								router.push('/cart');
+							}}>
+							Til handlekurven
+						</Button>
+					</div>
 				</div>
-			</div>
+			</Modal>
+			<div className="space-y-6">
+				<div className="flex items-baseline space-x-4">
+					<div className="flex items-center">
+						<h1 className="text-2xl font-semibold">Slanger og utstyr</h1>
+					</div>
+					<div className="flex w-[280px] items-center gap-3">
+						<p className="text-base font-normal text-[#5A615D]">Lokasjon:</p>
+						<Select onValueChange={handleUpdateS1ForAllItems}>
+							<SelectTrigger className="w-[200px] border-[#C1C4C2] bg-white font-medium text-[#0F1912]">
+								<div className="flex items-center gap-2 overflow-hidden">
+									<MapPin className="h-4 w-4 shrink-0 text-[#0F1912]" />
+									<SelectValue
+										className="truncate"
+										placeholder="Velg S1 anlegg"
+									/>
+								</div>
+								<ChevronDown
+									size={16}
+									className="text-[#5A615D]"
+								/>
+							</SelectTrigger>
+							<SelectContent
+								className="max-h-[300px] overflow-y-auto"
+								onScroll={(e) => {
+									const target = e.target as HTMLDivElement;
+									if (
+										target.scrollTop + target.clientHeight >=
+										target.scrollHeight - 20 &&
+										!loading &&
+										s1CodesPagination.currentPage < s1CodesPagination.totalPages
+									) {
+										fetchS1Codes(
+											s1CodesPagination.currentPage + 1,
+											s1CodesPagination.pageSize
+										);
+									}
+								}}
+							>
+								{(s1Codes || []).map((s1) => (
+									<SelectItem
+										key={s1.S1Code}
+										value={s1.S1Code}
+									>
+										{s1.S1Name}
+									</SelectItem>
+								))}
+								{loading && s1CodesPagination.currentPage > 1 && (
+									<div className="py-2 text-center text-sm text-gray-500">
+										Laster flere...
+									</div>
+								)}
+							</SelectContent>
+						</Select>
+						</div>
+				</div>
 
-			<div className="rounded-lg border border-[#C1C4C2] bg-white">
-				<div className="flex items-start justify-between space-y-6 p-6">
+				<div className="rounded-lg border border-[#C1C4C2] bg-white">
+					<div className="flex items-start justify-between space-y-6 p-6">
 					<div className="relative flex w-full max-w-[480px]">
 						<Search className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-[#5A615D]" />
 						<Input
@@ -690,7 +858,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 					selectedIds={selectedRows}
 					selectedRowBgClass="bg-[#DCF7E0]"
 				/>
+				</div>
 			</div>
-		</div>
+		</>
 	);
 }

@@ -14,6 +14,12 @@ export const useGetAssets = (customerNumber?: string, s1Code?: string) => {
 		totalItems: 0,
 		totalPages: 0,
 	});
+	const [s1CodesPagination, setS1CodesPagination] = useState({
+		currentPage: 1,
+		pageSize: 100,
+		totalItems: 0,
+		totalPages: 0,
+	});
 
 	const fetchAssets = async (page: number = 1, pageSize: number = 10) => {
 		try {
@@ -33,11 +39,27 @@ export const useGetAssets = (customerNumber?: string, s1Code?: string) => {
 		}
 	};
 
-	const fetchS1Codes = async () => {
+	const fetchS1Codes = async (page: number = 1, pageSize: number = 100) => {
 		try {
 			setLoading(true);
-			const response = await getS1Codes();
-			setS1Codes(response);
+			const response = await getS1Codes(page, pageSize);
+
+			setS1Codes((prevCodes) => {
+				const allCodes = page === 1 ? [] : prevCodes;
+				response.data.forEach((newCode) => {
+					if (!allCodes.find((item) => item.S1Code === newCode.S1Code)) {
+						allCodes.push(newCode);
+					}
+				});
+				return allCodes;
+			});
+
+			setS1CodesPagination({
+				currentPage: response.meta.page,
+				pageSize: response.meta.pageSize,
+				totalItems: response.meta.total,
+				totalPages: response.meta.totalPages,
+			});
 		} catch (error) {
 			setError(error as string);
 		} finally {
@@ -61,6 +83,8 @@ export const useGetAssets = (customerNumber?: string, s1Code?: string) => {
 		loading,
 		error,
 		pagination,
+		s1CodesPagination,
 		fetchAssets,
+		fetchS1Codes,
 	};
 };
