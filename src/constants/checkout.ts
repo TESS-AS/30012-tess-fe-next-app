@@ -61,3 +61,5 @@ export const shippingFields: Omit<FormFieldProps, "value" | "onChange">[] = [
 		field: "countryCode",
 	},
 ];
+
+export const HIDE_CHECKOUT_FOR_SPECIFIC_CUSTOMER_NUMBER = "169999";
