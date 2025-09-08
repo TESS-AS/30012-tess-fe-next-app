@@ -199,6 +199,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 			setSelectedItems(selectedAssets);
 			await handleAddToCart(selectedAssets);
+			router.push("/cart?mode=hose");
 		} else {
 			console.log(`Bulk action ${action} for rows:`, selectedRows);
 		}
@@ -494,7 +495,9 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 						{selectedItems
 							.slice(0, showAllItems ? undefined : 5)
 							.map((item, index) => (
-								<div key={index} className="text-sm text-gray-600">
+								<div
+									key={index}
+									className="text-sm text-gray-600">
 									1 × {item.beskrivelse}
 								</div>
 							))}
@@ -504,7 +507,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 								className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
 								{showAllItems ? (
 									<>
-										Vis færre <ChevronDown className="h-4 w-4 rotate-180 transform" />
+										Vis færre{" "}
+										<ChevronDown className="h-4 w-4 rotate-180 transform" />
 									</>
 								) : (
 									<>
@@ -520,7 +524,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 							className="w-full bg-[#1C6D2C] text-white hover:bg-[#164B1F]"
 							onClick={() => {
 								setCartModalOpen(false);
-								router.push('/cart');
+								router.push("/cart");
 							}}>
 							Til handlekurven
 						</Button>
@@ -554,22 +558,20 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 									const target = e.target as HTMLDivElement;
 									if (
 										target.scrollTop + target.clientHeight >=
-										target.scrollHeight - 20 &&
+											target.scrollHeight - 20 &&
 										!loading &&
 										s1CodesPagination.currentPage < s1CodesPagination.totalPages
 									) {
 										fetchS1Codes(
 											s1CodesPagination.currentPage + 1,
-											s1CodesPagination.pageSize
+											s1CodesPagination.pageSize,
 										);
 									}
-								}}
-							>
+								}}>
 								{(s1Codes || []).map((s1) => (
 									<SelectItem
 										key={s1.S1Code}
-										value={s1.S1Code}
-									>
+										value={s1.S1Code}>
 										{s1.S1Name}
 									</SelectItem>
 								))}
@@ -580,284 +582,286 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 								)}
 							</SelectContent>
 						</Select>
-						</div>
+					</div>
 				</div>
 
 				<div className="rounded-lg border border-[#C1C4C2] bg-white">
 					<div className="flex items-start justify-between space-y-6 p-6">
-					<div className="relative flex w-full max-w-[480px]">
-						<Search className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-[#5A615D]" />
-						<Input
-							placeholder="Søk etter ID nummer, ordrenummer, fartøy eller utstyr..."
-							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
-							className="font-sm h-10 flex-1 rounded-md border border-[#8A8F8C] bg-[#F8F9F8] pr-24 pl-12 text-base text-[#5A615D]"
-						/>
-						<Button
-							type="button"
-							className="absolute top-1/2 right-0 h-10 -translate-y-1/2 rounded-none rounded-r-md border-1 border-l-2 border-[#8A8F8C] bg-white px-4 font-medium text-[#0F1912] hover:bg-white">
-							Søk
-						</Button>
-					</div>
-
-					<div className="flex items-center space-x-4">
-						{/* Add column */}
-						<div className="flex items-center">
-							<DropdownMenu>
-								<DropdownMenuTrigger className="flex w-[200px] items-center justify-between rounded-md border border-[#C1C4C2] bg-white px-3 py-2 text-[#5A615D]">
-									<div className="flex items-center gap-2">
-										<PlusIcon size={16} />
-										<span>Legg til kolonne</span>
-									</div>
-									<ChevronDown
-										size={16}
-										className="text-[#5A615D]"
-									/>
-								</DropdownMenuTrigger>
-								<DropdownMenuContent className="w-[300px] rounded-2xl bg-white p-4 shadow-lg">
-									<div className="space-y-2">
-										{columnOptions.map((option) => (
-											<DropdownMenuItem
-												key={option}
-												onSelect={(e) => {
-													e.preventDefault();
-													handleColumnChange(option);
-												}}
-												className="rounded-md p-0 focus:bg-gray-50">
-												<div className="flex items-center space-x-2">
-													<Checkbox
-														checked={selectedColumns.includes(option)}
-													/>
-													<span className="text-gray-700">{option}</span>
-												</div>
-											</DropdownMenuItem>
-										))}
-									</div>
-								</DropdownMenuContent>
-							</DropdownMenu>
+						<div className="relative flex w-full max-w-[480px]">
+							<Search className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-[#5A615D]" />
+							<Input
+								placeholder="Søk etter ID nummer, ordrenummer, fartøy eller utstyr..."
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+								className="font-sm h-10 flex-1 rounded-md border border-[#8A8F8C] bg-[#F8F9F8] pr-24 pl-12 text-base text-[#5A615D]"
+							/>
+							<Button
+								type="button"
+								className="absolute top-1/2 right-0 h-10 -translate-y-1/2 rounded-none rounded-r-md border-1 border-l-2 border-[#8A8F8C] bg-white px-4 font-medium text-[#0F1912] hover:bg-white">
+								Søk
+							</Button>
 						</div>
 
-						{/* Filter */}
-						<div className="flex items-center">
-							<div className="relative w-[160px]">
+						<div className="flex items-center space-x-4">
+							{/* Add column */}
+							<div className="flex items-center">
 								<DropdownMenu>
-									<DropdownMenuTrigger className="flex w-full items-center justify-between rounded-md border border-[#C1C4C2] bg-white px-3 py-2 text-[#5A615D]">
+									<DropdownMenuTrigger className="flex w-[200px] items-center justify-between rounded-md border border-[#C1C4C2] bg-white px-3 py-2 text-[#5A615D]">
 										<div className="flex items-center gap-2">
-											<Funnel
-												size={16}
-												className="text-[#005522]"
-											/>
-											<span>Filter</span>
+											<PlusIcon size={16} />
+											<span>Legg til kolonne</span>
 										</div>
 										<ChevronDown
 											size={16}
 											className="text-[#5A615D]"
 										/>
 									</DropdownMenuTrigger>
-
 									<DropdownMenuContent className="w-[300px] rounded-2xl bg-white p-4 shadow-lg">
-										<div className="space-y-5 text-sm">
-											{/* Inspeksjon */}
-											<div>
-												<h4 className="mb-2 font-semibold text-[#0F1912]">
-													Inspeksjon
-												</h4>
-												<div className="space-y-2">
-													<DropdownMenuItem
-														className="rounded-md p-0 focus:bg-gray-50"
-														onSelect={(e) => {
-															e.preventDefault();
-															handleFilterChange("underkjente");
-														}}>
-														<div className="flex items-center gap-2">
-															<Checkbox
-																checked={selectedFilters.includes(
-																	"underkjente",
-																)}
-															/>
-															<span>Underkjente inspeksjoner</span>
-														</div>
-													</DropdownMenuItem>
-
-													<DropdownMenuItem
-														className="rounded-md p-0 focus:bg-gray-50"
-														onSelect={(e) => {
-															e.preventDefault();
-															handleFilterChange("med_merknader");
-														}}>
-														<div className="flex items-center gap-2">
-															<Checkbox
-																checked={selectedFilters.includes(
-																	"med_merknader",
-																)}
-															/>
-															<span>Med merknader</span>
-														</div>
-													</DropdownMenuItem>
-
-													<DropdownMenuItem
-														className="rounded-md p-0 focus:bg-gray-50"
-														onSelect={(e) => {
-															e.preventDefault();
-															handleFilterChange("forfalt");
-														}}>
-														<div className="flex items-center gap-2">
-															<Checkbox
-																checked={selectedFilters.includes("forfalt")}
-															/>
-															<span>Forfalt</span>
-														</div>
-													</DropdownMenuItem>
-												</div>
-											</div>
-
-											{/* Slangebytte */}
-											<div>
-												<h4 className="mb-2 font-semibold text-[#0F1912]">
-													Slangebytte
-												</h4>
-												<div className="space-y-2">
-													<DropdownMenuItem
-														className="rounded-md p-0 focus:bg-gray-50"
-														onSelect={(e) => {
-															e.preventDefault();
-															handleFilterChange("aktive_midlertidige");
-														}}>
-														<div className="flex items-center gap-2">
-															<Checkbox
-																checked={selectedFilters.includes(
-																	"aktive_midlertidige",
-																)}
-															/>
-															<span>Aktive midlertidige slangebytter</span>
-														</div>
-													</DropdownMenuItem>
-
-													<DropdownMenuItem
-														className="rounded-md p-0 focus:bg-gray-50"
-														onSelect={(e) => {
-															e.preventDefault();
-															handleFilterChange("forfaller_6m");
-														}}>
-														<div className="flex items-center gap-2">
-															<Checkbox
-																checked={selectedFilters.includes(
-																	"forfaller_6m",
-																)}
-															/>
-															<span>Forfaller om mindre enn 6 måneder</span>
-														</div>
-													</DropdownMenuItem>
-												</div>
-											</div>
-
-											{/* Etter alder */}
-											<div>
-												<h4 className="mb-2 font-semibold text-[#0F1912]">
-													Etter alder
-												</h4>
-												<div className="space-y-2">
-													<DropdownMenuItem
-														className="rounded-md p-0 focus:bg-gray-50"
-														onSelect={(e) => {
-															e.preventDefault();
-															handleFilterChange("age_5_6");
-														}}>
-														<div className="flex items-center gap-2">
-															<Checkbox
-																checked={selectedFilters.includes("age_5_6")}
-															/>
-															<span>Slanger 5–6 år gamle</span>
-														</div>
-													</DropdownMenuItem>
-
-													<DropdownMenuItem
-														className="rounded-md p-0 focus:bg-gray-50"
-														onSelect={(e) => {
-															e.preventDefault();
-															handleFilterChange("age_7_8");
-														}}>
-														<div className="flex items-center gap-2">
-															<Checkbox
-																checked={selectedFilters.includes("age_7_8")}
-															/>
-															<span>Slanger 7–8 år gamle</span>
-														</div>
-													</DropdownMenuItem>
-
-													<DropdownMenuItem
-														className="rounded-md p-0 focus:bg-gray-50"
-														onSelect={(e) => {
-															e.preventDefault();
-															handleFilterChange("age_8_10");
-														}}>
-														<div className="flex items-center gap-2">
-															<Checkbox
-																checked={selectedFilters.includes("age_8_10")}
-															/>
-															<span>Slanger 8–10 år gamle</span>
-														</div>
-													</DropdownMenuItem>
-
-													<DropdownMenuItem
-														className="rounded-md p-0 focus:bg-gray-50"
-														onSelect={(e) => {
-															e.preventDefault();
-															handleFilterChange("age_over_10");
-														}}>
-														<div className="flex items-center gap-2">
-															<Checkbox
-																checked={selectedFilters.includes(
-																	"age_over_10",
-																)}
-															/>
-															<span>Slanger eldre enn 10 år</span>
-														</div>
-													</DropdownMenuItem>
-												</div>
-											</div>
-
-											{/* Nødslanger */}
-											<div>
-												<h4 className="mb-2 font-semibold text-[#0F1912]">
-													Nødslanger
-												</h4>
-												<div className="space-y-2">
-													<DropdownMenuItem
-														className="rounded-md p-0 focus:bg-gray-50"
-														onSelect={(e) => {
-															e.preventDefault();
-															handleFilterChange("nodslanger");
-														}}>
-														<div className="flex items-center gap-2">
-															<Checkbox
-																checked={selectedFilters.includes("nodslanger")}
-															/>
-															<span>Nødslanger</span>
-														</div>
-													</DropdownMenuItem>
-												</div>
-											</div>
+										<div className="space-y-2">
+											{columnOptions.map((option) => (
+												<DropdownMenuItem
+													key={option}
+													onSelect={(e) => {
+														e.preventDefault();
+														handleColumnChange(option);
+													}}
+													className="rounded-md p-0 focus:bg-gray-50">
+													<div className="flex items-center space-x-2">
+														<Checkbox
+															checked={selectedColumns.includes(option)}
+														/>
+														<span className="text-gray-700">{option}</span>
+													</div>
+												</DropdownMenuItem>
+											))}
 										</div>
 									</DropdownMenuContent>
 								</DropdownMenu>
 							</div>
+
+							{/* Filter */}
+							<div className="flex items-center">
+								<div className="relative w-[160px]">
+									<DropdownMenu>
+										<DropdownMenuTrigger className="flex w-full items-center justify-between rounded-md border border-[#C1C4C2] bg-white px-3 py-2 text-[#5A615D]">
+											<div className="flex items-center gap-2">
+												<Funnel
+													size={16}
+													className="text-[#005522]"
+												/>
+												<span>Filter</span>
+											</div>
+											<ChevronDown
+												size={16}
+												className="text-[#5A615D]"
+											/>
+										</DropdownMenuTrigger>
+
+										<DropdownMenuContent className="w-[300px] rounded-2xl bg-white p-4 shadow-lg">
+											<div className="space-y-5 text-sm">
+												{/* Inspeksjon */}
+												<div>
+													<h4 className="mb-2 font-semibold text-[#0F1912]">
+														Inspeksjon
+													</h4>
+													<div className="space-y-2">
+														<DropdownMenuItem
+															className="rounded-md p-0 focus:bg-gray-50"
+															onSelect={(e) => {
+																e.preventDefault();
+																handleFilterChange("underkjente");
+															}}>
+															<div className="flex items-center gap-2">
+																<Checkbox
+																	checked={selectedFilters.includes(
+																		"underkjente",
+																	)}
+																/>
+																<span>Underkjente inspeksjoner</span>
+															</div>
+														</DropdownMenuItem>
+
+														<DropdownMenuItem
+															className="rounded-md p-0 focus:bg-gray-50"
+															onSelect={(e) => {
+																e.preventDefault();
+																handleFilterChange("med_merknader");
+															}}>
+															<div className="flex items-center gap-2">
+																<Checkbox
+																	checked={selectedFilters.includes(
+																		"med_merknader",
+																	)}
+																/>
+																<span>Med merknader</span>
+															</div>
+														</DropdownMenuItem>
+
+														<DropdownMenuItem
+															className="rounded-md p-0 focus:bg-gray-50"
+															onSelect={(e) => {
+																e.preventDefault();
+																handleFilterChange("forfalt");
+															}}>
+															<div className="flex items-center gap-2">
+																<Checkbox
+																	checked={selectedFilters.includes("forfalt")}
+																/>
+																<span>Forfalt</span>
+															</div>
+														</DropdownMenuItem>
+													</div>
+												</div>
+
+												{/* Slangebytte */}
+												<div>
+													<h4 className="mb-2 font-semibold text-[#0F1912]">
+														Slangebytte
+													</h4>
+													<div className="space-y-2">
+														<DropdownMenuItem
+															className="rounded-md p-0 focus:bg-gray-50"
+															onSelect={(e) => {
+																e.preventDefault();
+																handleFilterChange("aktive_midlertidige");
+															}}>
+															<div className="flex items-center gap-2">
+																<Checkbox
+																	checked={selectedFilters.includes(
+																		"aktive_midlertidige",
+																	)}
+																/>
+																<span>Aktive midlertidige slangebytter</span>
+															</div>
+														</DropdownMenuItem>
+
+														<DropdownMenuItem
+															className="rounded-md p-0 focus:bg-gray-50"
+															onSelect={(e) => {
+																e.preventDefault();
+																handleFilterChange("forfaller_6m");
+															}}>
+															<div className="flex items-center gap-2">
+																<Checkbox
+																	checked={selectedFilters.includes(
+																		"forfaller_6m",
+																	)}
+																/>
+																<span>Forfaller om mindre enn 6 måneder</span>
+															</div>
+														</DropdownMenuItem>
+													</div>
+												</div>
+
+												{/* Etter alder */}
+												<div>
+													<h4 className="mb-2 font-semibold text-[#0F1912]">
+														Etter alder
+													</h4>
+													<div className="space-y-2">
+														<DropdownMenuItem
+															className="rounded-md p-0 focus:bg-gray-50"
+															onSelect={(e) => {
+																e.preventDefault();
+																handleFilterChange("age_5_6");
+															}}>
+															<div className="flex items-center gap-2">
+																<Checkbox
+																	checked={selectedFilters.includes("age_5_6")}
+																/>
+																<span>Slanger 5–6 år gamle</span>
+															</div>
+														</DropdownMenuItem>
+
+														<DropdownMenuItem
+															className="rounded-md p-0 focus:bg-gray-50"
+															onSelect={(e) => {
+																e.preventDefault();
+																handleFilterChange("age_7_8");
+															}}>
+															<div className="flex items-center gap-2">
+																<Checkbox
+																	checked={selectedFilters.includes("age_7_8")}
+																/>
+																<span>Slanger 7–8 år gamle</span>
+															</div>
+														</DropdownMenuItem>
+
+														<DropdownMenuItem
+															className="rounded-md p-0 focus:bg-gray-50"
+															onSelect={(e) => {
+																e.preventDefault();
+																handleFilterChange("age_8_10");
+															}}>
+															<div className="flex items-center gap-2">
+																<Checkbox
+																	checked={selectedFilters.includes("age_8_10")}
+																/>
+																<span>Slanger 8–10 år gamle</span>
+															</div>
+														</DropdownMenuItem>
+
+														<DropdownMenuItem
+															className="rounded-md p-0 focus:bg-gray-50"
+															onSelect={(e) => {
+																e.preventDefault();
+																handleFilterChange("age_over_10");
+															}}>
+															<div className="flex items-center gap-2">
+																<Checkbox
+																	checked={selectedFilters.includes(
+																		"age_over_10",
+																	)}
+																/>
+																<span>Slanger eldre enn 10 år</span>
+															</div>
+														</DropdownMenuItem>
+													</div>
+												</div>
+
+												{/* Nødslanger */}
+												<div>
+													<h4 className="mb-2 font-semibold text-[#0F1912]">
+														Nødslanger
+													</h4>
+													<div className="space-y-2">
+														<DropdownMenuItem
+															className="rounded-md p-0 focus:bg-gray-50"
+															onSelect={(e) => {
+																e.preventDefault();
+																handleFilterChange("nodslanger");
+															}}>
+															<div className="flex items-center gap-2">
+																<Checkbox
+																	checked={selectedFilters.includes(
+																		"nodslanger",
+																	)}
+																/>
+																<span>Nødslanger</span>
+															</div>
+														</DropdownMenuItem>
+													</div>
+												</div>
+											</div>
+										</DropdownMenuContent>
+									</DropdownMenu>
+								</div>
+							</div>
 						</div>
 					</div>
-				</div>
 
-				<DataTable<HoseOrder>
-					data={transformedAssets}
-					columns={activeColumns}
-					currentPage={pagination.currentPage}
-					totalPages={pagination.totalPages}
-					totalItems={pagination.totalItems}
-					itemsPerPage={pagination.pageSize}
-					onPageChange={handlePageChange}
-					isLoading={loading}
-					selectedIds={selectedRows}
-					selectedRowBgClass="bg-[#DCF7E0]"
-				/>
+					<DataTable<HoseOrder>
+						data={transformedAssets}
+						columns={activeColumns}
+						currentPage={pagination.currentPage}
+						totalPages={pagination.totalPages}
+						totalItems={pagination.totalItems}
+						itemsPerPage={pagination.pageSize}
+						onPageChange={handlePageChange}
+						isLoading={loading}
+						selectedIds={selectedRows}
+						selectedRowBgClass="bg-[#DCF7E0]"
+					/>
 				</div>
 			</div>
 		</>
