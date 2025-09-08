@@ -76,15 +76,20 @@ export function OrdreHistorikk() {
 
 	const ITEMS_PER_PAGE = 10;
 
-	const neutralFilters: OrderFilters = {
+	const [filters, setFilters] = useState<OrderFilters>({
 		orderNumber: undefined,
 		invoiceNumber: "",
 		fromDate: "",
 		toDate: "",
 		status: undefined,
-	};
+	});
 
-	const { data: orders, isLoading } = useGetOrders(currentPage, ITEMS_PER_PAGE, neutralFilters);
+	const {
+		data: orders,
+		isLoading,
+		totalPages,
+		totalItems,
+	} = useGetOrders(currentPage, ITEMS_PER_PAGE, filters);
 
 	const statuses = [
 		"Alle",
@@ -114,59 +119,47 @@ export function OrdreHistorikk() {
 		}
 	};
 
-	const normalizedQuery = searchQuery.trim().replace(/^#/, "").toLowerCase();
-
-	const tableData: Order[] = useMemo(
-		() =>
-			(orders || []).map((order) => ({
-				...order,
-				orderId: String(order.id),
-			})),
-		[orders],
-	);
-
-	const filteredOrders: Order[] = useMemo(() => {
-		const matchesQuery = (o: any) => {
-			if (!normalizedQuery) return true;
-			const candidates = [
-				o.id,
-				o.orderNumber,
-				o.invoiceNumber,
-				o.customerName,
-				o.customer,
-			]
-				.filter(Boolean)
-				.map((v) => String(v).toLowerCase());
-
-			return candidates.some((v) => v.includes(normalizedQuery));
-		};
-
-		const statusOk =
-			selectedStatus === "Alle"
-				? () => true
-				: (o: any) => o.status === selectedStatus;
-
-		return tableData.filter((o) => matchesQuery(o) && statusOk(o));
-	}, [tableData, normalizedQuery, selectedStatus]);
+	const getStatusNumber = (status: string): number | undefined => {
+		switch (status) {
+			case "Mottatt":
+				return 10; // Written
+			case "Bekreftet":
+				return 20; // Confirmed
+			case "Plukket":
+				return 30; // Picked
+			case "Under transport":
+				return 45; // Shipped
+			case "Levert":
+				return 60; // Invoiced
+			case "Kansellert":
+				return 0; // Something Wrong
+			default:
+				return undefined;
+		}
+	};
 
 	useEffect(() => {
-		setCurrentPage(1);
+		const orderNumber = searchQuery
+			? parseInt(searchQuery.replace(/#/g, ""))
+			: undefined;
+		setFilters((prev) => ({
+			...prev,
+			orderNumber: orderNumber || undefined,
+			status:
+				selectedStatus === "Alle" ? undefined : getStatusNumber(selectedStatus),
+		}));
 	}, [searchQuery, selectedStatus]);
 
-	const derivedTotalItems = filteredOrders.length;
-	const derivedTotalPages = Math.max(
-		1,
-		Math.ceil(derivedTotalItems / ITEMS_PER_PAGE),
-	);
-	const start = (currentPage - 1) * ITEMS_PER_PAGE;
-	const end = start + ITEMS_PER_PAGE;
-	const pageRows = filteredOrders.slice(start, end);
+	const tableData = (orders || []).map((order) => ({
+		...order,
+		orderId: String(order.id),
+	}));
 
 	const columns = [
 		{
 			key: "id",
-			header: "ORDRE ID",
-			cell: (order: Order) => <span>#{order.id}</span>,
+			header: "ORDRENUMMER",
+			cell: (order: Order) => <span className="">#{order.orderNumber}</span>,
 			sortable: true,
 		},
 		{
@@ -272,23 +265,20 @@ export function OrdreHistorikk() {
 						</RadioGroup>
 					</div>
 				</div>
-
-				<div>
-					<DataTable
-						data={pageRows}
-						columns={columns}
-						currentPage={currentPage}
-						totalPages={derivedTotalPages}
-						totalItems={derivedTotalItems}
-						itemsPerPage={ITEMS_PER_PAGE}
-						onPageChange={(page) => {
-							setCurrentPage(page);
-							window.scrollTo({ top: 0, behavior: "smooth" });
-						}}
-						isLoading={isLoading}
-						isDropdownColumn
-					/>
-				</div>
+				<DataTable
+					data={tableData}
+					columns={columns}
+					currentPage={currentPage}
+					totalPages={totalPages}
+					totalItems={totalItems}
+					itemsPerPage={ITEMS_PER_PAGE}
+					onPageChange={(page) => {
+						setCurrentPage(page);
+						window.scrollTo({ top: 0, behavior: "smooth" });
+					}}
+					isLoading={isLoading}
+					isDropdownColumn
+				/>
 			</div>
 		</div>
 	);

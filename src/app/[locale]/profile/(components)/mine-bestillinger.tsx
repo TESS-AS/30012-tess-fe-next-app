@@ -173,8 +173,8 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
 	const columns = [
 		{
 			key: "id",
-			header: "ORDRE ID",
-			cell: (order: Order) => <span className="">#{order.id}</span>,
+			header: "ORDRENUMMER",
+			cell: (order: Order) => <span className="">#{order.orderNumber}</span>,
 			sortable: true,
 		},
 		{

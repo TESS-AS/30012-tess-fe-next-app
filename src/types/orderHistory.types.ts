@@ -76,6 +76,7 @@ export function getStatusBadgeProps(status: OrderStatus) {
 
 export interface OrderItems {
 	id: number;
+	orderNumber: string;
 	date: string;
 	status: OrderStatus;
 	total: number;
