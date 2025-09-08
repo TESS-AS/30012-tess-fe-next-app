@@ -11,6 +11,7 @@ import StepContactDelivery from "@/components/checkout/StepContactDelivery";
 import StepPayment from "@/components/checkout/StepPayment";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import Stepper from "@/components/ui/stepper";
+import { HIDE_CHECKOUT_FOR_SPECIFIC_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useCheckoutOrderData } from "@/hooks/useCheckoutOrderData";
 import { useContactPerson } from "@/hooks/useContactPerson";
 import { useFeedback } from "@/hooks/useFeedback";
@@ -34,12 +35,17 @@ const initialOptions: PayPalScriptOptions = {
 
 export default function CheckoutPage() {
 	const t = useTranslations("");
-	const { cartItems, calculatedPrices, handleArchiveCart, updatedAddress, setUpdatedAddress } = useAppContext();
+	const {
+		cartItems,
+		calculatedPrices,
+		handleArchiveCart,
+		updatedAddress,
+		setUpdatedAddress,
+	} = useAppContext();
 
 	const { data: profile, isLoading: isProfileLoading } = useGetProfileData();
 	const { data: defaultAddress, isLoading: isAddressLoading } =
 		useGetDefaultAddress();
-
 	const { submitFeedback, loading } = useFeedback();
 
 	const selectedAddress = defaultAddress?.[0];
@@ -59,7 +65,6 @@ export default function CheckoutPage() {
 	const [submittedOrder, setSubmittedOrder] = useState<OrderResponse | null>(
 		null,
 	);
-
 
 	const [orderData, setOrderData] = useCheckoutOrderData(
 		cartItems,
@@ -190,6 +195,13 @@ export default function CheckoutPage() {
 		4: t("Checkout.feedback.ratings.4"),
 		5: t("Checkout.feedback.ratings.5"),
 	};
+
+	if (
+		profile?.defaultCustomerNumber ===
+		HIDE_CHECKOUT_FOR_SPECIFIC_CUSTOMER_NUMBER
+	) {
+		return null;
+	}
 
 	return (
 		<PayPalScriptProvider options={initialOptions}>
