@@ -63,6 +63,7 @@ export function useGetOrders(
 					);
 					return {
 						id: order.orderId,
+						orderNumber: order.orderNumber,
 						date: order.date,
 						status: mapLineStatusToOrderStatus(maxStatus),
 						total: order.sum,
