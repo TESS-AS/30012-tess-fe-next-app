@@ -29,6 +29,7 @@ import {
 	WarehouseBatch,
 } from "@/services/product.service";
 import { RawCategory } from "@/types/categories.types";
+import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import {
 	ChevronDown,
 	ChevronRight,
@@ -376,7 +377,7 @@ const CartPage = () => {
 					/>
 
 					<p className="font-bold">
-						{(calculatedPrices[item.itemNumber] ?? 0)?.toFixed(2)}
+						{formatNorwegianCurrency(calculatedPrices[item.itemNumber] ?? 0)}
 					</p>
 
 					<Button

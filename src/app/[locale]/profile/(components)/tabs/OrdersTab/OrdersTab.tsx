@@ -17,6 +17,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { OrderFilters, useGetOrders } from "@/hooks/useGetOrders";
 import { getStatusBadgeProps } from "@/types/orderHistory.types";
+import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 
 export default function OrdersTab() {
 	const [page, setPage] = useState(1);
@@ -62,7 +63,7 @@ export default function OrdersTab() {
 								<span>{new Date(order.date).toLocaleDateString()}</span>
 							</div>
 							<span className="mt-2 text-base font-semibold text-black md:mt-0">
-								{order?.total?.toFixed(2)} €
+								{formatNorwegianCurrency(order?.total ?? 0)}
 							</span>
 						</div>
 						<div className="flex flex-wrap gap-2 pt-2">

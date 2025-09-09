@@ -4,6 +4,7 @@ import { EditContactModal } from "@/components/checkout/edit-contact-modal";
 import { EditDeliveryModal } from "@/components/checkout/edit-delivery-modal";
 import { EditPaymentModal } from "@/components/checkout/edit-payment-modal";
 import { useAppContext } from "@/lib/appContext";
+import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import { MapPin, Truck, User2, Wallet } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -149,7 +150,9 @@ export default function StepConfirmation({
 								<div className="flex items-center gap-50">
 									<p className="font-medium text-[#0F1912]">x{item.quantity}</p>
 									<p className="text-lg font-bold whitespace-nowrap">
-										{(calculatedPrices[item.itemNumber] ?? 0)?.toFixed(2)}
+										{formatNorwegianCurrency(
+											calculatedPrices[item.itemNumber] ?? 0,
+										)}
 									</p>
 								</div>
 							</div>

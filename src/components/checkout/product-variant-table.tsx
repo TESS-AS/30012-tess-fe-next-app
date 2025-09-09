@@ -39,6 +39,7 @@ import {
 	loadItemBalanceBatch,
 } from "@/services/product.service";
 import { PriceResponse } from "@/types/search.types";
+import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import {
 	Plus,
 	Loader2,
@@ -371,7 +372,7 @@ export default function ProductVariantTable({
 									)}
 									{visibleCols.price && (
 										<TableCell>
-											{prices[variant.itemNumber]?.toFixed(2) || "0.00"} kr
+											{formatNorwegianCurrency(prices[variant.itemNumber] ?? 0)}
 										</TableCell>
 									)}
 									{visibleCols.quantity && (
