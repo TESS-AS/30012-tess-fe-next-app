@@ -5,7 +5,10 @@ import { useState } from "react";
 import OrdersTab from "@/app/[locale]/profile/(components)/tabs/OrdersTab/OrdersTab";
 import PersonalInfoTab from "@/app/[locale]/profile/(components)/tabs/PersonalInfoTab";
 import UserAddressesTab from "@/app/[locale]/profile/(components)/tabs/UserAdresses/UserAddressesTab";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
+import { useAppContext } from "@/lib/appContext";
 import { cn } from "@/lib/utils";
 import {
 	ShoppingCart,
@@ -15,6 +18,7 @@ import {
 	LogOut,
 	ClipboardList,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Dimensions } from "./(components)/dimensions";
 import { HoseOrders } from "./(components)/hose-orders";
@@ -23,17 +27,12 @@ import { OrdreDetaljer } from "./(components)/ordre-detaljer";
 import { OrdreHistorikk } from "./(components)/ordre-historikk";
 import { Rekvisisjoner } from "./(components)/rekvisisjoner";
 import { SidebarNav } from "./(components)/sidebar-nav";
-import { useAppContext } from "@/lib/appContext";
-import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
-import { Button } from "@/components/ui/button";
-import { useTranslations } from "next-intl";
 
 export default function ProfilePage() {
-
 	const { setIsAuthOpen } = useAppContext();
 	const { data: profile } = usePunchoutProfile();
 	const t = useTranslations();
-	
+
 	const [activeMode, setActiveMode] = useState<"hose" | "ehandel">("ehandel");
 	const [activeTab, setActiveTab] = useState("mine-bestillinger");
 
