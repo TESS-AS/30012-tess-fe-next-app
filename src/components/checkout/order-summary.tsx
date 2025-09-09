@@ -154,7 +154,7 @@ export default function OrderSummary({
 							{isCheckoutLoading || isLoading ? (
 								<Loader2 className="h-4 w-4 animate-spin" />
 							) : (
-								"OrderSummary.punchoutCart"
+								t("OrderSummary.punchoutCart")
 							)}
 						</Button>
 					))}

@@ -123,6 +123,7 @@ export function DataTable<T extends { orderId: string }>({
 														"min-w-[180px]": column.key === "status",
 														// Pin the Handling header on the far right
 														"sticky right-0 z-10": column.key === "action",
+														"p-0": column.key === "handling",
 													},
 												)}>
 												{typeof column.header === "string"

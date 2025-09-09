@@ -36,6 +36,7 @@ import {
 	CreditCard,
 	CheckSquare,
 	MapPin,
+	X,
 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "react-toastify";
@@ -311,22 +312,24 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 			sortable: true,
 		},
 		Handling: {
-			key: "action",
+			key: "handling",
 			header: () => (
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<button
 							className={cn(
-								"inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium",
+								"group inline-flex h-[52px] w-full cursor-pointer items-center gap-2 rounded-tr-md px-3 py-2 text-sm font-medium transition-colors",
 								selectedRows.length > 0
-									? "border-[#0E7B34] bg-[#0E7B34] text-white hover:opacity-95"
-									: "border-[#C1C4C2] bg-white text-[#5A615D] hover:bg-gray-50",
+									? "border-[#0E7B34] bg-[#005522] text-white"
+									: "border-[#C1C4C2] text-[#5A615D] data-[state=open]:bg-[#003D1A] data-[state=open]:text-white",
 							)}>
 							<span className="tracking-wide">HANDLING</span>
 							<ChevronDown
 								className={cn(
-									"h-4 w-4",
-									selectedRows.length > 0 ? "text-white" : "text-[#5A615D]",
+									"h-4 w-4 transition-colors",
+									selectedRows.length > 0
+										? "text-white"
+										: "text-[#5A615D] group-data-[state=open]:text-white",
 								)}
 							/>
 						</button>
@@ -538,50 +541,70 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 					</div>
 					<div className="flex w-[280px] items-center gap-3">
 						<p className="text-base font-normal text-[#5A615D]">Lokasjon:</p>
-						<Select onValueChange={handleUpdateS1ForAllItems}>
-							<SelectTrigger className="w-[200px] border-[#C1C4C2] bg-white font-medium text-[#0F1912]">
-								<div className="flex items-center gap-2 overflow-hidden">
-									<MapPin className="h-4 w-4 shrink-0 text-[#0F1912]" />
-									<SelectValue
-										className="truncate"
-										placeholder="Velg S1 anlegg"
-									/>
-								</div>
-								<ChevronDown
-									size={16}
-									className="text-[#5A615D]"
-								/>
-							</SelectTrigger>
-							<SelectContent
-								className="max-h-[300px] overflow-y-auto"
-								onScroll={(e) => {
-									const target = e.target as HTMLDivElement;
-									if (
-										target.scrollTop + target.clientHeight >=
-											target.scrollHeight - 20 &&
-										!loading &&
-										s1CodesPagination.currentPage < s1CodesPagination.totalPages
-									) {
-										fetchS1Codes(
-											s1CodesPagination.currentPage + 1,
-											s1CodesPagination.pageSize,
-										);
+						<div className="relative">
+							<Select
+								value={selectedS1Code || ""}
+								onValueChange={(value) => {
+									if (!value) {
+										setSelectedS1Code("");
 									}
+									handleUpdateS1ForAllItems(value);
 								}}>
-								{(s1Codes || []).map((s1) => (
-									<SelectItem
-										key={s1.S1Code}
-										value={s1.S1Code}>
-										{s1.S1Name}
-									</SelectItem>
-								))}
-								{loading && s1CodesPagination.currentPage > 1 && (
-									<div className="py-2 text-center text-sm text-gray-500">
-										Laster flere...
+								<SelectTrigger className="relative w-[200px] border-[#C1C4C2] bg-white pr-8 font-medium text-[#0F1912]">
+									<div className="flex items-center gap-2 overflow-hidden">
+										<MapPin className="h-4 w-4 shrink-0 text-[#0F1912]" />
+										<SelectValue
+											className="truncate"
+											placeholder="Velg S1 anlegg"
+										/>
 									</div>
-								)}
-							</SelectContent>
-						</Select>
+								</SelectTrigger>
+								<SelectContent
+									className="max-h-[300px] overflow-y-auto"
+									onScroll={(e) => {
+										const target = e.target as HTMLDivElement;
+										if (
+											target.scrollTop + target.clientHeight >=
+												target.scrollHeight - 20 &&
+											!loading &&
+											s1CodesPagination.currentPage <
+												s1CodesPagination.totalPages
+										) {
+											fetchS1Codes(
+												s1CodesPagination.currentPage + 1,
+												s1CodesPagination.pageSize,
+											);
+										}
+									}}>
+									{(s1Codes || []).map((s1) => (
+										<SelectItem
+											key={s1.S1Code}
+											value={s1.S1Code}>
+											{s1.S1Name}
+										</SelectItem>
+									))}
+									{loading && s1CodesPagination.currentPage > 1 && (
+										<div className="py-2 text-center text-sm text-gray-500">
+											Laster flere...
+										</div>
+									)}
+								</SelectContent>
+							</Select>
+							{selectedS1Code && (
+								<button
+									type="button"
+									onClick={(e) => {
+										e.stopPropagation();
+										e.preventDefault();
+										setSelectedS1Code("");
+										handleUpdateS1ForAllItems("");
+									}}
+									className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
+									<X className="h-4 w-4 text-[#5A615D]" />
+									<span className="sr-only">Fjern lokasjon</span>
+								</button>
+							)}
+						</div>
 					</div>
 				</div>
 
