@@ -29,6 +29,7 @@ import {
 	WarehouseBatch,
 } from "@/services/product.service";
 import { RawCategory } from "@/types/categories.types";
+import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import { ChevronRight, CircleAlert, CircleCheck, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -202,7 +203,7 @@ const CartPage = () => {
 								{t("Cart.showStockStatus")}
 							</p>
 							<Select onValueChange={handleWarehouseChange}>
-								<SelectTrigger className="w-[40%] border-[#C1C4C2] text-[#5A615D] bg-white w-[170px]">
+								<SelectTrigger className="w-[40%] w-[170px] border-[#C1C4C2] bg-white text-[#5A615D]">
 									<SelectValue placeholder={t("Product.selectWarehouse")} />
 								</SelectTrigger>
 								<SelectContent>
@@ -293,7 +294,7 @@ const CartPage = () => {
 										</div>
 
 										<div className="flex flex-col">
-											<span className="mb-2 font-medium text-[#0F1912] hover:underline max-w-[170px] block">
+											<span className="mb-2 block max-w-[170px] font-medium text-[#0F1912] hover:underline">
 												<Link
 													className="block truncate"
 													href={`/${categoryPaths[item.productNumber]?.join("/") || ""}/${item.productNumber}`}>
@@ -404,7 +405,9 @@ const CartPage = () => {
 										/>
 
 										<p className="font-bold">
-											{(calculatedPrices[item.itemNumber] ?? 0)?.toFixed(2)}
+											{formatNorwegianCurrency(
+												calculatedPrices[item.itemNumber] ?? 0,
+											)}
 										</p>
 
 										<Button

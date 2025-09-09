@@ -1,3 +1,4 @@
+import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import { FileText } from "lucide-react";
 
 interface ProductInfoProps {
@@ -22,7 +23,7 @@ export function ProductInfo({ name, price, pdfUrl }: ProductInfoProps) {
 
 			{price && (
 				<p className="text-primary mt-2 text-xl font-semibold">
-					{price.toFixed(2)} EUR
+					{formatNorwegianCurrency(price)}
 				</p>
 			)}
 		</div>

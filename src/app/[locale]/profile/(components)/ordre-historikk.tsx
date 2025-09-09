@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { OrderFilters, useGetOrders } from "@/hooks/useGetOrders";
 import { cn } from "@/lib/utils";
 import { OrderItems } from "@/types/orderHistory.types";
+import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import { Search } from "lucide-react";
 import Image from "next/image";
 
@@ -183,7 +184,7 @@ export function OrdreHistorikk() {
 		{
 			key: "total",
 			header: "PRIS",
-			cell: (order: Order) => `${order.total?.toFixed(2)}`,
+			cell: (order: Order) => formatNorwegianCurrency(order.total ?? 0),
 			sortable: true,
 		},
 		{

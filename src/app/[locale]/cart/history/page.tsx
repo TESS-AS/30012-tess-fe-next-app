@@ -16,6 +16,7 @@ import { getArchiveCart } from "@/services/carts.service";
 import { getProductPrice } from "@/services/product.service";
 import { ArchiveCartResponse } from "@/types/carts.types";
 import { PriceResponse } from "@/types/search.types";
+import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
@@ -133,7 +134,7 @@ const CartHistoryPage = () => {
 												{item.cart.length}
 											</TableCell>
 											<TableCell className="text-right font-medium">
-												{total?.toFixed(2)} kr
+												{formatNorwegianCurrency(total)}
 											</TableCell>
 											<TableCell>
 												<Button
