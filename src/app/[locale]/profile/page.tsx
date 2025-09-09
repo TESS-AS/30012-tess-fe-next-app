@@ -5,7 +5,10 @@ import { useState } from "react";
 import OrdersTab from "@/app/[locale]/profile/(components)/tabs/OrdersTab/OrdersTab";
 import PersonalInfoTab from "@/app/[locale]/profile/(components)/tabs/PersonalInfoTab";
 import UserAddressesTab from "@/app/[locale]/profile/(components)/tabs/UserAdresses/UserAddressesTab";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
+import { useAppContext } from "@/lib/appContext";
 import { cn } from "@/lib/utils";
 import {
 	ShoppingCart,
@@ -15,6 +18,7 @@ import {
 	LogOut,
 	ClipboardList,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Dimensions } from "./(components)/dimensions";
 import { HoseOrders } from "./(components)/hose-orders";
@@ -25,6 +29,10 @@ import { Rekvisisjoner } from "./(components)/rekvisisjoner";
 import { SidebarNav } from "./(components)/sidebar-nav";
 
 export default function ProfilePage() {
+	const { setIsAuthOpen } = useAppContext();
+	const { data: profile } = usePunchoutProfile();
+	const t = useTranslations();
+
 	const [activeMode, setActiveMode] = useState<"hose" | "ehandel">("ehandel");
 	const [activeTab, setActiveTab] = useState("mine-bestillinger");
 
@@ -38,6 +46,17 @@ export default function ProfilePage() {
 	};
 	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 	const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+
+	if (!profile) {
+		return (
+			<div className="flex flex-col items-center justify-center gap-4 py-12">
+				<h1 className="text-2xl font-semibold">{t("Login.title")}</h1>
+				<Button onClick={() => setIsAuthOpen(true)}>
+					{t("Login.loginToViewCart")}
+				</Button>
+			</div>
+		);
+	}
 
 	return (
 		<main className="my-6 min-h-screen">

@@ -43,12 +43,22 @@ export const getAssets = async (
 	}
 };
 
-export const getS1Codes = async (): Promise<S1Codes[]> => {
+interface S1CodesResponse {
+	data: S1Codes[];
+	meta: {
+		page: number;
+		pageSize: number;
+		total: number;
+		totalPages: number;
+	}
+}
+
+export const getS1Codes = async (page: number = 1, pageSize: number = 100): Promise<S1CodesResponse> => {
 	try {
-		const response = await axiosClient.get(`/asset/getS1`);
-		return response.data;
+		const response = await axiosClient.get(`/asset/getS1?page=${page}&pageSize=${pageSize}`);
+		return response.data || { data: [], meta: { page: 1, pageSize, total: 0, totalPages: 0 } };
 	} catch (error) {
 		console.log(error);
-		return [];
+		return { data: [], meta: { page: 1, pageSize, total: 0, totalPages: 0 } };
 	}
 };
