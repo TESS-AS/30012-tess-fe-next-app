@@ -38,6 +38,7 @@ import { getProductVariations } from "@/services/product.service";
 import { Category } from "@/types/categories.types";
 import { IProductSearch } from "@/types/search.types";
 import { ProfileUser } from "@/types/user.types";
+import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import {
 	Building,
 	ChevronDown,
@@ -286,7 +287,7 @@ export default function Header() {
 								{cartItems?.length}
 							</Badge>
 						</div>
-						{cartItems?.length > 0 ? `${totalPrice.toFixed(2)}` : ""}
+						{cartItems?.length > 0 ? formatNorwegianCurrency(totalPrice) : ""}
 						<span className="sr-only">Cart</span>
 					</Button>
 					{profile ? (
