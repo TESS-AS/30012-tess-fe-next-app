@@ -30,14 +30,16 @@ interface SidebarNavItem {
 interface SidebarNavProps {
 	items: SidebarNavItem[];
 	activeMode: "hose" | "ehandel";
+	activeTab: string;
 	onModeChange: (mode: "hose" | "ehandel") => void;
-	onTabChange?: (tab: string) => void;
-	onCollapse?: (isCollapsed: boolean) => void;
+	onTabChange: (tab: string) => void;
+	onCollapse: (isCollapsed: boolean) => void;
 }
 
 export function SidebarNav({
 	items,
 	activeMode,
+	activeTab,
 	onModeChange,
 	onTabChange,
 	onCollapse,
@@ -140,12 +142,12 @@ export function SidebarNav({
 													}
 												}}
 												className={cn(
-													"mb-2 flex w-full items-center justify-between rounded-md p-2 text-base font-medium transition-colors",
-													isActive
-														? "bg-green-50 text-green-600"
-														: expandedItems.includes(item.href)
-															? "bg-[#DCF7E0]"
-															: "hover:bg-gray-50",
+													"mb-2 flex w-full cursor-pointer items-center justify-between rounded-md p-2 text-base font-medium transition-colors",
+													// isActive
+													// 	? "bg-green-50 text-green-600"
+													// 	: expandedItems.includes(item.href)
+													// 		? "bg-[#DCF7E0]"
+													// 		: "hover:bg-gray-50",
 													item.variant === "logout" &&
 														"mt-4 text-red-600 hover:text-red-700",
 												)}>
@@ -168,22 +170,25 @@ export function SidebarNav({
 											</button>
 
 											{item.subitems && expandedItems.includes(item.href) && (
-												<div className="ml-7 flex flex-col gap-1">
+												<div className="flex flex-col gap-1">
 													{item.subitems.map((subitem) => (
 														<Link
 															key={subitem.href}
 															href="#"
-															onClick={() => onTabChange?.(subitem.href)}
+															onClick={(e) => {
+																e.preventDefault();
+																onTabChange?.(subitem.href);
+															}}
 															className={cn(
-																"mb-1 flex items-center justify-between rounded-md px-3 py-1.5 text-sm transition-colors",
-																pathname === subitem.href
-																	? "bg-[#DCF7E0] text-green-600"
-																	: "text-gray-600 hover:bg-[#DCF7E0] hover:text-green-600",
+																"mb-1 flex cursor-pointer items-center rounded-md px-3 py-1.5 text-sm transition-colors",
+																subitem.href === activeTab
+																	? "bg-[#DCF7E0] text-[#1C6D2C]"
+																	: "ml-7 text-[#5A615D]",
 															)}>
-															{!isCollapsed && <span>{subitem.label}</span>}
-															{pathname === subitem.href && (
-																<ArrowRight className="h-3.5 w-3.5 text-green-600" />
+															{subitem.href === activeTab && (
+																<ArrowRight className="me-2 h-4 w-4 text-[#1C6D2C]" />
 															)}
+															{!isCollapsed && <span>{subitem.label}</span>}
 														</Link>
 													))}
 												</div>

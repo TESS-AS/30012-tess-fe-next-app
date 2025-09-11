@@ -2,6 +2,7 @@ import {
 	ArchiveCartResponse,
 	CartLine,
 	CartResponse,
+	WarehouseBatch,
 } from "@/types/carts.types";
 import { AxiosResponse } from "axios";
 
@@ -129,5 +130,24 @@ export async function updateWarehouseForCart({
 	} catch (error) {
 		console.error("Error updating warehouse", error);
 		return { message: "Error updating warehouse" };
+	}
+}
+
+export async function getItemBalanceArray(
+	itemNumber: string[],
+	warehouseNumber: string[],
+	companyNumber: string,
+): Promise<WarehouseBatch[]> {
+	try {
+		const url = `/item/balance/array`;
+		const response = await axiosClient.post(url, {
+			itemNumber,
+			warehouseNumber,
+			companyNumber,
+		});
+		return response.data;
+	} catch (error) {
+		console.error("Error getting item balance array", error);
+		return [];
 	}
 }

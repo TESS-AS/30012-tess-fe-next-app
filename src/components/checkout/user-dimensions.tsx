@@ -7,7 +7,6 @@ import { extractUniqueDimensions } from "@/utils/dimensionFormaters";
 import { useTranslations } from "next-intl";
 
 import { DimensionSearchInput } from "./dimension-search-input";
-import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import {

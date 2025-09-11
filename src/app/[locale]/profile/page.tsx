@@ -17,6 +17,9 @@ import {
 	Settings,
 	LogOut,
 	ClipboardList,
+	List,
+	HelpCircle,
+	LockKeyhole,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -67,6 +70,7 @@ export default function ProfilePage() {
 					<div className="h-full">
 						<SidebarNav
 							activeMode={activeMode}
+							activeTab={activeTab}
 							onModeChange={handleModeChange}
 							onTabChange={setActiveTab}
 							onCollapse={setIsSidebarCollapsed}
@@ -132,8 +136,23 @@ export default function ProfilePage() {
 									: [
 											{
 												href: "hose-orders",
-												label: "Orders",
-												icon: ClipboardList,
+												label: "Slanger/utstyr",
+												icon: List,
+											},
+											{
+												href: "hose",
+												label: "Oversikt",
+												icon: LockKeyhole,
+											},
+											{
+												href: "hose-settings",
+												label: "Innstillinger",
+												icon: LockKeyhole,
+											},
+											{
+												href: "support",
+												label: "Support",
+												icon: HelpCircle,
 											},
 											{
 												href: "logout",

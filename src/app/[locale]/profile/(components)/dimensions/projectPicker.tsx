@@ -16,7 +16,7 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { ChevronDownIcon, Check } from "lucide-react";
+import { ChevronDownIcon, Check, Search } from "lucide-react";
 
 type Project = { value: string; label: string };
 
@@ -48,7 +48,10 @@ export default function ProjectPicker({
 			</PopoverTrigger>
 			<PopoverContent className="w-[200px] p-0">
 				<Command>
-					<CommandInput placeholder="Søk prosjekt..." />
+					<div className="flex items-center justify-center border-b">
+						<Search className="h-6 w-6 shrink-0 pl-2" />
+						<CommandInput placeholder=" Søk prosjekt..." />
+					</div>
 					<CommandEmpty>Ingen prosjekter funnet.</CommandEmpty>
 					<CommandGroup>
 						{projects.map((project) => (

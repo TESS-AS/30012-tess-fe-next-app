@@ -45,3 +45,15 @@ export interface ArchiveCartResponse {
 		cart: CartLine[];
 	}[];
 }
+
+export interface WarehouseBatch {
+	warehouseNumber: string;
+	warehouseName: string;
+	cartItemCount: number;
+	inStockCount: number;
+	allInStock: boolean;
+	items: Array<{
+		itemNumber: string;
+		inStock: boolean;
+	}>;
+}
