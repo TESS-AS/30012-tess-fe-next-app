@@ -26,8 +26,9 @@ import { loadCategoryTree } from "@/services/categories.service";
 import {
 	getProductVariations,
 	loadItemBalanceBatch,
-	WarehouseBatch,
+	WarehouseBatch as ProductWarehouseBatch,
 } from "@/services/product.service";
+import { WarehouseBatch as CartWarehouseBatch } from "@/types/carts.types";
 import { RawCategory } from "@/types/categories.types";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import {
@@ -43,8 +44,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { toast } from "react-toastify";
+// import CheckedFilled from "icons/checked-filled.svg";
+// import AlertFilled from "icons/alert-filled.svg";
 
 import CartSkeleton from "./loading";
+import { getItemBalanceArray } from "@/services/carts.service";
+import { WarehouseCombobox } from "@/components/warehouse-combobox";
 
 /* =========================
       Helpers & Types
@@ -106,7 +111,12 @@ const CartPage = () => {
 
 	const { warehouses } = useGetWarehouses(true);
 
-	const [warehouseBlance, setWarehouseBlance] = useState<WarehouseBatch[]>([]);
+	const [warehouseBalancePerItem, setWarehouseBalancePerItem] = useState<
+		ProductWarehouseBatch[]
+	>([]);
+	const [warehouseBalance, setWarehouseBalance] = useState<
+		CartWarehouseBatch[]
+	>([]);
 	const [openModalId, setOpenModalId] = useState<string | null>(null);
 	const [outOfStock, setOutOfStock] = useState<boolean>(true);
 
@@ -123,6 +133,9 @@ const CartPage = () => {
 	>({});
 	const [itemsToRemove, setItemsToRemove] = React.useState<Set<string>>(
 		new Set(),
+	);
+	const [selectedWarehouse, setSelectedWarehouse] = useState<string | null>(
+		null,
 	);
 
 	const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
@@ -150,17 +163,40 @@ const CartPage = () => {
 	}, [cartItems, currentLocale]);
 
 	useEffect(() => {
-		async function loadWarehousesData() {
+		async function loadWarehousesBalanceItemData() {
 			if (cartItems && cartItems.length > 0) {
 				const itemNumbers = cartItems.map((item) => item.itemNumber.toString());
 				const warehousesData = await loadItemBalanceBatch(itemNumbers);
-				setWarehouseBlance(Array.isArray(warehousesData) ? warehousesData : []);
+				setWarehouseBalancePerItem(
+					Array.isArray(warehousesData) ? warehousesData : [],
+				);
 			} else {
-				setWarehouseBlance([]);
+				setWarehouseBalancePerItem([]);
+			}
+		}
+		if (!isLoading) loadWarehousesBalanceItemData();
+	}, [cartItems, isLoading]);
+
+	useEffect(() => {
+		async function loadWarehousesData() {
+			if (cartItems && cartItems.length > 0) {
+				const itemNumbers = cartItems.map((item) => item.itemNumber.toString());
+				const warehouseNumbers = warehouses.map((item) => item.id);
+				const warehousesData = await getItemBalanceArray(
+					itemNumbers,
+					warehouseNumbers,
+					profile?.defaultCompanyNumber || "01",
+				);
+				setWarehouseBalance(
+					Array.isArray(warehousesData) ? warehousesData : [],
+				);
+			} else {
+				setWarehouseBalance([]);
 			}
 		}
 		if (!isLoading) loadWarehousesData();
-	}, [cartItems, isLoading]);
+	}, [cartItems, isLoading, warehouses, profile?.defaultCompanyNumber]);
+	console.log(warehouseBalance, "warehouseBalance");
 
 	const handleCheckout = async () => {
 		setIsCheckoutLoading(true);
@@ -308,7 +344,7 @@ const CartPage = () => {
 							/>
 						</SelectTrigger>
 						<SelectContent>
-							{warehouseBlance
+							{warehouseBalancePerItem
 								.find((w) => w.item_number === item.itemNumber)
 								?.warehouses?.map((warehouse) => (
 									<SelectItem
@@ -467,20 +503,11 @@ const CartPage = () => {
 							<p className="text-base font-normal">
 								{t("Cart.showStockStatus")}
 							</p>
-							<Select onValueChange={handleWarehouseChange}>
-								<SelectTrigger className="w-[170px] border-[#C1C4C2] bg-white text-[#5A615D]">
-									<SelectValue placeholder={t("Product.selectWarehouse")} />
-								</SelectTrigger>
-								<SelectContent>
-									{warehouses.map((warehouse) => (
-										<SelectItem
-											key={warehouse.id}
-											value={warehouse.id}>
-											{warehouse.name}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+							<WarehouseCombobox
+								warehouseBalance={warehouseBalance}
+								value={selectedWarehouse}
+								onChange={handleWarehouseChange}
+							/>
 						</div>
 						<Button
 							variant="outline"

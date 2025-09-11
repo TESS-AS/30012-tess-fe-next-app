@@ -21,10 +21,20 @@ export const useGetAssets = (customerNumber?: string, s1Code?: string) => {
 		totalPages: 0,
 	});
 
-	const fetchAssets = async (page: number = 1, pageSize: number = 10) => {
+	const fetchAssets = async (
+		page: number = 1,
+		pageSize: number = 10,
+		ageSize?: string,
+	) => {
 		try {
 			setLoading(true);
-			const response = await getAssets(customerNumber, s1Code, page, pageSize);
+			const response = await getAssets(
+				customerNumber,
+				s1Code,
+				page,
+				pageSize,
+				ageSize,
+			);
 			setAssets(response.data);
 			setPagination({
 				currentPage: response.meta.page,

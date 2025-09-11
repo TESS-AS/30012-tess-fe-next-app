@@ -98,10 +98,11 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 	]);
 	const [selectedRows, setSelectedRows] = useState<string[]>([]);
 	const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+	const [selectedAgeRanges, setSelectedAgeRanges] = useState<string[]>([]);
 	const ITEMS_PER_PAGE = 10;
 
 	const transformedAssets: HoseOrder[] = (assets ?? []).map((asset: any) => ({
-		id: asset?.hoseHeader?.hoseLineId?.toString?.() || "",
+		id: asset?.hoseLine?.hexagonId?.toString?.() || "",
 		orderId: String(asset?.hoseHeader?.extDocSequenceId ?? ""),
 		kunde_id: asset?.hoseHeader?.customerNumber ?? "",
 		beskrivelse: asset?.hoseLine?.itemDescription ?? "",
@@ -470,7 +471,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 	const handleUpdateS1ForAllItems = async (s1Code: string) => {
 		try {
 			setSelectedS1Code(s1Code || undefined);
-			await fetchAssets(1, pagination.pageSize);
+			await fetchAssets(1, pagination.pageSize, selectedAgeRanges.join(","));
 		} catch (e) {
 			toast.error("Error updating S1 code");
 		}
@@ -786,13 +787,23 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 															className="rounded-md p-0 focus:bg-gray-50"
 															onSelect={(e) => {
 																e.preventDefault();
-																handleFilterChange("age_5_6");
+																const newRanges = selectedAgeRanges.includes(
+																	"5-6",
+																)
+																	? selectedAgeRanges.filter((r) => r !== "5-6")
+																	: [...selectedAgeRanges, "5-6"];
+																setSelectedAgeRanges(newRanges);
+																fetchAssets(
+																	1,
+																	pagination.pageSize,
+																	newRanges.join(","),
+																);
 															}}>
 															<div className="flex items-center gap-2">
 																<Checkbox
-																	checked={selectedFilters.includes("age_5_6")}
+																	checked={selectedAgeRanges.includes("5-6")}
 																/>
-																<span>Slanger 5–6 år gamle</span>
+																<span>5-6 år gamle</span>
 															</div>
 														</DropdownMenuItem>
 
@@ -800,13 +811,23 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 															className="rounded-md p-0 focus:bg-gray-50"
 															onSelect={(e) => {
 																e.preventDefault();
-																handleFilterChange("age_7_8");
+																const newRanges = selectedAgeRanges.includes(
+																	"7-8",
+																)
+																	? selectedAgeRanges.filter((r) => r !== "7-8")
+																	: [...selectedAgeRanges, "7-8"];
+																setSelectedAgeRanges(newRanges);
+																fetchAssets(
+																	1,
+																	pagination.pageSize,
+																	newRanges.join(","),
+																);
 															}}>
 															<div className="flex items-center gap-2">
 																<Checkbox
-																	checked={selectedFilters.includes("age_7_8")}
+																	checked={selectedAgeRanges.includes("7-8")}
 																/>
-																<span>Slanger 7–8 år gamle</span>
+																<span>7-8 år gamle</span>
 															</div>
 														</DropdownMenuItem>
 
@@ -814,13 +835,25 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 															className="rounded-md p-0 focus:bg-gray-50"
 															onSelect={(e) => {
 																e.preventDefault();
-																handleFilterChange("age_8_10");
+																const newRanges = selectedAgeRanges.includes(
+																	"8-10",
+																)
+																	? selectedAgeRanges.filter(
+																			(r) => r !== "8-10",
+																		)
+																	: [...selectedAgeRanges, "8-10"];
+																setSelectedAgeRanges(newRanges);
+																fetchAssets(
+																	1,
+																	pagination.pageSize,
+																	newRanges.join(","),
+																);
 															}}>
 															<div className="flex items-center gap-2">
 																<Checkbox
-																	checked={selectedFilters.includes("age_8_10")}
+																	checked={selectedAgeRanges.includes("8-10")}
 																/>
-																<span>Slanger 8–10 år gamle</span>
+																<span>8-10 år gamle</span>
 															</div>
 														</DropdownMenuItem>
 
@@ -828,15 +861,23 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 															className="rounded-md p-0 focus:bg-gray-50"
 															onSelect={(e) => {
 																e.preventDefault();
-																handleFilterChange("age_over_10");
+																const newRanges = selectedAgeRanges.includes(
+																	"10+",
+																)
+																	? selectedAgeRanges.filter((r) => r !== "10+")
+																	: [...selectedAgeRanges, "10+"];
+																setSelectedAgeRanges(newRanges);
+																fetchAssets(
+																	1,
+																	pagination.pageSize,
+																	newRanges.join(","),
+																);
 															}}>
 															<div className="flex items-center gap-2">
 																<Checkbox
-																	checked={selectedFilters.includes(
-																		"age_over_10",
-																	)}
+																	checked={selectedAgeRanges.includes("10+")}
 																/>
-																<span>Slanger eldre enn 10 år</span>
+																<span>10+ år gamle</span>
 															</div>
 														</DropdownMenuItem>
 													</div>

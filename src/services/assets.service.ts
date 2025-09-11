@@ -17,6 +17,7 @@ export const getAssets = async (
 	s1Code?: string,
 	page: number = 1,
 	pageSize: number = 10,
+	ageRange?: string,
 ): Promise<PaginatedResponse<GetAssetsResponse>> => {
 	try {
 		const params = new URLSearchParams();
@@ -24,6 +25,7 @@ export const getAssets = async (
 		if (s1Code) params.append("s1Code", s1Code);
 		params.append("page", page.toString());
 		params.append("pageSize", pageSize.toString());
+		params.append("ageRange", ageRange || "");
 
 		const response = await axiosClient.get(
 			`/asset/getHose?${params.toString()}`,
@@ -50,13 +52,23 @@ interface S1CodesResponse {
 		pageSize: number;
 		total: number;
 		totalPages: number;
-	}
+	};
 }
 
-export const getS1Codes = async (page: number = 1, pageSize: number = 100): Promise<S1CodesResponse> => {
+export const getS1Codes = async (
+	page: number = 1,
+	pageSize: number = 100,
+): Promise<S1CodesResponse> => {
 	try {
-		const response = await axiosClient.get(`/asset/getS1?page=${page}&pageSize=${pageSize}`);
-		return response.data || { data: [], meta: { page: 1, pageSize, total: 0, totalPages: 0 } };
+		const response = await axiosClient.get(
+			`/asset/getS1?page=${page}&pageSize=${pageSize}`,
+		);
+		return (
+			response.data || {
+				data: [],
+				meta: { page: 1, pageSize, total: 0, totalPages: 0 },
+			}
+		);
 	} catch (error) {
 		console.log(error);
 		return { data: [], meta: { page: 1, pageSize, total: 0, totalPages: 0 } };
