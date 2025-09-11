@@ -16,12 +16,14 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { WarehouseCombobox } from "@/components/warehouse-combobox";
 import { useCheckoutOrderData } from "@/hooks/useCheckoutOrderData";
 import { useGetWarehouses } from "@/hooks/useGetWarehouse";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { Link } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
+import { getItemBalanceArray } from "@/services/carts.service";
 import { loadCategoryTree } from "@/services/categories.service";
 import {
 	getProductVariations,
@@ -44,16 +46,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { toast } from "react-toastify";
-// import CheckedFilled from "icons/checked-filled.svg";
-// import AlertFilled from "icons/alert-filled.svg";
 
 import CartSkeleton from "./loading";
-import { getItemBalanceArray } from "@/services/carts.service";
-import { WarehouseCombobox } from "@/components/warehouse-combobox";
-
-/* =========================
-      Helpers & Types
-========================= */
 
 type CartItem = ReturnType<typeof useAppContext>["cartItems"][number];
 
@@ -79,7 +73,7 @@ const CartPage = () => {
 		updateQuantity,
 		updateWarehouse,
 		updateWarehouseForAllItems,
-		removeItemOptimistic, // optimistic delete
+		removeItemOptimistic,
 		handleArchiveCart,
 		setIsAuthOpen,
 		setShowFeedbackModal,
@@ -565,7 +559,6 @@ const CartPage = () => {
 											<div
 												key={key}
 												className="border-lightGray rounded-md border">
-												{/* Group header */}
 												<button
 													onClick={toggle}
 													className="flex w-full items-center justify-between px-4 py-3">
@@ -596,7 +589,6 @@ const CartPage = () => {
 													</div>
 												</button>
 
-												{/* Group body */}
 												{open && (
 													<div className="border-t p-4">
 														<div className="space-y-3">
