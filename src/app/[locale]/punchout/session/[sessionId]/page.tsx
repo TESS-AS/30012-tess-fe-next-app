@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 
-import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import axiosClient from "@/services/axiosClient";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 
 export default function PunchoutSessionPage() {
 	const params = useParams();
+	const router = useRouter();
 
 	const sessionId = Array.isArray(params.sessionId)
 		? params.sessionId[0]
@@ -35,9 +36,16 @@ export default function PunchoutSessionPage() {
 					},
 				);
 
-				await axiosClient.get("/user");
+				const { data: user } = await axiosClient.get("/user");
 
-				window.location.href = "/";
+				if (
+					user[0]?.defaultCustomerNumber ===
+					SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+				) {
+					router.replace("/profile");
+				} else {
+					router.replace("/");
+				}
 			} catch (err) {
 				console.error("PunchOut token validation failed", err);
 				setError("Failed to authenticate PunchOut session.");
@@ -45,7 +53,7 @@ export default function PunchoutSessionPage() {
 		};
 
 		authenticatePunchOut();
-	}, [sessionId]);
+	}, [sessionId, router]);
 
 	return (
 		<main className="p-8">
