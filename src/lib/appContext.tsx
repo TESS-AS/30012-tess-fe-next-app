@@ -123,7 +123,11 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			profile?.defaultCustomerNumber ===
 			SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
 		) {
-			if (!pathname.startsWith("/profile")) {
+			const isProfile = pathname.includes("/profile");
+			const isCheckout = pathname.includes("/checkout");
+			const isCart = pathname.includes("/cart");
+
+			if (!isProfile && !isCheckout && !isCart) {
 				router.replace("/profile");
 			}
 		}
