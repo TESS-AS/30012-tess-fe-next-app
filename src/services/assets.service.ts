@@ -18,6 +18,10 @@ export const getAssets = async (
 	page: number = 1,
 	pageSize: number = 10,
 	ageRange?: string,
+	approved?: string,
+	overdue?: string,
+	replacementDue?: string,
+	spareSet?: string,
 ): Promise<PaginatedResponse<GetAssetsResponse>> => {
 	try {
 		const params = new URLSearchParams();
@@ -26,6 +30,10 @@ export const getAssets = async (
 		params.append("page", page.toString());
 		params.append("pageSize", pageSize.toString());
 		params.append("ageRange", ageRange || "");
+		params.append("approved", approved || "");
+		params.append("overdue", overdue || "");
+		params.append("replacementDue", replacementDue || "");
+		params.append("spareSet", spareSet || "");
 
 		const response = await axiosClient.get(
 			`/asset/getHose?${params.toString()}`,

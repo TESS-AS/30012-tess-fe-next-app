@@ -151,3 +151,20 @@ export async function getItemBalanceArray(
 		return [];
 	}
 }
+
+export async function postCartKit({
+	hexagonId,
+}: {
+	hexagonId: number[];
+}): Promise<CartLine[]> {
+	try {
+		const url = `/cart/cartKit`;
+		const response: AxiosResponse<CartLine[]> = await axiosClient.post(url, {
+			hexagonId,
+		});
+		return response.data;
+	} catch (error) {
+		console.error("Error loading cart kit", error);
+		return [];
+	}
+}

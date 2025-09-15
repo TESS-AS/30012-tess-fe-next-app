@@ -21,11 +21,25 @@ export const useGetAssets = (customerNumber?: string, s1Code?: string) => {
 		totalPages: 0,
 	});
 
-	const fetchAssets = async (
-		page: number = 1,
-		pageSize: number = 10,
-		ageSize?: string,
-	) => {
+	interface FilterOptions {
+		page?: number;
+		pageSize?: number;
+		ageSize?: string;
+		approved?: string;
+		overdue?: string;
+		replacementDue?: string;
+		spareSet?: string;
+	}
+
+	const fetchAssets = async ({
+		page = 1,
+		pageSize = 10,
+		ageSize,
+		approved,
+		overdue,
+		replacementDue,
+		spareSet,
+	}: FilterOptions = {}) => {
 		try {
 			setLoading(true);
 			const response = await getAssets(
@@ -34,6 +48,10 @@ export const useGetAssets = (customerNumber?: string, s1Code?: string) => {
 				page,
 				pageSize,
 				ageSize,
+				approved,
+				overdue,
+				replacementDue,
+				spareSet
 			);
 			setAssets(response.data);
 			setPagination({
@@ -78,7 +96,7 @@ export const useGetAssets = (customerNumber?: string, s1Code?: string) => {
 	};
 
 	useEffect(() => {
-		fetchAssets();
+		fetchAssets({});
 	}, [customerNumber, s1Code]);
 
 	useEffect(() => {

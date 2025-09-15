@@ -25,7 +25,8 @@ import {
 import { useGetAssets } from "@/hooks/useGetAssets";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { cn } from "@/lib/utils";
-import { addToCart } from "@/services/carts.service";
+import { getAssets, getS1Codes } from "@/services/assets.service";
+import { addToCart, postCartKit } from "@/services/carts.service";
 import {
 	Funnel,
 	Paperclip,
@@ -68,6 +69,16 @@ interface HoseOrdersProps {
 	onOrderClick?: (orderId: string) => void;
 }
 
+type FilterParams = {
+	page: number;
+	pageSize: number;
+	approved?: string;
+	overdue?: string;
+	replacementDue?: string;
+	spareSet?: string;
+	ageSize?: string;
+};
+
 export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 	const { data: profile } = usePunchoutProfile();
 	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
@@ -79,7 +90,6 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		loading,
 		fetchAssets,
 	} = useGetAssets(
-		// Use customer number only if no S1 code is selected
 		selectedS1Code ? undefined : profile?.customerNumbers?.[3],
 		selectedS1Code,
 	);
@@ -148,46 +158,6 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 	const [selectedItems, setSelectedItems] = useState<HoseOrder[]>([]);
 	const router = useRouter();
 
-	const handleAddToCart = async (items: HoseOrder[]) => {
-		setIsAddingToCart(true);
-		try {
-			let successCount = 0;
-			let failureCount = 0;
-
-			for (const asset of items) {
-				try {
-					await addToCart({
-						productNumber: asset.id,
-						itemNumber: asset.id,
-						quantity: 1,
-						warehouseNumber: asset.warehouse,
-						companyNumber: asset.kunde_id,
-						itemName: asset.beskrivelse,
-					});
-					successCount++;
-				} catch (e) {
-					failureCount++;
-				}
-			}
-
-			if (successCount > 0) {
-				setCartModalOpen(true);
-			}
-			if (failureCount > 0) {
-				toast.error(
-					`Kunne ikke legge til ${failureCount} element${failureCount > 1 ? "er" : ""} i handlekurven`,
-				);
-			}
-
-			// Clear selection after adding to cart
-			setSelectedRows([]);
-		} catch (e) {
-			toast.error("Kunne ikke legge til elementer i handlekurven");
-		} finally {
-			setIsAddingToCart(false);
-		}
-	};
-
 	const handleBulkAction = async (action: string): Promise<void> => {
 		if (action === "cart") {
 			const selectedAssets = transformedAssets.filter((asset) =>
@@ -199,16 +169,54 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 				return;
 			}
 
-			setSelectedItems(selectedAssets);
-			await handleAddToCart(selectedAssets);
-			router.push("/cart?mode=hose");
+			try {
+				setIsAddingToCart(true);
+				const hexagonIds = selectedAssets.map((asset) => Number(asset.id));
+
+				await postCartKit({ hexagonId: hexagonIds });
+
+				toast.success("Elementer lagt til i handlekurven");
+				router.push("/cart?mode=hose");
+			} catch (error) {
+				toast.error("Kunne ikke legge til elementer i handlekurven");
+			} finally {
+				setIsAddingToCart(false);
+				setSelectedRows([]);
+			}
 		} else {
 			console.log(`Bulk action ${action} for rows:`, selectedRows);
 		}
 	};
 
+	const getActiveFilters = () => {
+		const filters: Record<string, any> = {};
+
+		if (selectedAgeRanges.length > 0) {
+			filters.ageSize = selectedAgeRanges.join(",");
+		}
+
+		if (selectedFilters.includes("approved")) filters.approved = "true";
+		if (selectedFilters.includes("overdue")) filters.overdue = "true";
+		if (selectedFilters.includes("replacementDue"))
+			filters.replacementDue = "true";
+		if (selectedFilters.includes("spareSet")) filters.spareSet = "true";
+
+		if (selectedS1Code) {
+			filters.s1Code = selectedS1Code;
+		} else if (profile?.customerNumbers?.[3]) {
+			filters.customerNumber = profile.customerNumbers[3];
+		}
+
+		return filters;
+	};
+
 	const handlePageChange = (page: number) => {
-		fetchAssets(page, ITEMS_PER_PAGE);
+		const filters: FilterParams = {
+			page,
+			pageSize: ITEMS_PER_PAGE,
+			...getActiveFilters(),
+		};
+		fetchAssets(filters);
 		window.scrollTo({ top: 0, behavior: "smooth" });
 	};
 
@@ -344,7 +352,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 						</div>
 
 						<DropdownMenuItem
-							onClick={() => handleBulkAction("cart")}
+							onClick={() => setCartModalOpen(true)}
 							disabled={selectedRows.length === 0 || isAddingToCart}
 							className={cn("", {
 								"cursor-not-allowed opacity-50":
@@ -462,16 +470,32 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		);
 	};
 
-	const handleFilterChange = (value: string): void => {
-		setSelectedFilters((prev) =>
-			prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value],
-		);
+	const handleFilterChange = async (value: string): Promise<void> => {
+		const newFilters = selectedFilters.includes(value)
+			? selectedFilters.filter((v) => v !== value)
+			: [...selectedFilters, value];
+
+		setSelectedFilters(newFilters);
+
+		await fetchAssets({
+			page: 1,
+			pageSize: pagination.pageSize,
+			...getActiveFilters(),
+			...(newFilters.includes("approved") && { approved: "true" }),
+			...(newFilters.includes("overdue") && { overdue: "true" }),
+			...(newFilters.includes("replacementDue") && { replacementDue: "true" }),
+			...(newFilters.includes("spareSet") && { spareSet: "true" }),
+		});
 	};
 
 	const handleUpdateS1ForAllItems = async (s1Code: string) => {
 		try {
 			setSelectedS1Code(s1Code || undefined);
-			await fetchAssets(1, pagination.pageSize, selectedAgeRanges.join(","));
+			await fetchAssets({
+				page: 1,
+				pageSize: pagination.pageSize,
+				...getActiveFilters(),
+			});
 		} catch (e) {
 			toast.error("Error updating S1 code");
 		}
@@ -627,7 +651,6 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 						</div>
 
 						<div className="flex items-center space-x-4">
-							{/* Add column */}
 							<div className="flex items-center">
 								<DropdownMenu>
 									<DropdownMenuTrigger className="flex w-[200px] items-center justify-between rounded-md border border-[#C1C4C2] bg-white px-3 py-2 text-[#5A615D]">
@@ -663,7 +686,6 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 								</DropdownMenu>
 							</div>
 
-							{/* Filter */}
 							<div className="flex items-center">
 								<div className="relative w-[160px]">
 									<DropdownMenu>
@@ -683,7 +705,6 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 										<DropdownMenuContent className="w-[300px] rounded-2xl bg-white p-4 shadow-lg">
 											<div className="space-y-5 text-sm">
-												{/* Inspeksjon */}
 												<div>
 													<h4 className="mb-2 font-semibold text-[#0F1912]">
 														Inspeksjon
@@ -709,13 +730,11 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 															className="rounded-md p-0 focus:bg-gray-50"
 															onSelect={(e) => {
 																e.preventDefault();
-																handleFilterChange("med_merknader");
+																handleFilterChange("approved");
 															}}>
 															<div className="flex items-center gap-2">
 																<Checkbox
-																	checked={selectedFilters.includes(
-																		"med_merknader",
-																	)}
+																	checked={selectedFilters.includes("approved")}
 																/>
 																<span>Med merknader</span>
 															</div>
@@ -725,11 +744,11 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 															className="rounded-md p-0 focus:bg-gray-50"
 															onSelect={(e) => {
 																e.preventDefault();
-																handleFilterChange("forfalt");
+																handleFilterChange("overdue");
 															}}>
 															<div className="flex items-center gap-2">
 																<Checkbox
-																	checked={selectedFilters.includes("forfalt")}
+																	checked={selectedFilters.includes("overdue")}
 																/>
 																<span>Forfalt</span>
 															</div>
@@ -737,7 +756,6 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 													</div>
 												</div>
 
-												{/* Slangebytte */}
 												<div>
 													<h4 className="mb-2 font-semibold text-[#0F1912]">
 														Slangebytte
@@ -763,12 +781,12 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 															className="rounded-md p-0 focus:bg-gray-50"
 															onSelect={(e) => {
 																e.preventDefault();
-																handleFilterChange("forfaller_6m");
+																handleFilterChange("replacementDue");
 															}}>
 															<div className="flex items-center gap-2">
 																<Checkbox
 																	checked={selectedFilters.includes(
-																		"forfaller_6m",
+																		"replacementDue",
 																	)}
 																/>
 																<span>Forfaller om mindre enn 6 måneder</span>
@@ -777,7 +795,6 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 													</div>
 												</div>
 
-												{/* Etter alder */}
 												<div>
 													<h4 className="mb-2 font-semibold text-[#0F1912]">
 														Etter alder
@@ -785,7 +802,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 													<div className="space-y-2">
 														<DropdownMenuItem
 															className="rounded-md p-0 focus:bg-gray-50"
-															onSelect={(e) => {
+															onSelect={async (e) => {
 																e.preventDefault();
 																const newRanges = selectedAgeRanges.includes(
 																	"5-6",
@@ -793,11 +810,12 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 																	? selectedAgeRanges.filter((r) => r !== "5-6")
 																	: [...selectedAgeRanges, "5-6"];
 																setSelectedAgeRanges(newRanges);
-																fetchAssets(
-																	1,
-																	pagination.pageSize,
-																	newRanges.join(","),
-																);
+																await fetchAssets({
+																	page: 1,
+																	pageSize: pagination.pageSize,
+																	ageSize: newRanges.join(","),
+																	...getActiveFilters(),
+																});
 															}}>
 															<div className="flex items-center gap-2">
 																<Checkbox
@@ -809,7 +827,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 														<DropdownMenuItem
 															className="rounded-md p-0 focus:bg-gray-50"
-															onSelect={(e) => {
+															onSelect={async (e) => {
 																e.preventDefault();
 																const newRanges = selectedAgeRanges.includes(
 																	"7-8",
@@ -817,11 +835,12 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 																	? selectedAgeRanges.filter((r) => r !== "7-8")
 																	: [...selectedAgeRanges, "7-8"];
 																setSelectedAgeRanges(newRanges);
-																fetchAssets(
-																	1,
-																	pagination.pageSize,
-																	newRanges.join(","),
-																);
+																await fetchAssets({
+																	page: 1,
+																	pageSize: pagination.pageSize,
+																	ageSize: newRanges.join(","),
+																	...getActiveFilters(),
+																});
 															}}>
 															<div className="flex items-center gap-2">
 																<Checkbox
@@ -833,7 +852,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 														<DropdownMenuItem
 															className="rounded-md p-0 focus:bg-gray-50"
-															onSelect={(e) => {
+															onSelect={async (e) => {
 																e.preventDefault();
 																const newRanges = selectedAgeRanges.includes(
 																	"8-10",
@@ -843,11 +862,12 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 																		)
 																	: [...selectedAgeRanges, "8-10"];
 																setSelectedAgeRanges(newRanges);
-																fetchAssets(
-																	1,
-																	pagination.pageSize,
-																	newRanges.join(","),
-																);
+																await fetchAssets({
+																	page: 1,
+																	pageSize: pagination.pageSize,
+																	ageSize: newRanges.join(","),
+																	...getActiveFilters(),
+																});
 															}}>
 															<div className="flex items-center gap-2">
 																<Checkbox
@@ -859,7 +879,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 														<DropdownMenuItem
 															className="rounded-md p-0 focus:bg-gray-50"
-															onSelect={(e) => {
+															onSelect={async (e) => {
 																e.preventDefault();
 																const newRanges = selectedAgeRanges.includes(
 																	"10+",
@@ -867,11 +887,12 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 																	? selectedAgeRanges.filter((r) => r !== "10+")
 																	: [...selectedAgeRanges, "10+"];
 																setSelectedAgeRanges(newRanges);
-																fetchAssets(
-																	1,
-																	pagination.pageSize,
-																	newRanges.join(","),
-																);
+																await fetchAssets({
+																	page: 1,
+																	pageSize: pagination.pageSize,
+																	ageSize: newRanges.join(","),
+																	...getActiveFilters(),
+																});
 															}}>
 															<div className="flex items-center gap-2">
 																<Checkbox
@@ -883,7 +904,6 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 													</div>
 												</div>
 
-												{/* Nødslanger */}
 												<div>
 													<h4 className="mb-2 font-semibold text-[#0F1912]">
 														Nødslanger
@@ -893,13 +913,11 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 															className="rounded-md p-0 focus:bg-gray-50"
 															onSelect={(e) => {
 																e.preventDefault();
-																handleFilterChange("nodslanger");
+																handleFilterChange("spareSet");
 															}}>
 															<div className="flex items-center gap-2">
 																<Checkbox
-																	checked={selectedFilters.includes(
-																		"nodslanger",
-																	)}
+																	checked={selectedFilters.includes("spareSet")}
 																/>
 																<span>Nødslanger</span>
 															</div>
