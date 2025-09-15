@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import {
 	NavigationMenu,
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { useNavMenuStore } from "@/stores/useNavMenuStore";
 import type { Category } from "@/types/categories.types";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
@@ -28,11 +29,15 @@ export default function CategoryNavigationMenu({
 	const t = useTranslations();
 	const [query, setQuery] = useState("");
 	const [openMenu, setOpenMenu] = useState<any>(false);
+	const { setIsOpen } = useNavMenuStore();
 
 	return (
 		<NavigationMenu
 			value={openMenu}
-			onValueChange={setOpenMenu}
+			onValueChange={(val) => {
+				setOpenMenu(val);
+				setIsOpen(!!val);
+			}}
 			className="hidden w-full justify-between md:flex">
 			<NavigationMenuList className="flex w-full max-w-full justify-center gap-2 px-0">
 				{loading
@@ -42,7 +47,9 @@ export default function CategoryNavigationMenu({
 							</NavigationMenuItem>
 						))
 					: categories?.slice(0, 7).map((category) => (
-							<NavigationMenuItem key={category.slug}>
+							<NavigationMenuItem
+								key={category.slug}
+								value={category.slug}>
 								{category.subcategories?.length ? (
 									<>
 										<NavigationMenuTrigger
@@ -58,10 +65,12 @@ export default function CategoryNavigationMenu({
 											{category.name}
 										</NavigationMenuTrigger>
 										<NavigationMenuContent>
-											<ul className="grid max-h-[800px] w-screen max-w-full min-w-screen gap-6 overflow-y-auto p-6 md:grid-cols-2 lg:grid-cols-3">
+											<ul className="min-h-[500px] w-screen max-w-full min-w-screen columns-3 gap-x-1 overflow-y-scroll p-2 md:columns-3">
 												{category.subcategories.map((subcategory) => (
-													<li key={subcategory.slug}>
-														<div className="mb-2 text-sm font-semibold">
+													<li
+														key={subcategory.slug}
+														className="mb-8 break-inside-avoid">
+														<div className="text-md mb-2 font-bold">
 															<Link
 																onClick={() => setOpenMenu(false)}
 																href={`/${category.slug}/${subcategory.slug}`}
@@ -70,17 +79,16 @@ export default function CategoryNavigationMenu({
 															</Link>
 														</div>
 														{Array.isArray(subcategory.subcategories) &&
-															subcategory.subcategories.length > 0 && (
+															subcategory.subcategories && (
 																<ul className="space-y-1">
-																	{/* first 5 children */}
 																	{subcategory.subcategories
-																		.slice(0, 5)
+																		.slice(0, 7)
 																		.map((child) => (
 																			<li key={child.slug}>
 																				<Link
 																					onClick={() => setOpenMenu(false)}
 																					href={`/${category.slug}/${subcategory.slug}/${child.slug}`}
-																					className="hover:text-foreground text-sm font-light text-[#6B7280] transition-colors">
+																					className="hover:text-foreground text-md font-medium text-gray-700 transition-colors">
 																					{child.name}
 																				</Link>
 																			</li>
@@ -90,7 +98,7 @@ export default function CategoryNavigationMenu({
 																		<Link
 																			onClick={() => setOpenMenu(false)}
 																			href={`/${category.slug}/${subcategory.slug}`}
-																			className="border-b-1 border-[#009640] pb-[1px] text-sm font-medium text-[#009640] hover:text-[#009640]">
+																			className="text-md border-b-1 border-[#009640] pb-[1px] font-medium text-[#009640] hover:text-[#009640]">
 																			{`Alle ${subcategory.name}`}
 																		</Link>
 																	</li>
@@ -105,7 +113,7 @@ export default function CategoryNavigationMenu({
 									<NavigationMenuLink asChild>
 										<Link
 											href={`/${category.slug}`}
-											className="hover:bg-accent hover:text-accent-foreground block rounded-md px-4 py-2 text-sm font-medium transition-colors">
+											className="hover:bg-accent hover:text-accent-foreground text-md block rounded-md px-4 py-2 font-medium transition-colors">
 											{category.name}
 										</Link>
 									</NavigationMenuLink>
@@ -146,7 +154,7 @@ const ListItem = React.forwardRef<
 					)}
 					{...props}>
 					<div className="text-sm leading-none font-medium">{title}</div>
-					<p className="text-muted-foreground line-clamp-2 text-sm leading-snug">
+					<p className="text-muted-foreground text-md line-clamp-2 leading-snug">
 						{children}
 					</p>
 				</a>
