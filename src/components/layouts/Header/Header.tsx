@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useSearch } from "@/hooks/useProductSearch";
@@ -419,14 +420,17 @@ export default function Header() {
 				</div>
 			</div>
 
-			<div className="border-t">
-				<div className="container m-auto flex h-12 w-full items-center justify-between gap-4">
-					<CategoryNavigationMenu
-						categories={categories as Category[]}
-						loading={loading}
-					/>
+			{profile?.defaultCustomerNumber !==
+				SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
+				<div className="border-t">
+					<div className="container m-auto flex h-12 w-full items-center justify-between gap-4">
+						<CategoryNavigationMenu
+							categories={categories as Category[]}
+							loading={loading}
+						/>
+					</div>
 				</div>
-			</div>
+			)}
 
 			<AuthDialog
 				isOpen={isAuthOpen}

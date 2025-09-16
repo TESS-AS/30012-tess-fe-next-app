@@ -54,7 +54,6 @@ export default function OrderSummary({
 				orderSummaryTotalPriceFromAppContext: 0,
 			}
 		: summary;
-	console.log(profile, "profa");
 	return (
 		<div className="space-y-6">
 			<div className="bg-card border-lightGray rounded-lg border p-6">

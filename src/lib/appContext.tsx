@@ -9,6 +9,7 @@ import {
 	useState,
 } from "react";
 
+import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import {
 	getCart,
@@ -25,6 +26,7 @@ import { AddressFormState } from "@/types/address";
 import { CartLine } from "@/types/carts.types";
 import { Order } from "@/types/orders.types";
 import { PriceResponse } from "@/types/search.types";
+import { usePathname, useRouter } from "next/navigation";
 
 interface AppContextType {
 	isCartChanging: boolean;
@@ -112,6 +114,24 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const [updatedAddress, setUpdatedAddress] = useState<AddressFormState | null>(
 		null,
 	);
+
+	const pathname = usePathname();
+	const router = useRouter();
+
+	useEffect(() => {
+		if (
+			profile?.defaultCustomerNumber ===
+			SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+		) {
+			const isProfile = pathname.includes("/profile");
+			const isCheckout = pathname.includes("/checkout");
+			const isCart = pathname.includes("/cart");
+
+			if (!isProfile && !isCheckout && !isCart) {
+				router.replace("/profile");
+			}
+		}
+	}, [profile, pathname, router]);
 
 	const loadCartData = async () => {
 		try {
