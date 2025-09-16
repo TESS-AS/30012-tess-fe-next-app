@@ -423,7 +423,7 @@ export default function Header() {
 			{profile?.defaultCustomerNumber !==
 				SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
 				<div className="border-t">
-					<div className="container m-auto flex h-12 w-full items-center justify-between gap-4">
+					<div className="m-auto flex h-12 w-full items-center justify-between gap-4">
 						<CategoryNavigationMenu
 							categories={categories as Category[]}
 							loading={loading}

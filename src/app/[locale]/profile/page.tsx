@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import OrdersTab from "@/app/[locale]/profile/(components)/tabs/OrdersTab/OrdersTab";
 import PersonalInfoTab from "@/app/[locale]/profile/(components)/tabs/PersonalInfoTab";
 import UserAddressesTab from "@/app/[locale]/profile/(components)/tabs/UserAdresses/UserAddressesTab";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useAppContext } from "@/lib/appContext";
 import { cn } from "@/lib/utils";
@@ -16,7 +17,6 @@ import {
 	User,
 	Settings,
 	LogOut,
-	ClipboardList,
 	List,
 	HelpCircle,
 	LockKeyhole,
@@ -38,6 +38,21 @@ export default function ProfilePage() {
 
 	const [activeMode, setActiveMode] = useState<"hose" | "ehandel">("ehandel");
 	const [activeTab, setActiveTab] = useState("mine-bestillinger");
+
+	useEffect(() => {
+		if (!profile) return;
+
+		if (
+			profile.defaultCustomerNumber ===
+			SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+		) {
+			setActiveMode("hose");
+			setActiveTab("hose-orders");
+		} else {
+			setActiveMode("ehandel");
+			setActiveTab("mine-bestillinger");
+		}
+	}, [profile]);
 
 	const handleModeChange = (mode: "hose" | "ehandel") => {
 		setActiveMode(mode);
