@@ -38,8 +38,8 @@ export default function CategoryNavigationMenu({
 				setOpenMenu(val);
 				setIsOpen(!!val);
 			}}
-			className="hidden w-full justify-between md:flex">
-			<NavigationMenuList className="flex w-full max-w-full justify-center gap-2 px-0">
+			className="container hidden w-full justify-between md:flex">
+			<NavigationMenuList className="container flex w-full max-w-full justify-center gap-2 px-0">
 				{loading
 					? Array.from({ length: 7 }).map((_, i) => (
 							<NavigationMenuItem key={i}>
@@ -65,7 +65,7 @@ export default function CategoryNavigationMenu({
 											{category.name}
 										</NavigationMenuTrigger>
 										<NavigationMenuContent>
-											<ul className="min-h-[500px] w-screen max-w-full min-w-screen columns-3 gap-x-1 overflow-y-scroll p-2 md:columns-3">
+											<ul className="xs:columns-2 container min-h-[500px] min-w-[calc(100vw-200px)] gap-x-1 overflow-y-scroll p-2 sm:columns-3 md:columns-4">
 												{category.subcategories.map((subcategory) => (
 													<li
 														key={subcategory.slug}
