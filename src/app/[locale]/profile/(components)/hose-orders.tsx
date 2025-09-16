@@ -1,4 +1,3 @@
-// HoseOrders.tsx
 "use client";
 
 import * as React from "react";
@@ -12,6 +11,7 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
+	DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
@@ -22,11 +22,10 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { useGetAssets } from "@/hooks/useGetAssets";
+import { FilterOptions, useGetAssets } from "@/hooks/useGetAssets";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { cn } from "@/lib/utils";
-import { getAssets, getS1Codes } from "@/services/assets.service";
-import { addToCart, postCartKit } from "@/services/carts.service";
+import { postCartKit } from "@/services/carts.service";
 import {
 	Funnel,
 	Paperclip,
@@ -69,31 +68,22 @@ interface HoseOrdersProps {
 	onOrderClick?: (orderId: string) => void;
 }
 
-type FilterParams = {
-	page: number;
-	pageSize: number;
-	approved?: string;
-	overdue?: string;
-	replacementDue?: string;
-	spareSet?: string;
-	ageSize?: string;
-};
-
 export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 	const { data: profile } = usePunchoutProfile();
+	const [customerNumber, setCustomerNumber] = useState<string>("");
 	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
 		undefined,
 	);
+
 	const {
 		assets = [],
 		pagination,
 		loading,
 		fetchAssets,
-	} = useGetAssets(
-		selectedS1Code ? undefined : profile?.customerNumbers?.[3],
-		selectedS1Code,
-	);
-	const { s1Codes = [], s1CodesPagination, fetchS1Codes } = useGetAssets();
+		s1Codes = [],
+		s1CodesPagination,
+		fetchS1Codes,
+	} = useGetAssets(customerNumber, selectedS1Code);
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedColumns, setSelectedColumns] = useState<string[]>([
@@ -130,11 +120,17 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 	}));
 
 	const handleRowSelect = (orderId: string): void => {
-		setSelectedRows((prev) =>
-			prev.includes(orderId)
+		const asset = transformedAssets.find((a) => a.orderId === orderId);
+		setSelectedRows((prev) => {
+			const next = prev.includes(orderId)
 				? prev.filter((id) => id !== orderId)
-				: [...prev, orderId],
-		);
+				: [...prev, orderId];
+
+			setSelectedItems(
+				transformedAssets.filter((a) => next.includes(a.orderId)),
+			);
+			return next;
+		});
 	};
 
 	const allSelectedOnPage = React.useMemo(() => {
@@ -145,11 +141,16 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 	const handleSelectAllOnPage = (checked: boolean) => {
 		const ids = transformedAssets.map((a) => a.orderId);
-		setSelectedRows((prev) =>
-			checked
+		setSelectedRows((prev) => {
+			const next = checked
 				? Array.from(new Set([...prev, ...ids]))
-				: prev.filter((id) => !ids.includes(id)),
-		);
+				: prev.filter((id) => !ids.includes(id));
+
+			setSelectedItems(
+				transformedAssets.filter((a) => next.includes(a.orderId)),
+			);
+			return next;
+		});
 	};
 
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -171,9 +172,14 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 			try {
 				setIsAddingToCart(true);
-				const hexagonIds = selectedAssets.map((asset) => Number(asset.id));
+				const cartItems = selectedAssets.map((asset) => ({
+					hexagonId: Number(asset.id),
+					quantity: 1,
+					warehouseNumber: "L01",
+					companyNumber: "1"
+				}));
 
-				await postCartKit({ hexagonId: hexagonIds });
+				await postCartKit(cartItems);
 
 				toast.success("Elementer lagt til i handlekurven");
 				router.push("/cart?mode=hose");
@@ -188,30 +194,27 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		}
 	};
 
-	const getActiveFilters = () => {
+	const getActiveFilters = (opts?: {
+		selectedFilters?: string[];
+		selectedAgeRanges?: string[];
+	}) => {
 		const filters: Record<string, any> = {};
+		const f = opts?.selectedFilters ?? selectedFilters;
+		const ages = opts?.selectedAgeRanges ?? selectedAgeRanges;
 
-		if (selectedAgeRanges.length > 0) {
-			filters.ageSize = selectedAgeRanges.join(",");
-		}
+		if (ages.length > 0) filters.ageSize = ages.join(",");
 
-		if (selectedFilters.includes("approved")) filters.approved = "true";
-		if (selectedFilters.includes("overdue")) filters.overdue = "true";
-		if (selectedFilters.includes("replacementDue"))
-			filters.replacementDue = "true";
-		if (selectedFilters.includes("spareSet")) filters.spareSet = "true";
-
-		if (selectedS1Code) {
-			filters.s1Code = selectedS1Code;
-		} else if (profile?.customerNumbers?.[3]) {
-			filters.customerNumber = profile.customerNumbers[3];
-		}
+		if (f.includes("approved")) filters.approved = "true";
+		if (f.includes("overdue")) filters.overdue = "true";
+		if (f.includes("replacementDue")) filters.replacementDue = "true";
+		if (f.includes("spareSet")) filters.spareSet = "true";
+		if (f.includes("rejected")) filters.rejected = "true";
 
 		return filters;
 	};
 
 	const handlePageChange = (page: number) => {
-		const filters: FilterParams = {
+		const filters: FilterOptions = {
 			page,
 			pageSize: ITEMS_PER_PAGE,
 			...getActiveFilters(),
@@ -238,6 +241,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 	const handleSelectAll = (checked: boolean) => {
 		const ids = transformedAssets.map((a) => a.orderId);
 		setSelectedRows(checked ? ids : []);
+		setSelectedItems(checked ? transformedAssets : []);
 	};
 
 	const allColumns: Record<string, Column<HoseOrder>> = {
@@ -470,35 +474,28 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		);
 	};
 
-	const handleFilterChange = async (value: string): Promise<void> => {
-		const newFilters = selectedFilters.includes(value)
-			? selectedFilters.filter((v) => v !== value)
-			: [...selectedFilters, value];
+	const handleFilterChange = async (
+		value: string,
+		checked?: boolean,
+	): Promise<void> => {
+		setSelectedFilters((prev) => {
+			const next =
+				checked === undefined
+					? prev.includes(value)
+						? prev.filter((v) => v !== value)
+						: [...prev, value]
+					: checked
+						? [...new Set([...prev, value])]
+						: prev.filter((v) => v !== value);
 
-		setSelectedFilters(newFilters);
-
-		await fetchAssets({
-			page: 1,
-			pageSize: pagination.pageSize,
-			...getActiveFilters(),
-			...(newFilters.includes("approved") && { approved: "true" }),
-			...(newFilters.includes("overdue") && { overdue: "true" }),
-			...(newFilters.includes("replacementDue") && { replacementDue: "true" }),
-			...(newFilters.includes("spareSet") && { spareSet: "true" }),
-		});
-	};
-
-	const handleUpdateS1ForAllItems = async (s1Code: string) => {
-		try {
-			setSelectedS1Code(s1Code || undefined);
-			await fetchAssets({
+			fetchAssets({
 				page: 1,
 				pageSize: pagination.pageSize,
-				...getActiveFilters(),
+				...getActiveFilters({ selectedFilters: next }),
+				...(searchQuery ? { search: searchQuery } : {}),
 			});
-		} catch (e) {
-			toast.error("Error updating S1 code");
-		}
+			return next;
+		});
 	};
 
 	return (
@@ -550,10 +547,10 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 						<Button
 							variant="default"
 							className="w-full bg-[#1C6D2C] text-white hover:bg-[#164B1F]"
-							onClick={() => {
-								setCartModalOpen(false);
-								router.push("/cart");
-							}}>
+							onClick={async () => {
+									setCartModalOpen(false);
+									await handleBulkAction("cart");
+								}}>
 							Til handlekurven
 						</Button>
 					</div>
@@ -573,7 +570,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 									if (!value) {
 										setSelectedS1Code("");
 									}
-									handleUpdateS1ForAllItems(value);
+									setSelectedS1Code(value);
 								}}>
 								<SelectTrigger className="relative w-[200px] border-[#C1C4C2] bg-white pr-8 font-medium text-[#0F1912]">
 									<div className="flex items-center gap-2 overflow-hidden">
@@ -622,11 +619,52 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 										e.stopPropagation();
 										e.preventDefault();
 										setSelectedS1Code("");
-										handleUpdateS1ForAllItems("");
 									}}
 									className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
 									<X className="h-4 w-4 text-[#5A615D]" />
 									<span className="sr-only">Fjern lokasjon</span>
+								</button>
+							)}
+						</div>
+					</div>
+					<div className="flex w-[280px] items-center gap-3">
+						<p className="text-base font-normal text-[#5A615D]">Customer:</p>
+						<div className="relative">
+							<Select
+								value={customerNumber || ""}
+								onValueChange={(value) => {
+									if (!value) {
+										setCustomerNumber("");
+									}
+									setCustomerNumber(value);
+								}}>
+								<SelectTrigger className="relative w-[200px] border-[#C1C4C2] bg-white pr-8 font-medium text-[#0F1912]">
+									<SelectValue
+										className="truncate"
+										placeholder="Velg customer"
+									/>
+								</SelectTrigger>
+								<SelectContent className="max-h-[300px] overflow-y-auto">
+									{(profile?.customerNumbers || []).map((s1) => (
+										<SelectItem
+											key={s1}
+											value={s1}>
+											{s1}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+							{customerNumber && (
+								<button
+									type="button"
+									onClick={(e) => {
+										e.stopPropagation();
+										e.preventDefault();
+										setCustomerNumber("");
+									}}
+									className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
+									<X className="h-4 w-4 text-[#5A615D]" />
+									<span className="sr-only">Fjern customer</span>
 								</button>
 							)}
 						</div>
@@ -641,10 +679,45 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 								placeholder="Søk etter ID nummer, ordrenummer, fartøy eller utstyr..."
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
+								onKeyDown={(e) => {
+									if (e.key === "Enter") {
+										fetchAssets({
+											page: 1,
+											pageSize: ITEMS_PER_PAGE,
+											search: searchQuery,
+											...getActiveFilters(),
+										});
+									}
+								}}
 								className="font-sm h-10 flex-1 rounded-md border border-[#8A8F8C] bg-[#F8F9F8] pr-24 pl-12 text-base text-[#5A615D]"
 							/>
+							{searchQuery && (
+								<button
+									type="button"
+									onClick={() => {
+										setSearchQuery("");
+										setSelectedFilters([]);
+										setSelectedAgeRanges([]);
+										fetchAssets({
+											page: 1,
+											pageSize: ITEMS_PER_PAGE,
+										});
+									}}
+									className="absolute top-1/2 right-24 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
+									<X className="h-4 w-4 text-[#5A615D]" />
+									<span className="sr-only">Fjern søk</span>
+								</button>
+							)}
 							<Button
 								type="button"
+								onClick={() => {
+									fetchAssets({
+										page: 1,
+										pageSize: ITEMS_PER_PAGE,
+										search: searchQuery,
+										...getActiveFilters(),
+									});
+								}}
 								className="absolute top-1/2 right-0 h-10 -translate-y-1/2 rounded-none rounded-r-md border-1 border-l-2 border-[#8A8F8C] bg-white px-4 font-medium text-[#0F1912] hover:bg-white">
 								Søk
 							</Button>
@@ -712,15 +785,13 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 													<div className="space-y-2">
 														<DropdownMenuItem
 															className="rounded-md p-0 focus:bg-gray-50"
-															onSelect={(e) => {
-																e.preventDefault();
-																handleFilterChange("underkjente");
+															onClick={(e) => {
+																e.stopPropagation();
+																handleFilterChange("rejected");
 															}}>
 															<div className="flex items-center gap-2">
 																<Checkbox
-																	checked={selectedFilters.includes(
-																		"underkjente",
-																	)}
+																	checked={selectedFilters.includes("rejected")}
 																/>
 																<span>Underkjente inspeksjoner</span>
 															</div>
@@ -728,8 +799,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 														<DropdownMenuItem
 															className="rounded-md p-0 focus:bg-gray-50"
-															onSelect={(e) => {
-																e.preventDefault();
+															onClick={(e) => {
+																e.stopPropagation();
 																handleFilterChange("approved");
 															}}>
 															<div className="flex items-center gap-2">
@@ -742,8 +813,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 														<DropdownMenuItem
 															className="rounded-md p-0 focus:bg-gray-50"
-															onSelect={(e) => {
-																e.preventDefault();
+															onClick={(e) => {
+																e.stopPropagation();
 																handleFilterChange("overdue");
 															}}>
 															<div className="flex items-center gap-2">
@@ -763,8 +834,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 													<div className="space-y-2">
 														<DropdownMenuItem
 															className="rounded-md p-0 focus:bg-gray-50"
-															onSelect={(e) => {
-																e.preventDefault();
+															onClick={(e) => {
+																e.stopPropagation();
 																handleFilterChange("aktive_midlertidige");
 															}}>
 															<div className="flex items-center gap-2">
@@ -779,8 +850,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 														<DropdownMenuItem
 															className="rounded-md p-0 focus:bg-gray-50"
-															onSelect={(e) => {
-																e.preventDefault();
+															onClick={(e) => {
+																e.stopPropagation();
 																handleFilterChange("replacementDue");
 															}}>
 															<div className="flex items-center gap-2">
@@ -802,8 +873,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 													<div className="space-y-2">
 														<DropdownMenuItem
 															className="rounded-md p-0 focus:bg-gray-50"
-															onSelect={async (e) => {
-																e.preventDefault();
+															onClick={async (e) => {
+																e.stopPropagation();
 																const newRanges = selectedAgeRanges.includes(
 																	"5-6",
 																)
@@ -815,6 +886,9 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 																	pageSize: pagination.pageSize,
 																	ageSize: newRanges.join(","),
 																	...getActiveFilters(),
+																	...(searchQuery
+																		? { search: searchQuery }
+																		: {}),
 																});
 															}}>
 															<div className="flex items-center gap-2">
@@ -827,8 +901,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 														<DropdownMenuItem
 															className="rounded-md p-0 focus:bg-gray-50"
-															onSelect={async (e) => {
-																e.preventDefault();
+															onClick={async (e) => {
+																e.stopPropagation();
 																const newRanges = selectedAgeRanges.includes(
 																	"7-8",
 																)
@@ -840,6 +914,9 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 																	pageSize: pagination.pageSize,
 																	ageSize: newRanges.join(","),
 																	...getActiveFilters(),
+																	...(searchQuery
+																		? { search: searchQuery }
+																		: {}),
 																});
 															}}>
 															<div className="flex items-center gap-2">
@@ -852,8 +929,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 														<DropdownMenuItem
 															className="rounded-md p-0 focus:bg-gray-50"
-															onSelect={async (e) => {
-																e.preventDefault();
+															onClick={async (e) => {
+																e.stopPropagation();
 																const newRanges = selectedAgeRanges.includes(
 																	"8-10",
 																)
@@ -867,6 +944,9 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 																	pageSize: pagination.pageSize,
 																	ageSize: newRanges.join(","),
 																	...getActiveFilters(),
+																	...(searchQuery
+																		? { search: searchQuery }
+																		: {}),
 																});
 															}}>
 															<div className="flex items-center gap-2">
@@ -879,8 +959,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 														<DropdownMenuItem
 															className="rounded-md p-0 focus:bg-gray-50"
-															onSelect={async (e) => {
-																e.preventDefault();
+															onClick={async (e) => {
+																e.stopPropagation();
 																const newRanges = selectedAgeRanges.includes(
 																	"10+",
 																)
@@ -892,6 +972,9 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 																	pageSize: pagination.pageSize,
 																	ageSize: newRanges.join(","),
 																	...getActiveFilters(),
+																	...(searchQuery
+																		? { search: searchQuery }
+																		: {}),
 																});
 															}}>
 															<div className="flex items-center gap-2">
@@ -911,8 +994,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 													<div className="space-y-2">
 														<DropdownMenuItem
 															className="rounded-md p-0 focus:bg-gray-50"
-															onSelect={(e) => {
-																e.preventDefault();
+															onClick={(e) => {
+																e.stopPropagation();
 																handleFilterChange("spareSet");
 															}}>
 															<div className="flex items-center gap-2">

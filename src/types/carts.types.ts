@@ -19,6 +19,35 @@ export interface CartLine {
 	}>;
 }
 
+export interface CartKitItem {
+	hexagonId: string;
+	assetId: number;
+	hose: {
+		dimension: string;
+		lengthMm: number;
+		lengthFtIn: string;
+		itemDescription: string;
+		genericHoseName: string;
+		quantity: number;
+	};
+	ferrule1: HoseComponent;
+	ferrule2: HoseComponent;
+	insert1: HoseComponent;
+	insert2: HoseComponent;
+}
+
+export interface CartKitResponse {
+	cart: CartLine[];
+	cartKit: CartKitItem[];
+}
+
+export interface HoseComponent {
+	name: string;
+	itemNumber: string;
+	itemId: number;
+	quantity: number;
+}
+
 export interface Media {
 	filename: string;
 	picture_type: string;
