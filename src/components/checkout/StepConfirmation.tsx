@@ -122,7 +122,7 @@ export default function StepConfirmation({
 			<div className="col-span-4 flex flex-col">
 				<h2 className="mb-4 text-xl font-semibold">{t("yourItems")}</h2>
 				<div className="flex flex-col space-y-4">
-					{cartItems?.map((item: any) => (
+					{cartItems?.cart?.map((item: any) => (
 						<Card
 							key={item.itemNumber}
 							className="rounded-lg border border-gray-200 p-6 shadow-none">

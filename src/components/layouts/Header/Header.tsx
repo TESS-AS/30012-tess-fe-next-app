@@ -285,10 +285,15 @@ export default function Header() {
 						<div className="relative mr-2 flex items-center">
 							<ShoppingCart className="h-5 w-5" />
 							<Badge className="absolute -top-2.5 -right-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#005522] p-0 text-xs">
-								{cartItems?.length}
+								{(cartItems?.cart?.length || 0) +
+									(cartItems?.cartKit?.length || 0)}
 							</Badge>
 						</div>
-						{cartItems?.length > 0 ? formatNorwegianCurrency(totalPrice) : ""}
+						{(cartItems?.cart?.length || 0) +
+							(cartItems?.cartKit?.length || 0) >
+						0
+							? formatNorwegianCurrency(totalPrice)
+							: ""}
 						<span className="sr-only">Cart</span>
 					</Button>
 					{profile ? (
