@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { cn } from "@/lib/utils";
 import {
 	LucideIcon,
@@ -47,6 +49,7 @@ export function SidebarNav({
 	const pathname = usePathname();
 	const [expandedItems, setExpandedItems] = useState<string[]>([]);
 	const [isCollapsed, setIsCollapsed] = useState(false);
+	const { data: profile } = useGetProfileData();
 
 	const toggleCollapse = () => {
 		const newCollapsed = !isCollapsed;
@@ -89,25 +92,28 @@ export function SidebarNav({
 						</div>
 						<span>Hose Management</span>
 					</button>
-					<button
-						onClick={() => onModeChange("ehandel")}
-						className={cn(
-							"flex w-16 cursor-pointer flex-col items-center gap-1 rounded-md p-1 text-[10px] font-medium transition-colors",
-						)}>
-						<div
+					{profile?.defaultCustomerNumber !==
+						SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
+						<button
+							onClick={() => onModeChange("ehandel")}
 							className={cn(
-								"flex h-[40px] w-[40px] items-center justify-center rounded",
-								activeMode === "ehandel" && "bg-[#DCF7E0]",
+								"flex w-16 cursor-pointer flex-col items-center gap-1 rounded-md p-1 text-[10px] font-medium transition-colors",
 							)}>
-							<Image
-								src={CartSvg}
-								alt="E-handel"
-								width={24}
-								height={24}
-							/>
-						</div>
-						<span>E-handel</span>
-					</button>
+							<div
+								className={cn(
+									"flex h-[40px] w-[40px] items-center justify-center rounded",
+									activeMode === "ehandel" && "bg-[#DCF7E0]",
+								)}>
+								<Image
+									src={CartSvg}
+									alt="E-handel"
+									width={24}
+									height={24}
+								/>
+							</div>
+							<span>E-handel</span>
+						</button>
+					)}
 				</div>
 				<div
 					className={`relative flex w-full flex-col items-end border-l pb-30 ${!isCollapsed ? "pr-4" : ""}`}>

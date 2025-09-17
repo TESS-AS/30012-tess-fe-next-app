@@ -38,8 +38,8 @@ export default function CategoryNavigationMenu({
 				setOpenMenu(val);
 				setIsOpen(!!val);
 			}}
-			className="hidden w-full justify-between md:flex">
-			<NavigationMenuList className="flex w-full max-w-full justify-center gap-2 px-0">
+			className="container hidden w-full justify-between md:flex">
+			<NavigationMenuList className="container flex w-full max-w-full justify-center gap-2 px-0">
 				{loading
 					? Array.from({ length: 7 }).map((_, i) => (
 							<NavigationMenuItem key={i}>
@@ -65,7 +65,7 @@ export default function CategoryNavigationMenu({
 											{category.name}
 										</NavigationMenuTrigger>
 										<NavigationMenuContent>
-											<ul className="min-h-[500px] w-screen max-w-full min-w-screen columns-3 gap-x-1 overflow-y-scroll p-2 md:columns-3">
+											<ul className="xs:columns-2 container min-h-[500px] min-w-[calc(100vw-200px)] gap-x-1 overflow-y-scroll p-2 sm:columns-3 md:columns-4">
 												{category.subcategories.map((subcategory) => (
 													<li
 														key={subcategory.slug}
@@ -81,18 +81,16 @@ export default function CategoryNavigationMenu({
 														{Array.isArray(subcategory.subcategories) &&
 															subcategory.subcategories && (
 																<ul className="space-y-1">
-																	{subcategory.subcategories
-																		.slice(0, 7)
-																		.map((child) => (
-																			<li key={child.slug}>
-																				<Link
-																					onClick={() => setOpenMenu(false)}
-																					href={`/${category.slug}/${subcategory.slug}/${child.slug}`}
-																					className="hover:text-foreground text-md font-medium text-gray-700 transition-colors">
-																					{child.name}
-																				</Link>
-																			</li>
-																		))}
+																	{subcategory.subcategories.map((child) => (
+																		<li key={child.slug}>
+																			<Link
+																				onClick={() => setOpenMenu(false)}
+																				href={`/${category.slug}/${subcategory.slug}/${child.slug}`}
+																				className="hover:text-foreground text-md font-medium text-gray-700 transition-colors">
+																				{child.name}
+																			</Link>
+																		</li>
+																	))}
 
 																	<li>
 																		<Link
