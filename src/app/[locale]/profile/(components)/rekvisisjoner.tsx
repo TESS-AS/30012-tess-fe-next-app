@@ -5,7 +5,9 @@ import { DataTable } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
 import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { cn } from "@/lib/utils";
+import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
+import { useRequisitions } from "@/hooks/useRequisitions";
+import { cn, formatDate } from "@/lib/utils";
 import { Label } from "@radix-ui/react-label";
 import {
 	Search,
@@ -36,6 +38,9 @@ interface OrderItem {
 }
 
 interface Rekvisisjon {
+	requisitionId: number;
+	requestDate: string;
+	requestTime: string;
 	orderId: string;
 	bestiller: string;
 	opprettet: string;
@@ -43,144 +48,6 @@ interface Rekvisisjon {
 	status: Status;
 	items: OrderItem[];
 }
-
-const mockRekvisisjoner: Rekvisisjon[] = [
-	{
-		orderId: "#FWB127364372",
-		bestiller: "Lars Hansen",
-		opprettet: "09 Mar 2025",
-		pris: "466.00",
-		status: "Venter godkjenning",
-		items: [
-			{
-				name: "TESSGULL-GULLSLANGE BLÅ",
-				sku: "P_65033",
-				quantity: 5,
-				price: "133.00",
-			},
-			{
-				name: "TESSGULL-GULLSLANGE BLÅ",
-				sku: "P_65033",
-				quantity: 5,
-				price: "133.00",
-			},
-			{
-				name: "TESSGULL-GULLSLANGE BLÅ",
-				sku: "P_65033",
-				quantity: 5,
-				price: "133.00",
-			},
-			{
-				name: "TESSGULL-GULLSLANGE BLÅ",
-				sku: "P_65033",
-				quantity: 5,
-				price: "133.00",
-			},
-			{
-				name: "TESSGULL-GULLSLANGE BLÅ",
-				sku: "P_65033",
-				quantity: 5,
-				price: "133.00",
-			},
-			{
-				name: "TESSGULL-GULLSLANGE BLÅ",
-				sku: "P_65033",
-				quantity: 5,
-				price: "133.00",
-			},
-			{
-				name: "TESSGULL-GULLSLANGE BLÅ",
-				sku: "P_65033",
-				quantity: 5,
-				price: "133.00",
-			},
-			{
-				name: "TESSGULL-GULLSLANGE BLÅ",
-				sku: "P_65033",
-				quantity: 5,
-				price: "133.00",
-			},
-			{
-				name: "TESSGULL-GULLSLANGE BLÅ",
-				sku: "P_65033",
-				quantity: 5,
-				price: "133.00",
-			},
-			{
-				name: "TESSGULL-GULLSLANGE BLÅ",
-				sku: "P_65033",
-				quantity: 5,
-				price: "133.00",
-			},
-		],
-	},
-	{
-		orderId: "#FWB125467980",
-		bestiller: "Kari Nordahl",
-		opprettet: "12 Mar 2025",
-		pris: "245.00",
-		status: "Venter godkjenning",
-		items: [
-			{
-				name: "TESSGULL-GULLSLANGE BLÅ",
-				sku: "P_65033",
-				quantity: 5,
-				price: "133.00",
-			},
-		],
-	},
-	{
-		orderId: "#FWB139485607",
-		bestiller: "Erik Johansen",
-		opprettet: "19 Mar 2025",
-		pris: "2000.00",
-		status: "Godkjent",
-		items: [
-			{
-				name: "TESSGULL-GULLSLANGE HVIT",
-				sku: "P_65034",
-				quantity: 3,
-				price: "133.00",
-			},
-		],
-	},
-	{
-		orderId: "#FWB137364371",
-		bestiller: "Lars Hansen",
-		opprettet: "23 Apr 2025",
-		pris: "90.00",
-		status: "Godkjent",
-		items: [
-			{
-				name: "TESSGULL-GULLSLANGE HVIT",
-				sku: "P_65034",
-				quantity: 3,
-				price: "133.00",
-			},
-		],
-	},
-	{
-		orderId: "#FWB148273645",
-		bestiller: "Lars Hansen",
-		opprettet: "20 Apr 2025",
-		pris: "3040.00",
-		status: "Avvist",
-		items: [
-			{
-				name: "TESSGULL-GULLSLANGE BLÅ",
-				sku: "P_65033",
-				quantity: 5,
-				price: "133.00",
-			},
-			{
-				name: "TESSGULL-GULLSLANGE HVIT",
-				sku: "P_65034",
-				quantity: 5,
-				price: "133.00",
-			},
-		],
-	},
-];
 
 export const getStatusChipColor = (status: string) => {
 	switch (status) {
@@ -197,12 +64,19 @@ export const getStatusChipColor = (status: string) => {
 
 export function Rekvisisjoner() {
 	const router = useRouter();
+	const { data: profile } = usePunchoutProfile();
+
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedStatus, setSelectedStatus] = useState<string>("Alle");
 	const [currentPage, setCurrentPage] = useState(1);
 	const [approvalModalOpen, setApprovalModalOpen] = useState(false);
 	const [selectedOrder, setSelectedOrder] = useState<Rekvisisjon | null>(null);
 	const [showAllItems, setShowAllItems] = useState(false);
+
+	const { requisitions, loading, error } = useRequisitions(
+		profile?.defaultCustomerNumber ?? "110667",
+	);
+	console.log(requisitions, "requisitions");
 
 	const getRadioStatusStyle = (status: Status) => {
 		switch (status) {
@@ -217,10 +91,13 @@ export function Rekvisisjoner() {
 		}
 	};
 
-	const filteredRekvisisjoner = mockRekvisisjoner.filter((rekvisisjon) => {
+	const filteredRekvisisjoner = requisitions.filter((rekvisisjon) => {
 		const matchesSearch =
-			rekvisisjon.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			rekvisisjon.bestiller.toLowerCase().includes(searchQuery.toLowerCase());
+			rekvisisjon.requisitionId
+				.toString()
+				.toLowerCase()
+				.includes(searchQuery.toLowerCase()) ||
+			rekvisisjon.description.toLowerCase().includes(searchQuery.toLowerCase());
 		const matchesStatus =
 			selectedStatus === "Alle" || rekvisisjon.status === selectedStatus;
 		return matchesSearch && matchesStatus;
@@ -230,7 +107,7 @@ export function Rekvisisjoner() {
 		{
 			key: "orderId",
 			header: "ORDRE ID",
-			cell: (rekvisisjon: Rekvisisjon) => rekvisisjon.orderId,
+			cell: (rekvisisjon: Rekvisisjon) => rekvisisjon.requisitionId,
 		},
 		{
 			key: "bestiller",
@@ -240,7 +117,8 @@ export function Rekvisisjoner() {
 		{
 			key: "opprettet",
 			header: "OPPRETTET",
-			cell: (rekvisisjon: Rekvisisjon) => rekvisisjon.opprettet,
+			cell: (rekvisisjon: Rekvisisjon) =>
+				formatDate(rekvisisjon.requestDate, rekvisisjon.requestTime),
 		},
 		{
 			key: "pris",
@@ -334,7 +212,7 @@ export function Rekvisisjoner() {
 							onValueChange={setSelectedStatus}
 							className="flex flex-wrap gap-3">
 							{statuses.map((status) => {
-								const count = getStatusCount(status, mockRekvisisjoner);
+								const count = getStatusCount(status, requisitions);
 								const badgeStyle = getRadioStatusStyle(status);
 								return (
 									<div
@@ -381,43 +259,46 @@ export function Rekvisisjoner() {
 					totalItems={filteredRekvisisjoner.length}
 					onPageChange={setCurrentPage}
 					isExpandable
-					expandableContent={(rekvisisjon) => (
-						<div>
-							<table className="w-[70%]">
-								<thead>
-									<tr>
-										<th className="w-[60%] pb-4 text-left text-xs font-bold text-[#5A615D]">
-											ENHETER
-										</th>
-										<th className="w-[20%] pb-4 text-left text-xs font-bold text-[#5A615D]">
-											ANTALL
-										</th>
-										<th className="w-[20%] pb-4 text-left text-xs font-bold text-[#5A615D]">
-											PRIS
-										</th>
-									</tr>
-								</thead>
-								<tbody className="text-sm">
-									{rekvisisjon.items.map((item, index) => (
-										<tr
-											key={index}
-											className="border-t border-[#E5E7E6]">
-											<td className="py-4">
-												<div className="space-y-1">
-													<p className="font-medium text-[#0F1912]">
-														{item.name}
-													</p>
-													<p className="text-[#5A615D]">{item.sku}</p>
-												</div>
-											</td>
-											<td className="py-4">{item.quantity}</td>
-											<td className="py-4">{item.price}</td>
+					expandableContent={(rekvisisjon) => {
+						console.log(rekvisisjon, "rekvisisjon");
+						return (
+							<div>
+								<table className="w-[70%]">
+									<thead>
+										<tr>
+											<th className="w-[60%] pb-4 text-left text-xs font-bold text-[#5A615D]">
+												ENHETER
+											</th>
+											<th className="w-[20%] pb-4 text-left text-xs font-bold text-[#5A615D]">
+												ANTALL
+											</th>
+											<th className="w-[20%] pb-4 text-left text-xs font-bold text-[#5A615D]">
+												PRIS
+											</th>
 										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
-					)}
+									</thead>
+									<tbody className="text-sm">
+										{rekvisisjon.items.map((item, index) => (
+											<tr
+												key={index}
+												className="border-t border-[#E5E7E6]">
+												<td className="py-4">
+													<div className="space-y-1">
+														<p className="font-medium text-[#0F1912]">
+															{item.name}
+														</p>
+														<p className="text-[#5A615D]">{item.sku}</p>
+													</div>
+												</td>
+												<td className="py-4">{item.quantity}</td>
+												<td className="py-4">{item.price}</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+							</div>
+						);
+					}}
 					totalPages={0}
 					isDropdownColumn
 				/>
