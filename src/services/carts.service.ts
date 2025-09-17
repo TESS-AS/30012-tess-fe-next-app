@@ -2,20 +2,24 @@ import {
 	ArchiveCartResponse,
 	CartLine,
 	CartResponse,
+	CartKitResponse,
 	WarehouseBatch,
 } from "@/types/carts.types";
 import { AxiosResponse } from "axios";
 
 import axiosClient from "./axiosClient";
 
-export async function getCart(): Promise<CartLine[]> {
+export async function getCart(): Promise<CartKitResponse> {
 	try {
 		const url = `/cart`;
-		const response: AxiosResponse<CartLine[]> = await axiosClient.get(url);
+		const response: AxiosResponse<CartKitResponse> = await axiosClient.get(url);
 		return response.data;
 	} catch (error) {
 		console.error("Error loading cart", error);
-		return [];
+		return {
+			cartKit: [],
+			cart: [],
+		};
 	}
 }
 
@@ -37,10 +41,10 @@ export async function addToCart(cartLine: CartLine): Promise<CartResponse> {
 }
 
 export async function removeFromCart(
-	cartLineId: number,
+	id: number | string,
 ): Promise<CartResponse> {
 	try {
-		const url = `/cart/deleteLine/${cartLineId}`;
+		const url = typeof id === 'string' ? `/cart/cartKit/${id}` : `/cart/deleteLine/${id}`;
 		const response: AxiosResponse<CartResponse> = await axiosClient.delete(url);
 		return response.data;
 	} catch (error) {

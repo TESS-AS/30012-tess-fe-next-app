@@ -22,7 +22,7 @@ import {
 	getProductPrice,
 } from "@/services/product.service";
 import { AddressFormState } from "@/types/address";
-import { CartLine } from "@/types/carts.types";
+import { CartKitResponse, CartLine } from "@/types/carts.types";
 import { Order } from "@/types/orders.types";
 import { PriceResponse } from "@/types/search.types";
 
@@ -30,8 +30,8 @@ interface AppContextType {
 	isCartChanging: boolean;
 	setIsCartChanging: (value: boolean) => void;
 
-	cartItems: CartLine[];
-	setCartItems: (value: CartLine[]) => void;
+	cartItems: CartKitResponse | undefined;
+	setCartItems: (value: CartKitResponse) => void;
 
 	prices: Record<string, number>;
 	calculatedPrices: Record<string, number>;
@@ -51,8 +51,7 @@ interface AppContextType {
 
 	updateWarehouseForAllItems: (warehouseNumber: string) => Promise<void>;
 
-	removeItem: (cartLine: number) => Promise<void>;
-	removeItemOptimistic: (cartLine: number) => Promise<void>; // NEW
+	removeItemOptimistic: (cartLine: number | string) => Promise<void>;
 
 	handleArchiveCart: () => Promise<void>;
 
@@ -90,7 +89,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const [currentStep, setCurrentStep] = useState(0);
 	const [isCartChanging, setIsCartChanging] = useState(false);
 
-	const [cartItems, setCartItems] = useState<CartLine[]>([]);
+	const [cartItems, setCartItems] = useState<CartKitResponse>();
 	const [prices, setPrices] = useState<Record<string, number>>({});
 	const [calculatedPrices, setCalculatedPrices] = useState<
 		Record<string, number>
@@ -121,11 +120,12 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			setCartItems(cart);
 
 			// Base prices (per item)
-			for (const item of cart) {
+			for (const item of cart.cart) {
 				const priceData = await getProductPrice(
 					profile?.defaultCustomerNumber,
 					profile?.defaultCompanyNumber,
 					item.productNumber,
+					item.warehouseNumber,
 				);
 				setPrices((prev) => ({
 					...prev,
@@ -138,7 +138,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 			// Initial calculation for all items
 			const priceRequests =
-				cart?.map((item) => ({
+				cart.cart?.map((item) => ({
 					itemNumber: item.itemNumber,
 					quantity: item.quantity,
 					warehouseNumber: profile?.defaultWarehouseNumber || "",
@@ -249,7 +249,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			await updateWarehouseForCart({
 				warehouseNumber,
 				companyNumber: String(profile?.defaultCompanyNumber) || "",
-				cartLines: cartItems.map((i) => Number(i.cartLine)),
+				cartLines: cartItems?.cart.map((i) => Number(i.cartLine)) || [],
 			});
 			await loadCartData();
 		} catch (error) {
@@ -260,35 +260,68 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		}
 	};
 
-	const removeItem = async (cartLine: number) => {
-		try {
-			await removeFromCart(cartLine);
-			setIsCartChanging((v) => !v);
-		} catch (error) {
-			console.error("Error removing item from cart:", error);
-			throw error;
-		}
-	};
-
-	const removeItemOptimistic = async (cartLine: number) => {
+	const removeItemOptimistic = async (cartLine: number | string) => {
 		const numericLine = Number(cartLine);
-		const backup = cartItems.find((i) => Number(i.cartLine) === numericLine);
 
-		setCartItems((prev) =>
-			prev.filter((i) => Number(i.cartLine) !== numericLine),
+		// Check if it's a cart kit item (hexagonId)
+		if (isNaN(numericLine)) {
+			const hexagonId = cartLine;
+			const backup = cartItems?.cartKit?.find(i => i.hexagonId === hexagonId);
+
+			setCartItems((prev) => {
+				if (!prev?.cartKit) return prev;
+				return {
+					...prev,
+					cartKit: prev.cartKit.filter(i => i.hexagonId !== hexagonId)
+				};
+			});
+
+			try {
+				await removeFromCart(hexagonId);
+				setIsCartChanging((v) => !v);
+			} catch (error) {
+				if (backup) {
+					setCartItems((prev) => {
+						if (!prev?.cartKit) return prev;
+						return {
+							...prev,
+							cartKit: [...prev.cartKit, backup]
+						};
+					});
+				}
+				console.error("Error removing cart kit item:", error);
+				throw error;
+			}
+			return;
+		}
+
+		// Regular cart item
+		const backup = cartItems?.cart?.find(
+			(i) => Number(i.cartLine) === numericLine,
 		);
 
-		try {
-			await removeFromCart(cartLine);
+		setCartItems((prev) => {
+			if (!prev?.cart) return prev;
+			return {
+				...prev,
+				cart: prev.cart.filter((i) => Number(i.cartLine) !== numericLine)
+			};
+		});
 
+		try {
+			await removeFromCart(numericLine);
 			setIsCartChanging((v) => !v);
 		} catch (error) {
 			if (backup) {
 				setCartItems((prev) => {
-					const next = [...prev, backup];
-					return next.sort(
-						(a, b) => (Number(a.cartLine) || 0) - (Number(b.cartLine) || 0),
+					if (!prev?.cart) return prev;
+					const updatedCart = [...prev.cart, backup].sort(
+						(a, b) => (Number(a.cartLine) || 0) - (Number(b.cartLine) || 0)
 					);
+					return {
+						...prev,
+						cart: updatedCart
+					};
 				});
 			}
 			console.error("Error removing item (optimistic) from cart:", error);
@@ -323,7 +356,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				updateWarehouse,
 				updateWarehouseForAllItems,
 
-				removeItem,
 				removeItemOptimistic,
 
 				handleArchiveCart,

@@ -23,6 +23,8 @@ export interface CartKitItem {
 	hexagonId: string;
 	assetId: number;
 	hose: {
+		itemName: string;
+		itemNumber: string;
 		dimension: string;
 		lengthMm: number;
 		lengthFtIn: string;
