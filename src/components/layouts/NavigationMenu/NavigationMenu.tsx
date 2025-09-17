@@ -81,18 +81,16 @@ export default function CategoryNavigationMenu({
 														{Array.isArray(subcategory.subcategories) &&
 															subcategory.subcategories && (
 																<ul className="space-y-1">
-																	{subcategory.subcategories
-																		.slice(0, 7)
-																		.map((child) => (
-																			<li key={child.slug}>
-																				<Link
-																					onClick={() => setOpenMenu(false)}
-																					href={`/${category.slug}/${subcategory.slug}/${child.slug}`}
-																					className="hover:text-foreground text-md font-medium text-gray-700 transition-colors">
-																					{child.name}
-																				</Link>
-																			</li>
-																		))}
+																	{subcategory.subcategories.map((child) => (
+																		<li key={child.slug}>
+																			<Link
+																				onClick={() => setOpenMenu(false)}
+																				href={`/${category.slug}/${subcategory.slug}/${child.slug}`}
+																				className="hover:text-foreground text-md font-medium text-gray-700 transition-colors">
+																				{child.name}
+																			</Link>
+																		</li>
+																	))}
 
 																	<li>
 																		<Link
