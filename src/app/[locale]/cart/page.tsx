@@ -78,9 +78,9 @@ const CartPage = () => {
 
 	const {
 		cartItems,
-		prices,
-		calculatedPrices,
 		isLoading,
+		calculatedPrices,
+		prices,
 		updateQuantity,
 		updateWarehouse,
 		updateWarehouseForAllItems,
@@ -90,6 +90,7 @@ const CartPage = () => {
 		setShowFeedbackModal,
 		setSubmittedOrder,
 		setShowOrderConfirmation,
+		handleClearCart,
 	} = useAppContext();
 
 	const [orderData] = useCheckoutOrderData(
@@ -133,15 +134,6 @@ const CartPage = () => {
 	const [openModalId, setOpenModalId] = useState<string | null>(null);
 	const [outOfStock, setOutOfStock] = useState<boolean>(true);
 
-	const getRegularCartId = (it: RegularCartItem) =>
-		String(it.cartLine ?? it.itemNumber);
-	const getCartKitId = (it: CartKitItem) => String(it.hexagonId);
-
-	const getId = (it: CartItem) =>
-		isCartKitItem(it)
-			? getCartKitId(it)
-			: getRegularCartId(it as RegularCartItem);
-
 	const [openItems, setOpenItems] = React.useState<Record<string, boolean>>({});
 	const [variations, setVariations] = React.useState<Record<string, any>>({});
 	const [loadingItems, setLoadingItems] = React.useState<
@@ -156,8 +148,6 @@ const CartPage = () => {
 	const [selectedWarehouse, setSelectedWarehouse] = useState<string | null>(
 		null,
 	);
-
-	const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
 
 	useEffect(() => {
 		const loadPaths = async () => {
@@ -262,7 +252,7 @@ const CartPage = () => {
 	};
 
 	const renderRegularCartRow = (item: RegularCartItem) => {
-		const id = getRegularCartId(item);
+		const id = String(item.cartLine ?? item.itemNumber);
 
 		return (
 			<React.Fragment key={id}>
@@ -511,6 +501,7 @@ const CartPage = () => {
 							/>
 						</div>
 						<Button
+							onClick={handleClearCart}
 							variant="outline"
 							className="border-[#C81E1E] text-[#C81E1E]">
 							<Trash2 className="h-4 w-4" />
@@ -531,7 +522,9 @@ const CartPage = () => {
 						<div className="flex items-center justify-between">
 							<h1 className="text-2xl font-semibold">
 								{t("Cart.yourCart")} (
-								{cartItems.cart.length + cartItems.cartKit.length})
+								{(cartItems?.cart?.length || 0) +
+									(cartItems?.cartKit?.length || 0)}
+								)
 							</h1>
 							<div className="flex items-center gap-2">
 								<Button
@@ -557,15 +550,27 @@ const CartPage = () => {
 										return (
 											<div
 												key={idx}
-												className="border-lightGray rounded-md border">
-												<button
+												className="border-lightGray rounded-md border py-6">
+												<div
+													role="button"
+													tabIndex={0}
+													aria-expanded={!!expandedItems[item.hexagonId]}
 													onClick={() =>
 														setExpandedItems((prev) => ({
 															...prev,
 															[item.hexagonId]: !prev[item.hexagonId],
 														}))
 													}
-													className="flex w-full items-center justify-between px-4 py-3">
+													onKeyDown={(e) => {
+														if (e.key === "Enter" || e.key === " ") {
+															e.preventDefault();
+															setExpandedItems((prev) => ({
+																...prev,
+																[item.hexagonId]: !prev[item.hexagonId],
+															}));
+														}
+													}}
+													className="flex w-full cursor-pointer items-center justify-between px-4 py-3">
 													<div className="flex items-center gap-3">
 														{expandedItems[item.hexagonId] ? (
 															<ChevronUp className="h-4 w-4 text-[#5A615D]" />
@@ -573,78 +578,89 @@ const CartPage = () => {
 															<ChevronDown className="h-4 w-4 text-[#5A615D]" />
 														)}
 														<span className="text-sm text-[#5A615D]">
-															ID: {idx + 1}
+															ID: {item.hexagonId}
 														</span>
 														<span className="font-medium text-[#0F1912]">
-															{item.hose.itemName}
+															{item.hose.itemDescription}
 														</span>
 													</div>
-
-													<QuantityButtons
-														isLoading={!!loadingItems[item.hose.itemNumber]}
-														quantity={item.hose.quantity}
-														onIncrease={async (e) => {
-															e.stopPropagation();
-															setLoadingItems((prev) => ({
-																...prev,
-																[item.hose.itemNumber]: true,
-															}));
-															try {
-																await updateQuantity(
-																	Number(item.hexagonId),
-																	item.hose.itemNumber,
-																	item.hose.quantity + 1,
-																);
-															} finally {
-																setLoadingItems((prev) => ({
-																	...prev,
-																	[item.hose.itemNumber]: false,
-																}));
-															}
-														}}
-														onDecrease={async (e) => {
-															e.stopPropagation();
-															setLoadingItems((prev) => ({
-																...prev,
-																[item.hose.itemNumber]: true,
-															}));
-															try {
-																await updateQuantity(
-																	Number(item.hexagonId),
-																	item.hose.itemNumber,
-																	item.hose.quantity - 1,
-																);
-															} finally {
-																setLoadingItems((prev) => ({
-																	...prev,
-																	[item.hose.itemNumber]: false,
-																}));
-															}
-														}}
-													/>
-													<div className="flex items-center gap-3">
-														<span className="font-semibold">2527.50,-</span>
-														<button
-															onClick={async (e) => {
+													<div className="flex items-center gap-6">
+														<QuantityButtons
+															isLoading={!!loadingItems[item.hose.itemNumber]}
+															quantity={item.hose.quantity}
+															onIncrease={async (e) => {
 																e.stopPropagation();
+																setLoadingItems((prev) => ({
+																	...prev,
+																	[item.hose.itemNumber]: true,
+																}));
 																try {
-																	await removeItemOptimistic(item.hexagonId);
-																	toast.success(t("Cart.itemRemoved"));
-																} catch {
-																	toast.error(t("Cart.itemRemoveError"));
+																	await updateQuantity(
+																		Number(item.hexagonId),
+																		item.hose.itemNumber,
+																		item.hose.quantity + 1,
+																	);
+																} finally {
+																	setLoadingItems((prev) => ({
+																		...prev,
+																		[item.hose.itemNumber]: false,
+																	}));
 																}
 															}}
-															className="cursor-pointer hover:opacity-80"
-														>
-															<Trash2 className="h-4 w-4 text-[#C81E1E]" />
-														</button>
+															onDecrease={async (e) => {
+																e.stopPropagation();
+																setLoadingItems((prev) => ({
+																	...prev,
+																	[item.hose.itemNumber]: true,
+																}));
+																try {
+																	await updateQuantity(
+																		Number(item.hexagonId),
+																		item.hose.itemNumber,
+																		item.hose.quantity - 1,
+																	);
+																} finally {
+																	setLoadingItems((prev) => ({
+																		...prev,
+																		[item.hose.itemNumber]: false,
+																	}));
+																}
+															}}
+														/>
+														<div className="flex items-center gap-6">
+															<span className="font-semibold">2527.50,-</span>
+															<button
+																onClick={async (e) => {
+																	e.stopPropagation();
+																	try {
+																		await removeItemOptimistic(item.hexagonId);
+																		toast.success(t("Cart.itemRemoved"));
+																	} catch {
+																		toast.error(t("Cart.itemRemoveError"));
+																	}
+																}}
+																className="cursor-pointer hover:opacity-80">
+																<Trash2 className="h-4 w-4 text-[#C81E1E]" />
+															</button>
+														</div>
 													</div>
-												</button>
+												</div>
 
 												{expandedItems[item.hexagonId] && (
 													<div className="border-t p-4">
 														<div className="space-y-3">
 															<div className="space-y-4 pl-8">
+																<div className="flex items-start justify-between gap-2">
+																	<div className="flex flex-col">
+																		<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
+																			{item.hose.itemName}
+																		</p>
+																		<p className="text-xs text-[#5A615D]">
+																			{item.hose.itemNumber}
+																		</p>
+																	</div>
+																	<p className="font-bold">500.50,-</p>
+																</div>
 																<div className="flex items-start justify-between gap-2">
 																	<div className="flex flex-col">
 																		<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">

@@ -11,7 +11,6 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-	DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
@@ -24,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { FilterOptions, useGetAssets } from "@/hooks/useGetAssets";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
+import { useAppContext } from "@/lib/appContext";
 import { cn } from "@/lib/utils";
 import { postCartKit } from "@/services/carts.service";
 import {
@@ -42,6 +42,7 @@ import {
 	MapPin,
 	X,
 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -74,6 +75,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
 		undefined,
 	);
+	const { setIsCartChanging } = useAppContext();
 
 	const {
 		assets = [],
@@ -119,76 +121,81 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		neste_inspeksjonsdato: asset?.hoseLine?.nextInspectionDate ?? undefined,
 	}));
 
-	const handleRowSelect = (orderId: string): void => {
-		const asset = transformedAssets.find((a) => a.orderId === orderId);
-		setSelectedRows((prev) => {
-			const next = prev.includes(orderId)
-				? prev.filter((id) => id !== orderId)
-				: [...prev, orderId];
+	const selectedItems = useMemo(() => {
+		const set = new Set(selectedRows);
+		return transformedAssets.filter((a) => set.has(String(a.orderId)));
+	}, [selectedRows, transformedAssets]);
 
-			setSelectedItems(
-				transformedAssets.filter((a) => next.includes(a.orderId)),
-			);
-			return next;
-		});
-	};
-
-	const allSelectedOnPage = React.useMemo(() => {
+	const allSelectedOnPage = useMemo(() => {
 		if (!transformedAssets.length) return false;
-		const ids = transformedAssets.map((a) => a.orderId);
+		const ids = transformedAssets.map((a) => String(a.orderId));
 		return ids.every((id) => selectedRows.includes(id));
 	}, [transformedAssets, selectedRows]);
 
-	const handleSelectAllOnPage = (checked: boolean) => {
-		const ids = transformedAssets.map((a) => a.orderId);
+	const handleSelectRow = (key: string, checked: boolean | "indeterminate") => {
+		const on = checked === true;
+		setSelectedRows((prev) => {
+			if (on) {
+				return prev.includes(key) ? prev : [...prev, key];
+			}
+			return prev.filter((id) => id !== key);
+		});
+	};
+
+	const handleBulkSelect = (ids: string[], checked: boolean) => {
 		setSelectedRows((prev) => {
 			const next = checked
 				? Array.from(new Set([...prev, ...ids]))
 				: prev.filter((id) => !ids.includes(id));
-
-			setSelectedItems(
-				transformedAssets.filter((a) => next.includes(a.orderId)),
-			);
 			return next;
 		});
+	};
+
+	const handleSelectAllOnPage = (checked: boolean) => {
+		const ids = transformedAssets.map((a) => String(a.orderId));
+		handleBulkSelect(ids, checked);
 	};
 
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
 	const [cartModalOpen, setCartModalOpen] = useState(false);
 	const [showAllItems, setShowAllItems] = useState(false);
-	const [selectedItems, setSelectedItems] = useState<HoseOrder[]>([]);
+	const [isNavigating, setIsNavigating] = useState(false);
 	const router = useRouter();
 
 	const handleBulkAction = async (action: string): Promise<void> => {
 		if (action === "cart") {
-			const selectedAssets = transformedAssets.filter((asset) =>
-				selectedRows.includes(asset.orderId),
-			);
-
-			if (selectedAssets.length === 0) {
+			if (selectedItems.length === 0) {
 				toast.error("Vennligst velg elementer å legge til i handlekurven");
 				return;
 			}
 
-			try {
+			const handleAddToCart = async () => {
 				setIsAddingToCart(true);
-				const cartItems = selectedAssets.map((asset) => ({
-					hexagonId: Number(asset.id),
-					quantity: 1,
-					warehouseNumber: "L01",
-					companyNumber: "1"
-				}));
+				try {
+					const cartItems = selectedItems.map((asset) => ({
+						hexagonId: Number(asset.id),
+						quantity: 1,
+						warehouseNumber: "L01",
+						companyNumber: "1",
+					}));
 
-				await postCartKit(cartItems);
+					await postCartKit(cartItems);
+					setIsCartChanging(true);
+					setCartModalOpen(true);
+					toast.success("Elementer lagt til i handlekurven");
+					setIsNavigating(true);
+					setTimeout(() => {
+						router.push("/cart");
+					}, 1500);
+				} catch (error) {
+					toast.error("Kunne ikke legge til elementer i handlekurven");
+				} finally {
+					setIsAddingToCart(false);
+					setSelectedRows([]);
+				}
+			};
 
-				toast.success("Elementer lagt til i handlekurven");
-				router.push("/cart?mode=hose");
-			} catch (error) {
-				toast.error("Kunne ikke legge til elementer i handlekurven");
-			} finally {
-				setIsAddingToCart(false);
-				setSelectedRows([]);
-			}
+			handleAddToCart();
 		} else {
 			console.log(`Bulk action ${action} for rows:`, selectedRows);
 		}
@@ -239,9 +246,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 	];
 
 	const handleSelectAll = (checked: boolean) => {
-		const ids = transformedAssets.map((a) => a.orderId);
+		const ids = transformedAssets.map((a) => String(a.orderId));
 		setSelectedRows(checked ? ids : []);
-		setSelectedItems(checked ? transformedAssets : []);
 	};
 
 	const allColumns: Record<string, Column<HoseOrder>> = {
@@ -367,48 +373,56 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 								{isAddingToCart ? "Legger til..." : "Legg til i handlekurv"}
 							</span>
 						</DropdownMenuItem>
+
 						<DropdownMenuItem
 							onClick={() => handleBulkAction("support")}
 							className="">
 							<Mail className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Kontakt TESS support</span>
 						</DropdownMenuItem>
+
 						<DropdownMenuItem
 							onClick={() => handleBulkAction("sendmail")}
 							className="">
 							<Mail className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Send forespørsel om tilbud (RFQ)</span>
 						</DropdownMenuItem>
+
 						<DropdownMenuItem
 							onClick={() => handleBulkAction("report")}
 							className="">
 							<FileText className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Rapporter slangebytter</span>
 						</DropdownMenuItem>
+
 						<DropdownMenuItem
 							onClick={() => handleBulkAction("discard")}
 							className="">
 							<Trash2 className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Kasser utstyr</span>
 						</DropdownMenuItem>
+
 						<DropdownMenuItem
 							onClick={() => handleBulkAction("print-cert")}
 							className="">
 							<Printer className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Skriv ut TESS trykktest-sertifikat</span>
 						</DropdownMenuItem>
+
 						<DropdownMenuItem
 							onClick={() => handleBulkAction("print-id")}
 							className="">
 							<Printer className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Skriv ut visuelle ID-merker (strekkode)</span>
 						</DropdownMenuItem>
+
 						<DropdownMenuItem
 							onClick={() => handleBulkAction("print-certs")}
 							className="">
 							<Printer className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Skriv ut trykktest-sertifikater</span>
 						</DropdownMenuItem>
+
 						<DropdownMenuItem
 							onClick={() => handleBulkAction("export")}
 							className="">
@@ -416,7 +430,6 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 							<span>Eksporter oversiktsdata til Excel</span>
 						</DropdownMenuItem>
 
-						{/* Select/Deselect all (entire dataset currently shown) */}
 						<DropdownMenuItem
 							onClick={() =>
 								handleSelectAll(
@@ -431,7 +444,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 									: "Velg alle"}
 							</span>
 						</DropdownMenuItem>
-						{/* Select/Deselect this page */}
+
 						<DropdownMenuItem
 							onClick={() => handleSelectAllOnPage(!allSelectedOnPage)}
 							className="">
@@ -448,7 +461,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 			cell: (order: HoseOrder) => (
 				<Checkbox
 					checked={selectedRows.includes(String(order.orderId))}
-					onCheckedChange={() => handleRowSelect(String(order.orderId))}
+					onCheckedChange={(val) => handleSelectRow(String(order.orderId), val)}
 				/>
 			),
 		},
@@ -513,63 +526,83 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 								width={20}
 								height={20}
 							/>
-							<span>{selectedItems.length} varer lagt til i handlekurv</span>
+							<span>
+								{selectedItems.length}{" "}
+								{selectedItems.length === 1 ? "vare" : "varer"} lagt til i
+								handlekurv
+							</span>
 						</ModalTitle>
 					</ModalHeader>
-					<div className="space-y-2 py-4">
-						{selectedItems
-							.slice(0, showAllItems ? undefined : 5)
-							.map((item, index) => (
-								<div
-									key={index}
-									className="text-sm text-gray-600">
-									1 × {item.beskrivelse}
-								</div>
-							))}
-						{selectedItems.length > 5 && (
-							<button
-								onClick={() => setShowAllItems(!showAllItems)}
-								className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
-								{showAllItems ? (
-									<>
-										Vis færre{" "}
-										<ChevronDown className="h-4 w-4 rotate-180 transform" />
-									</>
-								) : (
-									<>
-										Vis alle <ChevronDown className="h-4 w-4" />
-									</>
-								)}
-							</button>
-						)}
+					<div className="space-y-4 py-4">
+						<div className="space-y-2">
+							{selectedItems.length === 0 ? (
+								<div className="text-sm text-gray-600">Ingen varer valgt</div>
+							) : (
+								<>
+									{selectedItems
+										.slice(0, showAllItems ? undefined : 5)
+										.map((item, index) => (
+											<div
+												key={index}
+												className="text-sm text-gray-600">
+												1 × {item.beskrivelse}
+											</div>
+										))}
+									{selectedItems.length > 5 && (
+										<button
+											onClick={() => setShowAllItems(!showAllItems)}
+											className="mt-2 flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
+											{showAllItems ? (
+												<>
+													Vis færre{" "}
+													<ChevronDown className="h-4 w-4 rotate-180 transform" />
+												</>
+											) : (
+												<>
+													Vis alle <ChevronDown className="h-4 w-4" />
+												</>
+											)}
+										</button>
+									)}
+								</>
+							)}
+						</div>
 					</div>
 					<div className="flex">
 						<Button
 							variant="default"
 							className="w-full bg-[#1C6D2C] text-white hover:bg-[#164B1F]"
+							disabled={isNavigating}
 							onClick={async () => {
-									setCartModalOpen(false);
-									await handleBulkAction("cart");
-								}}>
-							Til handlekurven
+								setCartModalOpen(false);
+								await handleBulkAction("cart");
+							}}>
+							{isNavigating ? (
+								<>
+									<span className="mr-2">Navigerer til handlekurv</span>
+									<Loader2 className="h-4 w-4 animate-spin" />
+								</>
+							) : (
+								"Til handlekurven"
+							)}
 						</Button>
 					</div>
 				</div>
 			</Modal>
+
 			<div className="space-y-6">
 				<div className="flex items-baseline space-x-4">
 					<div className="flex items-center">
 						<h1 className="text-2xl font-semibold">Slanger og utstyr</h1>
 					</div>
+
 					<div className="flex w-[280px] items-center gap-3">
 						<p className="text-base font-normal text-[#5A615D]">Lokasjon:</p>
 						<div className="relative">
 							<Select
 								value={selectedS1Code || ""}
 								onValueChange={(value) => {
-									if (!value) {
-										setSelectedS1Code("");
-									}
+									if (!value) setSelectedS1Code("");
 									setSelectedS1Code(value);
 								}}>
 								<SelectTrigger className="relative w-[200px] border-[#C1C4C2] bg-white pr-8 font-medium text-[#0F1912]">
@@ -627,15 +660,14 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 							)}
 						</div>
 					</div>
+
 					<div className="flex w-[280px] items-center gap-3">
 						<p className="text-base font-normal text-[#5A615D]">Customer:</p>
 						<div className="relative">
 							<Select
 								value={customerNumber || ""}
 								onValueChange={(value) => {
-									if (!value) {
-										setCustomerNumber("");
-									}
+									if (!value) setCustomerNumber("");
 									setCustomerNumber(value);
 								}}>
 								<SelectTrigger className="relative w-[200px] border-[#C1C4C2] bg-white pr-8 font-medium text-[#0F1912]">
@@ -645,11 +677,11 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 									/>
 								</SelectTrigger>
 								<SelectContent className="max-h-[300px] overflow-y-auto">
-									{(profile?.customerNumbers || []).map((s1) => (
+									{(profile?.customerNumbers || []).map((num) => (
 										<SelectItem
-											key={s1}
-											value={s1}>
-											{s1}
+											key={num}
+											value={num}>
+											{num}
 										</SelectItem>
 									))}
 								</SelectContent>

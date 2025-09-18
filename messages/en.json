@@ -85,22 +85,22 @@
 		"noProductsFound": "No products found",
 		"seeMoreCategories": "See more categories",
 		"resultsTitle": "Search results",
-        "noResults": {
-          "title": "No results found",
-          "description": "Sorry. We couldn’t find any products matching \"{query}\"",
-          "tipsTitle": "Tips for better search results:",
-          "tips": {
-            "checkSpelling": "Check the spelling or try alternative spellings",
-            "useFewerWords": "Use fewer or more general keywords",
-            "searchByType": "Try searching by product type or category",
-            "searchBySpec": "Try searching by technical specifications"
-          },
-          "help": {
-            "title": "Missing an item?",
-            "description": "Our experts will help you find the right products for your needs.",
-            "email": "Email: tess@tess.no"
-          }
-        }
+		"noResults": {
+			"title": "No results found",
+			"description": "Sorry. We couldn’t find any products matching \"{query}\"",
+			"tipsTitle": "Tips for better search results:",
+			"tips": {
+				"checkSpelling": "Check the spelling or try alternative spellings",
+				"useFewerWords": "Use fewer or more general keywords",
+				"searchByType": "Try searching by product type or category",
+				"searchBySpec": "Try searching by technical specifications"
+			},
+			"help": {
+				"title": "Missing an item?",
+				"description": "Our experts will help you find the right products for your needs.",
+				"email": "Email: tess@tess.no"
+			}
+		}
 	},
 	"Seo": {
 		"defaultTitle": "TESS - Teknisk Faghandel | Netthandel",
@@ -160,82 +160,82 @@
 		"cookies": "Cookie Policy",
 		"rights": "All rights reserved."
 	},
-    "Faq": {
-      "title": "Frequently Asked Questions (FAQ)",
-      "questions": {
-        "openingHours": "Opening hours?",
-        "delivery": "Deliveries from TESS?",
-        "forgotPassword": "Forgot password?",
-        "addToOrder": "Can I add an item to the order?",
-        "notFound": "I can't find the answer I'm looking for. What should I do?",
-        "missingProduct": "I can't find the product I want to buy. What should I do?",
-        "contactErrors": "Who do I contact about errors or missing items in the webshop?",
-        "specificProduct": "I want to know more about a specific product. Who do I contact?"
-      },
-      "answers": {
-        "openingHours": "Our webshop is open 24/7. Most service centers are open from 07:00 to 16:00. Find your nearest TESS <link>service center</link>.",
-        "delivery": "Contact your local sales representative or your nearest TESS <link>customer center</link>. You can also contact our central customer center.",
-        "forgotPassword": "Click on 'forgot password' on the login page. A password link will be sent to your email to reset your password.",
-        "addToOrder": "No, this is not possible. A new order must be placed.",
-        "notFound": "Use our chat service or contact your customer representative.",
-        "missingProduct": "Use our chat service or contact your customer representative.",
-        "contactErrors": "Send errors or missing items you find to: <email>netthandel@tess.no</email>.",
-        "specificProduct": "Contact your local sales representative or the nearest TESS <link>service center</link>."
-      },
-      "feedback": {
-        "question": "Did you find what you were looking for?",
-        "yes": "Yes",
-        "no": "No",
-        "thanks": "Thanks for your feedback!",
-        "closing": "We hope you found what you needed. Have a great day!",
-        "helpText": "Contact us and we’ll do our best to help you. We also use your input to improve the FAQ page.",
-        "whatWereYouLookingFor": "What were you looking for?",
-        "placeholder": "Tell us what you were looking for",
-        "contactQuestion": "Would you like to be contacted regarding the answer? We will contact you via your registered email.",
-        "send": "Send message",
-        "submittedMessage": "Thank you! Your feedback has been submitted."
-      },
-      "servicesenter": "service center",
-      "kundesenter": "customer service"
-    },
-    "Kjopsbetingelser": {
-      "title": "Terms and Conditions for the Customer (e-commerce)",
-      "sections": {
-        "customerTerms": {
-          "title": "Customer Terms",
-          "content": "For contract customers of TESS, conditions defined in the individual agreement apply."
-        },
-        "salesTerms": {
-          "title": "Sales Terms",
-          "content": "Prices are net excl. VAT. Delivery terms are ExW TESS according to Incoterms 2010 or NL09."
-        },
-        "deliveries": {
-          "title": "Deliveries",
-          "content": "At the customer’s expense."
-        },
-        "ownership": {
-          "title": "Ownership",
-          "content": "The seller retains ownership of the sold goods until the purchase price, including interest and costs, has been paid in full (ref: The Mortgage Act, in particular §3-15). Invoicing fee: NOK 65,- + VAT."
-        },
-        "returns": {
-          "title": "Returns",
-          "content": "Returns are accepted by agreement with your local TESS representative. If you are not connected to a local TESS branch, returns must be agreed with the Customer Center at TESS headquarters. See email and phone number in the footer. Cut hoses, assembled units, discontinued or custom-made products are normally not accepted for return. Unless otherwise agreed, the buyer covers the direct costs of returning goods. Direct costs will be shipping or transport costs, and any other direct costs such as purchase of new packaging. The term does not cover any administrative costs the return may have for the business."
-        },
-        "payment": {
-          "title": "Payment with Visa or Mastercard",
-          "content": "When you pay with Visa or Mastercard, the entire purchase amount is reserved on the card when the order is registered, but only charged upon shipment of the goods. If we cannot deliver an item line, we will not charge this amount from the card."
-        },
-        "disclaimer": {
-          "title": "Disclaimer",
-          "content": "Further reservations are made for documented changes from subcontractors, changed raw material prices, possible currency fluctuations, and typographical errors. Alloy surcharges, raw material surcharges, and possible environmental fees may apply to certain product groups."
-        },
-        "form": {
-          "title": "Form",
-          "content": "You can find the withdrawal form <link>here</link>."
-        }
-      }
-    },
-  "Cart": {
+	"Faq": {
+		"title": "Frequently Asked Questions (FAQ)",
+		"questions": {
+			"openingHours": "Opening hours?",
+			"delivery": "Deliveries from TESS?",
+			"forgotPassword": "Forgot password?",
+			"addToOrder": "Can I add an item to the order?",
+			"notFound": "I can't find the answer I'm looking for. What should I do?",
+			"missingProduct": "I can't find the product I want to buy. What should I do?",
+			"contactErrors": "Who do I contact about errors or missing items in the webshop?",
+			"specificProduct": "I want to know more about a specific product. Who do I contact?"
+		},
+		"answers": {
+			"openingHours": "Our webshop is open 24/7. Most service centers are open from 07:00 to 16:00. Find your nearest TESS <link>service center</link>.",
+			"delivery": "Contact your local sales representative or your nearest TESS <link>customer center</link>. You can also contact our central customer center.",
+			"forgotPassword": "Click on 'forgot password' on the login page. A password link will be sent to your email to reset your password.",
+			"addToOrder": "No, this is not possible. A new order must be placed.",
+			"notFound": "Use our chat service or contact your customer representative.",
+			"missingProduct": "Use our chat service or contact your customer representative.",
+			"contactErrors": "Send errors or missing items you find to: <email>netthandel@tess.no</email>.",
+			"specificProduct": "Contact your local sales representative or the nearest TESS <link>service center</link>."
+		},
+		"feedback": {
+			"question": "Did you find what you were looking for?",
+			"yes": "Yes",
+			"no": "No",
+			"thanks": "Thanks for your feedback!",
+			"closing": "We hope you found what you needed. Have a great day!",
+			"helpText": "Contact us and we’ll do our best to help you. We also use your input to improve the FAQ page.",
+			"whatWereYouLookingFor": "What were you looking for?",
+			"placeholder": "Tell us what you were looking for",
+			"contactQuestion": "Would you like to be contacted regarding the answer? We will contact you via your registered email.",
+			"send": "Send message",
+			"submittedMessage": "Thank you! Your feedback has been submitted."
+		},
+		"servicesenter": "service center",
+		"kundesenter": "customer service"
+	},
+	"Kjopsbetingelser": {
+		"title": "Terms and Conditions for the Customer (e-commerce)",
+		"sections": {
+			"customerTerms": {
+				"title": "Customer Terms",
+				"content": "For contract customers of TESS, conditions defined in the individual agreement apply."
+			},
+			"salesTerms": {
+				"title": "Sales Terms",
+				"content": "Prices are net excl. VAT. Delivery terms are ExW TESS according to Incoterms 2010 or NL09."
+			},
+			"deliveries": {
+				"title": "Deliveries",
+				"content": "At the customer’s expense."
+			},
+			"ownership": {
+				"title": "Ownership",
+				"content": "The seller retains ownership of the sold goods until the purchase price, including interest and costs, has been paid in full (ref: The Mortgage Act, in particular §3-15). Invoicing fee: NOK 65,- + VAT."
+			},
+			"returns": {
+				"title": "Returns",
+				"content": "Returns are accepted by agreement with your local TESS representative. If you are not connected to a local TESS branch, returns must be agreed with the Customer Center at TESS headquarters. See email and phone number in the footer. Cut hoses, assembled units, discontinued or custom-made products are normally not accepted for return. Unless otherwise agreed, the buyer covers the direct costs of returning goods. Direct costs will be shipping or transport costs, and any other direct costs such as purchase of new packaging. The term does not cover any administrative costs the return may have for the business."
+			},
+			"payment": {
+				"title": "Payment with Visa or Mastercard",
+				"content": "When you pay with Visa or Mastercard, the entire purchase amount is reserved on the card when the order is registered, but only charged upon shipment of the goods. If we cannot deliver an item line, we will not charge this amount from the card."
+			},
+			"disclaimer": {
+				"title": "Disclaimer",
+				"content": "Further reservations are made for documented changes from subcontractors, changed raw material prices, possible currency fluctuations, and typographical errors. Alloy surcharges, raw material surcharges, and possible environmental fees may apply to certain product groups."
+			},
+			"form": {
+				"title": "Form",
+				"content": "You can find the withdrawal form <link>here</link>."
+			}
+		}
+	},
+	"Cart": {
 		"archived": "Cart archived",
 		"errorArchiving": "Error archiving cart",
 		"showStockStatus": "Show stock status for:",
@@ -258,7 +258,8 @@
 		"warehouse": "Warehouse",
 		"company": "Company",
 		"page": "Page",
-		"of": "of"
+		"of": "of",
+		"itemRemoved": "Item removed from cart"
 	},
 	"Login": {
 		"title": "Login",

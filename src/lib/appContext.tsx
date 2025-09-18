@@ -17,6 +17,7 @@ import {
 	removeFromCart,
 	archiveCart as svcArchiveCart,
 	updateWarehouseForCart,
+	clearCart,
 } from "@/services/carts.service";
 import {
 	calculateItemPrice,
@@ -80,6 +81,8 @@ interface AppContextType {
 
 	orderSummaryTotalPriceFinal: number;
 	rabatterTotalPrice: number;
+
+	handleClearCart: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -139,7 +142,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 			setCartItems(cart);
 
-			// Base prices (per item)
 			for (const item of cart.cart) {
 				const priceData = await getProductPrice(
 					profile?.defaultCustomerNumber,
@@ -156,7 +158,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				}));
 			}
 
-			// Initial calculation for all items
 			const priceRequests =
 				cart.cart?.map((item) => ({
 					itemNumber: item.itemNumber,
@@ -164,28 +165,71 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					warehouseNumber: profile?.defaultWarehouseNumber || "",
 				})) ?? [];
 
-			if (priceRequests.length > 0) {
+			const cartKitPriceRequests =
+				cart.cartKit?.flatMap((item) => [
+					{
+						itemNumber: item.hose.itemNumber,
+						quantity: item.hose.quantity || 1,
+						warehouseNumber: profile?.defaultWarehouseNumber || "",
+					},
+					{
+						itemNumber: item.ferrule1.itemNumber,
+						quantity: item.hose.quantity || 1, // Each hose needs a set of ferrules and inserts
+						warehouseNumber: profile?.defaultWarehouseNumber || "",
+					},
+					{
+						itemNumber: item.ferrule2.itemNumber,
+						quantity: item.hose.quantity || 1,
+						warehouseNumber: profile?.defaultWarehouseNumber || "",
+					},
+					{
+						itemNumber: item.insert1.itemNumber,
+						quantity: item.hose.quantity || 1,
+						warehouseNumber: profile?.defaultWarehouseNumber || "",
+					},
+					{
+						itemNumber: item.insert2.itemNumber,
+						quantity: item.hose.quantity || 1,
+						warehouseNumber: profile?.defaultWarehouseNumber || "",
+					},
+				]) ?? [];
+
+			const allPriceRequests = [...priceRequests, ...cartKitPriceRequests];
+
+			if (allPriceRequests.length > 0) {
 				const priceResults = await calculateItemPrice(
-					priceRequests,
+					allPriceRequests,
 					profile?.defaultCustomerNumber,
 					profile?.defaultCompanyNumber,
 				);
-				console.log(priceResults, "priceresults");
+
+				const initialPrices: Record<string, number> = {};
+				const calculatedPrices: Record<string, number> = {};
+
+				for (const item of priceResults) {
+					initialPrices[item.itemNumber] = item.basePrice || 0;
+
+					calculatedPrices[item.itemNumber] =
+						item.bestPrice || item.basePrice || 0;
+				}
+
+				setPrices((prev) => ({
+					...prev,
+					...initialPrices,
+				}));
+				setCalculatedPrices((prev) => ({
+					...prev,
+					...calculatedPrices,
+				}));
 
 				const newSummary = priceResults.reduce(
 					(acc: Record<string, number>, it: PriceResponse) => {
-						acc[it.itemNumber] = it.basePriceTotal || 0;
+						acc[it.itemNumber] = it.basePriceTotal || it.bestPrice || 0;
 						return acc;
 					},
 					{},
 				);
-				const newCalculated = priceResults.reduce(
-					(acc: Record<string, number>, it: PriceResponse) => {
-						acc[it.itemNumber] = it.bestPrice || 0;
-						return acc;
-					},
-					{},
-				);
+
 				const newSurcharges = priceResults.reduce(
 					(acc: Record<string, number>, it: PriceResponse) => {
 						acc[it.itemNumber] = it.surCharge || 0;
@@ -202,7 +246,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				);
 
 				setOrderSummaryTotalPrice(newSummary);
-				setCalculatedPrices(newCalculated);
 				setSurChargePrices(newSurcharges);
 				setRabatterPrices(newRabatter);
 			}
@@ -286,13 +329,13 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		// Check if it's a cart kit item (hexagonId)
 		if (isNaN(numericLine)) {
 			const hexagonId = cartLine;
-			const backup = cartItems?.cartKit?.find(i => i.hexagonId === hexagonId);
+			const backup = cartItems?.cartKit?.find((i) => i.hexagonId === hexagonId);
 
 			setCartItems((prev) => {
 				if (!prev?.cartKit) return prev;
 				return {
 					...prev,
-					cartKit: prev.cartKit.filter(i => i.hexagonId !== hexagonId)
+					cartKit: prev.cartKit.filter((i) => i.hexagonId !== hexagonId),
 				};
 			});
 
@@ -305,7 +348,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 						if (!prev?.cartKit) return prev;
 						return {
 							...prev,
-							cartKit: [...prev.cartKit, backup]
+							cartKit: [...prev.cartKit, backup],
 						};
 					});
 				}
@@ -324,7 +367,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			if (!prev?.cart) return prev;
 			return {
 				...prev,
-				cart: prev.cart.filter((i) => Number(i.cartLine) !== numericLine)
+				cart: prev.cart.filter((i) => Number(i.cartLine) !== numericLine),
 			};
 		});
 
@@ -336,11 +379,11 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				setCartItems((prev) => {
 					if (!prev?.cart) return prev;
 					const updatedCart = [...prev.cart, backup].sort(
-						(a, b) => (Number(a.cartLine) || 0) - (Number(b.cartLine) || 0)
+						(a, b) => (Number(a.cartLine) || 0) - (Number(b.cartLine) || 0),
 					);
 					return {
 						...prev,
-						cart: updatedCart
+						cart: updatedCart,
 					};
 				});
 			}
@@ -355,6 +398,20 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			setIsCartChanging((v) => !v);
 		} catch (error) {
 			console.error("Error archiving cart:", error);
+			throw error;
+		}
+	};
+
+	const handleClearCart = async () => {
+		try {
+			await clearCart();
+			setCartItems({
+				cart: [],
+				cartKit: [],
+			});
+			setIsCartChanging((v) => !v);
+		} catch (error) {
+			console.error("Error clearing cart:", error);
 			throw error;
 		}
 	};
@@ -403,6 +460,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 				rabatterTotalPrice,
 				orderSummaryTotalPriceFinal,
+
+				handleClearCart,
 			}}>
 			{children}
 		</AppContext.Provider>

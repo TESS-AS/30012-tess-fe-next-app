@@ -44,7 +44,8 @@ export async function removeFromCart(
 	id: number | string,
 ): Promise<CartResponse> {
 	try {
-		const url = typeof id === 'string' ? `/cart/cartKit/${id}` : `/cart/deleteLine/${id}`;
+		const url =
+			typeof id === "string" ? `/cart/cartKit/${id}` : `/cart/deleteLine/${id}`;
 		const response: AxiosResponse<CartResponse> = await axiosClient.delete(url);
 		return response.data;
 	} catch (error) {
@@ -174,5 +175,17 @@ export async function postCartKit(items: CartKitItem[]): Promise<CartLine[]> {
 	} catch (error) {
 		console.error("Error loading cart kit", error);
 		return [];
+	}
+}
+
+export async function clearCart(): Promise<{ message: string }> {
+	try {
+		const url = `/cart/clear`;
+		const response: AxiosResponse<{ message: string }> =
+			await axiosClient.post(url);
+		return response.data;
+	} catch (error) {
+		console.error("Error clearing cart", error);
+		return { message: "Error clearing cart" };
 	}
 }
