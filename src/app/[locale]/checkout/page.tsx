@@ -67,7 +67,7 @@ export default function CheckoutPage() {
 	);
 
 	const [orderData, setOrderData] = useCheckoutOrderData(
-		cartItems,
+		cartItems?.cart || [],
 		profile,
 		calculatedPrices,
 	);

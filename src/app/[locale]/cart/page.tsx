@@ -49,14 +49,25 @@ import { toast } from "react-toastify";
 
 import CartSkeleton from "./loading";
 
-type CartItem = ReturnType<typeof useAppContext>["cartItems"][number];
+type RegularCartItem = NonNullable<
+	ReturnType<typeof useAppContext>["cartItems"]
+>["cart"][number];
+type CartKitItem = NonNullable<
+	ReturnType<typeof useAppContext>["cartItems"]
+>["cartKit"][number];
+type CartItem = RegularCartItem | CartKitItem;
+
+const isCartKitItem = (item: CartItem): item is CartKitItem => {
+	return (item as CartKitItem)?.hexagonId !== undefined;
+};
 
 const CartPage = () => {
 	const t = useTranslations();
 	const currentLocale = useLocale();
 	const router = useRouter();
-	const searchParams = useSearchParams();
-	const isHoseMode = (searchParams.get("mode") || "").toLowerCase() === "hose";
+	const [expandedItems, setExpandedItems] = useState<{
+		[key: string]: boolean;
+	}>({});
 
 	const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
 	const [categoryPaths, setCategoryPaths] = useState<{
@@ -79,13 +90,22 @@ const CartPage = () => {
 		setShowFeedbackModal,
 		setSubmittedOrder,
 		setShowOrderConfirmation,
+		handleClearCart,
 	} = useAppContext();
 
 	const [orderData] = useCheckoutOrderData(
-		cartItems,
+		cartItems?.cart || [],
 		profile,
 		calculatedPrices,
 	);
+
+	const cartKitOrderData =
+		cartItems?.cartKit?.map((kit) => ({
+			hexagonId: kit.hexagonId,
+			quantity: kit.hose.quantity,
+			warehouseNumber: "L01",
+			companyNumber: "1",
+		})) || [];
 
 	const submitOrder = useSubmitOrder(
 		profile?.punchout || false,
@@ -114,9 +134,6 @@ const CartPage = () => {
 	const [openModalId, setOpenModalId] = useState<string | null>(null);
 	const [outOfStock, setOutOfStock] = useState<boolean>(true);
 
-	const getId = (it: (typeof cartItems)[number]) =>
-		String(it?.cartLine ?? it?.itemNumber);
-
 	const [openItems, setOpenItems] = React.useState<Record<string, boolean>>({});
 	const [variations, setVariations] = React.useState<Record<string, any>>({});
 	const [loadingItems, setLoadingItems] = React.useState<
@@ -132,13 +149,11 @@ const CartPage = () => {
 		null,
 	);
 
-	const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
-
 	useEffect(() => {
 		const loadPaths = async () => {
-			if (!cartItems) return;
+			if (!cartItems?.cart) return;
 			const newPaths: { [key: string]: string[] } = {};
-			for (const item of cartItems) {
+			for (const item of cartItems.cart) {
 				try {
 					const categoryTree = await loadCategoryTree(item.productNumber);
 					const path = categoryTree
@@ -158,8 +173,10 @@ const CartPage = () => {
 
 	useEffect(() => {
 		async function loadWarehousesBalanceItemData() {
-			if (cartItems && cartItems.length > 0) {
-				const itemNumbers = cartItems.map((item) => item.itemNumber.toString());
+			if (cartItems?.cart && cartItems.cart.length > 0) {
+				const itemNumbers = cartItems.cart.map((item) =>
+					item.itemNumber.toString(),
+				);
 				const warehousesData = await loadItemBalanceBatch(itemNumbers);
 				setWarehouseBalancePerItem(
 					Array.isArray(warehousesData) ? warehousesData : [],
@@ -173,8 +190,10 @@ const CartPage = () => {
 
 	useEffect(() => {
 		async function loadWarehousesData() {
-			if (cartItems && cartItems.length > 0) {
-				const itemNumbers = cartItems.map((item) => item.itemNumber.toString());
+			if (cartItems?.cart && cartItems.cart.length > 0) {
+				const itemNumbers = cartItems.cart.map((item) =>
+					item.itemNumber.toString(),
+				);
 				const warehouseNumbers = warehouses.map((item) => item.id);
 				const warehousesData = await getItemBalanceArray(
 					itemNumbers,
@@ -232,30 +251,8 @@ const CartPage = () => {
 		}
 	};
 
-	const groupKey = (it: CartItem) =>
-		String((it as any)?.hoseId ?? it.productNumber);
-
-	const groupCartItems = (items: CartItem[]) => {
-		const map = new Map<string, CartItem[]>();
-		for (const it of items) {
-			const k = groupKey(it);
-			map.set(k, [...(map.get(k) || []), it]);
-		}
-		return Array.from(map.entries()).map(([key, list]) => ({ key, list }));
-	};
-
-	const sumGroupTotal = (list: CartItem[]) => {
-		return list.reduce((acc, it) => {
-			const unit = calculatedPrices[it.itemNumber] ?? 0;
-			return acc + unit;
-		}, 0);
-	};
-
-	const grouped =
-		isHoseMode && !isLoading ? groupCartItems(cartItems || []) : [];
-
-	const renderCartRow = (item: CartItem) => {
-		const id = getId(item);
+	const renderRegularCartRow = (item: RegularCartItem) => {
+		const id = String(item.cartLine ?? item.itemNumber);
 
 		return (
 			<React.Fragment key={id}>
@@ -275,7 +272,7 @@ const CartPage = () => {
 							console.error("Error fetching variations:", error);
 						}
 					}}
-					className={`border-lightGray mb-4 grid transform grid-cols-[70px_2fr_2fr_1fr_1fr_40px] items-center gap-4 rounded-md border p-6 transition-all duration-300 ease-in-out ${
+					className={`border-lightGray mb-4 grid transform grid-cols-[70px_2fr_2fr_1fr_1fr_40px] items-center gap-4 rounded-md border border-b border-gray-200 p-4 p-6 transition-all duration-300 ease-in-out ${
 						itemsToRemove.has(id)
 							? "pointer-events-none -translate-y-4 scale-95 opacity-0"
 							: "translate-y-0 scale-100 opacity-100"
@@ -504,6 +501,7 @@ const CartPage = () => {
 							/>
 						</div>
 						<Button
+							onClick={handleClearCart}
 							variant="outline"
 							className="border-[#C81E1E] text-[#C81E1E]">
 							<Trash2 className="h-4 w-4" />
@@ -520,11 +518,13 @@ const CartPage = () => {
 						/>
 					)}
 
-					{!isHoseMode && (
+					{cartItems?.cart && cartItems.cart.length > 0 && (
 						<div className="flex items-center justify-between">
 							<h1 className="text-2xl font-semibold">
 								{t("Cart.yourCart")} (
-								{cartItems?.cart?.length + cartItems?.cartKit?.length})
+								{(cartItems?.cart?.length || 0) +
+									(cartItems?.cartKit?.length || 0)}
+								)
 							</h1>
 							<div className="flex items-center gap-2">
 								<Button
@@ -544,27 +544,35 @@ const CartPage = () => {
 
 					{!isLoading && (
 						<>
-							{isHoseMode ? (
+							{cartItems?.cartKit && cartItems.cartKit.length > 0 && (
 								<div className="space-y-4">
-									{grouped.map(({ key, list }, idx) => {
-										const first = list[0];
-										const headerTitle = `${first?.itemName || ""} ${
-											first?.productNumber || ""
-										}`.trim();
-										const total = sumGroupTotal(list);
-										const open = !!openGroups[key];
-										const toggle = () =>
-											setOpenGroups((s) => ({ ...s, [key]: !s[key] }));
-
+									{cartItems.cartKit.map((item, idx) => {
 										return (
 											<div
-												key={key}
-												className="border-lightGray rounded-md border">
-												<button
-													onClick={toggle}
-													className="flex w-full items-center justify-between px-4 py-3">
+												key={idx}
+												className="border-lightGray rounded-md border py-6">
+												<div
+													role="button"
+													tabIndex={0}
+													aria-expanded={!!expandedItems[item.hexagonId]}
+													onClick={() =>
+														setExpandedItems((prev) => ({
+															...prev,
+															[item.hexagonId]: !prev[item.hexagonId],
+														}))
+													}
+													onKeyDown={(e) => {
+														if (e.key === "Enter" || e.key === " ") {
+															e.preventDefault();
+															setExpandedItems((prev) => ({
+																...prev,
+																[item.hexagonId]: !prev[item.hexagonId],
+															}));
+														}
+													}}
+													className="flex w-full cursor-pointer items-center justify-between px-4 py-3">
 													<div className="flex items-center gap-3">
-														{open ? (
+														{expandedItems[item.hexagonId] ? (
 															<ChevronUp className="h-4 w-4 text-[#5A615D]" />
 														) : (
 															<ChevronDown className="h-4 w-4 text-[#5A615D]" />
@@ -576,7 +584,7 @@ const CartPage = () => {
 															{item.hose.itemDescription}
 														</span>
 													</div>
-													<div className="flex items-center gap-3">
+													<div className="flex items-center gap-6">
 														<QuantityButtons
 															isLoading={!!loadingItems[item.hose.itemNumber]}
 															quantity={item.hose.quantity}
@@ -619,26 +627,8 @@ const CartPage = () => {
 																}
 															}}
 														/>
-														<div className="flex items-center gap-3">
-															<span className="font-semibold">
-																{(() => {
-																	const total = [
-																		calculatedPrices[item.hose.itemNumber] ?? 0,
-																		calculatedPrices[
-																			item.ferrule1.itemNumber
-																		] ?? 0,
-																		calculatedPrices[
-																			item.ferrule2.itemNumber
-																		] ?? 0,
-																		calculatedPrices[item.insert1.itemNumber] ??
-																			0,
-																		calculatedPrices[item.insert2.itemNumber] ??
-																			0,
-																	].reduce((sum, price) => sum + price, 0);
-																	console.log("Total price:", total);
-																	return formatNorwegianCurrency(total);
-																})()}
-															</span>
+														<div className="flex items-center gap-6">
+															<span className="font-semibold">2527.50,-</span>
 															<button
 																onClick={async (e) => {
 																	e.stopPropagation();
@@ -654,12 +644,23 @@ const CartPage = () => {
 															</button>
 														</div>
 													</div>
-												</button>
+												</div>
 
-												{open && (
+												{expandedItems[item.hexagonId] && (
 													<div className="border-t p-4">
 														<div className="space-y-3">
 															<div className="space-y-4 pl-8">
+																<div className="flex items-start justify-between gap-2">
+																	<div className="flex flex-col">
+																		<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
+																			{item.hose.itemName}
+																		</p>
+																		<p className="text-xs text-[#5A615D]">
+																			{item.hose.itemNumber}
+																		</p>
+																	</div>
+																	<p className="font-bold">500.50,-</p>
+																</div>
 																<div className="flex items-start justify-between gap-2">
 																	<div className="flex flex-col">
 																		<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
@@ -669,12 +670,7 @@ const CartPage = () => {
 																			{item.ferrule1.itemNumber}
 																		</p>
 																	</div>
-																	<p className="font-bold">
-																		{formatNorwegianCurrency(
-																			(prices[item.ferrule1.itemNumber] ?? 0) *
-																				(item.hose.quantity || 1),
-																		)}
-																	</p>
+																	<p className="font-bold">500.50,-</p>
 																</div>
 																<div className="flex items-start justify-between gap-2">
 																	<div className="flex flex-col">
@@ -685,12 +681,7 @@ const CartPage = () => {
 																			{item.ferrule2.itemNumber}
 																		</p>
 																	</div>
-																	<p className="font-bold">
-																		{formatNorwegianCurrency(
-																			(prices[item.ferrule2.itemNumber] ?? 0) *
-																				(item.hose.quantity || 1),
-																		)}
-																	</p>
+																	<p className="font-bold">500.50,-</p>
 																</div>
 																<div className="flex items-start justify-between gap-2">
 																	<div className="flex flex-col">
@@ -701,12 +692,7 @@ const CartPage = () => {
 																			{item.insert1.itemNumber}
 																		</p>
 																	</div>
-																	<p className="font-bold">
-																		{formatNorwegianCurrency(
-																			(prices[item.insert1.itemNumber] ?? 0) *
-																				(item.hose.quantity || 1),
-																		)}
-																	</p>
+																	<p className="font-bold">500.50,-</p>
 																</div>
 																<div className="flex items-start justify-between gap-2">
 																	<div className="flex flex-col">
@@ -717,12 +703,7 @@ const CartPage = () => {
 																			{item.insert2.itemNumber}
 																		</p>
 																	</div>
-																	<p className="font-bold">
-																		{formatNorwegianCurrency(
-																			(prices[item.insert2.itemNumber] ?? 0) *
-																				(item.hose.quantity || 1),
-																		)}
-																	</p>
+																	<p className="font-bold">500.50,-</p>
 																</div>
 															</div>
 														</div>
@@ -732,8 +713,9 @@ const CartPage = () => {
 										);
 									})}
 								</div>
-							) : (
-								cartItems?.map((item) => renderCartRow(item))
+							)}
+							{cartItems?.cart?.map((item: RegularCartItem) =>
+								renderRegularCartRow(item),
 							)}
 						</>
 					)}

@@ -1,7 +1,18 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-import { getAssets, getS1Codes } from "@/services/assets.service";
+import { getAssets, getS1Codes, searchAssets } from "@/services/assets.service";
 import { GetAssetsResponse, S1Codes } from "@/types/assets.types";
+
+export interface FilterOptions {
+	page?: number;
+	pageSize?: number;
+	ageSize?: string;
+	approved?: string;
+	overdue?: string;
+	replacementDue?: string;
+	spareSet?: string;
+	rejected?: string;
+}
 
 export const useGetAssets = (customerNumber?: string, s1Code?: string) => {
 	const [s1Codes, setS1Codes] = useState<S1Codes[]>([]);
@@ -21,64 +32,95 @@ export const useGetAssets = (customerNumber?: string, s1Code?: string) => {
 		totalPages: 0,
 	});
 
-	const fetchAssets = async (
-		page: number = 1,
-		pageSize: number = 10,
-		ageSize?: string,
-	) => {
-		try {
-			setLoading(true);
-			const response = await getAssets(
-				customerNumber,
-				s1Code,
-				page,
-				pageSize,
-				ageSize,
-			);
-			setAssets(response.data);
-			setPagination({
-				currentPage: response.meta.page,
-				pageSize: response.meta.pageSize,
-				totalItems: response.meta.totalItems,
-				totalPages: response.meta.totalPages,
-			});
-		} catch (error) {
-			setError(error as string);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	const fetchS1Codes = async (page: number = 1, pageSize: number = 100) => {
-		try {
-			setLoading(true);
-			const response = await getS1Codes(page, pageSize);
-
-			setS1Codes((prevCodes) => {
-				const allCodes = page === 1 ? [] : prevCodes;
-				response.data.forEach((newCode) => {
-					if (!allCodes.find((item) => item.S1Code === newCode.S1Code)) {
-						allCodes.push(newCode);
-					}
+	const fetchAssets = useCallback(
+		async ({
+			page = 1,
+			pageSize = 10,
+			ageSize,
+			approved,
+			overdue,
+			replacementDue,
+			spareSet,
+			rejected,
+			search,
+		}: FilterOptions & { search?: string } = {}) => {
+			try {
+				setLoading(true);
+				const response = search
+					? await searchAssets(
+							search,
+							customerNumber,
+							s1Code,
+							page,
+							pageSize,
+							ageSize,
+							approved,
+							overdue,
+							replacementDue,
+							spareSet,
+							rejected,
+						)
+					: await getAssets(
+							customerNumber,
+							s1Code,
+							page,
+							pageSize,
+							ageSize,
+							approved,
+							overdue,
+							replacementDue,
+							spareSet,
+							rejected,
+						);
+				setAssets(response.data);
+				setPagination({
+					currentPage: response.meta.page,
+					pageSize: response.meta.pageSize,
+					totalItems: response.meta.totalItems,
+					totalPages: response.meta.totalPages,
 				});
-				return allCodes;
-			});
+			} catch (error) {
+				setError(error as string);
+			} finally {
+				setLoading(false);
+			}
+		},
+		[customerNumber, s1Code],
+	);
 
-			setS1CodesPagination({
-				currentPage: response.meta.page,
-				pageSize: response.meta.pageSize,
-				totalItems: response.meta.total,
-				totalPages: response.meta.totalPages,
-			});
-		} catch (error) {
-			setError(error as string);
-		} finally {
-			setLoading(false);
-		}
-	};
+	const fetchS1Codes = useCallback(
+		async (page: number = 1, pageSize: number = 100) => {
+			try {
+				setLoading(true);
+				const response = await getS1Codes(page, pageSize);
+
+				setS1Codes((prevCodes) => {
+					const allCodes = page === 1 ? [] : prevCodes;
+					response.data.forEach((newCode) => {
+						if (!allCodes.find((item) => item.S1Code === newCode.S1Code)) {
+							allCodes.push(newCode);
+						}
+					});
+					return allCodes;
+				});
+
+				setS1CodesPagination({
+					currentPage: response.meta.page,
+					pageSize: response.meta.pageSize,
+					totalItems: response.meta.total,
+					totalPages: response.meta.totalPages,
+				});
+			} catch (error) {
+				setError(error as string);
+			} finally {
+				setLoading(false);
+			}
+		},
+		[],
+	);
 
 	useEffect(() => {
-		fetchAssets();
+		fetchAssets({});
 	}, [customerNumber, s1Code]);
 
 	useEffect(() => {

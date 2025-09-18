@@ -25,6 +25,28 @@ export function mapCategoryTree(node: RawCategory, locale: string): Category {
 	};
 }
 
+export function formatDate(date: string | Date, time?: string) {
+	const dateObj = typeof date === "string" ? new Date(date) : date;
+	const formattedDate = dateObj
+		.toLocaleDateString("no", {
+			year: "numeric",
+			month: "2-digit",
+			day: "2-digit",
+			...(!time && {
+				hour: "2-digit",
+				minute: "2-digit",
+			}),
+		})
+		.replace(",", "");
+
+	if (time) {
+		const formattedTime = time.slice(0, 5);
+		return `${formattedDate} ${formattedTime}`;
+	}
+
+	return formattedDate;
+}
+
 export function formatUrlToDisplayName(urlString: string): string {
 	if (!urlString) return "";
 	const decodedString = decodeURIComponent(urlString);

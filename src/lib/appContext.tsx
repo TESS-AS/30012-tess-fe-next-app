@@ -17,13 +17,14 @@ import {
 	removeFromCart,
 	archiveCart as svcArchiveCart,
 	updateWarehouseForCart,
+	clearCart,
 } from "@/services/carts.service";
 import {
 	calculateItemPrice,
 	getProductPrice,
 } from "@/services/product.service";
 import { AddressFormState } from "@/types/address";
-import { CartLine } from "@/types/carts.types";
+import { CartKitResponse, CartLine } from "@/types/carts.types";
 import { Order } from "@/types/orders.types";
 import { PriceResponse } from "@/types/search.types";
 import { usePathname, useRouter } from "next/navigation";
@@ -32,8 +33,8 @@ interface AppContextType {
 	isCartChanging: boolean;
 	setIsCartChanging: (value: boolean) => void;
 
-	cartItems: CartLine[];
-	setCartItems: (value: CartLine[]) => void;
+	cartItems: CartKitResponse | undefined;
+	setCartItems: (value: CartKitResponse) => void;
 
 	prices: Record<string, number>;
 	calculatedPrices: Record<string, number>;
@@ -53,8 +54,7 @@ interface AppContextType {
 
 	updateWarehouseForAllItems: (warehouseNumber: string) => Promise<void>;
 
-	removeItem: (cartLine: number) => Promise<void>;
-	removeItemOptimistic: (cartLine: number) => Promise<void>; // NEW
+	removeItemOptimistic: (cartLine: number | string) => Promise<void>;
 
 	handleArchiveCart: () => Promise<void>;
 
@@ -81,6 +81,8 @@ interface AppContextType {
 
 	orderSummaryTotalPriceFinal: number;
 	rabatterTotalPrice: number;
+
+	handleClearCart: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -92,7 +94,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const [currentStep, setCurrentStep] = useState(0);
 	const [isCartChanging, setIsCartChanging] = useState(false);
 
-	const [cartItems, setCartItems] = useState<CartLine[]>([]);
+	const [cartItems, setCartItems] = useState<CartKitResponse>();
 	const [prices, setPrices] = useState<Record<string, number>>({});
 	const [calculatedPrices, setCalculatedPrices] = useState<
 		Record<string, number>
@@ -140,15 +142,29 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 			setCartItems(cart);
 
-			// Base prices and calculations for regular cart items
-			const regularPriceRequests =
+			for (const item of cart.cart) {
+				const priceData = await getProductPrice(
+					profile?.defaultCustomerNumber,
+					profile?.defaultCompanyNumber,
+					item.productNumber,
+					item.warehouseNumber,
+				);
+				setPrices((prev) => ({
+					...prev,
+					[item.itemNumber]:
+						priceData?.find(
+							(p: PriceResponse) => p.itemNumber === String(item.itemNumber),
+						)?.basePrice || 0,
+				}));
+			}
+
+			const priceRequests =
 				cart.cart?.map((item) => ({
 					itemNumber: item.itemNumber,
 					quantity: item.quantity,
 					warehouseNumber: profile?.defaultWarehouseNumber || "",
 				})) ?? [];
 
-			// Base prices and calculations for cart kit items
 			const cartKitPriceRequests =
 				cart.cartKit?.flatMap((item) => [
 					{
@@ -178,11 +194,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					},
 				]) ?? [];
 
-			// Combine all price requests
-			const allPriceRequests = [
-				...regularPriceRequests,
-				...cartKitPriceRequests,
-			];
+			const allPriceRequests = [...priceRequests, ...cartKitPriceRequests];
 
 			if (allPriceRequests.length > 0) {
 				const priceResults = await calculateItemPrice(
@@ -191,20 +203,16 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					profile?.defaultCompanyNumber,
 				);
 
-				// Set initial prices and calculated prices
 				const initialPrices: Record<string, number> = {};
 				const calculatedPrices: Record<string, number> = {};
 
 				for (const item of priceResults) {
-					// Base price for individual display
 					initialPrices[item.itemNumber] = item.basePrice || 0;
 
-					// Total price including quantity and discounts
 					calculatedPrices[item.itemNumber] =
 						item.bestPrice || item.basePrice || 0;
 				}
 
-				// Update state
 				setPrices((prev) => ({
 					...prev,
 					...initialPrices,
@@ -214,7 +222,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					...calculatedPrices,
 				}));
 
-				// Calculate totals and other price components
 				const newSummary = priceResults.reduce(
 					(acc: Record<string, number>, it: PriceResponse) => {
 						acc[it.itemNumber] = it.basePriceTotal || it.bestPrice || 0;
@@ -223,7 +230,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					{},
 				);
 
-				// Calculate surcharges
 				const newSurcharges = priceResults.reduce(
 					(acc: Record<string, number>, it: PriceResponse) => {
 						acc[it.itemNumber] = it.surCharge || 0;
@@ -241,6 +247,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 				setOrderSummaryTotalPrice(newSummary);
 				setSurChargePrices(newSurcharges);
+				setRabatterPrices(newRabatter);
 			}
 		} catch (error) {
 			console.error("Error fetching cart:", error);
@@ -305,7 +312,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			await updateWarehouseForCart({
 				warehouseNumber,
 				companyNumber: String(profile?.defaultCompanyNumber) || "",
-				cartLines: cartItems.map((i) => Number(i.cartLine)),
+				cartLines: cartItems?.cart.map((i) => Number(i.cartLine)) || [],
 			});
 			await loadCartData();
 		} catch (error) {
@@ -365,8 +372,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		});
 
 		try {
-			await removeFromCart(cartLine);
-
+			await removeFromCart(numericLine);
 			setIsCartChanging((v) => !v);
 		} catch (error) {
 			if (backup) {
@@ -396,6 +402,20 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		}
 	};
 
+	const handleClearCart = async () => {
+		try {
+			await clearCart();
+			setCartItems({
+				cart: [],
+				cartKit: [],
+			});
+			setIsCartChanging((v) => !v);
+		} catch (error) {
+			console.error("Error clearing cart:", error);
+			throw error;
+		}
+	};
+
 	return (
 		<AppContext.Provider
 			value={{
@@ -413,7 +433,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				updateWarehouse,
 				updateWarehouseForAllItems,
 
-				removeItem,
 				removeItemOptimistic,
 
 				handleArchiveCart,
@@ -441,6 +460,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 				rabatterTotalPrice,
 				orderSummaryTotalPriceFinal,
+
+				handleClearCart,
 			}}>
 			{children}
 		</AppContext.Provider>

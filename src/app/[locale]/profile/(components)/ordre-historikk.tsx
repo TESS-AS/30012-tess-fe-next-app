@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { OrderFilters, useGetOrders } from "@/hooks/useGetOrders";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { OrderItems } from "@/types/orderHistory.types";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import { Search } from "lucide-react";
@@ -166,19 +166,7 @@ export function OrdreHistorikk() {
 		{
 			key: "date",
 			header: "BESTILLINGSDATO",
-			cell: (order: Order) => {
-				const date = new Date(order.date);
-				const formattedDate = date
-					.toLocaleDateString("no", {
-						year: "numeric",
-						month: "2-digit",
-						day: "2-digit",
-						hour: "2-digit",
-						minute: "2-digit",
-					})
-					.replace(",", "");
-				return <span>{formattedDate}</span>;
-			},
+			cell: (order: Order) => <span>{formatDate(order.date)}</span>,
 			sortable: true,
 		},
 		{

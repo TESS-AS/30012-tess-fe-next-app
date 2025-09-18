@@ -2,20 +2,24 @@ import {
 	ArchiveCartResponse,
 	CartLine,
 	CartResponse,
+	CartKitResponse,
 	WarehouseBatch,
 } from "@/types/carts.types";
 import { AxiosResponse } from "axios";
 
 import axiosClient from "./axiosClient";
 
-export async function getCart(): Promise<CartLine[]> {
+export async function getCart(): Promise<CartKitResponse> {
 	try {
 		const url = `/cart`;
-		const response: AxiosResponse<CartLine[]> = await axiosClient.get(url);
+		const response: AxiosResponse<CartKitResponse> = await axiosClient.get(url);
 		return response.data;
 	} catch (error) {
 		console.error("Error loading cart", error);
-		return [];
+		return {
+			cartKit: [],
+			cart: [],
+		};
 	}
 }
 
@@ -37,10 +41,11 @@ export async function addToCart(cartLine: CartLine): Promise<CartResponse> {
 }
 
 export async function removeFromCart(
-	cartLineId: number,
+	id: number | string,
 ): Promise<CartResponse> {
 	try {
-		const url = `/cart/deleteLine/${cartLineId}`;
+		const url =
+			typeof id === "string" ? `/cart/cartKit/${id}` : `/cart/deleteLine/${id}`;
 		const response: AxiosResponse<CartResponse> = await axiosClient.delete(url);
 		return response.data;
 	} catch (error) {
@@ -149,5 +154,38 @@ export async function getItemBalanceArray(
 	} catch (error) {
 		console.error("Error getting item balance array", error);
 		return [];
+	}
+}
+
+interface CartKitItem {
+	hexagonId: number;
+	quantity: number;
+	warehouseNumber: string;
+	companyNumber: string;
+}
+
+export async function postCartKit(items: CartKitItem[]): Promise<CartLine[]> {
+	try {
+		const url = `/cart/cartKit`;
+		const response: AxiosResponse<CartLine[]> = await axiosClient.post(
+			url,
+			items,
+		);
+		return response.data;
+	} catch (error) {
+		console.error("Error loading cart kit", error);
+		return [];
+	}
+}
+
+export async function clearCart(): Promise<{ message: string }> {
+	try {
+		const url = `/cart/clear`;
+		const response: AxiosResponse<{ message: string }> =
+			await axiosClient.post(url);
+		return response.data;
+	} catch (error) {
+		console.error("Error clearing cart", error);
+		return { message: "Error clearing cart" };
 	}
 }
