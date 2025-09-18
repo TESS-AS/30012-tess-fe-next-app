@@ -140,52 +140,90 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 			setCartItems(cart);
 
-			// Base prices (per item)
-			for (const item of cart) {
-				const priceData = await getProductPrice(
-					profile?.defaultCustomerNumber,
-					profile?.defaultCompanyNumber,
-					item.productNumber,
-				);
-				setPrices((prev) => ({
-					...prev,
-					[item.itemNumber]:
-						priceData?.find(
-							(p: PriceResponse) => p.itemNumber === String(item.itemNumber),
-						)?.basePrice || 0,
-				}));
-			}
-
-			// Initial calculation for all items
-			const priceRequests =
-				cart?.map((item) => ({
+			// Base prices and calculations for regular cart items
+			const regularPriceRequests =
+				cart.cart?.map((item) => ({
 					itemNumber: item.itemNumber,
 					quantity: item.quantity,
 					warehouseNumber: profile?.defaultWarehouseNumber || "",
 				})) ?? [];
 
-			if (priceRequests.length > 0) {
+			// Base prices and calculations for cart kit items
+			const cartKitPriceRequests =
+				cart.cartKit?.flatMap((item) => [
+					{
+						itemNumber: item.hose.itemNumber,
+						quantity: item.hose.quantity || 1,
+						warehouseNumber: profile?.defaultWarehouseNumber || "",
+					},
+					{
+						itemNumber: item.ferrule1.itemNumber,
+						quantity: item.hose.quantity || 1, // Each hose needs a set of ferrules and inserts
+						warehouseNumber: profile?.defaultWarehouseNumber || "",
+					},
+					{
+						itemNumber: item.ferrule2.itemNumber,
+						quantity: item.hose.quantity || 1,
+						warehouseNumber: profile?.defaultWarehouseNumber || "",
+					},
+					{
+						itemNumber: item.insert1.itemNumber,
+						quantity: item.hose.quantity || 1,
+						warehouseNumber: profile?.defaultWarehouseNumber || "",
+					},
+					{
+						itemNumber: item.insert2.itemNumber,
+						quantity: item.hose.quantity || 1,
+						warehouseNumber: profile?.defaultWarehouseNumber || "",
+					},
+				]) ?? [];
+
+			// Combine all price requests
+			const allPriceRequests = [
+				...regularPriceRequests,
+				...cartKitPriceRequests,
+			];
+
+			if (allPriceRequests.length > 0) {
 				const priceResults = await calculateItemPrice(
-					priceRequests,
+					allPriceRequests,
 					profile?.defaultCustomerNumber,
 					profile?.defaultCompanyNumber,
 				);
-				console.log(priceResults, "priceresults");
 
+				// Set initial prices and calculated prices
+				const initialPrices: Record<string, number> = {};
+				const calculatedPrices: Record<string, number> = {};
+
+				for (const item of priceResults) {
+					// Base price for individual display
+					initialPrices[item.itemNumber] = item.basePrice || 0;
+
+					// Total price including quantity and discounts
+					calculatedPrices[item.itemNumber] =
+						item.bestPrice || item.basePrice || 0;
+				}
+
+				// Update state
+				setPrices((prev) => ({
+					...prev,
+					...initialPrices,
+				}));
+				setCalculatedPrices((prev) => ({
+					...prev,
+					...calculatedPrices,
+				}));
+
+				// Calculate totals and other price components
 				const newSummary = priceResults.reduce(
 					(acc: Record<string, number>, it: PriceResponse) => {
-						acc[it.itemNumber] = it.basePriceTotal || 0;
+						acc[it.itemNumber] = it.basePriceTotal || it.bestPrice || 0;
 						return acc;
 					},
 					{},
 				);
-				const newCalculated = priceResults.reduce(
-					(acc: Record<string, number>, it: PriceResponse) => {
-						acc[it.itemNumber] = it.bestPrice || 0;
-						return acc;
-					},
-					{},
-				);
+
+				// Calculate surcharges
 				const newSurcharges = priceResults.reduce(
 					(acc: Record<string, number>, it: PriceResponse) => {
 						acc[it.itemNumber] = it.surCharge || 0;
@@ -202,9 +240,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				);
 
 				setOrderSummaryTotalPrice(newSummary);
-				setCalculatedPrices(newCalculated);
 				setSurChargePrices(newSurcharges);
-				setRabatterPrices(newRabatter);
 			}
 		} catch (error) {
 			console.error("Error fetching cart:", error);
@@ -280,23 +316,53 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		}
 	};
 
-	const removeItem = async (cartLine: number) => {
-		try {
-			await removeFromCart(cartLine);
-			setIsCartChanging((v) => !v);
-		} catch (error) {
-			console.error("Error removing item from cart:", error);
-			throw error;
-		}
-	};
-
-	const removeItemOptimistic = async (cartLine: number) => {
+	const removeItemOptimistic = async (cartLine: number | string) => {
 		const numericLine = Number(cartLine);
-		const backup = cartItems.find((i) => Number(i.cartLine) === numericLine);
 
-		setCartItems((prev) =>
-			prev.filter((i) => Number(i.cartLine) !== numericLine),
+		// Check if it's a cart kit item (hexagonId)
+		if (isNaN(numericLine)) {
+			const hexagonId = cartLine;
+			const backup = cartItems?.cartKit?.find((i) => i.hexagonId === hexagonId);
+
+			setCartItems((prev) => {
+				if (!prev?.cartKit) return prev;
+				return {
+					...prev,
+					cartKit: prev.cartKit.filter((i) => i.hexagonId !== hexagonId),
+				};
+			});
+
+			try {
+				await removeFromCart(hexagonId);
+				setIsCartChanging((v) => !v);
+			} catch (error) {
+				if (backup) {
+					setCartItems((prev) => {
+						if (!prev?.cartKit) return prev;
+						return {
+							...prev,
+							cartKit: [...prev.cartKit, backup],
+						};
+					});
+				}
+				console.error("Error removing cart kit item:", error);
+				throw error;
+			}
+			return;
+		}
+
+		// Regular cart item
+		const backup = cartItems?.cart?.find(
+			(i) => Number(i.cartLine) === numericLine,
 		);
+
+		setCartItems((prev) => {
+			if (!prev?.cart) return prev;
+			return {
+				...prev,
+				cart: prev.cart.filter((i) => Number(i.cartLine) !== numericLine),
+			};
+		});
 
 		try {
 			await removeFromCart(cartLine);
@@ -305,10 +371,14 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		} catch (error) {
 			if (backup) {
 				setCartItems((prev) => {
-					const next = [...prev, backup];
-					return next.sort(
+					if (!prev?.cart) return prev;
+					const updatedCart = [...prev.cart, backup].sort(
 						(a, b) => (Number(a.cartLine) || 0) - (Number(b.cartLine) || 0),
 					);
+					return {
+						...prev,
+						cart: updatedCart,
+					};
 				});
 			}
 			console.error("Error removing item (optimistic) from cart:", error);

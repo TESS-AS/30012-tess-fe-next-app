@@ -67,9 +67,9 @@ const CartPage = () => {
 
 	const {
 		cartItems,
-		prices,
-		calculatedPrices,
 		isLoading,
+		calculatedPrices,
+		prices,
 		updateQuantity,
 		updateWarehouse,
 		updateWarehouseForAllItems,
@@ -523,7 +523,8 @@ const CartPage = () => {
 					{!isHoseMode && (
 						<div className="flex items-center justify-between">
 							<h1 className="text-2xl font-semibold">
-								{t("Cart.yourCart")} ({cartItems?.length})
+								{t("Cart.yourCart")} (
+								{cartItems?.cart?.length + cartItems?.cartKit?.length})
 							</h1>
 							<div className="flex items-center gap-2">
 								<Button
@@ -569,30 +570,161 @@ const CartPage = () => {
 															<ChevronDown className="h-4 w-4 text-[#5A615D]" />
 														)}
 														<span className="text-sm text-[#5A615D]">
-															ID: {idx + 1}
+															ID: {item.hexagonId}
 														</span>
 														<span className="font-medium text-[#0F1912]">
-															{headerTitle}
+															{item.hose.itemDescription}
 														</span>
 													</div>
-
 													<div className="flex items-center gap-3">
-														<div className="flex items-center gap-2 text-sm text-[#5A615D]">
-															<span className="inline-flex h-6 min-w-6 items-center justify-center rounded border px-2">
-																{list.length}
+														<QuantityButtons
+															isLoading={!!loadingItems[item.hose.itemNumber]}
+															quantity={item.hose.quantity}
+															onIncrease={async (e) => {
+																e.stopPropagation();
+																setLoadingItems((prev) => ({
+																	...prev,
+																	[item.hose.itemNumber]: true,
+																}));
+																try {
+																	await updateQuantity(
+																		Number(item.hexagonId),
+																		item.hose.itemNumber,
+																		item.hose.quantity + 1,
+																	);
+																} finally {
+																	setLoadingItems((prev) => ({
+																		...prev,
+																		[item.hose.itemNumber]: false,
+																	}));
+																}
+															}}
+															onDecrease={async (e) => {
+																e.stopPropagation();
+																setLoadingItems((prev) => ({
+																	...prev,
+																	[item.hose.itemNumber]: true,
+																}));
+																try {
+																	await updateQuantity(
+																		Number(item.hexagonId),
+																		item.hose.itemNumber,
+																		item.hose.quantity - 1,
+																	);
+																} finally {
+																	setLoadingItems((prev) => ({
+																		...prev,
+																		[item.hose.itemNumber]: false,
+																	}));
+																}
+															}}
+														/>
+														<div className="flex items-center gap-3">
+															<span className="font-semibold">
+																{(() => {
+																	const total = [
+																		calculatedPrices[item.hose.itemNumber] ?? 0,
+																		calculatedPrices[
+																			item.ferrule1.itemNumber
+																		] ?? 0,
+																		calculatedPrices[
+																			item.ferrule2.itemNumber
+																		] ?? 0,
+																		calculatedPrices[item.insert1.itemNumber] ??
+																			0,
+																		calculatedPrices[item.insert2.itemNumber] ??
+																			0,
+																	].reduce((sum, price) => sum + price, 0);
+																	console.log("Total price:", total);
+																	return formatNorwegianCurrency(total);
+																})()}
 															</span>
+															<button
+																onClick={async (e) => {
+																	e.stopPropagation();
+																	try {
+																		await removeItemOptimistic(item.hexagonId);
+																		toast.success(t("Cart.itemRemoved"));
+																	} catch {
+																		toast.error(t("Cart.itemRemoveError"));
+																	}
+																}}
+																className="cursor-pointer hover:opacity-80">
+																<Trash2 className="h-4 w-4 text-[#C81E1E]" />
+															</button>
 														</div>
-														<span className="font-semibold">
-															{total.toFixed(2)}
-														</span>
-														<Trash2 className="h-4 w-4 text-[#C81E1E]" />
 													</div>
 												</button>
 
 												{open && (
 													<div className="border-t p-4">
 														<div className="space-y-3">
-															{list.map((it) => renderCartRow(it))}
+															<div className="space-y-4 pl-8">
+																<div className="flex items-start justify-between gap-2">
+																	<div className="flex flex-col">
+																		<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
+																			{item.ferrule1.name}
+																		</p>
+																		<p className="text-xs text-[#5A615D]">
+																			{item.ferrule1.itemNumber}
+																		</p>
+																	</div>
+																	<p className="font-bold">
+																		{formatNorwegianCurrency(
+																			(prices[item.ferrule1.itemNumber] ?? 0) *
+																				(item.hose.quantity || 1),
+																		)}
+																	</p>
+																</div>
+																<div className="flex items-start justify-between gap-2">
+																	<div className="flex flex-col">
+																		<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
+																			{item.ferrule2.name}
+																		</p>
+																		<p className="text-xs text-[#5A615D]">
+																			{item.ferrule2.itemNumber}
+																		</p>
+																	</div>
+																	<p className="font-bold">
+																		{formatNorwegianCurrency(
+																			(prices[item.ferrule2.itemNumber] ?? 0) *
+																				(item.hose.quantity || 1),
+																		)}
+																	</p>
+																</div>
+																<div className="flex items-start justify-between gap-2">
+																	<div className="flex flex-col">
+																		<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
+																			{item.insert1.name}
+																		</p>
+																		<p className="text-xs text-[#5A615D]">
+																			{item.insert1.itemNumber}
+																		</p>
+																	</div>
+																	<p className="font-bold">
+																		{formatNorwegianCurrency(
+																			(prices[item.insert1.itemNumber] ?? 0) *
+																				(item.hose.quantity || 1),
+																		)}
+																	</p>
+																</div>
+																<div className="flex items-start justify-between gap-2">
+																	<div className="flex flex-col">
+																		<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
+																			{item.insert2.name}
+																		</p>
+																		<p className="text-xs text-[#5A615D]">
+																			{item.insert2.itemNumber}
+																		</p>
+																	</div>
+																	<p className="font-bold">
+																		{formatNorwegianCurrency(
+																			(prices[item.insert2.itemNumber] ?? 0) *
+																				(item.hose.quantity || 1),
+																		)}
+																	</p>
+																</div>
+															</div>
 														</div>
 													</div>
 												)}
