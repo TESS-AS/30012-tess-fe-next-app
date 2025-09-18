@@ -5,7 +5,6 @@ import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2 } from "lucide-react";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import {
 	DropdownMenu,
@@ -24,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { FilterOptions, useGetAssets } from "@/hooks/useGetAssets";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
+import { useAppContext } from "@/lib/appContext";
 import { cn } from "@/lib/utils";
 import { postCartKit } from "@/services/carts.service";
 import {
@@ -42,10 +42,10 @@ import {
 	MapPin,
 	X,
 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { useAppContext } from "@/lib/appContext";
 
 export interface HoseOrder {
 	orderId: string;
