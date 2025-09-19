@@ -5,7 +5,7 @@ import { useCallback, useMemo } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IAttribute } from "@/types/product.types";
 import { Clipboard } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 interface ProductDetailsProps {
 	description?: string;
@@ -24,6 +24,7 @@ export function ProductDetails({
 	application,
 	users,
 	remarks,
+	attributes,
 	usp,
 }: ProductDetailsProps) {
 	const t = useTranslations();
@@ -36,6 +37,8 @@ export function ProductDetails({
 		if (!usp) return [];
 		return Object.values(usp).filter((val) => val && val.trim() !== "");
 	}, [usp]);
+
+	const locale = useLocale();
 
 	return (
 		<div className="mt-1">
@@ -120,6 +123,25 @@ export function ProductDetails({
 							<span className="font-semibold">{t("Product.remarks")}: </span>
 							<span>{remarks}</span>
 						</p>
+					)}
+
+					{attributes && attributes.length > 0 && (
+						<div className="space-y-1">
+							{attributes
+								.filter(
+									(attr) =>
+										(locale === "en" && attr.language === "English") ||
+										(locale === "no" && attr.language === "Norwegian"),
+								)
+								.map((attr, idx) => (
+									<p
+										key={idx}
+										className="text-sm">
+										<span className="font-semibold">{attr.name}: </span>
+										<span>{attr.value_def}</span>
+									</p>
+								))}
+						</div>
 					)}
 				</TabsContent>
 			</Tabs>

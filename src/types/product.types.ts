@@ -24,6 +24,7 @@ export interface IAttribute {
 	nameKeyLanguage: string;
 	valueDef: string;
 	value_max: string;
+	value_def?: string;
 }
 
 export interface IProductDetails {
