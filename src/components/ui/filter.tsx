@@ -290,7 +290,7 @@ export function Filter({
 										return (
 											<li
 												key={cf.assortmentNumber}
-												className="flex items-center space-x-2">
+												className="mb-4 flex items-center space-x-2">
 												<Checkbox
 													id={`category-${cf.assortmentNumber}`}
 													checked={isChecked}
@@ -316,7 +316,7 @@ export function Filter({
 									variant="link"
 									size="sm"
 									onClick={() => setShowAllCategories((prev) => !prev)}
-									className="text-primary mt-2 px-0 text-sm hover:underline">
+									className="text-primary px-0 text-sm hover:underline">
 									{showAllCategories ? "Vis mindre" : "Vis mer"}
 								</Button>
 							)}
@@ -370,7 +370,7 @@ export function Filter({
 										value={filter.key}
 										className="border-b">
 										<AccordionTrigger
-											className="text-sm font-medium hover:no-underline"
+											className="text-md font-semibold hover:no-underline"
 											onClick={() => {
 												setOpenAccordion(filter.key);
 												loadChildrenForFilter(
@@ -399,7 +399,7 @@ export function Filter({
 														{children.values.map((child) => (
 															<div
 																key={child.value}
-																className="flex items-center space-x-2">
+																className="mb-5 flex items-center justify-between space-x-2 font-normal">
 																<Checkbox
 																	id={`${filter.key}-${child.value}`}
 																	checked={
@@ -413,8 +413,11 @@ export function Filter({
 																/>
 																<label
 																	htmlFor={`${filter.key}-${child.value}`}
-																	className="cursor-pointer text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-																	{child.value} ({child.productcount})
+																	className="flex w-full cursor-pointer justify-between text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+																	<span>{child.value}</span>
+																	<span className="text-muted-foreground">
+																		{child.productcount}
+																	</span>
 																</label>
 															</div>
 														))}
