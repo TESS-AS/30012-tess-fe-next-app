@@ -628,7 +628,25 @@ const CartPage = () => {
 															}}
 														/>
 														<div className="flex items-center gap-6">
-															<span className="font-semibold">2527.50,-</span>
+															<span className="font-semibold">
+																{(() => {
+																	const total = [
+																		calculatedPrices[item.hose.itemNumber] ?? 0,
+																		calculatedPrices[
+																			item.ferrule1.itemNumber
+																		] ?? 0,
+																		calculatedPrices[
+																			item.ferrule2.itemNumber
+																		] ?? 0,
+																		calculatedPrices[item.insert1.itemNumber] ??
+																			0,
+																		calculatedPrices[item.insert2.itemNumber] ??
+																			0,
+																	].reduce((sum, price) => sum + price, 0);
+																	console.log("Total price:", total);
+																	return formatNorwegianCurrency(total);
+																})()}
+															</span>
 															<button
 																onClick={async (e) => {
 																	e.stopPropagation();
@@ -659,7 +677,12 @@ const CartPage = () => {
 																			{item.hose.itemNumber}
 																		</p>
 																	</div>
-																	<p className="font-bold">500.50,-</p>
+																	<p className="font-bold">
+																		{formatNorwegianCurrency(
+																			(prices[item.hose.itemNumber] ?? 0) *
+																				(item.hose.quantity || 1),
+																		)}
+																	</p>
 																</div>
 																<div className="flex items-start justify-between gap-2">
 																	<div className="flex flex-col">
@@ -670,7 +693,13 @@ const CartPage = () => {
 																			{item.ferrule1.itemNumber}
 																		</p>
 																	</div>
-																	<p className="font-bold">500.50,-</p>
+
+																	<p className="font-bold">
+																		{formatNorwegianCurrency(
+																			(prices[item.ferrule1.itemNumber] ?? 0) *
+																				(item.hose.quantity || 1),
+																		)}
+																	</p>
 																</div>
 																<div className="flex items-start justify-between gap-2">
 																	<div className="flex flex-col">
@@ -681,7 +710,12 @@ const CartPage = () => {
 																			{item.ferrule2.itemNumber}
 																		</p>
 																	</div>
-																	<p className="font-bold">500.50,-</p>
+																	<p className="font-bold">
+																		{formatNorwegianCurrency(
+																			(prices[item.ferrule2.itemNumber] ?? 0) *
+																				(item.hose.quantity || 1),
+																		)}
+																	</p>
 																</div>
 																<div className="flex items-start justify-between gap-2">
 																	<div className="flex flex-col">
@@ -692,7 +726,12 @@ const CartPage = () => {
 																			{item.insert1.itemNumber}
 																		</p>
 																	</div>
-																	<p className="font-bold">500.50,-</p>
+																	<p className="font-bold">
+																		{formatNorwegianCurrency(
+																			(prices[item.insert1.itemNumber] ?? 0) *
+																				(item.hose.quantity || 1),
+																		)}
+																	</p>
 																</div>
 																<div className="flex items-start justify-between gap-2">
 																	<div className="flex flex-col">
@@ -703,7 +742,12 @@ const CartPage = () => {
 																			{item.insert2.itemNumber}
 																		</p>
 																	</div>
-																	<p className="font-bold">500.50,-</p>
+																	<p className="font-bold">
+																		{formatNorwegianCurrency(
+																			(prices[item.insert2.itemNumber] ?? 0) *
+																				(item.hose.quantity || 1),
+																		)}
+																	</p>
 																</div>
 															</div>
 														</div>
