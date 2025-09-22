@@ -180,13 +180,11 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 					}));
 
 					await postCartKit(cartItems);
-					setIsCartChanging(true);
 					setCartModalOpen(true);
 					toast.success("Elementer lagt til i handlekurven");
 					setIsNavigating(true);
-					setTimeout(() => {
-						router.push("/cart");
-					}, 1500);
+					router.push("/cart");
+					setIsCartChanging(true);
 				} catch (error) {
 					toast.error("Kunne ikke legge til elementer i handlekurven");
 				} finally {
