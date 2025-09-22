@@ -409,6 +409,11 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				cart: [],
 				cartKit: [],
 			});
+			setPrices({});
+			setCalculatedPrices({});
+			setSurChargePrices({});
+			setRabatterPrices({});
+			setOrderSummaryTotalPrice({});
 			setIsCartChanging((v) => !v);
 		} catch (error) {
 			console.error("Error clearing cart:", error);
