@@ -85,6 +85,7 @@
 		"noProductsFound": "No products found",
 		"seeMoreCategories": "See more categories",
 		"resultsTitle": "Search results",
+        "inMainWarehouse": "In main warehouse",
 		"noResults": {
 			"title": "No results found",
 			"description": "Sorry. We couldn’t find any products matching \"{query}\"",
