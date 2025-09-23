@@ -174,22 +174,22 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					},
 					{
 						itemNumber: item.ferrule1.itemNumber,
-						quantity: item.hose.quantity || 1, // Each hose needs a set of ferrules and inserts
+						quantity: item.ferrule1.quantity || 1,
 						warehouseNumber: profile?.defaultWarehouseNumber || "",
 					},
 					{
 						itemNumber: item.ferrule2.itemNumber,
-						quantity: item.hose.quantity || 1,
+						quantity: item.ferrule2.quantity || 1,
 						warehouseNumber: profile?.defaultWarehouseNumber || "",
 					},
 					{
 						itemNumber: item.insert1.itemNumber,
-						quantity: item.hose.quantity || 1,
+						quantity: item.insert1.quantity || 1,
 						warehouseNumber: profile?.defaultWarehouseNumber || "",
 					},
 					{
 						itemNumber: item.insert2.itemNumber,
-						quantity: item.hose.quantity || 1,
+						quantity: item.insert2.quantity || 1,
 						warehouseNumber: profile?.defaultWarehouseNumber || "",
 					},
 				]) ?? [];
@@ -202,6 +202,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					profile?.defaultCustomerNumber,
 					profile?.defaultCompanyNumber,
 				);
+				console.log(priceResults, "priceResults");
 
 				const initialPrices: Record<string, number> = {};
 				const calculatedPrices: Record<string, number> = {};

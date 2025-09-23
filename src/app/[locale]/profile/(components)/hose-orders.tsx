@@ -183,8 +183,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 					setCartModalOpen(true);
 					toast.success("Elementer lagt til i handlekurven");
 					setIsNavigating(true);
-					router.push("/cart");
 					setIsCartChanging(true);
+					router.push("/cart");
 				} catch (error) {
 					toast.error("Kunne ikke legge til elementer i handlekurven");
 				} finally {

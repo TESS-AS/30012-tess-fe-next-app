@@ -30,6 +30,7 @@ import { OrdreDetaljer } from "./(components)/ordre-detaljer";
 import { OrdreHistorikk } from "./(components)/ordre-historikk";
 import { Rekvisisjoner } from "./(components)/rekvisisjoner";
 import { SidebarNav } from "./(components)/sidebar-nav";
+import HoseOverview from "./(components)/hose-overview";
 
 export default function ProfilePage() {
 	const { setIsAuthOpen } = useAppContext();
@@ -155,7 +156,7 @@ export default function ProfilePage() {
 												icon: List,
 											},
 											{
-												href: "hose",
+												href: "hose-oversikt",
 												label: "Oversikt",
 												icon: LockKeyhole,
 											},
@@ -232,6 +233,10 @@ export default function ProfilePage() {
 
 						<TabsContent value="orders">
 							<OrdersTab />
+						</TabsContent>
+
+						<TabsContent value="hose-oversikt">
+							<HoseOverview />
 						</TabsContent>
 
 						<TabsContent value="wishlist">

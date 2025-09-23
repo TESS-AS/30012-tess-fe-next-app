@@ -272,42 +272,43 @@ const CartPage = () => {
 							console.error("Error fetching variations:", error);
 						}
 					}}
-					className={`border-lightGray mb-4 grid transform grid-cols-[70px_2fr_2fr_1fr_1fr_40px] items-center gap-4 rounded-md border border-b border-gray-200 p-4 p-6 transition-all duration-300 ease-in-out ${
+					className={`border-lightGray mb-4 flex transform items-center justify-between gap-4 rounded-md border border-b border-gray-200 p-4 transition-all duration-300 ease-in-out ${
 						itemsToRemove.has(id)
 							? "pointer-events-none -translate-y-4 scale-95 opacity-0"
 							: "translate-y-0 scale-100 opacity-100"
 					}`}>
-					<div className="bg-muted relative h-17 w-17 rounded">
-						{item.mediaId?.[0]?.url ? (
-							<Image
-								src={item.mediaId[0].url}
-								alt={item.mediaId[0].filename || ""}
-								fill
-								className="object-contain"
-							/>
-						) : (
-							<div className="h-full w-full bg-gray-200" />
-						)}
-					</div>
+					<div className="flex items-center gap-4">
+						<div className="bg-muted relative h-17 w-17 rounded">
+							{item.mediaId?.[0]?.url ? (
+								<Image
+									src={item.mediaId[0].url}
+									alt={item.mediaId[0].filename || ""}
+									fill
+									className="object-contain"
+								/>
+							) : (
+								<div className="h-full w-full bg-gray-200" />
+							)}
+						</div>
 
-					<div className="flex flex-col">
-						<span className="mb-2 block max-w-[170px] truncate font-medium text-[#0F1912] hover:underline">
-							<Link
-								className="block truncate"
-								href={`/${
-									categoryPaths[item.productNumber]?.join("/") || ""
-								}/${item.productNumber}`}>
-								{item.itemName}
-							</Link>
-						</span>
-						<p
-							onClick={() => setOpenModalId(item.productNumber)}
-							className="flex cursor-pointer items-center text-xs text-[#5A615D] hover:text-[#009640] hover:underline">
-							{item.itemNumber}, 300mm, 3/8”{" "}
-							<ChevronRight className="h-4 w-4" />
-						</p>
+						<div className="flex flex-col">
+							<span className="mb-2 block max-w-[170px] truncate font-medium text-[#0F1912] hover:underline">
+								<Link
+									className="block truncate"
+									href={`/${
+										categoryPaths[item.productNumber]?.join("/") || ""
+									}/${item.productNumber}`}>
+									{item.itemName}
+								</Link>
+							</span>
+							<p
+								onClick={() => setOpenModalId(item.productNumber)}
+								className="flex cursor-pointer items-center text-xs text-[#5A615D] hover:text-[#009640] hover:underline">
+								{item.itemNumber}, 300mm, 3/8”{" "}
+								<ChevronRight className="h-4 w-4" />
+							</p>
+						</div>
 					</div>
-
 					<Select
 						onValueChange={async (warehouseNumber: string) => {
 							setLoadingItems((prev) => ({
@@ -360,99 +361,102 @@ const CartPage = () => {
 						</SelectContent>
 					</Select>
 
-					<QuantityButtons
-						isLoading={!!loadingItems[item.itemNumber]}
-						quantity={item.quantity}
-						onIncrease={async (e) => {
-							e.stopPropagation();
-							setLoadingItems((prev) => ({
-								...prev,
-								[item.itemNumber]: true,
-							}));
-							try {
-								await updateQuantity(
-									item.cartLine ?? 0,
-									item.itemNumber,
-									item.quantity + 1,
-								);
-							} finally {
+					<div className="flex items-center gap-6">
+						<QuantityButtons
+							isLoading={!!loadingItems[item.itemNumber]}
+							quantity={item.quantity}
+							onIncrease={async (e) => {
+								e.stopPropagation();
 								setLoadingItems((prev) => ({
 									...prev,
-									[item.itemNumber]: false,
+									[item.itemNumber]: true,
 								}));
-							}
-						}}
-						onDecrease={async (e) => {
-							e.stopPropagation();
-							setLoadingItems((prev) => ({
-								...prev,
-								[item.itemNumber]: true,
-							}));
-							try {
-								await updateQuantity(
-									item.cartLine ?? 0,
-									item.itemNumber,
-									item.quantity - 1,
-								);
-							} finally {
+								try {
+									await updateQuantity(
+										item.cartLine ?? 0,
+										item.itemNumber,
+										item.quantity + 1,
+									);
+								} finally {
+									setLoadingItems((prev) => ({
+										...prev,
+										[item.itemNumber]: false,
+									}));
+								}
+							}}
+							onDecrease={async (e) => {
+								e.stopPropagation();
 								setLoadingItems((prev) => ({
 									...prev,
-									[item.itemNumber]: false,
+									[item.itemNumber]: true,
 								}));
-							}
-						}}
-					/>
+								try {
+									await updateQuantity(
+										item.cartLine ?? 0,
+										item.itemNumber,
+										item.quantity - 1,
+									);
+								} finally {
+									setLoadingItems((prev) => ({
+										...prev,
+										[item.itemNumber]: false,
+									}));
+								}
+							}}
+						/>
 
-					<p className="font-bold">
-						{formatNorwegianCurrency(calculatedPrices[item.itemNumber] ?? 0)}
-					</p>
+						<p className="font-bold">
+							{formatNorwegianCurrency(calculatedPrices[item.itemNumber] ?? 0)}
+						</p>
 
-					<Button
-						size="icon"
-						variant="ghost"
-						disabled={!!removingItems[id]}
-						onClick={async (e) => {
-							e.stopPropagation();
-							try {
-								setItemsToRemove((prev) => {
-									const next = new Set(prev);
-									next.add(id);
-									return next;
-								});
-								setRemovingItems((prev) => ({ ...prev, [id]: true }));
+						<Button
+							className="w-4 p-0"
+							size="icon"
+							variant="ghost"
+							disabled={!!removingItems[id]}
+							onClick={async (e) => {
+								e.stopPropagation();
+								try {
+									setItemsToRemove((prev) => {
+										const next = new Set(prev);
+										next.add(id);
+										return next;
+									});
+									setRemovingItems((prev) => ({ ...prev, [id]: true }));
 
-								await new Promise((r) => setTimeout(r, 300));
+									await new Promise((r) => setTimeout(r, 300));
 
-								await removeItemOptimistic(Number(item.cartLine));
+									await removeItemOptimistic(Number(item.cartLine));
 
-								setRemovingItems((prev) => ({
-									...prev,
-									[id]: false,
-								}));
-								setItemsToRemove((prev) => {
-									const next = new Set(prev);
-									next.delete(id);
-									return next;
-								});
-							} catch {
-								setRemovingItems((prev) => ({
-									...prev,
-									[id]: false,
-								}));
-								setItemsToRemove((prev) => {
-									const next = new Set(prev);
-									next.delete(id);
-									return next;
-								});
-								toast.error(t("Cart.errors.removeItem"));
-							}
-						}}>
-						{removingItems[id] ? (
-							<div className="border-t-primary h-4 w-4 animate-spin rounded-full border-2 border-gray-300" />
-						) : (
-							<Trash2 className="h-4 w-4 text-[#C81E1E]" />
-						)}
-					</Button>
+									setRemovingItems((prev) => ({
+										...prev,
+										[id]: false,
+									}));
+									setItemsToRemove((prev) => {
+										const next = new Set(prev);
+										next.delete(id);
+										return next;
+									});
+								} catch {
+									setRemovingItems((prev) => ({
+										...prev,
+										[id]: false,
+									}));
+									setItemsToRemove((prev) => {
+										const next = new Set(prev);
+										next.delete(id);
+										return next;
+									});
+									toast.error(t("Cart.errors.removeItem"));
+								}
+							}}>
+							{removingItems[id] ? (
+								<div className="border-t-primary h-4 w-4 animate-spin rounded-full border-2 border-gray-300" />
+							) : (
+								<Trash2 className="h-4 w-4 text-[#C81E1E]" />
+							)}
+						</Button>
+					</div>
 				</div>
 
 				<Modal
@@ -647,7 +651,12 @@ const CartPage = () => {
 																	return formatNorwegianCurrency(total);
 																})()}
 															</span>
-															<button
+
+															<Button
+																className="w-4 p-0"
+																size="icon"
+																variant="ghost"
+																disabled={!!removingItems[item.hexagonId]}
 																onClick={async (e) => {
 																	e.stopPropagation();
 																	try {
@@ -656,10 +665,13 @@ const CartPage = () => {
 																	} catch {
 																		toast.error(t("Cart.itemRemoveError"));
 																	}
-																}}
-																className="cursor-pointer hover:opacity-80">
-																<Trash2 className="h-4 w-4 text-[#C81E1E]" />
-															</button>
+																}}>
+																{removingItems[item.hexagonId] ? (
+																	<div className="border-t-primary h-4 w-4 animate-spin rounded-full border-2 border-gray-300" />
+																) : (
+																	<Trash2 className="h-4 w-4 text-[#C81E1E]" />
+																)}
+															</Button>
 														</div>
 													</div>
 												</div>
