@@ -6,8 +6,10 @@ import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { Category, RawCategory } from "@/types/categories.types";
 import { IProductSearch } from "@/types/search.types";
+import { BadgeCheck } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import ProductVariantTable from "../checkout/product-variant-table";
 
@@ -47,6 +49,7 @@ export function ProductItem({
 }: Props) {
 	const { data: profile } = useGetProfileData();
 	const [categoryPath, setCategoryPath] = useState("");
+	const t = useTranslations();
 
 	useEffect(() => {
 		const loadCategory = async () => {
@@ -97,6 +100,8 @@ export function ProductItem({
 		return Array.from(set);
 	})();
 
+	console.log(product, "ppro");
+
 	return (
 		<div key={product.productNumber}>
 			<div className="mb-3 flex w-full items-center gap-4 rounded-md border border-gray-200 p-3 hover:border-gray-400">
@@ -133,25 +138,33 @@ export function ProductItem({
 						))}
 					</div>
 				</div>
+				<div className="ml-auto flex flex-col items-end gap-5">
+					{product.inStock && (
+						<div className="flex items-center gap-1 rounded bg-[#DCF7E0] px-2 py-1 text-xs font-medium text-emerald-800">
+							<BadgeCheck className="h-4 w-4 fill-emerald-800 text-white" />
+							<span>{t("Search.inMainWarehouse")}</span>
+						</div>
+					)}
 
-				<Button
-					type="button"
-					onClick={async (e) => {
-						e.preventDefault();
-						setIsModalIdOpen(product.productNumber);
-						const productVariations = await getProductVariations(
-							product.productNumber,
-							profile?.defaultWarehouseNumber || "",
-							profile?.defaultCompanyNumber || "",
-						);
-						setVariations((prev: Record<string, any>) => ({
-							...prev,
-							[product.productNumber]: productVariations,
-						}));
-					}}
-					className="mt-2 ml-auto self-center rounded-md bg-green-600 px-5 py-2 text-sm font-medium text-white hover:bg-green-700">
-					Se produktvarianter ({product.itemVariantCount || 0}) →
-				</Button>
+					<Button
+						type="button"
+						onClick={async (e) => {
+							e.preventDefault();
+							setIsModalIdOpen(product.productNumber);
+							const productVariations = await getProductVariations(
+								product.productNumber,
+								profile?.defaultWarehouseNumber || "",
+								profile?.defaultCompanyNumber || "",
+							);
+							setVariations((prev: Record<string, any>) => ({
+								...prev,
+								[product.productNumber]: productVariations,
+							}));
+						}}
+						className="mt-2 ml-auto self-center rounded-md bg-green-600 px-5 py-2 text-sm font-medium text-white hover:bg-green-700">
+						Se produktvarianter ({product.itemVariantCount || 0}) →
+					</Button>
+				</div>
 			</div>
 			<Modal
 				open={isModalIdOpen === product.productNumber}
