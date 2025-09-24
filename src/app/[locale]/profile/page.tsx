@@ -31,6 +31,7 @@ import { OrdreHistorikk } from "./(components)/ordre-historikk";
 import { Rekvisisjoner } from "./(components)/rekvisisjoner";
 import { SidebarNav } from "./(components)/sidebar-nav";
 import HoseOverview from "./(components)/hose-overview";
+import HoseInspections from "./(components)/hose-inspections";
 
 export default function ProfilePage() {
 	const { setIsAuthOpen } = useAppContext();
@@ -161,8 +162,8 @@ export default function ProfilePage() {
 												icon: LockKeyhole,
 											},
 											{
-												href: "hose-settings",
-												label: "Innstillinger",
+												href: "hose-inspections",
+												label: "Inspeksjoner",
 												icon: LockKeyhole,
 											},
 											{
@@ -229,6 +230,12 @@ export default function ProfilePage() {
 							value="hose-orders"
 							className="mt-0">
 							<HoseOrders />
+						</TabsContent>
+
+						<TabsContent
+							value="hose-inspections"
+							className="mt-0">
+							<HoseInspections />
 						</TabsContent>
 
 						<TabsContent value="orders">

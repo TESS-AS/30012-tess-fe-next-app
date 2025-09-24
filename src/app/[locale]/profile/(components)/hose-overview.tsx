@@ -209,8 +209,7 @@ const HoseOverview = () => {
 			</div>
 
 			<div className="grid grid-cols-[2fr_1fr] gap-8">
-				{/* LEFT: STRUCTURE WITH ACCORDIONS */}
-				<div className="rounded-lg bg-white p-4 shadow-md">
+				<div className="relative rounded-lg bg-white p-4 shadow">
 					<div className="flex flex-col">
 						<div className="flex items-start justify-between pt-2 pb-8">
 							<div className="flex gap-4">
@@ -336,9 +335,22 @@ const HoseOverview = () => {
 							</Accordion>
 						</div>
 					</div>
+					<div className="absolute bottom-0 left-0 mt-6 flex w-full items-center divide-x divide-[#E6E7E6] border-t border-[#E6E7E6] p-6 text-sm text-[#5A615D]">
+						<div className="flex items-center gap-2 pr-6">
+							<MapPin className="h-4 w-4" />
+							S2
+						</div>
+						<div className="flex items-center gap-2 px-6">
+							<Settings className="h-4 w-4" />
+							Utstyr/Equipment
+						</div>
+						<div className="flex items-center gap-2 pl-6">
+							<Settings className="h-4 w-4" />
+							Utstyr/Equipment subkategori
+						</div>
+					</div>
 				</div>
 
-				{/* RIGHT: cards unchanged */}
 				<div className="flex flex-col gap-4">
 					<div className="flex flex-col gap-4">
 						<div className="mb-5 flex items-center gap-4">
