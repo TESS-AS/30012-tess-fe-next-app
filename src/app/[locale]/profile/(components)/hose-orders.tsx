@@ -21,6 +21,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { FilterOptions, useGetAssets } from "@/hooks/useGetAssets";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useAppContext } from "@/lib/appContext";
@@ -73,19 +74,31 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 	const { data: profile } = usePunchoutProfile();
 	const [customerNumber, setCustomerNumber] = useState<string>("");
 	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
-		undefined,
+		() => {
+			if (typeof window !== "undefined") {
+				return localStorage.getItem("selectedS1Code") || undefined;
+			}
+			return undefined;
+		},
 	);
 	const { setIsCartChanging } = useAppContext();
 
 	const {
 		assets = [],
+		setAssets,
 		pagination,
 		loading,
+		setLoading,
 		fetchAssets,
 		s1Codes = [],
 		s1CodesPagination,
 		fetchS1Codes,
-	} = useGetAssets(customerNumber, selectedS1Code);
+	} = useGetAssets(
+		profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+			? profile?.defaultCustomerNumber
+			: customerNumber,
+		selectedS1Code,
+	);
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedColumns, setSelectedColumns] = useState<string[]>([
@@ -98,7 +111,13 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		"Ordrenummer (PO)",
 		"Handling",
 	]);
-	const [selectedRows, setSelectedRows] = useState<string[]>([]);
+	const [selectedRows, setSelectedRows] = useState<string[]>(() => {
+		if (typeof window !== "undefined") {
+			const saved = localStorage.getItem("selectedHoseRows");
+			return saved ? JSON.parse(saved) : [];
+		}
+		return [];
+	});
 	const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 	const [selectedAgeRanges, setSelectedAgeRanges] = useState<string[]>([]);
 	const ITEMS_PER_PAGE = 10;
@@ -135,19 +154,23 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 	const handleSelectRow = (key: string, checked: boolean | "indeterminate") => {
 		const on = checked === true;
 		setSelectedRows((prev) => {
-			if (on) {
-				return prev.includes(key) ? prev : [...prev, key];
-			}
-			return prev.filter((id) => id !== key);
+			const newSelection = on
+				? prev.includes(key)
+					? prev
+					: [...prev, key]
+				: prev.filter((id) => id !== key);
+			localStorage.setItem("selectedHoseRows", JSON.stringify(newSelection));
+			return newSelection;
 		});
 	};
 
 	const handleBulkSelect = (ids: string[], checked: boolean) => {
 		setSelectedRows((prev) => {
-			const next = checked
+			const newSelection = checked
 				? Array.from(new Set([...prev, ...ids]))
 				: prev.filter((id) => !ids.includes(id));
-			return next;
+			localStorage.setItem("selectedHoseRows", JSON.stringify(newSelection));
+			return newSelection;
 		});
 	};
 
@@ -183,8 +206,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 					setCartModalOpen(true);
 					toast.success("Elementer lagt til i handlekurven");
 					setIsNavigating(true);
-					router.push("/cart");
 					setIsCartChanging(true);
+					router.push("/cart");
 				} catch (error) {
 					toast.error("Kunne ikke legge til elementer i handlekurven");
 				} finally {
@@ -245,8 +268,12 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 	const handleSelectAll = (checked: boolean) => {
 		const ids = transformedAssets.map((a) => String(a.orderId));
-		setSelectedRows(checked ? ids : []);
+		const newSelection = checked ? ids : [];
+		setSelectedRows(newSelection);
+		localStorage.setItem("selectedHoseRows", JSON.stringify(newSelection));
 	};
+
+	console.log(selectedRows, "selectedRows");
 
 	const allColumns: Record<string, Column<HoseOrder>> = {
 		Vedlegg: {
@@ -373,6 +400,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 						</DropdownMenuItem>
 
 						<DropdownMenuItem
+							disabled
 							onClick={() => handleBulkAction("support")}
 							className="">
 							<Mail className="mr-3 h-4 w-4 text-[#005522]" />
@@ -380,13 +408,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 						</DropdownMenuItem>
 
 						<DropdownMenuItem
-							onClick={() => handleBulkAction("sendmail")}
-							className="">
-							<Mail className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>Send forespørsel om tilbud (RFQ)</span>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem
+							disabled
 							onClick={() => handleBulkAction("report")}
 							className="">
 							<FileText className="mr-3 h-4 w-4 text-[#005522]" />
@@ -394,6 +416,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 						</DropdownMenuItem>
 
 						<DropdownMenuItem
+							disabled
 							onClick={() => handleBulkAction("discard")}
 							className="">
 							<Trash2 className="mr-3 h-4 w-4 text-[#005522]" />
@@ -401,6 +424,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 						</DropdownMenuItem>
 
 						<DropdownMenuItem
+							disabled
 							onClick={() => handleBulkAction("print-cert")}
 							className="">
 							<Printer className="mr-3 h-4 w-4 text-[#005522]" />
@@ -408,6 +432,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 						</DropdownMenuItem>
 
 						<DropdownMenuItem
+							disabled
 							onClick={() => handleBulkAction("print-id")}
 							className="">
 							<Printer className="mr-3 h-4 w-4 text-[#005522]" />
@@ -415,6 +440,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 						</DropdownMenuItem>
 
 						<DropdownMenuItem
+							disabled
 							onClick={() => handleBulkAction("print-certs")}
 							className="">
 							<Printer className="mr-3 h-4 w-4 text-[#005522]" />
@@ -422,6 +448,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 						</DropdownMenuItem>
 
 						<DropdownMenuItem
+							disabled
 							onClick={() => handleBulkAction("export")}
 							className="">
 							<CreditCard className="mr-3 h-4 w-4 text-[#005522]" />
@@ -600,8 +627,13 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 							<Select
 								value={selectedS1Code || ""}
 								onValueChange={(value) => {
-									if (!value) setSelectedS1Code("");
-									setSelectedS1Code(value);
+									if (!value) {
+										setSelectedS1Code("");
+										localStorage.removeItem("selectedS1Code");
+									} else {
+										setSelectedS1Code(value);
+										localStorage.setItem("selectedS1Code", value);
+									}
 								}}>
 								<SelectTrigger className="relative w-[200px] border-[#C1C4C2] bg-white pr-8 font-medium text-[#0F1912]">
 									<div className="flex items-center gap-2 overflow-hidden">
@@ -650,6 +682,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 										e.stopPropagation();
 										e.preventDefault();
 										setSelectedS1Code("");
+										localStorage.removeItem("selectedS1Code");
 									}}
 									className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
 									<X className="h-4 w-4 text-[#5A615D]" />
@@ -659,46 +692,52 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 						</div>
 					</div>
 
-					<div className="flex w-[280px] items-center gap-3">
-						<p className="text-base font-normal text-[#5A615D]">Customer:</p>
-						<div className="relative">
-							<Select
-								value={customerNumber || ""}
-								onValueChange={(value) => {
-									if (!value) setCustomerNumber("");
-									setCustomerNumber(value);
-								}}>
-								<SelectTrigger className="relative w-[200px] border-[#C1C4C2] bg-white pr-8 font-medium text-[#0F1912]">
-									<SelectValue
-										className="truncate"
-										placeholder="Velg customer"
-									/>
-								</SelectTrigger>
-								<SelectContent className="max-h-[300px] overflow-y-auto">
-									{(profile?.customerNumbers || []).map((num) => (
-										<SelectItem
-											key={num}
-											value={num}>
-											{num}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							{customerNumber && (
-								<button
-									type="button"
-									onClick={(e) => {
-										e.stopPropagation();
-										e.preventDefault();
-										setCustomerNumber("");
-									}}
-									className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
-									<X className="h-4 w-4 text-[#5A615D]" />
-									<span className="sr-only">Fjern customer</span>
-								</button>
-							)}
-						</div>
-					</div>
+					{profile?.defaultCustomerNumber &&
+						profile.defaultCustomerNumber !==
+							SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
+							<div className="flex w-[280px] items-center gap-3">
+								<p className="text-base font-normal text-[#5A615D]">
+									Customer:
+								</p>
+								<div className="relative">
+									<Select
+										value={customerNumber || ""}
+										onValueChange={(value) => {
+											if (!value) setCustomerNumber("");
+											setCustomerNumber(value);
+										}}>
+										<SelectTrigger className="relative w-[200px] border-[#C1C4C2] bg-white pr-8 font-medium text-[#0F1912]">
+											<SelectValue
+												className="truncate"
+												placeholder="Velg customer"
+											/>
+										</SelectTrigger>
+										<SelectContent className="max-h-[300px] overflow-y-auto">
+											{(profile?.customerNumbers || []).map((num) => (
+												<SelectItem
+													key={num}
+													value={num}>
+													{num}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+									{customerNumber && (
+										<button
+											type="button"
+											onClick={(e) => {
+												e.stopPropagation();
+												e.preventDefault();
+												setCustomerNumber("");
+											}}
+											className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
+											<X className="h-4 w-4 text-[#5A615D]" />
+											<span className="sr-only">Fjern customer</span>
+										</button>
+									)}
+								</div>
+							</div>
+						)}
 				</div>
 
 				<div className="rounded-lg border border-[#C1C4C2] bg-white">
@@ -726,6 +765,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 									type="button"
 									onClick={() => {
 										setSearchQuery("");
+										setSelectedRows([]);
+										localStorage.removeItem("selectedHoseRows");
 										setSelectedFilters([]);
 										setSelectedAgeRanges([]);
 										fetchAssets({
@@ -1046,7 +1087,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 					</div>
 
 					<DataTable<HoseOrder>
-						data={transformedAssets}
+						data={loading ? [] : transformedAssets}
 						columns={activeColumns}
 						currentPage={pagination.currentPage}
 						totalPages={pagination.totalPages}

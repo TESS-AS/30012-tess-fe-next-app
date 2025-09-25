@@ -156,8 +156,11 @@ export default function Header() {
 		await signOut();
 	};
 
+	console.log(profile?.punchout, "punchout");
+
 	return (
-		<header className="bg-background h-[182px] w-full border-t">
+		<header
+			className={`bg-background w-full border-t ${profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER ? "h-[132px]" : "h-[182px]"}`}>
 			<div className="container m-auto flex h-16 items-center justify-between">
 				<div className="flex items-center gap-6">
 					<Button
@@ -333,11 +336,13 @@ export default function Header() {
 								<DropdownMenuItem onClick={() => router.push("/wishlist")}>
 									Wishlist
 								</DropdownMenuItem>
-								<DropdownMenuItem
-									onClick={handleLogout}
-									className="text-green-600">
-									Log out
-								</DropdownMenuItem>
+								{!profile.punchout && (
+									<DropdownMenuItem
+										onClick={handleLogout}
+										className="text-green-600">
+										Log out
+									</DropdownMenuItem>
+								)}
 							</DropdownMenuContent>
 						</DropdownMenu>
 					) : (

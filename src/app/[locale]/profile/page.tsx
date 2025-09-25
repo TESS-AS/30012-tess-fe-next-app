@@ -24,7 +24,11 @@ import {
 import { useTranslations } from "next-intl";
 
 import { Dimensions } from "./(components)/dimensions";
+import HoseInspections from "./(components)/hose-inspections";
 import { HoseOrders } from "./(components)/hose-orders";
+import HoseOverview from "./(components)/hose-overview";
+import HoseReplacement from "./(components)/hose-replacement";
+import HoseRiskClass from "./(components)/hose-risk-class";
 import { MineBestillinger } from "./(components)/mine-bestillinger";
 import { OrdreDetaljer } from "./(components)/ordre-detaljer";
 import { OrdreHistorikk } from "./(components)/ordre-historikk";
@@ -155,13 +159,23 @@ export default function ProfilePage() {
 												icon: List,
 											},
 											{
-												href: "hose",
+												href: "hose-oversikt",
 												label: "Oversikt",
 												icon: LockKeyhole,
 											},
 											{
-												href: "hose-settings",
-												label: "Innstillinger",
+												href: "hose-inspections",
+												label: "Inspeksjoner",
+												icon: LockKeyhole,
+											},
+											{
+												href: "hose-replacement",
+												label: "Slangebytte",
+												icon: LockKeyhole,
+											},
+											{
+												href: "hose-risk-class",
+												label: "Risikoklasse",
 												icon: LockKeyhole,
 											},
 											{
@@ -230,8 +244,26 @@ export default function ProfilePage() {
 							<HoseOrders />
 						</TabsContent>
 
+						<TabsContent
+							value="hose-inspections"
+							className="mt-0">
+							<HoseInspections />
+						</TabsContent>
+
 						<TabsContent value="orders">
 							<OrdersTab />
+						</TabsContent>
+
+						<TabsContent value="hose-oversikt">
+							<HoseOverview />
+						</TabsContent>
+
+						<TabsContent value="hose-replacement">
+							<HoseReplacement />
+						</TabsContent>
+
+						<TabsContent value="hose-risk-class">
+							<HoseRiskClass />
 						</TabsContent>
 
 						<TabsContent value="wishlist">
