@@ -27,6 +27,8 @@ export const useSubmitOrder = (
 		try {
 			const response = await salesOrder(payload);
 
+			localStorage.removeItem("selectedHoseRows");
+
 			if (!isPunchoutUser && typeof response !== "string" && response?.order) {
 				await handleArchiveCart();
 				return response.order;

@@ -32,6 +32,8 @@ import { Rekvisisjoner } from "./(components)/rekvisisjoner";
 import { SidebarNav } from "./(components)/sidebar-nav";
 import HoseOverview from "./(components)/hose-overview";
 import HoseInspections from "./(components)/hose-inspections";
+import HoseRiskClass from "./(components)/hose-risk-class";
+import HoseReplacement from "./(components)/hose-replacement";
 
 export default function ProfilePage() {
 	const { setIsAuthOpen } = useAppContext();
@@ -167,6 +169,16 @@ export default function ProfilePage() {
 												icon: LockKeyhole,
 											},
 											{
+												href: "hose-replacement",
+												label: "Slangebytte",
+												icon: LockKeyhole,
+											},
+											{
+												href: "hose-risk-class",
+												label: "Risikoklasse",
+												icon: LockKeyhole,
+											},
+											{
 												href: "support",
 												label: "Support",
 												icon: HelpCircle,
@@ -244,6 +256,14 @@ export default function ProfilePage() {
 
 						<TabsContent value="hose-oversikt">
 							<HoseOverview />
+						</TabsContent>
+
+						<TabsContent value="hose-replacement">
+							<HoseReplacement />
+						</TabsContent>
+
+						<TabsContent value="hose-risk-class">
+							<HoseRiskClass />
 						</TabsContent>
 
 						<TabsContent value="wishlist">
