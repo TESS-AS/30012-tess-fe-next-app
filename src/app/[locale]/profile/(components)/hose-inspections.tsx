@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useGetAssets } from "@/hooks/useGetAssets";
+
 import {
 	Select,
 	SelectContent,
@@ -7,8 +7,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Calendar, MapPin, X } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { useGetAssets } from "@/hooks/useGetAssets";
+import { Calendar, MapPin, X } from "lucide-react";
 
 type InspectionType = "completed" | "planned";
 

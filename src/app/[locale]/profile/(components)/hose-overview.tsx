@@ -1,6 +1,12 @@
-import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useState } from "react";
-import { useGetAssets } from "@/hooks/useGetAssets";
+
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 import {
 	Select,
 	SelectContent,
@@ -8,12 +14,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from "@/components/ui/accordion";
+import { useGetAssets } from "@/hooks/useGetAssets";
+import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
+import { Separator } from "@radix-ui/react-select";
 import {
 	ChevronRight,
 	Ellipsis,
@@ -23,8 +26,6 @@ import {
 	X,
 } from "lucide-react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@radix-ui/react-select";
 
 type Status = "ok" | "warn" | "error";
 

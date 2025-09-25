@@ -24,16 +24,16 @@ import {
 import { useTranslations } from "next-intl";
 
 import { Dimensions } from "./(components)/dimensions";
+import HoseInspections from "./(components)/hose-inspections";
 import { HoseOrders } from "./(components)/hose-orders";
+import HoseOverview from "./(components)/hose-overview";
+import HoseReplacement from "./(components)/hose-replacement";
+import HoseRiskClass from "./(components)/hose-risk-class";
 import { MineBestillinger } from "./(components)/mine-bestillinger";
 import { OrdreDetaljer } from "./(components)/ordre-detaljer";
 import { OrdreHistorikk } from "./(components)/ordre-historikk";
 import { Rekvisisjoner } from "./(components)/rekvisisjoner";
 import { SidebarNav } from "./(components)/sidebar-nav";
-import HoseOverview from "./(components)/hose-overview";
-import HoseInspections from "./(components)/hose-inspections";
-import HoseRiskClass from "./(components)/hose-risk-class";
-import HoseReplacement from "./(components)/hose-replacement";
 
 export default function ProfilePage() {
 	const { setIsAuthOpen } = useAppContext();
