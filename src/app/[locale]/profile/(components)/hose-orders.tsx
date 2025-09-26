@@ -84,13 +84,13 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 	const { setIsCartChanging } = useAppContext();
 
 	const {
-		assets = [],
+		assets,
 		setAssets,
 		pagination,
 		loading,
 		setLoading,
 		fetchAssets,
-		s1Codes = [],
+		s1Codes,
 		s1CodesPagination,
 		fetchS1Codes,
 	} = useGetAssets(
@@ -122,7 +122,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 	const [selectedAgeRanges, setSelectedAgeRanges] = useState<string[]>([]);
 	const ITEMS_PER_PAGE = 10;
 
-	const transformedAssets: HoseOrder[] = (assets ?? []).map((asset: any) => ({
+	const transformedAssets: HoseOrder[] = assets.map((asset: any) => ({
 		id: asset?.hoseLine?.hexagonId?.toString?.() || "",
 		orderId: String(asset?.hoseHeader?.extDocSequenceId ?? ""),
 		kunde_id: asset?.hoseHeader?.customerNumber ?? "",

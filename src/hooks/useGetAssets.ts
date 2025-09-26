@@ -47,6 +47,7 @@ export const useGetAssets = (customerNumber?: string, s1Code?: string) => {
 			search,
 		}: FilterOptions & { search?: string } = {}) => {
 			try {
+				setLoading(true);
 				const result = search
 					? await searchAssets(
 							search,
@@ -74,10 +75,20 @@ export const useGetAssets = (customerNumber?: string, s1Code?: string) => {
 							rejected,
 						);
 
+				setAssets(result.data);
+				setPagination({
+					currentPage: result.meta.page,
+					pageSize: result.meta.pageSize,
+					totalItems: result.meta.totalItems,
+					totalPages: result.meta.totalPages,
+				});
+
 				return result;
 			} catch (error) {
 				setError(error as string);
 				throw error;
+			} finally {
+				setLoading(false);
 			}
 		},
 		[customerNumber, s1Code],
