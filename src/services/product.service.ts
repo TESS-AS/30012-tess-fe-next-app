@@ -1,8 +1,10 @@
+import axiosServer from "@/services/axiosServer";
 import { IProduct } from "@/types/product.types";
 import { PriceResponse } from "@/types/search.types";
 import axios, { AxiosResponse } from "axios";
 
 import axiosInstance from "./axiosClient";
+import axiosClient from "./axiosClient";
 
 interface WarehouseBalance {
 	warehouseNumber: string;
@@ -53,6 +55,16 @@ export async function productFetch(productName: string) {
 		return apires.data;
 	} catch (error) {
 		console.error("Error fetching product:", error);
+		throw error;
+	}
+}
+
+export async function getItemCard(variantNumber: string) {
+	try {
+		const response = await axiosServer.get(`/item/card/${variantNumber}`);
+		return response.data;
+	} catch (error) {
+		console.error(`Error fetching item card for ${variantNumber}:`, error);
 		throw error;
 	}
 }
