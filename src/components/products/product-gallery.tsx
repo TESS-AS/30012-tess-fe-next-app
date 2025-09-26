@@ -31,17 +31,6 @@ export function ProductGallery({ images, className }: ProductGalleryProps) {
 		},
 	);
 
-	const [loadedImages, setLoadedImages] = useState<{ [key: number]: boolean }>(
-		{},
-	);
-
-	const handleImageLoad = (index: number) => {
-		setLoadedImages((prev) => ({
-			...prev,
-			[index]: true,
-		}));
-	};
-
 	if (!images || images.length === 0) {
 		return (
 			<div className="grid grid-cols-12 gap-4">
@@ -55,48 +44,17 @@ export function ProductGallery({ images, className }: ProductGalleryProps) {
 	}
 
 	return (
-		<div className={cn("grid grid-cols-12 gap-4", className)}>
-			{/* Thumbnails */}
-			<div className="col-span-2 flex flex-col gap-4">
-				{images.map((image, index) => (
-					<Button
-						key={image.filename}
-						onClick={() => setSelectedImage(image)}
-						variant="ghost"
-						className={cn(
-							"relative aspect-square h-20 w-20 w-full border-2 p-0",
-							selectedImage.filename === image.filename
-								? "border-[#009640]"
-								: "border-transparent",
-						)}>
-						{!loadedImages[index] && (
-							<Skeleton className="absolute inset-0 z-10" />
-						)}
-						<Image
-							src={image.thumbnail_url || image.url}
-							alt={image.filename}
-							width={100}
-							height={100}
-							quality={60}
-							loading="lazy"
-							className={cn(
-								"h-full w-full rounded-md object-contain transition-all duration-300",
-								!loadedImages[index] && "scale-110 blur-sm",
-							)}
-							onLoad={() => handleImageLoad(index)}
-						/>
-					</Button>
-				))}
-			</div>
-
-			<div className="col-span-10 p-2 shadow-sm">
-				<ZoomImage
-					src={selectedImage.url}
-					alt={selectedImage.filename}
-					width={550}
-					height={400}
-					className="aspect-square"
-				/>
+		<div className={cn("grid grid-cols-12 items-stretch gap-4", className)}>
+			<div className="col-span-12">
+				<div className="rounded-lg border border-gray-200 p-4">
+					<ZoomImage
+						src={selectedImage.url}
+						alt={selectedImage.filename}
+						width={550}
+						height={350}
+						className="aspect-square rounded-lg"
+					/>
+				</div>
 			</div>
 		</div>
 	);

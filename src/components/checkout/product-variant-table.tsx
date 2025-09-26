@@ -32,26 +32,15 @@ import {
 	lockedCols,
 } from "@/constants/productVariantTable";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
-import { useAppContext } from "@/lib/appContext";
-import { addToCart, getCart } from "@/services/carts.service";
 import {
 	calculateItemPrice,
 	loadItemBalanceBatch,
 } from "@/services/product.service";
 import { PriceResponse } from "@/types/search.types";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
-import {
-	Plus,
-	Loader2,
-	Search,
-	ShoppingCart,
-	ChevronUp,
-	ChevronDown,
-	Check,
-} from "lucide-react";
+import { Plus, Search, ChevronUp, ChevronDown, Check } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { toast } from "react-toastify";
 
 import QuantityButtons from "../ui/quantity-buttons";
 
@@ -76,11 +65,15 @@ interface ProductVariantTableProps {
 	variants: ProductVariant[];
 	productNumber: string;
 	hasSearch?: boolean;
+	selectedItemNumber?: string;
+	onSelectVariant?: (itemNumber: string) => void;
 }
 
 export default function ProductVariantTable({
 	variants,
 	productNumber,
+	selectedItemNumber,
+	onSelectVariant,
 	hasSearch = true,
 }: ProductVariantTableProps) {
 	const t = useTranslations();
@@ -88,14 +81,12 @@ export default function ProductVariantTable({
 
 	const [searchQuery, setSearchQuery] = useState<string>("");
 	const [quantities, setQuantities] = useState<Record<number, number>>({});
-	const [loading, setLoading] = useState<Record<number, boolean>>({});
 	const [warehouse, setWarehouse] = useState<Record<number, string>>({});
 	const [isLoading, setIsLoading] = useState(true);
 	const [variantsWithWarehouses, setVariantsWithWarehouses] = useState<
 		ProductVariant[]
 	>([]);
 	const [prices, setPrices] = useState<Record<number, number>>({});
-	const { isCartChanging, setIsCartChanging } = useAppContext();
 
 	const [visibleCols, setVisibleCols] = useState<Record<ColumnKey, boolean>>({
 		image: false,
@@ -424,93 +415,24 @@ export default function ProductVariantTable({
 									)}
 									{visibleCols.cart && (
 										<TableCell>
-											<Button
-												variant="outlineGreen"
-												size="sm"
-												disabled={loading[variant.itemNumber]}
-												className="relative"
-												onClick={async () => {
-													if (!selectedWarehouse) {
-														toast(t("Product.selectWarehouseFirst"), {
-															type: "warning",
-															position: "bottom-right",
-															autoClose: 2000,
-														});
-														return;
-													}
-
-													const selectedWarehouseData =
-														variant.warehouses?.find(
-															(w) => w.warehouseNumber === selectedWarehouse,
-														);
-													if (
-														selectedWarehouseData?.balance === undefined ||
-														selectedWarehouseData.balance === null
-													) {
-														toast(t("Product.noBalanceForWarehouse"), {
-															type: "warning",
-															position: "bottom-right",
-															autoClose: 2000,
-														});
-														return;
-													}
-
-													setLoading((prev) => ({
-														...prev,
-														[variant.itemNumber]: true,
-													}));
-
-													try {
-														const response = await addToCart({
-															productNumber,
-															itemNumber: variant.itemNumber.toString(),
-															quantity: qty,
-															warehouseNumber: selectedWarehouse,
-															companyNumber: "1",
-														});
-														setIsCartChanging(!isCartChanging);
-
-														if (response.message === "Error adding to cart") {
-															throw new Error(response.message);
-														}
-
-														toast(t("Product.addedToCart"), {
-															type: "success",
-															position: "bottom-right",
-															autoClose: 2000,
-														});
-
-														setQuantities((prev) => ({
-															...prev,
-															[variant.itemNumber]: 1,
-														}));
-														await getCart();
-													} catch (err) {
-														console.error("Error adding to cart:", err);
-														toast(t("Product.errorAddingToCart"), {
-															type: "error",
-															position: "bottom-right",
-															autoClose: 2000,
-														});
-													} finally {
-														setLoading((prev) => ({
-															...prev,
-															[variant.itemNumber]: false,
-														}));
-													}
-												}}>
-												{loading[variant.itemNumber] ? (
-													<>
-														<Loader2 className="inline h-4 w-4 animate-spin" />
-														{t("Product.adding")}
-													</>
-												) : (
-													<>
-														<ShoppingCart className="color-[#009640] h-4 w-4" />
-														{t("Product.addToCart")}
-													</>
-												)}
-											</Button>
+											{selectedItemNumber === variant.itemNumber.toString() ? (
+												<Button
+													size="sm"
+													className="flex min-w-[100px] items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700">
+													<Check className="h-4 w-4" />
+													{t("Product.selected")}
+												</Button>
+											) : (
+												<Button
+													size="sm"
+													variant="outline"
+													className="flex min-w-[100px] items-center gap-2 rounded-md border border-green-600 px-4 py-2 text-green-600 hover:bg-green-600 hover:text-white"
+													onClick={() =>
+														onSelectVariant?.(variant.itemNumber.toString())
+													}>
+													{t("Product.select")}
+												</Button>
+											)}
 										</TableCell>
 									)}
 								</TableRow>

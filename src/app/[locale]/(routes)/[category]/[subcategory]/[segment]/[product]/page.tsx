@@ -1,21 +1,11 @@
-import ProductVariantTable from "@/components/checkout/product-variant-table";
-import { ProductBreadcrumbs } from "@/components/products/product-breadcrumbs";
-import { ProductDetails } from "@/components/products/product-details";
-import {
-	ProductDocument,
-	ProductDocuments,
-} from "@/components/products/product-documents";
-import { ProductGallery } from "@/components/products/product-gallery";
-import { ProductInfo } from "@/components/products/product-info";
-import { RelatedProducts } from "@/components/products/related-products";
-import { Separator } from "@/components/ui/separator";
+// app/[locale]/[category]/[product]/page.tsx
 import { getSeoMetadata } from "@/lib/seo";
 import { mockProducts } from "@/mocks/mockProducts";
 import { productFetch } from "@/services/product.service";
-import { Info } from "lucide-react";
 import { notFound } from "next/navigation";
-import { getLocale } from "next-intl/server";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+
+import { ProductPageClient } from "./product-page-client";
 
 export async function generateMetadata({
 	params,
@@ -68,91 +58,22 @@ export default async function ProductPage({
 }) {
 	const locale = await getLocale();
 	const { category, product, segment } = await params;
-	const t = await getTranslations({ locale, namespace: "Product" });
 
 	const _productData = await getProducts(product);
-
 	const [productData] = _productData;
 
 	if (!productData) {
 		return notFound();
 	}
 
-	const productImages = Array.isArray(productData.mediaId)
-		? productData.mediaId
-		: [productData.mediaId];
-
-	// Get localized content
-	const localizedContent = {
-		name: locale === "en" ? productData.productNameEn : productData.productName,
-		description:
-			locale === "en" ? productData.shortDescEn : productData.shortDescNo,
-		technicalInfo:
-			locale === "en"
-				? productData.technicalInfoEn
-				: productData.technicalInfoNo,
-		application:
-			locale === "en" ? productData.applicationEn : productData.applicationNo,
-		users: locale === "en" ? productData.usersEn : productData.usersNo,
-		remarks: locale === "en" ? productData.remarksEn : productData.remarksNo,
-		usp: productData.usp,
-	};
+	const t = await getTranslations({ locale, namespace: "Product" });
 
 	return (
-		<div className="container mx-auto space-y-12 px-4 py-8">
-			<ProductBreadcrumbs
-				segment={segment}
-				productName={localizedContent.name}
-			/>
-			<div className="grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-2">
-				<ProductGallery images={productImages} />
-
-				<div className="flex flex-col gap-2">
-					<ProductInfo
-						name={localizedContent.name}
-						category={category}
-						price={productData.price}
-					/>
-
-					{/*<ProductActions*/}
-					{/*	items={productData.items}*/}
-					{/*	productNumber={productData.product_number}*/}
-					{/*/>*/}
-
-					<ProductDetails
-						description={localizedContent.description}
-						attributes={productData.attributes}
-						productNumber={productData.productNumber}
-						technicalInfo={localizedContent.technicalInfo}
-						application={localizedContent.application}
-						users={localizedContent.users}
-						remarks={localizedContent.remarks}
-						usp={localizedContent.usp}
-					/>
-				</div>
-			</div>
-
-			<div className="mb-1">
-				<h2 className="pb-5 text-sm font-medium text-gray-500">
-					{t("variantTitle")}
-				</h2>
-				<Separator />
-				<ProductVariantTable
-					variants={productData.items}
-					productNumber={productData.productNumber}
-				/>
-			</div>
-			<div className="flex items-center gap-2 border-t border-t-1 pt-2 text-sm font-medium text-gray-500">
-				<Info className="h-3 w-3 text-green-900" />
-				<p>{t("stockInfo")}</p>
-			</div>
-			<ProductDocuments
-				documents={productData.documents as ProductDocument[] | undefined}
-			/>
-			<RelatedProducts
-				products={productData.productToProductReference}
-				category={category}
-			/>
-		</div>
+		<ProductPageClient
+			locale={locale}
+			category={category}
+			segment={segment}
+			productData={productData}
+		/>
 	);
 }
