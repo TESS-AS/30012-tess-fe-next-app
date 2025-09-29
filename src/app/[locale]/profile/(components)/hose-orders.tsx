@@ -12,8 +12,6 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
 import {
 	Select,
 	SelectContent,
@@ -30,8 +28,6 @@ import { postCartKit } from "@/services/carts.service";
 import {
 	Funnel,
 	Paperclip,
-	PlusIcon,
-	Search,
 	ShoppingCart,
 	FileText,
 	Printer,
@@ -43,11 +39,14 @@ import {
 	MapPin,
 	X,
 } from "lucide-react";
-import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
+import { CartAddedModal } from "./cart-added-modal";
+import { HoseSearchBar } from "./hose-search-bar";
+import { HoseColumnsDropdown } from "./hose-columns-dropdown";
+import { HoseFiltersDropdown } from "./hose-filters-dropdown";
 
 export interface HoseOrder {
 	orderId: string;
@@ -556,82 +555,18 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 	return (
 		<>
-			<Modal
-				className="max-w-[400px]"
+			<CartAddedModal
 				open={cartModalOpen}
-				onOpenChange={setCartModalOpen}>
-				<div>
-					<ModalHeader>
-						<ModalTitle className="flex items-center gap-2">
-							<Image
-								src="/icons/check-filled.svg"
-								alt="Check"
-								width={20}
-								height={20}
-							/>
-							<span>
-								{selectedItems.length}{" "}
-								{selectedItems.length === 1 ? "vare" : "varer"} lagt til i
-								handlekurv
-							</span>
-						</ModalTitle>
-					</ModalHeader>
-					<div className="space-y-4 py-4">
-						<div className="space-y-2">
-							{selectedItems.length === 0 ? (
-								<div className="text-sm text-gray-600">Ingen varer valgt</div>
-							) : (
-								<>
-									{selectedItems
-										.slice(0, showAllItems ? undefined : 5)
-										.map((item, index) => (
-											<div
-												key={index}
-												className="text-sm text-gray-600">
-												1 × {item.beskrivelse}
-											</div>
-										))}
-									{selectedItems.length > 5 && (
-										<button
-											onClick={() => setShowAllItems(!showAllItems)}
-											className="mt-2 flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
-											{showAllItems ? (
-												<>
-													Vis færre{" "}
-													<ChevronDown className="h-4 w-4 rotate-180 transform" />
-												</>
-											) : (
-												<>
-													Vis alle <ChevronDown className="h-4 w-4" />
-												</>
-											)}
-										</button>
-									)}
-								</>
-							)}
-						</div>
-					</div>
-					<div className="flex">
-						<Button
-							variant="default"
-							className="w-full bg-[#1C6D2C] text-white hover:bg-[#164B1F]"
-							disabled={isNavigating}
-							onClick={async () => {
-								setCartModalOpen(false);
-								await handleBulkAction("cart");
-							}}>
-							{isNavigating ? (
-								<>
-									<span className="mr-2">Navigerer til handlekurv</span>
-									<Loader2 className="h-4 w-4 animate-spin" />
-								</>
-							) : (
-								"Til handlekurven"
-							)}
-						</Button>
-					</div>
-				</div>
-			</Modal>
+				onOpenChange={setCartModalOpen}
+				selectedItems={selectedItems}
+				showAllItems={showAllItems}
+				setShowAllItems={setShowAllItems}
+				isNavigating={isNavigating}
+				onConfirm={async () => {
+					setCartModalOpen(false);
+					await handleBulkAction("cart");
+				}}
+			/>
 
 			<SupportDialog
 				open={supportOpen}
@@ -772,347 +707,52 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 				<div className="rounded-lg border border-[#C1C4C2] bg-white">
 					<div className="flex items-start justify-between space-y-6 p-6">
-						<div className="relative flex w-full max-w-[480px]">
-							<Search className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-[#5A615D]" />
-							<Input
-								placeholder="Søk etter ID nummer, ordrenummer, fartøy eller utstyr..."
-								value={searchQuery}
-								onChange={(e) => setSearchQuery(e.target.value)}
-								onKeyDown={(e) => {
-									if (e.key === "Enter") {
-										fetchAssets({
-											page: 1,
-											pageSize: ITEMS_PER_PAGE,
-											search: searchQuery,
-											...getActiveFilters(),
-										});
-									}
-								}}
-								className="font-sm h-10 flex-1 rounded-md border border-[#8A8F8C] bg-[#F8F9F8] pr-24 pl-12 text-base text-[#5A615D]"
-							/>
-							{searchQuery && (
-								<button
-									type="button"
-									onClick={() => {
-										setSearchQuery("");
-										setSelectedRows([]);
-										localStorage.removeItem("selectedHoseRows");
-										setSelectedFilters([]);
-										setSelectedAgeRanges([]);
-										fetchAssets({
-											page: 1,
-											pageSize: ITEMS_PER_PAGE,
-										});
-									}}
-									className="absolute top-1/2 right-24 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
-									<X className="h-4 w-4 text-[#5A615D]" />
-									<span className="sr-only">Fjern søk</span>
-								</button>
-							)}
-							<Button
-								type="button"
-								onClick={() => {
-									fetchAssets({
-										page: 1,
-										pageSize: ITEMS_PER_PAGE,
-										search: searchQuery,
-										...getActiveFilters(),
-									});
-								}}
-								className="absolute top-1/2 right-0 h-10 -translate-y-1/2 rounded-none rounded-r-md border-1 border-l-2 border-[#8A8F8C] bg-white px-4 font-medium text-[#0F1912] hover:bg-white">
-								Søk
-							</Button>
-						</div>
+						<HoseSearchBar
+							value={searchQuery}
+							onChange={setSearchQuery}
+							onSearch={() =>
+								fetchAssets({
+									page: 1,
+									pageSize: ITEMS_PER_PAGE,
+									search: searchQuery,
+									...getActiveFilters(),
+								})
+							}
+							onClear={() => {
+								setSearchQuery("");
+								setSelectedRows([]);
+								localStorage.removeItem("selectedHoseRows");
+								setSelectedFilters([]);
+								setSelectedAgeRanges([]);
+								fetchAssets({ page: 1, pageSize: ITEMS_PER_PAGE });
+							}}
+						/>
 
 						<div className="flex items-center space-x-4">
-							<div className="flex items-center">
-								<DropdownMenu>
-									<DropdownMenuTrigger className="flex w-[200px] items-center justify-between rounded-md border border-[#C1C4C2] bg-white px-3 py-2 text-[#5A615D]">
-										<div className="flex items-center gap-2">
-											<PlusIcon size={16} />
-											<span>Legg til kolonne</span>
-										</div>
-										<ChevronDown
-											size={16}
-											className="text-[#5A615D]"
-										/>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent className="w-[300px] rounded-2xl bg-white p-4 shadow-lg">
-										<div className="space-y-2">
-											{columnOptions.map((option) => (
-												<DropdownMenuItem
-													key={option}
-													onSelect={(e) => {
-														e.preventDefault();
-														handleColumnChange(option);
-													}}
-													className="rounded-md p-0 focus:bg-gray-50">
-													<div className="flex items-center space-x-2">
-														<Checkbox
-															checked={selectedColumns.includes(option)}
-														/>
-														<span className="text-gray-700">{option}</span>
-													</div>
-												</DropdownMenuItem>
-											))}
-										</div>
-									</DropdownMenuContent>
-								</DropdownMenu>
-							</div>
+							<HoseColumnsDropdown
+								options={columnOptions}
+								selected={selectedColumns}
+								onToggle={handleColumnChange}
+							/>
 
-							<div className="flex items-center">
-								<div className="relative w-[160px]">
-									<DropdownMenu>
-										<DropdownMenuTrigger className="flex w-full items-center justify-between rounded-md border border-[#C1C4C2] bg-white px-3 py-2 text-[#5A615D]">
-											<div className="flex items-center gap-2">
-												<Funnel
-													size={16}
-													className="text-[#005522]"
-												/>
-												<span>Filter</span>
-											</div>
-											<ChevronDown
-												size={16}
-												className="text-[#5A615D]"
-											/>
-										</DropdownMenuTrigger>
-
-										<DropdownMenuContent className="w-[300px] rounded-2xl bg-white p-4 shadow-lg">
-											<div className="space-y-5 text-sm">
-												<div>
-													<h4 className="mb-2 font-semibold text-[#0F1912]">
-														Inspeksjon
-													</h4>
-													<div className="space-y-2">
-														<DropdownMenuItem
-															className="rounded-md p-0 focus:bg-gray-50"
-															onClick={(e) => {
-																e.stopPropagation();
-																handleFilterChange("rejected");
-															}}>
-															<div className="flex items-center gap-2">
-																<Checkbox
-																	checked={selectedFilters.includes("rejected")}
-																/>
-																<span>Underkjente inspeksjoner</span>
-															</div>
-														</DropdownMenuItem>
-
-														<DropdownMenuItem
-															className="rounded-md p-0 focus:bg-gray-50"
-															onClick={(e) => {
-																e.stopPropagation();
-																handleFilterChange("approved");
-															}}>
-															<div className="flex items-center gap-2">
-																<Checkbox
-																	checked={selectedFilters.includes("approved")}
-																/>
-																<span>Med merknader</span>
-															</div>
-														</DropdownMenuItem>
-
-														<DropdownMenuItem
-															className="rounded-md p-0 focus:bg-gray-50"
-															onClick={(e) => {
-																e.stopPropagation();
-																handleFilterChange("overdue");
-															}}>
-															<div className="flex items-center gap-2">
-																<Checkbox
-																	checked={selectedFilters.includes("overdue")}
-																/>
-																<span>Forfalt</span>
-															</div>
-														</DropdownMenuItem>
-													</div>
-												</div>
-
-												<div>
-													<h4 className="mb-2 font-semibold text-[#0F1912]">
-														Slangebytte
-													</h4>
-													<div className="space-y-2">
-														<DropdownMenuItem
-															className="rounded-md p-0 focus:bg-gray-50"
-															onClick={(e) => {
-																e.stopPropagation();
-																handleFilterChange("aktive_midlertidige");
-															}}>
-															<div className="flex items-center gap-2">
-																<Checkbox
-																	checked={selectedFilters.includes(
-																		"aktive_midlertidige",
-																	)}
-																/>
-																<span>Aktive midlertidige slangebytter</span>
-															</div>
-														</DropdownMenuItem>
-
-														<DropdownMenuItem
-															className="rounded-md p-0 focus:bg-gray-50"
-															onClick={(e) => {
-																e.stopPropagation();
-																handleFilterChange("replacementDue");
-															}}>
-															<div className="flex items-center gap-2">
-																<Checkbox
-																	checked={selectedFilters.includes(
-																		"replacementDue",
-																	)}
-																/>
-																<span>Forfaller om mindre enn 6 måneder</span>
-															</div>
-														</DropdownMenuItem>
-													</div>
-												</div>
-
-												<div>
-													<h4 className="mb-2 font-semibold text-[#0F1912]">
-														Etter alder
-													</h4>
-													<div className="space-y-2">
-														<DropdownMenuItem
-															className="rounded-md p-0 focus:bg-gray-50"
-															onClick={async (e) => {
-																e.stopPropagation();
-																const newRanges = selectedAgeRanges.includes(
-																	"5-6",
-																)
-																	? selectedAgeRanges.filter((r) => r !== "5-6")
-																	: [...selectedAgeRanges, "5-6"];
-																setSelectedAgeRanges(newRanges);
-																await fetchAssets({
-																	page: 1,
-																	pageSize: pagination.pageSize,
-																	ageSize: newRanges.join(","),
-																	...getActiveFilters(),
-																	...(searchQuery
-																		? { search: searchQuery }
-																		: {}),
-																});
-															}}>
-															<div className="flex items-center gap-2">
-																<Checkbox
-																	checked={selectedAgeRanges.includes("5-6")}
-																/>
-																<span>5-6 år gamle</span>
-															</div>
-														</DropdownMenuItem>
-
-														<DropdownMenuItem
-															className="rounded-md p-0 focus:bg-gray-50"
-															onClick={async (e) => {
-																e.stopPropagation();
-																const newRanges = selectedAgeRanges.includes(
-																	"7-8",
-																)
-																	? selectedAgeRanges.filter((r) => r !== "7-8")
-																	: [...selectedAgeRanges, "7-8"];
-																setSelectedAgeRanges(newRanges);
-																await fetchAssets({
-																	page: 1,
-																	pageSize: pagination.pageSize,
-																	ageSize: newRanges.join(","),
-																	...getActiveFilters(),
-																	...(searchQuery
-																		? { search: searchQuery }
-																		: {}),
-																});
-															}}>
-															<div className="flex items-center gap-2">
-																<Checkbox
-																	checked={selectedAgeRanges.includes("7-8")}
-																/>
-																<span>7-8 år gamle</span>
-															</div>
-														</DropdownMenuItem>
-
-														<DropdownMenuItem
-															className="rounded-md p-0 focus:bg-gray-50"
-															onClick={async (e) => {
-																e.stopPropagation();
-																const newRanges = selectedAgeRanges.includes(
-																	"8-10",
-																)
-																	? selectedAgeRanges.filter(
-																			(r) => r !== "8-10",
-																		)
-																	: [...selectedAgeRanges, "8-10"];
-																setSelectedAgeRanges(newRanges);
-																await fetchAssets({
-																	page: 1,
-																	pageSize: pagination.pageSize,
-																	ageSize: newRanges.join(","),
-																	...getActiveFilters(),
-																	...(searchQuery
-																		? { search: searchQuery }
-																		: {}),
-																});
-															}}>
-															<div className="flex items-center gap-2">
-																<Checkbox
-																	checked={selectedAgeRanges.includes("8-10")}
-																/>
-																<span>8-10 år gamle</span>
-															</div>
-														</DropdownMenuItem>
-
-														<DropdownMenuItem
-															className="rounded-md p-0 focus:bg-gray-50"
-															onClick={async (e) => {
-																e.stopPropagation();
-																const newRanges = selectedAgeRanges.includes(
-																	"10+",
-																)
-																	? selectedAgeRanges.filter((r) => r !== "10+")
-																	: [...selectedAgeRanges, "10+"];
-																setSelectedAgeRanges(newRanges);
-																await fetchAssets({
-																	page: 1,
-																	pageSize: pagination.pageSize,
-																	ageSize: newRanges.join(","),
-																	...getActiveFilters(),
-																	...(searchQuery
-																		? { search: searchQuery }
-																		: {}),
-																});
-															}}>
-															<div className="flex items-center gap-2">
-																<Checkbox
-																	checked={selectedAgeRanges.includes("10+")}
-																/>
-																<span>10+ år gamle</span>
-															</div>
-														</DropdownMenuItem>
-													</div>
-												</div>
-
-												<div>
-													<h4 className="mb-2 font-semibold text-[#0F1912]">
-														Nødslanger
-													</h4>
-													<div className="space-y-2">
-														<DropdownMenuItem
-															className="rounded-md p-0 focus:bg-gray-50"
-															onClick={(e) => {
-																e.stopPropagation();
-																handleFilterChange("spareSet");
-															}}>
-															<div className="flex items-center gap-2">
-																<Checkbox
-																	checked={selectedFilters.includes("spareSet")}
-																/>
-																<span>Nødslanger</span>
-															</div>
-														</DropdownMenuItem>
-													</div>
-												</div>
-											</div>
-										</DropdownMenuContent>
-									</DropdownMenu>
-								</div>
-							</div>
+							<HoseFiltersDropdown
+								selectedFilters={selectedFilters}
+								selectedAgeRanges={selectedAgeRanges}
+								onToggleFilter={(value) => handleFilterChange(value)}
+								onToggleAgeRange={async (value) => {
+									const newRanges = selectedAgeRanges.includes(value)
+										? selectedAgeRanges.filter((r) => r !== value)
+										: [...selectedAgeRanges, value];
+									setSelectedAgeRanges(newRanges);
+									await fetchAssets({
+										page: 1,
+										pageSize: pagination.pageSize,
+										ageSize: newRanges.join(","),
+										...getActiveFilters(),
+										...(searchQuery ? { search: searchQuery } : {}),
+									});
+								}}
+							/>
 						</div>
 					</div>
 

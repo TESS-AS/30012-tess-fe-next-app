@@ -69,8 +69,8 @@ export default function CheckoutPage() {
 
 	const [orderData, setOrderData] = useCheckoutOrderData(
 		{
-			cart: cartItems?.cart || [],
-			cartKit: cartItems?.cartKit || [],
+			cart: cartItems?.cart as CartLine[],
+			cartKit: cartItems?.cartKit as CartKitItem[],
 		},
 		profile,
 		calculatedPrices,
