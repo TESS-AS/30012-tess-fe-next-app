@@ -26,6 +26,7 @@ import type { PayPalScriptOptions } from "@paypal/paypal-js";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
+import { CartKitItem, CartLine } from "@/types/carts.types";
 
 const initialOptions: PayPalScriptOptions = {
 	clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "",
@@ -67,7 +68,10 @@ export default function CheckoutPage() {
 	);
 
 	const [orderData, setOrderData] = useCheckoutOrderData(
-		cartItems?.cart || [],
+		{
+			cart: cartItems?.cart || [],
+			cartKit: cartItems?.cartKit || [],
+		},
 		profile,
 		calculatedPrices,
 	);

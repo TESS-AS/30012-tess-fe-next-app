@@ -316,7 +316,10 @@
 		"punchoutCartStep2": "Fullfør ordre",
 		"punchoutCartStep3": "Bekreft",
 		"or": "eller",
-		"continueShopping": "Fortsett å handle"
+		"continueShopping": "Fortsett å handle",
+		"termsText": "Jeg godtar",
+		"termsLink": "vilkårene",
+		"termsEnd": "for kjøp"
 	},
 	"Checkout": {
 		"modals": {

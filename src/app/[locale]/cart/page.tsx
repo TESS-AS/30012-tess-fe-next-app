@@ -30,7 +30,10 @@ import {
 	loadItemBalanceBatch,
 	WarehouseBatch as ProductWarehouseBatch,
 } from "@/services/product.service";
-import { WarehouseBatch as CartWarehouseBatch } from "@/types/carts.types";
+import {
+	CartLine,
+	WarehouseBatch as CartWarehouseBatch,
+} from "@/types/carts.types";
 import { RawCategory } from "@/types/categories.types";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import {
@@ -94,7 +97,10 @@ const CartPage = () => {
 	} = useAppContext();
 
 	const [orderData] = useCheckoutOrderData(
-		cartItems?.cart || [],
+		{
+			cart: cartItems?.cart || [],
+			cartKit: cartItems?.cartKit || [],
+		},
 		profile,
 		calculatedPrices,
 	);

@@ -313,7 +313,10 @@
 		"punchoutCartStep2": "Complete order",
 		"punchoutCartStep3": "Confirm",
 		"or": "or",
-		"continueShopping": "Continue shopping"
+		"continueShopping": "Continue shopping",
+		"termsText": "I accept",
+		"termsLink": "terms",
+		"termsEnd": "for purchase"
 	},
 	"Checkout": {
 		"modals": {

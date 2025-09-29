@@ -108,15 +108,15 @@ export default function OrderSummary({
 							<label
 								htmlFor="terms"
 								className="cursor-pointer text-sm text-[#0F1912]">
-								{t("Jeg godtar ")}
+								{t("OrderSummary.termsText")}
 								<a
 									href="/vilkar"
 									className="text-[#009640] underline hover:text-[#009640]/80"
 									target="_blank"
 									rel="noopener noreferrer">
-									{t("vilkårene")}
+									{t("OrderSummary.termsLink")}
 								</a>
-								{t(" for kjøp")}
+								{t("OrderSummary.termsEnd")}
 							</label>
 						</div>
 					)}
