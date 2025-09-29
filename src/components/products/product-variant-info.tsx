@@ -14,6 +14,7 @@ import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
 import { addToCart, getCart } from "@/services/carts.service";
 import { calculateItemPrice } from "@/services/product.service";
+import { useProductTabs } from "@/stores/useProductTabs";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import { ShoppingCart, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -43,6 +44,13 @@ export function ProductVariantInfo({
 	const [price, setPrice] = useState<number | null>(null);
 	const [loadingPrice, setLoadingPrice] = useState(false);
 	const [adding, setAdding] = useState(false);
+	const { setActiveTab } = useProductTabs();
+
+	const handleSeeAllVariants = () => {
+		setActiveTab("variants");
+		const target = document.querySelector("#product-table-details");
+		target?.scrollIntoView({ behavior: "smooth" });
+	};
 
 	const { data: profile } = useGetProfileData();
 
@@ -151,8 +159,14 @@ export function ProductVariantInfo({
 	return (
 		<div className="space-y-3">
 			<div className="space-y-3 rounded-md border border-gray-200 bg-gray-50 p-4">
-				<h3 className="text-lg font-semibold text-[#0F1912]">
+				<h3 className="flex items-center justify-between text-lg font-semibold text-[#0F1912]">
 					{t("variantTitle")}
+					<button
+						type="button"
+						onClick={handleSeeAllVariants}
+						className="cursor-pointer text-sm font-medium text-green-600 hover:underline">
+						{t("seeAllVariants")}
+					</button>
 				</h3>
 
 				{isLoading && <p className="text-gray-500">{t("loadingVariant")}</p>}

@@ -26,8 +26,9 @@
 		"viewAll": "Se alle kategorier"
 	},
 	"Product": {
-		"notFound": "Produkt ikke funnet",
-        "copied": "Kopiert!",
+      "notFound": "Produkt ikke funnet",
+      "seeAllVariants": "Se alle varianter",
+      "copied": "Kopiert!",
 		"productDescription": "Produktbeskrivelse",
 		"selectSize": "Velg størrelse",
 		"selectedSize": "Størrelse: {size}",

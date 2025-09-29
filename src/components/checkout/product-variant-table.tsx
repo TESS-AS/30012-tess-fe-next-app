@@ -122,27 +122,36 @@ export default function ProductVariantTable({
 
 	useEffect(() => {
 		const loadPrices = async () => {
-			if (!variants?.length) return;
+			if (!variants?.length || !profile) return;
 
-			const priceRequests = variants.map((variant) => ({
-				itemNumber: variant.itemNumber.toString(),
-				quantity: 1,
-				warehouseNumber: profile?.defaultWarehouseNumber || "",
-			}));
+			const newPrices: Record<number, number> = {};
 
-			const priceResults = await calculateItemPrice(
-				priceRequests,
-				profile?.defaultCustomerNumber,
-				profile?.defaultCompanyNumber,
-			);
+			for (const variant of variants) {
+				try {
+					const [priceResult] = await calculateItemPrice(
+						[
+							{
+								itemNumber: variant.itemNumber.toString(),
+								quantity: 1,
+								warehouseNumber: profile.defaultWarehouseNumber || "",
+							},
+						],
+						profile.defaultCustomerNumber,
+						profile.defaultCompanyNumber,
+					);
 
-			priceResults.forEach((item: PriceResponse) => {
-				setPrices((prev) => ({
-					...prev,
-					[item.itemNumber]: item.bestPrice || 0,
-				}));
-			});
+					if (priceResult) {
+						newPrices[variant.itemNumber] = priceResult.bestPrice || 0;
+					}
+				} catch (err) {
+					console.error("Price fetch failed for", variant.itemNumber, err);
+					newPrices[variant.itemNumber] = 0;
+				}
+			}
+
+			setPrices(newPrices);
 		};
+
 		loadPrices();
 	}, [variants, profile]);
 
