@@ -1,5 +1,7 @@
 import { Category, RawCategory } from "@/types/categories.types";
+import { SidebarNavItem } from "@/types/sidebar.types";
 import { clsx, type ClassValue } from "clsx";
+import { StaticImageData } from "next/image";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -59,4 +61,13 @@ export function formatUrlToDisplayName(urlString: string): string {
 			return word[0].toUpperCase() + word.slice(1);
 		})
 		.join(" ");
+}
+
+export function isImageSource(
+	icon: SidebarNavItem["icon"],
+): icon is string | StaticImageData {
+	return (
+		typeof icon === "string" ||
+		(typeof icon === "object" && icon !== null && "src" in icon)
+	);
 }

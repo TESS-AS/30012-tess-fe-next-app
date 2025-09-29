@@ -51,7 +51,7 @@ export default function ProfilePage() {
 			SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
 		) {
 			setActiveMode("hose");
-			setActiveTab("hose-orders");
+			setActiveTab("hose-oversikt");
 		} else {
 			setActiveMode("ehandel");
 			setActiveTab("mine-bestillinger");
@@ -63,7 +63,7 @@ export default function ProfilePage() {
 		if (mode === "ehandel") {
 			setActiveTab("mine-bestillinger");
 		} else if (mode === "hose") {
-			setActiveTab("hose-orders");
+			setActiveTab("hose-oversikt");
 		}
 	};
 	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -154,34 +154,49 @@ export default function ProfilePage() {
 										]
 									: [
 											{
-												href: "hose-orders",
-												label: "Slanger/utstyr",
-												icon: List,
-											},
-											{
 												href: "hose-oversikt",
 												label: "Oversikt",
-												icon: LockKeyhole,
+												icon: "/icons/profile/navbar/overview.svg",
+											},
+											{
+												href: "hose-orders",
+												label: "Slanger/utstyr",
+												icon: "/icons/profile/navbar/list.svg",
 											},
 											{
 												href: "hose-inspections",
 												label: "Inspeksjoner",
-												icon: LockKeyhole,
+												icon: "/icons/profile/navbar/inspectioner.svg",
 											},
 											{
 												href: "hose-replacement",
 												label: "Slangebytte",
-												icon: LockKeyhole,
+												icon: "/icons/profile/navbar/hose-changer.svg",
 											},
 											{
 												href: "hose-risk-class",
 												label: "Risikoklasse",
-												icon: LockKeyhole,
+												icon: "/icons/profile/navbar/risk-classes.svg",
+											},
+											{
+												href: "hose-requests",
+												label: "Forespørsler",
+												icon: "/icons/profile/navbar/requirments.svg",
+											},
+											{
+												href: "hose-activities",
+												label: "Siste aktiviteter",
+												icon: "/icons/profile/navbar/activities.svg",
+											},
+											{
+												href: "hose-settings",
+												label: "Innstillinger",
+												icon: "/icons/profile/navbar/settings.svg",
 											},
 											{
 												href: "support",
 												label: "Support",
-												icon: HelpCircle,
+												icon: "/icons/profile/navbar/support.svg",
 											},
 											{
 												href: "logout",

@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import { DataTable } from "@/components/ui/data-table";
+//
 import {
 	Select,
 	SelectContent,
@@ -11,7 +10,17 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { ChevronDown, MapPin, X } from "lucide-react";
+import {
+	ChevronDown,
+	ChevronRight,
+	CircleAlert,
+	MapPin,
+	Settings,
+	X,
+} from "lucide-react";
+import { NotificationCard } from "@/components/ui/notification-card";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
 
 type ReplacementData = {
 	orderId: string;
@@ -24,35 +33,59 @@ type ReplacementData = {
 	cost?: string;
 };
 
-const mockData: ReplacementData[] = [
+type Group = {
+	name: string;
+	rows: ReplacementData[];
+	estimatedCost?: string;
+};
+
+const groups: Group[] = [
 	{
-		orderId: "1",
-		structure: "Anchor Mooring Winch 01",
-		"2025": 12,
-		"2026": 4,
-		"2027": 0,
-		"2028": 0,
-		total: 16,
+		name: "Floatel Endurance",
+		rows: [
+			{
+				orderId: "1",
+				structure: "Anchor Mooring Winch 01",
+				"2025": 12,
+				"2026": 4,
+				"2027": 0,
+				"2028": 0,
+				total: 16,
+			},
+			{
+				orderId: "2",
+				structure: "Anchor Mooring Winch 02",
+				"2025": 12,
+				"2026": 4,
+				"2027": 0,
+				"2028": 0,
+				total: 16,
+			},
+			{
+				orderId: "3",
+				structure: "Anchor Mooring Winch 02",
+				"2025": 12,
+				"2026": 4,
+				"2027": 0,
+				"2028": 0,
+				total: 16,
+			},
+			{
+				orderId: "total_fe",
+				structure: "Floatel Endurance Total",
+				"2025": 1195,
+				"2026": 1002,
+				"2027": 104,
+				"2028": 44,
+				total: 2345,
+			},
+		],
+		estimatedCost: "14.500,-",
 	},
-	{
-		orderId: "2",
-		structure: "Anchor Mooring Winch 02",
-		"2025": 12,
-		"2026": 4,
-		"2027": 0,
-		"2028": 0,
-		total: 16,
-	},
-	{
-		orderId: "3",
-		structure: "Floatel Endurance Total",
-		"2025": 1195,
-		"2026": 1002,
-		"2027": 104,
-		"2028": 44,
-		total: 2345,
-		cost: "14.500,-",
-	},
+	{ name: "Floatel Reliance", rows: [] },
+	{ name: "Floatel Superior", rows: [] },
+	{ name: "Floatel Triumph", rows: [] },
+	{ name: "Floatel Victory", rows: [] },
 ];
 
 const mockLocations = [
@@ -64,7 +97,26 @@ const mockLocations = [
 ];
 
 const HoseReplacement = () => {
+	const t = useTranslations();
+	const [notificationCard, setNotificationCard] = useState(true);
 	const [selectedLocation, setSelectedLocation] = useState<string>("");
+	const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
+		{
+			"Floatel Endurance": true,
+		},
+	);
+
+	const toggleGroup = (name: string) =>
+		setExpandedGroups((prev) => ({ ...prev, [name]: !prev[name] }));
+
+	const renderYearCell = (value: number) => (
+		<button
+			type="button"
+			className="inline-flex cursor-pointer items-center text-[#009640] hover:opacity-80">
+			{value}
+			<ChevronRight className="h-4 w-4" />
+		</button>
+	);
 
 	return (
 		<div className="space-y-6">
@@ -110,101 +162,145 @@ const HoseReplacement = () => {
 
 			<div className="rounded-lg border border-[#C1C4C2] bg-white">
 				<div className="p-6">
-					<div className="mb-4 rounded-lg bg-[#FFF9E6] p-4">
-						<p className="flex items-center gap-2 text-sm text-[#5A615D]">
-							Estimerte priser – ikke endelig kostnad
-						</p>
-						<p className="mt-1 text-sm text-[#5A615D]">
-							Priser som vises er veiledende for budsjetteringsformål og er ikke
-							justert for eventuelle fremtidige prisendringer. Prisene inkluderer
-							ikke frakt og eventuelle tjenester som montering mv.
-						</p>
-					</div>
+					{notificationCard && (
+						<NotificationCard
+							className="bg-[#FDFDEA]"
+							icon={<CircleAlert className="h-4 w-4" />}
+							title={t("Cart.outOfStock")}
+							message={t("Cart.outOfStockMessage")}
+							onClose={() => setNotificationCard(false)}
+						/>
+					)}
 
-					<DataTable<ReplacementData>
-						columns={[
-							{
-								key: "structure",
-								header: "STRUKTUR (S1+S2)",
-								cell: (row: ReplacementData) => (
-									<span className={row.cost ? "font-medium" : ""}>
-										{row.structure}
-									</span>
-								),
-							},
-							{
-								key: "2025",
-								header: () => (
-									<div className="flex items-center gap-1">
-										2025
-										<ChevronDown className="h-4 w-4" />
-									</div>
-								),
-								cell: (row: ReplacementData) => (
-									<span className={row.cost ? "font-medium" : ""}>
-										{row["2025"]}
-									</span>
-								),
-							},
-							{
-								key: "2026",
-								header: () => (
-									<div className="flex items-center gap-1">
-										2026
-										<ChevronDown className="h-4 w-4" />
-									</div>
-								),
-								cell: (row: ReplacementData) => (
-									<span className={row.cost ? "font-medium" : ""}>
-										{row["2026"]}
-									</span>
-								),
-							},
-							{
-								key: "2027",
-								header: () => (
-									<div className="flex items-center gap-1">
-										2027
-										<ChevronDown className="h-4 w-4" />
-									</div>
-								),
-								cell: (row: ReplacementData) => (
-									<span className={row.cost ? "font-medium" : ""}>
-										{row["2027"]}
-									</span>
-								),
-							},
-							{
-								key: "2028",
-								header: () => (
-									<div className="flex items-center gap-1">
-										2028
-										<ChevronDown className="h-4 w-4" />
-									</div>
-								),
-								cell: (row: ReplacementData) => (
-									<span className={row.cost ? "font-medium" : ""}>
-										{row["2028"]}
-									</span>
-								),
-							},
-							{
-								key: "total",
-								header: "TOTAL",
-								cell: (row: ReplacementData) => (
-									<span className={row.cost ? "font-medium" : ""}>
-										{row.total}
-									</span>
-								),
-							},
-						]}
-						data={mockData}
-						className="w-full"
-						currentPage={1}
-						totalPages={1}
-						totalItems={mockData.length}
-						itemsPerPage={10}
-					/>
+					<div className="mt-4">
+						<div className="grid [grid-template-columns:3fr_1fr_1fr_1fr_1fr_1fr] items-center rounded-t-lg border-b border-[#E7E9E8] bg-[#F8F9F8] p-4 text-xs font-medium text-[#5A615D]">
+							<div className="ps-6">STRUKTUR (S1+S2)</div>
+							<div className="flex items-center gap-1">
+								2025
+								<Image
+									src="/icons/toggle-caret.svg"
+									alt="Chevron down"
+									width={8}
+									height={8}
+								/>
+							</div>
+							<div className="flex items-center gap-1">
+								2026
+								<Image
+									src="/icons/toggle-caret.svg"
+									alt="Chevron down"
+									width={8}
+									height={8}
+								/>
+							</div>
+							<div className="flex items-center gap-1">
+								2027
+								<Image
+									src="/icons/toggle-caret.svg"
+									alt="Chevron down"
+									width={8}
+									height={8}
+								/>
+							</div>
+							<div className="flex items-center gap-1">
+								2028
+								<Image
+									src="/icons/toggle-caret.svg"
+									alt="Chevron down"
+									width={8}
+									height={8}
+								/>
+							</div>
+							<div>TOTAL</div>
+						</div>
+
+						<div className="divide-y divide-[#E7E9E8]">
+							{groups
+								.filter((g) => !selectedLocation || g.name === selectedLocation)
+								.map((group) => {
+									const isOpen = !!expandedGroups[group.name];
+									return (
+										<div key={group.name}>
+											<button
+												onClick={() => toggleGroup(group.name)}
+												className="grid w-full [grid-template-columns:3fr_1fr_1fr_1fr_1fr_1fr] items-center gap-2 px-4 py-3 text-left text-sm hover:bg-[#F8F9F8]">
+												<div className="flex cursor-pointer items-center gap-2 text-[#0F1912]">
+													<ChevronDown
+														className={`${isOpen ? "rotate-180" : ""} h-4 w-4 transition-transform`}
+													/>
+													<MapPin className="h-4 w-4 text-[#5A615D]" />
+													{group.name}
+												</div>
+												<div />
+												<div />
+												<div />
+												<div />
+												<div />
+											</button>
+
+											{isOpen && (
+												<div>
+													{group.rows.slice(0, -1).map((row) => (
+														<div
+															key={row.orderId}
+															className="grid [grid-template-columns:3fr_1fr_1fr_1fr_1fr_1fr] items-center border-t border-[#E7E9E8] py-3 pr-4">
+															<div className="flex items-center gap-2 ps-18 text-[#0F1912]">
+																<Settings className="h-5 w-5 text-[#5A615D]" />
+																<span className="text-sm">{row.structure}</span>
+															</div>
+															<div className="text-[#0F1912]">
+																{renderYearCell(row["2025"])}
+															</div>
+															<div className="text-[#0F1912]">
+																{renderYearCell(row["2026"])}
+															</div>
+															<div className="text-[#0F1912]">
+																{renderYearCell(row["2027"])}
+															</div>
+															<div className="text-[#0F1912]">
+																{renderYearCell(row["2028"])}
+															</div>
+															<div className="text-[#0F1912]">{row.total}</div>
+														</div>
+													))}
+
+													{group.rows.length > 0 && (
+														<div className="grid [grid-template-columns:3fr_1fr_1fr_1fr_1fr_1fr] items-center border-t border-[#E7E9E8] py-3 pr-4 text-sm text-[#0F1912]">
+															{(() => {
+																const total = group.rows[group.rows.length - 1];
+																return (
+																	<>
+																		<div className="ps-18">
+																			{total.structure}
+																		</div>
+																		<div>{total["2025"]}</div>
+																		<div>{total["2026"]}</div>
+																		<div>{total["2027"]}</div>
+																		<div>{total["2028"]}</div>
+																		<div>{total.total}</div>
+																	</>
+																);
+															})()}
+														</div>
+													)}
+
+													{group.estimatedCost && (
+														<div className="grid [grid-template-columns:3fr_1fr_1fr_1fr_1fr_1fr] items-center border-t border-[#003D1A] bg-[#F0FCF2] py-3 pr-4 text-sm text-[#0F1912]">
+															<div className="ps-18">Estimerte kostnader</div>
+															<div>{group.estimatedCost}</div>
+															<div>{group.estimatedCost}</div>
+															<div>{group.estimatedCost}</div>
+															<div>{group.estimatedCost}</div>
+															<div>{group.estimatedCost}</div>
+														</div>
+													)}
+												</div>
+											)}
+										</div>
+									);
+								})}
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

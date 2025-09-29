@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { ComponentType, SVGProps, useState } from "react";
 
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
-import { cn } from "@/lib/utils";
+import { cn, isImageSource } from "@/lib/utils";
 import {
 	LucideIcon,
 	ArrowRight,
@@ -15,28 +15,7 @@ import { usePathname } from "next/navigation";
 
 import CartSvg from "../../../../../public/icons/profile/cart.svg";
 import ClipboardSvg from "../../../../../public/icons/profile/clipboard-check.svg";
-
-interface SubItem {
-	href: string;
-	label: string;
-}
-
-interface SidebarNavItem {
-	href: string;
-	label: string;
-	icon: LucideIcon;
-	variant?: "default" | "logout";
-	subitems?: SubItem[];
-}
-
-interface SidebarNavProps {
-	items: SidebarNavItem[];
-	activeMode: "hose" | "ehandel";
-	activeTab: string;
-	onModeChange: (mode: "hose" | "ehandel") => void;
-	onTabChange: (tab: string) => void;
-	onCollapse: (isCollapsed: boolean) => void;
-}
+import { SidebarNavProps } from "@/types/sidebar.types";
 
 export function SidebarNav({
 	items,
@@ -124,7 +103,6 @@ export function SidebarNav({
 							</p>
 							<div className="flex w-full flex-col py-2 pl-4">
 								{items.map((item, index) => {
-									const Icon = item.icon;
 									const isActive =
 										pathname === item.href ||
 										item.subitems?.some((subitem) => pathname === subitem.href);
@@ -149,11 +127,6 @@ export function SidebarNav({
 												}}
 												className={cn(
 													"mb-2 flex w-full cursor-pointer items-center justify-between rounded-md p-2 text-base font-medium transition-colors",
-													// isActive
-													// 	? "bg-green-50 text-green-600"
-													// 	: expandedItems.includes(item.href)
-													// 		? "bg-[#DCF7E0]"
-													// 		: "hover:bg-gray-50",
 													item.variant === "logout" &&
 														"mt-4 text-red-600 hover:text-red-700",
 												)}>
@@ -162,7 +135,21 @@ export function SidebarNav({
 														"flex items-center gap-3",
 														isCollapsed && "justify-center",
 													)}>
-													<Icon className="h-5 w-5" />
+													{isImageSource(item.icon) ? (
+														<Image
+															src={item.icon}
+															alt=""
+															width={20}
+															height={20}
+														/>
+													) : (
+														(() => {
+															const IconComp = item.icon as
+																| LucideIcon
+																| ComponentType<SVGProps<SVGSVGElement>>;
+															return <IconComp className="h-5 w-5" />;
+														})()
+													)}
 													{!isCollapsed && <span>{item.label}</span>}
 												</div>
 												{item.subitems && (

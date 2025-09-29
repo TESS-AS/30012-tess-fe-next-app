@@ -27,6 +27,8 @@ export const NotificationCard = ({
 					<X
 						className="cursor-pointer"
 						onClick={onClose}
+						width={16}
+						height={16}
 					/>
 				</div>
 				<p className="text-sm">{message}</p>

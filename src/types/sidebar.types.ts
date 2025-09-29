@@ -1,0 +1,30 @@
+import { LucideIcon } from "lucide-react";
+import { ComponentType } from "react";
+import { SVGProps } from "react";
+import { StaticImageData } from "next/image";
+
+export interface SubItem {
+	href: string;
+	label: string;
+}
+
+export interface SidebarNavItem {
+	href: string;
+	label: string;
+	icon:
+		| LucideIcon
+		| ComponentType<SVGProps<SVGSVGElement>>
+		| string
+		| StaticImageData;
+	variant?: "default" | "logout";
+	subitems?: SubItem[];
+}
+
+export interface SidebarNavProps {
+	items: SidebarNavItem[];
+	activeMode: "hose" | "ehandel";
+	activeTab: string;
+	onModeChange: (mode: "hose" | "ehandel") => void;
+	onTabChange: (tab: string) => void;
+	onCollapse: (isCollapsed: boolean) => void;
+}

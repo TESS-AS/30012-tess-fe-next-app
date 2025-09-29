@@ -47,6 +47,7 @@ import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 
 export interface HoseOrder {
 	orderId: string;
@@ -179,8 +180,17 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		handleBulkSelect(ids, checked);
 	};
 
+	const handleRemoveSelectedId = (id: string) => {
+		setSelectedRows((prev) => {
+			const next = prev.filter((x) => x !== id);
+			localStorage.setItem("selectedHoseRows", JSON.stringify(next));
+			return next;
+		});
+	};
+
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
 	const [cartModalOpen, setCartModalOpen] = useState(false);
+	const [supportOpen, setSupportOpen] = useState(false);
 	const [showAllItems, setShowAllItems] = useState(false);
 	const [isNavigating, setIsNavigating] = useState(false);
 	const router = useRouter();
@@ -400,9 +410,17 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 						</DropdownMenuItem>
 
 						<DropdownMenuItem
-							disabled
-							onClick={() => handleBulkAction("support")}
-							className="">
+							onClick={() => {
+								if (selectedRows.length === 0) {
+									toast.error("Vennligst velg elementer å kontakte om");
+									return;
+								}
+								setSupportOpen(true);
+							}}
+							className={cn("", {
+								"cursor-not-allowed opacity-50": selectedRows.length === 0,
+							})}
+							disabled={selectedRows.length === 0}>
 							<Mail className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Kontakt TESS support</span>
 						</DropdownMenuItem>
@@ -614,6 +632,18 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 					</div>
 				</div>
 			</Modal>
+
+			<SupportDialog
+				open={supportOpen}
+				onOpenChange={setSupportOpen}
+				selectedIds={selectedRows}
+				onRemoveId={handleRemoveSelectedId}
+				onSubmit={async ({ subject, message, file, ids }) => {
+					// TODO: integrate with backend endpoint for support tickets
+					console.log("Support submit", { subject, message, file, ids });
+					toast.success("Meldingen ble sendt til TESS support");
+				}}
+			/>
 
 			<div className="space-y-6">
 				<div className="flex items-baseline space-x-4">
