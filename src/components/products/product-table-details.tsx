@@ -2,6 +2,7 @@
 
 import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useProductTabs } from "@/stores/useProductTabs";
 import { useTranslations } from "next-intl";
 
 interface ProductDetailsTableProps {
@@ -20,6 +21,7 @@ export function ProductDetailsTable({
 	onSelectVariant,
 }: ProductDetailsTableProps) {
 	const t = useTranslations("Product");
+	const { activeTab, setActiveTab } = useProductTabs();
 
 	const filteredAttributes =
 		variantData?.itemTechnicalSpec?.itemAttributes?.filter((attr: any) =>
@@ -28,9 +30,15 @@ export function ProductDetailsTable({
 				: attr.language === "English",
 		) ?? [];
 
+	console.log(variantData, "datavali");
+
 	return (
-		<div className="rounded-md border border-gray-200 p-4">
+		<div
+			className="rounded-md border border-gray-200 p-4"
+			id="product-table-details">
 			<Tabs
+				value={activeTab}
+				onValueChange={setActiveTab}
 				defaultValue="description"
 				className="w-full py-5">
 				<TabsList className="grid w-full grid-cols-4 overflow-hidden rounded-none bg-gray-50 p-0">
@@ -62,10 +70,35 @@ export function ProductDetailsTable({
 				<TabsContent
 					value="description"
 					className="mt-4 text-sm">
-					{variantData?.description?.itemRemarks ? (
-						<p className="whitespace-pre-line text-gray-700">
-							{variantData.description.itemRemarks}
-						</p>
+					{variantData?.description?.itemRemarks ||
+					variantData?.description?.itemSpec ? (
+						<div className="space-y-4">
+							{variantData?.description?.itemRemarks && (
+								<p className="whitespace-pre-line text-gray-700">
+									{variantData.description.itemRemarks}
+								</p>
+							)}
+
+							{Object.values(variantData?.description?.itemSpec ?? {}).filter(
+								(usp: any) => usp && usp.trim() !== "",
+							).length > 0 && (
+								<div>
+									<h3 className="text-base font-semibold text-gray-900">
+										{t("uniqueSellingPoints")}
+									</h3>
+									<ul className="list-disc pl-5 text-gray-700">
+										{Object.values(variantData.description.itemSpec ?? {})
+											.filter(
+												(usp): usp is string =>
+													typeof usp === "string" && usp.trim() !== "",
+											)
+											.map((usp, i) => (
+												<li key={i}>{usp}</li>
+											))}
+									</ul>
+								</div>
+							)}
+						</div>
 					) : (
 						<p className="text-gray-500">{t("noDescriptionAvailable")}</p>
 					)}
@@ -76,7 +109,6 @@ export function ProductDetailsTable({
 					className="mt-4 text-sm">
 					{filteredAttributes.length ? (
 						<div className="space-y-6">
-							{/* Section title */}
 							<h3 className="text-base font-semibold text-gray-900">
 								{t("technicalData")}
 							</h3>

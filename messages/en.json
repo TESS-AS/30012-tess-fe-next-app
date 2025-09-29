@@ -27,6 +27,7 @@
 	},
     "Product": {
       "notFound": "Product not found",
+      "seeAllVariants": "See all variants",
       "copied": "Copied!",
       "productDescription": "Product Description",
       "selectSize": "Select size",
