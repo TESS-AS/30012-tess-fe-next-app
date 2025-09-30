@@ -34,6 +34,8 @@ import { OrdreDetaljer } from "./(components)/ordre-detaljer";
 import { OrdreHistorikk } from "./(components)/ordre-historikk";
 import { Rekvisisjoner } from "./(components)/rekvisisjoner";
 import { SidebarNav } from "./(components)/sidebar-nav";
+import HoseRequests from "./(components)/hose-requests";
+import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 
 export default function ProfilePage() {
 	const { setIsAuthOpen } = useAppContext();
@@ -67,6 +69,7 @@ export default function ProfilePage() {
 		}
 	};
 	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+	const [supportOpen, setSupportOpen] = useState(false);
 	const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
 	if (!profile) {
@@ -91,7 +94,13 @@ export default function ProfilePage() {
 							activeMode={activeMode}
 							activeTab={activeTab}
 							onModeChange={handleModeChange}
-							onTabChange={setActiveTab}
+							onTabChange={(tab) => {
+								if (tab === "support") {
+									setSupportOpen(true);
+									return;
+								}
+								setActiveTab(tab);
+							}}
 							onCollapse={setIsSidebarCollapsed}
 							items={
 								activeMode === "ehandel"
@@ -281,6 +290,10 @@ export default function ProfilePage() {
 							<HoseRiskClass />
 						</TabsContent>
 
+						<TabsContent value="hose-requests">
+							<HoseRequests />
+						</TabsContent>
+
 						<TabsContent value="wishlist">
 							<p className="text-muted-foreground">My wishlist coming soon.</p>
 						</TabsContent>
@@ -295,6 +308,15 @@ export default function ProfilePage() {
 					</div>
 				</Tabs>
 			</div>
+
+			<SupportDialog
+				open={supportOpen}
+				onOpenChange={setSupportOpen}
+				selectedIds={[]}
+				onSubmit={async ({ subject, message, file }) => {
+					console.log("Support submit", { subject, message, file });
+				}}
+			/>
 		</main>
 	);
 }
