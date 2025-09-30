@@ -21,6 +21,7 @@ import { useModals } from "@/hooks/useModals";
 import { useOrderStepper } from "@/hooks/useOrderStepper";
 import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { useAppContext } from "@/lib/appContext";
+import { CartKitItem, CartLine } from "@/types/carts.types";
 import { Order, OrderResponse } from "@/types/orders.types";
 import type { PayPalScriptOptions } from "@paypal/paypal-js";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
@@ -67,7 +68,10 @@ export default function CheckoutPage() {
 	);
 
 	const [orderData, setOrderData] = useCheckoutOrderData(
-		cartItems?.cart || [],
+		{
+			cart: cartItems?.cart as CartLine[],
+			cartKit: cartItems?.cartKit as CartKitItem[],
+		},
 		profile,
 		calculatedPrices,
 	);

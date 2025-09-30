@@ -30,7 +30,10 @@ import {
 	loadItemBalanceBatch,
 	WarehouseBatch as ProductWarehouseBatch,
 } from "@/services/product.service";
-import { WarehouseBatch as CartWarehouseBatch } from "@/types/carts.types";
+import {
+	CartLine,
+	WarehouseBatch as CartWarehouseBatch,
+} from "@/types/carts.types";
 import { RawCategory } from "@/types/categories.types";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import {
@@ -65,14 +68,6 @@ const CartPage = () => {
 	const t = useTranslations();
 	const currentLocale = useLocale();
 	const router = useRouter();
-	const [expandedItems, setExpandedItems] = useState<{
-		[key: string]: boolean;
-	}>({});
-
-	const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
-	const [categoryPaths, setCategoryPaths] = useState<{
-		[key: string]: string[];
-	}>({});
 
 	const { data: profile, isLoading: isLoadingProfile } = usePunchoutProfile();
 
@@ -94,18 +89,13 @@ const CartPage = () => {
 	} = useAppContext();
 
 	const [orderData] = useCheckoutOrderData(
-		cartItems?.cart || [],
+		{
+			cart: cartItems?.cart as CartLine[],
+			cartKit: cartItems?.cartKit as CartKitItem[],
+		},
 		profile,
 		calculatedPrices,
 	);
-
-	const cartKitOrderData =
-		cartItems?.cartKit?.map((kit) => ({
-			hexagonId: kit.hexagonId,
-			quantity: kit.hose.quantity,
-			warehouseNumber: "L01",
-			companyNumber: "1",
-		})) || [];
 
 	const submitOrder = useSubmitOrder(
 		profile?.punchout || false,
@@ -148,6 +138,14 @@ const CartPage = () => {
 	const [selectedWarehouse, setSelectedWarehouse] = useState<string | null>(
 		null,
 	);
+	const [expandedItems, setExpandedItems] = useState<{
+		[key: string]: boolean;
+	}>({});
+
+	const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+	const [categoryPaths, setCategoryPaths] = useState<{
+		[key: string]: string[];
+	}>({});
 
 	useEffect(() => {
 		const loadPaths = async () => {

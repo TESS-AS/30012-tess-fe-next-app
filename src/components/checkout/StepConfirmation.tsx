@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import { ConfirmationCard } from "@/components/checkout/confirmation-card";
 import { EditAddressModal } from "@/components/checkout/edit-address-modal";
 import { EditContactModal } from "@/components/checkout/edit-contact-modal";
@@ -5,7 +7,14 @@ import { EditDeliveryModal } from "@/components/checkout/edit-delivery-modal";
 import { EditPaymentModal } from "@/components/checkout/edit-payment-modal";
 import { useAppContext } from "@/lib/appContext";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
-import { MapPin, Truck, User2, Wallet } from "lucide-react";
+import {
+	ChevronDown,
+	ChevronUp,
+	MapPin,
+	Truck,
+	User2,
+	Wallet,
+} from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
@@ -23,10 +32,13 @@ export default function StepConfirmation({
 	setDimensionInputMode,
 	handleContactPersonSave,
 }: any) {
-	const { cartItems, calculatedPrices } = useAppContext();
-
-	const { setUpdatedAddress } = useAppContext();
 	const t = useTranslations("Checkout.confirmation");
+	const { cartItems, calculatedPrices, setUpdatedAddress, prices } =
+		useAppContext();
+
+	const [expandedItems, setExpandedItems] = useState<{
+		[key: string]: boolean;
+	}>({});
 
 	return (
 		<div className="grid grid-cols-4 gap-6">
@@ -122,6 +134,159 @@ export default function StepConfirmation({
 			<div className="col-span-4 flex flex-col">
 				<h2 className="mb-4 text-xl font-semibold">{t("yourItems")}</h2>
 				<div className="flex flex-col space-y-4">
+					{cartItems?.cartKit && cartItems.cartKit.length > 0 && (
+						<div className="space-y-4">
+							{cartItems.cartKit.map((item, idx) => {
+								return (
+									<div
+										key={idx}
+										className="border-lightGray rounded-md border py-6">
+										<div
+											role="button"
+											tabIndex={0}
+											aria-expanded={!!expandedItems[item.hexagonId]}
+											onClick={() =>
+												setExpandedItems((prev) => ({
+													...prev,
+													[item.hexagonId]: !prev[item.hexagonId],
+												}))
+											}
+											onKeyDown={(e) => {
+												if (e.key === "Enter" || e.key === " ") {
+													e.preventDefault();
+													setExpandedItems((prev) => ({
+														...prev,
+														[item.hexagonId]: !prev[item.hexagonId],
+													}));
+												}
+											}}
+											className="flex w-full cursor-pointer items-center justify-between px-4 py-3">
+											<div className="flex items-center gap-3">
+												{expandedItems[item.hexagonId] ? (
+													<ChevronUp className="h-4 w-4 text-[#5A615D]" />
+												) : (
+													<ChevronDown className="h-4 w-4 text-[#5A615D]" />
+												)}
+												<span className="text-sm text-[#5A615D]">
+													ID: {item.hexagonId}
+												</span>
+												<span className="font-medium text-[#0F1912]">
+													{item.hose.itemDescription}
+												</span>
+											</div>
+											<div className="flex items-center gap-6">
+												<div className="flex items-center gap-6">
+													<span className="font-semibold">
+														{(() => {
+															const total = [
+																calculatedPrices[item.hose.itemNumber] ?? 0,
+																calculatedPrices[item.ferrule1.itemNumber] ?? 0,
+																calculatedPrices[item.ferrule2.itemNumber] ?? 0,
+																calculatedPrices[item.insert1.itemNumber] ?? 0,
+																calculatedPrices[item.insert2.itemNumber] ?? 0,
+															].reduce((sum, price) => sum + price, 0);
+															console.log("Total price:", total);
+															return formatNorwegianCurrency(total);
+														})()}
+													</span>
+												</div>
+											</div>
+										</div>
+
+										{expandedItems[item.hexagonId] && (
+											<div className="border-t p-4">
+												<div className="space-y-3">
+													<div className="space-y-4 pl-8">
+														<div className="flex items-start justify-between gap-2">
+															<div className="flex flex-col">
+																<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
+																	{item.hose.itemName}
+																</p>
+																<p className="text-xs text-[#5A615D]">
+																	{item.hose.itemNumber}
+																</p>
+															</div>
+															<p className="font-bold">
+																{formatNorwegianCurrency(
+																	(prices[item.hose.itemNumber] ?? 0) *
+																		(item.hose.quantity || 1),
+																)}
+															</p>
+														</div>
+														<div className="flex items-start justify-between gap-2">
+															<div className="flex flex-col">
+																<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
+																	{item.ferrule1.name}
+																</p>
+																<p className="text-xs text-[#5A615D]">
+																	{item.ferrule1.itemNumber}
+																</p>
+															</div>
+
+															<p className="font-bold">
+																{formatNorwegianCurrency(
+																	(prices[item.ferrule1.itemNumber] ?? 0) *
+																		(item.hose.quantity || 1),
+																)}
+															</p>
+														</div>
+														<div className="flex items-start justify-between gap-2">
+															<div className="flex flex-col">
+																<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
+																	{item.ferrule2.name}
+																</p>
+																<p className="text-xs text-[#5A615D]">
+																	{item.ferrule2.itemNumber}
+																</p>
+															</div>
+															<p className="font-bold">
+																{formatNorwegianCurrency(
+																	(prices[item.ferrule2.itemNumber] ?? 0) *
+																		(item.hose.quantity || 1),
+																)}
+															</p>
+														</div>
+														<div className="flex items-start justify-between gap-2">
+															<div className="flex flex-col">
+																<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
+																	{item.insert1.name}
+																</p>
+																<p className="text-xs text-[#5A615D]">
+																	{item.insert1.itemNumber}
+																</p>
+															</div>
+															<p className="font-bold">
+																{formatNorwegianCurrency(
+																	(prices[item.insert1.itemNumber] ?? 0) *
+																		(item.hose.quantity || 1),
+																)}
+															</p>
+														</div>
+														<div className="flex items-start justify-between gap-2">
+															<div className="flex flex-col">
+																<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
+																	{item.insert2.name}
+																</p>
+																<p className="text-xs text-[#5A615D]">
+																	{item.insert2.itemNumber}
+																</p>
+															</div>
+															<p className="font-bold">
+																{formatNorwegianCurrency(
+																	(prices[item.insert2.itemNumber] ?? 0) *
+																		(item.hose.quantity || 1),
+																)}
+															</p>
+														</div>
+													</div>
+												</div>
+											</div>
+										)}
+									</div>
+								);
+							})}
+						</div>
+					)}
 					{cartItems?.cart?.map((item: any) => (
 						<Card
 							key={item.itemNumber}

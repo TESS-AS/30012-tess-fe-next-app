@@ -1,12 +1,18 @@
 import { useEffect, useState } from "react";
 
-import { Order } from "@/types/orders.types";
+import { CartKitResponse } from "@/types/carts.types";
+import { Order, OrderLines } from "@/types/orders.types";
 
 export function useCheckoutOrderData(
-	cartItems: any[],
+	cartItems: CartKitResponse,
 	profile: any,
 	calculatedPrices: Record<string, number>,
-) {
+): [Order, React.Dispatch<React.SetStateAction<Order>>] {
+	const cart = cartItems?.cart;
+	const cartKit = cartItems?.cartKit;
+	const companyNumber = profile?.defaultCompanyNumber;
+	const warehouseNumber = profile?.defaultWarehouseNumber;
+	const userId = profile?.userId;
 	const [orderData, setOrderData] = useState<Order>({
 		documentControl: { companyCode: "" },
 		salesOrderHeader: {
@@ -27,20 +33,25 @@ export function useCheckoutOrderData(
 		salesOrderLines: [],
 	});
 
+	console.log(cartItems, "cartItems");
+
 	useEffect(() => {
-		if (!cartItems?.length || !profile) return;
+		if (!companyNumber || !warehouseNumber || !userId) return;
 
-		const companyCode =
-			Number(profile.defaultCompanyNumber) < 10 && profile.defaultCompanyNumber !== null && profile.defaultCompanyNumber !== undefined
-				? `0${profile.defaultCompanyNumber}`
-				: profile.defaultCompanyNumber?.toString();
+		const companyCode = companyNumber
+			? Number(companyNumber) < 10
+				? `0${companyNumber}`
+				: companyNumber.toString()
+			: "";
 
-		setOrderData((prev) => ({
-			...prev,
-			documentControl: { companyCode },
-			salesOrderLines: cartItems.map((item, idx) => ({
-				customerOrderLine: idx + 1,
-				warehouseNumber: String(profile.defaultWarehouseNumber),
+		let salesOrderLines: OrderLines[] = [];
+		let lineCounter = 1;
+
+		// Handle regular cart items
+		if (cart?.length) {
+			salesOrderLines = cart.map((item) => ({
+				customerOrderLine: lineCounter++,
+				warehouseNumber: warehouseNumber,
 				orderType: "S2",
 				itemCode: item.itemNumber,
 				orderedQuantity: item.quantity,
@@ -50,9 +61,60 @@ export function useCheckoutOrderData(
 				accountPart4: String(profile.userId || ""),
 				accountPart5: "",
 				text: "",
-			})),
+			}));
+		}
+
+		// Handle cartKit items
+		if (cartKit?.length) {
+			cartKit.forEach((kitItem) => {
+				// Add each component of the kit with its hexagonId
+				const kitComponents = [
+					{
+						itemNumber: kitItem.hose.itemNumber,
+						quantity: kitItem.hose.quantity,
+					},
+					{
+						itemNumber: kitItem.ferrule1.itemNumber,
+						quantity: kitItem.hose.quantity,
+					},
+					{
+						itemNumber: kitItem.ferrule2.itemNumber,
+						quantity: kitItem.hose.quantity,
+					},
+					{
+						itemNumber: kitItem.insert1.itemNumber,
+						quantity: kitItem.hose.quantity,
+					},
+					{
+						itemNumber: kitItem.insert2.itemNumber,
+						quantity: kitItem.hose.quantity,
+					},
+				];
+
+				const kitLines = kitComponents.map((component) => ({
+					customerOrderLine: lineCounter++,
+					warehouseNumber: warehouseNumber,
+					orderType: "S2",
+					itemCode: component.itemNumber,
+					orderedQuantity: component.quantity,
+					salesPrice: calculatedPrices[component.itemNumber] || 0,
+					requestedDeliveryDate: new Date().toISOString().split("T")[0],
+					accountPart3: "",
+					accountPart4: String(userId || ""),
+					accountPart5: "",
+					text: kitItem.hexagonId, // Add hexagonId to text field for all kit components
+				}));
+
+				salesOrderLines = [...salesOrderLines, ...kitLines];
+			});
+		}
+
+		setOrderData((prev) => ({
+			...prev,
+			documentControl: { companyCode },
+			salesOrderLines,
 		}));
-	}, [cartItems, profile]);
+	}, [cart, cartKit, companyNumber, warehouseNumber, userId, calculatedPrices]);
 
 	return [orderData, setOrderData] as const;
 }

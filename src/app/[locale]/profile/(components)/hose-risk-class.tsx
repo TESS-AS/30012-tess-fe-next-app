@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { RiskPieChartFilled } from "@/components/ui/risk-pie-chart";
 import { ChevronDown, ChevronRight, MoreHorizontal } from "lucide-react";
 
 type RiskClass = {
@@ -72,9 +73,9 @@ const HoseRiskClass = () => {
 				<div className="rounded-lg bg-white p-6 shadow-md ring-1 ring-[#E6E7E6]">
 					<div className="flex items-start justify-between">
 						<div className="flex flex-col">
-							<div className="flex space-y-1">
+							<div className="flex gap-3 space-y-1">
 								<h1 className="text-2xl font-semibold">Kritikalitet</h1>
-								<h2 className="text-lg font-medium">
+								<h2 className="text-base text-[#5A615D]">
 									Prosent av (S1) TESS Princess IMO: 789548
 								</h2>
 							</div>
@@ -96,46 +97,7 @@ const HoseRiskClass = () => {
 						</Button>
 					</div>
 
-					<div className="relative mx-auto mt-8 aspect-square w-full max-w-[420px]">
-						<div className="absolute inset-0 rounded-full bg-[#F8F9F8] ring-8 ring-[#F8F9F8]" />
-
-						<div
-							className="absolute inset-0 rounded-full"
-							style={{ background: gradient }}
-						/>
-
-						<div className="pointer-events-none absolute inset-0">
-							<div className="absolute top-0 left-1/2 h-full w-[2px] -translate-x-1/2 bg-white/95 shadow-[0_0_2px_rgba(0,0,0,0.08)]" />
-							<div className="absolute top-1/2 left-0 h-[2px] w-full -translate-y-1/2 bg-white/95 shadow-[0_0_2px_rgba(0,0,0,0.08)]" />
-						</div>
-
-						<div className="absolute top-1/2 left-1/2 h-[60%] w-[60%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-inner" />
-
-						{quadrantData.map((r, i) => (
-							<button
-								key={r.class}
-								type="button"
-								className={[
-									"absolute top-1/2 left-1/2 h-1/2 w-1/2 origin-bottom-right -translate-x-full -translate-y-full rounded-tr-[999px]",
-									"transition outline-none",
-									hovered !== null && hovered !== r.class ? "opacity-50" : "",
-								].join(" ")}
-								style={{
-									transform: `translate(-100%, -100%) rotate(${i * 90}deg)`,
-								}}
-								aria-label={`RK ${r.class} – ${r.count}`}
-								onMouseEnter={() => setHovered(r.class)}
-								onMouseLeave={() => setHovered(null)}
-							/>
-						))}
-
-						{hovered !== null && (
-							<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[140%] rounded-lg bg-black/90 px-4 py-2 text-sm text-white shadow-lg">
-								{riskClasses.find((r) => r.class === hovered)?.count} slanger i{" "}
-								risikoklasse {hovered}
-							</div>
-						)}
-					</div>
+					<RiskPieChartFilled data={quadrantData} />
 
 					<div className="mt-8 flex flex-wrap items-center justify-center gap-4">
 						{quadrantData.map((risk) => (

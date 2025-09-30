@@ -25,7 +25,7 @@ export interface SalesOrderHeader {
 	text: string;
 }
 
-interface OrderLines {
+export interface OrderLines {
 	warehouseNumber: string;
 	orderType: string;
 	itemCode: string;
