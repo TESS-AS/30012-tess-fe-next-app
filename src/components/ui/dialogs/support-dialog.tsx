@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,8 +12,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { X } from "lucide-react";
+import Image from "next/image";
 
 export interface SupportDialogProps {
 	open: boolean;
@@ -65,7 +65,11 @@ export function SupportDialog({
 		<Dialog
 			open={open}
 			onOpenChange={onOpenChange}>
-			<DialogContent className={cn("min-w-[650px] rounded-2xl p-0 max-h-[85vh] overflow-y-auto", className)}>
+			<DialogContent
+				className={cn(
+					"max-h-[85vh] min-w-[650px] overflow-y-auto rounded-2xl p-0",
+					className,
+				)}>
 				<DialogHeader className="px-6 pt-5">
 					<DialogTitle className="text-lg font-semibold">
 						Kontakt TESS support

@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, MoreHorizontal } from "lucide-react";
 import { RiskPieChartFilled } from "@/components/ui/risk-pie-chart";
+import { ChevronDown, ChevronRight, MoreHorizontal } from "lucide-react";
 
 type RiskClass = {
 	class: number;

@@ -6,6 +6,7 @@ import OrdersTab from "@/app/[locale]/profile/(components)/tabs/OrdersTab/Orders
 import PersonalInfoTab from "@/app/[locale]/profile/(components)/tabs/PersonalInfoTab";
 import UserAddressesTab from "@/app/[locale]/profile/(components)/tabs/UserAdresses/UserAddressesTab";
 import { Button } from "@/components/ui/button";
+import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
@@ -28,14 +29,13 @@ import HoseInspections from "./(components)/hose-inspections";
 import { HoseOrders } from "./(components)/hose-orders";
 import HoseOverview from "./(components)/hose-overview";
 import HoseReplacement from "./(components)/hose-replacement";
+import HoseRequests from "./(components)/hose-requests";
 import HoseRiskClass from "./(components)/hose-risk-class";
 import { MineBestillinger } from "./(components)/mine-bestillinger";
 import { OrdreDetaljer } from "./(components)/ordre-detaljer";
 import { OrdreHistorikk } from "./(components)/ordre-historikk";
 import { Rekvisisjoner } from "./(components)/rekvisisjoner";
 import { SidebarNav } from "./(components)/sidebar-nav";
-import HoseRequests from "./(components)/hose-requests";
-import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 
 export default function ProfilePage() {
 	const { setIsAuthOpen } = useAppContext();

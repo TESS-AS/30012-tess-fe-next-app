@@ -21,12 +21,12 @@ import { useModals } from "@/hooks/useModals";
 import { useOrderStepper } from "@/hooks/useOrderStepper";
 import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { useAppContext } from "@/lib/appContext";
+import { CartKitItem, CartLine } from "@/types/carts.types";
 import { Order, OrderResponse } from "@/types/orders.types";
 import type { PayPalScriptOptions } from "@paypal/paypal-js";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
-import { CartKitItem, CartLine } from "@/types/carts.types";
 
 const initialOptions: PayPalScriptOptions = {
 	clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "",

@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 //
+import { NotificationCard } from "@/components/ui/notification-card";
 import {
 	Select,
 	SelectContent,
@@ -18,9 +19,8 @@ import {
 	Settings,
 	X,
 } from "lucide-react";
-import { NotificationCard } from "@/components/ui/notification-card";
-import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 type ReplacementData = {
 	orderId: string;

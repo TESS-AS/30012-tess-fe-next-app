@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, type Column } from "@/components/ui/data-table";
+import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -42,11 +43,11 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
+
 import { CartAddedModal } from "./cart-added-modal";
-import { HoseSearchBar } from "./hose-search-bar";
 import { HoseColumnsDropdown } from "./hose-columns-dropdown";
 import { HoseFiltersDropdown } from "./hose-filters-dropdown";
+import { HoseSearchBar } from "./hose-search-bar";
 
 export interface HoseOrder {
 	orderId: string;

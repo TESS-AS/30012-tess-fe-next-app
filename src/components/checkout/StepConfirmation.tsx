@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import { ConfirmationCard } from "@/components/checkout/confirmation-card";
 import { EditAddressModal } from "@/components/checkout/edit-address-modal";
 import { EditContactModal } from "@/components/checkout/edit-contact-modal";
@@ -17,7 +19,6 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 import { Card } from "../ui/card";
-import { useState } from "react";
 
 export default function StepConfirmation({
 	contactPerson,

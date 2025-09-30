@@ -1,13 +1,14 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
-import { cn } from "@/lib/utils";
+
+import { Button } from "@/components/ui/button";
 import { DataTable, type Column } from "@/components/ui/data-table";
-import { getStatusIcons } from "./mine-bestillinger";
+import { cn } from "@/lib/utils";
 import { CircleX } from "lucide-react";
-import { getStatusChipColor } from "./rekvisisjoner";
+import { usePathname, useRouter } from "next/navigation";
+
+import { getStatusIcons } from "./mine-bestillinger";
 
 const HoseRequests = () => {
 	const router = useRouter();

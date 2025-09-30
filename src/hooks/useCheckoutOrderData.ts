@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-import { Order, OrderLines } from "@/types/orders.types";
 import { CartKitResponse } from "@/types/carts.types";
+import { Order, OrderLines } from "@/types/orders.types";
 
 export function useCheckoutOrderData(
 	cartItems: CartKitResponse,

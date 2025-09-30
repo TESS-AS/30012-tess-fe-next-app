@@ -3,6 +3,7 @@ import { ComponentType, SVGProps, useState } from "react";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { cn, isImageSource } from "@/lib/utils";
+import { SidebarNavProps } from "@/types/sidebar.types";
 import {
 	LucideIcon,
 	ArrowRight,
@@ -15,7 +16,6 @@ import { usePathname } from "next/navigation";
 
 import CartSvg from "../../../../../public/icons/profile/cart.svg";
 import ClipboardSvg from "../../../../../public/icons/profile/clipboard-check.svg";
-import { SidebarNavProps } from "@/types/sidebar.types";
 
 export function SidebarNav({
 	items,

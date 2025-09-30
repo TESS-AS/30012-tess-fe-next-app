@@ -1,6 +1,7 @@
-import { LucideIcon } from "lucide-react";
 import { ComponentType } from "react";
 import { SVGProps } from "react";
+
+import { LucideIcon } from "lucide-react";
 import { StaticImageData } from "next/image";
 
 export interface SubItem {
