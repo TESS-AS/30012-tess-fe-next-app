@@ -48,6 +48,8 @@ import { CartAddedModal } from "./cart-added-modal";
 import { HoseColumnsDropdown } from "./hose-columns-dropdown";
 import { HoseFiltersDropdown } from "./hose-filters-dropdown";
 import { HoseSearchBar } from "./hose-search-bar";
+import { RFQRequestDialog } from "@/components/ui/dialogs/rfq-request-dialog";
+import { DiscardEquipmentDialog } from "@/components/ui/dialogs/discard-equipment-dialog";
 
 export interface HoseOrder {
 	orderId: string;
@@ -191,6 +193,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
 	const [cartModalOpen, setCartModalOpen] = useState(false);
 	const [supportOpen, setSupportOpen] = useState(false);
+	const [rfqOpen, setRfqOpen] = useState(false);
+	const [discardOpen, setDiscardOpen] = useState(false);
 	const [showAllItems, setShowAllItems] = useState(false);
 	const [isNavigating, setIsNavigating] = useState(false);
 	const router = useRouter();
@@ -426,17 +430,27 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 						</DropdownMenuItem>
 
 						<DropdownMenuItem
-							disabled
-							onClick={() => handleBulkAction("report")}
-							className="">
+							onClick={() => {
+								if (selectedRows.length === 0) return;
+								setRfqOpen(true);
+							}}
+							className={cn("", {
+								"cursor-not-allowed opacity-50": selectedRows.length === 0,
+							})}
+							disabled={selectedRows.length === 0}>
 							<FileText className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Rapporter slangebytter</span>
 						</DropdownMenuItem>
 
 						<DropdownMenuItem
-							disabled
-							onClick={() => handleBulkAction("discard")}
-							className="">
+							onClick={() => {
+								if (selectedRows.length === 0) return;
+								setDiscardOpen(true);
+							}}
+							className={cn("", {
+								"cursor-not-allowed opacity-50": selectedRows.length === 0,
+							})}
+							disabled={selectedRows.length === 0}>
 							<Trash2 className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Kasser utstyr</span>
 						</DropdownMenuItem>
@@ -578,6 +592,30 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 					// TODO: integrate with backend endpoint for support tickets
 					console.log("Support submit", { subject, message, file, ids });
 					toast.success("Meldingen ble sendt til TESS support");
+				}}
+			/>
+
+			<RFQRequestDialog
+				open={rfqOpen}
+				onOpenChange={setRfqOpen}
+				selectedIds={selectedRows}
+				onRemoveId={handleRemoveSelectedId}
+				onSubmit={async ({ requestType, comment, ids }) => {
+					// TODO: Integrate with backend to create RFQ
+					console.log("RFQ submit", { requestType, comment, ids });
+					toast.success("Forespørselen ble sendt");
+				}}
+			/>
+
+			<DiscardEquipmentDialog
+				open={discardOpen}
+				onOpenChange={setDiscardOpen}
+				selectedIds={selectedRows}
+				onRemoveId={handleRemoveSelectedId}
+				onSubmit={async ({ name, title, ids }) => {
+					// TODO: Integrer utrangerings-endepunkt
+					console.log("Discard submit", { name, title, ids });
+					toast.success("Utstyr utrangert");
 				}}
 			/>
 

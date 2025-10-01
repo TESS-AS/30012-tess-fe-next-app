@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { getRequisition } from "@/services/requisitions.service";
+import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 
 type Status = "Alle" | "Venter godkjenning" | "Godkjent" | "Avvist";
 
@@ -50,13 +51,13 @@ export const useRequisitions = (customerNumber: string) => {
 				orderId: req.requisitionId.toString(),
 				bestiller: req.description,
 				opprettet: req.requestDate,
-				pris: "N/A",
+				pris: formatNorwegianCurrency(req.totalPrice) || "N/A",
 				status: mapApiStatus(req.status),
 				items: req.requisitionLines.map((line) => ({
 					name: `Item ${line.itemId}`,
 					sku: line.itemId.toString(),
 					quantity: line.quantity,
-					price: "N/A",
+					price: formatNorwegianCurrency(line.unitPrice) || "N/A",
 				})),
 				requisitionId: req.requisitionId,
 				requestDate: req.requestDate,
