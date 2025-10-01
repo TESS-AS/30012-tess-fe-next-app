@@ -14,7 +14,16 @@ export interface FilterOptions {
 	rejected?: string;
 }
 
-export const useGetAssets = (customerNumber?: string, s1Code?: string) => {
+type InitOptions = {
+	initAssets?: boolean;
+	initS1Codes?: boolean;
+};
+
+export const useGetAssets = (
+	customerNumber?: string,
+	s1Code?: string,
+	options: InitOptions = { initAssets: true, initS1Codes: true },
+) => {
 	const [initialized, setInitialized] = useState(false);
 	const [s1Codes, setS1Codes] = useState<S1Codes[]>([]);
 	const [assets, setAssets] = useState<GetAssetsResponse[]>([]);
@@ -107,6 +116,29 @@ export const useGetAssets = (customerNumber?: string, s1Code?: string) => {
 		[],
 	);
 
+	const ensureS1Codes = useCallback(async () => {
+		if (s1Codes.length > 0) return s1Codes;
+		try {
+			const res = await fetchS1Codes();
+			const allCodes: S1Codes[] = [];
+			res.data.forEach((newCode: S1Codes) => {
+				if (!allCodes.find((item) => item.S1Code === newCode.S1Code)) {
+					allCodes.push(newCode);
+				}
+			});
+			setS1Codes(allCodes);
+			setS1CodesPagination({
+				currentPage: res.meta.page,
+				pageSize: res.meta.pageSize,
+				totalItems: res.meta.total,
+				totalPages: res.meta.totalPages,
+			});
+			return allCodes;
+		} catch (e) {
+			throw e;
+		}
+	}, [s1Codes.length, fetchS1Codes]);
+
 	useEffect(() => {
 		const loadInitialData = async () => {
 			setLoading(true);
@@ -116,43 +148,33 @@ export const useGetAssets = (customerNumber?: string, s1Code?: string) => {
 			try {
 				if (!initialized) {
 					setS1Codes([]);
-					const [assetsResult, s1CodesResult] = await Promise.all([
-						fetchAssets({}),
-						fetchS1Codes(),
-					]);
+					if (options.initAssets !== false) {
+						const assetsResult = await fetchAssets({});
+						setAssets(assetsResult.data);
+						setPagination({
+							currentPage: assetsResult.meta.page,
+							pageSize: assetsResult.meta.pageSize,
+							totalItems: assetsResult.meta.totalItems,
+							totalPages: assetsResult.meta.totalPages,
+						});
+					}
 
-					setAssets(assetsResult.data);
-					setPagination({
-						currentPage: assetsResult.meta.page,
-						pageSize: assetsResult.meta.pageSize,
-						totalItems: assetsResult.meta.totalItems,
-						totalPages: assetsResult.meta.totalPages,
-					});
-
-					const allCodes: S1Codes[] = [];
-					s1CodesResult.data.forEach((newCode) => {
-						if (!allCodes.find((item) => item.S1Code === newCode.S1Code)) {
-							allCodes.push(newCode);
-						}
-					});
-					setS1Codes(allCodes);
-					setS1CodesPagination({
-						currentPage: s1CodesResult.meta.page,
-						pageSize: s1CodesResult.meta.pageSize,
-						totalItems: s1CodesResult.meta.total,
-						totalPages: s1CodesResult.meta.totalPages,
-					});
+					if (options.initS1Codes !== false && s1Codes.length === 0) {
+						await ensureS1Codes();
+					}
 
 					setInitialized(true);
 				} else {
-					const assetsResult = await fetchAssets({});
-					setAssets(assetsResult.data);
-					setPagination({
-						currentPage: assetsResult.meta.page,
-						pageSize: assetsResult.meta.pageSize,
-						totalItems: assetsResult.meta.totalItems,
-						totalPages: assetsResult.meta.totalPages,
-					});
+					if (options.initAssets !== false) {
+						const assetsResult = await fetchAssets({});
+						setAssets(assetsResult.data);
+						setPagination({
+							currentPage: assetsResult.meta.page,
+							pageSize: assetsResult.meta.pageSize,
+							totalItems: assetsResult.meta.totalItems,
+							totalPages: assetsResult.meta.totalPages,
+						});
+					}
 				}
 			} catch (error) {
 				console.error("Error loading data:", error);
@@ -163,7 +185,15 @@ export const useGetAssets = (customerNumber?: string, s1Code?: string) => {
 		};
 
 		loadInitialData();
-	}, [customerNumber, s1Code, initialized]);
+	}, [
+		customerNumber,
+		s1Code,
+		initialized,
+		options.initAssets,
+		options.initS1Codes,
+		s1Codes.length,
+		ensureS1Codes,
+	]);
 
 	return {
 		assets,
@@ -177,5 +207,6 @@ export const useGetAssets = (customerNumber?: string, s1Code?: string) => {
 		s1CodesPagination,
 		fetchAssets,
 		fetchS1Codes,
+		ensureS1Codes,
 	};
 };

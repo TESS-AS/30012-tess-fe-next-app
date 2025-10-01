@@ -7,12 +7,15 @@ export interface RequisitionResponse {
 	requestTime: string;
 	description: string;
 	status: string;
+	totalPrice: number;
 	requisitionLines: [
 		{
 			requisitionLineId: number;
 			lineNumber: number;
 			itemId: number;
 			quantity: number;
+			itemNumber: string;
+			unitPrice: number;
 		},
 	];
 }
@@ -24,6 +27,7 @@ export const getRequisition = async (
 		const response = await axiosInstance.get(
 			`/requisition/getRequisition/${customerNumber}`,
 		);
+		console.log(response.data, "response");
 		return response.data;
 	} catch (error) {
 		console.error("Error getting requisition:", error);

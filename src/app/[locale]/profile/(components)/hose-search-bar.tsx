@@ -22,6 +22,29 @@ export function HoseSearchBar({
 	onClear,
 	className,
 }: HoseSearchBarProps) {
+	const debounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+	const prevValueRef = React.useRef<string>(value);
+	React.useEffect(() => {
+		const prev = prevValueRef.current;
+		const curr = value;
+		const prevHas = prev.trim().length > 0;
+		const currHas = curr.trim().length > 0;
+
+		if (debounceRef.current) clearTimeout(debounceRef.current);
+
+		if (!currHas) {
+			if (prevHas) onClear();
+		} else {
+			debounceRef.current = setTimeout(() => {
+				onSearch();
+			}, 300);
+		}
+
+		prevValueRef.current = curr;
+		return () => {
+			if (debounceRef.current) clearTimeout(debounceRef.current);
+		};
+	}, [value]);
 	return (
 		<div className={cn("relative flex w-full max-w-[480px]", className)}>
 			<Search className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-[#5A615D]" />
