@@ -35,6 +35,13 @@ export function ProductPageClient({
 		selectedItemNumber,
 	);
 
+	console.log(variantData, "dataa");
+
+	const selectedVariant =
+		variantData?.itemVariants?.find(
+			(v: any) => v.itemNumber === selectedItemNumber,
+		) || null;
+
 	const productImages = Array.isArray(productData.mediaId)
 		? productData.mediaId
 		: [productData.mediaId];
@@ -64,6 +71,7 @@ export function ProductPageClient({
 						price={productData.price}
 						productNumber={productData.productNumber}
 						pdfUrl={productData.pdfUrl}
+						gtin={selectedVariant?.gtin ?? "-"}
 					/>
 
 					<ProductStockStatus

@@ -12,6 +12,7 @@ interface ProductInfoProps {
 	price?: number;
 	pdfUrl?: string;
 	productNumber?: string;
+	gtin?: string | null;
 }
 
 export function ProductInfo({
@@ -19,17 +20,18 @@ export function ProductInfo({
 	price,
 	pdfUrl,
 	productNumber,
+	gtin,
 }: ProductInfoProps) {
 	const t = useTranslations("Product");
 	const [copied, setCopied] = useState(false);
 
 	const handleCopyGtin = useCallback(() => {
-		if (productNumber) {
-			navigator.clipboard.writeText(productNumber);
+		if (gtin) {
+			navigator.clipboard.writeText(gtin);
 			setCopied(true);
 			setTimeout(() => setCopied(false), 1000);
 		}
-	}, [productNumber]);
+	}, [gtin]);
 
 	return (
 		<div>
@@ -44,7 +46,7 @@ export function ProductInfo({
 								onClick={handleCopyGtin}
 								className="inline-flex items-center gap-1.5 text-sm font-light focus:outline-none">
 								<span className="uppercase">GTIN:</span>
-								<span className="font-light">{productNumber}</span>
+								<span className="font-light">{gtin}</span>
 								<Files className="h-4 w-4 cursor-pointer text-gray-500" />
 							</button>
 
