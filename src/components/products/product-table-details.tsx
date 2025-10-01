@@ -2,6 +2,7 @@
 
 import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { useGetColumnAttributes } from "@/hooks/useGetColumnAttributes"; // ✅ hook for attributes
 import { useProductTabs } from "@/stores/useProductTabs";
 import { useTranslations } from "next-intl";
 
@@ -23,14 +24,17 @@ export function ProductDetailsTable({
 	const t = useTranslations("Product");
 	const { activeTab, setActiveTab } = useProductTabs();
 
+	const firstVariant = variantData?.itemVariants?.[0]?.itemNumber;
+
+	const { data: columnAttributes, isLoading: loadingAttributes } =
+		useGetColumnAttributes(firstVariant);
+
 	const filteredAttributes =
 		variantData?.itemTechnicalSpec?.itemAttributes?.filter((attr: any) =>
 			locale === "no"
 				? attr.language === "Norwegian"
 				: attr.language === "English",
 		) ?? [];
-
-	console.log(variantData, "datavali");
 
 	return (
 		<div
@@ -142,9 +146,11 @@ export function ProductDetailsTable({
 						<ProductVariantTable
 							variants={variantData.itemVariants}
 							productNumber={productNumber || ""}
-							hasSearch={true}
+							hasSearch
 							selectedItemNumber={selectedItemNumber}
 							onSelectVariant={onSelectVariant}
+							columnAttributes={columnAttributes ?? undefined}
+							loadingAttributes={loadingAttributes}
 						/>
 					) : (
 						<p className="text-gray-500">{t("noVariants")}</p>

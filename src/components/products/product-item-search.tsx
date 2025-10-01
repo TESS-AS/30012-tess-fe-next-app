@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
+import { useGetColumnAttributes } from "@/hooks/useGetColumnAttributes";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { Category, RawCategory } from "@/types/categories.types";
 import { IProductSearch } from "@/types/search.types";
@@ -50,6 +51,9 @@ export function ProductItem({
 	const { data: profile } = useGetProfileData();
 	const [categoryPath, setCategoryPath] = useState("");
 	const t = useTranslations();
+	const [selectedVariantNumber, setSelectedVariantNumber] = useState<
+		string | null
+	>(null);
 
 	useEffect(() => {
 		const loadCategory = async () => {
@@ -100,7 +104,8 @@ export function ProductItem({
 		return Array.from(set);
 	})();
 
-	console.log(product, "ppro");
+	const { data: columnAttributes, isLoading: loadingAttrs } =
+		useGetColumnAttributes(selectedVariantNumber ?? undefined);
 
 	return (
 		<div key={product.productNumber}>
@@ -160,6 +165,11 @@ export function ProductItem({
 								...prev,
 								[product.productNumber]: productVariations,
 							}));
+
+							if (productVariations.length > 0) {
+								const firstVariantNumber = productVariations[0].itemNumber;
+								setSelectedVariantNumber(firstVariantNumber);
+							}
 						}}
 						className="mt-2 ml-auto self-center rounded-md bg-green-600 px-5 py-2 text-sm font-medium text-white hover:bg-green-700">
 						Se produktvarianter ({product.itemVariantCount || 0}) →
@@ -181,10 +191,13 @@ export function ProductItem({
 				<ModalHeader className="border-b border-gray-200 pb-5">
 					<ModalTitle>Velg produktvariant - {product.productName}</ModalTitle>
 				</ModalHeader>
-				<div className="">
+				<div className="w-full overflow-hidden">
 					<ProductVariantTable
 						variants={variations[product.productNumber]}
 						productNumber={product.productNumber}
+						hasAddToCart
+						columnAttributes={columnAttributes}
+						loadingAttributes={loadingAttrs}
 					/>
 				</div>
 			</Modal>
