@@ -1,18 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { Info } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
-import {
-	Dialog,
-	DialogClose,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Info } from "lucide-react";
 
 export interface DiscardEquipmentDialogProps {
 	open: boolean;
