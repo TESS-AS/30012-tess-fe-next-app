@@ -6,6 +6,8 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, type Column } from "@/components/ui/data-table";
+import { DiscardEquipmentDialog } from "@/components/ui/dialogs/discard-equipment-dialog";
+import { RFQRequestDialog } from "@/components/ui/dialogs/rfq-request-dialog";
 import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 import {
 	DropdownMenu,
@@ -48,8 +50,6 @@ import { CartAddedModal } from "./cart-added-modal";
 import { HoseColumnsDropdown } from "./hose-columns-dropdown";
 import { HoseFiltersDropdown } from "./hose-filters-dropdown";
 import { HoseSearchBar } from "./hose-search-bar";
-import { RFQRequestDialog } from "@/components/ui/dialogs/rfq-request-dialog";
-import { DiscardEquipmentDialog } from "@/components/ui/dialogs/discard-equipment-dialog";
 
 export interface HoseOrder {
 	orderId: string;
