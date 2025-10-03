@@ -27,7 +27,6 @@ export const getRequisition = async (
 		const response = await axiosInstance.get(
 			`/requisition/getRequisition/${customerNumber}`,
 		);
-		console.log(response.data, "response");
 		return response.data;
 	} catch (error) {
 		console.error("Error getting requisition:", error);

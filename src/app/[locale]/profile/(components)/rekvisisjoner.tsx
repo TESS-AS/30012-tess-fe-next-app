@@ -76,7 +76,6 @@ export function Rekvisisjoner() {
 	const { requisitions, loading, error } = useRequisitions(
 		profile?.defaultCustomerNumber ?? "110667",
 	);
-	console.log(requisitions, "requisitions");
 
 	const getRadioStatusStyle = (status: Status) => {
 		switch (status) {
@@ -260,7 +259,6 @@ export function Rekvisisjoner() {
 					onPageChange={setCurrentPage}
 					isExpandable
 					expandableContent={(rekvisisjon) => {
-						console.log(rekvisisjon, "rekvisisjon");
 						return (
 							<div>
 								<table className="w-[70%]">

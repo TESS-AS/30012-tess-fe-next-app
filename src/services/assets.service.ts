@@ -52,7 +52,6 @@ export const getAssets = async (
 		);
 		return response.data;
 	} catch (error) {
-		console.log(error);
 		return {
 			data: [],
 			meta: {
@@ -80,7 +79,6 @@ export const getS1Codes = async (
 			}
 		);
 	} catch (error) {
-		console.log(error);
 		return { data: [], meta: { page: 1, pageSize, total: 0, totalPages: 0 } };
 	}
 };
@@ -116,7 +114,6 @@ export const searchAssets = async (
 		);
 		return response.data;
 	} catch (error) {
-		console.log(error);
 		return {
 			data: [],
 			meta: {

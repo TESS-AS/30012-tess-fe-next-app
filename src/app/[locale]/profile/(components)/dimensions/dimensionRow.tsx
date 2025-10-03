@@ -110,8 +110,6 @@ export default function DimensionRow(props: Props): ReactElement {
 
 	const isEditingThis = editingDimension?.id === dimension.id;
 
-	console.log("dimension", dimension);
-
 	return (
 		<Fragment key={dimension.id}>
 			<tr

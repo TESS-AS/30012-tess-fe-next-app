@@ -173,7 +173,7 @@ export function ProductVariantInfo({
 
 				{!isLoading && variantData && (
 					<>
-						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-5">
+						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
 							{attributes.map((attr: any) => (
 								<div
 									key={attr.attribute_identifier}

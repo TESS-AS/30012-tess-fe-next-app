@@ -74,7 +74,8 @@
         "warehouse": "Lager",
         "cart": "Handlekurv",
         "selected": "Valgt",
-        "select": "Velg"
+        "select": "Velg",
+        "uniqueSellingPoints": "Viktige egenskaper"
     },
 	"BreadCrumbs": {
 		"home": "Hjem",

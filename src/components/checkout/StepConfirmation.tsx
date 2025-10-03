@@ -185,7 +185,6 @@ export default function StepConfirmation({
 																calculatedPrices[item.insert1.itemNumber] ?? 0,
 																calculatedPrices[item.insert2.itemNumber] ?? 0,
 															].reduce((sum, price) => sum + price, 0);
-															console.log("Total price:", total);
 															return formatNorwegianCurrency(total);
 														})()}
 													</span>

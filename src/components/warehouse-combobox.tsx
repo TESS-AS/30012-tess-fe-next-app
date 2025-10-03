@@ -76,7 +76,6 @@ export function WarehouseCombobox({
 			}
 		};
 	}, [value]);
-	console.log("selected", selected);
 
 	return (
 		<Popover

@@ -207,7 +207,6 @@ const CartPage = () => {
 		}
 		if (!isLoading) loadWarehousesData();
 	}, [cartItems, isLoading, warehouses, profile?.defaultCompanyNumber]);
-	console.log(warehouseBalance, "warehouseBalance");
 
 	const handleCheckout = async () => {
 		setIsCheckoutLoading(true);
@@ -645,7 +644,6 @@ const CartPage = () => {
 																		calculatedPrices[item.insert2.itemNumber] ??
 																			0,
 																	].reduce((sum, price) => sum + price, 0);
-																	console.log("Total price:", total);
 																	return formatNorwegianCurrency(total);
 																})()}
 															</span>

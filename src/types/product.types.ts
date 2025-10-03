@@ -16,6 +16,18 @@ export interface IVariation {
 	unspsc: string;
 }
 
+export interface IRelatedProductRaw {
+	product_name_no: string;
+	product_number: string;
+	short_desc_no?: string;
+	media_id?: {
+		url: string;
+		filename: string;
+		picture_type: string;
+		thumbnail_url?: string;
+	}[];
+}
+
 export interface IAttribute {
 	attributeIdentifier: string;
 	dataType: string;

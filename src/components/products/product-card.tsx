@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { IProduct } from "@/types/product.types";
 import Image from "next/image";
 
-interface ProductCardProps extends IProduct {
+interface ProductCardProps extends Partial<IProduct> {
 	className?: string;
 	aspectRatio?: "portrait" | "square";
 	variant?: "default" | "compact";
@@ -15,8 +16,8 @@ interface ProductCardProps extends IProduct {
 }
 
 export function ProductCard({
-	productNumber,
-	productName,
+	productNumber = "-",
+	productName = "",
 	mediaM,
 	shortDesc,
 	className,
@@ -25,9 +26,9 @@ export function ProductCard({
 	viewLayout,
 	priority = false,
 }: ProductCardProps) {
-	const [isImageLoading, setIsImageLoading] = useState(true);
+	const [isLoaded, setIsLoaded] = useState(false);
 
-	const content = (
+	return (
 		<div
 			className={cn(
 				"group bg-background cursor-pointer overflow-hidden rounded-lg border transition-all hover:shadow-md",
@@ -40,64 +41,35 @@ export function ProductCard({
 					"relative overflow-hidden rounded-md",
 					aspectRatio === "portrait" ? "aspect-[3/4]" : "aspect-square",
 					viewLayout === "list" ? "me-4 w-[250px]" : "",
-					isImageLoading ? "animate-pulse" : "",
 				)}>
-				{mediaM ? (
-					<Image
-						src={mediaM}
-						alt={productName}
-						fill
-						priority={priority}
-						loading={priority ? "eager" : "lazy"}
-						sizes={
-							viewLayout === "list"
-								? "250px"
-								: "(min-width: 1280px) 256px, (min-width: 1024px) 192px, (min-width: 768px) 256px, (min-width: 640px) 384px, calc(100vw - 48px)"
-						}
-						quality={100}
-						className={cn(
-							"object-contain",
-							"transition-all duration-300",
-							isImageLoading
-								? "scale-110 blur-sm grayscale"
-								: "blur-0 scale-100 grayscale-0",
-							"group-hover:scale-105",
-						)}
-						onLoad={() => setIsImageLoading(false)}
-					/>
-				) : (
-					<div className="h-full w-full bg-white">
-						<Image
-							src="/images/tess.webp"
-							alt="Tess"
-							fill
-							priority={priority}
-							loading={priority ? "eager" : "lazy"}
-							sizes={
-								viewLayout === "list"
-									? "250px"
-									: "(min-width: 1280px) 256px, (min-width: 1024px) 192px, (min-width: 768px) 256px, (min-width: 640px) 384px, calc(100vw - 48px)"
-							}
-							quality={100}
-							className={cn(
-								"object-contain",
-								"transition-all duration-300",
-								isImageLoading
-									? "scale-110 blur-sm grayscale"
-									: "blur-0 scale-100 grayscale-0",
-								"group-hover:scale-105",
-							)}
-							onLoad={() => setIsImageLoading(false)}
-						/>
-					</div>
-				)}
+				{!isLoaded && <Skeleton className="absolute inset-0 h-full w-full" />}
+
+				<Image
+					src={mediaM ?? "/images/tess.webp"}
+					alt={productName || "Product image"}
+					fill
+					priority={priority}
+					loading={priority ? "eager" : "lazy"}
+					sizes={
+						viewLayout === "list"
+							? "250px"
+							: "(min-width: 1280px) 256px, (min-width: 1024px) 192px, (min-width: 768px) 256px, (min-width: 640px) 384px, calc(100vw - 48px)"
+					}
+					quality={90}
+					className={cn(
+						"object-contain transition-transform duration-300 group-hover:scale-105",
+						!isLoaded && "opacity-0",
+					)}
+					onLoadingComplete={() => setIsLoaded(true)}
+				/>
 			</div>
+
 			<div
 				className={cn(
 					"flex flex-col",
 					variant === "default" ? "mt-4" : "mt-2",
 				)}>
-				<h3 className="min-h-[50px] text-sm font-medium">{productName}</h3>
+				<h3 className="min-h-[30px] text-sm font-medium">{productName}</h3>
 				<div className="text-muted-foreground mt-2 flex items-center justify-between text-sm">
 					<p>{productNumber}</p>
 				</div>
@@ -109,6 +81,4 @@ export function ProductCard({
 			</div>
 		</div>
 	);
-
-	return content;
 }

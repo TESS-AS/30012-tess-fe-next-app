@@ -145,8 +145,6 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
 		}
 	};
 
-	console.log(orders, "orders test");
-
 	const getStatusColor = (status: string) => {
 		switch (status) {
 			case "Mottatt": // Written
