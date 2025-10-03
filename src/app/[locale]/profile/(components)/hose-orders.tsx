@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { DiscardEquipmentDialog } from "@/components/ui/dialogs/discard-equipment-dialog";
+import { PrintCertificatesDialog } from "@/components/ui/dialogs/print-certificates-dialog";
+import { PrintTagsDialog } from "@/components/ui/dialogs/print-tags-dialog";
 import { RFQRequestDialog } from "@/components/ui/dialogs/rfq-request-dialog";
 import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 import {
@@ -195,6 +197,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 	const [supportOpen, setSupportOpen] = useState(false);
 	const [rfqOpen, setRfqOpen] = useState(false);
 	const [discardOpen, setDiscardOpen] = useState(false);
+	const [printOpen, setPrintOpen] = useState(false);
+	const [printTagsOpen, setPrintTagsOpen] = useState(false);
 	const [showAllItems, setShowAllItems] = useState(false);
 	const [isNavigating, setIsNavigating] = useState(false);
 	const router = useRouter();
@@ -462,16 +466,23 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 						</DropdownMenuItem>
 
 						<DropdownMenuItem
-							disabled
-							onClick={() => handleBulkAction("print-id")}
-							className="">
+							onClick={() => {
+								if (selectedRows.length === 0) return;
+								setPrintTagsOpen(true);
+							}}
+							className={cn("", {
+								"cursor-not-allowed opacity-50": selectedRows.length === 0,
+							})}
+							disabled={selectedRows.length === 0}>
 							<Printer className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Skriv ut visuelle ID-merker (strekkode)</span>
 						</DropdownMenuItem>
 
 						<DropdownMenuItem
-							disabled
-							onClick={() => handleBulkAction("print-certs")}
+							onClick={() => {
+								if (selectedRows.length === 0) return;
+								setPrintOpen(true);
+							}}
 							className="">
 							<Printer className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Skriv ut trykktest-sertifikater</span>
@@ -612,6 +623,23 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 					// TODO: Integrer utrangerings-endepunkt
 					toast.success("Utstyr utrangert");
 				}}
+			/>
+
+			<PrintTagsDialog
+				open={printTagsOpen}
+				onOpenChange={setPrintTagsOpen}
+				selectedIds={selectedRows}
+				onRemoveId={handleRemoveSelectedId}
+				previewUrl="/images/presentation.png"
+			/>
+
+			<PrintCertificatesDialog
+				open={printOpen}
+				onOpenChange={setPrintOpen}
+				selectedIds={selectedRows}
+				onRemoveId={handleRemoveSelectedId}
+				pdfUrl="https://www.orimi.com/pdf-test.pdf"
+				// pdfUrl can be wired when backend provides a URL
 			/>
 
 			<div className="space-y-6">
