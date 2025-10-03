@@ -48,23 +48,14 @@ type LocationNode = {
 };
 
 const HoseOverview = () => {
-	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
-		undefined,
-	);
+	const [selectedS1Code] = useState<string | undefined>(undefined);
 
-	const {
-		loading,
-		s1Codes = [],
-		s1CodesPagination,
-		fetchS1Codes,
-	} = useGetAssets("", selectedS1Code, {
+	const { loading, s1Codes = [] } = useGetAssets("", selectedS1Code, {
 		initAssets: false,
 		initS1Codes: true,
 	});
 
 	const locations: LocationNode[] = useMemo(() => {
-		// Transform S1/S2 API shape into LocationNode/ChildNode
-		// Default all statuses to 'ok' until we have health data
 		return (s1Codes || []).map((s1: any) => ({
 			id: String(s1.S1Id ?? s1.S1Code),
 			name: String(s1.S1Name ?? s1.S1Code ?? "S1"),

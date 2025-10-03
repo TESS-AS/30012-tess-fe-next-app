@@ -12,6 +12,45 @@ interface S1CodesResponse {
 	};
 }
 
+export type InspectionSummaryType = "completed" | "upcoming";
+
+export interface InspectionSummaryItem {
+	month: string;
+	year: string;
+	inspectionCount: number;
+}
+
+export interface InspectionSummaryResponse {
+	data: InspectionSummaryItem[];
+}
+
+export const getInspectionSummary = async (
+	type: InspectionSummaryType,
+	opts?: {
+		s1Code?: string;
+		customerNumber?: string;
+		yearOffset?: number; // -2..+2
+	},
+): Promise<InspectionSummaryResponse> => {
+	try {
+		const params = new URLSearchParams();
+		if (opts?.s1Code) params.append("s1Code", opts.s1Code);
+		if (opts?.customerNumber)
+			params.append("customerNumber", opts.customerNumber);
+		if (typeof opts?.yearOffset === "number") {
+			params.append("yearOffset", String(opts.yearOffset));
+		}
+
+		const res = await axiosClient.get(
+			`/asset/inspectionSummary/${type}?${params.toString()}`,
+		);
+		return res.data ?? { data: [] };
+	} catch (error) {
+		console.log(error);
+		return { data: [] };
+	}
+};
+
 export interface PaginatedResponse<T> {
 	data: T[];
 	meta: {
@@ -55,12 +94,7 @@ export const getAssets = async (
 		console.log(error);
 		return {
 			data: [],
-			meta: {
-				page: 1,
-				pageSize: 10,
-				totalItems: 0,
-				totalPages: 0,
-			},
+			meta: { page: 1, pageSize: 10, totalItems: 0, totalPages: 0 },
 		};
 	}
 };
@@ -119,12 +153,7 @@ export const searchAssets = async (
 		console.log(error);
 		return {
 			data: [],
-			meta: {
-				page,
-				pageSize,
-				totalItems: 0,
-				totalPages: 0,
-			},
+			meta: { page, pageSize, totalItems: 0, totalPages: 0 },
 		};
 	}
 };
