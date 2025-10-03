@@ -156,8 +156,6 @@ export default function Header() {
 		await signOut();
 	};
 
-	console.log(profile?.punchout, "punchout");
-
 	return (
 		<header
 			className={`bg-background w-full border-t ${profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER ? "h-[132px]" : "h-[182px]"}`}>

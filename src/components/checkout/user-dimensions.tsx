@@ -271,7 +271,6 @@ export const UserDimensionsInput: React.FC<Props> = ({
 						level={1}
 						value={userDimensionOne}
 						onChange={(value) => {
-							console.log(value, "value");
 							setUserDimensionOne(value);
 							setActiveDimension(value ? 1 : null);
 						}}

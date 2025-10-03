@@ -130,7 +130,6 @@ export default function ProjectSelect({
       value="1000 - Eksempelprosjekt"
       onChange={(val) => console.log('Selected:', val)}
       onAddProject={async (newProject) => {
-        console.log('Adding new:', newProject);
       }}
     /> 
 

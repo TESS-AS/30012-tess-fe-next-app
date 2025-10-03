@@ -87,6 +87,7 @@ interface ProductVariantTableProps {
 	hasAddToCart?: boolean;
 	columnAttributes?: Record<string, any> | null;
 	loadingAttributes?: boolean;
+	hasQuantity?: boolean;
 }
 
 export default function ProductVariantTable({
@@ -98,6 +99,7 @@ export default function ProductVariantTable({
 	hasAddToCart = false,
 	columnAttributes,
 	loadingAttributes,
+	hasQuantity = false,
 }: ProductVariantTableProps) {
 	const t = useTranslations();
 	const { data: profile } = useGetProfileData();
@@ -119,8 +121,8 @@ export default function ProductVariantTable({
 		unspsc: false,
 		contentUnit: false,
 		price: true,
-		quantity: true,
 		warehouse: true,
+		quantity: hasQuantity ?? true,
 		cart: true,
 	});
 
@@ -156,7 +158,7 @@ export default function ProductVariantTable({
 
 		const maxAttributeSlots = Math.max(
 			0,
-			10 - visibleStaticCount - fixedTailCount,
+			6 - visibleStaticCount - fixedTailCount,
 		);
 
 		setVisibleAttributes((prev) => {
@@ -312,7 +314,7 @@ export default function ProductVariantTable({
 		}
 
 		const fixedTail: ColumnKey[] = [];
-		if (visibleCols.quantity) fixedTail.push("quantity");
+		if (hasQuantity && visibleCols.quantity) fixedTail.push("quantity");
 		if (visibleCols.warehouse) fixedTail.push("warehouse");
 		if (visibleCols.cart) fixedTail.push("cart");
 

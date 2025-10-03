@@ -35,8 +35,6 @@ export function ProductPageClient({
 		selectedItemNumber,
 	);
 
-	console.log(variantData, "dataa");
-
 	const selectedVariant =
 		variantData?.itemVariants?.find(
 			(v: any) => v.itemNumber === selectedItemNumber,
@@ -107,7 +105,7 @@ export function ProductPageClient({
 			</div>
 
 			<RelatedProducts
-				products={productData.productToProductReference}
+				products={variantData?.itemRelatedProducts ?? []}
 				category={category}
 			/>
 		</div>

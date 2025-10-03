@@ -287,8 +287,6 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		localStorage.setItem("selectedHoseRows", JSON.stringify(newSelection));
 	};
 
-	console.log(selectedRows, "selectedRows");
-
 	const allColumns: Record<string, Column<HoseOrder>> = {
 		Vedlegg: {
 			key: "vedlegg",
@@ -590,7 +588,6 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 				onRemoveId={handleRemoveSelectedId}
 				onSubmit={async ({ subject, message, file, ids }) => {
 					// TODO: integrate with backend endpoint for support tickets
-					console.log("Support submit", { subject, message, file, ids });
 					toast.success("Meldingen ble sendt til TESS support");
 				}}
 			/>
@@ -602,7 +599,6 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 				onRemoveId={handleRemoveSelectedId}
 				onSubmit={async ({ requestType, comment, ids }) => {
 					// TODO: Integrate with backend to create RFQ
-					console.log("RFQ submit", { requestType, comment, ids });
 					toast.success("Forespørselen ble sendt");
 				}}
 			/>
@@ -614,7 +610,6 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 				onRemoveId={handleRemoveSelectedId}
 				onSubmit={async ({ name, title, ids }) => {
 					// TODO: Integrer utrangerings-endepunkt
-					console.log("Discard submit", { name, title, ids });
 					toast.success("Utstyr utrangert");
 				}}
 			/>

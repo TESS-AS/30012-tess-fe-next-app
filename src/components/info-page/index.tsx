@@ -28,7 +28,6 @@ export function InfoPage({
 	const [submitted, setSubmitted] = useState(false);
 
 	const handleSubmit = () => {
-		console.log({ text, contactMe });
 		setSubmitted(true);
 	};
 

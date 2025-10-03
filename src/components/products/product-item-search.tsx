@@ -193,6 +193,7 @@ export function ProductItem({
 				</ModalHeader>
 				<div className="w-full overflow-hidden">
 					<ProductVariantTable
+						hasQuantity
 						variants={variations[product.productNumber]}
 						productNumber={product.productNumber}
 						hasAddToCart

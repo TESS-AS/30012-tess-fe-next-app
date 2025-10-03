@@ -33,8 +33,6 @@ export function useCheckoutOrderData(
 		salesOrderLines: [],
 	});
 
-	console.log(cartItems, "cartItems");
-
 	useEffect(() => {
 		if (!companyNumber || !warehouseNumber || !userId) return;
 

@@ -240,7 +240,6 @@ export function Dimensions(): ReactElement {
 
 	const addSubcategory = (path: string[]) => {
 		const level = path.length;
-		console.log("Creating dimension at level:", level + 1);
 
 		// Reset all dimension types to inactive
 		setDimensionTypes((prev) => prev.map((d) => ({ ...d, active: false })));
@@ -457,7 +456,6 @@ export function Dimensions(): ReactElement {
 			return next;
 		});
 	};
-	console.log(dimensionTypes, "dimensionTypes");
 	const handleOpenTypeModal = () => {
 		const level = createAtPath?.length || 0;
 		setCurrentLevel(level);

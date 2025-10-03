@@ -1,22 +1,68 @@
 "use client";
+
 import { Separator } from "@/components/ui/separator";
 import { IProduct } from "@/types/product.types";
+import { IRelatedProductRaw } from "@/types/product.types"; // new type
+import { useKeenSlider } from "keen-slider/react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { ProductCard } from "./product-card";
+import "keen-slider/keen-slider.min.css";
+
+// eslint-disable-next-line import/order
+import { Button } from "@/components/ui/button";
+
+// eslint-disable-next-line import/order
+import { useState } from "react";
 
 interface RelatedProductsProps {
-	products: IProduct[];
+	products: IRelatedProductRaw[];
 	category: string;
 }
 
 export function RelatedProducts({ products, category }: RelatedProductsProps) {
-	const pathname = usePathname();
 	const t = useTranslations();
-
 	const isEmpty = !products || products.length === 0;
+
+	const normalizedProducts: IProduct[] = products.map(
+		(p: IRelatedProductRaw) => ({
+			productNumber: p.product_number,
+			productName: p.product_name_no,
+			mediaM: p.media_id?.[0]?.url ?? "",
+			shortDesc: p.short_desc_no ?? "",
+		}),
+	);
+
+	const [currentSlide, setCurrentSlide] = useState(0);
+	const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
+		mode: "free-snap",
+		rubberband: true,
+		slides: {
+			perView: 1.2,
+			spacing: 16,
+		},
+		breakpoints: {
+			"(min-width: 640px)": {
+				slides: { perView: 2.2, spacing: 16 },
+			},
+			"(min-width: 1024px)": {
+				slides: { perView: 4, spacing: 15 },
+			},
+		},
+		slideChanged(slider) {
+			setCurrentSlide(slider.track.details.rel);
+		},
+	});
+
+	const slidesLength = instanceRef.current?.track.details.slides.length ?? 1;
+
+	const perView: any =
+		typeof instanceRef.current?.options.slides === "object" &&
+		instanceRef.current?.options.slides?.perView
+			? instanceRef.current.options.slides.perView!
+			: 1;
 
 	return (
 		<section className="mt-8 rounded-lg border border-gray-200 bg-white p-6">
@@ -30,17 +76,41 @@ export function RelatedProducts({ products, category }: RelatedProductsProps) {
 					{t("Product.noRelatedProducts")}
 				</p>
 			) : (
-				<div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-					{products.map((product) => (
-						<Link
-							key={product.productNumber}
-							href={`${pathname}/${product.productNumber}`}>
-							<ProductCard
-								{...product}
-								variant="compact"
-							/>
-						</Link>
-					))}
+				<div className="relative mt-6 flex items-center px-6">
+					<Button
+						variant="outline"
+						size="icon"
+						className="absolute top-1/2 -left-4 z-10 -translate-y-1/2 rounded-md shadow-md"
+						onClick={() => instanceRef.current?.prev()}
+						disabled={currentSlide === 0}>
+						<ChevronLeft className="h-3 w-3" />
+					</Button>
+
+					<div
+						ref={sliderRef}
+						className="keen-slider w-full">
+						{normalizedProducts.map((product) => (
+							<div
+								key={product.productNumber}
+								className="keen-slider__slide">
+								<Link href={product.productNumber}>
+									<ProductCard
+										{...product}
+										variant="compact"
+									/>
+								</Link>
+							</div>
+						))}
+					</div>
+
+					<Button
+						variant="outline"
+						size="icon"
+						className="absolute top-1/2 -right-4 z-10 -translate-y-1/2 rounded-md shadow-md"
+						onClick={() => instanceRef.current?.next()}
+						disabled={currentSlide >= slidesLength - perView}>
+						<ChevronRight className="h-2 w-2" />
+					</Button>
 				</div>
 			)}
 		</section>

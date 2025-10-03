@@ -73,7 +73,8 @@
       "warehouse": "Warehouse",
       "cart": "Cart",
       "selected": "Selected",
-      "select": "Select"
+      "select": "Select",
+      "uniqueSellingPoints": "Attributes"
     },
   "BreadCrumbs": {
 		"home": "Home",

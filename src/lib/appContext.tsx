@@ -202,7 +202,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					profile?.defaultCustomerNumber,
 					profile?.defaultCompanyNumber,
 				);
-				console.log(priceResults, "priceResults");
 
 				const initialPrices: Record<string, number> = {};
 				const calculatedPrices: Record<string, number> = {};
