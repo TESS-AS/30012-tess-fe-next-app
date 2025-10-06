@@ -52,6 +52,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
 import QuantityButtons from "../ui/quantity-buttons";
+import { useAppContext } from "@/lib/appContext";
 
 interface Warehouse {
 	warehouseNumber: string;
@@ -103,6 +104,7 @@ export default function ProductVariantTable({
 }: ProductVariantTableProps) {
 	const t = useTranslations();
 	const { data: profile } = useGetProfileData();
+	const { isCartChanging, setIsCartChanging } = useAppContext();
 
 	const [searchQuery, setSearchQuery] = useState<string>("");
 	const [quantities, setQuantities] = useState<Record<number, number>>({});
@@ -113,7 +115,6 @@ export default function ProductVariantTable({
 	>([]);
 	const [prices, setPrices] = useState<Record<number, number>>({});
 	const [loading, setLoading] = useState<Record<number, boolean>>({});
-	const [isCartChanging, setIsCartChanging] = useState(false);
 
 	const [visibleCols, setVisibleCols] = useState<Record<ColumnKey, boolean>>({
 		image: false,
@@ -741,6 +742,7 @@ export default function ProductVariantTable({
 																					warehouseNumber: selectedWarehouse,
 																					companyNumber: "1",
 																				});
+
 																				setIsCartChanging(!isCartChanging);
 
 																				if (

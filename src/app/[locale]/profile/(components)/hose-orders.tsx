@@ -86,7 +86,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 			return undefined;
 		},
 	);
-	const { setIsCartChanging } = useAppContext();
+	const { setIsCartChanging, isCartChanging } = useAppContext();
 
 	const {
 		assets,
@@ -224,7 +224,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 					setCartModalOpen(true);
 					toast.success("Elementer lagt til i handlekurven");
 					setIsNavigating(true);
-					setIsCartChanging(true);
+					setIsCartChanging(!isCartChanging);
+
 					router.push("/cart");
 				} catch (error) {
 					toast.error("Kunne ikke legge til elementer i handlekurven");
