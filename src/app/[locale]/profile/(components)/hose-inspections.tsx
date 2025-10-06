@@ -13,21 +13,7 @@ import { useGetAssets } from "@/hooks/useGetAssets";
 import { useInspectionSummary } from "@/hooks/useInspectionSummary";
 import type { UIInspectionType } from "@/hooks/useInspectionSummary";
 import { Calendar, MapPin, X } from "lucide-react";
-
-const indexToShort: Record<number, string> = {
-	0: "Jan",
-	1: "Feb",
-	2: "Mar",
-	3: "Apr",
-	4: "Mai",
-	5: "Jun",
-	6: "Jul",
-	7: "Aug",
-	8: "Sep",
-	9: "Okt",
-	10: "Nov",
-	11: "Des",
-};
+import { indexToShort } from "@/constants/profileTabs";
 
 const getQuarter = (monthIndex: number) => Math.floor(monthIndex / 3) + 1;
 
@@ -54,12 +40,6 @@ const HoseInspections = () => {
 
 	const quarterGroups = useMemo(() => {
 		if (!series?.length) return [];
-		const groups: {
-			key: string;
-			quarter: string;
-			items: typeof series;
-			monthsShort: string[];
-		}[] = [];
 
 		const map = new Map<string, { quarter: string; items: typeof series }>();
 

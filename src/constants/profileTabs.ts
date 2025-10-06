@@ -18,3 +18,18 @@ export const profileTabs = [
 	{ value: "password", label: "Change Password", icon: Lock },
 	{ value: "ratings", label: "Ratings", icon: Star },
 ];
+
+export const indexToShort: Record<number, string> = {
+	0: "Jan",
+	1: "Feb",
+	2: "Mar",
+	3: "Apr",
+	4: "Mai",
+	5: "Jun",
+	6: "Jul",
+	7: "Aug",
+	8: "Sep",
+	9: "Okt",
+	10: "Nov",
+	11: "Des",
+};
