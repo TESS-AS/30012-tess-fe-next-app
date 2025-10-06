@@ -32,6 +32,7 @@ import {
 	lockedCols,
 } from "@/constants/productVariantTable";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { useAppContext } from "@/lib/appContext";
 import { addToCart, getCart } from "@/services/carts.service";
 import {
 	calculateItemPrice,
@@ -52,7 +53,6 @@ import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
 import QuantityButtons from "../ui/quantity-buttons";
-import { useAppContext } from "@/lib/appContext";
 
 interface Warehouse {
 	warehouseNumber: string;
