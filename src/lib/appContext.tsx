@@ -162,7 +162,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				cart.cart?.map((item) => ({
 					itemNumber: item.itemNumber,
 					quantity: item.quantity,
-					warehouseNumber: profile?.defaultWarehouseNumber || "",
+					warehouseNumber:
+						item.warehouseNumber || profile?.defaultWarehouseNumber || "",
 				})) ?? [];
 
 			const cartKitPriceRequests =
@@ -221,6 +222,71 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					...prev,
 					...calculatedPrices,
 				}));
+
+				const allItemsForPricing: Array<{
+					itemNumber: string;
+					quantity: number;
+					warehouseNumber: string;
+				}> = [
+					...(cart.cart ?? []).map((i) => ({
+						itemNumber: i.itemNumber,
+						quantity: i.quantity,
+						warehouseNumber:
+							i.warehouseNumber || profile?.defaultWarehouseNumber || "",
+					})),
+					...(cart.cartKit ?? []).flatMap((k) => [
+						{
+							itemNumber: k.hose.itemNumber,
+							quantity: k.hose.quantity || 1,
+							warehouseNumber: profile?.defaultWarehouseNumber || "",
+						},
+						{
+							itemNumber: k.ferrule1.itemNumber,
+							quantity: k.ferrule1.quantity || 1,
+							warehouseNumber: profile?.defaultWarehouseNumber || "",
+						},
+						{
+							itemNumber: k.ferrule2.itemNumber,
+							quantity: k.ferrule2.quantity || 1,
+							warehouseNumber: profile?.defaultWarehouseNumber || "",
+						},
+						{
+							itemNumber: k.insert1.itemNumber,
+							quantity: k.insert1.quantity || 1,
+							warehouseNumber: profile?.defaultWarehouseNumber || "",
+						},
+						{
+							itemNumber: k.insert2.itemNumber,
+							quantity: k.insert2.quantity || 1,
+							warehouseNumber: profile?.defaultWarehouseNumber || "",
+						},
+					]),
+				];
+
+				const currentCalculated = new Set(Object.keys(calculatedPrices));
+				const missingItems = allItemsForPricing.filter(
+					(it) => !currentCalculated.has(it.itemNumber),
+				);
+				if (missingItems.length > 0) {
+					try {
+						const fallbackResults = await calculateItemPrice(
+							missingItems,
+							profile?.defaultCustomerNumber,
+							profile?.defaultCompanyNumber,
+						);
+						const fallbackCalculated: Record<string, number> = {};
+						const fallbackInitial: Record<string, number> = {};
+						for (const item of fallbackResults) {
+							fallbackInitial[item.itemNumber] = item.basePrice || 0;
+							fallbackCalculated[item.itemNumber] =
+								item.bestPrice || item.basePrice || 0;
+						}
+						setPrices((prev) => ({ ...prev, ...fallbackInitial }));
+						setCalculatedPrices((prev) => ({ ...prev, ...fallbackCalculated }));
+					} catch (e) {
+						console.warn("Fallback batch pricing failed", e);
+					}
+				}
 
 				const newSummary = priceResults.reduce(
 					(acc: Record<string, number>, it: PriceResponse) => {
@@ -326,7 +392,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const removeItemOptimistic = async (cartLine: number | string) => {
 		const numericLine = Number(cartLine);
 
-		// Check if it's a cart kit item (hexagonId)
 		if (isNaN(numericLine)) {
 			const hexagonId = cartLine;
 			const backup = cartItems?.cartKit?.find((i) => i.hexagonId === hexagonId);
@@ -358,7 +423,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			return;
 		}
 
-		// Regular cart item
 		const backup = cartItems?.cart?.find(
 			(i) => Number(i.cartLine) === numericLine,
 		);

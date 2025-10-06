@@ -57,7 +57,6 @@ const HoseOverview = () => {
 		}));
 	}, [s1Codes]);
 
-	// Load inspection/replacement counts for the right-hand summary cards
 	const { counts } = useHoseInspectionCounts(selectedS1Code);
 
 	return (
