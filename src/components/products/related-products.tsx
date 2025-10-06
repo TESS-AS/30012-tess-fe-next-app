@@ -58,11 +58,13 @@ export function RelatedProducts({ products, category }: RelatedProductsProps) {
 
 	const slidesLength = instanceRef.current?.track.details.slides.length ?? 1;
 
-	const perView: any =
-		typeof instanceRef.current?.options.slides === "object" &&
-		instanceRef.current?.options.slides?.perView
-			? instanceRef.current.options.slides.perView!
-			: 1;
+	function getPerView(): number {
+		const slidesOpt = instanceRef.current?.options.slides;
+		if (typeof slidesOpt === "object" && slidesOpt?.perView) {
+			return slidesOpt.perView as any;
+		}
+		return 1;
+	}
 
 	return (
 		<section className="mt-8 rounded-lg border border-gray-200 bg-white p-6">
@@ -108,7 +110,11 @@ export function RelatedProducts({ products, category }: RelatedProductsProps) {
 						size="icon"
 						className="absolute top-1/2 -right-4 z-10 -translate-y-1/2 rounded-md shadow-md"
 						onClick={() => instanceRef.current?.next()}
-						disabled={currentSlide >= slidesLength - perView}>
+						disabled={
+							currentSlide >=
+							(instanceRef.current?.track.details.slides.length ?? 1) -
+								getPerView()
+						}>
 						<ChevronRight className="h-2 w-2" />
 					</Button>
 				</div>
