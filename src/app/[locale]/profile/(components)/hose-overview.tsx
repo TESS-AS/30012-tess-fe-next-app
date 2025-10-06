@@ -7,26 +7,11 @@ import {
 	AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { useGetAssets } from "@/hooks/useGetAssets";
-import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
-import { Separator } from "@radix-ui/react-select";
-import {
-	ChevronRight,
-	Ellipsis,
-	MapPin,
-	Search,
-	Settings,
-	X,
-} from "lucide-react";
-import Image from "next/image";
 import { useHoseInspectionCounts } from "@/hooks/useHoseInspectionCounts";
+import { Separator } from "@radix-ui/react-select";
+import { ChevronRight, Ellipsis, MapPin, Settings } from "lucide-react";
+import Image from "next/image";
 
 type Status = "ok" | "warn" | "error";
 
@@ -268,7 +253,9 @@ const HoseOverview = () => {
 											src="/icons/alert-icons/red-exclamation-point.svg"
 											alt="Red Exclamation Point"
 										/>
-										<span className="text-2xl font-bold">{counts.rejected}</span>
+										<span className="text-2xl font-bold">
+											{counts.rejected}
+										</span>
 									</div>
 									<p className="text-sm font-medium text-[#5A615D]">
 										Underkjente inspeksjoner
@@ -285,7 +272,9 @@ const HoseOverview = () => {
 											src="/icons/alert-icons/yelllow-exclamation-point.svg"
 											alt="Yellow Exclamation Point"
 										/>
-										<span className="text-2xl font-bold">{counts.approved}</span>
+										<span className="text-2xl font-bold">
+											{counts.approved}
+										</span>
 									</div>
 									<p className="text-sm font-medium text-[#5A615D]">
 										Bestått med anmerkninger
@@ -319,7 +308,9 @@ const HoseOverview = () => {
 											src="/icons/alert-icons/time-aquamarine.svg"
 											alt="Time Aquamarine"
 										/>
-										<span className="text-2xl font-bold">{counts.upcomingInspection}</span>
+										<span className="text-2xl font-bold">
+											{counts.upcomingInspection}
+										</span>
 									</div>
 									<p className="text-sm font-medium text-[#5A615D]">
 										Planlagte inspeksjoner
@@ -351,7 +342,9 @@ const HoseOverview = () => {
 											src="/icons/alert-icons/time-yellow.svg"
 											alt="Time Yellow"
 										/>
-										<span className="text-2xl font-bold">{counts.replacementDue}</span>
+										<span className="text-2xl font-bold">
+											{counts.replacementDue}
+										</span>
 									</div>
 									<p className="text-sm font-medium text-[#5A615D]">
 										Forfalte inspeksjoner
@@ -368,7 +361,9 @@ const HoseOverview = () => {
 											src="/icons/alert-icons/time-aquamarine.svg"
 											alt="Time Aquamarine"
 										/>
-										<span className="text-2xl font-bold">{counts.upcomingReplacement}</span>
+										<span className="text-2xl font-bold">
+											{counts.upcomingReplacement}
+										</span>
 									</div>
 									<p className="text-sm font-medium text-[#5A615D]">
 										Planlagte inspeksjoner

@@ -9,11 +9,11 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { indexToShort } from "@/constants/profileTabs";
 import { useGetAssets } from "@/hooks/useGetAssets";
 import { useInspectionSummary } from "@/hooks/useInspectionSummary";
 import type { UIInspectionType } from "@/hooks/useInspectionSummary";
 import { Calendar, MapPin, X } from "lucide-react";
-import { indexToShort } from "@/constants/profileTabs";
 
 const getQuarter = (monthIndex: number) => Math.floor(monthIndex / 3) + 1;
 

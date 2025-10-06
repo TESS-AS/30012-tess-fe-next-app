@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { getHoseInspection } from "@/services/assets.service";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
+import { getHoseInspection } from "@/services/assets.service";
 
 export type HoseInspectionCounts = {
 	approved: number;
