@@ -58,11 +58,6 @@ type RegularCartItem = NonNullable<
 type CartKitItem = NonNullable<
 	ReturnType<typeof useAppContext>["cartItems"]
 >["cartKit"][number];
-type CartItem = RegularCartItem | CartKitItem;
-
-const isCartKitItem = (item: CartItem): item is CartKitItem => {
-	return (item as CartKitItem)?.hexagonId !== undefined;
-};
 
 const CartPage = () => {
 	const t = useTranslations();
@@ -86,6 +81,7 @@ const CartPage = () => {
 		setSubmittedOrder,
 		setShowOrderConfirmation,
 		handleClearCart,
+		cartKitTotals,
 	} = useAppContext();
 
 	const [orderData] = useCheckoutOrderData(
@@ -122,7 +118,7 @@ const CartPage = () => {
 		CartWarehouseBatch[]
 	>([]);
 	const [openModalId, setOpenModalId] = useState<string | null>(null);
-	const [outOfStock, setOutOfStock] = useState<boolean>(true);
+	const [outOfStock, setOutOfStock] = useState<boolean>(false);
 
 	const [openItems, setOpenItems] = React.useState<Record<string, boolean>>({});
 	const [variations, setVariations] = React.useState<Record<string, any>>({});
@@ -242,6 +238,14 @@ const CartPage = () => {
 
 	const handleWarehouseChange = async (warehouseNumber: string) => {
 		try {
+			const anyOutOfStock = (warehouseBalancePerItem ?? []).some((batch) => {
+				const wh = batch.warehouses?.find(
+					(w) => w.warehouse_number === warehouseNumber,
+				);
+				return !wh || (wh.balance ?? 0) <= 0;
+			});
+
+			setOutOfStock(anyOutOfStock);
 			await updateWarehouseForAllItems(warehouseNumber);
 		} catch {
 			toast.error(t("Cart.warehouseUpdateError"));
@@ -630,22 +634,9 @@ const CartPage = () => {
 														/>
 														<div className="flex items-center gap-6">
 															<span className="font-semibold">
-																{(() => {
-																	const total = [
-																		calculatedPrices[item.hose.itemNumber] ?? 0,
-																		calculatedPrices[
-																			item.ferrule1.itemNumber
-																		] ?? 0,
-																		calculatedPrices[
-																			item.ferrule2.itemNumber
-																		] ?? 0,
-																		calculatedPrices[item.insert1.itemNumber] ??
-																			0,
-																		calculatedPrices[item.insert2.itemNumber] ??
-																			0,
-																	].reduce((sum, price) => sum + price, 0);
-																	return formatNorwegianCurrency(total);
-																})()}
+																{formatNorwegianCurrency(
+																	cartKitTotals[item.hexagonId],
+																) ?? 0}
 															</span>
 
 															<Button
