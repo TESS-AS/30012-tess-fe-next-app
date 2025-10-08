@@ -38,6 +38,7 @@ interface AppContextType {
 
 	prices: Record<string, number>;
 	calculatedPrices: Record<string, number>;
+	cartKitTotals: Record<string, number>;
 	isLoading: boolean;
 
 	updateQuantity: (
@@ -324,10 +325,25 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		if (profile) loadCartData();
 	}, [profile, isCartChanging]);
 
-	const totalPrice = useMemo(
-		() => Object.values(calculatedPrices).reduce((sum, v) => sum + v, 0),
-		[calculatedPrices],
-	);
+	const totalPrice = useMemo(() => {
+		const regularTotal = (cartItems?.cart ?? []).reduce((sum, line) => {
+			const unit = calculatedPrices[line.itemNumber] ?? 0;
+			return sum + unit * (line.quantity || 1);
+		}, 0);
+
+		const kitsTotal = (cartItems?.cartKit ?? []).reduce((sum, kit) => {
+			const unitSum =
+				(calculatedPrices[kit.hose.itemNumber] ?? 0) +
+				(calculatedPrices[kit.ferrule1.itemNumber] ?? 0) +
+				(calculatedPrices[kit.ferrule2.itemNumber] ?? 0) +
+				(calculatedPrices[kit.insert1.itemNumber] ?? 0) +
+				(calculatedPrices[kit.insert2.itemNumber] ?? 0);
+			const qty = kit.hose.quantity || 1;
+			return sum + unitSum * qty;
+		}, 0);
+
+		return regularTotal + kitsTotal;
+	}, [cartItems?.cart, cartItems?.cartKit, calculatedPrices]);
 
 	const surChargeTotalPrice = useMemo(
 		() => Object.values(surChargePrices).reduce((sum, v) => sum + v, 0),
@@ -343,6 +359,21 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		() => Object.values(orderSummaryTotalPrice).reduce((sum, v) => sum + v, 0),
 		[orderSummaryTotalPrice],
 	);
+
+	const cartKitTotals = useMemo(() => {
+		const totals: Record<string, number> = {};
+		for (const kit of cartItems?.cartKit ?? []) {
+			const unitSum =
+				(calculatedPrices[kit.hose.itemNumber] ?? 0) +
+				(calculatedPrices[kit.ferrule1.itemNumber] ?? 0) +
+				(calculatedPrices[kit.ferrule2.itemNumber] ?? 0) +
+				(calculatedPrices[kit.insert1.itemNumber] ?? 0) +
+				(calculatedPrices[kit.insert2.itemNumber] ?? 0);
+			const qty = kit.hose.quantity || 1;
+			totals[kit.hexagonId] = unitSum * qty;
+		}
+		return totals;
+	}, [cartItems?.cartKit, calculatedPrices]);
 
 	const updateQuantity = async (
 		cartLine: number,
@@ -496,6 +527,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 				prices,
 				calculatedPrices,
+				cartKitTotals,
 				isLoading,
 
 				updateQuantity,
@@ -505,6 +537,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				removeItemOptimistic,
 
 				handleArchiveCart,
+
+				handleClearCart,
 
 				currentStep,
 				setCurrentStep,
@@ -529,8 +563,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 				rabatterTotalPrice,
 				orderSummaryTotalPriceFinal,
-
-				handleClearCart,
 			}}>
 			{children}
 		</AppContext.Provider>

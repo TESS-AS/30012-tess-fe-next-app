@@ -72,7 +72,8 @@ export function DataTable<T extends { orderId: string }>({
 		[columns],
 	);
 	const isSelected = (id: string) => selectedIds.includes(id);
-
+	const showPagination =
+		!isLoading && totalItems > itemsPerPage && data.length > 0;
 	return (
 		<div className={className}>
 			<div className="overflow-hidden">
@@ -258,7 +259,7 @@ export function DataTable<T extends { orderId: string }>({
 				</div>
 			</div>
 
-			{totalItems > 0 && (
+			{showPagination && (
 				<div className="flex items-center justify-between px-2 py-4">
 					<p className="text-sm text-gray-700">
 						Viser {(currentPage - 1) * itemsPerPage + 1} til{" "}
