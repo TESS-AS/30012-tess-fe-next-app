@@ -64,7 +64,7 @@ export default function OrderSummary({
 				<div className="mt-4 space-y-2 text-sm">
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">Opprinnelig pris</span>
-						<PriceDisplay amount={orderSummaryTotalPriceFromAppContext} />
+						<PriceDisplay amount={originalPrice} />
 					</div>
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">Rabatter</span>
@@ -72,7 +72,7 @@ export default function OrderSummary({
 					</div>
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">Sum etter rabatt (eks. mva.)</span>
-						<PriceDisplay amount={sumAfterDiscount} />
+						<PriceDisplay amount={orderSummaryTotalPriceFromAppContext} />
 					</div>
 					<div className="flex justify-between">
 						<span className="text-[#5A615D]">Tilleggsavgift</span>

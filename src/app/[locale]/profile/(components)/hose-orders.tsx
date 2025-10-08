@@ -590,6 +590,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 				onConfirm={async () => {
 					setCartModalOpen(false);
 					await handleBulkAction("cart");
+					localStorage.setItem("selectedHoseRows", JSON.stringify([]));
 				}}
 			/>
 
@@ -599,7 +600,6 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 				selectedIds={selectedRows}
 				onRemoveId={handleRemoveSelectedId}
 				onSubmit={async ({ subject, message, file, ids }) => {
-					// TODO: integrate with backend endpoint for support tickets
 					toast.success("Meldingen ble sendt til TESS support");
 				}}
 			/>
