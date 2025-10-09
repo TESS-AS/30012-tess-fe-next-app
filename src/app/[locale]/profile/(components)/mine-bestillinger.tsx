@@ -279,6 +279,7 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
 						}}
 						isLoading={isLoading}
 						isDropdownColumn
+						onOrderClick={onOrderClick}
 					/>
 				</div>
 			</div>

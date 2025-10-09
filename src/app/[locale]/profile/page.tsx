@@ -36,6 +36,7 @@ import { OrdreDetaljer } from "./(components)/ordre-detaljer";
 import { OrdreHistorikk } from "./(components)/ordre-historikk";
 import { Rekvisisjoner } from "./(components)/rekvisisjoner";
 import { SidebarNav } from "./(components)/sidebar-nav";
+import HoseDetailsPage from "./(components)/hose-details-page";
 
 export default function ProfilePage() {
 	const { setIsAuthOpen } = useAppContext();
@@ -71,6 +72,7 @@ export default function ProfilePage() {
 	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 	const [supportOpen, setSupportOpen] = useState(false);
 	const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+	const [selectedHoseId, setSelectedHoseId] = useState<string | null>(null);
 
 	if (!profile) {
 		return (
@@ -279,7 +281,14 @@ export default function ProfilePage() {
 						</TabsContent>
 
 						<TabsContent value="hose-oversikt">
-							<HoseOverview />
+							{selectedHoseId ? (
+								<HoseDetailsPage
+									hoseId={selectedHoseId}
+									onBack={() => setSelectedHoseId(null)}
+								/>
+							) : (
+								<HoseOverview goToHose={setSelectedHoseId} />
+							)}
 						</TabsContent>
 
 						<TabsContent value="hose-replacement">

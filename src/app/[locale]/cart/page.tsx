@@ -678,8 +678,8 @@ const CartPage = () => {
 																	</div>
 																	<p className="font-bold">
 																		{formatNorwegianCurrency(
-																			(prices[item.hose.itemNumber] ?? 0) *
-																				(item.hose.quantity || 1),
+																			(calculatedPrices[item.hose.itemNumber] ??
+																				0) * (item.hose.quantity || 1),
 																		)}
 																	</p>
 																</div>
@@ -695,8 +695,9 @@ const CartPage = () => {
 
 																	<p className="font-bold">
 																		{formatNorwegianCurrency(
-																			(prices[item.ferrule1.itemNumber] ?? 0) *
-																				(item.hose.quantity || 1),
+																			(calculatedPrices[
+																				item.ferrule1.itemNumber
+																			] ?? 0) * (item.hose.quantity || 1),
 																		)}
 																	</p>
 																</div>
@@ -711,8 +712,9 @@ const CartPage = () => {
 																	</div>
 																	<p className="font-bold">
 																		{formatNorwegianCurrency(
-																			(prices[item.ferrule2.itemNumber] ?? 0) *
-																				(item.hose.quantity || 1),
+																			(calculatedPrices[
+																				item.ferrule2.itemNumber
+																			] ?? 0) * (item.hose.quantity || 1),
 																		)}
 																	</p>
 																</div>
@@ -727,8 +729,9 @@ const CartPage = () => {
 																	</div>
 																	<p className="font-bold">
 																		{formatNorwegianCurrency(
-																			(prices[item.insert1.itemNumber] ?? 0) *
-																				(item.hose.quantity || 1),
+																			(calculatedPrices[
+																				item.insert1.itemNumber
+																			] ?? 0) * (item.hose.quantity || 1),
 																		)}
 																	</p>
 																</div>
@@ -743,8 +746,9 @@ const CartPage = () => {
 																	</div>
 																	<p className="font-bold">
 																		{formatNorwegianCurrency(
-																			(prices[item.insert2.itemNumber] ?? 0) *
-																				(item.hose.quantity || 1),
+																			(calculatedPrices[
+																				item.insert2.itemNumber
+																			] ?? 0) * (item.hose.quantity || 1),
 																		)}
 																	</p>
 																</div>

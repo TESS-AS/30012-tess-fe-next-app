@@ -63,32 +63,40 @@ export default function OrderSummary({
 				<h2 className="text-xl font-semibold">{t("OrderSummary.title")}</h2>
 				<div className="mt-4 space-y-2 text-sm">
 					<div className="flex justify-between">
-						<span className="text-[#5A615D]">Opprinnelig pris</span>
-						<PriceDisplay amount={originalPrice} />
-					</div>
-					<div className="flex justify-between">
-						<span className="text-[#5A615D]">Rabatter</span>
-						<PriceDisplay amount={discounts} />
-					</div>
-					<div className="flex justify-between">
-						<span className="text-[#5A615D]">Sum etter rabatt (eks. mva.)</span>
+						<span className="text-[#5A615D]">
+							{t("OrderSummary.originalPrice")}
+						</span>
 						<PriceDisplay amount={orderSummaryTotalPriceFromAppContext} />
 					</div>
 					<div className="flex justify-between">
-						<span className="text-[#5A615D]">Tilleggsavgift</span>
+						<span className="text-[#5A615D]">
+							{t("OrderSummary.discounts")}
+						</span>
+						<PriceDisplay amount={discounts} />
+					</div>
+					<div className="flex justify-between">
+						<span className="text-[#5A615D]">
+							{t("OrderSummary.sumAfterDiscount")}
+						</span>
+						<PriceDisplay amount={sumAfterDiscount} />
+					</div>
+					<div className="flex justify-between">
+						<span className="text-[#5A615D]">
+							{t("OrderSummary.deliverySurcharge")}
+						</span>
 						<PriceDisplay
 							amount={deliverySurcharge}
 							isPositive
 						/>
 					</div>
 					<div className="flex justify-between">
-						<span className="text-[#5A615D]">MVA(25%)</span>
+						<span className="text-[#5A615D]">{t("OrderSummary.vat")}</span>
 						<PriceDisplay amount={vat} />
 					</div>
 					<Separator className="h-[1px] flex-1 bg-[#5A615D]" />
 					<div className="flex justify-between">
 						<span className="text-base font-bold text-[#0F1912]">
-							Total inkl. mva.
+							{t("OrderSummary.totalIncVat")}
 						</span>
 						<PriceDisplay
 							amount={totalIncVat}
@@ -111,7 +119,7 @@ export default function OrderSummary({
 								{t("OrderSummary.termsText")}
 								<a
 									href="/vilkar"
-									className="text-[#009640] underline hover:text-[#009640]/80"
+									className="mx-1 text-[#009640] underline hover:text-[#009640]/80"
 									target="_blank"
 									rel="noopener noreferrer">
 									{t("OrderSummary.termsLink")}
