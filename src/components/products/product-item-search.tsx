@@ -36,7 +36,6 @@ interface Props {
 	setVariations: (variations: Record<string, any>) => void;
 	variations: Record<string, any>;
 	searchQuery: string;
-	profile: any; // Pass profile as prop to avoid duplicate API calls
 }
 
 export function ProductItem({
