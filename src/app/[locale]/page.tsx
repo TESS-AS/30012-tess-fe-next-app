@@ -1,10 +1,7 @@
-import BannerSearchInput from "@/components/banner-search";
 import MainCategorySection from "@/components/categories/main-categories";
 import { CustomerWebPromo } from "@/components/customer-web-promo";
 import { Quote } from "@/components/quote";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
@@ -36,18 +33,6 @@ export default function Home() {
 										<br />
 										Vi har over 130 servicesentre klare til å levere.
 									</p>
-								</div>
-
-								<div className="w-full">
-									<div className="flex items-center gap-2 rounded-lg bg-white p-1 shadow-lg">
-										<div className="flex flex-1 items-center gap-3 px-1 py-1">
-											<BannerSearchInput />
-										</div>
-										<Button className="mr-3 flex items-center gap-2 rounded-md bg-green-600 px-8 py-5 font-medium text-white hover:bg-green-700">
-											<Search className="h-4 w-4" />
-											Søk
-										</Button>
-									</div>
 								</div>
 							</div>
 						</div>

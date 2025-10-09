@@ -71,12 +71,12 @@ export default function CategoryNavigationMenu({
 														key={subcategory.slug}
 														className="mb-8 break-inside-avoid">
 														<div className="text-md mb-2 font-bold">
-															<Link
-																onClick={() => setOpenMenu(false)}
-																href={`/${category.slug}/${subcategory.slug}`}
-																className="hover:underline">
-																{subcategory.name}
-															</Link>
+														<Link
+															onClick={() => setOpenMenu(false)}
+															href={`/${category.slug}/${subcategory.slug}`}
+															className="hover:underline">
+															{subcategory.name}
+														</Link>
 														</div>
 														{Array.isArray(subcategory.subcategories) &&
 															subcategory.subcategories && (

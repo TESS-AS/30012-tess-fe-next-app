@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
 import { useGetColumnAttributes } from "@/hooks/useGetColumnAttributes";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { cn } from "@/lib/utils";
 import { Category, RawCategory } from "@/types/categories.types";
 import { IProductSearch } from "@/types/search.types";
 import { BadgeCheck } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import ProductVariantTable from "../checkout/product-variant-table";
@@ -34,6 +36,7 @@ interface Props {
 	setVariations: (variations: Record<string, any>) => void;
 	variations: Record<string, any>;
 	searchQuery: string;
+	profile: any; // Pass profile as prop to avoid duplicate API calls
 }
 
 export function ProductItem({
@@ -54,6 +57,7 @@ export function ProductItem({
 	const [selectedVariantNumber, setSelectedVariantNumber] = useState<
 		string | null
 	>(null);
+	const router = useRouter();
 
 	useEffect(() => {
 		const loadCategory = async () => {
@@ -108,72 +112,88 @@ export function ProductItem({
 		useGetColumnAttributes(selectedVariantNumber ?? undefined);
 
 	return (
-		<div key={product.productNumber}>
-			<div className="mb-3 flex w-full items-center gap-4 rounded-md border border-gray-200 p-3 hover:border-gray-400">
-				<div className="flex h-32 w-32 min-w-32 items-center justify-center overflow-hidden rounded-md">
-					{product.thumbnail ? (
-						<Image
-							src={product.thumbnail}
-							alt={product.productName}
-							unoptimized
-							width={128}
-							height={128}
-							className="max-h-23 max-w-32 object-contain"
-						/>
-					) : (
-						<div className="h-32 w-32 rounded bg-gray-300" />
-					)}
-				</div>
-				<div className="flex flex-1 flex-col justify-center gap-2">
-					<Link
-						className="w-fit"
-						href={`/${categoryPath}/${product.productNumber}`}
-						onClick={() => setSearchQuery("")}>
-						<span className="text-base font-medium">
-							{highlightParts(product.productName, matchedAttributes)}
-						</span>
-					</Link>
-					<div className="flex max-w-xs flex-col gap-2">
-						{["attribute1", "attribute2"].map((k) => (
-							<div
-								key={k}
-								className="flex h-6 items-center justify-center rounded-sm border border-gray-300 bg-white px-3 text-[12px] text-gray-800">
-								{(product as unknown as Record<string, any>)?.[k] ?? "-"}
-							</div>
-						))}
-					</div>
-				</div>
-				<div className="ml-auto flex flex-col items-end gap-5">
-					{product.inStock && (
-						<div className="flex items-center gap-1 rounded bg-[#DCF7E0] px-2 py-1 text-xs font-medium text-emerald-800">
-							<BadgeCheck className="h-4 w-4 fill-emerald-800 text-white" />
-							<span>{t("Search.inMainWarehouse")}</span>
+		<div>
+			<div
+				onClick={() => {
+					setSearchQuery("");
+					router.push(`/${categoryPath}/${product.productNumber}`);
+				}}>
+				<div key={product.productNumber}>
+					<div className="group mb-3 flex w-full cursor-pointer items-center gap-4 rounded-md border border-gray-200 p-3 hover:border-gray-400">
+						<div className="flex h-32 w-32 min-w-32 items-center justify-center overflow-hidden rounded-md">
+							{product.thumbnail ? (
+								<Image
+									src={product.thumbnail}
+									alt={product.productName}
+									unoptimized
+									width={128}
+									height={128}
+									className="max-h-23 max-w-32 object-contain"
+								/>
+							) : (
+								<div className="h-32 w-32 rounded bg-gray-300" />
+							)}
 						</div>
-					)}
+						<div className="flex flex-1 flex-col justify-center gap-2">
+							<Link
+								className="w-fit"
+								href={`/${categoryPath}/${product.productNumber}`}
+								onClick={() => setSearchQuery("")}>
+								<span
+									className={cn(
+										"text-base font-medium",
+										"border-black group-hover:border-b",
+									)}>
+									{highlightParts(product.productName, matchedAttributes)}
+								</span>
+							</Link>
+							<div className="flex max-w-xs flex-col gap-2">
+								{["attribute1", "attribute2"].map((k) => (
+									<div
+										key={k}
+										className="flex h-6 items-center rounded-sm bg-white text-[12px] text-gray-800">
+										{(product as unknown as Record<string, any>)?.[k] ?? ""}
+									</div>
+								))}
+							</div>
+						</div>
+						<div className="ml-auto flex flex-col items-end gap-5">
+							{product.inStock && (
+								<div className="flex items-center gap-1 rounded bg-[#DCF7E0] px-2 py-1 text-xs font-medium text-emerald-800">
+									<BadgeCheck className="h-4 w-4 fill-emerald-800 text-white" />
+									<span>{t("Search.inMainWarehouse")}</span>
+								</div>
+							)}
 
-					<Button
-						type="button"
-						onClick={async (e) => {
-							e.preventDefault();
-							setIsModalIdOpen(product.productNumber);
-							const productVariations = await getProductVariations(
-								product.productNumber,
-								profile?.defaultWarehouseNumber || "",
-								profile?.defaultCompanyNumber || "",
-							);
-							setVariations((prev: Record<string, any>) => ({
-								...prev,
-								[product.productNumber]: productVariations,
-							}));
+							<Button
+								type="button"
+								className={cn(
+									"mt-2 ml-auto self-center rounded-md px-5 py-2 text-sm font-medium transition-colors",
+									"border border-green-600 bg-white text-green-700",
+									"hover:border-green-700 hover:bg-green-700 hover:text-white",
+									"group-hover:border-green-600 group-hover:bg-green-600 group-hover:text-white",
+								)}
+								onClick={async (e) => {
+									e.stopPropagation();
+									setIsModalIdOpen(product.productNumber);
+									const productVariations = await getProductVariations(
+										product.productNumber,
+										profile?.defaultWarehouseNumber || "",
+										profile?.defaultCompanyNumber || "",
+									);
+									setVariations((prev: Record<string, any>) => ({
+										...prev,
+										[product.productNumber]: productVariations,
+									}));
 
-							if (productVariations.length > 0) {
-								const firstVariantNumber = productVariations[0].itemNumber;
-								setSelectedVariantNumber(firstVariantNumber);
-							}
-						}}
-						className="mt-2 ml-auto self-center rounded-md bg-green-600 px-5 py-2 text-sm font-medium text-white hover:bg-green-700">
-						Se produktvarianter ({product.itemVariantCount || 0}) →
-					</Button>
+									if (productVariations.length > 0) {
+										setSelectedVariantNumber(productVariations[0].itemNumber);
+									}
+								}}>
+								Se produktvarianter ({product.itemVariantCount || 0}) →
+							</Button>
+						</div>
+					</div>
 				</div>
 			</div>
 			<Modal
