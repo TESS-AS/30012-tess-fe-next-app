@@ -51,7 +51,7 @@ export default function SearchAside({
 											onClick={() => onPick(href)}
 											className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-gray-50">
 											<Search className="h-4 w-4 text-gray-400" />
-											<span className="text-[#0A7A3F] hover:underline">
+											<span className="text-[#0A7A3F] hover:cursor-pointer hover:underline">
 												{suggestion}
 											</span>
 										</button>
@@ -86,7 +86,7 @@ export default function SearchAside({
 												type="button"
 												onClick={() => onPick(href)}
 												className="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm hover:bg-gray-50">
-												<span className="text-[#0A7A3F] hover:underline">
+												<span className="text-[#0A7A3F] hover:cursor-pointer hover:underline">
 													{cat.name}
 												</span>
 												<span className="text-gray-500">({cat.count})</span>
@@ -100,7 +100,7 @@ export default function SearchAside({
 								<button
 									type="button"
 									onClick={() => onPick(seeMoreHref)}
-									className="mt-2 inline-flex items-center gap-2 px-3 py-2 text-sm text-[#0A7A3F] hover:underline">
+									className="mt-2 inline-flex items-center gap-2 px-3 py-2 text-sm text-[#0A7A3F] hover:cursor-pointer hover:underline">
 									{t("Search.seeMoreCategories", {
 										default: "Se flere kategorier",
 									})}
