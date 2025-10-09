@@ -11,7 +11,6 @@ export function useInstantSearch({
 }: UseInstantSearchProps = {}) {
 	const [query, setQuery] = useState("");
 
-	// Only search if query meets minimum length
 	const shouldSearch = query.length >= minQueryLength;
 
 	const searchQuery = useSearchQuery({
@@ -19,7 +18,6 @@ export function useInstantSearch({
 		enabled: shouldSearch,
 	});
 
-	// Clear results when query is too short
 	const data = useMemo(() => {
 		if (!shouldSearch) return null;
 		return searchQuery.data;
@@ -35,7 +33,6 @@ export function useInstantSearch({
 		error: searchQuery.error,
 		isSuccess: searchQuery.isSuccess,
 		refetch: searchQuery.refetch,
-		// Helper to clear search
 		clearSearch: () => {
 			setQuery("");
 		},

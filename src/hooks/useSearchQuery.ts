@@ -8,7 +8,6 @@ interface UseSearchQueryProps {
 }
 
 export function useSearchQuery({ query, enabled = true }: UseSearchQueryProps) {
-	// Main search query
 	const searchQuery = useQuery({
 		queryKey: ["search", query],
 		queryFn: async (): Promise<SearchResponse> => {
@@ -18,9 +17,8 @@ export function useSearchQuery({ query, enabled = true }: UseSearchQueryProps) {
 			return response.data;
 		},
 		enabled: enabled && query.length > 0,
-		staleTime: 30 * 1000, // 30 seconds for search results (more responsive)
-		gcTime: 2 * 60 * 1000, // 2 minutes cache
-		// Prevent too many rapid requests by adding a small delay
+		staleTime: 30 * 1000,
+		gcTime: 2 * 60 * 1000,
 		refetchOnMount: false,
 		refetchOnReconnect: false,
 	});

@@ -41,7 +41,6 @@ export function useSearch(query: string) {
 
 		try {
 			setIsLoading(true);
-			// Fetch search results
 			const response = await axiosClient.get<SearchResponse>(
 				`/search/${searchQuery}`,
 			);

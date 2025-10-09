@@ -31,9 +31,6 @@ import { useAppContext } from "@/lib/appContext";
 import { useCategories } from "@/lib/CategoriesProvider";
 import { useSearchStore } from "@/lib/searchStore";
 import axiosClient from "@/services/axiosClient";
-import {
-	loadCategoryTree,
-} from "@/services/categories.service";
 import { getProductVariations } from "@/services/product.service";
 import { Category } from "@/types/categories.types";
 import { IProductSearch } from "@/types/search.types";
@@ -63,7 +60,6 @@ export default function Header() {
 	const [variations, setVariations] = useState<Record<string, any>>({});
 	const { cartItems, totalPrice, isAuthOpen, setIsAuthOpen } = useAppContext();
 
-	// Use React Query for instant search (no debouncing)
 	const {
 		query: searchQuery,
 		setQuery: setSearchQuery,
@@ -75,13 +71,12 @@ export default function Header() {
 	const inputRef = useRef<HTMLInputElement>(null);
 	const { shouldFocus, resetFocus } = useSearchStore();
 
-	// Use optimized hook for search filter parents with caching and debouncing
 	const { categoryFilters: searchCategories } = useSearchFilterParents({
 		searchTerm: searchQuery,
 		language: currentLocale,
 		enabled: searchQuery.length > 0,
-		debounceMs: 300, // 300ms debounce for search
-		minQueryLength: 2, // Only fetch filters for queries with 2+ characters
+		debounceMs: 300,
+		minQueryLength: 2,
 	});
 
 	const { profile } = useProfile();
@@ -92,7 +87,6 @@ export default function Header() {
 			resetFocus();
 		}
 	}, [shouldFocus, resetFocus]);
-
 
 	const searchRef = useClickOutside<HTMLDivElement>(() => {
 		clearSearch();

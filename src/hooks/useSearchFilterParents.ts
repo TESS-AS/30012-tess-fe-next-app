@@ -20,7 +20,6 @@ export function useSearchFilterParents({
 }: UseSearchFilterParentsProps) {
 	const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
-	// Debounce the search term
 	useEffect(() => {
 		if (!searchTerm.trim()) {
 			setDebouncedSearchTerm("");
@@ -34,7 +33,6 @@ export function useSearchFilterParents({
 		return () => clearTimeout(timer);
 	}, [searchTerm, debounceMs]);
 
-	// Only enable query if we have a search term that meets minimum length and it's enabled
 	const shouldFetch = enabled && debouncedSearchTerm.length >= minQueryLength;
 
 	const query = useQuery({
@@ -48,19 +46,16 @@ export function useSearchFilterParents({
 			return result;
 		},
 		enabled: shouldFetch,
-		staleTime: 5 * 60 * 1000, // 5 minutes - filter data doesn't change often during search
-		gcTime: 10 * 60 * 1000, // 10 minutes cache - keep in memory longer for better UX
+		staleTime: 5 * 60 * 1000,
+		gcTime: 10 * 60 * 1000,
 		refetchOnWindowFocus: false,
 		refetchOnMount: false,
 		refetchOnReconnect: false,
 		refetchInterval: false,
-		// Retry only once on failure to avoid excessive retries
 		retry: 1,
-		// Don't retry on 4xx errors (client errors)
 		retryOnMount: false,
 	});
 
-	// Extract category filters from the result
 	const categoryFilters = useMemo(() => {
 		if (
 			!query.data ||

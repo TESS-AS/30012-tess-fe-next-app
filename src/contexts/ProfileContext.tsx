@@ -24,7 +24,6 @@ export const ProfileProvider = ({
 	const { data: punchoutProfile, isLoading: isPunchoutLoading } =
 		usePunchoutProfile();
 
-	// Memoize the profile selection to prevent unnecessary re-renders
 	const profileData = useMemo(() => {
 		if (punchoutProfile?.punchout === true) {
 			return {

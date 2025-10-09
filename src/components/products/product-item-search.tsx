@@ -48,9 +48,6 @@ export function ProductItem({
 		string | null
 	>(null);
 	const router = useRouter();
-
-	// Use a simple product link instead of building category paths
-	// This eliminates the need for loadCategoryTree API calls
 	const productLink = `/product/${product.productNumber}`;
 
 	const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
