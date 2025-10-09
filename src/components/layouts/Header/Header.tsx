@@ -31,7 +31,6 @@ import { useAppContext } from "@/lib/appContext";
 import { useCategories } from "@/lib/CategoriesProvider";
 import { useSearchStore } from "@/lib/searchStore";
 import axiosClient from "@/services/axiosClient";
-import { usePathname } from "next/navigation";
 import {
 	loadCategoryTree,
 	loadFilterParents,
@@ -51,6 +50,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 

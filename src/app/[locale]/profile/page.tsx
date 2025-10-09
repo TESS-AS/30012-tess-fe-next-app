@@ -25,6 +25,7 @@ import {
 import { useTranslations } from "next-intl";
 
 import { Dimensions } from "./(components)/dimensions";
+import HoseDetailsPage from "./(components)/hose-details-page";
 import HoseInspections from "./(components)/hose-inspections";
 import { HoseOrders } from "./(components)/hose-orders";
 import HoseOverview from "./(components)/hose-overview";
@@ -36,7 +37,6 @@ import { OrdreDetaljer } from "./(components)/ordre-detaljer";
 import { OrdreHistorikk } from "./(components)/ordre-historikk";
 import { Rekvisisjoner } from "./(components)/rekvisisjoner";
 import { SidebarNav } from "./(components)/sidebar-nav";
-import HoseDetailsPage from "./(components)/hose-details-page";
 
 export default function ProfilePage() {
 	const { setIsAuthOpen } = useAppContext();

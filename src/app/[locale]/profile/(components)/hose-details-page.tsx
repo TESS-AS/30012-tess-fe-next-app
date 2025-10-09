@@ -1,7 +1,19 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import {
 	Barcode,
 	ChevronRight,
@@ -12,21 +24,8 @@ import {
 	ShoppingCart,
 	SquarePen,
 } from "lucide-react";
-import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
+import Image from "next/image";
+import Link from "next/link";
 
 interface Props {
 	hoseId: string;
