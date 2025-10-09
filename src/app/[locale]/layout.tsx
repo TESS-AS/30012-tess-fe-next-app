@@ -2,10 +2,12 @@ import { ReactNode } from "react";
 
 import { Footer } from "@/components/layouts/Footer/Footer";
 import Main from "@/components/layouts/Main/Main";
+import { ProfileProvider } from "@/contexts/ProfileContext";
 import { AppContextProvider } from "@/lib/appContext";
 import { CategoriesProvider } from "@/lib/CategoriesProvider";
 import { AuthProvider } from "@/lib/providers/AuthProvider";
 import { getSeoMetadata } from "@/lib/seo";
+import { QueryProvider } from "@/providers/QueryProvider";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { ToastContainer } from "react-toastify";
@@ -49,27 +51,31 @@ export default async function LocaleLayout({
 				<NextIntlClientProvider
 					locale={locale}
 					messages={messages}>
-					<AuthProvider>
-						<AppContextProvider>
-							<CategoriesProvider>
-								<ToastContainer
-									position="top-right"
-									autoClose={5000}
-									hideProgressBar
-									newestOnTop
-									closeOnClick
-									rtl={false}
-									pauseOnFocusLoss
-									draggable
-									pauseOnHover
-								/>
-								<Main>
-									{children}
-									<Footer />
-								</Main>
-							</CategoriesProvider>
-						</AppContextProvider>
-					</AuthProvider>
+					<QueryProvider>
+						<AuthProvider>
+							<ProfileProvider>
+								<AppContextProvider>
+									<CategoriesProvider>
+										<ToastContainer
+											position="top-right"
+											autoClose={5000}
+											hideProgressBar
+											newestOnTop
+											closeOnClick
+											rtl={false}
+											pauseOnFocusLoss
+											draggable
+											pauseOnHover
+										/>
+										<Main>
+											{children}
+											<Footer />
+										</Main>
+									</CategoriesProvider>
+								</AppContextProvider>
+							</ProfileProvider>
+						</AuthProvider>
+					</QueryProvider>
 				</NextIntlClientProvider>
 			</body>
 		</html>

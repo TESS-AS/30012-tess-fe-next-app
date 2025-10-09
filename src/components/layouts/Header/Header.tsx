@@ -22,10 +22,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
+import { useProfile } from "@/contexts/ProfileContext";
 import { useClickOutside } from "@/hooks/useClickOutside";
-import { useGetProfileData } from "@/hooks/useGetProfileData";
-import { useSearch } from "@/hooks/useProductSearch";
-import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
+import { useInstantSearch } from "@/hooks/useInstantSearch";
+import { useSearchFilterParents } from "@/hooks/useSearchFilterParents";
 import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import { useCategories } from "@/lib/CategoriesProvider";
@@ -33,12 +33,10 @@ import { useSearchStore } from "@/lib/searchStore";
 import axiosClient from "@/services/axiosClient";
 import {
 	loadCategoryTree,
-	loadFilterParents,
 } from "@/services/categories.service";
 import { getProductVariations } from "@/services/product.service";
 import { Category } from "@/types/categories.types";
 import { IProductSearch } from "@/types/search.types";
-import { ProfileUser } from "@/types/user.types";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import {
 	Building,
@@ -60,32 +58,33 @@ export default function Header() {
 	const t = useTranslations();
 	const router = useRouter();
 
-	const [searchQuery, setSearchQuery] = useState("");
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [isModalIdOpen, setIsModalIdOpen] = useState<string | null>(null);
 	const [variations, setVariations] = useState<Record<string, any>>({});
-	const { data, attributeResults, isLoading } = useSearch(searchQuery);
 	const { cartItems, totalPrice, isAuthOpen, setIsAuthOpen } = useAppContext();
+
+	// Use React Query for instant search (no debouncing)
+	const {
+		query: searchQuery,
+		setQuery: setSearchQuery,
+		data: searchData,
+		isLoading: isSearchLoading,
+		clearSearch,
+	} = useInstantSearch({ minQueryLength: 1 });
 	const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
-	const [searchCategories, setSearchCategories] = useState<CategoryLink[]>([]);
-	const [profile, setProfile] = useState<ProfileUser | null>(null);
-	const [, setIsLoading] = useState(true);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const { shouldFocus, resetFocus } = useSearchStore();
 
-	const { data: ssoProfile, isLoading: isSSOLoading } = useGetProfileData();
-	const { data: punchoutProfile, isLoading: isPunchoutLoading } =
-		usePunchoutProfile();
+	// Use optimized hook for search filter parents with caching and debouncing
+	const { categoryFilters: searchCategories } = useSearchFilterParents({
+		searchTerm: searchQuery,
+		language: currentLocale,
+		enabled: searchQuery.length > 0,
+		debounceMs: 300, // 300ms debounce for search
+		minQueryLength: 2, // Only fetch filters for queries with 2+ characters
+	});
 
-	useEffect(() => {
-		if (punchoutProfile?.punchout === true) {
-			setProfile(punchoutProfile);
-			setIsLoading(isPunchoutLoading);
-		} else if (ssoProfile) {
-			setProfile(ssoProfile);
-			setIsLoading(isSSOLoading);
-		}
-	}, [ssoProfile, punchoutProfile, isSSOLoading, isPunchoutLoading]);
+	const { profile } = useProfile();
 
 	useEffect(() => {
 		if (shouldFocus) {
@@ -94,32 +93,9 @@ export default function Header() {
 		}
 	}, [shouldFocus, resetFocus]);
 
-	useEffect(() => {
-		if (searchQuery.trim()) {
-			loadFilterParents({
-				categoryNumber: null,
-				searchTerm: searchQuery,
-				language: currentLocale,
-			})
-				.then((res) => {
-					const cats =
-						Array.isArray(res) && res[0]?.categoryFilters
-							? res[0].categoryFilters.map((c: any) => ({
-									id: c.assortmentNumber,
-									name: c.nameNo,
-									count: c.productCount,
-								}))
-							: [];
-					setSearchCategories(cats);
-				})
-				.catch(() => setSearchCategories([]));
-		} else {
-			setSearchCategories([]);
-		}
-	}, [searchQuery, currentLocale]);
 
 	const searchRef = useClickOutside<HTMLDivElement>(() => {
-		setSearchQuery("");
+		clearSearch();
 		setIsSearchOpen(false);
 	});
 
@@ -134,7 +110,7 @@ export default function Header() {
 			router.push(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
 		}
 		setIsSearchOpen(false);
-		setSearchQuery("");
+		clearSearch();
 	};
 
 	const handleLanguageChange = (locale: string) => {
@@ -143,7 +119,7 @@ export default function Header() {
 
 	const handlePick = (href: string) => {
 		router.push(href);
-		setSearchQuery("");
+		clearSearch();
 		setIsSearchOpen(false);
 	};
 
@@ -223,12 +199,12 @@ export default function Header() {
 								className="absolute top-[7px] right-[7px] text-xs font-medium">
 								Søk
 							</Button>
-							{searchQuery && data && (
-								<div className="fixed top-34 left-1/2 z-[11] grid max-h-[80vh] w-[80vw] -translate-x-1/2 grid-cols-3 gap-4 overflow-y-auto bg-white p-4 shadow-lg">
+							{searchQuery && (
+								<div className="animate-in fade-in-0 zoom-in-95 fixed top-34 left-1/2 z-[11] grid max-h-[80vh] w-[80vw] -translate-x-1/2 grid-cols-3 gap-4 overflow-y-auto bg-white p-4 shadow-lg duration-200">
 									<div className="col-span-1 space-y-4 pr-4">
 										<SearchAside
 											suggestions={
-												(data?.suggestions ?? []) as unknown as string[]
+												(searchData?.suggestions ?? []) as unknown as string[]
 											}
 											categories={searchCategories}
 											query={searchQuery}
@@ -240,24 +216,25 @@ export default function Header() {
 											<h3 className="text-lg font-semibold">
 												{t("Search.resultsTitle", { default: "Dine treff" })}
 											</h3>
-											<span className="text-sm text-gray-500">
-												{data.productRes?.length} / {data.productRes.length}{" "}
-												produkter
-											</span>
+											{searchData && (
+												<span className="text-sm text-gray-500">
+													{searchData.productRes?.length} /{" "}
+													{searchData.productRes.length} produkter
+												</span>
+											)}
 										</div>
 
-										{data.productRes?.length ? (
-											data.productRes.map((product: IProductSearch) => {
-												const attr = attributeResults.find(
-													(r) => r.productNumber === product.productNumber,
-												);
+										{isSearchLoading ? (
+											<div className="flex items-center justify-center py-8">
+												<div className="h-6 w-6 animate-spin rounded-full border-b-2 border-green-600"></div>
+											</div>
+										) : searchData?.productRes?.length ? (
+											searchData.productRes.map((product: IProductSearch) => {
 												return (
 													<ProductItem
 														key={product.productNumber}
 														product={product}
-														attr={attr}
 														currentLocale={currentLocale}
-														loadCategoryTree={loadCategoryTree}
 														setSearchQuery={setSearchQuery}
 														isModalIdOpen={isModalIdOpen}
 														setIsModalIdOpen={setIsModalIdOpen}
@@ -268,8 +245,14 @@ export default function Header() {
 													/>
 												);
 											})
-										) : (
+										) : searchData ? (
 											<NoResults query={searchQuery} />
+										) : (
+											<div className="flex items-center justify-center py-8">
+												<span className="text-gray-500">
+													Skriv for å søke...
+												</span>
+											</div>
 										)}
 									</div>
 								</div>
