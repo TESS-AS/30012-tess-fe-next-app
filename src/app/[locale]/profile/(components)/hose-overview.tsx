@@ -12,6 +12,8 @@ import { useHoseInspectionCounts } from "@/hooks/useHoseInspectionCounts";
 import { Separator } from "@radix-ui/react-select";
 import { ChevronRight, Ellipsis, MapPin, Settings } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 
 type Status = "ok" | "warn" | "error";
 
@@ -33,7 +35,10 @@ type LocationNode = {
 	children?: ChildNode[];
 };
 
-const HoseOverview = () => {
+interface Props {
+	goToHose: (hoseId: string) => void;
+}
+const HoseOverview = ({ goToHose }: Props) => {
 	const [selectedS1Code] = useState<string | undefined>(undefined);
 
 	const { loading, s1Codes = [] } = useGetAssets("", selectedS1Code, {
@@ -173,7 +178,13 @@ const HoseOverview = () => {
 																					{child.name}
 																				</span>
 																			</div>
-																			<ChevronRight className="h-7 w-7 text-[#C1C4C2]" />
+																			<ChevronRight
+																				className="h-7 w-7 cursor-pointer text-[#C1C4C2]"
+																				onClick={(e) => {
+																					e.stopPropagation();
+																					goToHose(child.id);
+																				}}
+																			/>
 																		</div>
 																	</AccordionTrigger>
 

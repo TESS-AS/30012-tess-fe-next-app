@@ -27,6 +27,16 @@ export const useOrderSummary = (): OrderSummaryPrices => {
 		orderSummaryTotalPriceFinal - discounts + vat + deliverySurcharge;
 	const orderSummaryTotalPriceFromAppContext = orderSummaryTotalPriceFinal;
 
+	console.log(
+		totalPrice,
+		orderSummaryTotalPriceFinal,
+		discounts,
+		vat,
+		deliverySurcharge,
+		totalIncVat,
+		"cartprice",
+	);
+
 	return {
 		originalPrice,
 		discounts,

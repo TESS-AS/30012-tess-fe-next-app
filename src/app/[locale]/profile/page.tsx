@@ -25,6 +25,7 @@ import {
 import { useTranslations } from "next-intl";
 
 import { Dimensions } from "./(components)/dimensions";
+import HoseDetailsPage from "./(components)/hose-details-page";
 import HoseInspections from "./(components)/hose-inspections";
 import { HoseOrders } from "./(components)/hose-orders";
 import HoseOverview from "./(components)/hose-overview";
@@ -71,6 +72,7 @@ export default function ProfilePage() {
 	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 	const [supportOpen, setSupportOpen] = useState(false);
 	const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+	const [selectedHoseId, setSelectedHoseId] = useState<string | null>(null);
 
 	if (!profile) {
 		return (
@@ -279,7 +281,14 @@ export default function ProfilePage() {
 						</TabsContent>
 
 						<TabsContent value="hose-oversikt">
-							<HoseOverview />
+							{selectedHoseId ? (
+								<HoseDetailsPage
+									hoseId={selectedHoseId}
+									onBack={() => setSelectedHoseId(null)}
+								/>
+							) : (
+								<HoseOverview goToHose={setSelectedHoseId} />
+							)}
 						</TabsContent>
 
 						<TabsContent value="hose-replacement">

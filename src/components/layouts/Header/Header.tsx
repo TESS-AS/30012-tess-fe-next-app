@@ -50,6 +50,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -59,6 +60,7 @@ export default function Header() {
 	const currentLocale = useLocale();
 	const t = useTranslations();
 	const router = useRouter();
+	const pathname = usePathname();
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -138,7 +140,8 @@ export default function Header() {
 	};
 
 	const handleLanguageChange = (locale: string) => {
-		router.replace("/", { locale });
+		const pathWithoutLocale = pathname.replace(/^\/(en|no)/, "") || "/";
+		router.replace(pathWithoutLocale, { locale });
 	};
 
 	const handlePick = (href: string) => {

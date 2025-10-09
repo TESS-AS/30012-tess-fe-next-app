@@ -427,7 +427,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 							className={cn("", {
 								"cursor-not-allowed opacity-50": selectedRows.length === 0,
 							})}
-							disabled={selectedRows.length === 0}>
+							// disabled={selectedRows.length === 0}
+							disabled>
 							<Mail className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Kontakt TESS support</span>
 						</DropdownMenuItem>
@@ -440,7 +441,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 							className={cn("", {
 								"cursor-not-allowed opacity-50": selectedRows.length === 0,
 							})}
-							disabled={selectedRows.length === 0}>
+							// disabled={selectedRows.length === 0}
+							disabled>
 							<FileText className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Rapporter slangebytter</span>
 						</DropdownMenuItem>
@@ -453,7 +455,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 							className={cn("", {
 								"cursor-not-allowed opacity-50": selectedRows.length === 0,
 							})}
-							disabled={selectedRows.length === 0}>
+							// disabled={selectedRows.length === 0}
+							disabled>
 							<Trash2 className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Kasser utstyr</span>
 						</DropdownMenuItem>
@@ -474,7 +477,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 							className={cn("", {
 								"cursor-not-allowed opacity-50": selectedRows.length === 0,
 							})}
-							disabled={selectedRows.length === 0}>
+							// disabled={selectedRows.length === 0}
+							disabled>
 							<Printer className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Skriv ut visuelle ID-merker (strekkode)</span>
 						</DropdownMenuItem>
@@ -484,7 +488,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 								if (selectedRows.length === 0) return;
 								setPrintOpen(true);
 							}}
-							className="">
+							className=""
+							disabled>
 							<Printer className="mr-3 h-4 w-4 text-[#005522]" />
 							<span>Skriv ut trykktest-sertifikater</span>
 						</DropdownMenuItem>

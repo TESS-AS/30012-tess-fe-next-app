@@ -155,7 +155,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					[item.itemNumber]:
 						priceData?.find(
 							(p: PriceResponse) => p.itemNumber === String(item.itemNumber),
-						)?.basePrice || 0,
+						)?.basePriceTotal || 0,
 				}));
 			}
 
@@ -195,6 +195,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 						warehouseNumber: profile?.defaultWarehouseNumber || "",
 					},
 				]) ?? [];
+			console.log(cartKitPriceRequests, "cartKitPriceRequests");
 
 			const allPriceRequests = [...priceRequests, ...cartKitPriceRequests];
 
@@ -205,15 +206,18 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					profile?.defaultCompanyNumber,
 				);
 
+				console.log(priceResults, "priceresults");
+
 				const initialPrices: Record<string, number> = {};
 				const calculatedPrices: Record<string, number> = {};
 
 				for (const item of priceResults) {
-					initialPrices[item.itemNumber] = item.basePrice || 0;
+					initialPrices[item.itemNumber] = item.basePriceTotal || 0;
 
-					calculatedPrices[item.itemNumber] =
-						item.bestPrice || item.basePrice || 0;
+					calculatedPrices[item.itemNumber] = item.bestPrice || 0;
 				}
+
+				console.log(initialPrices, calculatedPrices, "inital");
 
 				setPrices((prev) => ({
 					...prev,
@@ -278,9 +282,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 						const fallbackCalculated: Record<string, number> = {};
 						const fallbackInitial: Record<string, number> = {};
 						for (const item of fallbackResults) {
-							fallbackInitial[item.itemNumber] = item.basePrice || 0;
-							fallbackCalculated[item.itemNumber] =
-								item.bestPrice || item.basePrice || 0;
+							fallbackInitial[item.itemNumber] = item.basePriceTotal || 0;
+							fallbackCalculated[item.itemNumber] = item.bestPrice || 0;
 						}
 						setPrices((prev) => ({ ...prev, ...fallbackInitial }));
 						setCalculatedPrices((prev) => ({ ...prev, ...fallbackCalculated }));
@@ -291,7 +294,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 				const newSummary = priceResults.reduce(
 					(acc: Record<string, number>, it: PriceResponse) => {
-						acc[it.itemNumber] = it.basePriceTotal || it.bestPrice || 0;
+						acc[it.itemNumber] =
+							(acc[it.itemNumber] || 0) + (it.basePriceTotal || 0);
 						return acc;
 					},
 					{},
@@ -299,14 +303,16 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 				const newSurcharges = priceResults.reduce(
 					(acc: Record<string, number>, it: PriceResponse) => {
-						acc[it.itemNumber] = it.surCharge || 0;
+						acc[it.itemNumber] =
+							(acc[it.itemNumber] || 0) + (it.surCharge || 0);
 						return acc;
 					},
 					{},
 				);
 				const newRabatter = priceResults.reduce(
 					(acc: Record<string, number>, it: PriceResponse) => {
-						acc[it.itemNumber] = it.flatDiscount || 0;
+						acc[it.itemNumber] =
+							(acc[it.itemNumber] || 0) + (it.flatDiscount || 0);
 						return acc;
 					},
 					{},
@@ -420,6 +426,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		}
 	};
 
+	console.log(calculatedPrices, prices, "prices and cal");
 	const removeItemOptimistic = async (cartLine: number | string) => {
 		const numericLine = Number(cartLine);
 
@@ -463,6 +470,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			return {
 				...prev,
 				cart: prev.cart.filter((i) => Number(i.cartLine) !== numericLine),
+				cartKit: prev.cartKit,
 			};
 		});
 
