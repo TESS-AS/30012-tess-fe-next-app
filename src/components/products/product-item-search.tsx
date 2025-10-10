@@ -3,10 +3,9 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
+import { useProfile } from "@/contexts/ProfileContext";
 import { useGetColumnAttributes } from "@/hooks/useGetColumnAttributes";
-import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { cn } from "@/lib/utils";
-import { Category, RawCategory } from "@/types/categories.types";
 import { IProductSearch } from "@/types/search.types";
 import { BadgeCheck } from "lucide-react";
 import Image from "next/image";
@@ -18,13 +17,7 @@ import ProductVariantTable from "../checkout/product-variant-table";
 
 interface Props {
 	product: IProductSearch;
-	attr:
-		| {
-				matchedAttributes: string[];
-		  }
-		| undefined;
 	currentLocale: string;
-	loadCategoryTree: (productNumber: string) => Promise<Category[]>;
 	setSearchQuery: (query: string) => void;
 	isModalIdOpen: string | null;
 	setIsModalIdOpen: (id: string | null) => void;
@@ -41,7 +34,6 @@ interface Props {
 export function ProductItem({
 	product,
 	currentLocale,
-	loadCategoryTree,
 	setSearchQuery,
 	isModalIdOpen,
 	setIsModalIdOpen,
@@ -50,27 +42,13 @@ export function ProductItem({
 	variations,
 	searchQuery,
 }: Props) {
-	const { data: profile } = useGetProfileData();
-	const [categoryPath, setCategoryPath] = useState("");
+	const { profile } = useProfile();
 	const t = useTranslations();
 	const [selectedVariantNumber, setSelectedVariantNumber] = useState<
 		string | null
 	>(null);
 	const router = useRouter();
-
-	useEffect(() => {
-		const loadCategory = async () => {
-			const categoryTree = await loadCategoryTree(product.productNumber);
-			const path = categoryTree
-				.slice(0, 3)
-				.map((category: RawCategory) =>
-					currentLocale === "en" ? category.nameEn : category.nameNo,
-				)
-				.join("/");
-			setCategoryPath(path);
-		};
-		loadCategory();
-	}, [product.productNumber, currentLocale]);
+	const productLink = `/product/${product.productNumber}`;
 
 	const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 	const highlightParts = (text: string, matches: string[] = []) => {
@@ -115,7 +93,7 @@ export function ProductItem({
 			<div
 				onClick={() => {
 					setSearchQuery("");
-					router.push(`/${categoryPath}/${product.productNumber}`);
+					router.push(productLink);
 				}}>
 				<div key={product.productNumber}>
 					<div className="group mb-3 flex w-full cursor-pointer items-center gap-4 rounded-md border border-gray-200 p-3 hover:border-gray-400">
@@ -136,7 +114,7 @@ export function ProductItem({
 						<div className="flex flex-1 flex-col justify-center gap-2">
 							<Link
 								className="w-fit"
-								href={`/${categoryPath}/${product.productNumber}`}
+								href={productLink}
 								onClick={() => setSearchQuery("")}>
 								<span
 									className={cn(
