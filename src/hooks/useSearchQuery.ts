@@ -21,11 +21,14 @@ export function useSearchQuery({ query, enabled = true }: UseSearchQueryProps) {
 		gcTime: 2 * 60 * 1000,
 		refetchOnMount: false,
 		refetchOnReconnect: false,
+		placeholderData: (previousData) => previousData,
+		notifyOnChangeProps: ["data", "error"],
 	});
 
 	return {
 		data: searchQuery.data,
-		isLoading: searchQuery.isLoading,
+		isLoading: searchQuery.isLoading && !searchQuery.data,
+		isFetching: searchQuery.isFetching,
 		error: searchQuery.error,
 		isSuccess: searchQuery.isSuccess,
 		refetch: searchQuery.refetch,

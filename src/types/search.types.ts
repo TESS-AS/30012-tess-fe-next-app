@@ -31,9 +31,15 @@ export interface SearchArray {
 	media_m: string;
 }
 
+export interface SearchCategory {
+	name: string;
+	productVariantCount: string;
+}
+
 export interface SearchResponse {
 	suggestions: ISuggestions[];
 	productRes: IProductSearch[];
+	categories: SearchCategory[];
 }
 
 export interface PriceResponse {

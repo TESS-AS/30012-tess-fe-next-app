@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 import CustomerNumberSwitcher from "@/components/customer-profile/customer-number-switcher";
 import { NoResults } from "@/components/empty-search-result";
@@ -25,7 +25,6 @@ import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout"
 import { useProfile } from "@/contexts/ProfileContext";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useInstantSearch } from "@/hooks/useInstantSearch";
-import { useSearchFilterParents } from "@/hooks/useSearchFilterParents";
 import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import { useCategories } from "@/lib/CategoriesProvider";
@@ -67,19 +66,22 @@ export default function Header() {
 		setQuery: setSearchQuery,
 		data: searchData,
 		isLoading: isSearchLoading,
+		isFetching: isSearchFetching,
 		clearSearch,
 	} = useInstantSearch({ minQueryLength: 1 });
 	const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const { shouldFocus, resetFocus } = useSearchStore();
 
-	const { categoryFilters: searchCategories } = useSearchFilterParents({
-		searchTerm: searchQuery,
-		language: currentLocale,
-		enabled: searchQuery.length > 0,
-		debounceMs: 300,
-		minQueryLength: 2,
-	});
+	const searchCategories = useMemo(() => {
+		if (!searchData?.categories) return [];
+
+		return searchData.categories.map((category) => ({
+			id: category.name, // Use name as ID since we don't have category numbers
+			name: category.name,
+			count: parseInt(category.productVariantCount) || 0,
+		}));
+	}, [searchData?.categories]);
 
 	const { profile } = useProfile();
 
