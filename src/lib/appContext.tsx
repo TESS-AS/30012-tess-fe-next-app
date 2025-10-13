@@ -430,25 +430,25 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const removeItemOptimistic = async (cartLine: number | string) => {
 		const numericLine = Number(cartLine);
 
-		if (isNaN(numericLine)) {
-			const hexagonId = cartLine;
-			const backup = cartItems?.cartKit?.find((i) => i.hexagonId === hexagonId);
+		// Check if it's a kit item by looking in cartKit array
+		const kitBackup = cartItems?.cartKit?.find(
+			(i) => i.cartLine === numericLine,
+		);
 
-			const itemNumbersToRemove = backup
-				? [
-						backup.hose.itemNumber,
-						backup.ferrule1.itemNumber,
-						backup.ferrule2.itemNumber,
-						backup.insert1.itemNumber,
-						backup.insert2.itemNumber,
-					]
-				: [];
+		if (kitBackup) {
+			const itemNumbersToRemove = [
+				kitBackup.hose.itemNumber,
+				kitBackup.ferrule1.itemNumber,
+				kitBackup.ferrule2.itemNumber,
+				kitBackup.insert1.itemNumber,
+				kitBackup.insert2.itemNumber,
+			];
 
 			setCartItems((prev) => {
 				if (!prev?.cartKit) return prev;
 				return {
 					...prev,
-					cartKit: prev.cartKit.filter((i) => i.hexagonId !== hexagonId),
+					cartKit: prev.cartKit.filter((i) => i.cartLine !== numericLine),
 				};
 			});
 
@@ -479,29 +479,27 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			});
 
 			try {
-				await removeFromCart(hexagonId);
+				await removeFromCart(numericLine);
 				setIsCartChanging((v) => !v);
 			} catch (error) {
-				if (backup) {
-					setCartItems((prev) => {
-						if (!prev?.cartKit) return prev;
-						return {
-							...prev,
-							cartKit: [...prev.cartKit, backup],
-						};
-					});
-				}
+				setCartItems((prev) => {
+					if (!prev?.cartKit) return prev;
+					return {
+						...prev,
+						cartKit: [...prev.cartKit, kitBackup],
+					};
+				});
 				console.error("Error removing cart kit item:", error);
 				throw error;
 			}
 			return;
 		}
 
+		// Handle regular cart item removal
 		const backup = cartItems?.cart?.find(
 			(i) => Number(i.cartLine) === numericLine,
 		);
 
-		// Get the item number to remove from price states
 		const itemNumberToRemove = backup?.itemNumber;
 
 		setCartItems((prev) => {
@@ -513,7 +511,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			};
 		});
 
-		// Remove price data for the item
 		if (itemNumberToRemove) {
 			setPrices((prev) => {
 				const updated = { ...prev };
