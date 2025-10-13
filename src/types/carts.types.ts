@@ -22,6 +22,7 @@ export interface CartLine {
 export interface CartKitItem {
 	hexagonId: string;
 	assetId: number;
+	cartLine: number;
 	hose: {
 		itemName: string;
 		itemNumber: string;

@@ -30,9 +30,18 @@ const HoseInspections = () => {
 		s1Codes = [],
 		s1CodesPagination,
 		fetchS1Codes,
-	} = useGetAssets("", selectedS1Code);
+	} = useGetAssets("", selectedS1Code, {
+		initAssets: false,
+		initS1Codes: true,
+		s2Filter: false,
+	});
 
-	const { series, loading, error, maxCount } = useInspectionSummary({
+	const {
+		series,
+		loading: inspectionLoading,
+		error,
+		maxCount,
+	} = useInspectionSummary({
 		type: selectedType,
 		s1Code: selectedS1Code,
 		yearOffset: yearOffset,
@@ -112,16 +121,19 @@ const HoseInspections = () => {
 										fetchS1Codes(
 											s1CodesPagination.currentPage + 1,
 											s1CodesPagination.pageSize,
+											true,
 										);
 									}
 								}}>
-								{(s1Codes || []).map((s1) => (
-									<SelectItem
-										key={s1.S1Code}
-										value={s1.S1Code}>
-										{s1.S1Name}
-									</SelectItem>
-								))}
+								{(s1Codes || [])
+									.filter((s1) => s1.S1Code && s1.S1Name)
+									.map((s1) => (
+										<SelectItem
+											key={s1.S1Code}
+											value={s1.S1Code}>
+											{s1.S1Name}
+										</SelectItem>
+									))}
 								{s1Loading && s1CodesPagination.currentPage > 1 && (
 									<div className="py-2 text-center text-sm text-gray-500">
 										Laster flere...
@@ -192,23 +204,23 @@ const HoseInspections = () => {
 
 				<div className="relative h-[400px] w-full">
 					<div className="absolute bottom-0 left-0 flex h-[300px] w-full items-end justify-between gap-2">
-						{loading && (
+						{inspectionLoading && (
 							<div className="mx-auto w-full text-center text-sm text-[#5A615D]">
 								Laster data...
 							</div>
 						)}
-						{!loading && Boolean(error) && (
+						{!inspectionLoading && Boolean(error) && (
 							<div className="mx-auto w-full text-center text-sm text-red-600">
 								Kunne ikke laste data.
 							</div>
 						)}
-						{!loading && !error && series.length === 0 && (
+						{!inspectionLoading && !error && series.length === 0 && (
 							<div className="mx-auto w-full text-center text-sm text-[#5A615D]">
 								Ingen data i valgt periode.
 							</div>
 						)}
 
-						{!loading &&
+						{!inspectionLoading &&
 							!error &&
 							series.length > 0 &&
 							quarterGroups.map((group, gi, arr) => (

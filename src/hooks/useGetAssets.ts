@@ -17,12 +17,17 @@ export interface FilterOptions {
 type InitOptions = {
 	initAssets?: boolean;
 	initS1Codes?: boolean;
+	s2Filter?: boolean;
 };
 
 export const useGetAssets = (
 	customerNumber?: string,
 	s1Code?: string,
-	options: InitOptions = { initAssets: true, initS1Codes: true },
+	options: InitOptions = {
+		initAssets: true,
+		initS1Codes: true,
+		s2Filter: false,
+	},
 ) => {
 	const [initialized, setInitialized] = useState(false);
 	const [s1Codes, setS1Codes] = useState<S1Codes[]>([]);
@@ -104,9 +109,9 @@ export const useGetAssets = (
 	);
 
 	const fetchS1Codes = useCallback(
-		async (page: number = 1, pageSize: number = 100) => {
+		async (page: number = 1, pageSize: number = 100, s2?: boolean) => {
 			try {
-				const response = await getS1Codes(page, pageSize);
+				const response = await getS1Codes(page, pageSize, s2);
 				return response;
 			} catch (error) {
 				setError(error as string);
@@ -119,7 +124,7 @@ export const useGetAssets = (
 	const ensureS1Codes = useCallback(async () => {
 		if (s1Codes.length > 0) return s1Codes;
 		try {
-			const res = await fetchS1Codes();
+			const res = await fetchS1Codes(1, 100, options.s2Filter);
 			const allCodes: S1Codes[] = [];
 			res.data.forEach((newCode: S1Codes) => {
 				if (!allCodes.find((item) => item.S1Code === newCode.S1Code)) {
@@ -137,7 +142,7 @@ export const useGetAssets = (
 		} catch (e) {
 			throw e;
 		}
-	}, [s1Codes.length, fetchS1Codes]);
+	}, [s1Codes.length, fetchS1Codes, options.s2Filter]);
 
 	useEffect(() => {
 		const loadInitialData = async () => {

@@ -430,40 +430,77 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const removeItemOptimistic = async (cartLine: number | string) => {
 		const numericLine = Number(cartLine);
 
-		if (isNaN(numericLine)) {
-			const hexagonId = cartLine;
-			const backup = cartItems?.cartKit?.find((i) => i.hexagonId === hexagonId);
+		// Check if it's a kit item by looking in cartKit array
+		const kitBackup = cartItems?.cartKit?.find(
+			(i) => i.cartLine === numericLine,
+		);
+
+		if (kitBackup) {
+			const itemNumbersToRemove = [
+				kitBackup.hose.itemNumber,
+				kitBackup.ferrule1.itemNumber,
+				kitBackup.ferrule2.itemNumber,
+				kitBackup.insert1.itemNumber,
+				kitBackup.insert2.itemNumber,
+			];
 
 			setCartItems((prev) => {
 				if (!prev?.cartKit) return prev;
 				return {
 					...prev,
-					cartKit: prev.cartKit.filter((i) => i.hexagonId !== hexagonId),
+					cartKit: prev.cartKit.filter((i) => i.cartLine !== numericLine),
 				};
 			});
 
+			setPrices((prev) => {
+				const updated = { ...prev };
+				itemNumbersToRemove.forEach((itemNum) => delete updated[itemNum]);
+				return updated;
+			});
+			setCalculatedPrices((prev) => {
+				const updated = { ...prev };
+				itemNumbersToRemove.forEach((itemNum) => delete updated[itemNum]);
+				return updated;
+			});
+			setSurChargePrices((prev) => {
+				const updated = { ...prev };
+				itemNumbersToRemove.forEach((itemNum) => delete updated[itemNum]);
+				return updated;
+			});
+			setRabatterPrices((prev) => {
+				const updated = { ...prev };
+				itemNumbersToRemove.forEach((itemNum) => delete updated[itemNum]);
+				return updated;
+			});
+			setOrderSummaryTotalPrice((prev) => {
+				const updated = { ...prev };
+				itemNumbersToRemove.forEach((itemNum) => delete updated[itemNum]);
+				return updated;
+			});
+
 			try {
-				await removeFromCart(hexagonId);
+				await removeFromCart(numericLine);
 				setIsCartChanging((v) => !v);
 			} catch (error) {
-				if (backup) {
-					setCartItems((prev) => {
-						if (!prev?.cartKit) return prev;
-						return {
-							...prev,
-							cartKit: [...prev.cartKit, backup],
-						};
-					});
-				}
+				setCartItems((prev) => {
+					if (!prev?.cartKit) return prev;
+					return {
+						...prev,
+						cartKit: [...prev.cartKit, kitBackup],
+					};
+				});
 				console.error("Error removing cart kit item:", error);
 				throw error;
 			}
 			return;
 		}
 
+		// Handle regular cart item removal
 		const backup = cartItems?.cart?.find(
 			(i) => Number(i.cartLine) === numericLine,
 		);
+
+		const itemNumberToRemove = backup?.itemNumber;
 
 		setCartItems((prev) => {
 			if (!prev?.cart) return prev;
@@ -473,6 +510,34 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				cartKit: prev.cartKit,
 			};
 		});
+
+		if (itemNumberToRemove) {
+			setPrices((prev) => {
+				const updated = { ...prev };
+				delete updated[itemNumberToRemove];
+				return updated;
+			});
+			setCalculatedPrices((prev) => {
+				const updated = { ...prev };
+				delete updated[itemNumberToRemove];
+				return updated;
+			});
+			setSurChargePrices((prev) => {
+				const updated = { ...prev };
+				delete updated[itemNumberToRemove];
+				return updated;
+			});
+			setRabatterPrices((prev) => {
+				const updated = { ...prev };
+				delete updated[itemNumberToRemove];
+				return updated;
+			});
+			setOrderSummaryTotalPrice((prev) => {
+				const updated = { ...prev };
+				delete updated[itemNumberToRemove];
+				return updated;
+			});
+		}
 
 		try {
 			await removeFromCart(numericLine);

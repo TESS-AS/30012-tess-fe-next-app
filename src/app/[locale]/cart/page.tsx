@@ -601,8 +601,8 @@ const CartPage = () => {
 																}));
 																try {
 																	await updateQuantity(
-																		Number(item.hexagonId),
-																		item.hose.itemNumber,
+																		item.cartLine,
+																		item.hexagonId,
 																		item.hose.quantity + 1,
 																	);
 																} finally {
@@ -620,8 +620,8 @@ const CartPage = () => {
 																}));
 																try {
 																	await updateQuantity(
-																		Number(item.hexagonId),
-																		item.hose.itemNumber,
+																		item.cartLine,
+																		item.hexagonId,
 																		item.hose.quantity - 1,
 																	);
 																} finally {
@@ -647,7 +647,7 @@ const CartPage = () => {
 																onClick={async (e) => {
 																	e.stopPropagation();
 																	try {
-																		await removeItemOptimistic(item.hexagonId);
+																		await removeItemOptimistic(item.cartLine);
 																		toast.success(t("Cart.itemRemoved"));
 																	} catch {
 																		toast.error(t("Cart.itemRemoveError"));

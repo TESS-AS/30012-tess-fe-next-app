@@ -103,6 +103,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 			? profile?.defaultCustomerNumber
 			: customerNumber,
 		selectedS1Code,
+		{ initAssets: true, initS1Codes: true, s2Filter: false },
 	);
 
 	const [searchQuery, setSearchQuery] = useState("");
@@ -691,16 +692,19 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 											fetchS1Codes(
 												s1CodesPagination.currentPage + 1,
 												s1CodesPagination.pageSize,
+												false,
 											);
 										}
 									}}>
-									{(s1Codes || []).map((s1) => (
-										<SelectItem
-											key={s1.S1Code}
-											value={s1.S1Code}>
-											{s1.S1Name}
-										</SelectItem>
-									))}
+									{(s1Codes || [])
+										.filter((s1) => s1.S1Code && s1.S1Name)
+										.map((s1) => (
+											<SelectItem
+												key={s1.S1Code}
+												value={s1.S1Code}>
+												{s1.S1Name}
+											</SelectItem>
+										))}
 									{loading && s1CodesPagination.currentPage > 1 && (
 										<div className="py-2 text-center text-sm text-gray-500">
 											Laster flere...
