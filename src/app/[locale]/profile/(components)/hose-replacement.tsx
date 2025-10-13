@@ -52,35 +52,37 @@ const HoseReplacement = () => {
 		setExpandedGroups((prev) => ({ ...prev, [name]: !prev[name] }));
 
 	const s1Groups: Group[] = useMemo(() => {
-		return (s1Codes || []).map((s1: any) => {
-			const s1Name = String(s1.S1Name ?? s1.S1Code ?? "S1");
-			const rows: ReplacementData[] = Array.isArray(s1.S2)
-				? s1.S2.map((s2: any, idx: number) => ({
-						orderId: String(s2.S2Id ?? s2.S2Code ?? idx),
-						structure: String(s2.S2Name ?? s2.S2Code ?? "S2"),
-						"2025": 0,
-						"2026": 0,
-						"2027": 0,
-						"2028": 0,
-						total: 0,
-					}))
-				: [];
+		return (s1Codes || [])
+			.filter((s1) => s1.S1Code && s1.S1Name)
+			.map((s1: any) => {
+				const s1Name = String(s1.S1Name ?? s1.S1Code ?? "S1");
+				const rows: ReplacementData[] = Array.isArray(s1.S2)
+					? s1.S2.map((s2: any, idx: number) => ({
+							orderId: String(s2.S2Id ?? s2.S2Code ?? idx),
+							structure: String(s2.S2Name ?? s2.S2Code ?? "S2"),
+							"2025": 0,
+							"2026": 0,
+							"2027": 0,
+							"2028": 0,
+							total: 0,
+						}))
+					: [];
 
-			if (rows.length > 0) {
-				const totalRow: ReplacementData = {
-					orderId: `total_${s1Name}`,
-					structure: `${s1Name} Total`,
-					"2025": rows.reduce((a, r) => a + r["2025"], 0),
-					"2026": rows.reduce((a, r) => a + r["2026"], 0),
-					"2027": rows.reduce((a, r) => a + r["2027"], 0),
-					"2028": rows.reduce((a, r) => a + r["2028"], 0),
-					total: rows.reduce((a, r) => a + r.total, 0),
-				};
-				rows.push(totalRow);
-			}
+				if (rows.length > 0) {
+					const totalRow: ReplacementData = {
+						orderId: `total_${s1Name}`,
+						structure: `${s1Name} Total`,
+						"2025": rows.reduce((a, r) => a + r["2025"], 0),
+						"2026": rows.reduce((a, r) => a + r["2026"], 0),
+						"2027": rows.reduce((a, r) => a + r["2027"], 0),
+						"2028": rows.reduce((a, r) => a + r["2028"], 0),
+						total: rows.reduce((a, r) => a + r.total, 0),
+					};
+					rows.push(totalRow);
+				}
 
-			return { name: s1Name, rows } as Group;
-		});
+				return { name: s1Name, rows } as Group;
+			});
 	}, [s1Codes]);
 
 	const renderYearCell = (value: number) => (

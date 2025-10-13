@@ -101,11 +101,12 @@ export const getAssets = async (
 export const getS1Codes = async (
 	page: number = 1,
 	pageSize: number = 100,
+	s2?: boolean,
 ): Promise<S1CodesResponse> => {
+	const url = `/asset/getS1?page=${page}&pageSize=${pageSize}&s2=${s2}`;
+	console.log('🌐 getS1Codes service called with:', { page, pageSize, s2, url });
 	try {
-		const response = await axiosClient.get(
-			`/asset/getS1?page=${page}&pageSize=${pageSize}`,
-		);
+		const response = await axiosClient.get(url);
 		return (
 			response.data || {
 				data: [],

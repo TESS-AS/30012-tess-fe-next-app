@@ -434,12 +434,48 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			const hexagonId = cartLine;
 			const backup = cartItems?.cartKit?.find((i) => i.hexagonId === hexagonId);
 
+			const itemNumbersToRemove = backup
+				? [
+						backup.hose.itemNumber,
+						backup.ferrule1.itemNumber,
+						backup.ferrule2.itemNumber,
+						backup.insert1.itemNumber,
+						backup.insert2.itemNumber,
+					]
+				: [];
+
 			setCartItems((prev) => {
 				if (!prev?.cartKit) return prev;
 				return {
 					...prev,
 					cartKit: prev.cartKit.filter((i) => i.hexagonId !== hexagonId),
 				};
+			});
+
+			setPrices((prev) => {
+				const updated = { ...prev };
+				itemNumbersToRemove.forEach((itemNum) => delete updated[itemNum]);
+				return updated;
+			});
+			setCalculatedPrices((prev) => {
+				const updated = { ...prev };
+				itemNumbersToRemove.forEach((itemNum) => delete updated[itemNum]);
+				return updated;
+			});
+			setSurChargePrices((prev) => {
+				const updated = { ...prev };
+				itemNumbersToRemove.forEach((itemNum) => delete updated[itemNum]);
+				return updated;
+			});
+			setRabatterPrices((prev) => {
+				const updated = { ...prev };
+				itemNumbersToRemove.forEach((itemNum) => delete updated[itemNum]);
+				return updated;
+			});
+			setOrderSummaryTotalPrice((prev) => {
+				const updated = { ...prev };
+				itemNumbersToRemove.forEach((itemNum) => delete updated[itemNum]);
+				return updated;
 			});
 
 			try {
@@ -465,6 +501,9 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			(i) => Number(i.cartLine) === numericLine,
 		);
 
+		// Get the item number to remove from price states
+		const itemNumberToRemove = backup?.itemNumber;
+
 		setCartItems((prev) => {
 			if (!prev?.cart) return prev;
 			return {
@@ -473,6 +512,35 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				cartKit: prev.cartKit,
 			};
 		});
+
+		// Remove price data for the item
+		if (itemNumberToRemove) {
+			setPrices((prev) => {
+				const updated = { ...prev };
+				delete updated[itemNumberToRemove];
+				return updated;
+			});
+			setCalculatedPrices((prev) => {
+				const updated = { ...prev };
+				delete updated[itemNumberToRemove];
+				return updated;
+			});
+			setSurChargePrices((prev) => {
+				const updated = { ...prev };
+				delete updated[itemNumberToRemove];
+				return updated;
+			});
+			setRabatterPrices((prev) => {
+				const updated = { ...prev };
+				delete updated[itemNumberToRemove];
+				return updated;
+			});
+			setOrderSummaryTotalPrice((prev) => {
+				const updated = { ...prev };
+				delete updated[itemNumberToRemove];
+				return updated;
+			});
+		}
 
 		try {
 			await removeFromCart(numericLine);
