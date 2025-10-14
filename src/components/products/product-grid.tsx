@@ -66,6 +66,7 @@ export function ProductGrid({
 	const observerTarget = useRef<HTMLDivElement>(null);
 	const [sort, setSort] = useState<string>("");
 	const [filtersState, setFiltersState] = useState(filters);
+	const filterRef = useRef<{ clearRangeFilter: (filterKey: string) => void } | null>(null);
 	const {
 		products,
 		isLoading,
@@ -134,6 +135,7 @@ export function ProductGrid({
 		<div className="flex flex-col gap-8 lg:flex-row">
 			<aside className="w-full pr-4 lg:w-1/4">
 				<Filter
+					ref={filterRef}
 					filters={filtersState}
 					variant="default"
 					size="default"
@@ -222,8 +224,57 @@ export function ProductGrid({
 
 				<div className="mb-4 flex items-center justify-between align-middle">
 					<div className="flex flex-wrap gap-2">
-						{Object.entries(selectedFilters).map(([key, values]) =>
-							values
+						{Object.entries(selectedFilters).map(([key, values]) => {
+							// Check if this is a range filter (has exactly 2 numeric values)
+							const isRangeFilter = values.length === 2 && 
+								values.every(val => !isNaN(Number(val))) &&
+								values[0] !== values[1];
+
+							if (isRangeFilter) {
+								// Display range as single chip
+								const rangeValue = `${values[0]} - ${values[1]}`;
+								return (
+									<div
+										key={`${key}-range`}
+										className="bg-primary/10 flex items-center gap-1 rounded-md px-3 py-1 text-sm">
+										<TooltipProvider>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<div className="flex items-center gap-1">
+														<span className="text-md max-w-[100px] truncate">
+															{key === "category" ? "Kategori" : key}:
+														</span>
+														<span className="max-w-[100px] truncate">
+															{rangeValue}
+														</span>
+													</div>
+												</TooltipTrigger>
+												<TooltipContent>
+													<p>
+														{key}: {rangeValue}
+													</p>
+												</TooltipContent>
+											</Tooltip>
+										</TooltipProvider>
+										<button
+											onClick={() => {
+												// Clear the range filter using the filter component's method
+												if (filterRef.current?.clearRangeFilter) {
+													filterRef.current.clearRangeFilter(key);
+												} else {
+													// Fallback: remove the entire range filter
+													values.forEach(value => removeFilter(key, value));
+												}
+											}}
+											className="hover:bg-primary/20 ml-1 rounded-md p-0.5">
+											<X className="h-3 w-3" />
+										</button>
+									</div>
+								);
+							}
+
+							// Regular filter values
+							return values
 								.filter((value) => !!value)
 								.map((value) => (
 									<div
@@ -254,8 +305,8 @@ export function ProductGrid({
 											<X className="h-3 w-3" />
 										</button>
 									</div>
-								)),
-						)}
+								));
+						})}
 					</div>
 				</div>
 				<div

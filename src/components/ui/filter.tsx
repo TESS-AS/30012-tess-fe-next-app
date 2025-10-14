@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useCallback } from "react";
+import { useCallback, useMemo, useImperativeHandle } from "react";
 
 import {
 	Accordion,
@@ -80,7 +80,10 @@ const filterVariants = cva(
 	},
 );
 
-export function Filter({
+export const Filter = React.forwardRef<
+	{ clearRangeFilter: (filterKey: string) => void },
+	FilterProps
+>(({
 	className,
 	variant,
 	size,
@@ -93,7 +96,7 @@ export function Filter({
 	handleCategoryChange,
 	query,
 	...props
-}: FilterProps) {
+}, ref) => {
 	const t = useTranslations();
 	const [searchTerm, setSearchTerm] = React.useState("");
 	const [showAllCategories, setShowAllCategories] = React.useState(false);
@@ -117,6 +120,10 @@ export function Filter({
 	>({});
 
 	const [rangeValues, setRangeValues] = React.useState<
+		Record<string, [number, number]>
+	>({});
+
+	const [tempRangeValues, setTempRangeValues] = React.useState<
 		Record<string, [number, number]>
 	>({});
 
@@ -192,17 +199,63 @@ export function Filter({
 		],
 	);
 
-	const handleRangeChange = useCallback(
+	// Debounced effect for range changes
+	React.useEffect(() => {
+		const timeoutId = setTimeout(() => {
+			Object.entries(tempRangeValues).forEach(([filterKey, values]) => {
+				if (rangeValues[filterKey]?.toString() !== values.toString()) {
+					handleRangeChangeDebounced(filterKey, values);
+				}
+			});
+		}, 300); // 300ms debounce
+
+		return () => clearTimeout(timeoutId);
+	}, [tempRangeValues]);
+
+	const handleRangeChangeDebounced = useCallback(
 		async (filterKey: string, values: [number, number]) => {
 			setRangeValues((prev) => ({
 				...prev,
 				[filterKey]: values,
 			}));
 
-			const rangeString = `${values[0]}-${values[1]}`;
+			// Check if range is at full range (min to max) - if so, clear the filter
+			const children = loadedChildren[filterKey];
+			if (children?.slider) {
+				const isFullRange = values[0] === children.slider.min && values[1] === children.slider.max;
+				
+				if (isFullRange) {
+					// Remove the filter entirely
+					const updatedFilters = { ...localSelectedFilters };
+					delete updatedFilters[filterKey];
+					setLocalSelectedFilters(updatedFilters);
+
+					const filterArray: FilterValues[] = Object.entries(updatedFilters)
+						.filter(([key, values]) => key !== "category" && values.length > 0)
+						.map(([key, values]) => ({ key, values }));
+
+					await loadFilterParents({
+						categoryNumber: selectedCategory || categoryNumber,
+						searchTerm: query,
+						language: "no",
+						filters: filterArray,
+					});
+
+					await loadChildrenForFilter(
+						filterKey,
+						selectedCategory || categoryNumber,
+						filterArray,
+					);
+
+					onFilterChange(filterArray);
+					return;
+				}
+			}
+
+			// Send range values as separate values separated by comma
 			const updatedFilters = {
 				...localSelectedFilters,
-				[filterKey]: [rangeString],
+				[filterKey]: [values[0].toString(), values[1].toString()],
 			};
 
 			setLocalSelectedFilters(updatedFilters);
@@ -235,8 +288,93 @@ export function Filter({
 		],
 	);
 
+	const handleRangeChange = useCallback(
+		(filterKey: string, values: [number, number]) => {
+			const children = loadedChildren[filterKey];
+			if (!children?.values) return;
+
+			// Extract available values and sort them
+			const availableValues = children.values
+				.map(child => {
+					// Handle values like "15, 20" by taking the first number
+					const firstValue = child.value.split(',')[0].trim();
+					return parseFloat(firstValue);
+				})
+				.filter(val => !isNaN(val))
+				.sort((a, b) => a - b);
+
+			if (availableValues.length === 0) return;
+
+			// Find the closest available values
+			const findClosestValue = (target: number) => {
+				return availableValues.reduce((closest, current) => {
+					return Math.abs(current - target) < Math.abs(closest - target) ? current : closest;
+				});
+			};
+
+			const snappedValues: [number, number] = [
+				findClosestValue(values[0]),
+				findClosestValue(values[1])
+			];
+
+			if (snappedValues[0] > snappedValues[1]) {
+				snappedValues[0] = snappedValues[1];
+			}
+
+			setTempRangeValues((prev) => ({
+				...prev,
+				[filterKey]: snappedValues,
+			}));
+		},
+		[loadedChildren],
+	);
+
+	const clearRangeFilter = useCallback(
+		async (filterKey: string) => {
+			// Reset range values to full range
+			const children = loadedChildren[filterKey];
+			if (children?.slider) {
+				const fullRange: [number, number] = [children.slider.min, children.slider.max];
+				setRangeValues((prev) => ({
+					...prev,
+					[filterKey]: fullRange,
+				}));
+				setTempRangeValues((prev) => ({
+					...prev,
+					[filterKey]: fullRange,
+				}));
+
+				// Remove the filter from selected filters
+				const updatedFilters = { ...localSelectedFilters };
+				delete updatedFilters[filterKey];
+				setLocalSelectedFilters(updatedFilters);
+
+				const filterArray: FilterValues[] = Object.entries(updatedFilters)
+					.filter(([key, values]) => key !== "category" && values.length > 0)
+					.map(([key, values]) => ({ key, values }));
+
+				await loadFilterParents({
+					categoryNumber: selectedCategory || categoryNumber,
+					searchTerm: query,
+					language: "no",
+					filters: filterArray,
+				});
+
+				await loadChildrenForFilter(
+					filterKey,
+					selectedCategory || categoryNumber,
+					filterArray,
+				);
+
+				onFilterChange(filterArray);
+			}
+		},
+		[loadedChildren, localSelectedFilters, selectedCategory, categoryNumber, query, onFilterChange],
+	);
+
 	const resetFilters = useCallback(() => {
 		setRangeValues({});
+		setTempRangeValues({});
 		onFilterChange([]);
 	}, [onFilterChange]);
 
@@ -244,6 +382,13 @@ export function Filter({
 		(acc, values) => acc + values.length,
 		0,
 	);
+
+	// Expose clearRangeFilter function to parent component
+	useImperativeHandle(ref, () => ({
+		clearRangeFilter: (filterKey: string) => {
+			clearRangeFilter(filterKey);
+		},
+	}), [clearRangeFilter]);
 
 	const loadChildrenForFilter = async (
 		attributeKey: string,
@@ -276,10 +421,31 @@ export function Filter({
 			}));
 
 			if (normalized.slider && !rangeValues[attributeKey]) {
-				setRangeValues((prev) => ({
-					...prev,
-					[attributeKey]: [normalized.slider!.min, normalized.slider!.max],
-				}));
+				// Extract available values and use first and last as initial range
+				const availableValues = normalized.values
+					.map(child => {
+						const firstValue = child.value.split(',')[0].trim();
+						return parseFloat(firstValue);
+					})
+					.filter(val => !isNaN(val))
+					.sort((a, b) => a - b);
+
+				if (availableValues.length > 0) {
+					const initialRange: [number, number] = [
+						availableValues[0],
+						availableValues[availableValues.length - 1]
+					];
+					
+					setRangeValues((prev) => ({
+						...prev,
+						[attributeKey]: initialRange,
+					}));
+				} else {
+					setRangeValues((prev) => ({
+						...prev,
+						[attributeKey]: [normalized.slider!.min, normalized.slider!.max],
+					}));
+				}
 			}
 		} catch (error) {
 			console.error("Failed to load filter children:", error);
@@ -454,15 +620,14 @@ export function Filter({
 															<div className="text-muted-foreground flex justify-between text-sm">
 																<span>
 																	{children.slider.min}
-																	{children.slider.unit}
 																</span>
 																<span>
 																	{children.slider.max}
-																	{children.slider.unit}
 																</span>
 															</div>
 															<Slider
 																value={
+																	tempRangeValues[filter.key] || 
 																	rangeValues[filter.key] || [
 																		children.slider.min,
 																		children.slider.max,
@@ -485,16 +650,24 @@ export function Filter({
 																<SliderThumb />
 																<SliderThumb />
 															</Slider>
-															<div className="flex justify-between text-sm font-medium">
+															<div className="flex items-center justify-between text-sm font-medium">
 																<span>
-																	{rangeValues[filter.key]?.[0] ||
+																	{tempRangeValues[filter.key]?.[0] ||
+																		rangeValues[filter.key]?.[0] ||
 																		children.slider.min}
-																	{children.slider.unit}
 																</span>
+																<Button
+																	variant="ghost"
+																	size="sm"
+																	onClick={() => clearRangeFilter(filter.key)}
+																	className="h-6 px-2 text-xs"
+																>
+																	Clear
+																</Button>
 																<span>
-																	{rangeValues[filter.key]?.[1] ||
+																	{tempRangeValues[filter.key]?.[1] ||
+																		rangeValues[filter.key]?.[1] ||
 																		children.slider.max}
-																	{children.slider.unit}
 																</span>
 															</div>
 														</div>
@@ -547,4 +720,6 @@ export function Filter({
 			</div>
 		</div>
 	);
-}
+});
+
+Filter.displayName = "Filter";
