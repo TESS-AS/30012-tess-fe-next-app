@@ -16,13 +16,18 @@ import {
 	loadFilterChildren,
 	loadFilterParents,
 } from "@/services/categories.service";
-import type { FilterValues } from "@/types/filter.types";
+import type {
+	FilterValues,
+	FilterChildrenResponse,
+	SliderConfig,
+} from "@/types/filter.types";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "./button";
 import { Checkbox } from "./checkbox";
+import { Slider, SliderTrack, SliderRange, SliderThumb } from "./slider";
 
 export interface FilterCategory {
 	category: string;
@@ -108,13 +113,11 @@ export function Filter({
 	>(new Set());
 
 	const [loadedChildren, setLoadedChildren] = React.useState<
-		Record<
-			string,
-			{
-				attributeKey: string;
-				values: { value: string; productcount: string }[];
-			}
-		>
+		Record<string, FilterChildrenResponse>
+	>({});
+
+	const [rangeValues, setRangeValues] = React.useState<
+		Record<string, [number, number]>
 	>({});
 
 	const selectedFilters = externalSelectedFilters;
@@ -189,7 +192,51 @@ export function Filter({
 		],
 	);
 
+	const handleRangeChange = useCallback(
+		async (filterKey: string, values: [number, number]) => {
+			setRangeValues((prev) => ({
+				...prev,
+				[filterKey]: values,
+			}));
+
+			const rangeString = `${values[0]}-${values[1]}`;
+			const updatedFilters = {
+				...localSelectedFilters,
+				[filterKey]: [rangeString],
+			};
+
+			setLocalSelectedFilters(updatedFilters);
+
+			const filterArray: FilterValues[] = Object.entries(updatedFilters)
+				.filter(([key, values]) => key !== "category" && values.length > 0)
+				.map(([key, values]) => ({ key, values }));
+
+			await loadFilterParents({
+				categoryNumber: selectedCategory || categoryNumber,
+				searchTerm: query,
+				language: "no",
+				filters: filterArray,
+			});
+
+			await loadChildrenForFilter(
+				filterKey,
+				selectedCategory || categoryNumber,
+				filterArray,
+			);
+
+			onFilterChange(filterArray);
+		},
+		[
+			onFilterChange,
+			localSelectedFilters,
+			categoryNumber,
+			query,
+			selectedCategory,
+		],
+	);
+
 	const resetFilters = useCallback(() => {
+		setRangeValues({});
 		onFilterChange([]);
 	}, [onFilterChange]);
 
@@ -210,7 +257,7 @@ export function Filter({
 		setLoadingChildrenKeys((prev) => new Set(prev).add(attributeKey));
 
 		try {
-			const result = await loadFilterChildren({
+			const result: FilterChildrenResponse = await loadFilterChildren({
 				attributeKey,
 				categoryNumber: effectiveCategoryNumber,
 				searchTerm: effectiveSearchTerm,
@@ -218,7 +265,7 @@ export function Filter({
 				filters,
 			});
 
-			const normalized =
+			const normalized: FilterChildrenResponse =
 				Array.isArray(result) && result.length === 0
 					? { attributeKey, values: [] }
 					: result;
@@ -227,6 +274,13 @@ export function Filter({
 				...prev,
 				[attributeKey]: normalized,
 			}));
+
+			if (normalized.slider && !rangeValues[attributeKey]) {
+				setRangeValues((prev) => ({
+					...prev,
+					[attributeKey]: [normalized.slider!.min, normalized.slider!.max],
+				}));
+			}
 		} catch (error) {
 			console.error("Failed to load filter children:", error);
 		} finally {
@@ -394,7 +448,58 @@ export function Filter({
 													<Skeleton className="mb-2 h-4 w-32" />
 												</>
 											) : children ? (
-												children.values.length > 0 ? (
+												children.slider ? (
+													<div className="space-y-4 pl-2">
+														<div className="space-y-2">
+															<div className="text-muted-foreground flex justify-between text-sm">
+																<span>
+																	{children.slider.min}
+																	{children.slider.unit}
+																</span>
+																<span>
+																	{children.slider.max}
+																	{children.slider.unit}
+																</span>
+															</div>
+															<Slider
+																value={
+																	rangeValues[filter.key] || [
+																		children.slider.min,
+																		children.slider.max,
+																	]
+																}
+																onValueChange={(values) =>
+																	handleRangeChange(
+																		filter.key,
+																		values as [number, number],
+																	)
+																}
+																min={children.slider.min}
+																max={children.slider.max}
+																step={1}
+																className="w-full"
+															>
+																<SliderTrack>
+																	<SliderRange />
+																</SliderTrack>
+																<SliderThumb />
+																<SliderThumb />
+															</Slider>
+															<div className="flex justify-between text-sm font-medium">
+																<span>
+																	{rangeValues[filter.key]?.[0] ||
+																		children.slider.min}
+																	{children.slider.unit}
+																</span>
+																<span>
+																	{rangeValues[filter.key]?.[1] ||
+																		children.slider.max}
+																	{children.slider.unit}
+																</span>
+															</div>
+														</div>
+													</div>
+												) : children.values.length > 0 ? (
 													<div className="space-y-2 pl-2">
 														{children.values.map((child) => (
 															<div

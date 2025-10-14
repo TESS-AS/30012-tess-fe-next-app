@@ -16,6 +16,26 @@ export interface FilterValues {
 	values: string[];
 }
 
+export interface SliderConfig {
+	attributeKey: string;
+	type: "slider";
+	min: number;
+	max: number;
+	unit: string;
+}
+
+export interface FilterChildValue {
+	value: string;
+	type: string;
+	productcount: string;
+}
+
+export interface FilterChildrenResponse {
+	attributeKey: string;
+	values: FilterChildValue[];
+	slider?: SliderConfig;
+}
+
 export interface FilterEntry {
 	key: string;
 	productCount: number;
