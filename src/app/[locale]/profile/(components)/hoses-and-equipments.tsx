@@ -12,12 +12,6 @@ import { PrintTagsDialog } from "@/components/ui/dialogs/print-tags-dialog";
 import { RFQRequestDialog } from "@/components/ui/dialogs/rfq-request-dialog";
 import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
 	Select,
 	SelectContent,
 	SelectItem,
@@ -30,20 +24,7 @@ import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useAppContext } from "@/lib/appContext";
 import { cn } from "@/lib/utils";
 import { postCartKit } from "@/services/carts.service";
-import {
-	Funnel,
-	Paperclip,
-	ShoppingCart,
-	FileText,
-	Printer,
-	ChevronDown,
-	Mail,
-	Trash2,
-	CreditCard,
-	CheckSquare,
-	MapPin,
-	X,
-} from "lucide-react";
+import { Paperclip, MapPin, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -52,6 +33,7 @@ import { CartAddedModal } from "./cart-added-modal";
 import { HoseColumnsDropdown } from "./hose-columns-dropdown";
 import { HoseFiltersDropdown } from "./hose-filters-dropdown";
 import { HoseSearchBar } from "./hose-search-bar";
+import { HoseActionsDropdown } from "./hose-actions-dropdown";
 
 export interface HoseOrder {
 	orderId: string;
@@ -71,11 +53,11 @@ export interface HoseOrder {
 	neste_inspeksjonsdato?: string;
 }
 
-interface HoseOrdersProps {
+interface HosesAndEquipmentsProps {
 	onOrderClick?: (orderId: string) => void;
 }
 
-export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
+export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 	const { data: profile } = usePunchoutProfile();
 	const [customerNumber, setCustomerNumber] = useState<string>("");
 	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
@@ -376,160 +358,42 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		Handling: {
 			key: "handling",
 			header: () => (
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<button
-							className={cn(
-								"group inline-flex h-[52px] w-full cursor-pointer items-center gap-2 rounded-tr-md px-3 py-2 text-sm font-medium transition-colors",
-								selectedRows.length > 0
-									? "border-[#0E7B34] bg-[#005522] text-white"
-									: "border-[#C1C4C2] text-[#5A615D] data-[state=open]:bg-[#003D1A] data-[state=open]:text-white",
-							)}>
-							<span className="tracking-wide">HANDLING</span>
-							<ChevronDown
-								className={cn(
-									"h-4 w-4 transition-colors",
-									selectedRows.length > 0
-										? "text-white"
-										: "text-[#5A615D] group-data-[state=open]:text-white",
-								)}
-							/>
-						</button>
-					</DropdownMenuTrigger>
-
-					<DropdownMenuContent
-						align="start"
-						className="w-[300px]">
-						<div className="text-muted-foreground px-3 pt-1 pb-2 text-xs">
-							Valgt: {selectedRows.length}
-						</div>
-
-						<DropdownMenuItem
-							onClick={() => setCartModalOpen(true)}
-							disabled={selectedRows.length === 0 || isAddingToCart}
-							className={cn("", {
-								"cursor-not-allowed opacity-50":
-									selectedRows.length === 0 || isAddingToCart,
-							})}>
-							<ShoppingCart className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>
-								{isAddingToCart ? "Legger til..." : "Legg til i handlekurv"}
-							</span>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem
-							onClick={() => {
-								if (selectedRows.length === 0) {
-									toast.error("Vennligst velg elementer å kontakte om");
-									return;
-								}
-								setSupportOpen(true);
-							}}
-							className={cn("", {
-								"cursor-not-allowed opacity-50": selectedRows.length === 0,
-							})}
-							// disabled={selectedRows.length === 0}
-							disabled>
-							<Mail className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>Kontakt TESS support</span>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem
-							onClick={() => {
-								if (selectedRows.length === 0) return;
-								setRfqOpen(true);
-							}}
-							className={cn("", {
-								"cursor-not-allowed opacity-50": selectedRows.length === 0,
-							})}
-							// disabled={selectedRows.length === 0}
-							disabled>
-							<FileText className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>Rapporter slangebytter</span>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem
-							onClick={() => {
-								if (selectedRows.length === 0) return;
-								setDiscardOpen(true);
-							}}
-							className={cn("", {
-								"cursor-not-allowed opacity-50": selectedRows.length === 0,
-							})}
-							// disabled={selectedRows.length === 0}
-							disabled>
-							<Trash2 className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>Kasser utstyr</span>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem
-							disabled
-							onClick={() => handleBulkAction("print-cert")}
-							className="">
-							<Printer className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>Skriv ut TESS trykktest-sertifikat</span>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem
-							onClick={() => {
-								if (selectedRows.length === 0) return;
-								setPrintTagsOpen(true);
-							}}
-							className={cn("", {
-								"cursor-not-allowed opacity-50": selectedRows.length === 0,
-							})}
-							// disabled={selectedRows.length === 0}
-							disabled>
-							<Printer className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>Skriv ut visuelle ID-merker (strekkode)</span>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem
-							onClick={() => {
-								if (selectedRows.length === 0) return;
-								setPrintOpen(true);
-							}}
-							className=""
-							disabled>
-							<Printer className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>Skriv ut trykktest-sertifikater</span>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem
-							disabled
-							onClick={() => handleBulkAction("export")}
-							className="">
-							<CreditCard className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>Eksporter oversiktsdata til Excel</span>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem
-							onClick={() =>
-								handleSelectAll(
-									!(selectedRows.length === transformedAssets.length),
-								)
-							}
-							className="rounded-none border-t">
-							<CheckSquare className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>
-								{selectedRows.length === transformedAssets.length
-									? "Fjern alle"
-									: "Velg alle"}
-							</span>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem
-							onClick={() => handleSelectAllOnPage(!allSelectedOnPage)}
-							className="">
-							<CheckSquare className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>
-								{allSelectedOnPage
-									? "Fjern alle på denne siden"
-									: "Velg alle på denne siden"}
-							</span>
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
+				<HoseActionsDropdown
+					selectedCount={selectedRows.length}
+					isAddingToCart={isAddingToCart}
+					onAddToCart={() => setCartModalOpen(true)}
+					onContactSupport={() => {
+						if (selectedRows.length === 0) {
+							toast.error("Vennligst velg elementer å kontakte om");
+							return;
+						}
+						setSupportOpen(true);
+					}}
+					onReportReplacement={() => {
+						if (selectedRows.length === 0) return;
+						setRfqOpen(true);
+					}}
+					onDiscardEquipment={() => {
+						if (selectedRows.length === 0) return;
+						setDiscardOpen(true);
+					}}
+					onPrintCertificate={() => handleBulkAction("print-cert")}
+					onPrintTags={() => {
+						if (selectedRows.length === 0) return;
+						setPrintTagsOpen(true);
+					}}
+					onPrintTestCertificates={() => {
+						if (selectedRows.length === 0) return;
+						setPrintOpen(true);
+					}}
+					onExport={() => handleBulkAction("export")}
+					onSelectAll={() =>
+						handleSelectAll(!(selectedRows.length === transformedAssets.length))
+					}
+					onSelectAllOnPage={() => handleSelectAllOnPage(!allSelectedOnPage)}
+					allSelected={selectedRows.length === transformedAssets.length}
+					allSelectedOnPage={allSelectedOnPage}
+				/>
 			),
 			cell: (order: HoseOrder) => (
 				<Checkbox

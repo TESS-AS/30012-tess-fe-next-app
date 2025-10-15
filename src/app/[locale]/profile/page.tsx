@@ -27,7 +27,7 @@ import { useTranslations } from "next-intl";
 import { Dimensions } from "./(components)/dimensions";
 import HoseDetailsPage from "./(components)/hose-details-page";
 import HoseInspections from "./(components)/hose-inspections";
-import { HoseOrders } from "./(components)/hose-orders";
+import { HosesAndEquipments } from "./(components)/hoses-and-equipments";
 import HoseOverview from "./(components)/hose-overview";
 import HoseReplacement from "./(components)/hose-replacement";
 import HoseRequests from "./(components)/hose-requests";
@@ -267,7 +267,7 @@ export default function ProfilePage() {
 						<TabsContent
 							value="hose-orders"
 							className="mt-0">
-							<HoseOrders />
+							<HosesAndEquipments />
 						</TabsContent>
 
 						<TabsContent
