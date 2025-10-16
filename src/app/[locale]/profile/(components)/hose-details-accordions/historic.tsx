@@ -1,3 +1,5 @@
+import React from "react";
+
 import {
 	AccordionItem,
 	AccordionTrigger,
@@ -5,7 +7,7 @@ import {
 } from "@/components/ui/accordion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+
 import { Cell } from "./cell";
 
 interface HistoryDetail {

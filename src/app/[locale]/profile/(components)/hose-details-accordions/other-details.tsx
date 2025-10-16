@@ -3,6 +3,7 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
+
 import { Cell } from "./cell";
 
 export const OtherDetailsAccordion = ({

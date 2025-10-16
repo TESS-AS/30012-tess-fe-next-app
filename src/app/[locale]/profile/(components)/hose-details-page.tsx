@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,17 +13,18 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import ProductDetailsModal from "./product-details-modal";
-import { S2EquipmentsAccordion } from "./hose-details-accordions/s2-equipments";
-import { HoseAccordion } from "./hose-details-accordions/hose";
-import { AdditionalEquipmentAccordion } from "./hose-details-accordions/additional-equipment";
-import { OtherDetailsAccordion } from "./hose-details-accordions/other-details";
-import { InspectionsAccordion } from "./hose-details-accordions/inspections";
-import { DocumentsAccordion } from "./hose-details-accordions/documents";
-import { StructureAccordion } from "./hose-details-accordions/structure";
-import { HistoricAccordion } from "./hose-details-accordions/historic";
+
 import { AssetIdSelector } from "./asset-id-selector";
 import { HoseActionsDropdown } from "./hose-actions-dropdown";
+import { AdditionalEquipmentAccordion } from "./hose-details-accordions/additional-equipment";
+import { DocumentsAccordion } from "./hose-details-accordions/documents";
+import { HistoricAccordion } from "./hose-details-accordions/historic";
+import { HoseAccordion } from "./hose-details-accordions/hose";
+import { InspectionsAccordion } from "./hose-details-accordions/inspections";
+import { OtherDetailsAccordion } from "./hose-details-accordions/other-details";
+import { S2EquipmentsAccordion } from "./hose-details-accordions/s2-equipments";
+import { StructureAccordion } from "./hose-details-accordions/structure";
+import ProductDetailsModal from "./product-details-modal";
 
 interface Props {
 	hoseId: string;

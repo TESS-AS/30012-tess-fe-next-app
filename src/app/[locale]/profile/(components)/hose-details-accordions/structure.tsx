@@ -1,4 +1,3 @@
-import { Cell } from "./cell";
 import {
 	Accordion,
 	AccordionItem,
@@ -6,6 +5,8 @@ import {
 	AccordionContent,
 } from "@/components/ui/accordion";
 import { Settings } from "lucide-react";
+
+import { Cell } from "./cell";
 
 export const StructureAccordion = ({ isEditMode }: { isEditMode: boolean }) => {
 	return (

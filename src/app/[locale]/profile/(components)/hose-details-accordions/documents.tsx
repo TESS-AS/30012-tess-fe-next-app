@@ -3,9 +3,10 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 import { FileText, Plus } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+
 import { Cell } from "./cell";
 
 interface Props {

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import OrdersTab from "@/app/[locale]/profile/(components)/tabs/OrdersTab/OrdersTab";
 import PersonalInfoTab from "@/app/[locale]/profile/(components)/tabs/PersonalInfoTab";
 import UserAddressesTab from "@/app/[locale]/profile/(components)/tabs/UserAdresses/UserAddressesTab";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
@@ -18,17 +19,16 @@ import { useTranslations } from "next-intl";
 import { Dimensions } from "./(components)/dimensions";
 import HoseDetailsPage from "./(components)/hose-details-page";
 import HoseInspections from "./(components)/hose-inspections";
-import { HosesAndEquipments } from "./(components)/hoses-and-equipments";
 import HoseOverview from "./(components)/hose-overview";
 import HoseReplacement from "./(components)/hose-replacement";
 import HoseRequests from "./(components)/hose-requests";
 import HoseRiskClass from "./(components)/hose-risk-class";
+import { HosesAndEquipments } from "./(components)/hoses-and-equipments";
 import { MineBestillinger } from "./(components)/mine-bestillinger";
 import { OrdreDetaljer } from "./(components)/ordre-detaljer";
 import { OrdreHistorikk } from "./(components)/ordre-historikk";
 import { Rekvisisjoner } from "./(components)/rekvisisjoner";
 import { SidebarNav } from "./(components)/sidebar-nav";
-import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default function ProfilePage() {
 	const { setIsAuthOpen } = useAppContext();

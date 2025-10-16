@@ -1,6 +1,12 @@
-import React, { ReactNode, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, type Column } from "@/components/ui/data-table";
+import { DiscardEquipmentDialog } from "@/components/ui/dialogs/discard-equipment-dialog";
+import { PrintCertificatesDialog } from "@/components/ui/dialogs/print-certificates-dialog";
+import { PrintTagsDialog } from "@/components/ui/dialogs/print-tags-dialog";
+import { RFQRequestDialog } from "@/components/ui/dialogs/rfq-request-dialog";
+import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 import {
 	Select,
 	SelectContent,
@@ -8,24 +14,20 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { DiscardEquipmentDialog } from "@/components/ui/dialogs/discard-equipment-dialog";
-import { PrintCertificatesDialog } from "@/components/ui/dialogs/print-certificates-dialog";
-import { PrintTagsDialog } from "@/components/ui/dialogs/print-tags-dialog";
-import { RFQRequestDialog } from "@/components/ui/dialogs/rfq-request-dialog";
-import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { FilterOptions, useGetAssets } from "@/hooks/useGetAssets";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useAppContext } from "@/lib/appContext";
 import { postCartKit } from "@/services/carts.service";
+import { MapPin, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+
+import { CartAddedModal } from "./cart-added-modal";
+import { HoseActionsDropdown } from "./hose-actions-dropdown";
 import { HoseColumnsDropdown } from "./hose-columns-dropdown";
 import { HoseFiltersDropdown } from "./hose-filters-dropdown";
 import { HoseSearchBar } from "./hose-search-bar";
-import { CartAddedModal } from "./cart-added-modal";
-import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
-import { MapPin, X } from "lucide-react";
-import { HoseActionsDropdown } from "./hose-actions-dropdown";
 
 export interface HoseOrder {
 	orderId: string;
