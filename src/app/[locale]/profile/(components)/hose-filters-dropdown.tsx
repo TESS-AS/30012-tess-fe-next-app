@@ -44,7 +44,6 @@ export function HoseFiltersDropdown({
 
 					<DropdownMenuContent className="w-[300px] rounded-2xl bg-white p-4 shadow-lg">
 						<div className="space-y-5 text-sm">
-							{/* Inspeksjon */}
 							<div>
 								<h4 className="mb-2 font-semibold text-[#0F1912]">
 									Inspeksjon
@@ -92,7 +91,6 @@ export function HoseFiltersDropdown({
 								</div>
 							</div>
 
-							{/* Slangebytte */}
 							<div>
 								<h4 className="mb-2 font-semibold text-[#0F1912]">
 									Slangebytte
@@ -130,7 +128,6 @@ export function HoseFiltersDropdown({
 								</div>
 							</div>
 
-							{/* Etter alder */}
 							<div>
 								<h4 className="mb-2 font-semibold text-[#0F1912]">
 									Etter alder

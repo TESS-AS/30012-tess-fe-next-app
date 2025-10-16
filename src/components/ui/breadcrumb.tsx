@@ -10,6 +10,7 @@ interface BreadcrumbItem {
 	href: string;
 	label: string;
 	current?: boolean;
+	onClick?: (e: React.MouseEvent) => void;
 }
 
 interface BreadcrumbProps extends React.HTMLAttributes<HTMLElement> {
@@ -33,7 +34,7 @@ const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
 				{...props}>
 				<ol className="inline-flex items-center space-x-2">
 					{showHome && (
-						<li className="inline-flex items-center">
+						<li className="inline-flex cursor-pointer items-center">
 							<Link
 								href="/"
 								className="text-muted-foreground hover:text-foreground inline-flex items-center">
@@ -55,17 +56,30 @@ const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
 								{index > 0 || showHome ? (
 									<li
 										aria-hidden="true"
-										className="text-muted-foreground/40 select-none">
+										className="text-muted-foreground/40 cursor-pointer select-none">
 										{Separator}
 									</li>
 								) : null}
-								<li className="inline-flex items-center">
-									<Link
-										href={item.href}
-										className={linkClassName}
-										aria-current={item.current || isLast ? "page" : undefined}>
-										{item.label}
-									</Link>
+								<li className="inline-flex cursor-pointer items-center">
+									{item.onClick ? (
+										<button
+											onClick={item.onClick}
+											className={linkClassName + " cursor-pointer"}
+											aria-current={
+												item.current || isLast ? "page" : undefined
+											}>
+											{item.label}
+										</button>
+									) : (
+										<Link
+											href={item.href}
+											className={linkClassName + " cursor-pointer"}
+											aria-current={
+												item.current || isLast ? "page" : undefined
+											}>
+											{item.label}
+										</Link>
+									)}
 								</li>
 							</React.Fragment>
 						);

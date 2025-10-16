@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import OrdersTab from "@/app/[locale]/profile/(components)/tabs/OrdersTab/OrdersTab";
 import PersonalInfoTab from "@/app/[locale]/profile/(components)/tabs/PersonalInfoTab";
 import UserAddressesTab from "@/app/[locale]/profile/(components)/tabs/UserAdresses/UserAddressesTab";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
@@ -12,26 +13,17 @@ import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout"
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useAppContext } from "@/lib/appContext";
 import { cn } from "@/lib/utils";
-import {
-	ShoppingCart,
-	Folder,
-	User,
-	Settings,
-	LogOut,
-	List,
-	HelpCircle,
-	LockKeyhole,
-} from "lucide-react";
+import { ShoppingCart, Folder, User, Settings, LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Dimensions } from "./(components)/dimensions";
 import HoseDetailsPage from "./(components)/hose-details-page";
 import HoseInspections from "./(components)/hose-inspections";
-import { HoseOrders } from "./(components)/hose-orders";
 import HoseOverview from "./(components)/hose-overview";
 import HoseReplacement from "./(components)/hose-replacement";
 import HoseRequests from "./(components)/hose-requests";
 import HoseRiskClass from "./(components)/hose-risk-class";
+import { HosesAndEquipments } from "./(components)/hoses-and-equipments";
 import { MineBestillinger } from "./(components)/mine-bestillinger";
 import { OrdreDetaljer } from "./(components)/ordre-detaljer";
 import { OrdreHistorikk } from "./(components)/ordre-historikk";
@@ -85,9 +77,86 @@ export default function ProfilePage() {
 		);
 	}
 
+	const getBreadcrumbItems = () => {
+		const items = [];
+
+		const tabLabels: Record<string, string> = {
+			// E-handel tabs
+			"mine-bestillinger": "Mine bestillinger",
+			rekvisisjoner: "Rekvisisjoner",
+			ordrehistorikk: "Ordrehistorikk",
+			dimensions: "Dimensjoner",
+			usage: "Forbruk",
+			users: "Brukere",
+			catalog: "Katalog",
+			settings: "Innstillinger",
+			// Hose tabs
+			"hose-oversikt": "Oversikt",
+			"hose-orders": "Slanger/utstyr",
+			"hose-inspections": "Inspeksjoner",
+			"hose-replacement": "Slangebytte",
+			"hose-risk-class": "Risikoklasse",
+			"hose-requests": "Forespørsler",
+			"hose-activities": "Siste aktiviteter",
+			"hose-settings": "Innstillinger",
+		};
+
+		const modeLabel =
+			activeMode === "hose"
+				? t("BreadCrumbs.hoseManagement")
+				: t("BreadCrumbs.ehandel");
+		const defaultTab =
+			activeMode === "hose" ? "hose-oversikt" : "mine-bestillinger";
+
+		items.push({
+			href: "/profile",
+			label: modeLabel,
+			onClick: (e: React.MouseEvent) => {
+				e.preventDefault();
+				setActiveTab(defaultTab);
+				setSelectedHoseId(null);
+				setSelectedOrderId(null);
+			},
+		});
+
+		if (activeTab) {
+			const tabLabel = tabLabels[activeTab] || activeTab;
+			items.push({
+				href: `/profile?tab=${activeTab}`,
+				label: tabLabel,
+				onClick: (e: React.MouseEvent) => {
+					e.preventDefault();
+					setActiveTab(activeTab);
+					setSelectedHoseId(null);
+					setSelectedOrderId(null);
+				},
+			});
+		}
+
+		if (selectedHoseId && activeTab === "hose-oversikt") {
+			items.push({
+				href: "#",
+				label: selectedHoseId,
+			} as any);
+		}
+
+		if (selectedOrderId && activeTab === "mine-bestillinger") {
+			items.push({
+				href: "#",
+				label: selectedOrderId,
+			} as any);
+		}
+
+		return items;
+	};
+
 	return (
 		<main className="my-6 min-h-screen">
-			<div className="mx-auto flex gap-6">
+			<Breadcrumb
+				items={getBreadcrumbItems()}
+				showHome
+			/>
+			<div className="mx-auto flex gap-6 pt-4">
 				<Tabs
 					value={activeTab}
 					className="flex w-full gap-5">
@@ -267,7 +336,7 @@ export default function ProfilePage() {
 						<TabsContent
 							value="hose-orders"
 							className="mt-0">
-							<HoseOrders />
+							<HosesAndEquipments />
 						</TabsContent>
 
 						<TabsContent

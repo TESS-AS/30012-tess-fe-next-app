@@ -86,7 +86,31 @@
 		"category": "Kategori",
 		"product": "Produkt",
 		"cart": "Handlekurv",
-		"checkout": "Kassen"
+		"checkout": "Kassen",
+		"profile": "Profil",
+		"ehandel": "E-handel",
+		"hoseManagement": "Slangestyring"
+	},
+	"Profile": {
+		"tabs": {
+			"mine-bestillinger": "Mine bestillinger",
+			"rekvisisjoner": "Rekvisisjoner",
+			"ordre-historikk": "Ordrehistorikk",
+			"hose-oversikt": "Slangeoversikt",
+			"hose-inspections": "Slangeinspeksjoner",
+			"hose-replacement": "Slangebytter",
+			"hose-requests": "Slangeforespørsler",
+			"hose-risk-class": "Slangerisikoklasse",
+			"dimensions": "Dimensjoner",
+			"personal-info": "Personlig informasjon",
+			"addresses": "Adresser",
+			"orders": "Bestillinger",
+			"wishlist": "Ønskeliste",
+			"password": "Endre passord",
+			"ratings": "Vurderinger"
+		},
+		"hoseDetail": "Slangedetaljer",
+		"orderDetail": "Ordredetaljer"
 	},
 	"Common": {
 		"reset": "Nullstill",

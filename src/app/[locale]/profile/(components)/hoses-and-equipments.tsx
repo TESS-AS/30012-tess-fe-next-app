@@ -1,9 +1,5 @@
-"use client";
+import React, { useMemo, useState } from "react";
 
-import * as React from "react";
-import { useMemo, useState } from "react";
-
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { DiscardEquipmentDialog } from "@/components/ui/dialogs/discard-equipment-dialog";
@@ -11,12 +7,6 @@ import { PrintCertificatesDialog } from "@/components/ui/dialogs/print-certifica
 import { PrintTagsDialog } from "@/components/ui/dialogs/print-tags-dialog";
 import { RFQRequestDialog } from "@/components/ui/dialogs/rfq-request-dialog";
 import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
 	Select,
 	SelectContent,
@@ -28,27 +18,13 @@ import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout"
 import { FilterOptions, useGetAssets } from "@/hooks/useGetAssets";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useAppContext } from "@/lib/appContext";
-import { cn } from "@/lib/utils";
 import { postCartKit } from "@/services/carts.service";
-import {
-	Funnel,
-	Paperclip,
-	ShoppingCart,
-	FileText,
-	Printer,
-	ChevronDown,
-	Mail,
-	Trash2,
-	CreditCard,
-	CheckSquare,
-	MapPin,
-	X,
-} from "lucide-react";
-import Image from "next/image";
+import { MapPin, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 import { CartAddedModal } from "./cart-added-modal";
+import { HoseActionsDropdown } from "./hose-actions-dropdown";
 import { HoseColumnsDropdown } from "./hose-columns-dropdown";
 import { HoseFiltersDropdown } from "./hose-filters-dropdown";
 import { HoseSearchBar } from "./hose-search-bar";
@@ -71,11 +47,11 @@ export interface HoseOrder {
 	neste_inspeksjonsdato?: string;
 }
 
-interface HoseOrdersProps {
+interface HosesAndEquipmentsProps {
 	onOrderClick?: (orderId: string) => void;
 }
 
-export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
+export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 	const { data: profile } = usePunchoutProfile();
 	const [customerNumber, setCustomerNumber] = useState<string>("");
 	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
@@ -86,6 +62,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 			return undefined;
 		},
 	);
+
 	const { setIsCartChanging, isCartChanging } = useAppContext();
 
 	const {
@@ -108,7 +85,6 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedColumns, setSelectedColumns] = useState<string[]>([
-		"Vedlegg",
 		"ID",
 		"Kunde-ID",
 		"Beskrivelse",
@@ -117,6 +93,9 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		"Ordrenummer (PO)",
 		"Handling",
 	]);
+
+	// === NEW SELECTION MODEL ===
+	// explicit selections (when not in global-select mode)
 	const [selectedRows, setSelectedRows] = useState<string[]>(() => {
 		if (typeof window !== "undefined") {
 			const saved = localStorage.getItem("selectedHoseRows");
@@ -124,6 +103,12 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		}
 		return [];
 	});
+
+	// global select across all pages
+	const [allAcrossPages, setAllAcrossPages] = useState(false);
+	// exceptions when global select is ON (these are excluded)
+	const [deselectedIds, setDeselectedIds] = useState<Set<string>>(new Set());
+
 	const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 	const [selectedAgeRanges, setSelectedAgeRanges] = useState<string[]>([]);
 	const ITEMS_PER_PAGE = 10;
@@ -146,37 +131,83 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		neste_inspeksjonsdato: asset?.hoseLine?.nextInspectionDate ?? undefined,
 	}));
 
+	// === selection derived ===
+	const isRowSelected = (id: string) => {
+		if (allAcrossPages) return !deselectedIds.has(id);
+		return selectedRows.includes(id);
+	};
+
+	const selectedCount = allAcrossPages
+		? Math.max(0, (pagination?.totalItems ?? 0) - deselectedIds.size)
+		: selectedRows.length;
+
 	const selectedItems = useMemo(() => {
 		const set = new Set(selectedRows);
-		return transformedAssets.filter((a) => set.has(String(a.orderId)));
-	}, [selectedRows, transformedAssets]);
+		// NOTE: when allAcrossPages = true, selectedItems may not include off-page items.
+		// Use selectedCount for counts and pass only visible "selectedItems" to actions that need concrete IDs from the page.
+		return transformedAssets.filter((a) =>
+			allAcrossPages
+				? !deselectedIds.has(String(a.orderId))
+				: set.has(String(a.orderId)),
+		);
+	}, [selectedRows, transformedAssets, allAcrossPages, deselectedIds]);
 
 	const allSelectedOnPage = useMemo(() => {
 		if (!transformedAssets.length) return false;
-		const ids = transformedAssets.map((a) => String(a.orderId));
-		return ids.every((id) => selectedRows.includes(id));
-	}, [transformedAssets, selectedRows]);
+		if (allAcrossPages) {
+			return transformedAssets.every(
+				(a) => !deselectedIds.has(String(a.orderId)),
+			);
+		}
+		const set = new Set(selectedRows);
+		return transformedAssets.every((a) => set.has(String(a.orderId)));
+	}, [transformedAssets, selectedRows, allAcrossPages, deselectedIds]);
 
+	const allSelectedGlobally = allAcrossPages && selectedCount > 0;
+
+	// === handlers ===
 	const handleSelectRow = (key: string, checked: boolean | "indeterminate") => {
 		const on = checked === true;
+		if (allAcrossPages) {
+			setDeselectedIds((prev) => {
+				const next = new Set(prev);
+				if (on) next.delete(key);
+				else next.add(key);
+				return next;
+			});
+			return;
+		}
+
 		setSelectedRows((prev) => {
-			const newSelection = on
+			const next = on
 				? prev.includes(key)
 					? prev
 					: [...prev, key]
 				: prev.filter((id) => id !== key);
-			localStorage.setItem("selectedHoseRows", JSON.stringify(newSelection));
-			return newSelection;
+			localStorage.setItem("selectedHoseRows", JSON.stringify(next));
+			return next;
 		});
 	};
 
 	const handleBulkSelect = (ids: string[], checked: boolean) => {
+		if (allAcrossPages) {
+			setDeselectedIds((prev) => {
+				const next = new Set(prev);
+				for (const id of ids) {
+					if (checked) next.delete(id);
+					else next.add(id);
+				}
+				return next;
+			});
+			return;
+		}
+
 		setSelectedRows((prev) => {
-			const newSelection = checked
+			const next = checked
 				? Array.from(new Set([...prev, ...ids]))
 				: prev.filter((id) => !ids.includes(id));
-			localStorage.setItem("selectedHoseRows", JSON.stringify(newSelection));
-			return newSelection;
+			localStorage.setItem("selectedHoseRows", JSON.stringify(next));
+			return next;
 		});
 	};
 
@@ -185,7 +216,29 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		handleBulkSelect(ids, checked);
 	};
 
+	const handleSelectAllGlobally = (on: boolean) => {
+		if (on) {
+			setAllAcrossPages(true);
+			setDeselectedIds(new Set());
+			setSelectedRows([]);
+			localStorage.setItem("selectedHoseRows", JSON.stringify([]));
+		} else {
+			setAllAcrossPages(false);
+			setDeselectedIds(new Set());
+			setSelectedRows([]);
+			localStorage.setItem("selectedHoseRows", JSON.stringify([]));
+		}
+	};
+
 	const handleRemoveSelectedId = (id: string) => {
+		if (allAcrossPages) {
+			setDeselectedIds((prev) => {
+				const next = new Set(prev);
+				next.add(id);
+				return next;
+			});
+			return;
+		}
 		setSelectedRows((prev) => {
 			const next = prev.filter((x) => x !== id);
 			localStorage.setItem("selectedHoseRows", JSON.stringify(next));
@@ -206,7 +259,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 	const handleBulkAction = async (action: string): Promise<void> => {
 		if (action === "cart") {
-			if (selectedItems.length === 0) {
+			if (selectedCount === 0) {
 				toast.error("Vennligst velg elementer å legge til i handlekurven");
 				return;
 			}
@@ -214,7 +267,17 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 			const handleAddToCart = async () => {
 				setIsAddingToCart(true);
 				try {
-					const cartItems = selectedItems.map((asset) => ({
+					// If allAcrossPages, you'd normally send a server-side query representing the current filters
+					// plus exclusions (deselectedIds) instead of explicit IDs. Here, we only map visible items.
+					const rowsToUse = allAcrossPages
+						? transformedAssets.filter(
+								(a) => !deselectedIds.has(String(a.orderId)),
+							)
+						: transformedAssets.filter((a) =>
+								selectedRows.includes(String(a.orderId)),
+							);
+
+					const cartItems = rowsToUse.map((asset) => ({
 						hexagonId: Number(asset.id),
 						quantity: 1,
 						warehouseNumber: "L01",
@@ -226,13 +289,14 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 					toast.success("Elementer lagt til i handlekurven");
 					setIsNavigating(true);
 					setIsCartChanging(!isCartChanging);
-
 					router.push("/cart");
 				} catch (error) {
 					toast.error("Kunne ikke legge til elementer i handlekurven");
 				} finally {
 					setIsAddingToCart(false);
 					setSelectedRows([]);
+					setAllAcrossPages(false);
+					setDeselectedIds(new Set());
 				}
 			};
 
@@ -251,7 +315,6 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		const ages = opts?.selectedAgeRanges ?? selectedAgeRanges;
 
 		if (ages.length > 0) filters.ageSize = ages.join(",");
-
 		if (f.includes("approved")) filters.approved = "true";
 		if (f.includes("overdue")) filters.overdue = "true";
 		if (f.includes("replacementDue")) filters.replacementDue = "true";
@@ -272,7 +335,6 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 	};
 
 	const columnOptions = [
-		"Vedlegg",
 		"ID",
 		"Kunde-ID",
 		"Beskrivelse",
@@ -286,33 +348,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		"Neste inspeksjonsdato",
 	];
 
-	const handleSelectAll = (checked: boolean) => {
-		const ids = transformedAssets.map((a) => String(a.orderId));
-		const newSelection = checked ? ids : [];
-		setSelectedRows(newSelection);
-		localStorage.setItem("selectedHoseRows", JSON.stringify(newSelection));
-	};
-
 	const allColumns: Record<string, Column<HoseOrder>> = {
-		Vedlegg: {
-			key: "vedlegg",
-			header: "VEDLEGG",
-			cell: () => (
-				<div className="flex items-center gap-2">
-					<span className="cursor-pointer">
-						<Image
-							width={16}
-							height={20}
-							src="/icons/profile/wifi.svg"
-							alt="Wifi"
-						/>
-					</span>
-					<span className="cursor-pointer">
-						<Paperclip />
-					</span>
-				</div>
-			),
-		},
 		ID: {
 			key: "id",
 			header: "ID",
@@ -376,164 +412,44 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		Handling: {
 			key: "handling",
 			header: () => (
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<button
-							className={cn(
-								"group inline-flex h-[52px] w-full cursor-pointer items-center gap-2 rounded-tr-md px-3 py-2 text-sm font-medium transition-colors",
-								selectedRows.length > 0
-									? "border-[#0E7B34] bg-[#005522] text-white"
-									: "border-[#C1C4C2] text-[#5A615D] data-[state=open]:bg-[#003D1A] data-[state=open]:text-white",
-							)}>
-							<span className="tracking-wide">HANDLING</span>
-							<ChevronDown
-								className={cn(
-									"h-4 w-4 transition-colors",
-									selectedRows.length > 0
-										? "text-white"
-										: "text-[#5A615D] group-data-[state=open]:text-white",
-								)}
-							/>
-						</button>
-					</DropdownMenuTrigger>
-
-					<DropdownMenuContent
-						align="start"
-						className="w-[300px]">
-						<div className="text-muted-foreground px-3 pt-1 pb-2 text-xs">
-							Valgt: {selectedRows.length}
-						</div>
-
-						<DropdownMenuItem
-							onClick={() => setCartModalOpen(true)}
-							disabled={selectedRows.length === 0 || isAddingToCart}
-							className={cn("", {
-								"cursor-not-allowed opacity-50":
-									selectedRows.length === 0 || isAddingToCart,
-							})}>
-							<ShoppingCart className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>
-								{isAddingToCart ? "Legger til..." : "Legg til i handlekurv"}
-							</span>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem
-							onClick={() => {
-								if (selectedRows.length === 0) {
-									toast.error("Vennligst velg elementer å kontakte om");
-									return;
-								}
-								setSupportOpen(true);
-							}}
-							className={cn("", {
-								"cursor-not-allowed opacity-50": selectedRows.length === 0,
-							})}
-							// disabled={selectedRows.length === 0}
-							disabled>
-							<Mail className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>Kontakt TESS support</span>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem
-							onClick={() => {
-								if (selectedRows.length === 0) return;
-								setRfqOpen(true);
-							}}
-							className={cn("", {
-								"cursor-not-allowed opacity-50": selectedRows.length === 0,
-							})}
-							// disabled={selectedRows.length === 0}
-							disabled>
-							<FileText className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>Rapporter slangebytter</span>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem
-							onClick={() => {
-								if (selectedRows.length === 0) return;
-								setDiscardOpen(true);
-							}}
-							className={cn("", {
-								"cursor-not-allowed opacity-50": selectedRows.length === 0,
-							})}
-							// disabled={selectedRows.length === 0}
-							disabled>
-							<Trash2 className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>Kasser utstyr</span>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem
-							disabled
-							onClick={() => handleBulkAction("print-cert")}
-							className="">
-							<Printer className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>Skriv ut TESS trykktest-sertifikat</span>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem
-							onClick={() => {
-								if (selectedRows.length === 0) return;
-								setPrintTagsOpen(true);
-							}}
-							className={cn("", {
-								"cursor-not-allowed opacity-50": selectedRows.length === 0,
-							})}
-							// disabled={selectedRows.length === 0}
-							disabled>
-							<Printer className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>Skriv ut visuelle ID-merker (strekkode)</span>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem
-							onClick={() => {
-								if (selectedRows.length === 0) return;
-								setPrintOpen(true);
-							}}
-							className=""
-							disabled>
-							<Printer className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>Skriv ut trykktest-sertifikater</span>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem
-							disabled
-							onClick={() => handleBulkAction("export")}
-							className="">
-							<CreditCard className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>Eksporter oversiktsdata til Excel</span>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem
-							onClick={() =>
-								handleSelectAll(
-									!(selectedRows.length === transformedAssets.length),
-								)
-							}
-							className="rounded-none border-t">
-							<CheckSquare className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>
-								{selectedRows.length === transformedAssets.length
-									? "Fjern alle"
-									: "Velg alle"}
-							</span>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem
-							onClick={() => handleSelectAllOnPage(!allSelectedOnPage)}
-							className="">
-							<CheckSquare className="mr-3 h-4 w-4 text-[#005522]" />
-							<span>
-								{allSelectedOnPage
-									? "Fjern alle på denne siden"
-									: "Velg alle på denne siden"}
-							</span>
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
+				<HoseActionsDropdown
+					selectedCount={selectedCount}
+					isAddingToCart={isAddingToCart}
+					onAddToCart={() => setCartModalOpen(true)}
+					onContactSupport={() => {
+						if (selectedCount === 0) {
+							toast.error("Vennligst velg elementer å kontakte om");
+							return;
+						}
+						setSupportOpen(true);
+					}}
+					onReportReplacement={() => {
+						if (selectedCount === 0) return;
+						setRfqOpen(true);
+					}}
+					onDiscardEquipment={() => {
+						if (selectedCount === 0) return;
+						setDiscardOpen(true);
+					}}
+					onPrintCertificate={() => handleBulkAction("print-cert")}
+					onPrintTags={() => {
+						if (selectedCount === 0) return;
+						setPrintTagsOpen(true);
+					}}
+					onPrintTestCertificates={() => {
+						if (selectedCount === 0) return;
+						setPrintOpen(true);
+					}}
+					onExport={() => handleBulkAction("export")}
+					onSelectAll={() => handleSelectAllGlobally(!allAcrossPages)}
+					onSelectAllOnPage={() => handleSelectAllOnPage(!allSelectedOnPage)}
+					allSelected={allSelectedGlobally}
+					allSelectedOnPage={allSelectedOnPage}
+				/>
 			),
 			cell: (order: HoseOrder) => (
 				<Checkbox
-					checked={selectedRows.includes(String(order.orderId))}
+					checked={isRowSelected(String(order.orderId))}
 					onCheckedChange={(val) => handleSelectRow(String(order.orderId), val)}
 				/>
 			),
@@ -545,12 +461,15 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 		const cols: Column<HoseOrder>[] = nonHandling
 			.map((n) => allColumns[n])
 			.filter(Boolean) as Column<HoseOrder>[];
-
-		if (selectedColumns.includes("Handling")) {
-			cols.push(allColumns["Handling"]);
-		}
+		if (selectedColumns.includes("Handling")) cols.push(allColumns["Handling"]);
 		return cols;
-	}, [selectedColumns, selectedRows]);
+	}, [
+		selectedColumns,
+		selectedRows,
+		allAcrossPages,
+		deselectedIds,
+		selectedCount,
+	]);
 
 	const handleColumnChange = (value: string): void => {
 		setSelectedColumns((prev) =>
@@ -603,9 +522,15 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 			<SupportDialog
 				open={supportOpen}
 				onOpenChange={setSupportOpen}
-				selectedIds={selectedRows}
+				selectedIds={
+					allAcrossPages
+						? transformedAssets
+								.filter((a) => !deselectedIds.has(String(a.orderId)))
+								.map((a) => String(a.orderId))
+						: selectedRows
+				}
 				onRemoveId={handleRemoveSelectedId}
-				onSubmit={async ({ subject, message, file, ids }) => {
+				onSubmit={async () => {
 					toast.success("Meldingen ble sendt til TESS support");
 				}}
 			/>
@@ -613,10 +538,15 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 			<RFQRequestDialog
 				open={rfqOpen}
 				onOpenChange={setRfqOpen}
-				selectedIds={selectedRows}
+				selectedIds={
+					allAcrossPages
+						? transformedAssets
+								.filter((a) => !deselectedIds.has(String(a.orderId)))
+								.map((a) => String(a.orderId))
+						: selectedRows
+				}
 				onRemoveId={handleRemoveSelectedId}
-				onSubmit={async ({ requestType, comment, ids }) => {
-					// TODO: Integrate with backend to create RFQ
+				onSubmit={async () => {
 					toast.success("Forespørselen ble sendt");
 				}}
 			/>
@@ -624,10 +554,15 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 			<DiscardEquipmentDialog
 				open={discardOpen}
 				onOpenChange={setDiscardOpen}
-				selectedIds={selectedRows}
+				selectedIds={
+					allAcrossPages
+						? transformedAssets
+								.filter((a) => !deselectedIds.has(String(a.orderId)))
+								.map((a) => String(a.orderId))
+						: selectedRows
+				}
 				onRemoveId={handleRemoveSelectedId}
-				onSubmit={async ({ name, title, ids }) => {
-					// TODO: Integrer utrangerings-endepunkt
+				onSubmit={async () => {
 					toast.success("Utstyr utrangert");
 				}}
 			/>
@@ -635,7 +570,13 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 			<PrintTagsDialog
 				open={printTagsOpen}
 				onOpenChange={setPrintTagsOpen}
-				selectedIds={selectedRows}
+				selectedIds={
+					allAcrossPages
+						? transformedAssets
+								.filter((a) => !deselectedIds.has(String(a.orderId)))
+								.map((a) => String(a.orderId))
+						: selectedRows
+				}
 				onRemoveId={handleRemoveSelectedId}
 				previewUrl="/images/presentation.png"
 			/>
@@ -643,10 +584,15 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 			<PrintCertificatesDialog
 				open={printOpen}
 				onOpenChange={setPrintOpen}
-				selectedIds={selectedRows}
+				selectedIds={
+					allAcrossPages
+						? transformedAssets
+								.filter((a) => !deselectedIds.has(String(a.orderId)))
+								.map((a) => String(a.orderId))
+						: selectedRows
+				}
 				onRemoveId={handleRemoveSelectedId}
 				pdfUrl="https://www.orimi.com/pdf-test.pdf"
-				// pdfUrl can be wired when backend provides a URL
 			/>
 
 			<div className="space-y-6">
@@ -721,7 +667,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 										setSelectedS1Code("");
 										localStorage.removeItem("selectedS1Code");
 									}}
-									className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
+									className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none">
 									<X className="h-4 w-4 text-[#5A615D]" />
 									<span className="sr-only">Fjern lokasjon</span>
 								</button>
@@ -767,7 +713,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 												e.preventDefault();
 												setCustomerNumber("");
 											}}
-											className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
+											className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none">
 											<X className="h-4 w-4 text-[#5A615D]" />
 											<span className="sr-only">Fjern customer</span>
 										</button>
@@ -793,6 +739,8 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 							onClear={() => {
 								setSearchQuery("");
 								setSelectedRows([]);
+								setAllAcrossPages(false);
+								setDeselectedIds(new Set());
 								localStorage.removeItem("selectedHoseRows");
 								setSelectedFilters([]);
 								setSelectedAgeRanges([]);
@@ -802,7 +750,7 @@ export function HoseOrders({ onOrderClick }: HoseOrdersProps) {
 
 						<div className="flex items-center space-x-4">
 							<HoseColumnsDropdown
-								options={columnOptions}
+								options={[...columnOptions]}
 								selected={selectedColumns}
 								onToggle={handleColumnChange}
 							/>

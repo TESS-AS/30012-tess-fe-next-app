@@ -1,31 +1,30 @@
 "use client";
 
-import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from "@/components/ui/accordion";
+import { useState } from "react";
+
+import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import {
-	Barcode,
 	ChevronRight,
 	Download,
 	Ellipsis,
-	FileText,
-	Settings,
 	ShoppingCart,
 	SquarePen,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+
+import { AssetIdSelector } from "./asset-id-selector";
+import { HoseActionsDropdown } from "./hose-actions-dropdown";
+import { AdditionalEquipmentAccordion } from "./hose-details-accordions/additional-equipment";
+import { DocumentsAccordion } from "./hose-details-accordions/documents";
+import { HistoricAccordion } from "./hose-details-accordions/historic";
+import { HoseAccordion } from "./hose-details-accordions/hose";
+import { InspectionsAccordion } from "./hose-details-accordions/inspections";
+import { OtherDetailsAccordion } from "./hose-details-accordions/other-details";
+import { S2EquipmentsAccordion } from "./hose-details-accordions/s2-equipments";
+import { StructureAccordion } from "./hose-details-accordions/structure";
+import ProductDetailsModal from "./product-details-modal";
 
 interface Props {
 	hoseId: string;
@@ -33,6 +32,12 @@ interface Props {
 }
 
 export default function HoseDetailsPage({ onBack }: Props) {
+	const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+	const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+	const [isEditMode, setIsEditMode] = useState(false);
+	const [selectedAssetId, setSelectedAssetId] = useState("25252525");
+	const [isAddingToCart, setIsAddingToCart] = useState(false);
+
 	const hoseId = "HOSE ECB81-08";
 	const title = `${hoseId} · 55220PSI SISTEMA CO2 x 700 mm`;
 
@@ -46,10 +51,107 @@ export default function HoseDetailsPage({ onBack }: Props) {
 		],
 	};
 
+	const assetIdOptions = [
+		{
+			value: "25252525",
+			label: "000000000000000000025252525",
+			status: "Levert",
+		},
+		{
+			value: "25252826",
+			label: "000000000000000000025252826",
+			status: "Installert",
+		},
+		{
+			value: "25252827",
+			label: "000000000000000000025252827",
+			status: "Utrangert",
+		},
+		{
+			value: "25252828",
+			label: "000000000000000000025252828",
+			status: "Resirkulert",
+		},
+	];
+
 	const documents = [
 		{ id: "doc1", name: "Dokument 1" },
 		{ id: "doc2", name: "Dokument 2" },
 	];
+
+	const historyData = [
+		{
+			id: "25252525",
+			workOrder: "000000000000025252525",
+			description: "KUNDE-DB OPPDATERT AV FIQMAR11",
+			date: "11. 08. 2025",
+			details: [
+				{
+					workOrder: "5049205",
+					description: "KUNDE-DB OPPDATERT AV FIQMAR11",
+					date: "11. 08. 2025",
+					link: "SE KOMMENTARER FOR DETALJER",
+				},
+				{
+					workOrder: "4140106",
+					description: "CUSTOMER DB UPDATE BY: 2239FULL",
+					date: "31.12.24",
+					link: "SE KOMMENTARER FOR DETALJER",
+				},
+				{
+					workOrder: "4140108",
+					description: "PRESSURE TEST CERTIFICATE",
+					date: "31.12.22",
+					link: null,
+				},
+			],
+		},
+		{
+			id: "25252524",
+			workOrder: "000000000000025252524",
+			description: "KUNDE-ID OPPDATERT AV FIQMAR1",
+			date: "11.08.2025",
+			details: [
+				{
+					workOrder: "5049205",
+					description: "KUNDE-DB OPPDATERT AV FIQMAR11",
+					date: "11. 08. 2025",
+					link: "SE KOMMENTARER FOR DETALJER",
+				},
+				{
+					workOrder: "4140106",
+					description: "CUSTOMER DB UPDATE BY: 2239FULL",
+					date: "31.12.24",
+					link: "SE KOMMENTARER FOR DETALJER",
+				},
+				{
+					workOrder: "4140108",
+					description: "PRESSURE TEST CERTIFICATE",
+					date: "31.12.22",
+					link: null,
+				},
+			],
+		},
+		{
+			id: "25252523",
+			workOrder: "000000000000025252523",
+			description: "KUNDE-ID OPPDATERT AV FIQMAR1",
+			date: "11.08.2025",
+			details: [],
+		},
+	];
+
+	const toggleRow = (id: string) => {
+		setExpandedRows((prev) => {
+			const newSet = new Set(prev);
+			if (newSet.has(id)) {
+				newSet.delete(id);
+			} else {
+				newSet.add(id);
+			}
+			return newSet;
+		});
+	};
 
 	return (
 		<div className="mx-auto max-w-[1200px] space-y-4">
@@ -82,19 +184,11 @@ export default function HoseDetailsPage({ onBack }: Props) {
 								</svg>
 								{keyInfo.location}
 							</div>
-							<Select defaultValue="a5454545">
-								<SelectTrigger className="mt-2 h-8 w-full border-[#C1C4C2] bg-white px-2 py-1 text-xs">
-									<div className="flex items-center gap-2">
-										<Barcode className="h-4 w-4" />
-										<SelectValue />
-									</div>
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="a5454545">a5454545 (gjeldende)</SelectItem>
-									<SelectItem value="a5454546">a5454546</SelectItem>
-									<SelectItem value="a5454547">a5454547</SelectItem>
-								</SelectContent>
-							</Select>
+							<AssetIdSelector
+								value={selectedAssetId}
+								options={assetIdOptions}
+								onValueChange={setSelectedAssetId}
+							/>
 						</div>
 					</div>
 
@@ -131,7 +225,7 @@ export default function HoseDetailsPage({ onBack }: Props) {
 									className="flex items-center justify-between gap-2">
 									<span className="text-sm text-[#0F1912]">{s.label}</span>
 									<div
-										className={`flex h-5 w-5 items-center justify-center rounded-full`}>
+										className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full`}>
 										{s.ok ? (
 											<Image
 												src="/icons/check-filled.svg"
@@ -155,9 +249,10 @@ export default function HoseDetailsPage({ onBack }: Props) {
 				</div>
 				<div className="flex justify-end gap-4 rounded-b-lg bg-[#F8F9F8] px-6 py-3">
 					<Button
+						onClick={() => setIsEditMode(!isEditMode)}
 						className="border-[#C1C4C2] text-[#0F1912]"
 						variant="outline">
-						<SquarePen /> Rediger
+						<SquarePen /> {isEditMode ? "Avbryt" : "Rediger"}
 					</Button>
 					<Button
 						className="border-[#C1C4C2] text-[#0F1912]"
@@ -169,11 +264,32 @@ export default function HoseDetailsPage({ onBack }: Props) {
 						variant="outline">
 						<Download /> Eksporter
 					</Button>
-					<Button
-						className="border-[#C1C4C2] text-[#0F1912]"
-						variant="outline">
-						<Ellipsis /> Mer
-					</Button>
+					<HoseActionsDropdown
+						selectedCount={1}
+						isAddingToCart={isAddingToCart}
+						onAddToCart={() => {
+							setIsAddingToCart(true);
+							// Add to cart logic here
+							setTimeout(() => setIsAddingToCart(false), 1000);
+						}}
+						onContactSupport={() => console.log("Contact support")}
+						onReportReplacement={() => console.log("Report replacement")}
+						onDiscardEquipment={() => console.log("Discard equipment")}
+						onPrintCertificate={() => console.log("Print certificate")}
+						onPrintTags={() => console.log("Print tags")}
+						onPrintTestCertificates={() =>
+							console.log("Print test certificates")
+						}
+						onExport={() => console.log("Export")}
+						triggerButton={
+							<Button
+								className="border-[#C1C4C2] text-[#0F1912]"
+								variant="outline">
+								<Ellipsis /> Mer
+							</Button>
+						}
+						align="end"
+					/>
 				</div>
 			</div>
 
@@ -181,205 +297,39 @@ export default function HoseDetailsPage({ onBack }: Props) {
 				<Accordion
 					type="multiple"
 					className="space-y-3">
-					<AccordionItem
-						value="s2-utstyr"
-						className="border-none">
-						<AccordionTrigger className="text-decoration-none cursor-pointer rounded-none border-b border-[#C1C4C2] p-4 px-0 text-lg font-bold text-[#0F1912] hover:no-underline">
-							S2-utstyr
-						</AccordionTrigger>
-						<AccordionContent className="p-0">
-							<table className="w-full text-sm">
-								<tbody>
-									<tr className="bg-[#F8F9F8]">
-										<td className="px-4 py-3 text-[#5A615D]">S2-utstyr</td>
-										<td className="px-4 py-3 text-[#0F1912]">
-											Deck crane port side
-										</td>
-									</tr>
-									<tr className="bg-white">
-										<td className="px-4 py-3 text-[#5A615D]">Kundeutstyr nr</td>
-										<td className="px-4 py-3 text-[#0F1912]">4521-39.80</td>
-									</tr>
-									<tr className="bg-[#F8F9F8]">
-										<td className="px-4 py-3 text-[#5A615D]">
-											System WP (BAR)
-										</td>
-										<td className="px-4 py-3 text-[#0F1912]">—</td>
-									</tr>
-								</tbody>
-							</table>
-						</AccordionContent>
-					</AccordionItem>
+					<S2EquipmentsAccordion isEditMode={isEditMode} />
 
-					<AccordionItem
-						value="slange"
-						className="border-none">
-						<AccordionTrigger className="text-decoration-none cursor-pointer rounded-none border-b border-[#C1C4C2] p-4 px-0 text-lg font-bold text-[#0F1912] hover:no-underline">
-							Slange
-						</AccordionTrigger>
-						<AccordionContent className="p-0">
-							<p className="text-sm text-[#5A615D]">Detaljer om slange...</p>
-						</AccordionContent>
-					</AccordionItem>
+					<HoseAccordion
+						isEditMode={isEditMode}
+						setIsProductModalOpen={setIsProductModalOpen}
+					/>
 
-					<AccordionItem
-						value="andre-detaljer"
-						className="border-none">
-						<AccordionTrigger className="text-decoration-none cursor-pointer rounded-none border-b border-[#C1C4C2] p-4 px-0 text-lg font-bold text-[#0F1912] hover:no-underline">
-							Andre detaljer
-						</AccordionTrigger>
-						<AccordionContent className="p-0">
-							<p className="text-sm text-[#5A615D]">Tilleggsinformasjon...</p>
-						</AccordionContent>
-					</AccordionItem>
+					<AdditionalEquipmentAccordion isEditMode={isEditMode} />
 
-					<AccordionItem
-						value="inspeksjon"
-						className="border-none">
-						<AccordionTrigger className="text-decoration-none cursor-pointer rounded-none border-b border-[#C1C4C2] p-4 px-0 text-lg font-bold text-[#0F1912] hover:no-underline">
-							Inspeksjon
-						</AccordionTrigger>
-						<AccordionContent className="p-0">
-							<p className="text-sm text-[#5A615D]">Historikk og status...</p>
-						</AccordionContent>
-					</AccordionItem>
+					<OtherDetailsAccordion isEditMode={isEditMode} />
 
-					<AccordionItem
-						value="dokumenter"
-						className="border-none">
-						<AccordionTrigger className="text-decoration-none cursor-pointer rounded-none border-b border-[#C1C4C2] p-4 px-0 text-lg font-bold text-[#0F1912] hover:no-underline">
-							Dokumenter
-						</AccordionTrigger>
-						<AccordionContent className="p-0 pt-4">
-							<div className="space-y-4">
-								{documents.map((d) => (
-									<Link
-										key={d.id}
-										href="#"
-										className="flex items-center gap-3 text-emerald-700">
-										<FileText className="h-5 w-5 text-[#003D1A]" />
-										<span className="underline underline-offset-3">
-											{d.name}
-										</span>
-									</Link>
-								))}
-							</div>
-						</AccordionContent>
-					</AccordionItem>
+					<InspectionsAccordion isEditMode={isEditMode} />
 
-					<AccordionItem
-						value="struktur"
-						className="border-none">
-						<AccordionTrigger className="text-decoration-none cursor-pointer rounded-none border-b border-[#C1C4C2] p-4 px-0 text-lg font-bold text-[#0F1912] hover:no-underline">
-							Struktur
-						</AccordionTrigger>
-						<AccordionContent className="p-0 pt-4">
-							<Accordion
-								type="multiple"
-								className="space-y-1">
-								<AccordionItem
-									value="test-princess"
-									className="border-none">
-									<AccordionTrigger className="p-0 text-sm font-normal text-[#0F1912] hover:no-underline">
-										<div className="flex items-center gap-2">
-											<ChevronRight className="h-4 w-4" />
-											<Settings className="h-4 w-4 text-[#5A615D]" />
-											<span>Test Princess</span>
-										</div>
-									</AccordionTrigger>
-									<AccordionContent className="ml-6 pt-1 pb-0">
-										<Accordion
-											type="multiple"
-											className="space-y-1">
-											<AccordionItem
-												value="bls-oem"
-												className="border-none">
-												<AccordionTrigger className="p-0 text-sm font-normal text-[#0F1912] hover:no-underline">
-													<div className="flex items-center gap-2">
-														<ChevronRight className="h-4 w-4" />
-														<Settings className="h-4 w-4 text-[#5A615D]" />
-														<span>BLS OEM 43</span>
-													</div>
-												</AccordionTrigger>
-												<AccordionContent className="ml-6 pt-1 pb-0">
-													<Accordion
-														type="multiple"
-														className="space-y-1">
-														<AccordionItem
-															value="deck-crane"
-															className="border-none">
-															<AccordionTrigger className="p-0 text-sm font-normal text-[#0F1912] hover:no-underline">
-																<div className="flex items-center gap-2">
-																	<ChevronRight className="h-4 w-4" />
-																	<Settings className="h-4 w-4 text-[#5A615D]" />
-																	<span>Eq. no N/A : Deck Crane</span>
-																</div>
-															</AccordionTrigger>
-															<AccordionContent className="ml-6 pt-1 pb-0">
-																<div className="flex items-center gap-2 rounded-lg bg-emerald-50 p-3 text-sm">
-																	<ChevronRight className="h-4 w-4" />
-																	<Settings className="h-4 w-4 text-[#5A615D]" />
-																	<span>Eq. no N/A : Deck Crane 250</span>
-																</div>
-																<div className="mt-3 flex items-center gap-3 text-xs text-[#5A615D]">
-																	<div className="flex items-center gap-1">
-																		<Settings className="h-4 w-4" />
-																		<span>S2</span>
-																	</div>
-																	<div className="flex items-center gap-1">
-																		<Settings className="h-4 w-4" />
-																		<span>Utstyr/Equipment</span>
-																	</div>
-																	<div className="flex items-center gap-1">
-																		<Settings className="h-4 w-4" />
-																		<span>Utstyr/Equipment subcategory</span>
-																	</div>
-																</div>
-															</AccordionContent>
-														</AccordionItem>
-													</Accordion>
-												</AccordionContent>
-											</AccordionItem>
-										</Accordion>
-									</AccordionContent>
-								</AccordionItem>
-							</Accordion>
-						</AccordionContent>
-					</AccordionItem>
+					<DocumentsAccordion
+						documents={documents}
+						isEditMode={isEditMode}
+					/>
 
-					<AccordionItem
-						value="historikk"
-						className="border-none">
-						<AccordionTrigger className="text-decoration-none cursor-pointer rounded-none border-b border-[#C1C4C2] p-4 px-0 text-lg font-bold text-[#0F1912] hover:no-underline">
-							Historikk
-						</AccordionTrigger>
-						<AccordionContent className="p-0">
-							<div className="overflow-hidden rounded border">
-								<table className="w-full text-left text-sm">
-									<thead className="bg-[#F8F9F8] text-[#5A615D]">
-										<tr>
-											<th className="px-3 py-2">Arbeidsordrenummer (WO)</th>
-											<th className="px-3 py-2">Beskrivelse</th>
-											<th className="px-3 py-2">Dato fullført</th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr className="border-t">
-											<td className="px-3 py-2 text-emerald-700">
-												000000000000025252525
-											</td>
-											<td className="px-3 py-2">
-												KUNDE-ID OPPDATERT AV FIQMAR1
-											</td>
-											<td className="px-3 py-2">11.08.2025</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</AccordionContent>
-					</AccordionItem>
+					<StructureAccordion isEditMode={isEditMode} />
+
+					<HistoricAccordion
+						historyData={historyData}
+						expandedRows={expandedRows}
+						toggleRow={toggleRow}
+						isEditMode={isEditMode}
+					/>
 				</Accordion>
 			</div>
+
+			<ProductDetailsModal
+				isOpen={isProductModalOpen}
+				onClose={() => setIsProductModalOpen(false)}
+			/>
 		</div>
 	);
 }
