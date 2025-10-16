@@ -223,7 +223,7 @@ export default function HoseDetailsPage({ onBack }: Props) {
 									className="flex items-center justify-between gap-2">
 									<span className="text-sm text-[#0F1912]">{s.label}</span>
 									<div
-										className={`flex h-5 w-5 items-center justify-center rounded-full`}>
+										className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full`}>
 										{s.ok ? (
 											<Image
 												src="/icons/check-filled.svg"
@@ -275,7 +275,9 @@ export default function HoseDetailsPage({ onBack }: Props) {
 						onDiscardEquipment={() => console.log("Discard equipment")}
 						onPrintCertificate={() => console.log("Print certificate")}
 						onPrintTags={() => console.log("Print tags")}
-						onPrintTestCertificates={() => console.log("Print test certificates")}
+						onPrintTestCertificates={() =>
+							console.log("Print test certificates")
+						}
 						onExport={() => console.log("Export")}
 						triggerButton={
 							<Button

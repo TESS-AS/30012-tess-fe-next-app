@@ -8,7 +8,6 @@ interface OrdreDetaljerProps {
 }
 
 export function OrdreDetaljer({ orderId, onBack }: OrdreDetaljerProps) {
-	// Mock data - replace with real data fetching
 	const orderDetails = {
 		orderId: orderId,
 		status: "Mottatt",
@@ -60,23 +59,8 @@ export function OrdreDetaljer({ orderId, onBack }: OrdreDetaljerProps) {
 
 	return (
 		<div className="space-y-4">
-			{/* Header with back button */}
-			<div className="flex items-center gap-2">
-				<div
-					className="flex cursor-pointer items-center gap-2 font-medium text-[#2D3530]"
-					onClick={onBack}>
-					<span className="text-sm">Mine bestillinger</span>
-					<ChevronRight className="h-4 w-4" />
-				</div>
-				<span className="text-sm font-medium text-[#2D3530]">
-					{orderDetails.orderId}
-				</span>
-			</div>
-
-			{/* Main content */}
 			<div className="rounded-lg border border-[#C1C4C2] bg-white p-6 shadow-sm">
 				<div className="grid grid-cols-4 gap-8">
-					{/* Contact Person */}
 					<div className="rounded-lg p-6 shadow-sm">
 						<h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-[#0F1912]">
 							<svg
@@ -99,7 +83,6 @@ export function OrdreDetaljer({ orderId, onBack }: OrdreDetaljerProps) {
 						</div>
 					</div>
 
-					{/* Address */}
 					<div className="rounded-lg p-6 shadow-sm">
 						<h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-[#0F1912]">
 							<svg

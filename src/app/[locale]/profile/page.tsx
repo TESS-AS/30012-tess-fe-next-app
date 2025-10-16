@@ -12,16 +12,7 @@ import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout"
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useAppContext } from "@/lib/appContext";
 import { cn } from "@/lib/utils";
-import {
-	ShoppingCart,
-	Folder,
-	User,
-	Settings,
-	LogOut,
-	List,
-	HelpCircle,
-	LockKeyhole,
-} from "lucide-react";
+import { ShoppingCart, Folder, User, Settings, LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Dimensions } from "./(components)/dimensions";
@@ -89,6 +80,27 @@ export default function ProfilePage() {
 	const getBreadcrumbItems = () => {
 		const items = [];
 
+		const tabLabels: Record<string, string> = {
+			// E-handel tabs
+			"mine-bestillinger": "Mine bestillinger",
+			rekvisisjoner: "Rekvisisjoner",
+			ordrehistorikk: "Ordrehistorikk",
+			dimensions: "Dimensjoner",
+			usage: "Forbruk",
+			users: "Brukere",
+			catalog: "Katalog",
+			settings: "Innstillinger",
+			// Hose tabs
+			"hose-oversikt": "Oversikt",
+			"hose-orders": "Slanger/utstyr",
+			"hose-inspections": "Inspeksjoner",
+			"hose-replacement": "Slangebytte",
+			"hose-risk-class": "Risikoklasse",
+			"hose-requests": "Forespørsler",
+			"hose-activities": "Siste aktiviteter",
+			"hose-settings": "Innstillinger",
+		};
+
 		const modeLabel =
 			activeMode === "hose"
 				? t("BreadCrumbs.hoseManagement")
@@ -103,18 +115,20 @@ export default function ProfilePage() {
 				e.preventDefault();
 				setActiveTab(defaultTab);
 				setSelectedHoseId(null);
+				setSelectedOrderId(null);
 			},
 		});
 
 		if (activeTab) {
-			const tabKey = `Profile.tabs.${activeTab}` as any;
+			const tabLabel = tabLabels[activeTab] || activeTab;
 			items.push({
 				href: `/profile?tab=${activeTab}`,
-				label: t(tabKey),
+				label: tabLabel,
 				onClick: (e: React.MouseEvent) => {
 					e.preventDefault();
 					setActiveTab(activeTab);
 					setSelectedHoseId(null);
+					setSelectedOrderId(null);
 				},
 			});
 		}
@@ -122,7 +136,14 @@ export default function ProfilePage() {
 		if (selectedHoseId && activeTab === "hose-oversikt") {
 			items.push({
 				href: "#",
-				label: t("Profile.hoseDetail"),
+				label: selectedHoseId,
+			} as any);
+		}
+
+		if (selectedOrderId && activeTab === "mine-bestillinger") {
+			items.push({
+				href: "#",
+				label: selectedOrderId,
 			} as any);
 		}
 

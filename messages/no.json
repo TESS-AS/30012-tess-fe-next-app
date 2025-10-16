@@ -105,7 +105,8 @@
 			"password": "Endre passord",
 			"ratings": "Vurderinger"
 		},
-		"hoseDetail": "Slangedetaljer"
+		"hoseDetail": "Slangedetaljer",
+		"orderDetail": "Ordredetaljer"
 	},
 	"Common": {
 		"reset": "Nullstill",

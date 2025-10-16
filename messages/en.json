@@ -104,7 +104,8 @@
 			"password": "Change Password",
 			"ratings": "Ratings"
 		},
-		"hoseDetail": "Hose Detail"
+		"hoseDetail": "Hose Detail",
+		"orderDetail": "Order Details"
 	},
 	"Common": {
 		"reset": "Nullstill",
