@@ -47,6 +47,7 @@ interface DataTableProps<T> {
 
 	selectedIds?: string[]; // to tint selected rows
 	selectedRowBgClass?: string; // the class to apply for selected rows
+	onHoseClick?: (hoseId: string) => void;
 }
 
 export function DataTable<T extends { orderId: string }>({
@@ -65,6 +66,7 @@ export function DataTable<T extends { orderId: string }>({
 	isDropdownColumn,
 	selectedIds = [],
 	selectedRowBgClass = "bg-[#E6F7EA]",
+	onHoseClick,
 }: DataTableProps<T>) {
 	const [expandedRows, setExpandedRows] = useState<number[]>([]);
 	const safeColumns = useMemo(
@@ -158,11 +160,13 @@ export function DataTable<T extends { orderId: string }>({
 									{data.map((item, index) => (
 										<React.Fragment key={index}>
 											<tr
+												onClick={() => onHoseClick?.(item.orderId)}
 												className={cn(
 													"group border-b border-[#C1C4C2] transition-colors duration-200",
 													isSelected(item.orderId)
 														? selectedRowBgClass
 														: "hover:bg-[#F8F9F8]",
+													onHoseClick && "cursor-pointer",
 												)}>
 												{isExpandable && (
 													<td className="w-10 px-4 py-4">

@@ -48,10 +48,10 @@ export interface HoseOrder {
 }
 
 interface HosesAndEquipmentsProps {
-	onOrderClick?: (orderId: string) => void;
+	goToHose?: (hoseId: string) => void;
 }
 
-export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
+export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 	const { data: profile } = usePunchoutProfile();
 	const [customerNumber, setCustomerNumber] = useState<string>("");
 	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
@@ -787,6 +787,7 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 						isLoading={loading}
 						selectedIds={selectedRows}
 						selectedRowBgClass="bg-[#DCF7E0]"
+						onHoseClick={goToHose}
 					/>
 				</div>
 			</div>

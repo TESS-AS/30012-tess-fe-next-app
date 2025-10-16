@@ -35,10 +35,7 @@ type LocationNode = {
 	children?: ChildNode[];
 };
 
-interface Props {
-	goToHose: (hoseId: string) => void;
-}
-const HoseOverview = ({ goToHose }: Props) => {
+const HoseOverview = () => {
 	const [selectedS1Code] = useState<string | undefined>(undefined);
 
 	const { loading, s1Codes = [] } = useGetAssets("", selectedS1Code, {
@@ -183,10 +180,7 @@ const HoseOverview = ({ goToHose }: Props) => {
 																			</div>
 																			<ChevronRight
 																				className="h-7 w-7 cursor-pointer text-[#C1C4C2]"
-																				onClick={(e) => {
-																					e.stopPropagation();
-																					goToHose(child.id);
-																				}}
+																				onClick={() => {}}
 																			/>
 																		</div>
 																	</AccordionTrigger>
