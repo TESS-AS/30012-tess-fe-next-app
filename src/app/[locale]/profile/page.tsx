@@ -37,6 +37,7 @@ import { OrdreDetaljer } from "./(components)/ordre-detaljer";
 import { OrdreHistorikk } from "./(components)/ordre-historikk";
 import { Rekvisisjoner } from "./(components)/rekvisisjoner";
 import { SidebarNav } from "./(components)/sidebar-nav";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default function ProfilePage() {
 	const { setIsAuthOpen } = useAppContext();
@@ -85,9 +86,56 @@ export default function ProfilePage() {
 		);
 	}
 
+	const getBreadcrumbItems = () => {
+		const items = [];
+
+		const modeLabel =
+			activeMode === "hose"
+				? t("BreadCrumbs.hoseManagement")
+				: t("BreadCrumbs.ehandel");
+		const defaultTab =
+			activeMode === "hose" ? "hose-oversikt" : "mine-bestillinger";
+
+		items.push({
+			href: "/profile",
+			label: modeLabel,
+			onClick: (e: React.MouseEvent) => {
+				e.preventDefault();
+				setActiveTab(defaultTab);
+				setSelectedHoseId(null);
+			},
+		});
+
+		if (activeTab) {
+			const tabKey = `Profile.tabs.${activeTab}` as any;
+			items.push({
+				href: `/profile?tab=${activeTab}`,
+				label: t(tabKey),
+				onClick: (e: React.MouseEvent) => {
+					e.preventDefault();
+					setActiveTab(activeTab);
+					setSelectedHoseId(null);
+				},
+			});
+		}
+
+		if (selectedHoseId && activeTab === "hose-oversikt") {
+			items.push({
+				href: "#",
+				label: t("Profile.hoseDetail"),
+			} as any);
+		}
+
+		return items;
+	};
+
 	return (
 		<main className="my-6 min-h-screen">
-			<div className="mx-auto flex gap-6">
+			<Breadcrumb
+				items={getBreadcrumbItems()}
+				showHome
+			/>
+			<div className="mx-auto flex gap-6 pt-4">
 				<Tabs
 					value={activeTab}
 					className="flex w-full gap-5">

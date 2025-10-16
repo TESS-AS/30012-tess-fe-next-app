@@ -10,6 +10,7 @@ interface BreadcrumbItem {
 	href: string;
 	label: string;
 	current?: boolean;
+	onClick?: (e: React.MouseEvent) => void;
 }
 
 interface BreadcrumbProps extends React.HTMLAttributes<HTMLElement> {
@@ -60,12 +61,21 @@ const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
 									</li>
 								) : null}
 								<li className="inline-flex items-center">
-									<Link
-										href={item.href}
-										className={linkClassName}
-										aria-current={item.current || isLast ? "page" : undefined}>
-										{item.label}
-									</Link>
+									{item.onClick ? (
+										<button
+											onClick={item.onClick}
+											className={linkClassName}
+											aria-current={item.current || isLast ? "page" : undefined}>
+											{item.label}
+										</button>
+									) : (
+										<Link
+											href={item.href}
+											className={linkClassName}
+											aria-current={item.current || isLast ? "page" : undefined}>
+											{item.label}
+										</Link>
+									)}
 								</li>
 							</React.Fragment>
 						);

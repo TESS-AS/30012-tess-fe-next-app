@@ -90,7 +90,7 @@ export function HoseActionsDropdown({
 				<DropdownMenuItem
 					onClick={onAddToCart}
 					disabled={selectedCount === 0 || isAddingToCart}
-					className={cn("", {
+					className={cn({
 						"cursor-not-allowed opacity-50":
 							selectedCount === 0 || isAddingToCart,
 					})}>
@@ -102,7 +102,7 @@ export function HoseActionsDropdown({
 
 				<DropdownMenuItem
 					onClick={onContactSupport}
-					className={cn("", {
+					className={cn({
 						"cursor-not-allowed opacity-50": selectedCount === 0,
 					})}
 					disabled>
@@ -112,7 +112,7 @@ export function HoseActionsDropdown({
 
 				<DropdownMenuItem
 					onClick={onReportReplacement}
-					className={cn("", {
+					className={cn({
 						"cursor-not-allowed opacity-50": selectedCount === 0,
 					})}
 					disabled>
@@ -122,7 +122,7 @@ export function HoseActionsDropdown({
 
 				<DropdownMenuItem
 					onClick={onDiscardEquipment}
-					className={cn("", {
+					className={cn({
 						"cursor-not-allowed opacity-50": selectedCount === 0,
 					})}
 					disabled>
@@ -132,15 +132,14 @@ export function HoseActionsDropdown({
 
 				<DropdownMenuItem
 					disabled
-					onClick={onPrintCertificate}
-					className="">
+					onClick={onPrintCertificate}>
 					<Printer className="mr-3 h-4 w-4 text-[#005522]" />
 					<span>Skriv ut TESS trykktest-sertifikat</span>
 				</DropdownMenuItem>
 
 				<DropdownMenuItem
 					onClick={onPrintTags}
-					className={cn("", {
+					className={cn({
 						"cursor-not-allowed opacity-50": selectedCount === 0,
 					})}
 					disabled>
@@ -150,7 +149,6 @@ export function HoseActionsDropdown({
 
 				<DropdownMenuItem
 					onClick={onPrintTestCertificates}
-					className=""
 					disabled>
 					<Printer className="mr-3 h-4 w-4 text-[#005522]" />
 					<span>Skriv ut trykktest-sertifikater</span>
@@ -158,8 +156,7 @@ export function HoseActionsDropdown({
 
 				<DropdownMenuItem
 					disabled
-					onClick={onExport}
-					className="">
+					onClick={onExport}>
 					<CreditCard className="mr-3 h-4 w-4 text-[#005522]" />
 					<span>Eksporter oversiktsdata til Excel</span>
 				</DropdownMenuItem>
@@ -174,9 +171,7 @@ export function HoseActionsDropdown({
 				)}
 
 				{onSelectAllOnPage && (
-					<DropdownMenuItem
-						onClick={onSelectAllOnPage}
-						className="">
+					<DropdownMenuItem onClick={onSelectAllOnPage}>
 						<CheckSquare className="mr-3 h-4 w-4 text-[#005522]" />
 						<span>
 							{allSelectedOnPage

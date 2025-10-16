@@ -1,16 +1,6 @@
-"use client";
-
-import * as React from "react";
-import { useMemo, useState } from "react";
-
-import { Button } from "@/components/ui/button";
+import React, { ReactNode, useMemo, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, type Column } from "@/components/ui/data-table";
-import { DiscardEquipmentDialog } from "@/components/ui/dialogs/discard-equipment-dialog";
-import { PrintCertificatesDialog } from "@/components/ui/dialogs/print-certificates-dialog";
-import { PrintTagsDialog } from "@/components/ui/dialogs/print-tags-dialog";
-import { RFQRequestDialog } from "@/components/ui/dialogs/rfq-request-dialog";
-import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 import {
 	Select,
 	SelectContent,
@@ -18,21 +8,23 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { DiscardEquipmentDialog } from "@/components/ui/dialogs/discard-equipment-dialog";
+import { PrintCertificatesDialog } from "@/components/ui/dialogs/print-certificates-dialog";
+import { PrintTagsDialog } from "@/components/ui/dialogs/print-tags-dialog";
+import { RFQRequestDialog } from "@/components/ui/dialogs/rfq-request-dialog";
+import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { FilterOptions, useGetAssets } from "@/hooks/useGetAssets";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useAppContext } from "@/lib/appContext";
-import { cn } from "@/lib/utils";
 import { postCartKit } from "@/services/carts.service";
-import { Paperclip, MapPin, X } from "lucide-react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
-
-import { CartAddedModal } from "./cart-added-modal";
 import { HoseColumnsDropdown } from "./hose-columns-dropdown";
 import { HoseFiltersDropdown } from "./hose-filters-dropdown";
 import { HoseSearchBar } from "./hose-search-bar";
+import { CartAddedModal } from "./cart-added-modal";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
+import { MapPin, X } from "lucide-react";
 import { HoseActionsDropdown } from "./hose-actions-dropdown";
 
 export interface HoseOrder {
@@ -68,6 +60,7 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 			return undefined;
 		},
 	);
+
 	const { setIsCartChanging, isCartChanging } = useAppContext();
 
 	const {
@@ -90,7 +83,6 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedColumns, setSelectedColumns] = useState<string[]>([
-		"Vedlegg",
 		"ID",
 		"Kunde-ID",
 		"Beskrivelse",
@@ -99,6 +91,9 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 		"Ordrenummer (PO)",
 		"Handling",
 	]);
+
+	// === NEW SELECTION MODEL ===
+	// explicit selections (when not in global-select mode)
 	const [selectedRows, setSelectedRows] = useState<string[]>(() => {
 		if (typeof window !== "undefined") {
 			const saved = localStorage.getItem("selectedHoseRows");
@@ -106,6 +101,12 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 		}
 		return [];
 	});
+
+	// global select across all pages
+	const [allAcrossPages, setAllAcrossPages] = useState(false);
+	// exceptions when global select is ON (these are excluded)
+	const [deselectedIds, setDeselectedIds] = useState<Set<string>>(new Set());
+
 	const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 	const [selectedAgeRanges, setSelectedAgeRanges] = useState<string[]>([]);
 	const ITEMS_PER_PAGE = 10;
@@ -128,37 +129,83 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 		neste_inspeksjonsdato: asset?.hoseLine?.nextInspectionDate ?? undefined,
 	}));
 
+	// === selection derived ===
+	const isRowSelected = (id: string) => {
+		if (allAcrossPages) return !deselectedIds.has(id);
+		return selectedRows.includes(id);
+	};
+
+	const selectedCount = allAcrossPages
+		? Math.max(0, (pagination?.totalItems ?? 0) - deselectedIds.size)
+		: selectedRows.length;
+
 	const selectedItems = useMemo(() => {
 		const set = new Set(selectedRows);
-		return transformedAssets.filter((a) => set.has(String(a.orderId)));
-	}, [selectedRows, transformedAssets]);
+		// NOTE: when allAcrossPages = true, selectedItems may not include off-page items.
+		// Use selectedCount for counts and pass only visible "selectedItems" to actions that need concrete IDs from the page.
+		return transformedAssets.filter((a) =>
+			allAcrossPages
+				? !deselectedIds.has(String(a.orderId))
+				: set.has(String(a.orderId)),
+		);
+	}, [selectedRows, transformedAssets, allAcrossPages, deselectedIds]);
 
 	const allSelectedOnPage = useMemo(() => {
 		if (!transformedAssets.length) return false;
-		const ids = transformedAssets.map((a) => String(a.orderId));
-		return ids.every((id) => selectedRows.includes(id));
-	}, [transformedAssets, selectedRows]);
+		if (allAcrossPages) {
+			return transformedAssets.every(
+				(a) => !deselectedIds.has(String(a.orderId)),
+			);
+		}
+		const set = new Set(selectedRows);
+		return transformedAssets.every((a) => set.has(String(a.orderId)));
+	}, [transformedAssets, selectedRows, allAcrossPages, deselectedIds]);
 
+	const allSelectedGlobally = allAcrossPages && selectedCount > 0;
+
+	// === handlers ===
 	const handleSelectRow = (key: string, checked: boolean | "indeterminate") => {
 		const on = checked === true;
+		if (allAcrossPages) {
+			setDeselectedIds((prev) => {
+				const next = new Set(prev);
+				if (on) next.delete(key);
+				else next.add(key);
+				return next;
+			});
+			return;
+		}
+
 		setSelectedRows((prev) => {
-			const newSelection = on
+			const next = on
 				? prev.includes(key)
 					? prev
 					: [...prev, key]
 				: prev.filter((id) => id !== key);
-			localStorage.setItem("selectedHoseRows", JSON.stringify(newSelection));
-			return newSelection;
+			localStorage.setItem("selectedHoseRows", JSON.stringify(next));
+			return next;
 		});
 	};
 
 	const handleBulkSelect = (ids: string[], checked: boolean) => {
+		if (allAcrossPages) {
+			setDeselectedIds((prev) => {
+				const next = new Set(prev);
+				for (const id of ids) {
+					if (checked) next.delete(id);
+					else next.add(id);
+				}
+				return next;
+			});
+			return;
+		}
+
 		setSelectedRows((prev) => {
-			const newSelection = checked
+			const next = checked
 				? Array.from(new Set([...prev, ...ids]))
 				: prev.filter((id) => !ids.includes(id));
-			localStorage.setItem("selectedHoseRows", JSON.stringify(newSelection));
-			return newSelection;
+			localStorage.setItem("selectedHoseRows", JSON.stringify(next));
+			return next;
 		});
 	};
 
@@ -167,7 +214,29 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 		handleBulkSelect(ids, checked);
 	};
 
+	const handleSelectAllGlobally = (on: boolean) => {
+		if (on) {
+			setAllAcrossPages(true);
+			setDeselectedIds(new Set());
+			setSelectedRows([]);
+			localStorage.setItem("selectedHoseRows", JSON.stringify([]));
+		} else {
+			setAllAcrossPages(false);
+			setDeselectedIds(new Set());
+			setSelectedRows([]);
+			localStorage.setItem("selectedHoseRows", JSON.stringify([]));
+		}
+	};
+
 	const handleRemoveSelectedId = (id: string) => {
+		if (allAcrossPages) {
+			setDeselectedIds((prev) => {
+				const next = new Set(prev);
+				next.add(id);
+				return next;
+			});
+			return;
+		}
 		setSelectedRows((prev) => {
 			const next = prev.filter((x) => x !== id);
 			localStorage.setItem("selectedHoseRows", JSON.stringify(next));
@@ -188,7 +257,7 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 
 	const handleBulkAction = async (action: string): Promise<void> => {
 		if (action === "cart") {
-			if (selectedItems.length === 0) {
+			if (selectedCount === 0) {
 				toast.error("Vennligst velg elementer å legge til i handlekurven");
 				return;
 			}
@@ -196,7 +265,17 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 			const handleAddToCart = async () => {
 				setIsAddingToCart(true);
 				try {
-					const cartItems = selectedItems.map((asset) => ({
+					// If allAcrossPages, you'd normally send a server-side query representing the current filters
+					// plus exclusions (deselectedIds) instead of explicit IDs. Here, we only map visible items.
+					const rowsToUse = allAcrossPages
+						? transformedAssets.filter(
+								(a) => !deselectedIds.has(String(a.orderId)),
+							)
+						: transformedAssets.filter((a) =>
+								selectedRows.includes(String(a.orderId)),
+							);
+
+					const cartItems = rowsToUse.map((asset) => ({
 						hexagonId: Number(asset.id),
 						quantity: 1,
 						warehouseNumber: "L01",
@@ -208,13 +287,14 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 					toast.success("Elementer lagt til i handlekurven");
 					setIsNavigating(true);
 					setIsCartChanging(!isCartChanging);
-
 					router.push("/cart");
 				} catch (error) {
 					toast.error("Kunne ikke legge til elementer i handlekurven");
 				} finally {
 					setIsAddingToCart(false);
 					setSelectedRows([]);
+					setAllAcrossPages(false);
+					setDeselectedIds(new Set());
 				}
 			};
 
@@ -233,7 +313,6 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 		const ages = opts?.selectedAgeRanges ?? selectedAgeRanges;
 
 		if (ages.length > 0) filters.ageSize = ages.join(",");
-
 		if (f.includes("approved")) filters.approved = "true";
 		if (f.includes("overdue")) filters.overdue = "true";
 		if (f.includes("replacementDue")) filters.replacementDue = "true";
@@ -254,7 +333,6 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 	};
 
 	const columnOptions = [
-		"Vedlegg",
 		"ID",
 		"Kunde-ID",
 		"Beskrivelse",
@@ -268,33 +346,7 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 		"Neste inspeksjonsdato",
 	];
 
-	const handleSelectAll = (checked: boolean) => {
-		const ids = transformedAssets.map((a) => String(a.orderId));
-		const newSelection = checked ? ids : [];
-		setSelectedRows(newSelection);
-		localStorage.setItem("selectedHoseRows", JSON.stringify(newSelection));
-	};
-
 	const allColumns: Record<string, Column<HoseOrder>> = {
-		Vedlegg: {
-			key: "vedlegg",
-			header: "VEDLEGG",
-			cell: () => (
-				<div className="flex items-center gap-2">
-					<span className="cursor-pointer">
-						<Image
-							width={16}
-							height={20}
-							src="/icons/profile/wifi.svg"
-							alt="Wifi"
-						/>
-					</span>
-					<span className="cursor-pointer">
-						<Paperclip />
-					</span>
-				</div>
-			),
-		},
 		ID: {
 			key: "id",
 			header: "ID",
@@ -359,45 +411,43 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 			key: "handling",
 			header: () => (
 				<HoseActionsDropdown
-					selectedCount={selectedRows.length}
+					selectedCount={selectedCount}
 					isAddingToCart={isAddingToCart}
 					onAddToCart={() => setCartModalOpen(true)}
 					onContactSupport={() => {
-						if (selectedRows.length === 0) {
+						if (selectedCount === 0) {
 							toast.error("Vennligst velg elementer å kontakte om");
 							return;
 						}
 						setSupportOpen(true);
 					}}
 					onReportReplacement={() => {
-						if (selectedRows.length === 0) return;
+						if (selectedCount === 0) return;
 						setRfqOpen(true);
 					}}
 					onDiscardEquipment={() => {
-						if (selectedRows.length === 0) return;
+						if (selectedCount === 0) return;
 						setDiscardOpen(true);
 					}}
 					onPrintCertificate={() => handleBulkAction("print-cert")}
 					onPrintTags={() => {
-						if (selectedRows.length === 0) return;
+						if (selectedCount === 0) return;
 						setPrintTagsOpen(true);
 					}}
 					onPrintTestCertificates={() => {
-						if (selectedRows.length === 0) return;
+						if (selectedCount === 0) return;
 						setPrintOpen(true);
 					}}
 					onExport={() => handleBulkAction("export")}
-					onSelectAll={() =>
-						handleSelectAll(!(selectedRows.length === transformedAssets.length))
-					}
+					onSelectAll={() => handleSelectAllGlobally(!allAcrossPages)}
 					onSelectAllOnPage={() => handleSelectAllOnPage(!allSelectedOnPage)}
-					allSelected={selectedRows.length === transformedAssets.length}
+					allSelected={allSelectedGlobally}
 					allSelectedOnPage={allSelectedOnPage}
 				/>
 			),
 			cell: (order: HoseOrder) => (
 				<Checkbox
-					checked={selectedRows.includes(String(order.orderId))}
+					checked={isRowSelected(String(order.orderId))}
 					onCheckedChange={(val) => handleSelectRow(String(order.orderId), val)}
 				/>
 			),
@@ -409,12 +459,15 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 		const cols: Column<HoseOrder>[] = nonHandling
 			.map((n) => allColumns[n])
 			.filter(Boolean) as Column<HoseOrder>[];
-
-		if (selectedColumns.includes("Handling")) {
-			cols.push(allColumns["Handling"]);
-		}
+		if (selectedColumns.includes("Handling")) cols.push(allColumns["Handling"]);
 		return cols;
-	}, [selectedColumns, selectedRows]);
+	}, [
+		selectedColumns,
+		selectedRows,
+		allAcrossPages,
+		deselectedIds,
+		selectedCount,
+	]);
 
 	const handleColumnChange = (value: string): void => {
 		setSelectedColumns((prev) =>
@@ -467,9 +520,15 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 			<SupportDialog
 				open={supportOpen}
 				onOpenChange={setSupportOpen}
-				selectedIds={selectedRows}
+				selectedIds={
+					allAcrossPages
+						? transformedAssets
+								.filter((a) => !deselectedIds.has(String(a.orderId)))
+								.map((a) => String(a.orderId))
+						: selectedRows
+				}
 				onRemoveId={handleRemoveSelectedId}
-				onSubmit={async ({ subject, message, file, ids }) => {
+				onSubmit={async () => {
 					toast.success("Meldingen ble sendt til TESS support");
 				}}
 			/>
@@ -477,10 +536,15 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 			<RFQRequestDialog
 				open={rfqOpen}
 				onOpenChange={setRfqOpen}
-				selectedIds={selectedRows}
+				selectedIds={
+					allAcrossPages
+						? transformedAssets
+								.filter((a) => !deselectedIds.has(String(a.orderId)))
+								.map((a) => String(a.orderId))
+						: selectedRows
+				}
 				onRemoveId={handleRemoveSelectedId}
-				onSubmit={async ({ requestType, comment, ids }) => {
-					// TODO: Integrate with backend to create RFQ
+				onSubmit={async () => {
 					toast.success("Forespørselen ble sendt");
 				}}
 			/>
@@ -488,10 +552,15 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 			<DiscardEquipmentDialog
 				open={discardOpen}
 				onOpenChange={setDiscardOpen}
-				selectedIds={selectedRows}
+				selectedIds={
+					allAcrossPages
+						? transformedAssets
+								.filter((a) => !deselectedIds.has(String(a.orderId)))
+								.map((a) => String(a.orderId))
+						: selectedRows
+				}
 				onRemoveId={handleRemoveSelectedId}
-				onSubmit={async ({ name, title, ids }) => {
-					// TODO: Integrer utrangerings-endepunkt
+				onSubmit={async () => {
 					toast.success("Utstyr utrangert");
 				}}
 			/>
@@ -499,7 +568,13 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 			<PrintTagsDialog
 				open={printTagsOpen}
 				onOpenChange={setPrintTagsOpen}
-				selectedIds={selectedRows}
+				selectedIds={
+					allAcrossPages
+						? transformedAssets
+								.filter((a) => !deselectedIds.has(String(a.orderId)))
+								.map((a) => String(a.orderId))
+						: selectedRows
+				}
 				onRemoveId={handleRemoveSelectedId}
 				previewUrl="/images/presentation.png"
 			/>
@@ -507,10 +582,15 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 			<PrintCertificatesDialog
 				open={printOpen}
 				onOpenChange={setPrintOpen}
-				selectedIds={selectedRows}
+				selectedIds={
+					allAcrossPages
+						? transformedAssets
+								.filter((a) => !deselectedIds.has(String(a.orderId)))
+								.map((a) => String(a.orderId))
+						: selectedRows
+				}
 				onRemoveId={handleRemoveSelectedId}
 				pdfUrl="https://www.orimi.com/pdf-test.pdf"
-				// pdfUrl can be wired when backend provides a URL
 			/>
 
 			<div className="space-y-6">
@@ -585,7 +665,7 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 										setSelectedS1Code("");
 										localStorage.removeItem("selectedS1Code");
 									}}
-									className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
+									className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none">
 									<X className="h-4 w-4 text-[#5A615D]" />
 									<span className="sr-only">Fjern lokasjon</span>
 								</button>
@@ -631,7 +711,7 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 												e.preventDefault();
 												setCustomerNumber("");
 											}}
-											className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
+											className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none">
 											<X className="h-4 w-4 text-[#5A615D]" />
 											<span className="sr-only">Fjern customer</span>
 										</button>
@@ -657,6 +737,8 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 							onClear={() => {
 								setSearchQuery("");
 								setSelectedRows([]);
+								setAllAcrossPages(false);
+								setDeselectedIds(new Set());
 								localStorage.removeItem("selectedHoseRows");
 								setSelectedFilters([]);
 								setSelectedAgeRanges([]);
@@ -666,7 +748,7 @@ export function HosesAndEquipments({ onOrderClick }: HosesAndEquipmentsProps) {
 
 						<div className="flex items-center space-x-4">
 							<HoseColumnsDropdown
-								options={columnOptions}
+								options={[...columnOptions]}
 								selected={selectedColumns}
 								onToggle={handleColumnChange}
 							/>
