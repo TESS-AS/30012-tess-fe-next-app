@@ -47,6 +47,7 @@ import {
 	Check,
 	Loader2,
 	ShoppingCart,
+	CheckCircle,
 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -144,6 +145,41 @@ export default function ProductVariantTable({
 		);
 	}, [variantsWithWarehouses, columnAttributes]);
 
+	const getWarehouseOptions = useMemo(() => {
+		const optionsMap: Record<
+			number,
+			Array<{ warehouseId: number; warehouseName: string; balance: number }>
+		> = {};
+
+		variantsWithWarehouses.forEach((variant) => {
+			const inventory = columnAttributes?.[variant.itemNumber]?.inventory || [];
+
+			const warehouseMap = new Map();
+			inventory
+				.filter((inv: any) => inv.balance > 0)
+				.forEach((inv: any) => {
+					const key = inv.warehouseId;
+					if (warehouseMap.has(key)) {
+						warehouseMap.get(key).balance += inv.balance;
+					} else {
+						warehouseMap.set(key, {
+							warehouseId: inv.warehouseId,
+							warehouseName:
+								inv.warehouseName ||
+								`${t("Product.warehouses")} ${inv.warehouseId}`,
+							balance: inv.balance,
+						});
+					}
+				});
+
+			optionsMap[variant.itemNumber] = Array.from(warehouseMap.values())
+				.slice(0, 50)
+				.sort((a: any, b: any) => b.balance - a.balance);
+		});
+
+		return optionsMap;
+	}, [variantsWithWarehouses, columnAttributes]);
+
 	useEffect(() => {
 		if (!allAttributeNames?.length) return;
 
@@ -219,6 +255,45 @@ export default function ProductVariantTable({
 		});
 	});
 
+	const calculatePriceForVariant = async (variant: ProductVariant) => {
+		if (!profile) return;
+
+		try {
+			setLoading((prev) => ({ ...prev, [variant.itemNumber]: true }));
+
+			const selectedWarehouse = warehouse[variant.itemNumber];
+			const warehouseNumber =
+				selectedWarehouse || profile.defaultWarehouseNumber || "";
+
+			const [priceResult] = await calculateItemPrice(
+				[
+					{
+						itemNumber: variant.itemNumber.toString(),
+						quantity: 1,
+						warehouseNumber: warehouseNumber,
+					},
+				],
+				profile.defaultCustomerNumber,
+				profile.defaultCompanyNumber,
+			);
+
+			if (priceResult) {
+				setPrices((prev) => ({
+					...prev,
+					[variant.itemNumber]: priceResult.bestPrice || 0,
+				}));
+			}
+		} catch (err) {
+			console.error("Price fetch failed for", variant.itemNumber, err);
+			setPrices((prev) => ({
+				...prev,
+				[variant.itemNumber]: 0,
+			}));
+		} finally {
+			setLoading((prev) => ({ ...prev, [variant.itemNumber]: false }));
+		}
+	};
+
 	useEffect(() => {
 		const loadPrices = async () => {
 			if (!variants?.length || !profile) return;
@@ -259,23 +334,14 @@ export default function ProductVariantTable({
 			try {
 				if (!variants?.length) return;
 
-				const itemNumbers = variants.map((variant) =>
-					variant.itemNumber.toString(),
-				);
-
-				const warehousesData = await loadItemBalanceBatch(itemNumbers);
-
 				const updatedVariants = variants.map((variant) => {
-					const variantWarehouses = (warehousesData || [])?.find(
-						(w) => w.item_number === variant.itemNumber.toString(),
-					);
-
-					const warehouses =
-						variantWarehouses?.warehouses.map((w) => ({
-							warehouseNumber: w.warehouse_number,
-							warehouseName: w.warehouse_name,
-							balance: w.balance,
-						})) || [];
+					const warehouseOptions =
+						getWarehouseOptions[variant.itemNumber] || [];
+					const warehouses = warehouseOptions.map((w) => ({
+						warehouseNumber: w.warehouseId.toString(),
+						warehouseName: w.warehouseName,
+						balance: w.balance,
+					}));
 
 					if (warehouses.length > 0) {
 						setWarehouse((prev) => ({
@@ -298,7 +364,7 @@ export default function ProductVariantTable({
 
 		setIsLoading(true);
 		loadWarehousesData();
-	}, [variants]);
+	}, [variants, columnAttributes]);
 
 	const renderColumns = () => {
 		const orderedStaticFirst: ColumnKey[] = [];
@@ -429,47 +495,25 @@ export default function ProductVariantTable({
 										(col) => !["quantity", "warehouse", "cart"].includes(col),
 									)
 									.map((col) => {
-										if (col === "image")
-											return (
-												<TableHead
-													key="image"
-													className="min-w-[80px]">
-													BILDE
-												</TableHead>
-											);
-										if (col === "itemNumber")
-											return (
-												<TableHead
-													key="itemNumber"
-													className="min-w-[120px]">
-													Varenummer
-												</TableHead>
-											);
-										if (col === "unspsc")
-											return (
-												<TableHead
-													key="unspsc"
-													className="min-w-[100px]">
-													UNSPSC
-												</TableHead>
-											);
-										if (col === "contentUnit")
-											return (
-												<TableHead
-													key="contentUnit"
-													className="min-w-[80px]">
-													STYKK
-												</TableHead>
-											);
-										if (col === "price")
-											return (
-												<TableHead
-													key="price"
-													className="min-w-[100px]">
-													Pris
-												</TableHead>
-											);
-										return null;
+										return (
+											<TableHead
+												key={col}
+												className={
+													col === "image"
+														? "min-w-[80px]"
+														: col === "itemNumber"
+															? "min-w-[120px]"
+															: col === "unspsc"
+																? "min-w-[100px]"
+																: col === "contentUnit"
+																	? "min-w-[80px]"
+																	: col === "price"
+																		? "min-w-[100px]"
+																		: "min-w-[120px]"
+												}>
+												{columnLabels[col]}
+											</TableHead>
+										);
 									})}
 								{allAttributeNames
 									.filter((name) => visibleAttributes[name])
@@ -485,31 +529,21 @@ export default function ProductVariantTable({
 										["quantity", "warehouse", "cart"].includes(col),
 									)
 									.map((col) => {
-										if (col === "quantity")
-											return (
-												<TableHead
-													key="quantity"
-													className="min-w-[120px]">
-													Antall
-												</TableHead>
-											);
-										if (col === "warehouse")
-											return (
-												<TableHead
-													key="warehouse"
-													className="min-w-[200px]">
-													Lager
-												</TableHead>
-											);
-										if (col === "cart")
-											return (
-												<TableHead
-													key="cart"
-													className="min-w-[140px]">
-													Handlekurv
-												</TableHead>
-											);
-										return null;
+										return (
+											<TableHead
+												key={col}
+												className={
+													col === "quantity"
+														? "min-w-[120px]"
+														: col === "warehouse"
+															? "min-w-[200px]"
+															: col === "cart"
+																? "min-w-[140px]"
+																: "min-w-[120px]"
+												}>
+												{columnLabels[col]}
+											</TableHead>
+										);
 									})}
 							</TableRow>
 						</TableHeader>
@@ -530,13 +564,17 @@ export default function ProductVariantTable({
 											.map((col) => {
 												switch (col) {
 													case "image":
+														const imageUrl =
+															columnAttributes?.[variant.itemNumber]
+																?.mediaId?.[0]?.url ||
+															variant.mediaId?.[0]?.url;
 														return (
 															<TableCell
 																key="image"
 																className="min-w-[80px]">
-																{variant.mediaId?.[0]?.url ? (
+																{imageUrl ? (
 																	<Image
-																		src={variant.mediaId[0].url}
+																		src={imageUrl}
 																		alt={variant.itemNumber.toString()}
 																		width={60}
 																		height={60}
@@ -556,19 +594,53 @@ export default function ProductVariantTable({
 															</TableCell>
 														);
 													case "unspsc":
+														const unspscValue =
+															columnAttributes?.[
+																variant.itemNumber
+															]?.attributes?.find((attr: any) => attr.unspsc)
+																?.unspsc ||
+															columnAttributes?.[
+																variant.itemNumber
+															]?.attributes?.find(
+																(attr: any) =>
+																	attr.attributeIdentifier === "unspsc" ||
+																	attr.name?.toLowerCase().includes("unspsc"),
+															)?.valueDef ||
+															variant.unspsc ||
+															"-";
 														return (
 															<TableCell
 																key="unspsc"
 																className="min-w-[100px]">
-																{variant.unspsc || "-"}
+																{unspscValue}
 															</TableCell>
 														);
 													case "contentUnit":
+														const contentUnitValue =
+															columnAttributes?.[
+																variant.itemNumber
+															]?.attributes?.find(
+																(attr: any) => attr.contentUnit,
+															)?.contentUnit ||
+															columnAttributes?.[
+																variant.itemNumber
+															]?.attributes?.find(
+																(attr: any) =>
+																	attr.attributeIdentifier === "contentUnit" ||
+																	attr.name
+																		?.toLowerCase()
+																		.includes("contentunit") ||
+																	attr.name
+																		?.toLowerCase()
+																		.includes("content unit"),
+															)?.valueDef ||
+															variant.contentUnit ||
+															"-";
 														return (
 															<TableCell
 																key="contentUnit"
 																className="min-w-[80px]">
-																{variant.contentUnit}
+																{contentUnitValue}
 															</TableCell>
 														);
 													case "price":
@@ -576,8 +648,17 @@ export default function ProductVariantTable({
 															<TableCell
 																key="price"
 																className="min-w-[100px]">
-																{formatNorwegianCurrency(
-																	prices[variant.itemNumber] ?? 0,
+																{loading[variant.itemNumber] ? (
+																	<div className="flex items-center gap-2">
+																		<Loader2 className="h-4 w-4 animate-spin" />
+																		<span className="text-muted-foreground text-sm">
+																			{t("Product.loadingPrice")}
+																		</span>
+																	</div>
+																) : (
+																	formatNorwegianCurrency(
+																		prices[variant.itemNumber] ?? 0,
+																	)
 																)}
 															</TableCell>
 														);
@@ -633,34 +714,63 @@ export default function ProductVariantTable({
 															</TableCell>
 														);
 													case "warehouse":
+														const warehouseOptions =
+															getWarehouseOptions[variant.itemNumber] || [];
+														const hasManyOptions = warehouseOptions.length > 20;
+
 														return (
 															<TableCell
 																key="warehouse"
 																className="min-w-[200px]">
 																<Select
 																	value={selectedWarehouse || ""}
-																	onValueChange={(value) =>
+																	onValueChange={async (value) => {
 																		setWarehouse((prev) => ({
 																			...prev,
 																			[variant.itemNumber]: value,
-																		}))
-																	}>
+																		}));
+																		await calculatePriceForVariant(variant);
+																	}}>
 																	<SelectTrigger className="w-[180px]">
 																		<SelectValue
-																			placeholder={t("Product.selectWarehouse")}
+																			placeholder={
+																				warehouseOptions.length === 0
+																					? t("Product.noWarehouses")
+																					: t("Product.selectWarehouse")
+																			}
 																		/>
 																	</SelectTrigger>
-																	<SelectContent>
-																		{variant.warehouses?.map((w, index) => (
-																			<SelectItem
-																				key={`${variant.itemNumber}-${w.warehouseNumber}-${index}`}
-																				value={w.warehouseNumber}>
-																				{w.warehouseName} - {w.warehouseNumber}
-																				{w.balance !== undefined
-																					? ` (${w.balance})`
-																					: ""}
-																			</SelectItem>
-																		))}
+																	<SelectContent className="max-h-[300px] overflow-y-auto">
+																		{warehouseOptions.length === 0 ? (
+																			<div className="px-2 py-1 text-sm text-gray-500">
+																				{t("Product.noWarehousesAvailable")}
+																			</div>
+																		) : (
+																			<>
+																				{hasManyOptions && (
+																					<div className="border-b px-2 py-1 text-xs text-gray-500">
+																						{t("Product.showingFirst")}{" "}
+																						{warehouseOptions.length}{" "}
+																						{t("Product.warehouses")}
+																					</div>
+																				)}
+																				{warehouseOptions.map(
+																					(w: any, index: number) => (
+																						<SelectItem
+																							key={`${variant.itemNumber}-${w.warehouseId}-${index}`}
+																							value={w.warehouseId.toString()}>
+																							<div className="flex items-center gap-2">
+																								<CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
+																								<span className="truncate">
+																									({w.balance}){" "}
+																									{w.warehouseName}
+																								</span>
+																							</div>
+																						</SelectItem>
+																					),
+																				)}
+																			</>
+																		)}
 																	</SelectContent>
 																</Select>
 															</TableCell>

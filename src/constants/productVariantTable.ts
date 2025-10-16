@@ -14,7 +14,7 @@ export const columnLabels: Record<ColumnKey, string> = {
 	image: "Bilde",
 	itemNumber: "Varenummer",
 	unspsc: "UNSPSC",
-	contentUnit: "Stykk",
+	contentUnit: "Enhet",
 	price: "Pris",
 	quantity: "Antall",
 	warehouse: "Lager",
