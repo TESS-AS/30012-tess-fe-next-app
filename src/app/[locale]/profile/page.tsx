@@ -106,7 +106,7 @@ export default function ProfilePage() {
 				? t("BreadCrumbs.hoseManagement")
 				: t("BreadCrumbs.ehandel");
 		const defaultTab =
-			activeMode === "hose" ? "hose-oversikt" : "mine-bestillinger";
+			activeMode === "hose" ? "hose-orders" : "mine-bestillinger";
 
 		items.push({
 			href: "/profile",
@@ -133,7 +133,7 @@ export default function ProfilePage() {
 			});
 		}
 
-		if (selectedHoseId && activeTab === "hose-oversikt") {
+		if (selectedHoseId && activeTab === "hose-orders") {
 			items.push({
 				href: "#",
 				label: selectedHoseId,
@@ -325,6 +325,10 @@ export default function ProfilePage() {
 							<OrdreHistorikk />
 						</TabsContent>
 
+						<TabsContent value="users">
+							<UserAddressesTab />
+						</TabsContent>
+
 						<TabsContent value="addresses">
 							<UserAddressesTab />
 						</TabsContent>
@@ -336,7 +340,14 @@ export default function ProfilePage() {
 						<TabsContent
 							value="hose-orders"
 							className="mt-0">
-							<HosesAndEquipments />
+							{selectedHoseId ? (
+								<HoseDetailsPage
+									hoseId={selectedHoseId}
+									onBack={() => setSelectedHoseId(null)}
+								/>
+							) : (
+								<HosesAndEquipments goToHose={setSelectedHoseId} />
+							)}
 						</TabsContent>
 
 						<TabsContent
@@ -350,14 +361,7 @@ export default function ProfilePage() {
 						</TabsContent>
 
 						<TabsContent value="hose-oversikt">
-							{selectedHoseId ? (
-								<HoseDetailsPage
-									hoseId={selectedHoseId}
-									onBack={() => setSelectedHoseId(null)}
-								/>
-							) : (
-								<HoseOverview goToHose={setSelectedHoseId} />
-							)}
+							<HoseOverview />
 						</TabsContent>
 
 						<TabsContent value="hose-replacement">
