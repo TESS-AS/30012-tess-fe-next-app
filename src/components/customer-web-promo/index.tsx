@@ -52,10 +52,10 @@ export function CustomerWebPromo() {
 								<p className="mt-6 max-w-xl text-lg leading-relaxed text-[#5A615D]">
 									{t("customerWeb.description")}
 								</p>
-								<p className="mt-6 text-lg leading-relaxed font-semibold text-[#5A615D]">
-									{t("customerWeb.feedbackPrompt")}
-								</p>
-								<p className="text-lg leading-relaxed text-[#5A615D]">
+								<p className="mt-6 text-lg leading-relaxed text-[#5A615D]">
+									<span className="font-semibold">
+										{t("customerWeb.feedbackPrompt")} -{" "}
+									</span>
 									{t("customerWeb.feedbackSubtext")}
 								</p>
 								<Button
@@ -67,10 +67,11 @@ export function CustomerWebPromo() {
 							<div className="flex justify-center md:justify-end">
 								<figure className="w-[640px] max-w-full text-center">
 									<Image
-										src="/images/web-promo.png"
+										src="/images/web-promo.svg"
 										alt={t("imageAlt")}
+										quality={100}
 										width={640}
-										height={400}
+										height={405}
 										className="mx-auto"
 									/>
 									<figcaption className="text-muted-foreground mt-2 text-sm">
