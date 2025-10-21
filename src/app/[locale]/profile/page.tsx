@@ -29,6 +29,7 @@ import { OrdreDetaljer } from "./(components)/ordre-detaljer";
 import { OrdreHistorikk } from "./(components)/ordre-historikk";
 import { Rekvisisjoner } from "./(components)/rekvisisjoner";
 import { SidebarNav } from "./(components)/sidebar-nav";
+import UsersBrukere from "./(components)/users-brukere";
 
 export default function ProfilePage() {
 	const { setIsAuthOpen } = useAppContext();
@@ -198,22 +199,22 @@ export default function ProfilePage() {
 											{
 												href: "dimensions",
 												label: "Dimensjoner",
-												icon: Folder,
+												icon: "/icons/profile/navbar/folder-outline.svg",
 											},
 											{
 												href: "usage",
 												label: "Forbruk",
-												icon: User,
+												icon: "/icons/profile/navbar/lock-time-outline.svg",
 											},
 											{
 												href: "users",
 												label: "Brukere",
-												icon: User,
+												icon: "/icons/profile/navbar/user-settings-outline.svg",
 											},
 											{
 												href: "catalog",
 												label: "Katalog",
-												icon: User,
+												icon: "/icons/profile/navbar/lock-time-outline.svg",
 											},
 											{
 												href: "settings",
@@ -326,7 +327,7 @@ export default function ProfilePage() {
 						</TabsContent>
 
 						<TabsContent value="users">
-							<UserAddressesTab />
+							<UsersBrukere />
 						</TabsContent>
 
 						<TabsContent value="addresses">

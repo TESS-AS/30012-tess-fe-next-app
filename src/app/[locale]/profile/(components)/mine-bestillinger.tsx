@@ -166,7 +166,7 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
 
 	const filteredOrders = (orders || []).map((order) => ({
 		...order,
-		orderId: order.id.toString(), // Map id to orderId for DataTable compatibility
+		orderId: order.id.toString(),
 	}));
 
 	const columns = [
