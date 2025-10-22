@@ -36,16 +36,12 @@ export function DeleteUserModal({
 					</ModalTitle>
 				</ModalHeader>
 
-				<div className="space-y-3 px-6 pb-2">
-					<p className="text-sm text-[#5A615D]">
-						{t("message")}
-					</p>
-					<p className="text-sm text-[#5A615D]">
-						{t("warning")}
-					</p>
+				<div className="space-y-3 pb-2">
+					<p className="text-sm text-[#5A615D]">{t("message")}</p>
+					<p className="text-sm text-[#5A615D]">{t("warning")}</p>
 				</div>
 
-				<div className="flex justify-end gap-3 border-t border-[#E8EAE9] px-6 pt-4 pb-6">
+				<div className="flex justify-start gap-3">
 					<Button
 						type="button"
 						variant="outline"

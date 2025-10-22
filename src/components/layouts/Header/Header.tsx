@@ -47,6 +47,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
+import { PriceDisplay } from "@/components/ui/price-display";
+import { useOrderSummary } from "@/hooks/useOrderSummary";
 
 export default function Header() {
 	const { categories, loading, error } = useCategories();
@@ -59,7 +61,8 @@ export default function Header() {
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [isModalIdOpen, setIsModalIdOpen] = useState<string | null>(null);
 	const [variations, setVariations] = useState<Record<string, any>>({});
-	const { cartItems, totalPrice, isAuthOpen, setIsAuthOpen } = useAppContext();
+	const { sumAfterDiscount } = useOrderSummary();
+	const { cartItems, isAuthOpen, setIsAuthOpen } = useAppContext();
 
 	const {
 		query: searchQuery,
@@ -274,9 +277,11 @@ export default function Header() {
 						</div>
 						{(cartItems?.cart?.length || 0) +
 							(cartItems?.cartKit?.length || 0) >
-						0
-							? formatNorwegianCurrency(totalPrice)
-							: ""}
+						0 ? (
+							<PriceDisplay amount={sumAfterDiscount} />
+						) : (
+							""
+						)}
 						<span className="sr-only">Cart</span>
 					</Button>
 					{profile ? (

@@ -22,6 +22,12 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { AddUserModal } from "./add-user-modal";
 import { DeleteUserModal } from "./delete-user-modal";
+import { ViewUserModal } from "./view-user-modal";
+import {
+	BulkEditConfirmationModal,
+	BulkEditChanges,
+} from "./bulk-edit-confirmation-modal";
+import { ConfirmChangesModal } from "./confirm-changes-modal";
 import { useTranslations } from "next-intl";
 
 interface User {
@@ -41,6 +47,13 @@ const UsersBrukere = () => {
 	const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [userToDelete, setUserToDelete] = useState<User | null>(null);
+	const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+	const [userToView, setUserToView] = useState<User | null>(null);
+	const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
+	const [isConfirmChangesModalOpen, setIsConfirmChangesModalOpen] =
+		useState(false);
+	const [pendingBulkChanges, setPendingBulkChanges] =
+		useState<BulkEditChanges | null>(null);
 
 	const users: User[] = [
 		{
@@ -99,9 +112,43 @@ const UsersBrukere = () => {
 
 	const handleDeleteConfirm = () => {
 		if (userToDelete) {
-			// Handle user deletion logic here
 			console.log("Deleting user:", userToDelete);
 			setUserToDelete(null);
+		}
+	};
+
+	const handleViewClick = (user: User) => {
+		setUserToView(user);
+		setIsViewModalOpen(true);
+	};
+
+	const handleEditClick = (user: User) => {
+		console.log("Editing user:", user);
+	};
+
+	const handleBulkEditClick = () => {
+		if (selectedUsers.length > 0) {
+			setIsBulkEditModalOpen(true);
+		}
+	};
+
+	const handleBulkEditConfirm = (changes: BulkEditChanges) => {
+		setPendingBulkChanges(changes);
+		setIsBulkEditModalOpen(false);
+		setIsConfirmChangesModalOpen(true);
+	};
+
+	const handleFinalConfirm = () => {
+		if (pendingBulkChanges) {
+			console.log(
+				"Applying bulk changes:",
+				pendingBulkChanges,
+				"to users:",
+				selectedUsers,
+			);
+			// Apply the changes here
+			setPendingBulkChanges(null);
+			setSelectedUsers([]);
 		}
 	};
 
@@ -137,12 +184,14 @@ const UsersBrukere = () => {
 							/>
 						</div>
 
-						<Button
-							variant="default"
-							onClick={() => setIsAddUserModalOpen(true)}
-							className="bg-[#009640] hover:bg-[#008036]">
-							<Plus className="mr-2 h-4 w-4" /> {t("addUser")}
-						</Button>
+						<div className="flex gap-3">
+							<Button
+								variant="default"
+								onClick={() => setIsAddUserModalOpen(true)}
+								className="bg-[#009640] hover:bg-[#008036]">
+								<Plus className="mr-2 h-4 w-4" /> {t("addUser")}
+							</Button>
+						</div>
 					</div>
 				</div>
 
@@ -230,15 +279,15 @@ const UsersBrukere = () => {
 												</Button>
 											</DropdownMenuTrigger>
 											<DropdownMenuContent align="end">
-												<DropdownMenuItem>
+												<DropdownMenuItem onClick={() => handleViewClick(user)}>
 													<Eye className="mr-2 h-4 w-4" />
 													{t("actions.viewDetails")}
 												</DropdownMenuItem>
-												<DropdownMenuItem>
+												<DropdownMenuItem onClick={handleBulkEditClick}>
 													<Edit className="mr-2 h-4 w-4" />
 													{t("actions.editUser")}
 												</DropdownMenuItem>
-												<DropdownMenuItem 
+												<DropdownMenuItem
 													className="text-red-600"
 													onClick={() => handleDeleteClick(user)}>
 													<Trash2 className="mr-2 h-4 w-4" />
@@ -271,6 +320,36 @@ const UsersBrukere = () => {
 				onOpenChange={setIsDeleteModalOpen}
 				onConfirm={handleDeleteConfirm}
 				userName={userToDelete?.name}
+			/>
+
+			<ViewUserModal
+				open={isViewModalOpen}
+				onOpenChange={setIsViewModalOpen}
+				user={userToView}
+				onEdit={() => {
+					if (userToView) {
+						handleEditClick(userToView);
+					}
+				}}
+				onDelete={() => {
+					if (userToView) {
+						handleDeleteClick(userToView);
+					}
+				}}
+			/>
+
+			<BulkEditConfirmationModal
+				open={isBulkEditModalOpen}
+				onOpenChange={setIsBulkEditModalOpen}
+				selectedUsers={users.filter((u) => selectedUsers.includes(u.id))}
+				onConfirm={handleBulkEditConfirm}
+			/>
+
+			<ConfirmChangesModal
+				open={isConfirmChangesModalOpen}
+				onOpenChange={setIsConfirmChangesModalOpen}
+				onConfirm={handleFinalConfirm}
+				userCount={selectedUsers.length}
 			/>
 		</div>
 	);

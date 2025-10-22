@@ -798,6 +798,7 @@
         "subtitle": "Her kan du administrere brukere.",
         "searchPlaceholder": "S\u00f8k etter brukere",
         "addUser": "Legg til ny bruker",
+        "editSelected": "Rediger ({count})",
         "totalUsers": "Brukere totalt",
         "columns": {
             "name": "NAVN",
@@ -1013,5 +1014,56 @@
             "recentActivities": "Siste aktiviteter",
             "support": "Support"
         }
+    },
+    "ViewUserModal": {
+        "contactInfo": "Kontaktinformasjon",
+        "firstName": "Fornavn",
+        "lastName": "Etternavn",
+        "email": "Fornavn",
+        "title": "Tittel",
+        "phone": "Telefonnummer",
+        "access": "Tilganger",
+        "customerAccess": "Kundetilgang",
+        "catalog": "Kundekatalog",
+        "standardWarehouse": "Standard TESS lager",
+        "tessCompany": "TESS Firma",
+        "userRightsAndStatus": "Brukerrettigheter og status",
+        "role": "Rolle",
+        "roleDescriptions": {
+            "administrator": "Opprette nye brukere med egne innstillinger, godkjenne rekvisjoner, sette budsjetter p\u00e5 ansatte, opprette dimensjoner",
+            "superbruker": "Opprette nye brukere med egne innstillinger, godkjenne rekvisjoner, sette budsjetter p\u00e5 ansatte, opprette dimensjoner",
+            "ansatt": "Kan kun handle p\u00e5 vegne av seg selv"
+        },
+        "edit": "Rediger",
+        "delete": "Slett bruker"
+    },
+    "BulkEditConfirmationModal": {
+        "title": "Endre innstillinger",
+        "selectedUsers": "Valgte brukere ({count})",
+        "changesWillApply": "Endringene vil gjelde for:",
+        "warning": {
+            "title": "Velg kun feltene du vil endre",
+            "subtitle": "Du kan legge til flere valg for brukerne. Feltene du ikke velger, blir ikke endret.",
+            "howItWorks": "Slik fungerer oppdateringen:",
+            "point1": "Nye valg legges til \u2013 tidligere tilganger beholdes.",
+            "point2": "Vil du fjerne tilganger, m\u00e5 det gj\u00f8res for hver bruker."
+        },
+        "access": "Tilganger",
+        "customerAccess": "Kundetilgang",
+        "customerAccessPlaceholder": "{count} kunder valgt",
+        "catalog": "Kundekatalog",
+        "catalogPlaceholder": "Velg kundekatalog",
+        "standardWarehouse": "Standard TESS lager",
+        "warehousePlaceholder": "{count} lager valgt",
+        "tessCompany": "TESS Firma",
+        "companyPlaceholder": "Velg TESS firma",
+        "updateUsers": "Oppdater {count} brukere",
+        "close": "Lukk"
+    },
+    "ConfirmChangesModal": {
+        "title": "Bekreft endringer",
+        "description": "Du er i ferd med \u00e5 oppdatere {count} brukere. Alle utfylte felter vil bli endret for disse brukerne.",
+        "cancel": "Avbryt",
+        "confirm": "Bekreft endringene"
     }
 }

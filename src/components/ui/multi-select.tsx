@@ -209,10 +209,9 @@ export function MultiSelectWithTags({
 		onChange,
 	});
 
-	// Collapse/expand behavior like the screenshot
 	const [expanded, setExpanded] = React.useState(false);
-	const maxCollapsedTags = 2; // show 2 tags when collapsed
-	const shouldCollapse = selected.length > 3; // only show +N when > 3 selected
+	const maxCollapsedTags = 2;
+	const shouldCollapse = selected.length > 3;
 	const remainingCount = Math.max(selected.length - maxCollapsedTags, 0);
 
 	const visibleValues =

@@ -141,7 +141,7 @@ export function RadioSelect({
 											/>
 											<Label
 												htmlFor={id}
-												className="w-full cursor-pointer text-base text-[#0F1912]"
+												className="w-full cursor-pointer text-xs text-[#0F1912]"
 												data-rs-interactive>
 												{option.label}
 											</Label>

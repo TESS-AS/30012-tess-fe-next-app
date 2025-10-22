@@ -797,6 +797,7 @@
 		"subtitle": "Here you can manage users.",
 		"searchPlaceholder": "Search for users",
 		"addUser": "Add new user",
+		"editSelected": "Edit ({count})",
 		"totalUsers": "Total users",
 		"columns": {
 			"name": "NAME",
@@ -1012,5 +1013,56 @@
 			"recentActivities": "Recent Activities",
 			"support": "Support"
 		}
+	},
+	"ViewUserModal": {
+		"contactInfo": "Contact Information",
+		"firstName": "First Name",
+		"lastName": "Last Name",
+		"email": "Email",
+		"title": "Title",
+		"phone": "Phone Number",
+		"access": "Access",
+		"customerAccess": "Customer Access",
+		"catalog": "Customer Catalog",
+		"standardWarehouse": "Standard TESS Warehouse",
+		"tessCompany": "TESS Company",
+		"userRightsAndStatus": "User Rights and Status",
+		"role": "Role",
+		"roleDescriptions": {
+			"administrator": "Create new users with custom settings, approve requisitions, set budgets for employees, create dimensions",
+			"superbruker": "Create new users with custom settings, approve requisitions, set budgets for employees, create dimensions",
+			"ansatt": "Can only shop on behalf of themselves"
+		},
+		"edit": "Edit",
+		"delete": "Delete User"
+	},
+	"BulkEditConfirmationModal": {
+		"title": "Change Settings",
+		"selectedUsers": "Selected Users ({count})",
+		"changesWillApply": "Changes will apply to:",
+		"warning": {
+			"title": "Select only the fields you want to change",
+			"subtitle": "You can add more options for the users. Fields you don't select will not be changed.",
+			"howItWorks": "How the update works:",
+			"point1": "New options are added \u2013 previous access is retained.",
+			"point2": "To remove access, it must be done for each user."
+		},
+		"access": "Access",
+		"customerAccess": "Customer Access",
+		"customerAccessPlaceholder": "{count} customers selected",
+		"catalog": "Customer Catalog",
+		"catalogPlaceholder": "Select customer catalog",
+		"standardWarehouse": "Standard TESS Warehouse",
+		"warehousePlaceholder": "{count} warehouses selected",
+		"tessCompany": "TESS Company",
+		"companyPlaceholder": "Select TESS company",
+		"updateUsers": "Update {count} users",
+		"close": "Close"
+	},
+	"ConfirmChangesModal": {
+		"title": "Confirm Changes",
+		"description": "You are about to update {count} users. All filled fields will be changed for these users.",
+		"cancel": "Cancel",
+		"confirm": "Confirm Changes"
 	}
 }
