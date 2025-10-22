@@ -10,7 +10,7 @@ export default function MainCategorySection() {
 	return (
 		<>
 			<section className="relative right-1/2 left-1/2 -mx-[50vw] w-screen bg-white py-16">
-				<div className="container mx-auto px-4">
+				<div className="container mx-auto">
 					<div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
 						<div className="space-y-6">
 							<h2 className="text-6xl leading-tight font-light text-gray-900">
@@ -30,16 +30,16 @@ export default function MainCategorySection() {
 							</Button>
 						</div>
 
-						<div className="relative">
-							<div className="relative aspect-[4/3] w-full overflow-hidden">
+						<div className="flex justify-center md:justify-end">
+							<figure className="w-[640px] max-w-full text-center">
 								<Image
-									src="/images/presentation.png"
+									src="/images/presentation.svg"
 									alt="Woman presenting at TESS conference"
-									fill
-									className="object-cover"
-									sizes="(max-width: 1024px) 100vw, 50vw"
+									width={640}
+									height={405}
+									className="mx-auto"
 								/>
-							</div>
+							</figure>
 						</div>
 					</div>
 				</div>

@@ -591,6 +591,7 @@ const CartPage = () => {
 													</div>
 													<div className="flex items-center gap-6">
 														<QuantityButtons
+															disabled={true}
 															isLoading={!!loadingItems[item.hose.itemNumber]}
 															quantity={item.hose.quantity}
 															onIncrease={async (e) => {
@@ -643,7 +644,7 @@ const CartPage = () => {
 																className="w-4 p-0"
 																size="icon"
 																variant="ghost"
-																disabled={!!removingItems[item.hexagonId]}
+																disabled={true}
 																onClick={async (e) => {
 																	e.stopPropagation();
 																	try {

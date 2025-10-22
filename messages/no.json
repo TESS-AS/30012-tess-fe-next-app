@@ -1,1069 +1,1069 @@
 {
-    "Index": {
-        "title": "Home"
-    },
-    "NotFound": {
-        "title": "Page Not Found",
-        "description": "The page you are looking for does not exist."
-    },
-    "LocaleSwitcher": {
-        "label": "Change language",
-        "locale": "{locale, select, en {English} no {Norwegian} other {Unknown}}"
-    },
-    "Home": {
-        "title": "Home Page No",
-        "bannerTitle": "Velkommen til TESS!",
-        "browseOurTopCategories": "Bla gjennom v\u00e5re toppkategorier",
-        "ourCategories": "Our categories",
-        "seeCategories": "Se kategorier",
-        "learnMore": "L\u00e6r mer"
-    },
-    "Products": {
-        "noProducts": "Ingen produkter funnet"
-    },
-    "Category": {
-        "noResults": "Ingen resultater funnet",
-        "viewAll": "Se alle kategorier"
-    },
-    "Product": {
-        "notFound": "Produkt ikke funnet",
-        "seeAllVariants": "Se alle varianter",
-        "copied": "Kopiert!",
-        "productDescription": "Produktbeskrivelse",
-        "selectSize": "Velg st\u00f8rrelse",
-        "selectedSize": "St\u00f8rrelse: {size}",
-        "adding": "Legger til i kassen...",
-        "addToCart": "Legg til",
-        "addToWishlist": "Legg til i \u00f8nskeliste",
-        "relatedProducts": "Relaterte produkter",
-        "viewAll": "Vis alle",
-        "specifications": "Spesifikasjoner",
-        "technicalInfo": "Teknisk informasjon",
-        "application": "Bruksomr\u00e5de",
-        "users": "Brukere",
-        "remarks": "Merknader",
-        "description": "Beskrivelse",
-        "details": "Produktdetaljer",
-        "noVariants": "Ingen varianter funnet",
-        "addedToCart": "Legget til i kassen",
-        "errorAddingToCart": "Kunne ikke legge til i kassen",
-        "selectWarehouse": "Velg lager",
-        "selectWarehouseFirst": "Vennligst velg en lagerstasjon f\u00f8rst",
-        "noBalanceForWarehouse": "Ingen balanse tilgjengelig for denne lagerstasjonen",
-        "noWarehouses": "Ingen lager",
-        "noWarehousesAvailable": "Ingen lager tilgjengelig",
-        "showingFirst": "Viser f\u00f8rste",
-        "warehouses": "Lager",
-        "noDescriptionAvailable": "Ingen beskrivelse er tilgjengelig for dette produktet.",
-        "stockInfo": "Varer ikke p\u00e5 lager kan fortsatt bestilles \u2013 3 dager ekstra leveringstid.",
-        "documentsTitle": "Dokumentasjon",
-        "noDocumentsAvailable": "Ingen dokumenter er tilgjengelige for dette produktet.",
-        "noRelatedProducts": "Ingen relaterte produkter er tilgjengelige for dette produktet.",
-        "variantTitle": "Velg produktvariant",
-        "loadingVariant": "Laster variant...",
-        "unknownAttribute": "Ukjent",
-        "itemNumber": "Varenummer",
-        "inStockDelivery": "P\u00e5 lager \u2013 leveres innen 2-3 dager",
-        "loadingPrice": "Laster pris...",
-        "excludingVat": "eks. mva",
-        "allVariants": "Alle varianter",
-        "technicalData": "Tekniske data",
-        "noSpecifications": "Ingen tekniske spesifikasjoner tilgjengelig.",
-        "addAttribute": "Rediger tabell",
-        "image": "Bilde",
-        "unspsc": "UNSPSC",
-        "unit": "Enhet",
-        "price": "Pris",
-        "quantity": "Antall",
-        "warehouse": "Lager",
-        "cart": "Handlekurv",
-        "selected": "Valgt",
-        "select": "Velg",
-        "uniqueSellingPoints": "Viktige egenskaper"
-    },
-    "BreadCrumbs": {
-        "home": "Hjem",
-        "category": "Kategori",
-        "product": "Produkt",
-        "cart": "Handlekurv",
-        "checkout": "Kassen",
-        "profile": "Profil",
-        "ehandel": "E-handel",
-        "hoseManagement": "Slangestyring"
-    },
-    "Profile": {
-        "tabs": {
-            "mine-bestillinger": "Mine bestillinger",
-            "rekvisisjoner": "Rekvisisjoner",
-            "ordre-historikk": "Ordrehistorikk",
-            "hose-oversikt": "Slangeoversikt",
-            "hose-inspections": "Slangeinspeksjoner",
-            "hose-replacement": "Slangebytter",
-            "hose-requests": "Slangeforesp\u00f8rsler",
-            "hose-risk-class": "Slangerisikoklasse",
-            "dimensions": "Dimensjoner",
-            "personal-info": "Personlig informasjon",
-            "addresses": "Adresser",
-            "orders": "Bestillinger",
-            "wishlist": "\u00d8nskeliste",
-            "password": "Endre passord",
-            "ratings": "Vurderinger"
-        },
-        "hoseDetail": "Slangedetaljer",
-        "orderDetail": "Ordredetaljer"
-    },
-    "Common": {
-        "reset": "Nullstill",
-        "error": {
-            "title": "Noe gikk galt!",
-            "tryAgain": "Pr\u00f8v igjen",
-            "categoryLoad": "Vi kunne ikke laste kategorien innhold.",
-            "subcategoryLoad": "Vi kunne ikke laste subkategorien innhold."
-        },
-        "sort": "Sorter",
-        "search": "S\u00f8k",
-        "searchProducts": "S\u00f8k etter slanger, utstyr, diameter, trykklasse...",
-        "searchAttributes": "S\u00f8k etter attributter",
-        "attributes": "Attributter",
-        "showMore": "Vis mer",
-        "showLess": "Vis mindre"
-    },
-    "CustomerSwitcher": {
-        "title": "Kundeinformasjon",
-        "selectCustomerLabel": "Kunder",
-        "selectCustomerPlaceholder": "Velg kundenummer",
-        "selectWarehouseLabel": "Lager",
-        "selectWarehousePlaceholder": "Velg lager",
-        "noWarehousesAvailable": "Ingen lager tilgjengelig",
-        "selectAssortmentLabel": "Sortiment",
-        "selectAssortmentPlaceholder": "Velg sortiment",
-        "noAssortmentsAvailable": "Ingen sortimenter tilgjengelig",
-        "selectCompanyLabel": "Selskap",
-        "selectCompanyPlaceholder": "Velg selskap",
-        "noCompaniesAvailable": "Ingen selskaper tilgjengelig",
-        "defaultCompanyFallback": "Standardselskap ({companyNumber})",
-        "save": "Lagre",
-        "saving": "Lagrer..."
-    },
-    "CustomerWebPromo": {
-        "switcher": {
-            "news": "Nyhet",
-            "future": "Fremtidens kundeweb"
-        },
-        "customerWeb": {
-            "title": "Fremtidens kundeweb for THM sammen former vi l\u00f8sningen",
-            "description": "Vi bygger n\u00e5 neste generasjon kundeweb for TESS Hose Management (THM). Dette er mer enn en oppdatering \u2013 vi utvikler en moderne plattform som kombinerer e-handel og avansert beslutningsst\u00f8tte, slik at du f\u00e5r full oversikt og kontroll over slanger og utstyr.",
-            "feedbackPrompt": "Har du \u00f8nsker eller forslag?",
-            "feedbackSubtext": "Legg igjen en tilbakemelding \u2013 din erfaring er viktig for oss.",
-            "feedbackButton": "Gi tilbakemelding"
-        },
-        "otherSection": {
-            "title": "En annen seksjon \u2013 eksempeltekst",
-            "description": "Denne visningen viser innholdet n\u00e5r brukeren velger alternativet \u201cFremtidens kundeweb\u201d.",
-            "cta": "Les mer"
-        },
-        "imageAlt": "THM kundeweb promo",
-        "imageCaption": "Eksempelbilde. Faktisk l\u00f8sning kan avvike."
-    },
-    "Search": {
-        "categories": "Kategori",
-        "suggestions": "S\u00f8keforslag",
-        "noSuggestions": "Ingen s\u00f8keforslag funnet",
-        "noProductsFound": "Ingen produkter funnet",
-        "seeMoreCategories": "Se flere kategorier",
-        "resultsTitle": "Dine treff",
-        "inMainWarehouse": "P\u00e5 hovedlager",
-        "noResults": {
-            "title": "Ingen resultater funnet",
-            "description": "Beklager. Vi fant ingen produkter som matcher s\u00f8ket \"{query}\"",
-            "tipsTitle": "Tips for bedre s\u00f8keresultater:",
-            "tips": {
-                "checkSpelling": "Sjekk stave m\u00e5ten og pr\u00f8v alternative skrivem\u00e5ter",
-                "useFewerWords": "Bruk f\u00e6rre eller mer generelle s\u00f8keord",
-                "searchByType": "S\u00f8k p\u00e5 produkttype eller kategori i stedet",
-                "searchBySpec": "Pr\u00f8v \u00e5 s\u00f8ke p\u00e5 tekniske spesifikasjoner"
-            },
-            "help": {
-                "title": "Mangler du vare?",
-                "description": "V\u00e5re eksperter hjelper deg med \u00e5 finne riktige produkter for dine behov.",
-                "email": "E-post: tess@tess.no"
-            }
-        }
-    },
-    "Seo": {
-        "defaultTitle": "TESS - Teknisk Faghandel | Netthandel",
-        "defaultDescription": "Tess er din p\u00e5litelige leverand\u00f8r av byggematerialer, sikkerhetsutstyr og industrielle produkter. Handle trygt og raskt p\u00e5 nett."
-    },
-    "Footer": {
-        "companyName": "TESS AS",
-        "companyDescription": "Din p\u00e5litelige partner innen teknisk utstyr og tjenester \u2013 siden 1968.",
-        "company": "Company",
-        "support": "Support",
-        "legal": "Legal",
-        "about": "About Us",
-        "careers": "Careers",
-        "contact": "Contact",
-        "help": "Help Center",
-        "shipping": "Shipping",
-        "returns": "Returns",
-        "terms": "Terms of Service",
-        "privacy": "Privacy Policy",
-        "cookies": "Cookie Policy",
-        "rights": "All rights reserved."
-    },
-    "Faq": {
-        "title": "Vanlige sp\u00f8rsm\u00e5l (FAQ)",
-        "questions": {
-            "openingHours": "\u00c5pningstider?",
-            "delivery": "Leveranser fra TESS?",
-            "forgotPassword": "Glemt passord?",
-            "addToOrder": "Jeg \u00f8nsker \u00e5 legge til en vare p\u00e5 ordren. Er det mulig?",
-            "notFound": "Jeg finner ikke svar p\u00e5 det jeg vil vite. Hva gj\u00f8r jeg?",
-            "missingProduct": "Jeg finner ikke varen jeg \u00f8nsker \u00e5 kj\u00f8pe. Hva gj\u00f8r jeg?",
-            "contactErrors": "Hvem kontakter jeg om feil eller mangler i nettbutikken?",
-            "specificProduct": "Jeg vil vite mer om en spesifikk vare. Hvem kontakter jeg?"
-        },
-        "answers": {
-            "openingHours": "V\u00e5r nettbutikk er \u00e5pen 24 timer i d\u00f8gnet. De fleste servicesentre holder \u00e5pent fra 07:00 til 16:00. Finn ditt n\u00e6rmeste TESS <link>servicesenter</link>.",
-            "delivery": "Kontakt din lokale selger eller ditt n\u00e6rmeste TESS <link>kundesenter</link>. Du kan ogs\u00e5 henvende deg til v\u00e5rt sentrale kundesenter.",
-            "forgotPassword": "Trykk p\u00e5 \u00abglemt passord\u00bb p\u00e5 login siden. Passordlink sendes til e-posten din som du kan bruke for \u00e5 lage nytt passord.",
-            "addToOrder": "Nei, det er ikke mulig. Det m\u00e5 legges ny bestilling.",
-            "notFound": "Benytt v\u00e5r chat-tjeneste eller ta kontakt med din kundekontakt.",
-            "missingProduct": "Benytt v\u00e5r chat-tjeneste eller ta kontakt med din kundekontakt.",
-            "contactErrors": "Send feil eller mangler du finner til: <email>netthandel@tess.no</email>.",
-            "specificProduct": "Kontakt din lokale selger eller n\u00e6rmeste TESS <link>servicesenter</link>."
-        },
-        "feedback": {
-            "question": "Fant du det du lette etter?",
-            "yes": "Ja",
-            "no": "Nei",
-            "thanks": "Takk for tilbakemeldingen!",
-            "closing": "Da h\u00e5per vi du fant det du trengte. Ha en fin dag!",
-            "helpText": "Kontakt oss, s\u00e5 gj\u00f8r vi v\u00e5rt beste for \u00e5 hjelpe deg. I tillegg bruker vi sp\u00f8rsm\u00e5lene til \u00e5 forbedre FAQ-siden.",
-            "whatWereYouLookingFor": "Hva lette du etter?",
-            "placeholder": "Fortell hva du lurer p\u00e5",
-            "contactQuestion": "Vil du bli kontaktet ang\u00e5ende svaret? Vi kontakter deg p\u00e5 din registrerte e-post.",
-            "send": "Send melding",
-            "submittedMessage": "Takk! Din tilbakemelding er sendt."
-        },
-        "servicesenter": "servicesenter",
-        "kundesenter": "kundesenter"
-    },
-    "Kjopsbetingelser": {
-        "title": "Kj\u00f8psbetingelser for kunden (e-handel)",
-        "sections": {
-            "customerTerms": {
-                "title": "Betingelser for kunden",
-                "content": "For avtalekunder av TESS gjelder betingelser definert i egen avtale."
-            },
-            "salesTerms": {
-                "title": "Salgsbetingelser",
-                "content": "Prisene er netto eks. mva. Leveringsbetingelser er ExW TESS iht Incoterms 2010 eller NL09."
-            },
-            "deliveries": {
-                "title": "Forsendelser",
-                "content": "For kundens regning."
-            },
-            "ownership": {
-                "title": "Eiendomsrett",
-                "content": "Selger har eiendomsretten til de solgte varene inntil kj\u00f8pesummen med tillegg av renter og omkostninger i sin helhet er betalt (kfr: Panteloven, spesielt \u00a73-15). Faktureringsgebyr: kr 65,- +mva."
-            },
-            "returns": {
-                "title": "Retur av varer",
-                "content": "Retur godkjennes etter avtale med din lokale TESS representant. Om du ikke er tilknyttet en lokal TESS-avdeling avtales retur med Kundesenteret p\u00e5 TESS hovedkontor. Se e-post og telefonnummer i bunnmeny. Kappede slanger, monterte enheter, utg\u00e5tte eller spesialproduserte produkter tas normalt ikke i retur. Med mindre annet er avtalt, dekker kj\u00f8per de direkte kostnadene ved \u00e5 returnere varen. Direkte kostnader vil v\u00e6re forsendelses- eller transportkostnader, og eventuelle andre direkte kostnader som eksempelvis innkj\u00f8p av ny frakt emballasje. Begrepet dekker ikke eventuelle administrative kostnader returen har for den n\u00e6ringsdrivende."
-            },
-            "payment": {
-                "title": "Betaling med Visa eller Mastercard",
-                "content": "N\u00e5r du har betalt med Visa eller Mastercard reserves hele kj\u00f8pesummen p\u00e5 kortet ved registrering av bestillingen, men belastes f\u00f8rst ved sending av varene. Dersom vi ikke kan levere en varelinje vil vi ikke trekke dette bel\u00f8pet fra kortet."
-            },
-            "disclaimer": {
-                "title": "Forbehold",
-                "content": "Det tas ytterligere forbehold for dokumenterbare endringer fra underleverand\u00f8rer, endrede r\u00e5varepriser, eventuelle valutasvingninger og trykkfeil. Legeringstillegg, r\u00e5varetillegg og eventuelle milj\u00f8avgifter kan forekomme for enkelte varegrupper."
-            },
-            "form": {
-                "title": "Skjema",
-                "content": "Angrerettskjema finner du <link>her</link>."
-            }
-        }
-    },
-    "Cart": {
-        "archived": "Cart archived",
-        "errorArchiving": "Error archiving cart",
-        "showStockStatus": "Vis lagerstatus for:",
-        "yourCart": "Din handlekurv",
-        "archiveCart": "Arkiver handlekurv",
-        "viewCartHistory": "Vis handlekurvhistorikk",
-        "outOfStock": "Noen varer er ikke p\u00e5 lager i ditt valgte varehus",
-        "outOfStockMessage": "Noen varer er ikke p\u00e5 lager ved valgt servicesenter. Levering kan ta opptil 3 ekstra dager. Du kan endre servicesenter per varelinje for raskere levering.",
-        "cartHistory": "Handlekurv historikk",
-        "date": "Dato",
-        "userId": "Bruker Id",
-        "article": "Varer",
-        "total": "Totalsum",
-        "view": "Vis",
-        "hide": "Skjul",
-        "image": "Bilde",
-        "productNumber": "Produktnummer",
-        "itemNumber": "Varenummer",
-        "quantity": "Antall",
-        "warehouse": "Lager",
-        "company": "Selskap",
-        "page": "Side",
-        "of": "av",
-        "itemRemoved": "Varen er fjernet fra handlekurven"
-    },
-    "Login": {
-        "title": "Login",
-        "loginToViewCart": "Please login to view your cart"
-    },
-    "AuthDialog": {
-        "welcome": "Velkommen",
-        "welcomeDescription": "Velg hvordan du vil logge inn.",
-        "loginWithMicrosoft": "Logg inn med jobbkonto (SSO)",
-        "loginWithMicrosoftDescription": "For partnere og TESS-ansatte med organisasjonskonto",
-        "loginWithMicrosoftTenant": "Logg inn/Opprett e-handels konto",
-        "loginWithMicrosoftTenantDescription": "Kun for partnere uten organisasjonskonto",
-        "or": "eller",
-        "contactSupport": "F\u00e5r du ikke logget inn?",
-        "contactSupportLink": "Kontakt support",
-        "copyright": "2025 TESS",
-        "honest": "\u00c6rlig, p\u00e5litelig og profesjonell",
-        "honestDescription": "Hos TESS m\u00f8ter du fagfolk b\u00e5de foran og bak disken. Vi gir deg markedets beste tilgjengelighet med over 130 lokale servicesentre."
-    },
-    "OrderSummary": {
-        "title": "Ordreoversikt",
-        "originalPrice": "Opprinnelig pris:",
-        "discounts": "Rabatter",
-        "sumAfterDiscount": "Sum etter rabatt (eks. mva.)",
-        "deliverySurcharge": "Tilleggsavgift",
-        "vat": "MVA(25%)",
-        "totalIncVat": "Total inkl. mva.",
-        "continueToPayment": "Fortsett til levering",
-        "punchoutCart": "Punchout Handlekurv",
-        "punchoutCartStep1": "Fortsett til betaling",
-        "punchoutCartStep2": "Fullf\u00f8r ordre",
-        "punchoutCartStep3": "Bekreft",
-        "or": "eller",
-        "continueShopping": "Fortsett \u00e5 handle",
-        "termsText": "Jeg godtar",
-        "termsLink": "vilk\u00e5rene",
-        "termsEnd": "for kj\u00f8p"
-    },
-    "Checkout": {
-        "modals": {
-            "feedback": {
-                "title": "Tilbakemelding etter kj\u00f8p",
-                "description": "Vi vil gjerne h\u00f8re hvordan kj\u00f8psopplevelsen din var. Din tilbakemelding hjelper oss \u00e5 bli enda bedre.",
-                "question": "Hvordan opplevde du kj\u00f8pet?",
-                "ratings": {
-                    "1": "1 - Veldig d\u00e5rlig",
-                    "2": "2 - D\u00e5rlig",
-                    "3": "3 - Helt grei",
-                    "4": "4 - Bra",
-                    "5": "5 - Veldig bra"
-                },
-                "commentLabel": "Har du kommentarer? (valgfritt)",
-                "commentPlaceholder": "Fortell oss gjerne hva som fungerte bra, eller hva vi kan forbedre",
-                "submit": "Send tilbakemelding"
-            },
-            "tracking": {
-                "title": "Spor leveringen av bestilling #{orderNumber}",
-                "orderDate": "Bestillingsdato",
-                "email": "E-post",
-                "phone": "Telefon",
-                "paymentMethod": "Betalingsm\u00e5te",
-                "deliveryAddress": "Leveringsadresse",
-                "totalPrice": "Totalpris",
-                "currency": "NOK",
-                "status": {
-                    "paymentReceived": "Betaling mottatt",
-                    "orderPlaced": "Bestilling lagt inn",
-                    "viaInvoice": "Via faktura"
-                },
-                "buttons": {
-                    "orderDetails": "Bestillingsdetaljer",
-                    "cancelOrder": "Kanseller bestilling"
-                }
-            },
-            "contact": {
-                "title": "Kontaktperson",
-                "firstName": "Fornavn",
-                "lastName": "Etternavn",
-                "email": "E-post",
-                "phone": "Telefon",
-                "save": "Lagre kontaktperson",
-                "cancel": "Avbryt"
-            },
-            "payment": {
-                "title": "Betalingsmetode",
-                "invoice": "Faktura",
-                "save": "Lagre betalingsmetode",
-                "cancel": "Avbryt"
-            },
-            "delivery": {
-                "title": "Velg leveringsmetode",
-                "addressDelivery": "Levering til adresse",
-                "estimatedTime": "Estimert leveringstid: 2 til 7 virkedager",
-                "save": "Lagre leveringsmetode",
-                "cancel": "Avbryt"
-            },
-            "address": {
-                "selector": {
-                    "placeholder": "Velg en lagret adresse",
-                    "user": "Bruker",
-                    "customer": "Kunde",
-                    "organization": "Organisasjon",
-                    "addAddress": "Legg til adresse"
-                },
-                "title": "Din adresse",
-                "save": "Bruk adresse",
-                "cancel": "Avbryt",
-                "savedAddresses": "Lagrede adresser",
-                "addressName": "Navn p\u00e5 adresse",
-                "addressNameExample": "Eksempel: Hjem, Jobb, Kontor",
-                "street": "Gatenavn",
-                "streetExample": "Eksempel: Storgata",
-                "houseNumber": "Husnummer",
-                "houseNumberExample": "Eksempel: 15",
-                "addExtra": "Legg til tilleggsopplysninger",
-                "extraInfo": "Tilleggsopplysninger (valgfri)",
-                "extraInfoExample": "Eksempel: c/o, etasje, oppgang osv.",
-                "postalCode": "Postnummer",
-                "postalCodeExample": "Eksempel: 0155",
-                "city": "Sted",
-                "cityPlaceholderAuto": "(fylles automatisk etter postnummer er validert)",
-                "cityPlaceholderManual": "Skriv inn sted",
-                "saveAsUserAddress": "Lagre som brukeradresse"
-            }
-        },
-        "steps": {
-            "delivery": "Levering",
-            "payment": "Betaling",
-            "confirm": "Bekreft"
-        },
-        "confirmation": {
-            "yourItems": "Dine varer",
-            "contactPerson": "Kontaktperson",
-            "address": "Adresse",
-            "delivery": "Levering",
-            "payment": "Betaling",
-            "deliveryMethod": "Levering til adresse",
-            "deliveryTime": "Estimert leveringstid: 2 til 7 virkedager",
-            "invoice": "Faktura",
-            "cardPayment": "Kortbetaling",
-            "project": "Prosjekt",
-            "department": "Avdeling",
-            "category": "Kategori",
-            "notSpecified": "\u2013"
-        },
-        "errors": {
-            "selectAddress": "Vennligst velg en adresse",
-            "orderSubmissionFailed": "Bestillingen kunne ikke sendes",
-            "dimensionsRequired": "Vennligst fyll ut alle p\u00e5krevde dimensjonsfelt"
-        },
-        "feedback": {
-            "rating": "Vurdering",
-            "comment": "Kommentar",
-            "ratings": {
-                "1": "1 - Veldig d\u00e5rlig",
-                "2": "2 - D\u00e5rlig",
-                "3": "3 - Middels",
-                "4": "4 - Bra",
-                "5": "5 - Veldig bra"
-            }
-        },
-        "contactPerson": {
-            "title": "Kontaktperson",
-            "edit": "Endre kontaktperson",
-            "firstName": "Fornavn",
-            "lastName": "Etternavn",
-            "email": "E-post",
-            "phone": "Telefonnummer",
-            "emailExample": "Eksempel: navn@eksempel.no",
-            "phoneExample": "Eksempel: +47 123 45 678",
-            "save": "Lagre kontaktperson",
-            "cancel": "Avbryt",
-            "fetchedFromProfile": "Hentet fra profil"
-        },
-        "address": {
-            "title": "Din adresse",
-            "edit": "Endre adresse",
-            "savedAddresses": "Lagrede adresser",
-            "addressName": "Adressenavn",
-            "addressNameExample": "Eksempel: Hjem, Jobb, Kontor",
-            "street": "Gatenavn",
-            "streetExample": "Eksempel: Hovedgata",
-            "houseNumber": "Husnummer",
-            "houseNumberExample": "Eksempel: 15",
-            "addExtra": "Legg til tilleggsinformasjon",
-            "extraInfo": "Tilleggsinformasjon (valgfritt)",
-            "extraInfoExample": "Eksempel: c/o, etasje, inngang, osv.",
-            "postalCode": "Postnummer",
-            "postalCodeExample": "Eksempel: 0155",
-            "city": "Sted",
-            "cityPlaceholderAuto": "(fylles ut automatisk etter postnummervalidering)",
-            "cityPlaceholderManual": "Skriv inn sted",
-            "saveAsUserAddress": "Lagre som brukeradresse",
-            "useAddress": "Bruk adresse",
-            "cancel": "Avbryt",
-            "homeAddress": "Hjemmeadresse"
-        },
-        "delivery": {
-            "title": "Velg leveringsm\u00e5te",
-            "warning": {
-                "title": "Noen varer er ikke p\u00e5 lager i ditt valgte varehus",
-                "message": "Noen varer er ikke p\u00e5 lager i ditt valgte varehus, og det kan ta opptil 3 dager ekstra \u00e5 f\u00e5 dem levert.",
-                "closeLabel": "Lukk varsel"
-            },
-            "options": {
-                "address": {
-                    "title": "Levering til adresse",
-                    "estimate": "Estimert leveringstid: 2 til 7 virkedager"
-                }
-            }
-        },
-        "payment": {
-            "title": "Velg betalingsm\u00e5te",
-            "invoice": "Faktura"
-        },
-        "invoice": {
-            "title": "Tilleggsinformasjon for faktura",
-            "description": "Opplysningene vises p\u00e5 fakturaen og hjelper \u00f8konomiavdelingen med riktig bokf\u00f8ring."
-        },
-        "dimensions": {
-            "label": "Brukerdimensjon inndata:",
-            "selectLabel": "Brukerdimensjoner",
-            "selectPlaceholder": "Velg",
-            "reference": "Referanse",
-            "dimension1": "Referanse 1",
-            "dimension2": "Referanse 2",
-            "dimension3": "Referanse 3",
-            "modes": {
-                "select": "Velg",
-                "search": "S\u00f8k",
-                "manual": "Manuell"
-            }
-        }
-    },
-    "HosesAndEquipments": {
-        "title": "Slanger og utstyr",
-        "location": "Lokasjon",
-        "customer": "Customer",
-        "selectS1Location": "Velg S1 anlegg",
-        "selectCustomer": "Velg customer",
-        "loadingMore": "Laster flere...",
-        "removeLocation": "Fjern lokasjon",
-        "columns": {
-            "id": "ID",
-            "customerId": "KUNDE-ID",
-            "description": "BESKRIVELSE",
-            "s1Location": "S1 ANLEGG, FART\u00d8Y, ENHET",
-            "s2Equipment": "S2 UTSTYR",
-            "orderNumber": "ORDRENUMMER (PO)",
-            "installationDate": "INSTALLASJONSDATO",
-            "productionDate": "PRODUKSJONSDATO",
-            "fillingDate": "P\u00c5FYLLINGSDATO",
-            "nextInspectionDate": "NESTE INSPEKSJONSDATO"
-        },
-        "errors": {
-            "selectItemsFirst": "Vennligst velg elementer \u00e5 kontakte om"
-        },
-        "success": {
-            "supportMessageSent": "Meldingen ble sendt til TESS support",
-            "requestSent": "Foresp\u00f8rselen ble sendt",
-            "equipmentDiscarded": "Utstyr utrangert"
-        }
-    },
-    "HoseOverview": {
-        "title": "Min oversikt",
-        "equipmentOverview": "Utstyrsoversikt",
-        "structure": "STRUKTUR (S1+S2)",
-        "noUnits": "Ingen enheter",
-        "legend": {
-            "s2": "S2",
-            "equipment": "Utstyr/Equipment",
-            "equipmentSubcategory": "Utstyr/Equipment subkategori"
-        },
-        "inspection": {
-            "title": "Inspeksjon",
-            "rejected": "Underkjente inspeksjoner",
-            "approvedWithRemarks": "Best\u00e5tt med anmerkninger",
-            "overdue": "Forfalte inspeksjoner",
-            "planned": "Planlagte inspeksjoner"
-        },
-        "replacement": {
-            "title": "Slangebytte",
-            "overdue": "Forfalte inspeksjoner",
-            "planned": "Planlagte inspeksjoner"
-        }
-    },
-    "HoseDetailsPage": {
-        "hoseEquipment": "Slange/utstyr",
-        "keyInformation": "N\u00f8kkel informasjon",
-        "images": "Bilder",
-        "viewAll": "Vis alle",
-        "status": "Status",
-        "edit": "Rediger",
-        "cancel": "Avbryt",
-        "addToCart": "Legg til i handlekurv",
-        "export": "Eksporter",
-        "more": "Mer"
-    },
-    "HoseAccordion": {
-        "title": "Slange",
-        "seeDetails": "Se detaljer"
-    },
-    "S2EquipmentsAccordion": {
-        "title": "S2-utstyr"
-    },
-    "AdditionalEquipmentAccordion": {
-        "title": "Tilleggsutstyr p\u00e5 slangen"
-    },
-    "OtherDetailsAccordion": {
-        "title": "Andre detaljer"
-    },
-    "InspectionsAccordion": {
-        "title": "Inspeksjon"
-    },
-    "DocumentsAccordion": {
-        "title": "Dokumenter",
-        "addDocument": "Legg til dokument"
-    },
-    "HistoricAccordion": {
-        "title": "Historikk",
-        "current": "(gjeldende)",
-        "columns": {
-            "workOrderNumber": "ARBEIDSORDRENUMMER (WO)",
-            "description": "BESKRIVELSE",
-            "content": "CONTENT"
-        }
-    },
-    "HoseInspections": {
-        "title": "Inspeksjoner",
-        "location": "Lokasjon",
-        "selectS1Location": "Velg S1 anlegg",
-        "loadingMore": "Laster flere...",
-        "removeLocation": "Fjern lokasjon",
-        "type": "Type",
-        "completedInspections": "Utf\u00f8rte inspeksjoner",
-        "plannedInspections": "Planlagte inspeksjoner",
-        "period": "Periode",
-        "selectPeriod": "Velg periode",
-        "last12Months": "Siste 12 m\u00e5neder",
-        "last24Months": "Siste 24 m\u00e5neder",
-        "currentYear": "Inneverende \u00e5r",
-        "next12Months": "Neste 12 m\u00e5neder",
-        "next24Months": "Neste 24 m\u00e5neder",
-        "loadingData": "Laster data...",
-        "couldNotLoadData": "Kunne ikke laste data.",
-        "noDataInPeriod": "Ingen data i valgt periode.",
-        "completed": "Utf\u00f8rt",
-        "planned": "Planlagt"
-    },
-    "HoseReplacement": {
-        "title": "Fremtidige slangebytter",
-        "notificationTitle": "Noen varer er ikke p\u00e5 lager",
-        "notificationMessage": "Noen varer er ikke p\u00e5 lager i ditt valgte varehus, og det kan ta opptil 3 dager ekstra \u00e5 f\u00e5 dem levert.",
-        "structure": "STRUKTUR (S1+S2)",
-        "total": "TOTAL",
-        "estimatedCosts": "Estimerte kostnader"
-    },
-    "HoseRiskClass": {
-        "title": "Kritikalitet",
-        "subtitle": "Prosent av (S1) TESS Princess IMO: 789548",
-        "riskClass": "Risikoklasse",
-        "rkLabel": "RK = Risikoklasse"
-    },
-    "HoseRequests": {
-        "title": "Mine foresp\u00f8rsler",
-        "subtitle": "Samleside med alle foresp\u00f8rsler knyttet til ditt kundenummer (Request for quote)",
-        "emptyState": {
-            "title": "Ingen foresp\u00f8rsler enn\u00e5.",
-            "instruction1": "Slik gj\u00f8r du: beskriv behovet, velg produkter og send til TESS.",
-            "instruction2": "Etter sending vises RFQ-en her med status og dato.",
-            "instruction3": "Fra Utstyrsliste: velg enheter \u2192 Handlinger \u2192 Send foresp\u00f8rsel.",
-            "goToEquipmentList": "G\u00e5 til utstyrsliste"
-        },
-        "rfqListTitle": "Foresp\u00f8rsler (RFQ)",
-        "equipmentOnRfq": "Utstyr p\u00e5 RFQ# 2211879",
-        "cancelRequest": "Kanseller foresp\u00f8rsel",
-        "columns": {
-            "rfqNumber": "RFQ#",
-            "requestType": "Foresp\u00f8rselstype",
-            "created": "Opprettet",
-            "status": "Status"
-        },
-        "equipmentTable": {
-            "equipment": "Utstyr",
-            "description": "Beskrivelse",
-            "showing": "Viser",
-            "of": "av"
-        }
-    },
-    "AssetIdSelector": {
-        "status": "Status"
-    },
-    "CartAddedModal": {
-        "item": "vare",
-        "items": "varer",
-        "addedToCart": "lagt til i handlekurv",
-        "noItemsSelected": "Ingen varer valgt",
-        "showLess": "Vis f\u00e6rre",
-        "showAll": "Vis alle",
-        "navigatingToCart": "Navigerer til handlekurv",
-        "goToCart": "Til handlekurven"
-    },
-    "HoseSearchBar": {
-        "placeholder": "S\u00f8k etter ID nummer, ordrenummer, fart\u00f8y eller utstyr...",
-        "clearSearch": "Fjern s\u00f8k",
-        "search": "S\u00f8k"
-    },
-    "HoseActionsDropdown": {
-        "action": "HANDLING",
-        "selected": "Valgt",
-        "addToCart": "Legg til i handlekurv",
-        "adding": "Legger til...",
-        "contactSupport": "Kontakt TESS support",
-        "reportReplacement": "Rapporter slangebytter",
-        "discardEquipment": "Kasser utstyr",
-        "printCertificate": "Skriv ut TESS trykktest-sertifikat",
-        "printTags": "Skriv ut visuelle ID-merker (strekkode)",
-        "printTestCertificates": "Skriv ut trykktest-sertifikater",
-        "exportToExcel": "Eksporter oversiktsdata til Excel",
-        "selectAll": "Velg alle",
-        "deselectAll": "Fjern alle",
-        "selectAllOnPage": "Velg alle p\u00e5 denne siden",
-        "deselectAllOnPage": "Fjern alle p\u00e5 denne siden"
-    },
-    "SidebarNav": {
-        "hoseManagement": "Hose Management",
-        "eCommerce": "E-handel"
-    },
-    "MineBestillinger": {
-        "title": "Mine bestillinger",
-        "subtitle": "Dine utf\u00f8rte bestillinger her i e-handelen.",
-        "searchPlaceholder": "S\u00f8k etter ordre-ID eller kundenavn",
-        "search": "S\u00f8k",
-        "status": "Status",
-        "all": "Alle",
-        "received": "Mottatt",
-        "confirmed": "Bekreftet",
-        "picked": "Plukket",
-        "inTransit": "Under transport",
-        "delivered": "Levert",
-        "cancelled": "Kansellert",
-        "orderNumber": "Ordrenummer",
-        "orderDate": "Bestillingsdato",
-        "price": "Pris"
-    },
-    "AddUserModal": {
-        "title": "Legg til ny bruker",
-        "contactInfo": "Kontaktinformasjon",
-        "firstName": "Fornavn",
-        "lastName": "Etternavn",
-        "email": "E-post",
-        "emailPlaceholder": "navn@selskap.no",
-        "titlePlaceholder": "Tittel",
-        "phone": "Telefonnummer",
-        "phonePlaceholder": "+47 444 44 444",
-        "permissions": "Tilganger",
-        "superuserInfoTitle": "Brukere du oppretter, overtar dine innstillinger",
-        "superuserInfoDesc": "Som superbruker kan du opprette brukere med samme kundenummer. Nye brukere overtar automatisk dine innstillinger.",
-        "customerAccess": "Kundetilgang",
-        "defaultWarehouse": "Standard TESS lager",
-        "customerCatalog": "Kundekatalog",
-        "tessCompany": "TESS firma",
-        "selectCustomers": "Velg relevante kunder",
-        "selectCatalog": "Velg katalog",
-        "selectWarehouse": "Velg lager",
-        "selectCompany": "Velg firma",
-        "userRights": "Brukerrettigheter og status",
-        "role": "Rolle",
-        "superuser": "Superbruker",
-        "superuserDesc": "Opprette nye brukere med egne innstillinger, godkjenne rekvisjoner, sette budsjetter p\u00e5 ansatte, opprette dimensjoner",
-        "employee": "Ansatt",
-        "employeeDesc": "Handle produkter (etter fastsatt budsjett), se ordrehistorikk, kontakte kundeservice",
-        "addUser": "Legg til bruker",
-        "close": "Lukk"
-    },
-    "DeleteUserModal": {
-        "title": "Slett bruker?",
-        "message": "Brukeren mister tilgang til alle bestillinger, ordrehistorikk og vil ikke kunne logge inn.",
-        "warning": "Handlingen kan ikke angres.",
-        "cancel": "Nei, avbryt",
-        "confirm": "Ja, slett bruker"
-    },
-    "UsersBrukere": {
-        "title": "Brukere",
-        "subtitle": "Her kan du administrere brukere.",
-        "searchPlaceholder": "S\u00f8k etter brukere",
-        "addUser": "Legg til ny bruker",
-        "editSelected": "Rediger ({count})",
-        "totalUsers": "Brukere totalt",
-        "columns": {
-            "name": "NAVN",
-            "role": "BRUKERROLLE",
-            "customerAccess": "KUNDETILGANG",
-            "catalog": "KATALOG",
-            "warehouse": "LAGER",
-            "company": "TESS FIRMA",
-            "action": "HANDLING"
-        },
-        "actions": {
-            "viewDetails": "Vis detaljer",
-            "editUser": "Rediger bruker",
-            "deleteUser": "Slett bruker"
-        }
-    },
-    "HoseColumnsDropdown": {
-        "addColumn": "Legg til kolonne"
-    },
-    "HoseFiltersDropdown": {
-        "filter": "Filter",
-        "inspection": "Inspeksjon",
-        "rejectedInspections": "Underkjente inspeksjoner",
-        "withRemarks": "Med merknader",
-        "overdue": "Forfalt",
-        "hoseReplacement": "Slangebytte",
-        "activeTemporary": "Aktive midlertidige slangebytter",
-        "dueInSixMonths": "Forfaller om mindre enn 6 m\u00e5neder",
-        "byAge": "Etter alder",
-        "age5to6": "5-6 \u00e5r gamle",
-        "age7to8": "7-8 \u00e5r gamle"
-    },
-    "Dimensions": {
-        "title": "Konteringsdimensjoner",
-        "subtitle": "Organiser prosjekter, avdelinger, arbeidsordre osv i hierarkisk struktur med budsjetter. Konteringsdimensjoner du legger til her vises i utsjekk for alle dine brukere.",
-        "showingProjectFor": "Viser prosjekt for",
-        "projects": {
-            "all": "Alle"
-        },
-        "defaultTypes": {
-            "department": "Avdeling",
-            "project": "Prosjekt",
-            "workorder": "Arbeidsordre"
-        },
-        "emptyState": {
-            "title": "Ingen dimensjoner enda",
-            "description": "Kom i gang med \u00e5 opprette din f\u00f8rste dimensjon. Du kan organisere det i kategorier og elementer."
-        },
-        "actions": {
-            "createNew": "Lag ny dimensjon",
-            "editTypes": "Endre dimensjonstyper"
-        },
-        "table": {
-            "name": "NAVN",
-            "nameTooltip": "Dette feltet brukes til \u00e5 identifisere dimensjonen.",
-            "type": "TYPE",
-            "typeTooltip": "Velg en dimensjonstype fra listen.",
-            "budget": "BUDSJETT",
-            "budgetTooltip": "Sett et budsjett for dimensjonen.",
-            "action": "HANDLING"
-        },
-        "validation": {
-            "nameRequired": "Vennligst fyll ut navn",
-            "typeRequired": "Vennligst velg type",
-            "budgetRequired": "Vennligst fyll ut budsjett",
-            "dimensionTypeRequired": "Vennligst velg en dimensjonstype"
-        },
-        "messages": {
-            "created": "Dimensjon opprettet",
-            "createError": "Kunne ikke opprette dimensjon. Vennligst pr\u00f8v igjen.",
-            "updated": "Dimensjon oppdatert",
-            "updateError": "Det oppstod en feil ved oppdatering av dimensjon",
-            "deleted": "Dimensjonen ble slettet",
-            "deleteError": "Kunne ikke slette dimensjonen. Vennligst pr\u00f8v igjen.",
-            "notFound": "Kunne ikke finne dimensjonen som skal oppdateres"
-        }
-    },
-    "DimensionsDeleteModal": {
-        "confirmMessage": "Er du sikker p\u00e5 at du vil slette \"{name}\"?",
-        "warningMessage": "Dette vil ogs\u00e5 slette alle underliggende elementer.",
-        "cancel": "Nei, avbryt",
-        "confirm": "Ja, jeg er sikker"
-    },
-    "DimensionsNewRow": {
-        "namePlaceholder": "Skriv inn navn",
-        "typePlaceholder": "Sett type",
-        "currency": "kr",
-        "save": "Lagre"
-    },
-    "DimensionsDimensionRow": {
-        "expand": "Utvid",
-        "collapse": "Kollaps",
-        "currency": "kr",
-        "cancel": "Avbryt",
-        "save": "Lagre",
-        "addSubcategory": "Legg til underkategori",
-        "editDimension": "Endre dimensjon",
-        "deleteDimension": "Slett dimensjon"
-    },
-    "DimensionsTypeModal": {
-        "title": "Sett dimensjonstyper",
-        "dimension": "Dimensjon",
-        "active": "Aktiv",
-        "type": "Type",
-        "typePlaceholder": "Skriv type",
-        "example": "Eksempel: Prosjekt, avdeling, arbeidsordre osv.",
-        "checkoutInfo": "Dimensjon vises p\u00e5 utsjekk\nog blir p\u00e5krevd \u00e5 fylle ut av alle ansatte",
-        "successMessage": "Dimensjonstyper oppdatert",
-        "errorMessage": "Kunne ikke oppdatere dimensjonstyper",
-        "saveButton": "Lagre dimensjonstyper"
-    },
-    "DimensionsProjectPicker": {
-        "searchPlaceholder": " S\u00f8k prosjekt...",
-        "noProjectsFound": "Ingen prosjekter funnet."
-    },
-    "OrdreDetaljer": {
-        "contactPerson": "Kontaktperson",
-        "address": "Adresse",
-        "delivery": "Levering",
-        "estimatedDeliveryTime": "Estimert leveringstid",
-        "payment": "Betaling",
-        "yourItems": "Dine varer",
-        "orderSummary": "Ordreoversikt",
-        "originalPrice": "Opprinnelig pris (eks. mva.)",
-        "discount": "Rabatt",
-        "subtotal": "Sum etter rabatt (eks. mva.)",
-        "vat": "MVA ({rate}%)",
-        "currency": "kr"
-    },
-    "OrdreHistorikk": {
-        "title": "Ordrehistorikk",
-        "subtitle": "Alle selskapets ordre (e-handel, service senter, forsyningsl\u00f8sninger, per e-post etc)",
-        "searchPlaceholder": "S\u00f8k etter ordre-ID eller kundenavn",
-        "search": "S\u00f8k",
-        "status": "Status",
-        "all": "Alle",
-        "received": "Mottatt",
-        "confirmed": "Bekreftet",
-        "picked": "Plukket",
-        "inTransit": "Under transport",
-        "delivered": "Levert",
-        "cancelled": "Kansellert",
-        "orderNumber": "Ordrenummer",
-        "orderDate": "Bestillingsdato",
-        "price": "Pris"
-    },
-    "ProductDetailsModal": {
-        "title": "Produktdetaljer",
-        "description": "Beskrivelse",
-        "productDetails": "Produktdetaljer",
-        "insert": "Innlegg",
-        "inner": "Innvendig",
-        "marking": "Merking",
-        "temperature": "Temperatur \u00b0c:",
-        "outer": "Utvendig",
-        "closeWindow": "Lukk vindu"
-    },
-    "Rekvisisjoner": {
-        "title": "Rekvisisjoner",
-        "subtitle": "Administrer og godkjenn innkomne rekvisisjoner fra ansatte og eksterne systemer.",
-        "searchPlaceholder": "S\u00f8k etter ordre-ID eller kundenavn",
-        "search": "S\u00f8k",
-        "status": "Status",
-        "orderId": "Ordre ID",
-        "orderer": "Bestiller",
-        "created": "Opprettet",
-        "price": "Pris",
-        "approve": "Godkjenn",
-        "reject": "Avvis",
-        "restore": "Gjenopprett",
-        "units": "Enheter",
-        "quantity": "Antall",
-        "itemsAddedToCart": "{count} varer lagt til i handlekurv",
-        "showLess": "Vis f\u00e6rre",
-        "showAll": "Vis alle",
-        "goToCart": "Til handlekurven"
-    },
-    "ProfilePage": {
-        "tabs": {
-            "myOrders": "Mine bestillinger",
-            "requisitions": "Rekvisisjoner",
-            "orderHistory": "Ordrehistorikk",
-            "dimensions": "Dimensjoner",
-            "usage": "Forbruk",
-            "users": "Brukere",
-            "catalog": "Katalog",
-            "settings": "Innstillinger",
-            "overview": "Oversikt",
-            "hosesEquipment": "Slanger/utstyr",
-            "inspections": "Inspeksjoner",
-            "hoseReplacement": "Slangebytte",
-            "riskClass": "Risikoklasse",
-            "requests": "Foresp\u00f8rsler",
-            "recentActivities": "Siste aktiviteter"
-        },
-        "sidebar": {
-            "orders": "Ordre",
-            "myOrders": "Mine bestillinger",
-            "requisitions": "Rekvisisjoner",
-            "orderHistory": "Ordrehistorikk",
-            "dimensions": "Dimensjoner",
-            "usage": "Forbruk",
-            "users": "Brukere",
-            "catalog": "Katalog",
-            "settings": "Innstillinger",
-            "logout": "Logg ut",
-            "overview": "Oversikt",
-            "hosesEquipment": "Slanger/utstyr",
-            "inspections": "Inspeksjoner",
-            "hoseReplacement": "Slangebytte",
-            "riskClass": "Risikoklasse",
-            "requests": "Foresp\u00f8rsler",
-            "recentActivities": "Siste aktiviteter",
-            "support": "Support"
-        }
-    },
-    "ViewUserModal": {
-        "contactInfo": "Kontaktinformasjon",
-        "firstName": "Fornavn",
-        "lastName": "Etternavn",
-        "email": "Fornavn",
-        "title": "Tittel",
-        "phone": "Telefonnummer",
-        "access": "Tilganger",
-        "customerAccess": "Kundetilgang",
-        "catalog": "Kundekatalog",
-        "standardWarehouse": "Standard TESS lager",
-        "tessCompany": "TESS Firma",
-        "userRightsAndStatus": "Brukerrettigheter og status",
-        "role": "Rolle",
-        "roleDescriptions": {
-            "administrator": "Opprette nye brukere med egne innstillinger, godkjenne rekvisjoner, sette budsjetter p\u00e5 ansatte, opprette dimensjoner",
-            "superbruker": "Opprette nye brukere med egne innstillinger, godkjenne rekvisjoner, sette budsjetter p\u00e5 ansatte, opprette dimensjoner",
-            "ansatt": "Kan kun handle p\u00e5 vegne av seg selv"
-        },
-        "edit": "Rediger",
-        "delete": "Slett bruker"
-    },
-    "BulkEditConfirmationModal": {
-        "title": "Endre innstillinger",
-        "selectedUsers": "Valgte brukere ({count})",
-        "changesWillApply": "Endringene vil gjelde for:",
-        "warning": {
-            "title": "Velg kun feltene du vil endre",
-            "subtitle": "Du kan legge til flere valg for brukerne. Feltene du ikke velger, blir ikke endret.",
-            "howItWorks": "Slik fungerer oppdateringen:",
-            "point1": "Nye valg legges til \u2013 tidligere tilganger beholdes.",
-            "point2": "Vil du fjerne tilganger, m\u00e5 det gj\u00f8res for hver bruker."
-        },
-        "access": "Tilganger",
-        "customerAccess": "Kundetilgang",
-        "customerAccessPlaceholder": "{count} kunder valgt",
-        "catalog": "Kundekatalog",
-        "catalogPlaceholder": "Velg kundekatalog",
-        "standardWarehouse": "Standard TESS lager",
-        "warehousePlaceholder": "{count} lager valgt",
-        "tessCompany": "TESS Firma",
-        "companyPlaceholder": "Velg TESS firma",
-        "updateUsers": "Oppdater {count} brukere",
-        "close": "Lukk"
-    },
-    "ConfirmChangesModal": {
-        "title": "Bekreft endringer",
-        "description": "Du er i ferd med \u00e5 oppdatere {count} brukere. Alle utfylte felter vil bli endret for disse brukerne.",
-        "cancel": "Avbryt",
-        "confirm": "Bekreft endringene"
-    }
+	"Index": {
+		"title": "Home"
+	},
+	"NotFound": {
+		"title": "Page Not Found",
+		"description": "The page you are looking for does not exist."
+	},
+	"LocaleSwitcher": {
+		"label": "Change language",
+		"locale": "{locale, select, en {English} no {Norwegian} other {Unknown}}"
+	},
+	"Home": {
+		"title": "Home Page No",
+		"bannerTitle": "Velkommen til TESS!",
+		"browseOurTopCategories": "Bla gjennom v\u00e5re toppkategorier",
+		"ourCategories": "Our categories",
+		"seeCategories": "Se kategorier",
+		"learnMore": "L\u00e6r mer"
+	},
+	"Products": {
+		"noProducts": "Ingen produkter funnet"
+	},
+	"Category": {
+		"noResults": "Ingen resultater funnet",
+		"viewAll": "Se alle kategorier"
+	},
+	"Product": {
+		"notFound": "Produkt ikke funnet",
+		"seeAllVariants": "Se alle varianter",
+		"copied": "Kopiert!",
+		"productDescription": "Produktbeskrivelse",
+		"selectSize": "Velg st\u00f8rrelse",
+		"selectedSize": "St\u00f8rrelse: {size}",
+		"adding": "Legger til i kassen...",
+		"addToCart": "Legg til",
+		"addToWishlist": "Legg til i \u00f8nskeliste",
+		"relatedProducts": "Relaterte produkter",
+		"viewAll": "Vis alle",
+		"specifications": "Spesifikasjoner",
+		"technicalInfo": "Teknisk informasjon",
+		"application": "Bruksomr\u00e5de",
+		"users": "Brukere",
+		"remarks": "Merknader",
+		"description": "Beskrivelse",
+		"details": "Produktdetaljer",
+		"noVariants": "Ingen varianter funnet",
+		"addedToCart": "Legget til i kassen",
+		"errorAddingToCart": "Kunne ikke legge til i kassen",
+		"selectWarehouse": "Velg lager",
+		"selectWarehouseFirst": "Vennligst velg en lagerstasjon f\u00f8rst",
+		"noBalanceForWarehouse": "Ingen balanse tilgjengelig for denne lagerstasjonen",
+		"noWarehouses": "Ingen lager",
+		"noWarehousesAvailable": "Ingen lager tilgjengelig",
+		"showingFirst": "Viser f\u00f8rste",
+		"warehouses": "Lager",
+		"noDescriptionAvailable": "Ingen beskrivelse er tilgjengelig for dette produktet.",
+		"stockInfo": "Varer ikke p\u00e5 lager kan fortsatt bestilles \u2013 3 dager ekstra leveringstid.",
+		"documentsTitle": "Dokumentasjon",
+		"noDocumentsAvailable": "Ingen dokumenter er tilgjengelige for dette produktet.",
+		"noRelatedProducts": "Ingen relaterte produkter er tilgjengelige for dette produktet.",
+		"variantTitle": "Velg produktvariant",
+		"loadingVariant": "Laster variant...",
+		"unknownAttribute": "Ukjent",
+		"itemNumber": "Varenummer",
+		"inStockDelivery": "P\u00e5 lager \u2013 leveres innen 2-3 dager",
+		"loadingPrice": "Laster pris...",
+		"excludingVat": "eks. mva",
+		"allVariants": "Alle varianter",
+		"technicalData": "Tekniske data",
+		"noSpecifications": "Ingen tekniske spesifikasjoner tilgjengelig.",
+		"addAttribute": "Rediger tabell",
+		"image": "Bilde",
+		"unspsc": "UNSPSC",
+		"unit": "Enhet",
+		"price": "Pris",
+		"quantity": "Antall",
+		"warehouse": "Lager",
+		"cart": "Handlekurv",
+		"selected": "Valgt",
+		"select": "Velg",
+		"uniqueSellingPoints": "Viktige egenskaper"
+	},
+	"BreadCrumbs": {
+		"home": "Hjem",
+		"category": "Kategori",
+		"product": "Produkt",
+		"cart": "Handlekurv",
+		"checkout": "Kassen",
+		"profile": "Profil",
+		"ehandel": "E-handel",
+		"hoseManagement": "Slangestyring"
+	},
+	"Profile": {
+		"tabs": {
+			"mine-bestillinger": "Mine bestillinger",
+			"rekvisisjoner": "Rekvisisjoner",
+			"ordre-historikk": "Ordrehistorikk",
+			"hose-oversikt": "Slangeoversikt",
+			"hose-inspections": "Slangeinspeksjoner",
+			"hose-replacement": "Slangebytter",
+			"hose-requests": "Slangeforesp\u00f8rsler",
+			"hose-risk-class": "Slangerisikoklasse",
+			"dimensions": "Dimensjoner",
+			"personal-info": "Personlig informasjon",
+			"addresses": "Adresser",
+			"orders": "Bestillinger",
+			"wishlist": "\u00d8nskeliste",
+			"password": "Endre passord",
+			"ratings": "Vurderinger"
+		},
+		"hoseDetail": "Slangedetaljer",
+		"orderDetail": "Ordredetaljer"
+	},
+	"Common": {
+		"reset": "Nullstill",
+		"error": {
+			"title": "Noe gikk galt!",
+			"tryAgain": "Pr\u00f8v igjen",
+			"categoryLoad": "Vi kunne ikke laste kategorien innhold.",
+			"subcategoryLoad": "Vi kunne ikke laste subkategorien innhold."
+		},
+		"sort": "Sorter",
+		"search": "S\u00f8k",
+		"searchProducts": "S\u00f8k etter slanger, utstyr, diameter, trykklasse...",
+		"searchAttributes": "S\u00f8k etter attributter",
+		"attributes": "Attributter",
+		"showMore": "Vis mer",
+		"showLess": "Vis mindre"
+	},
+	"CustomerSwitcher": {
+		"title": "Kundeinformasjon",
+		"selectCustomerLabel": "Kunder",
+		"selectCustomerPlaceholder": "Velg kundenummer",
+		"selectWarehouseLabel": "Lager",
+		"selectWarehousePlaceholder": "Velg lager",
+		"noWarehousesAvailable": "Ingen lager tilgjengelig",
+		"selectAssortmentLabel": "Sortiment",
+		"selectAssortmentPlaceholder": "Velg sortiment",
+		"noAssortmentsAvailable": "Ingen sortimenter tilgjengelig",
+		"selectCompanyLabel": "Selskap",
+		"selectCompanyPlaceholder": "Velg selskap",
+		"noCompaniesAvailable": "Ingen selskaper tilgjengelig",
+		"defaultCompanyFallback": "Standardselskap ({companyNumber})",
+		"save": "Lagre",
+		"saving": "Lagrer..."
+	},
+	"CustomerWebPromo": {
+		"switcher": {
+			"news": "Nyhet",
+			"future": "Fremtidens kundeweb for THM"
+		},
+		"customerWeb": {
+			"title": "Fremtidens kundeweb for THM sammen former vi l\u00f8sningen",
+			"description": "Vi bygger n\u00e5 neste generasjon kundeweb for TESS Hose Management (THM). Dette er mer enn en oppdatering \u2013 vi utvikler en moderne plattform som kombinerer e-handel og avansert beslutningsst\u00f8tte, slik at du f\u00e5r full oversikt og kontroll over slanger og utstyr.",
+			"feedbackPrompt": "Vær med og påvirk hvordan vi former løsningen",
+			"feedbackSubtext": "si oss dine behov, ønsker eller legg igjen et forslag.",
+			"feedbackButton": "Legg igjen ditt forslag"
+		},
+		"otherSection": {
+			"title": "En annen seksjon \u2013 eksempeltekst",
+			"description": "Denne visningen viser innholdet n\u00e5r brukeren velger alternativet \u201cFremtidens kundeweb\u201d.",
+			"cta": "Les mer"
+		},
+		"imageAlt": "THM kundeweb promo",
+		"imageCaption": "Eksempelbilde. Faktisk l\u00f8sning kan avvike."
+	},
+	"Search": {
+		"categories": "Kategori",
+		"suggestions": "S\u00f8keforslag",
+		"noSuggestions": "Ingen s\u00f8keforslag funnet",
+		"noProductsFound": "Ingen produkter funnet",
+		"seeMoreCategories": "Se flere kategorier",
+		"resultsTitle": "Dine treff",
+		"inMainWarehouse": "P\u00e5 hovedlager",
+		"noResults": {
+			"title": "Ingen resultater funnet",
+			"description": "Beklager. Vi fant ingen produkter som matcher s\u00f8ket \"{query}\"",
+			"tipsTitle": "Tips for bedre s\u00f8keresultater:",
+			"tips": {
+				"checkSpelling": "Sjekk stave m\u00e5ten og pr\u00f8v alternative skrivem\u00e5ter",
+				"useFewerWords": "Bruk f\u00e6rre eller mer generelle s\u00f8keord",
+				"searchByType": "S\u00f8k p\u00e5 produkttype eller kategori i stedet",
+				"searchBySpec": "Pr\u00f8v \u00e5 s\u00f8ke p\u00e5 tekniske spesifikasjoner"
+			},
+			"help": {
+				"title": "Mangler du vare?",
+				"description": "V\u00e5re eksperter hjelper deg med \u00e5 finne riktige produkter for dine behov.",
+				"email": "E-post: tess@tess.no"
+			}
+		}
+	},
+	"Seo": {
+		"defaultTitle": "TESS - Teknisk Faghandel | Netthandel",
+		"defaultDescription": "Tess er din p\u00e5litelige leverand\u00f8r av byggematerialer, sikkerhetsutstyr og industrielle produkter. Handle trygt og raskt p\u00e5 nett."
+	},
+	"Footer": {
+		"companyName": "TESS AS",
+		"companyDescription": "Din p\u00e5litelige partner innen teknisk utstyr og tjenester \u2013 siden 1968.",
+		"company": "Company",
+		"support": "Support",
+		"legal": "Legal",
+		"about": "About Us",
+		"careers": "Careers",
+		"contact": "Contact",
+		"help": "Help Center",
+		"shipping": "Shipping",
+		"returns": "Returns",
+		"terms": "Terms of Service",
+		"privacy": "Privacy Policy",
+		"cookies": "Cookie Policy",
+		"rights": "All rights reserved."
+	},
+	"Faq": {
+		"title": "Vanlige sp\u00f8rsm\u00e5l (FAQ)",
+		"questions": {
+			"openingHours": "\u00c5pningstider?",
+			"delivery": "Leveranser fra TESS?",
+			"forgotPassword": "Glemt passord?",
+			"addToOrder": "Jeg \u00f8nsker \u00e5 legge til en vare p\u00e5 ordren. Er det mulig?",
+			"notFound": "Jeg finner ikke svar p\u00e5 det jeg vil vite. Hva gj\u00f8r jeg?",
+			"missingProduct": "Jeg finner ikke varen jeg \u00f8nsker \u00e5 kj\u00f8pe. Hva gj\u00f8r jeg?",
+			"contactErrors": "Hvem kontakter jeg om feil eller mangler i nettbutikken?",
+			"specificProduct": "Jeg vil vite mer om en spesifikk vare. Hvem kontakter jeg?"
+		},
+		"answers": {
+			"openingHours": "V\u00e5r nettbutikk er \u00e5pen 24 timer i d\u00f8gnet. De fleste servicesentre holder \u00e5pent fra 07:00 til 16:00. Finn ditt n\u00e6rmeste TESS <link>servicesenter</link>.",
+			"delivery": "Kontakt din lokale selger eller ditt n\u00e6rmeste TESS <link>kundesenter</link>. Du kan ogs\u00e5 henvende deg til v\u00e5rt sentrale kundesenter.",
+			"forgotPassword": "Trykk p\u00e5 \u00abglemt passord\u00bb p\u00e5 login siden. Passordlink sendes til e-posten din som du kan bruke for \u00e5 lage nytt passord.",
+			"addToOrder": "Nei, det er ikke mulig. Det m\u00e5 legges ny bestilling.",
+			"notFound": "Benytt v\u00e5r chat-tjeneste eller ta kontakt med din kundekontakt.",
+			"missingProduct": "Benytt v\u00e5r chat-tjeneste eller ta kontakt med din kundekontakt.",
+			"contactErrors": "Send feil eller mangler du finner til: <email>netthandel@tess.no</email>.",
+			"specificProduct": "Kontakt din lokale selger eller n\u00e6rmeste TESS <link>servicesenter</link>."
+		},
+		"feedback": {
+			"question": "Fant du det du lette etter?",
+			"yes": "Ja",
+			"no": "Nei",
+			"thanks": "Takk for tilbakemeldingen!",
+			"closing": "Da h\u00e5per vi du fant det du trengte. Ha en fin dag!",
+			"helpText": "Kontakt oss, s\u00e5 gj\u00f8r vi v\u00e5rt beste for \u00e5 hjelpe deg. I tillegg bruker vi sp\u00f8rsm\u00e5lene til \u00e5 forbedre FAQ-siden.",
+			"whatWereYouLookingFor": "Hva lette du etter?",
+			"placeholder": "Fortell hva du lurer p\u00e5",
+			"contactQuestion": "Vil du bli kontaktet ang\u00e5ende svaret? Vi kontakter deg p\u00e5 din registrerte e-post.",
+			"send": "Send melding",
+			"submittedMessage": "Takk! Din tilbakemelding er sendt."
+		},
+		"servicesenter": "servicesenter",
+		"kundesenter": "kundesenter"
+	},
+	"Kjopsbetingelser": {
+		"title": "Kj\u00f8psbetingelser for kunden (e-handel)",
+		"sections": {
+			"customerTerms": {
+				"title": "Betingelser for kunden",
+				"content": "For avtalekunder av TESS gjelder betingelser definert i egen avtale."
+			},
+			"salesTerms": {
+				"title": "Salgsbetingelser",
+				"content": "Prisene er netto eks. mva. Leveringsbetingelser er ExW TESS iht Incoterms 2010 eller NL09."
+			},
+			"deliveries": {
+				"title": "Forsendelser",
+				"content": "For kundens regning."
+			},
+			"ownership": {
+				"title": "Eiendomsrett",
+				"content": "Selger har eiendomsretten til de solgte varene inntil kj\u00f8pesummen med tillegg av renter og omkostninger i sin helhet er betalt (kfr: Panteloven, spesielt \u00a73-15). Faktureringsgebyr: kr 65,- +mva."
+			},
+			"returns": {
+				"title": "Retur av varer",
+				"content": "Retur godkjennes etter avtale med din lokale TESS representant. Om du ikke er tilknyttet en lokal TESS-avdeling avtales retur med Kundesenteret p\u00e5 TESS hovedkontor. Se e-post og telefonnummer i bunnmeny. Kappede slanger, monterte enheter, utg\u00e5tte eller spesialproduserte produkter tas normalt ikke i retur. Med mindre annet er avtalt, dekker kj\u00f8per de direkte kostnadene ved \u00e5 returnere varen. Direkte kostnader vil v\u00e6re forsendelses- eller transportkostnader, og eventuelle andre direkte kostnader som eksempelvis innkj\u00f8p av ny frakt emballasje. Begrepet dekker ikke eventuelle administrative kostnader returen har for den n\u00e6ringsdrivende."
+			},
+			"payment": {
+				"title": "Betaling med Visa eller Mastercard",
+				"content": "N\u00e5r du har betalt med Visa eller Mastercard reserves hele kj\u00f8pesummen p\u00e5 kortet ved registrering av bestillingen, men belastes f\u00f8rst ved sending av varene. Dersom vi ikke kan levere en varelinje vil vi ikke trekke dette bel\u00f8pet fra kortet."
+			},
+			"disclaimer": {
+				"title": "Forbehold",
+				"content": "Det tas ytterligere forbehold for dokumenterbare endringer fra underleverand\u00f8rer, endrede r\u00e5varepriser, eventuelle valutasvingninger og trykkfeil. Legeringstillegg, r\u00e5varetillegg og eventuelle milj\u00f8avgifter kan forekomme for enkelte varegrupper."
+			},
+			"form": {
+				"title": "Skjema",
+				"content": "Angrerettskjema finner du <link>her</link>."
+			}
+		}
+	},
+	"Cart": {
+		"archived": "Cart archived",
+		"errorArchiving": "Error archiving cart",
+		"showStockStatus": "Vis lagerstatus for:",
+		"yourCart": "Din handlekurv",
+		"archiveCart": "Arkiver handlekurv",
+		"viewCartHistory": "Vis handlekurvhistorikk",
+		"outOfStock": "Noen varer er ikke p\u00e5 lager i ditt valgte varehus",
+		"outOfStockMessage": "Noen varer er ikke p\u00e5 lager ved valgt servicesenter. Levering kan ta opptil 3 ekstra dager. Du kan endre servicesenter per varelinje for raskere levering.",
+		"cartHistory": "Handlekurv historikk",
+		"date": "Dato",
+		"userId": "Bruker Id",
+		"article": "Varer",
+		"total": "Totalsum",
+		"view": "Vis",
+		"hide": "Skjul",
+		"image": "Bilde",
+		"productNumber": "Produktnummer",
+		"itemNumber": "Varenummer",
+		"quantity": "Antall",
+		"warehouse": "Lager",
+		"company": "Selskap",
+		"page": "Side",
+		"of": "av",
+		"itemRemoved": "Varen er fjernet fra handlekurven"
+	},
+	"Login": {
+		"title": "Login",
+		"loginToViewCart": "Please login to view your cart"
+	},
+	"AuthDialog": {
+		"welcome": "Velkommen",
+		"welcomeDescription": "Velg hvordan du vil logge inn.",
+		"loginWithMicrosoft": "Logg inn med jobbkonto (SSO)",
+		"loginWithMicrosoftDescription": "For partnere og TESS-ansatte med organisasjonskonto",
+		"loginWithMicrosoftTenant": "Logg inn/Opprett e-handels konto",
+		"loginWithMicrosoftTenantDescription": "Kun for partnere uten organisasjonskonto",
+		"or": "eller",
+		"contactSupport": "F\u00e5r du ikke logget inn?",
+		"contactSupportLink": "Kontakt support",
+		"copyright": "2025 TESS",
+		"honest": "\u00c6rlig, p\u00e5litelig og profesjonell",
+		"honestDescription": "Hos TESS m\u00f8ter du fagfolk b\u00e5de foran og bak disken. Vi gir deg markedets beste tilgjengelighet med over 130 lokale servicesentre."
+	},
+	"OrderSummary": {
+		"title": "Ordreoversikt",
+		"originalPrice": "Opprinnelig pris:",
+		"discounts": "Rabatter",
+		"sumAfterDiscount": "Sum etter rabatt (eks. mva.)",
+		"deliverySurcharge": "Tilleggsavgift",
+		"vat": "MVA(25%)",
+		"totalIncVat": "Total inkl. mva.",
+		"continueToPayment": "Fortsett til levering",
+		"punchoutCart": "Punchout Handlekurv",
+		"punchoutCartStep1": "Fortsett til betaling",
+		"punchoutCartStep2": "Fullf\u00f8r ordre",
+		"punchoutCartStep3": "Bekreft",
+		"or": "eller",
+		"continueShopping": "Fortsett \u00e5 handle",
+		"termsText": "Jeg godtar",
+		"termsLink": "vilk\u00e5rene",
+		"termsEnd": "for kj\u00f8p"
+	},
+	"Checkout": {
+		"modals": {
+			"feedback": {
+				"title": "Tilbakemelding etter kj\u00f8p",
+				"description": "Vi vil gjerne h\u00f8re hvordan kj\u00f8psopplevelsen din var. Din tilbakemelding hjelper oss \u00e5 bli enda bedre.",
+				"question": "Hvordan opplevde du kj\u00f8pet?",
+				"ratings": {
+					"1": "1 - Veldig d\u00e5rlig",
+					"2": "2 - D\u00e5rlig",
+					"3": "3 - Helt grei",
+					"4": "4 - Bra",
+					"5": "5 - Veldig bra"
+				},
+				"commentLabel": "Har du kommentarer? (valgfritt)",
+				"commentPlaceholder": "Fortell oss gjerne hva som fungerte bra, eller hva vi kan forbedre",
+				"submit": "Send tilbakemelding"
+			},
+			"tracking": {
+				"title": "Spor leveringen av bestilling #{orderNumber}",
+				"orderDate": "Bestillingsdato",
+				"email": "E-post",
+				"phone": "Telefon",
+				"paymentMethod": "Betalingsm\u00e5te",
+				"deliveryAddress": "Leveringsadresse",
+				"totalPrice": "Totalpris",
+				"currency": "NOK",
+				"status": {
+					"paymentReceived": "Betaling mottatt",
+					"orderPlaced": "Bestilling lagt inn",
+					"viaInvoice": "Via faktura"
+				},
+				"buttons": {
+					"orderDetails": "Bestillingsdetaljer",
+					"cancelOrder": "Kanseller bestilling"
+				}
+			},
+			"contact": {
+				"title": "Kontaktperson",
+				"firstName": "Fornavn",
+				"lastName": "Etternavn",
+				"email": "E-post",
+				"phone": "Telefon",
+				"save": "Lagre kontaktperson",
+				"cancel": "Avbryt"
+			},
+			"payment": {
+				"title": "Betalingsmetode",
+				"invoice": "Faktura",
+				"save": "Lagre betalingsmetode",
+				"cancel": "Avbryt"
+			},
+			"delivery": {
+				"title": "Velg leveringsmetode",
+				"addressDelivery": "Levering til adresse",
+				"estimatedTime": "Estimert leveringstid: 2 til 7 virkedager",
+				"save": "Lagre leveringsmetode",
+				"cancel": "Avbryt"
+			},
+			"address": {
+				"selector": {
+					"placeholder": "Velg en lagret adresse",
+					"user": "Bruker",
+					"customer": "Kunde",
+					"organization": "Organisasjon",
+					"addAddress": "Legg til adresse"
+				},
+				"title": "Din adresse",
+				"save": "Bruk adresse",
+				"cancel": "Avbryt",
+				"savedAddresses": "Lagrede adresser",
+				"addressName": "Navn p\u00e5 adresse",
+				"addressNameExample": "Eksempel: Hjem, Jobb, Kontor",
+				"street": "Gatenavn",
+				"streetExample": "Eksempel: Storgata",
+				"houseNumber": "Husnummer",
+				"houseNumberExample": "Eksempel: 15",
+				"addExtra": "Legg til tilleggsopplysninger",
+				"extraInfo": "Tilleggsopplysninger (valgfri)",
+				"extraInfoExample": "Eksempel: c/o, etasje, oppgang osv.",
+				"postalCode": "Postnummer",
+				"postalCodeExample": "Eksempel: 0155",
+				"city": "Sted",
+				"cityPlaceholderAuto": "(fylles automatisk etter postnummer er validert)",
+				"cityPlaceholderManual": "Skriv inn sted",
+				"saveAsUserAddress": "Lagre som brukeradresse"
+			}
+		},
+		"steps": {
+			"delivery": "Levering",
+			"payment": "Betaling",
+			"confirm": "Bekreft"
+		},
+		"confirmation": {
+			"yourItems": "Dine varer",
+			"contactPerson": "Kontaktperson",
+			"address": "Adresse",
+			"delivery": "Levering",
+			"payment": "Betaling",
+			"deliveryMethod": "Levering til adresse",
+			"deliveryTime": "Estimert leveringstid: 2 til 7 virkedager",
+			"invoice": "Faktura",
+			"cardPayment": "Kortbetaling",
+			"project": "Prosjekt",
+			"department": "Avdeling",
+			"category": "Kategori",
+			"notSpecified": "\u2013"
+		},
+		"errors": {
+			"selectAddress": "Vennligst velg en adresse",
+			"orderSubmissionFailed": "Bestillingen kunne ikke sendes",
+			"dimensionsRequired": "Vennligst fyll ut alle p\u00e5krevde dimensjonsfelt"
+		},
+		"feedback": {
+			"rating": "Vurdering",
+			"comment": "Kommentar",
+			"ratings": {
+				"1": "1 - Veldig d\u00e5rlig",
+				"2": "2 - D\u00e5rlig",
+				"3": "3 - Middels",
+				"4": "4 - Bra",
+				"5": "5 - Veldig bra"
+			}
+		},
+		"contactPerson": {
+			"title": "Kontaktperson",
+			"edit": "Endre kontaktperson",
+			"firstName": "Fornavn",
+			"lastName": "Etternavn",
+			"email": "E-post",
+			"phone": "Telefonnummer",
+			"emailExample": "Eksempel: navn@eksempel.no",
+			"phoneExample": "Eksempel: +47 123 45 678",
+			"save": "Lagre kontaktperson",
+			"cancel": "Avbryt",
+			"fetchedFromProfile": "Hentet fra profil"
+		},
+		"address": {
+			"title": "Din adresse",
+			"edit": "Endre adresse",
+			"savedAddresses": "Lagrede adresser",
+			"addressName": "Adressenavn",
+			"addressNameExample": "Eksempel: Hjem, Jobb, Kontor",
+			"street": "Gatenavn",
+			"streetExample": "Eksempel: Hovedgata",
+			"houseNumber": "Husnummer",
+			"houseNumberExample": "Eksempel: 15",
+			"addExtra": "Legg til tilleggsinformasjon",
+			"extraInfo": "Tilleggsinformasjon (valgfritt)",
+			"extraInfoExample": "Eksempel: c/o, etasje, inngang, osv.",
+			"postalCode": "Postnummer",
+			"postalCodeExample": "Eksempel: 0155",
+			"city": "Sted",
+			"cityPlaceholderAuto": "(fylles ut automatisk etter postnummervalidering)",
+			"cityPlaceholderManual": "Skriv inn sted",
+			"saveAsUserAddress": "Lagre som brukeradresse",
+			"useAddress": "Bruk adresse",
+			"cancel": "Avbryt",
+			"homeAddress": "Hjemmeadresse"
+		},
+		"delivery": {
+			"title": "Velg leveringsm\u00e5te",
+			"warning": {
+				"title": "Noen varer er ikke p\u00e5 lager i ditt valgte varehus",
+				"message": "Noen varer er ikke p\u00e5 lager i ditt valgte varehus, og det kan ta opptil 3 dager ekstra \u00e5 f\u00e5 dem levert.",
+				"closeLabel": "Lukk varsel"
+			},
+			"options": {
+				"address": {
+					"title": "Levering til adresse",
+					"estimate": "Estimert leveringstid: 2 til 7 virkedager"
+				}
+			}
+		},
+		"payment": {
+			"title": "Velg betalingsm\u00e5te",
+			"invoice": "Faktura"
+		},
+		"invoice": {
+			"title": "Tilleggsinformasjon for faktura",
+			"description": "Opplysningene vises p\u00e5 fakturaen og hjelper \u00f8konomiavdelingen med riktig bokf\u00f8ring."
+		},
+		"dimensions": {
+			"label": "Brukerdimensjon inndata:",
+			"selectLabel": "Brukerdimensjoner",
+			"selectPlaceholder": "Velg",
+			"reference": "Referanse",
+			"dimension1": "Referanse 1",
+			"dimension2": "Referanse 2",
+			"dimension3": "Referanse 3",
+			"modes": {
+				"select": "Velg",
+				"search": "S\u00f8k",
+				"manual": "Manuell"
+			}
+		}
+	},
+	"HosesAndEquipments": {
+		"title": "Slanger og utstyr",
+		"location": "Lokasjon",
+		"customer": "Customer",
+		"selectS1Location": "Velg S1 anlegg",
+		"selectCustomer": "Velg customer",
+		"loadingMore": "Laster flere...",
+		"removeLocation": "Fjern lokasjon",
+		"columns": {
+			"id": "ID",
+			"customerId": "KUNDE-ID",
+			"description": "BESKRIVELSE",
+			"s1Location": "S1 ANLEGG, FART\u00d8Y, ENHET",
+			"s2Equipment": "S2 UTSTYR",
+			"orderNumber": "ORDRENUMMER (PO)",
+			"installationDate": "INSTALLASJONSDATO",
+			"productionDate": "PRODUKSJONSDATO",
+			"fillingDate": "P\u00c5FYLLINGSDATO",
+			"nextInspectionDate": "NESTE INSPEKSJONSDATO"
+		},
+		"errors": {
+			"selectItemsFirst": "Vennligst velg elementer \u00e5 kontakte om"
+		},
+		"success": {
+			"supportMessageSent": "Meldingen ble sendt til TESS support",
+			"requestSent": "Foresp\u00f8rselen ble sendt",
+			"equipmentDiscarded": "Utstyr utrangert"
+		}
+	},
+	"HoseOverview": {
+		"title": "Min oversikt",
+		"equipmentOverview": "Utstyrsoversikt",
+		"structure": "STRUKTUR (S1+S2)",
+		"noUnits": "Ingen enheter",
+		"legend": {
+			"s2": "S2",
+			"equipment": "Utstyr/Equipment",
+			"equipmentSubcategory": "Utstyr/Equipment subkategori"
+		},
+		"inspection": {
+			"title": "Inspeksjon",
+			"rejected": "Underkjente inspeksjoner",
+			"approvedWithRemarks": "Best\u00e5tt med anmerkninger",
+			"overdue": "Forfalte inspeksjoner",
+			"planned": "Planlagte inspeksjoner"
+		},
+		"replacement": {
+			"title": "Slangebytte",
+			"overdue": "Forfalte inspeksjoner",
+			"planned": "Planlagte inspeksjoner"
+		}
+	},
+	"HoseDetailsPage": {
+		"hoseEquipment": "Slange/utstyr",
+		"keyInformation": "N\u00f8kkel informasjon",
+		"images": "Bilder",
+		"viewAll": "Vis alle",
+		"status": "Status",
+		"edit": "Rediger",
+		"cancel": "Avbryt",
+		"addToCart": "Legg til i handlekurv",
+		"export": "Eksporter",
+		"more": "Mer"
+	},
+	"HoseAccordion": {
+		"title": "Slange",
+		"seeDetails": "Se detaljer"
+	},
+	"S2EquipmentsAccordion": {
+		"title": "S2-utstyr"
+	},
+	"AdditionalEquipmentAccordion": {
+		"title": "Tilleggsutstyr p\u00e5 slangen"
+	},
+	"OtherDetailsAccordion": {
+		"title": "Andre detaljer"
+	},
+	"InspectionsAccordion": {
+		"title": "Inspeksjon"
+	},
+	"DocumentsAccordion": {
+		"title": "Dokumenter",
+		"addDocument": "Legg til dokument"
+	},
+	"HistoricAccordion": {
+		"title": "Historikk",
+		"current": "(gjeldende)",
+		"columns": {
+			"workOrderNumber": "ARBEIDSORDRENUMMER (WO)",
+			"description": "BESKRIVELSE",
+			"content": "CONTENT"
+		}
+	},
+	"HoseInspections": {
+		"title": "Inspeksjoner",
+		"location": "Lokasjon",
+		"selectS1Location": "Velg S1 anlegg",
+		"loadingMore": "Laster flere...",
+		"removeLocation": "Fjern lokasjon",
+		"type": "Type",
+		"completedInspections": "Utf\u00f8rte inspeksjoner",
+		"plannedInspections": "Planlagte inspeksjoner",
+		"period": "Periode",
+		"selectPeriod": "Velg periode",
+		"last12Months": "Siste 12 m\u00e5neder",
+		"last24Months": "Siste 24 m\u00e5neder",
+		"currentYear": "Inneverende \u00e5r",
+		"next12Months": "Neste 12 m\u00e5neder",
+		"next24Months": "Neste 24 m\u00e5neder",
+		"loadingData": "Laster data...",
+		"couldNotLoadData": "Kunne ikke laste data.",
+		"noDataInPeriod": "Ingen data i valgt periode.",
+		"completed": "Utf\u00f8rt",
+		"planned": "Planlagt"
+	},
+	"HoseReplacement": {
+		"title": "Fremtidige slangebytter",
+		"notificationTitle": "Noen varer er ikke p\u00e5 lager",
+		"notificationMessage": "Noen varer er ikke p\u00e5 lager i ditt valgte varehus, og det kan ta opptil 3 dager ekstra \u00e5 f\u00e5 dem levert.",
+		"structure": "STRUKTUR (S1+S2)",
+		"total": "TOTAL",
+		"estimatedCosts": "Estimerte kostnader"
+	},
+	"HoseRiskClass": {
+		"title": "Kritikalitet",
+		"subtitle": "Prosent av (S1) TESS Princess IMO: 789548",
+		"riskClass": "Risikoklasse",
+		"rkLabel": "RK = Risikoklasse"
+	},
+	"HoseRequests": {
+		"title": "Mine foresp\u00f8rsler",
+		"subtitle": "Samleside med alle foresp\u00f8rsler knyttet til ditt kundenummer (Request for quote)",
+		"emptyState": {
+			"title": "Ingen foresp\u00f8rsler enn\u00e5.",
+			"instruction1": "Slik gj\u00f8r du: beskriv behovet, velg produkter og send til TESS.",
+			"instruction2": "Etter sending vises RFQ-en her med status og dato.",
+			"instruction3": "Fra Utstyrsliste: velg enheter \u2192 Handlinger \u2192 Send foresp\u00f8rsel.",
+			"goToEquipmentList": "G\u00e5 til utstyrsliste"
+		},
+		"rfqListTitle": "Foresp\u00f8rsler (RFQ)",
+		"equipmentOnRfq": "Utstyr p\u00e5 RFQ# 2211879",
+		"cancelRequest": "Kanseller foresp\u00f8rsel",
+		"columns": {
+			"rfqNumber": "RFQ#",
+			"requestType": "Foresp\u00f8rselstype",
+			"created": "Opprettet",
+			"status": "Status"
+		},
+		"equipmentTable": {
+			"equipment": "Utstyr",
+			"description": "Beskrivelse",
+			"showing": "Viser",
+			"of": "av"
+		}
+	},
+	"AssetIdSelector": {
+		"status": "Status"
+	},
+	"CartAddedModal": {
+		"item": "vare",
+		"items": "varer",
+		"addedToCart": "lagt til i handlekurv",
+		"noItemsSelected": "Ingen varer valgt",
+		"showLess": "Vis f\u00e6rre",
+		"showAll": "Vis alle",
+		"navigatingToCart": "Navigerer til handlekurv",
+		"goToCart": "Til handlekurven"
+	},
+	"HoseSearchBar": {
+		"placeholder": "S\u00f8k etter ID nummer, ordrenummer, fart\u00f8y eller utstyr...",
+		"clearSearch": "Fjern s\u00f8k",
+		"search": "S\u00f8k"
+	},
+	"HoseActionsDropdown": {
+		"action": "HANDLING",
+		"selected": "Valgt",
+		"addToCart": "Legg til i handlekurv",
+		"adding": "Legger til...",
+		"contactSupport": "Kontakt TESS support",
+		"reportReplacement": "Rapporter slangebytter",
+		"discardEquipment": "Kasser utstyr",
+		"printCertificate": "Skriv ut TESS trykktest-sertifikat",
+		"printTags": "Skriv ut visuelle ID-merker (strekkode)",
+		"printTestCertificates": "Skriv ut trykktest-sertifikater",
+		"exportToExcel": "Eksporter oversiktsdata til Excel",
+		"selectAll": "Velg alle",
+		"deselectAll": "Fjern alle",
+		"selectAllOnPage": "Velg alle p\u00e5 denne siden",
+		"deselectAllOnPage": "Fjern alle p\u00e5 denne siden"
+	},
+	"SidebarNav": {
+		"hoseManagement": "Hose Management",
+		"eCommerce": "E-handel"
+	},
+	"MineBestillinger": {
+		"title": "Mine bestillinger",
+		"subtitle": "Dine utf\u00f8rte bestillinger her i e-handelen.",
+		"searchPlaceholder": "S\u00f8k etter ordre-ID eller kundenavn",
+		"search": "S\u00f8k",
+		"status": "Status",
+		"all": "Alle",
+		"received": "Mottatt",
+		"confirmed": "Bekreftet",
+		"picked": "Plukket",
+		"inTransit": "Under transport",
+		"delivered": "Levert",
+		"cancelled": "Kansellert",
+		"orderNumber": "Ordrenummer",
+		"orderDate": "Bestillingsdato",
+		"price": "Pris"
+	},
+	"AddUserModal": {
+		"title": "Legg til ny bruker",
+		"contactInfo": "Kontaktinformasjon",
+		"firstName": "Fornavn",
+		"lastName": "Etternavn",
+		"email": "E-post",
+		"emailPlaceholder": "navn@selskap.no",
+		"titlePlaceholder": "Tittel",
+		"phone": "Telefonnummer",
+		"phonePlaceholder": "+47 444 44 444",
+		"permissions": "Tilganger",
+		"superuserInfoTitle": "Brukere du oppretter, overtar dine innstillinger",
+		"superuserInfoDesc": "Som superbruker kan du opprette brukere med samme kundenummer. Nye brukere overtar automatisk dine innstillinger.",
+		"customerAccess": "Kundetilgang",
+		"defaultWarehouse": "Standard TESS lager",
+		"customerCatalog": "Kundekatalog",
+		"tessCompany": "TESS firma",
+		"selectCustomers": "Velg relevante kunder",
+		"selectCatalog": "Velg katalog",
+		"selectWarehouse": "Velg lager",
+		"selectCompany": "Velg firma",
+		"userRights": "Brukerrettigheter og status",
+		"role": "Rolle",
+		"superuser": "Superbruker",
+		"superuserDesc": "Opprette nye brukere med egne innstillinger, godkjenne rekvisjoner, sette budsjetter p\u00e5 ansatte, opprette dimensjoner",
+		"employee": "Ansatt",
+		"employeeDesc": "Handle produkter (etter fastsatt budsjett), se ordrehistorikk, kontakte kundeservice",
+		"addUser": "Legg til bruker",
+		"close": "Lukk"
+	},
+	"DeleteUserModal": {
+		"title": "Slett bruker?",
+		"message": "Brukeren mister tilgang til alle bestillinger, ordrehistorikk og vil ikke kunne logge inn.",
+		"warning": "Handlingen kan ikke angres.",
+		"cancel": "Nei, avbryt",
+		"confirm": "Ja, slett bruker"
+	},
+	"UsersBrukere": {
+		"title": "Brukere",
+		"subtitle": "Her kan du administrere brukere.",
+		"searchPlaceholder": "S\u00f8k etter brukere",
+		"addUser": "Legg til ny bruker",
+		"editSelected": "Rediger ({count})",
+		"totalUsers": "Brukere totalt",
+		"columns": {
+			"name": "NAVN",
+			"role": "BRUKERROLLE",
+			"customerAccess": "KUNDETILGANG",
+			"catalog": "KATALOG",
+			"warehouse": "LAGER",
+			"company": "TESS FIRMA",
+			"action": "HANDLING"
+		},
+		"actions": {
+			"viewDetails": "Vis detaljer",
+			"editUser": "Rediger bruker",
+			"deleteUser": "Slett bruker"
+		}
+	},
+	"HoseColumnsDropdown": {
+		"addColumn": "Legg til kolonne"
+	},
+	"HoseFiltersDropdown": {
+		"filter": "Filter",
+		"inspection": "Inspeksjon",
+		"rejectedInspections": "Underkjente inspeksjoner",
+		"withRemarks": "Med merknader",
+		"overdue": "Forfalt",
+		"hoseReplacement": "Slangebytte",
+		"activeTemporary": "Aktive midlertidige slangebytter",
+		"dueInSixMonths": "Forfaller om mindre enn 6 m\u00e5neder",
+		"byAge": "Etter alder",
+		"age5to6": "5-6 \u00e5r gamle",
+		"age7to8": "7-8 \u00e5r gamle"
+	},
+	"Dimensions": {
+		"title": "Konteringsdimensjoner",
+		"subtitle": "Organiser prosjekter, avdelinger, arbeidsordre osv i hierarkisk struktur med budsjetter. Konteringsdimensjoner du legger til her vises i utsjekk for alle dine brukere.",
+		"showingProjectFor": "Viser prosjekt for",
+		"projects": {
+			"all": "Alle"
+		},
+		"defaultTypes": {
+			"department": "Avdeling",
+			"project": "Prosjekt",
+			"workorder": "Arbeidsordre"
+		},
+		"emptyState": {
+			"title": "Ingen dimensjoner enda",
+			"description": "Kom i gang med \u00e5 opprette din f\u00f8rste dimensjon. Du kan organisere det i kategorier og elementer."
+		},
+		"actions": {
+			"createNew": "Lag ny dimensjon",
+			"editTypes": "Endre dimensjonstyper"
+		},
+		"table": {
+			"name": "NAVN",
+			"nameTooltip": "Dette feltet brukes til \u00e5 identifisere dimensjonen.",
+			"type": "TYPE",
+			"typeTooltip": "Velg en dimensjonstype fra listen.",
+			"budget": "BUDSJETT",
+			"budgetTooltip": "Sett et budsjett for dimensjonen.",
+			"action": "HANDLING"
+		},
+		"validation": {
+			"nameRequired": "Vennligst fyll ut navn",
+			"typeRequired": "Vennligst velg type",
+			"budgetRequired": "Vennligst fyll ut budsjett",
+			"dimensionTypeRequired": "Vennligst velg en dimensjonstype"
+		},
+		"messages": {
+			"created": "Dimensjon opprettet",
+			"createError": "Kunne ikke opprette dimensjon. Vennligst pr\u00f8v igjen.",
+			"updated": "Dimensjon oppdatert",
+			"updateError": "Det oppstod en feil ved oppdatering av dimensjon",
+			"deleted": "Dimensjonen ble slettet",
+			"deleteError": "Kunne ikke slette dimensjonen. Vennligst pr\u00f8v igjen.",
+			"notFound": "Kunne ikke finne dimensjonen som skal oppdateres"
+		}
+	},
+	"DimensionsDeleteModal": {
+		"confirmMessage": "Er du sikker p\u00e5 at du vil slette \"{name}\"?",
+		"warningMessage": "Dette vil ogs\u00e5 slette alle underliggende elementer.",
+		"cancel": "Nei, avbryt",
+		"confirm": "Ja, jeg er sikker"
+	},
+	"DimensionsNewRow": {
+		"namePlaceholder": "Skriv inn navn",
+		"typePlaceholder": "Sett type",
+		"currency": "kr",
+		"save": "Lagre"
+	},
+	"DimensionsDimensionRow": {
+		"expand": "Utvid",
+		"collapse": "Kollaps",
+		"currency": "kr",
+		"cancel": "Avbryt",
+		"save": "Lagre",
+		"addSubcategory": "Legg til underkategori",
+		"editDimension": "Endre dimensjon",
+		"deleteDimension": "Slett dimensjon"
+	},
+	"DimensionsTypeModal": {
+		"title": "Sett dimensjonstyper",
+		"dimension": "Dimensjon",
+		"active": "Aktiv",
+		"type": "Type",
+		"typePlaceholder": "Skriv type",
+		"example": "Eksempel: Prosjekt, avdeling, arbeidsordre osv.",
+		"checkoutInfo": "Dimensjon vises p\u00e5 utsjekk\nog blir p\u00e5krevd \u00e5 fylle ut av alle ansatte",
+		"successMessage": "Dimensjonstyper oppdatert",
+		"errorMessage": "Kunne ikke oppdatere dimensjonstyper",
+		"saveButton": "Lagre dimensjonstyper"
+	},
+	"DimensionsProjectPicker": {
+		"searchPlaceholder": " S\u00f8k prosjekt...",
+		"noProjectsFound": "Ingen prosjekter funnet."
+	},
+	"OrdreDetaljer": {
+		"contactPerson": "Kontaktperson",
+		"address": "Adresse",
+		"delivery": "Levering",
+		"estimatedDeliveryTime": "Estimert leveringstid",
+		"payment": "Betaling",
+		"yourItems": "Dine varer",
+		"orderSummary": "Ordreoversikt",
+		"originalPrice": "Opprinnelig pris (eks. mva.)",
+		"discount": "Rabatt",
+		"subtotal": "Sum etter rabatt (eks. mva.)",
+		"vat": "MVA ({rate}%)",
+		"currency": "kr"
+	},
+	"OrdreHistorikk": {
+		"title": "Ordrehistorikk",
+		"subtitle": "Alle selskapets ordre (e-handel, service senter, forsyningsl\u00f8sninger, per e-post etc)",
+		"searchPlaceholder": "S\u00f8k etter ordre-ID eller kundenavn",
+		"search": "S\u00f8k",
+		"status": "Status",
+		"all": "Alle",
+		"received": "Mottatt",
+		"confirmed": "Bekreftet",
+		"picked": "Plukket",
+		"inTransit": "Under transport",
+		"delivered": "Levert",
+		"cancelled": "Kansellert",
+		"orderNumber": "Ordrenummer",
+		"orderDate": "Bestillingsdato",
+		"price": "Pris"
+	},
+	"ProductDetailsModal": {
+		"title": "Produktdetaljer",
+		"description": "Beskrivelse",
+		"productDetails": "Produktdetaljer",
+		"insert": "Innlegg",
+		"inner": "Innvendig",
+		"marking": "Merking",
+		"temperature": "Temperatur \u00b0c:",
+		"outer": "Utvendig",
+		"closeWindow": "Lukk vindu"
+	},
+	"Rekvisisjoner": {
+		"title": "Rekvisisjoner",
+		"subtitle": "Administrer og godkjenn innkomne rekvisisjoner fra ansatte og eksterne systemer.",
+		"searchPlaceholder": "S\u00f8k etter ordre-ID eller kundenavn",
+		"search": "S\u00f8k",
+		"status": "Status",
+		"orderId": "Ordre ID",
+		"orderer": "Bestiller",
+		"created": "Opprettet",
+		"price": "Pris",
+		"approve": "Godkjenn",
+		"reject": "Avvis",
+		"restore": "Gjenopprett",
+		"units": "Enheter",
+		"quantity": "Antall",
+		"itemsAddedToCart": "{count} varer lagt til i handlekurv",
+		"showLess": "Vis f\u00e6rre",
+		"showAll": "Vis alle",
+		"goToCart": "Til handlekurven"
+	},
+	"ProfilePage": {
+		"tabs": {
+			"myOrders": "Mine bestillinger",
+			"requisitions": "Rekvisisjoner",
+			"orderHistory": "Ordrehistorikk",
+			"dimensions": "Dimensjoner",
+			"usage": "Forbruk",
+			"users": "Brukere",
+			"catalog": "Katalog",
+			"settings": "Innstillinger",
+			"overview": "Oversikt",
+			"hosesEquipment": "Slanger/utstyr",
+			"inspections": "Inspeksjoner",
+			"hoseReplacement": "Slangebytte",
+			"riskClass": "Risikoklasse",
+			"requests": "Foresp\u00f8rsler",
+			"recentActivities": "Siste aktiviteter"
+		},
+		"sidebar": {
+			"orders": "Ordre",
+			"myOrders": "Mine bestillinger",
+			"requisitions": "Rekvisisjoner",
+			"orderHistory": "Ordrehistorikk",
+			"dimensions": "Dimensjoner",
+			"usage": "Forbruk",
+			"users": "Brukere",
+			"catalog": "Katalog",
+			"settings": "Innstillinger",
+			"logout": "Logg ut",
+			"overview": "Oversikt",
+			"hosesEquipment": "Slanger/utstyr",
+			"inspections": "Inspeksjoner",
+			"hoseReplacement": "Slangebytte",
+			"riskClass": "Risikoklasse",
+			"requests": "Foresp\u00f8rsler",
+			"recentActivities": "Siste aktiviteter",
+			"support": "Support"
+		}
+	},
+	"ViewUserModal": {
+		"contactInfo": "Kontaktinformasjon",
+		"firstName": "Fornavn",
+		"lastName": "Etternavn",
+		"email": "Fornavn",
+		"title": "Tittel",
+		"phone": "Telefonnummer",
+		"access": "Tilganger",
+		"customerAccess": "Kundetilgang",
+		"catalog": "Kundekatalog",
+		"standardWarehouse": "Standard TESS lager",
+		"tessCompany": "TESS Firma",
+		"userRightsAndStatus": "Brukerrettigheter og status",
+		"role": "Rolle",
+		"roleDescriptions": {
+			"administrator": "Opprette nye brukere med egne innstillinger, godkjenne rekvisjoner, sette budsjetter p\u00e5 ansatte, opprette dimensjoner",
+			"superbruker": "Opprette nye brukere med egne innstillinger, godkjenne rekvisjoner, sette budsjetter p\u00e5 ansatte, opprette dimensjoner",
+			"ansatt": "Kan kun handle p\u00e5 vegne av seg selv"
+		},
+		"edit": "Rediger",
+		"delete": "Slett bruker"
+	},
+	"BulkEditConfirmationModal": {
+		"title": "Endre innstillinger",
+		"selectedUsers": "Valgte brukere ({count})",
+		"changesWillApply": "Endringene vil gjelde for:",
+		"warning": {
+			"title": "Velg kun feltene du vil endre",
+			"subtitle": "Du kan legge til flere valg for brukerne. Feltene du ikke velger, blir ikke endret.",
+			"howItWorks": "Slik fungerer oppdateringen:",
+			"point1": "Nye valg legges til \u2013 tidligere tilganger beholdes.",
+			"point2": "Vil du fjerne tilganger, m\u00e5 det gj\u00f8res for hver bruker."
+		},
+		"access": "Tilganger",
+		"customerAccess": "Kundetilgang",
+		"customerAccessPlaceholder": "{count} kunder valgt",
+		"catalog": "Kundekatalog",
+		"catalogPlaceholder": "Velg kundekatalog",
+		"standardWarehouse": "Standard TESS lager",
+		"warehousePlaceholder": "{count} lager valgt",
+		"tessCompany": "TESS Firma",
+		"companyPlaceholder": "Velg TESS firma",
+		"updateUsers": "Oppdater {count} brukere",
+		"close": "Lukk"
+	},
+	"ConfirmChangesModal": {
+		"title": "Bekreft endringer",
+		"description": "Du er i ferd med \u00e5 oppdatere {count} brukere. Alle utfylte felter vil bli endret for disse brukerne.",
+		"cancel": "Avbryt",
+		"confirm": "Bekreft endringene"
+	}
 }
