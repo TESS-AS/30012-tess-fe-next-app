@@ -52,7 +52,7 @@ interface DataTableProps<T> {
 
 export function DataTable<
 	T extends {
-		hexagonId: string;
+		hexagonId?: string;
 		orderId: string;
 	},
 >({
@@ -164,7 +164,7 @@ export function DataTable<
 									{data.map((item, index) => (
 										<React.Fragment key={index}>
 											<tr
-												onClick={() => onHoseClick?.(item?.hexagonId)}
+												onClick={() => onHoseClick?.(item?.hexagonId ?? "")}
 												className={cn(
 													"group border-b border-[#C1C4C2] transition-colors duration-200",
 													isSelected(item.orderId)
