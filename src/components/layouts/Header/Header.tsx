@@ -20,11 +20,13 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { PriceDisplay } from "@/components/ui/price-display";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useProfile } from "@/contexts/ProfileContext";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useInstantSearch } from "@/hooks/useInstantSearch";
+import { useOrderSummary } from "@/hooks/useOrderSummary";
 import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import { useCategories } from "@/lib/CategoriesProvider";
@@ -47,8 +49,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
-import { PriceDisplay } from "@/components/ui/price-display";
-import { useOrderSummary } from "@/hooks/useOrderSummary";
 
 export default function Header() {
 	const { categories, loading, error } = useCategories();

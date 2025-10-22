@@ -7,8 +7,8 @@ import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
 import { cn } from "@/lib/utils";
 import { updateUserDimensions } from "@/services/dimensions.service";
 import type { DimensionLabel, DimensionType } from "@/types/dimensions.types";
-import { toast } from "react-toastify";
 import { useTranslations } from "next-intl";
+import { toast } from "react-toastify";
 
 interface Props {
 	open: boolean;
@@ -90,9 +90,7 @@ export default function TypeModal({
 									disabled={!editAll && index !== currentLevel}
 								/>
 								{index === 0 && (
-									<p className="text-xs text-[#6B7280]">
-										{t("example")}
-									</p>
+									<p className="text-xs text-[#6B7280]">{t("example")}</p>
 								)}
 							</div>
 						</div>

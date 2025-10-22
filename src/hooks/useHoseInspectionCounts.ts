@@ -1,8 +1,8 @@
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { getHoseInspection } from "@/services/assets.service";
+import { useQuery } from "@tanstack/react-query";
 
 export type HoseInspectionCounts = {
 	approved: number;

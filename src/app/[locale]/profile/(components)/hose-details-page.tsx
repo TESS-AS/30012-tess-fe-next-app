@@ -4,6 +4,8 @@ import { useState } from "react";
 
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { useGetHoseHistory } from "@/hooks/useGetHoseHistory";
+import { useGetHoseSystems } from "@/hooks/useGetHoseSystems";
 import {
 	ChevronRight,
 	Download,
@@ -26,9 +28,6 @@ import { OtherDetailsAccordion } from "./hose-details-accordions/other-details";
 import { S2EquipmentsAccordion } from "./hose-details-accordions/s2-equipments";
 import { StructureAccordion } from "./hose-details-accordions/structure";
 import ProductDetailsModal from "./product-details-modal";
-import { useGetHoseHistory } from "@/hooks/useGetHoseHistory";
-import { useGetHoseSystems } from "@/hooks/useGetHoseSystems";
-import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 
 interface Props {
 	hexagonId: string;
@@ -105,7 +104,9 @@ export default function HoseDetailsPage({ hexagonId, onBack }: Props) {
 			<div className="rounded-lg bg-white shadow">
 				<div className="flex items-stretch justify-between gap-4 px-6 py-4">
 					<div className="flex flex-1 flex-col border-r border-[#E8EAE9] pr-4">
-						<h3 className="mb-2 font-bold text-[#0F1912]">{t("hoseEquipment")}</h3>
+						<h3 className="mb-2 font-bold text-[#0F1912]">
+							{t("hoseEquipment")}
+						</h3>
 						<p className="text-sm text-[#5A615D]">{title}</p>
 					</div>
 

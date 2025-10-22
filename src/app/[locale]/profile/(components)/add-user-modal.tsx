@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
+import { MultiSelectWithTags } from "@/components/ui/multi-select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { RadioSelect } from "@/components/ui/radio-select";
 import {
 	Select,
 	SelectContent,
@@ -12,9 +16,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { MultiSelectWithTags } from "@/components/ui/multi-select";
-import { RadioSelect } from "@/components/ui/radio-select";
 import { CheckCircle, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -81,9 +82,7 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 			onOpenChange={onOpenChange}
 			className="max-h-[90vh] w-[670px] overflow-y-auto p-0">
 			<ModalHeader className="px-6 py-4">
-				<ModalTitle className="text-xl font-semibold">
-					{t("title")}
-				</ModalTitle>
+				<ModalTitle className="text-xl font-semibold">{t("title")}</ModalTitle>
 			</ModalHeader>
 
 			<form
@@ -193,7 +192,9 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 					{formData.role === "superbruker" && (
 						<div className="grid grid-cols-2 gap-4 text-sm">
 							<div>
-								<div className="font-medium text-[#0F1912]">{t("customerAccess")}:</div>
+								<div className="font-medium text-[#0F1912]">
+									{t("customerAccess")}:
+								</div>
 								<div className="text-[#5A615D]">
 									{formData.kundetilgang.length > 0
 										? formData.kundetilgang
@@ -229,7 +230,9 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 								</div>
 							</div>
 							<div>
-								<div className="font-medium text-[#0F1912]">{t("tessCompany")}:</div>
+								<div className="font-medium text-[#0F1912]">
+									{t("tessCompany")}:
+								</div>
 								<div className="text-[#5A615D]">
 									{tessFirmaOptions.find((f) => f.value === formData.tessFirma)
 										?.label || "TESS Vest"}
@@ -265,7 +268,9 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 							</div>
 							<div className="grid grid-cols-2 gap-4">
 								<div className="space-y-2">
-									<Label htmlFor="standardTessLager">{t("defaultWarehouse")}</Label>
+									<Label htmlFor="standardTessLager">
+										{t("defaultWarehouse")}
+									</Label>
 									<Select
 										value={formData.standardTessLager}
 										onValueChange={(value) =>
@@ -321,9 +326,7 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 										className="cursor-pointer font-medium">
 										{t("superuser")}
 									</Label>
-									<p className="text-sm text-[#5A615D]">
-										{t("superuserDesc")}
-									</p>
+									<p className="text-sm text-[#5A615D]">{t("superuserDesc")}</p>
 								</div>
 							</div>
 							<div className="flex items-start space-x-3">
@@ -338,9 +341,7 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 										className="cursor-pointer font-medium">
 										{t("employee")}
 									</Label>
-									<p className="text-sm text-[#5A615D]">
-										{t("employeeDesc")}
-									</p>
+									<p className="text-sm text-[#5A615D]">{t("employeeDesc")}</p>
 								</div>
 							</div>
 						</RadioGroup>

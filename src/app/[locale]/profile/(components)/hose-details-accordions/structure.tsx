@@ -4,10 +4,10 @@ import {
 	AccordionTrigger,
 	AccordionContent,
 } from "@/components/ui/accordion";
+import { LocationNode, ChildNode } from "@/hooks/useGetHoseSystems";
 import { MapPin, Settings } from "lucide-react";
 
 import { Cell } from "./cell";
-import { LocationNode, ChildNode } from "@/hooks/useGetHoseSystems";
 
 interface Props {
 	isEditMode: boolean;

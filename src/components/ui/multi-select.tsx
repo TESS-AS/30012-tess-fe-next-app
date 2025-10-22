@@ -1,17 +1,18 @@
 "use client";
 
 import * as React from "react";
-import { X, ChevronDown, Search } from "lucide-react";
-import { cn } from "@/lib/utils";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
+import { X, ChevronDown, Search } from "lucide-react";
 
 export interface MultiSelectOption {
 	label: string;

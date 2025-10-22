@@ -1,13 +1,13 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Delete, PenIcon, SquarePen, Trash2, X } from "lucide-react";
+import { SquarePen, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 interface User {

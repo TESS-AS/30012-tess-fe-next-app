@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/tooltip";
 import { useCustomerDimensions } from "@/hooks/useCustomerDimensions";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
-import { cn } from "@/lib/utils";
 import {
 	createDimension,
 	deleteCustomerDimensions,
@@ -21,8 +20,8 @@ import {
 import { getUserDimensions } from "@/services/dimensions.service";
 import type { Dimension, DimensionType } from "@/types/dimensions.types";
 import { Info, PlusIcon, SquarePen } from "lucide-react";
-import { toast } from "react-toastify";
 import { useTranslations } from "next-intl";
+import { toast } from "react-toastify";
 
 import DeleteConfirmModal from "./dimensions/deleteConfirmModal";
 import DimensionRow from "./dimensions/dimensionRow";

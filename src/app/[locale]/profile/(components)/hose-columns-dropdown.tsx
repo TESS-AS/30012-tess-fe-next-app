@@ -3,7 +3,6 @@
 import * as React from "react";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { useTranslations } from "next-intl";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -11,6 +10,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PlusIcon, ChevronDown } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export interface HoseColumnsDropdownProps {
 	options: string[];

@@ -6,7 +6,6 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
 	ShoppingCart,
@@ -18,6 +17,7 @@ import {
 	CheckSquare,
 	ChevronDown,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface HoseActionsDropdownProps {
 	selectedCount: number;
@@ -98,9 +98,7 @@ export function HoseActionsDropdown({
 							selectedCount === 0 || isAddingToCart,
 					})}>
 					<ShoppingCart className="mr-3 h-4 w-4 text-[#005522]" />
-					<span>
-						{isAddingToCart ? t("adding") : t("addToCart")}
-					</span>
+					<span>{isAddingToCart ? t("adding") : t("addToCart")}</span>
 				</DropdownMenuItem>
 
 				<DropdownMenuItem

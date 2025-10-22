@@ -7,13 +7,12 @@ import {
 	AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { useGetAssets } from "@/hooks/useGetAssets";
+import { useGetHoseSystems } from "@/hooks/useGetHoseSystems";
 import { useHoseInspectionCounts } from "@/hooks/useHoseInspectionCounts";
 import { Separator } from "@radix-ui/react-select";
 import { ChevronRight, Ellipsis, MapPin, Settings } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useGetHoseSystems } from "@/hooks/useGetHoseSystems";
 
 const HoseOverview = () => {
 	const t = useTranslations("HoseOverview");
@@ -204,7 +203,9 @@ const HoseOverview = () => {
 								src="/icons/search.svg"
 								alt="Search"
 							/>
-							<p className="text-2xl font-bold text-[#0F1912]">{t("inspection.title")}</p>
+							<p className="text-2xl font-bold text-[#0F1912]">
+								{t("inspection.title")}
+							</p>
 							<Separator className="my-3 h-[1px] w-full bg-[#C1C4C2]" />
 						</div>
 						<div className="grid gap-4">
@@ -293,7 +294,9 @@ const HoseOverview = () => {
 								src="/icons/reload.svg"
 								alt="Reload"
 							/>
-							<p className="text-2xl font-bold text-[#0F1912]">{t("replacement.title")}</p>
+							<p className="text-2xl font-bold text-[#0F1912]">
+								{t("replacement.title")}
+							</p>
 							<Separator className="my-3 h-[1px] w-full bg-[#C1C4C2]" />
 						</div>
 						<div className="grid gap-4">

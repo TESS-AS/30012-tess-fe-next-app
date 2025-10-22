@@ -12,11 +12,11 @@ import { cn, formatDate } from "@/lib/utils";
 import { OrderItems } from "@/types/orderHistory.types";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import { Search } from "lucide-react";
-import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 type Order = OrderItems & {
-	orderId: string; // For backward compatibility with DataTable
+	orderId: string;
 };
 
 interface MineBestillingerProps {
@@ -214,9 +214,7 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
 			<div className="flex items-baseline justify-between">
 				<div className="flex items-center">
 					<h1 className="text-2xl font-semibold">{t("title")}</h1>
-					<p className="ml-4 text-[#5A615D]">
-						{t("subtitle")}
-					</p>
+					<p className="ml-4 text-[#5A615D]">{t("subtitle")}</p>
 				</div>
 			</div>
 

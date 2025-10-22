@@ -11,10 +11,10 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { indexToShort } from "@/constants/profileTabs";
 import { useGetAssets } from "@/hooks/useGetAssets";
-import { useTranslations } from "next-intl";
 import { useInspectionSummary } from "@/hooks/useInspectionSummary";
 import type { UIInspectionType } from "@/hooks/useInspectionSummary";
 import { Calendar, MapPin, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const getQuarter = (monthIndex: number) => Math.floor(monthIndex / 3) + 1;
 
@@ -93,7 +93,9 @@ const HoseInspections = () => {
 				</div>
 
 				<div className="flex w-[280px] items-center gap-3">
-					<p className="text-base font-normal text-[#5A615D]">{t("location")}:</p>
+					<p className="text-base font-normal text-[#5A615D]">
+						{t("location")}:
+					</p>
 					<div className="relative">
 						<Select
 							value={selectedS1Code || ""}

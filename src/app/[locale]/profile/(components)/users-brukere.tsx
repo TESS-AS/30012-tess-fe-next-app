@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
 	Plus,
@@ -13,22 +21,16 @@ import {
 	LockKeyhole,
 	UserPen,
 } from "lucide-react";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useTranslations } from "next-intl";
+
 import { AddUserModal } from "./add-user-modal";
-import { DeleteUserModal } from "./delete-user-modal";
-import { ViewUserModal } from "./view-user-modal";
 import {
 	BulkEditConfirmationModal,
 	BulkEditChanges,
 } from "./bulk-edit-confirmation-modal";
 import { ConfirmChangesModal } from "./confirm-changes-modal";
-import { useTranslations } from "next-intl";
+import { DeleteUserModal } from "./delete-user-modal";
+import { ViewUserModal } from "./view-user-modal";
 
 interface User {
 	id: string;

@@ -3,7 +3,6 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
-
 import { useTranslations } from "next-intl";
 
 import { Cell } from "./cell";

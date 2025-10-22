@@ -1,14 +1,18 @@
 "use client";
 
 import { useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { MultiSelectWithTags } from "@/components/ui/multi-select";
+import { RadioSelect } from "@/components/ui/radio-select";
 import {
 	Select,
 	SelectContent,
@@ -16,9 +20,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { MultiSelectWithTags } from "@/components/ui/multi-select";
-import { RadioSelect } from "@/components/ui/radio-select";
-import { Badge } from "@/components/ui/badge";
 import { X, Info } from "lucide-react";
 import { useTranslations } from "next-intl";
 

@@ -4,7 +4,6 @@ import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout"
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { cn, isImageSource } from "@/lib/utils";
 import { SidebarNavProps } from "@/types/sidebar.types";
-import { useTranslations } from "next-intl";
 import {
 	LucideIcon,
 	ArrowRight,
@@ -14,6 +13,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import CartSvg from "../../../../../public/icons/profile/cart.svg";
 import ClipboardSvg from "../../../../../public/icons/profile/clipboard-check.svg";
@@ -101,7 +101,9 @@ export function SidebarNav({
 					{!isCollapsed && (
 						<div className="flex w-full flex-col">
 							<p className="mt-4 ml-6 text-[14px] font-medium uppercase">
-								{activeMode === "ehandel" ? t("eCommerce") : t("hoseManagement")}
+								{activeMode === "ehandel"
+									? t("eCommerce")
+									: t("hoseManagement")}
 							</p>
 							<div className="flex w-full flex-col py-2 pl-4">
 								{items.map((item, index) => {

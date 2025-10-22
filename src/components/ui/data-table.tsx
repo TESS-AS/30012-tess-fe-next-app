@@ -50,7 +50,12 @@ interface DataTableProps<T> {
 	onHoseClick?: (hoseId: string) => void;
 }
 
-export function DataTable<T extends { orderId: string }>({
+export function DataTable<
+	T extends {
+		hexagonId: string;
+		orderId: string;
+	},
+>({
 	onOrderClick,
 	expandableContent,
 	isExpandable = false,
