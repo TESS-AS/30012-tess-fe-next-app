@@ -6,6 +6,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { FileText, Plus } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { Cell } from "./cell";
 
@@ -15,12 +16,13 @@ interface Props {
 }
 
 export const DocumentsAccordion = ({ documents, isEditMode }: Props) => {
+	const t = useTranslations("DocumentsAccordion");
 	return (
 		<AccordionItem
 			value="dokumenter"
 			className="border-none">
 			<AccordionTrigger className="text-decoration-none cursor-pointer rounded-none border-b border-[#C1C4C2] p-4 px-0 text-lg font-bold text-[#0F1912] hover:no-underline">
-				Dokumenter
+				{t("title")}
 			</AccordionTrigger>
 			<AccordionContent className="p-0 pt-4">
 				<div className="space-y-4">
@@ -54,7 +56,7 @@ export const DocumentsAccordion = ({ documents, isEditMode }: Props) => {
 							size="sm"
 							className="mt-2 flex items-center gap-2 text-sm text-[#003D1A]">
 							<Plus className="h-4 w-4" />
-							Legg til dokument
+							{t("addDocument")}
 						</Button>
 					)}
 				</div>

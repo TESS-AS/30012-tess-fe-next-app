@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { ChevronDownIcon, Check, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type Project = { value: string; label: string };
 
@@ -31,6 +32,7 @@ export default function ProjectPicker({
 	selected,
 	setSelected,
 }: Props) {
+	const t = useTranslations("DimensionsProjectPicker");
 	const [open, setOpen] = React.useState(false);
 	return (
 		<Popover
@@ -50,9 +52,9 @@ export default function ProjectPicker({
 				<Command>
 					<div className="flex items-center justify-center border-b">
 						<Search className="h-6 w-6 shrink-0 pl-2" />
-						<CommandInput placeholder=" Søk prosjekt..." />
+						<CommandInput placeholder={t("searchPlaceholder")} />
 					</div>
-					<CommandEmpty>Ingen prosjekter funnet.</CommandEmpty>
+					<CommandEmpty>{t("noProjectsFound")}</CommandEmpty>
 					<CommandGroup>
 						{projects.map((project) => (
 							<CommandItem

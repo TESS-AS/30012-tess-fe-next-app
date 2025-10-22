@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { PillSwitcher } from "@/components/ui/pill-switcher";
 import { FileText, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface ProductDetailsModalProps {
 	isOpen: boolean;
@@ -21,6 +22,7 @@ export default function ProductDetailsModal({
 	isOpen,
 	onClose,
 }: ProductDetailsModalProps) {
+	const t = useTranslations("ProductDetailsModal");
 	const [activeTab, setActiveTab] = useState<"beskrivelse" | "produktdetaljer">(
 		"produktdetaljer",
 	);
@@ -31,7 +33,7 @@ export default function ProductDetailsModal({
 			<DialogContent className="max-w-[600px] p-5">
 				<DialogHeader className="space-y-4">
 					<DialogTitle className="text-lg font-[500] text-[#0F1912]">
-						Produktdetaljer
+						{t("title")}
 					</DialogTitle>
 
 					<div className="flex items-start justify-between gap-4">
@@ -51,8 +53,8 @@ export default function ProductDetailsModal({
 					<div className="flex items-center gap-3">
 						<PillSwitcher
 							options={[
-								{ label: "Beskrivelse", value: "beskrivelse" },
-								{ label: "Produktdetaljer", value: "produktdetaljer" },
+								{ label: t("description"), value: "beskrivelse" },
+								{ label: t("productDetails"), value: "produktdetaljer" },
 							]}
 							value={activeTab}
 							onChange={setActiveTab}
@@ -67,29 +69,29 @@ export default function ProductDetailsModal({
 
 					<div className="space-y-3">
 						<div>
-							<span className="font-semibold text-[#0F1912]">Innlegg: </span>
+							<span className="font-semibold text-[#0F1912]">{t("insert")}: </span>
 							<span className="text-[#0F1912]">2 lag stålfletting</span>
 						</div>
 						<div>
-							<span className="font-semibold text-[#0F1912]">Innvendig: </span>
+							<span className="font-semibold text-[#0F1912]">{t("inner")}: </span>
 							<span className="text-[#0F1912]">
 								Oljebestandig syntetisk gummi
 							</span>
 						</div>
 						<div>
-							<span className="font-semibold text-[#0F1912]">Merking: </span>
+							<span className="font-semibold text-[#0F1912]">{t("marking")}: </span>
 							<span className="text-[#0F1912]">
 								Rockmaster 2SN- EN 853 2 SN- DIM-WP
 							</span>
 						</div>
 						<div>
 							<span className="font-semibold text-[#0F1912]">
-								Temperatur °c:{" "}
+								{t("temperature")}{" "}
 							</span>
 							<span className="text-[#0F1912]">-40 - 100</span>
 						</div>
 						<div>
-							<span className="font-semibold text-[#0F1912]">Utvendig: </span>
+							<span className="font-semibold text-[#0F1912]">{t("outer")}: </span>
 							<span className="text-[#0F1912]">Slitesterk syntetisk gummi</span>
 						</div>
 					</div>
@@ -98,7 +100,7 @@ export default function ProductDetailsModal({
 						variant="default"
 						onClick={onClose}
 						className="w-full bg-[#009640]">
-						Lukk vindu
+						{t("closeWindow")}
 					</Button>
 				</div>
 			</DialogContent>

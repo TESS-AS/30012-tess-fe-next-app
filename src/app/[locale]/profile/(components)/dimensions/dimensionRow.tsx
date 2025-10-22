@@ -27,6 +27,7 @@ import {
 	Trash2,
 	PlusIcon,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import NewRow from "./newRow";
 
@@ -83,6 +84,7 @@ type Props = {
 };
 
 export default function DimensionRow(props: Props): ReactElement {
+	const t = useTranslations("DimensionsDimensionRow");
 	const {
 		dimension,
 		path,
@@ -140,7 +142,7 @@ export default function DimensionRow(props: Props): ReactElement {
 										e.stopPropagation();
 										toggleExpand(dimension.id);
 									}}
-									aria-label={dimension.isExpanded ? "Collapse" : "Expand"}>
+									aria-label={dimension.isExpanded ? t("collapse") : t("expand")}>
 									<ChevronDownIcon
 										className={cn(
 											"h-4 w-4 transition-transform",
@@ -211,12 +213,12 @@ export default function DimensionRow(props: Props): ReactElement {
 								}}
 								className="h-8 w-[60px] border-[#C1C4C2] px-2 text-right hover:border-[#009640] focus:border-[#009640] focus:ring-1 focus:ring-[#009640]"
 							/>
-							<span> kr</span>
+							<span> {t("currency")}</span>
 						</div>
 					) : (
 						<div className="flex items-center gap-1">
 							<span>{dimension.budget}</span>
-							{dimension.budget && <span> kr</span>}
+							{dimension.budget && <span> {t("currency")}</span>}
 						</div>
 					)}
 				</td>
@@ -236,16 +238,15 @@ export default function DimensionRow(props: Props): ReactElement {
 											budget: "",
 											cents: "",
 										});
-										// parent will clear editing state
 									}}
 									data-no-row-toggle>
-									Avbryt
+									{t("cancel")}
 								</Button>
 								<Button
 									size="sm"
 									className="h-8 bg-[#009640] px-3 text-white hover:bg-[#005522]"
 									onClick={saveEdit}>
-									Lagre
+									{t("save")}
 								</Button>
 							</div>
 						) : (
@@ -265,7 +266,7 @@ export default function DimensionRow(props: Props): ReactElement {
 											)}
 										</TooltipTrigger>
 										<TooltipContent>
-											<p>Legg til underkategori</p>
+											<p>{t("addSubcategory")}</p>
 										</TooltipContent>
 									</Tooltip>
 								</TooltipProvider>
@@ -285,13 +286,13 @@ export default function DimensionRow(props: Props): ReactElement {
 											className="cursor-pointer gap-2 text-sm hover:bg-[#F3FAF7] hover:text-[#009640]"
 											onClick={() => addSubcategory([...path, dimension.id])}>
 											<CirclePlus className="h-4 w-4" />
-											Legg til underkategori
+											{t("addSubcategory")}
 										</DropdownMenuItem>
 										<DropdownMenuItem
 											className="cursor-pointer gap-2 text-sm hover:bg-[#F3FAF7] hover:text-[#009640]"
 											onClick={() => startEditing(dimension, path)}>
 											<PenSquare className="h-4 w-4" />
-											Endre dimensjon
+											{t("editDimension")}
 										</DropdownMenuItem>
 										<DropdownMenuItem
 											className="cursor-pointer gap-2 text-sm text-[#C81E1E] hover:bg-[#F3FAF7] hover:text-[#C81E1E]"
@@ -305,7 +306,7 @@ export default function DimensionRow(props: Props): ReactElement {
 												setShowDeleteModal(true);
 											}}>
 											<Trash2 className="h-4 w-4" />
-											Slett dimensjon
+											{t("deleteDimension")}
 										</DropdownMenuItem>
 									</DropdownMenuContent>
 								</DropdownMenu>

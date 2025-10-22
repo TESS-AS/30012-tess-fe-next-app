@@ -4,6 +4,8 @@ import { useState } from "react";
 
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { useGetHoseHistory } from "@/hooks/useGetHoseHistory";
+import { useGetHoseSystems } from "@/hooks/useGetHoseSystems";
 import {
 	ChevronRight,
 	Download,
@@ -13,6 +15,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { AssetIdSelector } from "./asset-id-selector";
 import { HoseActionsDropdown } from "./hose-actions-dropdown";
@@ -27,19 +30,22 @@ import { StructureAccordion } from "./hose-details-accordions/structure";
 import ProductDetailsModal from "./product-details-modal";
 
 interface Props {
-	hoseId: string;
-	onBack: (hoseId: string) => void;
+	hexagonId: string;
+	onBack: () => void;
 }
 
-export default function HoseDetailsPage({ onBack }: Props) {
+export default function HoseDetailsPage({ hexagonId, onBack }: Props) {
+	const t = useTranslations("HoseDetailsPage");
+	const { hoseHistory, isLoading, error } = useGetHoseHistory(hexagonId);
+	const { locations, loading, selectedS1Code } = useGetHoseSystems();
+
 	const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 	const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 	const [isEditMode, setIsEditMode] = useState(false);
 	const [selectedAssetId, setSelectedAssetId] = useState("25252525");
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-	const hoseId = "HOSE ECB81-08";
-	const title = `${hoseId} · 55220PSI SISTEMA CO2 x 700 mm`;
+	const title = `${hexagonId} · 55220PSI SISTEMA CO2 x 700 mm`;
 
 	const keyInfo = {
 		location: "Deck crane port side",
@@ -79,67 +85,7 @@ export default function HoseDetailsPage({ onBack }: Props) {
 		{ id: "doc2", name: "Dokument 2" },
 	];
 
-	const historyData = [
-		{
-			id: "25252525",
-			workOrder: "000000000000025252525",
-			description: "KUNDE-DB OPPDATERT AV FIQMAR11",
-			date: "11. 08. 2025",
-			details: [
-				{
-					workOrder: "5049205",
-					description: "KUNDE-DB OPPDATERT AV FIQMAR11",
-					date: "11. 08. 2025",
-					link: "SE KOMMENTARER FOR DETALJER",
-				},
-				{
-					workOrder: "4140106",
-					description: "CUSTOMER DB UPDATE BY: 2239FULL",
-					date: "31.12.24",
-					link: "SE KOMMENTARER FOR DETALJER",
-				},
-				{
-					workOrder: "4140108",
-					description: "PRESSURE TEST CERTIFICATE",
-					date: "31.12.22",
-					link: null,
-				},
-			],
-		},
-		{
-			id: "25252524",
-			workOrder: "000000000000025252524",
-			description: "KUNDE-ID OPPDATERT AV FIQMAR1",
-			date: "11.08.2025",
-			details: [
-				{
-					workOrder: "5049205",
-					description: "KUNDE-DB OPPDATERT AV FIQMAR11",
-					date: "11. 08. 2025",
-					link: "SE KOMMENTARER FOR DETALJER",
-				},
-				{
-					workOrder: "4140106",
-					description: "CUSTOMER DB UPDATE BY: 2239FULL",
-					date: "31.12.24",
-					link: "SE KOMMENTARER FOR DETALJER",
-				},
-				{
-					workOrder: "4140108",
-					description: "PRESSURE TEST CERTIFICATE",
-					date: "31.12.22",
-					link: null,
-				},
-			],
-		},
-		{
-			id: "25252523",
-			workOrder: "000000000000025252523",
-			description: "KUNDE-ID OPPDATERT AV FIQMAR1",
-			date: "11.08.2025",
-			details: [],
-		},
-	];
+	console.log(locations, "locations");
 
 	const toggleRow = (id: string) => {
 		setExpandedRows((prev) => {
@@ -158,13 +104,15 @@ export default function HoseDetailsPage({ onBack }: Props) {
 			<div className="rounded-lg bg-white shadow">
 				<div className="flex items-stretch justify-between gap-4 px-6 py-4">
 					<div className="flex flex-1 flex-col border-r border-[#E8EAE9] pr-4">
-						<h3 className="mb-2 font-bold text-[#0F1912]">Slange/utstyr</h3>
+						<h3 className="mb-2 font-bold text-[#0F1912]">
+							{t("hoseEquipment")}
+						</h3>
 						<p className="text-sm text-[#5A615D]">{title}</p>
 					</div>
 
 					<div className="flex flex-1 flex-col border-r border-[#E8EAE9] pr-4">
 						<h3 className="mb-2 font-bold text-[#0F1912]">
-							Nøkkel informasjon
+							{t("keyInformation")}
 						</h3>
 						<div className="space-y-1">
 							<div className="flex items-center gap-2 text-sm text-[#5A615D]">
@@ -194,11 +142,11 @@ export default function HoseDetailsPage({ onBack }: Props) {
 
 					<div className="flex flex-1 flex-col border-r border-[#E8EAE9] pr-4">
 						<div className="mb-2 flex items-center justify-between">
-							<h3 className="mb-2 font-bold text-[#0F1912]">Bilder</h3>
+							<h3 className="mb-2 font-bold text-[#0F1912]">{t("images")}</h3>
 							<Link
 								href="#"
 								className="flex items-center text-sm text-emerald-700 hover:underline">
-								Vis alle <ChevronRight className="h-4 w-4" />
+								{t("viewAll")} <ChevronRight className="h-4 w-4" />
 							</Link>
 						</div>
 						<div className="flex items-center gap-2">
@@ -217,7 +165,7 @@ export default function HoseDetailsPage({ onBack }: Props) {
 					</div>
 
 					<div className="flex flex-1 flex-col">
-						<h3 className="mb-2 font-bold text-[#0F1912]">Status</h3>
+						<h3 className="mb-2 font-bold text-[#0F1912]">{t("status")}</h3>
 						<div className="space-y-2">
 							{keyInfo.status.map((s, idx) => (
 								<div
@@ -252,17 +200,17 @@ export default function HoseDetailsPage({ onBack }: Props) {
 						onClick={() => setIsEditMode(!isEditMode)}
 						className="border-[#C1C4C2] text-[#0F1912]"
 						variant="outline">
-						<SquarePen /> {isEditMode ? "Avbryt" : "Rediger"}
+						<SquarePen /> {isEditMode ? t("cancel") : t("edit")}
 					</Button>
 					<Button
 						className="border-[#C1C4C2] text-[#0F1912]"
 						variant="outline">
-						<ShoppingCart /> Legg til i handlekurv
+						<ShoppingCart /> {t("addToCart")}
 					</Button>
 					<Button
 						className="border-[#C1C4C2] text-[#0F1912]"
 						variant="outline">
-						<Download /> Eksporter
+						<Download /> {t("export")}
 					</Button>
 					<HoseActionsDropdown
 						selectedCount={1}
@@ -285,7 +233,7 @@ export default function HoseDetailsPage({ onBack }: Props) {
 							<Button
 								className="border-[#C1C4C2] text-[#0F1912]"
 								variant="outline">
-								<Ellipsis /> Mer
+								<Ellipsis /> {t("more")}
 							</Button>
 						}
 						align="end"
@@ -315,10 +263,13 @@ export default function HoseDetailsPage({ onBack }: Props) {
 						isEditMode={isEditMode}
 					/>
 
-					<StructureAccordion isEditMode={isEditMode} />
+					<StructureAccordion
+						isEditMode={isEditMode}
+						s1Codes={locations}
+					/>
 
 					<HistoricAccordion
-						historyData={historyData}
+						historyData={hoseHistory}
 						expandedRows={expandedRows}
 						toggleRow={toggleRow}
 						isEditMode={isEditMode}

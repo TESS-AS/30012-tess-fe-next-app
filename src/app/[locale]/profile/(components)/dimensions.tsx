@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/tooltip";
 import { useCustomerDimensions } from "@/hooks/useCustomerDimensions";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
-import { cn } from "@/lib/utils";
 import {
 	createDimension,
 	deleteCustomerDimensions,
@@ -21,6 +20,7 @@ import {
 import { getUserDimensions } from "@/services/dimensions.service";
 import type { Dimension, DimensionType } from "@/types/dimensions.types";
 import { Info, PlusIcon, SquarePen } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
 import DeleteConfirmModal from "./dimensions/deleteConfirmModal";
@@ -29,14 +29,14 @@ import NewRow from "./dimensions/newRow";
 import ProjectPicker from "./dimensions/projectPicker";
 import TypeModal from "./dimensions/typeModal";
 
-const projects = [
-	{ value: "all", label: "Alle" },
-	{ value: "norsk-hydro", label: "Norsk Hydro" },
-	{ value: "equinor", label: "Equinor" },
-	{ value: "aker", label: "Aker Solutions" },
-];
-
 export function Dimensions(): ReactElement {
+	const t = useTranslations("Dimensions");
+	const projects = [
+		{ value: "all", label: t("projects.all") },
+		{ value: "norsk-hydro", label: "Norsk Hydro" },
+		{ value: "equinor", label: "Equinor" },
+		{ value: "aker", label: "Aker Solutions" },
+	];
 	const { data: profile } = usePunchoutProfile();
 	const {
 		dimensions: fetchedDimensions,
@@ -49,7 +49,6 @@ export function Dimensions(): ReactElement {
 		isLoading && localDimensions.length === 0,
 	);
 
-	// Keep local state in sync with fetched data
 	useEffect(() => {
 		const loadDimensionTypes = async () => {
 			if (profile?.customerNumbers[0]) {
@@ -62,17 +61,19 @@ export function Dimensions(): ReactElement {
 						setDimensionTypes([
 							{
 								dimension: "1",
-								type: hierarchy.dimension1?.label || "Department",
+								type:
+									hierarchy.dimension1?.label || t("defaultTypes.department"),
 								active: false,
 							},
 							{
 								dimension: "2",
-								type: hierarchy.dimension2?.label || "Project",
+								type: hierarchy.dimension2?.label || t("defaultTypes.project"),
 								active: false,
 							},
 							{
 								dimension: "3",
-								type: hierarchy.dimension3?.label || "Workorder",
+								type:
+									hierarchy.dimension3?.label || t("defaultTypes.workorder"),
 								active: false,
 							},
 						]);
@@ -92,7 +93,6 @@ export function Dimensions(): ReactElement {
 		}
 	}, [fetchedDimensions]);
 
-	// delete dialog
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [dimensionToDelete, setDimensionToDelete] = useState<{
 		id: string;
@@ -101,7 +101,6 @@ export function Dimensions(): ReactElement {
 		path: string[];
 	} | null>(null);
 
-	// edit existing
 	const [editingDimension, setEditingDimension] = useState<{
 		id: string;
 		path: string[];
@@ -113,7 +112,6 @@ export function Dimensions(): ReactElement {
 		cents: "",
 	});
 
-	// create inline
 	const [isCreating, setIsCreating] = useState(false);
 	const [createAtPath, setCreateAtPath] = useState<string[] | null>(null);
 	const newRowKey = useMemo(
@@ -121,17 +119,15 @@ export function Dimensions(): ReactElement {
 		[createAtPath],
 	);
 
-	// type modal
 	const [showTypeModal, setShowTypeModal] = useState(false);
 	const [isEditingTypes, setIsEditingTypes] = useState(false);
 	const [currentLevel, setCurrentLevel] = useState(0);
 	const [dimensionTypes, setDimensionTypes] = useState<DimensionType[]>([
-		{ dimension: "1", type: "Department", active: false },
-		{ dimension: "2", type: "Project", active: false },
-		{ dimension: "3", type: "Workorder", active: false },
+		{ dimension: "1", type: t("defaultTypes.department"), active: false },
+		{ dimension: "2", type: t("defaultTypes.project"), active: false },
+		{ dimension: "3", type: t("defaultTypes.workorder"), active: false },
 	]);
 
-	// new row data
 	const [newDimension, setNewDimension] = useState({
 		name: "",
 		type: "",
@@ -139,7 +135,6 @@ export function Dimensions(): ReactElement {
 		cents: "",
 	});
 
-	// focus refs
 	const newNameRef = useRef<HTMLInputElement>(null);
 	const editNameRef = useRef<HTMLInputElement>(null);
 
@@ -228,12 +223,12 @@ export function Dimensions(): ReactElement {
 					return dims;
 				});
 
-				toast.success("Dimensjonen ble slettet");
+				toast.success(t("messages.deleted"));
 				setDimensionToDelete(null);
 				setShowDeleteModal(false);
 			} catch (error) {
 				console.error("Error deleting dimension:", error);
-				toast.error("Kunne ikke slette dimensjonen. Vennligst prøv igjen.");
+				toast.error(t("messages.deleteError"));
 			}
 		}
 	};
@@ -241,7 +236,6 @@ export function Dimensions(): ReactElement {
 	const addSubcategory = (path: string[]) => {
 		const level = path.length;
 
-		// Reset all dimension types to inactive
 		setDimensionTypes((prev) => prev.map((d) => ({ ...d, active: false })));
 
 		setIsCreating(true);
@@ -291,22 +285,22 @@ export function Dimensions(): ReactElement {
 
 	const handleAddDimension = async () => {
 		if (!newDimension.name?.trim()) {
-			toast.error("Vennligst fyll ut navn");
+			toast.error(t("validation.nameRequired"));
 			return;
 		}
 		if (!newDimension.type?.trim()) {
-			toast.error("Vennligst velg type");
+			toast.error(t("validation.typeRequired"));
 			return;
 		}
 		if (!newDimension.budget?.trim()) {
-			toast.error("Vennligst fyll ut budsjett");
+			toast.error(t("validation.budgetRequired"));
 			return;
 		}
 
 		try {
 			const activeDimensionIndex = dimensionTypes.findIndex((d) => d.active);
 			if (activeDimensionIndex === -1) {
-				toast.error("Vennligst velg en dimensjonstype");
+				toast.error(t("validation.dimensionTypeRequired"));
 				return;
 			}
 
@@ -340,11 +334,11 @@ export function Dimensions(): ReactElement {
 				setShowEmptyState(false);
 				setDimensionTypes((prev) => prev.map((d) => ({ ...d, active: false })));
 
-				toast.success("Dimensjon opprettet");
+				toast.success(t("messages.created"));
 			}
 		} catch (error) {
 			console.error("Error creating dimension:", error);
-			toast.error("Kunne ikke opprette dimensjon. Vennligst prøv igjen.");
+			toast.error(t("messages.createError"));
 		}
 	};
 
@@ -375,7 +369,7 @@ export function Dimensions(): ReactElement {
 				editingDimension.id,
 			);
 			if (!oldDimension) {
-				toast.error("Kunne ikke finne dimensjonen som skal oppdateres");
+				toast.error(t("messages.notFound"));
 				return;
 			}
 
@@ -402,7 +396,6 @@ export function Dimensions(): ReactElement {
 				const [whole, decimal] = responseData.budget.toString().split(".");
 				const formattedBudget = `${whole}${decimal ? "," + decimal : ""}`;
 
-				// Get the dimension type display name from our types list
 				const dimensionLevel = getDimensionLevel(editingDimension.path);
 				const dimensionTypeDisplay = dimensionTypes[dimensionLevel]?.type || "";
 
@@ -422,24 +415,21 @@ export function Dimensions(): ReactElement {
 					});
 
 				setLocalDimensions((prev) => updateDimensionInTree(prev));
-				// Reset all editing states
 				setEditingDimension(null);
 				setEditDimensionData({ name: "", type: "", budget: "", cents: "" });
 				setShowTypeModal(false);
-				toast.success("Dimensjon oppdatert");
+				toast.success(t("messages.updated"));
 			}
 		} catch (error) {
 			console.error("Error updating dimension:", error);
-			toast.error("Det oppstod en feil ved oppdatering av dimensjon");
+			toast.error(t("messages.updateError"));
 		} finally {
-			// Always reset editing state, even if there's an error
 			setEditingDimension(null);
 			setEditDimensionData({ name: "", type: "", budget: "", cents: "" });
 			setShowTypeModal(false);
 		}
 	};
 
-	/** Type modal (shared) */
 	const handleTypeChange = (index: number, value: string) => {
 		setDimensionTypes((prev) => {
 			if (prev[index].type === value) return prev;
@@ -460,7 +450,6 @@ export function Dimensions(): ReactElement {
 		const level = createAtPath?.length || 0;
 		setCurrentLevel(level);
 
-		// Reset all dimension types and only set the current level active
 		setDimensionTypes((prev) =>
 			prev.map((d, i) => ({
 				...d,
@@ -487,12 +476,8 @@ export function Dimensions(): ReactElement {
 		<div className="space-y-6">
 			<div className="flex items-baseline justify-between">
 				<div className="flex items-center">
-					<h1 className="text-2xl font-semibold">Konteringsdimensjoner</h1>
-					<p className="ml-4 text-[#5A615D]">
-						Organiser prosjekter, avdelinger, arbeidsordre osv i hierarkisk
-						struktur med budsjetter. Konteringsdimensjoner du legger til her
-						vises i utsjekk for alle dine brukere.
-					</p>
+					<h1 className="text-2xl font-semibold">{t("title")}</h1>
+					<p className="ml-4 text-[#5A615D]">{t("subtitle")}</p>
 				</div>
 			</div>
 
@@ -501,11 +486,10 @@ export function Dimensions(): ReactElement {
 					<div className="m-6 space-y-6 rounded-lg bg-[#F3FAF7] p-6">
 						<div className="text-start">
 							<p className="mb-1 font-bold text-[#005522]">
-								Ingen dimensjoner enda
+								{t("emptyState.title")}
 							</p>
 							<p className="text-sm text-[#005522]">
-								Kom i gang med å opprette din første dimensjon. Du kan
-								organisere det i kategorier og elementer.
+								{t("emptyState.description")}
 							</p>
 						</div>
 						<div className="flex justify-start">
@@ -525,7 +509,7 @@ export function Dimensions(): ReactElement {
 									setCurrentLevel(0);
 								}}>
 								<PlusIcon className="h-4 w-4" />
-								Lag ny dimensjon
+								{t("actions.createNew")}
 							</Button>
 						</div>
 					</div>
@@ -536,7 +520,7 @@ export function Dimensions(): ReactElement {
 						<div className="mb-4 flex items-center justify-between border-b border-[#C1C4C2] pb-4">
 							<div className="flex items-center gap-2">
 								<span className="text-base font-bold text-[#5A615D]">
-									Viser prosjekt for:
+									{t("showingProjectFor")}:
 								</span>
 								<ProjectPicker
 									projects={projects}
@@ -553,7 +537,7 @@ export function Dimensions(): ReactElement {
 										setShowTypeModal(true);
 									}}>
 									<SquarePen className="h-4 w-4" />
-									Endre dimensjonstyper
+									{t("actions.editTypes")}
 								</Button>
 								<Button
 									variant="outline"
@@ -571,7 +555,7 @@ export function Dimensions(): ReactElement {
 									}}
 									className="border-[#C1C4C2] text-[#0F1912] hover:bg-[#F3FAF7] hover:text-[#0F1912]">
 									<PlusIcon className="h-4 w-4" />
-									Lag ny dimensjon
+									{t("actions.createNew")}
 								</Button>
 							</div>
 						</div>
@@ -581,7 +565,7 @@ export function Dimensions(): ReactElement {
 						<thead>
 							<tr className="border-b border-[#C1C4C2]">
 								<th className="bg-[#F8F9F8] px-4 py-4 text-left text-sm font-medium text-[#5A615D]">
-									NAVN
+									{t("table.name")}
 									<TooltipProvider>
 										<Tooltip>
 											<TooltipTrigger asChild>
@@ -590,15 +574,13 @@ export function Dimensions(): ReactElement {
 												</button>
 											</TooltipTrigger>
 											<TooltipContent>
-												<p>
-													Dette feltet brukes til å identifisere dimensjonen.
-												</p>
+												<p>{t("table.nameTooltip")}</p>
 											</TooltipContent>
 										</Tooltip>
 									</TooltipProvider>
 								</th>
 								<th className="bg-[#F8F9F8] px-4 py-4 text-left text-sm font-medium text-[#5A615D]">
-									TYPE
+									{t("table.type")}
 									<TooltipProvider>
 										<Tooltip>
 											<TooltipTrigger asChild>
@@ -607,13 +589,13 @@ export function Dimensions(): ReactElement {
 												</button>
 											</TooltipTrigger>
 											<TooltipContent>
-												<p>Velg en dimensjonstype fra listen.</p>
+												<p>{t("table.typeTooltip")}</p>
 											</TooltipContent>
 										</Tooltip>
 									</TooltipProvider>
 								</th>
 								<th className="bg-[#F8F9F8] px-4 py-4 text-left text-sm font-medium text-[#5A615D]">
-									BUDSJETT
+									{t("table.budget")}
 									<TooltipProvider>
 										<Tooltip>
 											<TooltipTrigger asChild>
@@ -622,13 +604,13 @@ export function Dimensions(): ReactElement {
 												</button>
 											</TooltipTrigger>
 											<TooltipContent>
-												<p>Sett et budsjett for dimensjonen.</p>
+												<p>{t("table.budgetTooltip")}</p>
 											</TooltipContent>
 										</Tooltip>
 									</TooltipProvider>
 								</th>
 								<th className="w-[100px] bg-[#F8F9F8] px-4 py-4 text-left text-sm font-medium text-[#5A615D]">
-									HANDLING
+									{t("table.action")}
 								</th>
 							</tr>
 						</thead>

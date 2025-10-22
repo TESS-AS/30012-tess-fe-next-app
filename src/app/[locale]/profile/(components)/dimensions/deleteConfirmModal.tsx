@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type Props = {
 	open: boolean;
@@ -17,6 +18,7 @@ export default function DeleteConfirmModal({
 	name,
 	onConfirm,
 }: Props) {
+	const t = useTranslations("DimensionsDeleteModal");
 	return (
 		<Modal
 			open={open}
@@ -27,10 +29,10 @@ export default function DeleteConfirmModal({
 				</div>
 				<div className="space-y-2 text-center">
 					<p className="text-base text-[#5A615D]">
-						Er du sikker på at du vil slette &quot;{name}&quot;?
+						{t("confirmMessage", { name: name || "" })}
 					</p>
 					<p className="text-base text-[#5A615D]">
-						Dette vil også slette alle underliggende elementer.
+						{t("warningMessage")}
 					</p>
 				</div>
 				<div className="flex justify-center gap-3">
@@ -38,12 +40,12 @@ export default function DeleteConfirmModal({
 						variant="outline"
 						className="border-[#C1C4C2] text-[#0F1912] hover:bg-[#F3FAF7] hover:text-[#0F1912]"
 						onClick={() => onOpenChange(false)}>
-						Nei, avbryt
+						{t("cancel")}
 					</Button>
 					<Button
 						className="bg-[#C81E1E] text-white hover:bg-[#A01818]"
 						onClick={onConfirm}>
-						Ja, jeg er sikker
+						{t("confirm")}
 					</Button>
 				</div>
 			</div>

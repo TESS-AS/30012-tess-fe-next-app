@@ -3,6 +3,7 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useTranslations } from "next-intl";
 
 import { Cell } from "./cell";
 
@@ -11,12 +12,13 @@ export const AdditionalEquipmentAccordion = ({
 }: {
 	isEditMode: boolean;
 }) => {
+	const t = useTranslations("AdditionalEquipmentAccordion");
 	return (
 		<AccordionItem
 			value="tilleggsutstyr"
 			className="border-none">
 			<AccordionTrigger className="text-decoration-none cursor-pointer rounded-none border-b border-[#C1C4C2] p-4 px-0 text-lg font-bold text-[#0F1912] hover:no-underline">
-				Tilleggsutstyr på slangen
+				{t("title")}
 			</AccordionTrigger>
 			<AccordionContent className="p-0">
 				<div className="flex">

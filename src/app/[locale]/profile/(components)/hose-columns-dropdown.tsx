@@ -10,6 +10,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PlusIcon, ChevronDown } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export interface HoseColumnsDropdownProps {
 	options: string[];
@@ -22,13 +23,14 @@ export function HoseColumnsDropdown({
 	selected,
 	onToggle,
 }: HoseColumnsDropdownProps) {
+	const t = useTranslations("HoseColumnsDropdown");
 	return (
 		<div className="flex items-center">
 			<DropdownMenu>
 				<DropdownMenuTrigger className="flex w-[200px] items-center justify-between rounded-md border border-[#C1C4C2] bg-white px-3 py-2 text-[#5A615D]">
 					<div className="flex items-center gap-2">
 						<PlusIcon size={16} />
-						<span>Legg til kolonne</span>
+						<span>{t("addColumn")}</span>
 					</div>
 					<ChevronDown
 						size={16}

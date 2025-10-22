@@ -20,11 +20,13 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { PriceDisplay } from "@/components/ui/price-display";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useProfile } from "@/contexts/ProfileContext";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useInstantSearch } from "@/hooks/useInstantSearch";
+import { useOrderSummary } from "@/hooks/useOrderSummary";
 import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import { useCategories } from "@/lib/CategoriesProvider";
@@ -59,7 +61,8 @@ export default function Header() {
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [isModalIdOpen, setIsModalIdOpen] = useState<string | null>(null);
 	const [variations, setVariations] = useState<Record<string, any>>({});
-	const { cartItems, totalPrice, isAuthOpen, setIsAuthOpen } = useAppContext();
+	const { sumAfterDiscount } = useOrderSummary();
+	const { cartItems, isAuthOpen, setIsAuthOpen } = useAppContext();
 
 	const {
 		query: searchQuery,
@@ -274,9 +277,11 @@ export default function Header() {
 						</div>
 						{(cartItems?.cart?.length || 0) +
 							(cartItems?.cartKit?.length || 0) >
-						0
-							? formatNorwegianCurrency(totalPrice)
-							: ""}
+						0 ? (
+							<PriceDisplay amount={sumAfterDiscount} />
+						) : (
+							""
+						)}
 						<span className="sr-only">Cart</span>
 					</Button>
 					{profile ? (

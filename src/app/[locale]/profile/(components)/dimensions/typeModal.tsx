@@ -7,6 +7,7 @@ import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
 import { cn } from "@/lib/utils";
 import { updateUserDimensions } from "@/services/dimensions.service";
 import type { DimensionLabel, DimensionType } from "@/types/dimensions.types";
+import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
 interface Props {
@@ -32,6 +33,7 @@ export default function TypeModal({
 	currentLevel,
 	editAll = false,
 }: Props) {
+	const t = useTranslations("DimensionsTypeModal");
 	return (
 		<Modal
 			open={open}
@@ -42,7 +44,7 @@ export default function TypeModal({
 				}
 			}}>
 			<ModalHeader>
-				<ModalTitle>Sett dimensjonstyper</ModalTitle>
+				<ModalTitle>{t("title")}</ModalTitle>
 			</ModalHeader>
 			<div className="space-y-8">
 				{dimensionTypes.map((dim, index) => (
@@ -54,7 +56,7 @@ export default function TypeModal({
 								"opacity-50": !editAll && index !== currentLevel,
 							})}>
 							<div className="space-y-2">
-								<p className="text-sm">Dimensjon</p>
+								<p className="text-sm">{t("dimension")}</p>
 								<Input
 									value={dim.dimension}
 									className="border-[#C1C4C2] bg-[#F8F9F8]"
@@ -73,14 +75,14 @@ export default function TypeModal({
 										className={cn("text-sm", {
 											"cursor-not-allowed": index !== currentLevel,
 										})}>
-										Aktiv
+										{t("active")}
 									</label>
 								</div>
 							</div>
 							<div className="space-y-2">
-								<p className="text-sm">Type</p>
+								<p className="text-sm">{t("type")}</p>
 								<Input
-									placeholder="Skriv type"
+									placeholder={t("typePlaceholder")}
 									className="border-[#C1C4C2] bg-white hover:border-[#009640] focus:border-[#009640] focus:ring-1 focus:ring-[#009640]"
 									value={dim.type}
 									onClick={(e) => e.stopPropagation()}
@@ -88,17 +90,13 @@ export default function TypeModal({
 									disabled={!editAll && index !== currentLevel}
 								/>
 								{index === 0 && (
-									<p className="text-xs text-[#6B7280]">
-										Eksempel: Prosjekt, avdeling, arbeidsordre osv.
-									</p>
+									<p className="text-xs text-[#6B7280]">{t("example")}</p>
 								)}
 							</div>
 						</div>
 						{index === 0 && (
 							<p className="text-xs leading-relaxed text-[#6B7280]">
-								Dimensjon vises på utsjekk
-								<br />
-								og blir påkrevd å fylle ut av alle ansatte
+								{t("checkoutInfo")}
 							</p>
 						)}
 					</div>
@@ -112,11 +110,11 @@ export default function TypeModal({
 								payload[`dimension_${idx + 1}_label`] = dim.type;
 							});
 							await updateUserDimensions(customerNumber, payload);
-							toast.success("Dimensjonstyper oppdatert");
+							toast.success(t("successMessage"));
 							onOpenChange(false);
 						} catch (error) {
 							console.error("Error updating dimension types:", error);
-							toast.error("Kunne ikke oppdatere dimensjonstyper");
+							toast.error(t("errorMessage"));
 						}
 					}}
 					className={cn("w-fit text-white", {
@@ -126,7 +124,7 @@ export default function TypeModal({
 							!editAll && !dimensionTypes.some((d) => d.active),
 					})}
 					disabled={!editAll && !dimensionTypes.some((d) => d.active)}>
-					Lagre dimensjonstyper
+					{t("saveButton")}
 				</Button>
 			</div>
 		</Modal>

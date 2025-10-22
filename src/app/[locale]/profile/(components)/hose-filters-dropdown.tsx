@@ -10,6 +10,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Funnel, ChevronDown } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export interface HoseFiltersDropdownProps {
 	selectedFilters: string[];
@@ -24,6 +25,7 @@ export function HoseFiltersDropdown({
 	onToggleFilter,
 	onToggleAgeRange,
 }: HoseFiltersDropdownProps) {
+	const t = useTranslations("HoseFiltersDropdown");
 	return (
 		<div className="flex items-center">
 			<div className="relative w-[160px]">
@@ -34,7 +36,7 @@ export function HoseFiltersDropdown({
 								size={16}
 								className="text-[#005522]"
 							/>
-							<span>Filter</span>
+							<span>{t("filter")}</span>
 						</div>
 						<ChevronDown
 							size={16}
@@ -46,7 +48,7 @@ export function HoseFiltersDropdown({
 						<div className="space-y-5 text-sm">
 							<div>
 								<h4 className="mb-2 font-semibold text-[#0F1912]">
-									Inspeksjon
+									{t("inspection")}
 								</h4>
 								<div className="space-y-2">
 									<DropdownMenuItem
@@ -59,7 +61,7 @@ export function HoseFiltersDropdown({
 											<Checkbox
 												checked={selectedFilters.includes("rejected")}
 											/>
-											<span>Underkjente inspeksjoner</span>
+											<span>{t("rejectedInspections")}</span>
 										</div>
 									</DropdownMenuItem>
 
@@ -73,7 +75,7 @@ export function HoseFiltersDropdown({
 											<Checkbox
 												checked={selectedFilters.includes("approved")}
 											/>
-											<span>Med merknader</span>
+											<span>{t("withRemarks")}</span>
 										</div>
 									</DropdownMenuItem>
 
@@ -85,7 +87,7 @@ export function HoseFiltersDropdown({
 										}}>
 										<div className="flex items-center gap-2">
 											<Checkbox checked={selectedFilters.includes("overdue")} />
-											<span>Forfalt</span>
+											<span>{t("overdue")}</span>
 										</div>
 									</DropdownMenuItem>
 								</div>
@@ -93,7 +95,7 @@ export function HoseFiltersDropdown({
 
 							<div>
 								<h4 className="mb-2 font-semibold text-[#0F1912]">
-									Slangebytte
+									{t("hoseReplacement")}
 								</h4>
 								<div className="space-y-2">
 									<DropdownMenuItem
@@ -108,7 +110,7 @@ export function HoseFiltersDropdown({
 													"aktive_midlertidige",
 												)}
 											/>
-											<span>Aktive midlertidige slangebytter</span>
+											<span>{t("activeTemporary")}</span>
 										</div>
 									</DropdownMenuItem>
 
@@ -122,7 +124,7 @@ export function HoseFiltersDropdown({
 											<Checkbox
 												checked={selectedFilters.includes("replacementDue")}
 											/>
-											<span>Forfaller om mindre enn 6 måneder</span>
+											<span>{t("dueInSixMonths")}</span>
 										</div>
 									</DropdownMenuItem>
 								</div>
@@ -130,7 +132,7 @@ export function HoseFiltersDropdown({
 
 							<div>
 								<h4 className="mb-2 font-semibold text-[#0F1912]">
-									Etter alder
+									{t("byAge")}
 								</h4>
 								<div className="space-y-2">
 									<DropdownMenuItem
@@ -141,7 +143,7 @@ export function HoseFiltersDropdown({
 										}}>
 										<div className="flex items-center gap-2">
 											<Checkbox checked={selectedAgeRanges.includes("5-6")} />
-											<span>5-6 år gamle</span>
+											<span>{t("age5to6")}</span>
 										</div>
 									</DropdownMenuItem>
 
@@ -153,7 +155,7 @@ export function HoseFiltersDropdown({
 										}}>
 										<div className="flex items-center gap-2">
 											<Checkbox checked={selectedAgeRanges.includes("7-8")} />
-											<span>7-8 år gamle</span>
+											<span>{t("age7to8")}</span>
 										</div>
 									</DropdownMenuItem>
 								</div>

@@ -14,10 +14,12 @@ import { useGetAssets } from "@/hooks/useGetAssets";
 import { useInspectionSummary } from "@/hooks/useInspectionSummary";
 import type { UIInspectionType } from "@/hooks/useInspectionSummary";
 import { Calendar, MapPin, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const getQuarter = (monthIndex: number) => Math.floor(monthIndex / 3) + 1;
 
 const HoseInspections = () => {
+	const t = useTranslations("HoseInspections");
 	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
 		undefined,
 	);
@@ -87,11 +89,13 @@ const HoseInspections = () => {
 		<div className="space-y-6">
 			<div className="flex items-baseline space-x-4">
 				<div className="flex items-center">
-					<h1 className="text-2xl font-semibold">Inspeksjoner</h1>
+					<h1 className="text-2xl font-semibold">{t("title")}</h1>
 				</div>
 
 				<div className="flex w-[280px] items-center gap-3">
-					<p className="text-base font-normal text-[#5A615D]">Lokasjon:</p>
+					<p className="text-base font-normal text-[#5A615D]">
+						{t("location")}:
+					</p>
 					<div className="relative">
 						<Select
 							value={selectedS1Code || ""}
@@ -104,7 +108,7 @@ const HoseInspections = () => {
 									<MapPin className="h-4 w-4 shrink-0 text-[#0F1912]" />
 									<SelectValue
 										className="truncate"
-										placeholder="Velg S1 anlegg"
+										placeholder={t("selectS1Location")}
 									/>
 								</div>
 							</SelectTrigger>
@@ -136,7 +140,7 @@ const HoseInspections = () => {
 									))}
 								{s1Loading && s1CodesPagination.currentPage > 1 && (
 									<div className="py-2 text-center text-sm text-gray-500">
-										Laster flere...
+										{t("loadingMore")}
 									</div>
 								)}
 							</SelectContent>
@@ -151,7 +155,7 @@ const HoseInspections = () => {
 								}}
 								className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
 								<X className="h-4 w-4 text-[#5A615D]" />
-								<span className="sr-only">Fjern lokasjon</span>
+								<span className="sr-only">{t("removeLocation")}</span>
 							</button>
 						)}
 					</div>
@@ -161,17 +165,17 @@ const HoseInspections = () => {
 			<div className="rounded-lg bg-white p-6 shadow-md">
 				<div className="mb-8 flex items-center gap-8">
 					<div className="flex items-center gap-4">
-						<div className="text-sm text-[#5A615D]">Type:</div>
+						<div className="text-sm text-[#5A615D]">{t("type")}:</div>
 						<PillSwitcher<UIInspectionType>
 							options={[
 								{
-									label: "Utførte inspeksjoner",
+									label: t("completedInspections"),
 									value: "completed",
 									activeClassName: "bg-[#003D1A] text-white",
 									inactiveClassName: "text-[#5A615D]",
 								},
 								{
-									label: "Planlagte inspeksjoner",
+									label: t("plannedInspections"),
 									value: "planned",
 									activeClassName: "bg-[#05505C] text-white",
 									inactiveClassName: "text-[#5A615D]",
@@ -183,20 +187,20 @@ const HoseInspections = () => {
 					</div>
 
 					<div className="flex items-center gap-4">
-						<div className="text-sm text-[#5A615D]">Periode:</div>
+						<div className="text-sm text-[#5A615D]">{t("period")}:</div>
 						<Select
 							value={String(yearOffset)}
 							onValueChange={(value) => setYearOffset(parseInt(value, 10))}>
 							<SelectTrigger className="w-[220px] border-[#C1C4C2] bg-white">
 								<Calendar className="h-4 w-4 shrink-0 text-[#0F1912]" />
-								<SelectValue placeholder="Velg periode" />
+								<SelectValue placeholder={t("selectPeriod")} />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="-2">Siste 12 måneder</SelectItem>
-								<SelectItem value="-1">Siste 24 måneder</SelectItem>
-								<SelectItem value="0">Current Year</SelectItem>
-								<SelectItem value="1">Neste 12 måneder</SelectItem>
-								<SelectItem value="2">Neste 24 måneder</SelectItem>
+								<SelectItem value="-2">{t("last12Months")}</SelectItem>
+								<SelectItem value="-1">{t("last24Months")}</SelectItem>
+								<SelectItem value="0">{t("currentYear")}</SelectItem>
+								<SelectItem value="1">{t("next12Months")}</SelectItem>
+								<SelectItem value="2">{t("next24Months")}</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
@@ -206,17 +210,17 @@ const HoseInspections = () => {
 					<div className="absolute bottom-0 left-0 flex h-[300px] w-full items-end justify-between gap-2">
 						{inspectionLoading && (
 							<div className="mx-auto w-full text-center text-sm text-[#5A615D]">
-								Laster data...
+								{t("loadingData")}
 							</div>
 						)}
 						{!inspectionLoading && Boolean(error) && (
 							<div className="mx-auto w-full text-center text-sm text-red-600">
-								Kunne ikke laste data.
+								{t("couldNotLoadData")}
 							</div>
 						)}
 						{!inspectionLoading && !error && series.length === 0 && (
 							<div className="mx-auto w-full text-center text-sm text-[#5A615D]">
-								Ingen data i valgt periode.
+								{t("noDataInPeriod")}
 							</div>
 						)}
 
@@ -306,7 +310,7 @@ const HoseInspections = () => {
 					<div className="flex items-center gap-2">
 						<div className={`h-3 w-3 rounded-full ${barColor}`}></div>
 						<span className="text-sm text-[#5A615D]">
-							{selectedType === "completed" ? "Utført" : "Planlagt"}
+							{selectedType === "completed" ? t("completed") : t("planned")}
 						</span>
 					</div>
 				</div>

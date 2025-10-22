@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { getStatusIcons } from "./mine-bestillinger";
 
@@ -63,6 +64,7 @@ export const getStatusChipColor = (status: string) => {
 };
 
 export function Rekvisisjoner() {
+	const t = useTranslations("Rekvisisjoner");
 	const router = useRouter();
 	const { data: profile } = usePunchoutProfile();
 
@@ -105,28 +107,28 @@ export function Rekvisisjoner() {
 	const columns = [
 		{
 			key: "orderId",
-			header: "ORDRE ID",
+			header: t("orderId").toUpperCase(),
 			cell: (rekvisisjon: Rekvisisjon) => rekvisisjon.requisitionId,
 		},
 		{
 			key: "bestiller",
-			header: "BESTILLER",
+			header: t("orderer").toUpperCase(),
 			cell: (rekvisisjon: Rekvisisjon) => rekvisisjon.bestiller,
 		},
 		{
 			key: "opprettet",
-			header: "OPPRETTET",
+			header: t("created").toUpperCase(),
 			cell: (rekvisisjon: Rekvisisjon) =>
 				formatDate(rekvisisjon.requestDate, rekvisisjon.requestTime),
 		},
 		{
 			key: "pris",
-			header: "PRIS",
+			header: t("price").toUpperCase(),
 			cell: (rekvisisjon: Rekvisisjon) => rekvisisjon.pris,
 		},
 		{
 			key: "status",
-			header: "STATUS",
+			header: t("status").toUpperCase(),
 			cell: (rekvisisjon: Rekvisisjon) => (
 				<div
 					className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 ${getStatusChipColor(rekvisisjon.status)}`}>
@@ -151,14 +153,14 @@ export function Rekvisisjoner() {
 									setShowAllItems(false);
 									setApprovalModalOpen(true);
 								}}>
-								Godkjenn
+								{t("approve")}
 								<CircleCheck />
 							</Button>
 							<Button
 								variant="outline"
 								size="sm"
 								className="border-[#C81E1E] text-[#C81E1E] hover:border-[#9B1C1C] hover:bg-[#9B1C1C] hover:text-white">
-								Avvis
+								{t("reject")}
 								<CircleX />
 							</Button>
 						</>
@@ -168,7 +170,7 @@ export function Rekvisisjoner() {
 							variant="outline"
 							size="sm"
 							className="border-[#C1C4C2] text-[#0F1912] hover:bg-[#E8EAE9] hover:text-[#009640]">
-							Gjenopprett
+							{t("restore")}
 						</Button>
 					)}
 				</div>
@@ -180,10 +182,9 @@ export function Rekvisisjoner() {
 		<div className="space-y-6">
 			<div className="flex items-baseline justify-between">
 				<div className="flex items-center">
-					<h1 className="text-2xl font-semibold">Rekvisisjoner</h1>
+					<h1 className="text-2xl font-semibold">{t("title")}</h1>
 					<p className="ml-4 text-[#5A615D]">
-						Administrer og godkjenn innkomne rekvisisjoner fra ansatte og
-						eksterne systemer.
+						{t("subtitle")}
 					</p>
 				</div>
 			</div>
@@ -193,7 +194,7 @@ export function Rekvisisjoner() {
 					<div className="relative flex w-full max-w-[480px]">
 						<Search className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-[#5A615D]" />
 						<Input
-							placeholder="Søk etter ordre-ID eller kundenavn"
+							placeholder={t("searchPlaceholder")}
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
 							className="font-sm h-10 flex-1 rounded-md border border-[#8A8F8C] bg-[#F8F9F8] pr-24 pl-12 text-base text-[#5A615D]"
@@ -201,11 +202,11 @@ export function Rekvisisjoner() {
 						<Button
 							type="submit"
 							className="absolute top-1/2 right-0 h-10 -translate-y-1/2 rounded-none rounded-r-md border-1 border-l-2 border-[#8A8F8C] bg-white px-4 font-medium text-[#0F1912] hover:bg-white">
-							Søk
+							{t("search")}
 						</Button>
 					</div>
 					<div className="flex items-center gap-3 border-t border-[#C1C4C2] pt-6">
-						<p className="text-sm font-bold text-[#0F1912]">Status:</p>
+						<p className="text-sm font-bold text-[#0F1912]">{t("status")}:</p>
 						<RadioGroup
 							value={selectedStatus}
 							onValueChange={setSelectedStatus}
@@ -265,13 +266,13 @@ export function Rekvisisjoner() {
 									<thead>
 										<tr>
 											<th className="w-[60%] pb-4 text-left text-xs font-bold text-[#5A615D]">
-												ENHETER
+												{t("units").toUpperCase()}
 											</th>
 											<th className="w-[20%] pb-4 text-left text-xs font-bold text-[#5A615D]">
-												ANTALL
+												{t("quantity").toUpperCase()}
 											</th>
 											<th className="w-[20%] pb-4 text-left text-xs font-bold text-[#5A615D]">
-												PRIS
+												{t("price").toUpperCase()}
 											</th>
 										</tr>
 									</thead>
@@ -316,7 +317,7 @@ export function Rekvisisjoner() {
 								height={20}
 							/>
 							<span>
-								{selectedOrder?.items?.length || 0} varer lagt til i handlekurv
+								{t("itemsAddedToCart", { count: selectedOrder?.items?.length || 0 })}
 							</span>
 						</ModalTitle>
 					</ModalHeader>
@@ -336,12 +337,12 @@ export function Rekvisisjoner() {
 								className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
 								{showAllItems ? (
 									<>
-										Vis færre{" "}
+										{t("showLess")}{" "}
 										<ChevronDownIcon className="h-4 w-4 rotate-180 transform" />
 									</>
 								) : (
 									<>
-										Vis alle <ChevronDownIcon className="h-4 w-4" />
+										{t("showAll")} <ChevronDownIcon className="h-4 w-4" />
 									</>
 								)}
 							</button>
@@ -355,7 +356,7 @@ export function Rekvisisjoner() {
 								setApprovalModalOpen(false);
 								router.push("/cart");
 							}}>
-							Til handlekurven
+							{t("goToCart")}
 						</Button>
 					</div>
 				</div>
