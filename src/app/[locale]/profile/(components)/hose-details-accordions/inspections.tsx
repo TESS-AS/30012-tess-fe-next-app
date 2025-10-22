@@ -4,6 +4,8 @@ import {
 	AccordionTrigger,
 } from "@/components/ui/accordion";
 
+import { useTranslations } from "next-intl";
+
 import { Cell } from "./cell";
 
 export const InspectionsAccordion = ({
@@ -11,12 +13,13 @@ export const InspectionsAccordion = ({
 }: {
 	isEditMode: boolean;
 }) => {
+	const t = useTranslations("InspectionsAccordion");
 	return (
 		<AccordionItem
 			value="inspeksjon"
 			className="border-none">
 			<AccordionTrigger className="text-decoration-none cursor-pointer rounded-none border-b border-[#C1C4C2] p-4 px-0 text-lg font-bold text-[#0F1912] hover:no-underline">
-				Inspeksjon
+				{t("title")}
 			</AccordionTrigger>
 			<AccordionContent className="p-0">
 				<table className="w-[50%] border-r border-[#E8EAE9] text-sm">

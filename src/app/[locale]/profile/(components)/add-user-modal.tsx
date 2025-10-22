@@ -16,6 +16,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { MultiSelectWithTags } from "@/components/ui/multi-select";
 import { RadioSelect } from "@/components/ui/radio-select";
 import { CheckCircle, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface AddUserModalProps {
 	open: boolean;
@@ -23,6 +24,7 @@ interface AddUserModalProps {
 }
 
 export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
+	const t = useTranslations("AddUserModal");
 	const [formData, setFormData] = useState({
 		fornavn: "",
 		etternavn: "",
@@ -80,7 +82,7 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 			className="max-h-[90vh] w-[670px] overflow-y-auto p-0">
 			<ModalHeader className="px-6 py-4">
 				<ModalTitle className="text-xl font-semibold">
-					Legg til ny bruker
+					{t("title")}
 				</ModalTitle>
 			</ModalHeader>
 
@@ -88,14 +90,14 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 				onSubmit={handleSubmit}
 				className="space-y-6 px-6 pb-6">
 				<div className="space-y-4">
-					<h3 className="text-lg font-semibold">Kontaktinformasjon</h3>
+					<h3 className="text-lg font-semibold">{t("contactInfo")}</h3>
 
 					<div className="grid grid-cols-2 gap-4">
 						<div className="space-y-2">
-							<Label htmlFor="fornavn">Fornavn</Label>
+							<Label htmlFor="fornavn">{t("firstName")}</Label>
 							<Input
 								id="fornavn"
-								placeholder="Fornavn"
+								placeholder={t("firstName")}
 								value={formData.fornavn}
 								onChange={(e) =>
 									setFormData({ ...formData, fornavn: e.target.value })
@@ -104,10 +106,10 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 							/>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="etternavn">Etternavn</Label>
+							<Label htmlFor="etternavn">{t("lastName")}</Label>
 							<Input
 								id="etternavn"
-								placeholder="Etternavn"
+								placeholder={t("lastName")}
 								value={formData.etternavn}
 								onChange={(e) =>
 									setFormData({ ...formData, etternavn: e.target.value })
@@ -119,11 +121,11 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 
 					<div className="grid grid-cols-2 gap-4">
 						<div className="space-y-2">
-							<Label htmlFor="email">E-post</Label>
+							<Label htmlFor="email">{t("email")}</Label>
 							<Input
 								id="email"
 								type="email"
-								placeholder="navn@selskap.no"
+								placeholder={t("emailPlaceholder")}
 								value={formData.email}
 								onChange={(e) =>
 									setFormData({ ...formData, email: e.target.value })
@@ -132,10 +134,10 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 							/>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="tittel">Tittel</Label>
+							<Label htmlFor="tittel">{t("title")}</Label>
 							<Input
 								id="tittel"
-								placeholder="Etternavn"
+								placeholder={t("titlePlaceholder")}
 								value={formData.tittel}
 								onChange={(e) =>
 									setFormData({ ...formData, tittel: e.target.value })
@@ -146,10 +148,10 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 					</div>
 
 					<div className="space-y-2">
-						<Label htmlFor="telefonnummer">Telefonnummer</Label>
+						<Label htmlFor="telefonnummer">{t("phone")}</Label>
 						<Input
 							id="telefonnummer"
-							placeholder="+47 444 44 444"
+							placeholder={t("phonePlaceholder")}
 							value={formData.telefonnummer}
 							onChange={(e) =>
 								setFormData({ ...formData, telefonnummer: e.target.value })
@@ -160,7 +162,7 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 				</div>
 
 				<div className="space-y-4 border-t border-[#E8EAE9] pt-4">
-					<h3 className="text-lg font-semibold">Tilganger</h3>
+					<h3 className="text-lg font-semibold">{t("permissions")}</h3>
 
 					{formData.role === "superbruker" && (
 						<div className="rounded-lg bg-[#E8F5E9] p-4">
@@ -169,12 +171,10 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 									<CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#009640]" />
 									<div>
 										<h4 className="font-semibold text-[#0F1912]">
-											Brukere du oppretter, overtar dine innstillinger
+											{t("superuserInfoTitle")}
 										</h4>
 										<p className="mt-1 text-sm text-[#5A615D]">
-											Som superbruker kan du opprette brukere med samme
-											kundenummer. Nye brukere overtar automatisk dine
-											innstillinger.
+											{t("superuserInfoDesc")}
 										</p>
 									</div>
 								</div>
@@ -193,7 +193,7 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 					{formData.role === "superbruker" && (
 						<div className="grid grid-cols-2 gap-4 text-sm">
 							<div>
-								<div className="font-medium text-[#0F1912]">Kundetilgang:</div>
+								<div className="font-medium text-[#0F1912]">{t("customerAccess")}:</div>
 								<div className="text-[#5A615D]">
 									{formData.kundetilgang.length > 0
 										? formData.kundetilgang
@@ -215,7 +215,7 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 							</div>
 							<div>
 								<div className="font-medium text-[#0F1912]">
-									Standard TESS lager:
+									{t("customerCatalog")}:
 								</div>
 								<div className="text-[#5A615D]">
 									{formData.kundekatalog.length > 0
@@ -229,7 +229,7 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 								</div>
 							</div>
 							<div>
-								<div className="font-medium text-[#0F1912]">TESS firma:</div>
+								<div className="font-medium text-[#0F1912]">{t("tessCompany")}:</div>
 								<div className="text-[#5A615D]">
 									{tessFirmaOptions.find((f) => f.value === formData.tessFirma)
 										?.label || "TESS Vest"}
@@ -241,38 +241,38 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 						<>
 							<div className="grid grid-cols-2 gap-4">
 								<div className="space-y-2">
-									<Label htmlFor="kundetilgang">Kundetilgang</Label>
+									<Label htmlFor="kundetilgang">{t("customerAccess")}</Label>
 									<MultiSelectWithTags
 										options={customerOptions}
 										selected={formData.kundetilgang}
 										onChange={(selected) =>
 											setFormData({ ...formData, kundetilgang: selected })
 										}
-										placeholder="Velg relevante kunder"
+										placeholder={t("selectCustomers")}
 									/>
 								</div>
 								<div className="space-y-2">
-									<Label htmlFor="kundekatalog">Kundekatalog</Label>
+									<Label htmlFor="kundekatalog">{t("customerCatalog")}</Label>
 									<MultiSelectWithTags
 										options={catalogOptions}
 										selected={formData.kundekatalog}
 										onChange={(selected) =>
 											setFormData({ ...formData, kundekatalog: selected })
 										}
-										placeholder="Velg katalog"
+										placeholder={t("selectCatalog")}
 									/>
 								</div>
 							</div>
 							<div className="grid grid-cols-2 gap-4">
 								<div className="space-y-2">
-									<Label htmlFor="standardTessLager">Standard TESS lager</Label>
+									<Label htmlFor="standardTessLager">{t("defaultWarehouse")}</Label>
 									<Select
 										value={formData.standardTessLager}
 										onValueChange={(value) =>
 											setFormData({ ...formData, standardTessLager: value })
 										}>
 										<SelectTrigger className="border-[#C1C4C2]">
-											<SelectValue placeholder="Velg lager" />
+											<SelectValue placeholder={t("selectWarehouse")} />
 										</SelectTrigger>
 										<SelectContent>
 											<SelectItem value="mo">Mo i rana</SelectItem>
@@ -282,14 +282,14 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 									</Select>
 								</div>
 								<div className="space-y-2">
-									<Label htmlFor="tessFirma">TESS Firma</Label>
+									<Label htmlFor="tessFirma">{t("tessCompany")}</Label>
 									<RadioSelect
 										options={tessFirmaOptions}
 										value={formData.tessFirma}
 										onChange={(value) =>
 											setFormData({ ...formData, tessFirma: value })
 										}
-										placeholder="Velg firma"
+										placeholder={t("selectCompany")}
 										searchable={false}
 									/>
 								</div>
@@ -299,10 +299,10 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 				</div>
 
 				<div className="space-y-4 border-t border-[#E8EAE9] pt-4">
-					<h3 className="text-lg font-semibold">Brukerrettigheter og status</h3>
+					<h3 className="text-lg font-semibold">{t("userRights")}</h3>
 
 					<div className="space-y-2">
-						<Label>Rolle</Label>
+						<Label>{t("role")}</Label>
 						<RadioGroup
 							value={formData.role}
 							onValueChange={(value) =>
@@ -319,12 +319,10 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 									<Label
 										htmlFor="superbruker"
 										className="cursor-pointer font-medium">
-										Superbruker
+										{t("superuser")}
 									</Label>
 									<p className="text-sm text-[#5A615D]">
-										Opprette nye brukere med egne innstillinger, godkjenne
-										rekvisjoner, sette budsjetter på ansatte, opprette
-										dimensjoner
+										{t("superuserDesc")}
 									</p>
 								</div>
 							</div>
@@ -338,11 +336,10 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 									<Label
 										htmlFor="ansatt"
 										className="cursor-pointer font-medium">
-										Ansatt
+										{t("employee")}
 									</Label>
 									<p className="text-sm text-[#5A615D]">
-										Handle produkter (etter fastsatt budsjett), se
-										ordrehistorikk, kontakte kundeservice
+										{t("employeeDesc")}
 									</p>
 								</div>
 							</div>
@@ -354,14 +351,14 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 					<Button
 						type="submit"
 						className="flex-1 bg-[#009640] hover:bg-[#008036]">
-						+ Legg til bruker
+						+ {t("addUser")}
 					</Button>
 					<Button
 						type="button"
 						variant="outline"
 						onClick={handleClose}
 						className="flex-1 border-[#C1C4C2]">
-						Lukk
+						{t("close")}
 					</Button>
 				</div>
 			</form>

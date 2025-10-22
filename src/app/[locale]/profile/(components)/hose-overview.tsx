@@ -12,55 +12,12 @@ import { useHoseInspectionCounts } from "@/hooks/useHoseInspectionCounts";
 import { Separator } from "@radix-ui/react-select";
 import { ChevronRight, Ellipsis, MapPin, Settings } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
-
-type Status = "ok" | "warn" | "error";
-
-type ChildNode = {
-	id: string;
-	name: string;
-	status: Status;
-	children?: {
-		id: string;
-		name: string;
-		status: Status;
-	}[];
-};
-
-type LocationNode = {
-	id: string;
-	name: string;
-	status: Status;
-	children?: ChildNode[];
-};
+import { useTranslations } from "next-intl";
+import { useGetHoseSystems } from "@/hooks/useGetHoseSystems";
 
 const HoseOverview = () => {
-	const [selectedS1Code] = useState<string | undefined>(undefined);
-
-	const { loading, s1Codes = [] } = useGetAssets("", selectedS1Code, {
-		initAssets: false,
-		initS1Codes: true,
-		s2Filter: true,
-	});
-
-	const locations: LocationNode[] = useMemo(() => {
-		return (s1Codes || [])
-			.filter((s1) => s1.S1Code && s1.S1Name)
-			.map((s1: any) => ({
-				id: String(s1.S1Id ?? s1.S1Code),
-				name: String(s1.S1Name ?? s1.S1Code ?? "S1"),
-				status: "ok" as Status,
-				children: Array.isArray(s1.S2)
-					? s1.S2.map((s2: any) => ({
-							id: String(s2.S2Id ?? s2.S2Code),
-							name: String(s2.S2Name ?? s2.S2Code ?? "S2"),
-							status: "ok" as Status,
-							children: [],
-						}))
-					: [],
-			}));
-	}, [s1Codes]);
+	const t = useTranslations("HoseOverview");
+	const { locations, loading, selectedS1Code } = useGetHoseSystems();
 
 	const { counts } = useHoseInspectionCounts(selectedS1Code);
 
@@ -68,7 +25,7 @@ const HoseOverview = () => {
 		<div className="space-y-6">
 			<div className="flex items-baseline space-x-4">
 				<div className="flex items-center">
-					<h1 className="text-2xl font-semibold">Min oversikt</h1>
+					<h1 className="text-2xl font-semibold">{t("title")}</h1>
 				</div>
 			</div>
 
@@ -84,7 +41,7 @@ const HoseOverview = () => {
 									alt="Settings"
 								/>
 								<p className="text-2xl font-bold text-[#0F1912]">
-									Utstyrsoversikt
+									{t("equipmentOverview")}
 								</p>
 							</div>
 
@@ -99,7 +56,7 @@ const HoseOverview = () => {
 
 						<div className="">
 							<p className="border-b border-[#E6E7E6] bg-[#F8F9F8] py-6 ps-12 text-sm font-medium text-[#5A615D]">
-								STRUKTUR (S1+S2)
+								{t("structure")}
 							</p>
 
 							<Accordion type="multiple">
@@ -151,7 +108,7 @@ const HoseOverview = () => {
 											<AccordionContent className="pb-2">
 												{(loc.children ?? []).length === 0 ? (
 													<div className="px-10 py-2 text-sm text-[#5A615D]">
-														Ingen enheter
+														{t("noUnits")}
 													</div>
 												) : (
 													<div className="space-y-1">
@@ -225,15 +182,15 @@ const HoseOverview = () => {
 					<div className="absolute bottom-0 left-0 mt-6 flex w-full items-center divide-x divide-[#E6E7E6] border-t border-[#E6E7E6] p-6 text-sm text-[#5A615D]">
 						<div className="flex items-center gap-2 pr-6">
 							<MapPin className="h-4 w-4" />
-							S2
+							{t("legend.s2")}
 						</div>
 						<div className="flex items-center gap-2 px-6">
 							<Settings className="h-4 w-4" />
-							Utstyr/Equipment
+							{t("legend.equipment")}
 						</div>
 						<div className="flex items-center gap-2 pl-6">
 							<Settings className="h-4 w-4" />
-							Utstyr/Equipment subkategori
+							{t("legend.equipmentSubcategory")}
 						</div>
 					</div>
 				</div>
@@ -247,7 +204,7 @@ const HoseOverview = () => {
 								src="/icons/search.svg"
 								alt="Search"
 							/>
-							<p className="text-2xl font-bold text-[#0F1912]">Inspeksjon</p>
+							<p className="text-2xl font-bold text-[#0F1912]">{t("inspection.title")}</p>
 							<Separator className="my-3 h-[1px] w-full bg-[#C1C4C2]" />
 						</div>
 						<div className="grid gap-4">
@@ -265,7 +222,7 @@ const HoseOverview = () => {
 										</span>
 									</div>
 									<p className="text-sm font-medium text-[#5A615D]">
-										Underkjente inspeksjoner
+										{t("inspection.rejected")}
 									</p>
 								</div>
 								<ChevronRight className="h-7 w-7 text-[#C1C4C2]" />
@@ -284,7 +241,7 @@ const HoseOverview = () => {
 										</span>
 									</div>
 									<p className="text-sm font-medium text-[#5A615D]">
-										Bestått med anmerkninger
+										{t("inspection.approvedWithRemarks")}
 									</p>
 								</div>
 								<ChevronRight className="h-7 w-7 text-[#C1C4C2]" />
@@ -336,7 +293,7 @@ const HoseOverview = () => {
 								src="/icons/reload.svg"
 								alt="Reload"
 							/>
-							<p className="text-2xl font-bold text-[#0F1912]">Slangebytte</p>
+							<p className="text-2xl font-bold text-[#0F1912]">{t("replacement.title")}</p>
 							<Separator className="my-3 h-[1px] w-full bg-[#C1C4C2]" />
 						</div>
 						<div className="grid gap-4">
@@ -354,7 +311,7 @@ const HoseOverview = () => {
 										</span>
 									</div>
 									<p className="text-sm font-medium text-[#5A615D]">
-										Forfalte inspeksjoner
+										{t("replacement.overdue")}
 									</p>
 								</div>
 								<ChevronRight className="h-7 w-7 text-[#C1C4C2]" />
@@ -373,7 +330,7 @@ const HoseOverview = () => {
 										</span>
 									</div>
 									<p className="text-sm font-medium text-[#5A615D]">
-										Planlagte inspeksjoner
+										{t("replacement.planned")}
 									</p>
 								</div>
 								<ChevronRight className="h-7 w-7 text-[#C1C4C2]" />

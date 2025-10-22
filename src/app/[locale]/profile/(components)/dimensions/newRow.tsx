@@ -5,6 +5,7 @@ import type { ReactElement } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useTranslations } from "next-intl";
 
 type InputRef =
 	| React.RefObject<HTMLInputElement>
@@ -38,6 +39,7 @@ const NewRow = memo(function NewRow({
 	inputRef,
 	onOpenTypeModal,
 }: NewRowProps): ReactElement {
+	const t = useTranslations("DimensionsNewRow");
 	useEffect(() => {
 		if (inputRef?.current) {
 			inputRef.current.focus();
@@ -56,7 +58,7 @@ const NewRow = memo(function NewRow({
 				<div style={{ marginLeft: `${level * 24}px` }}>
 					<Input
 						ref={inputRef}
-						placeholder="Skriv inn navn"
+						placeholder={t("namePlaceholder")}
 						className="w-full border-[#C1C4C2] hover:border-[#009640] focus:border-[#009640] focus:ring-1 focus:ring-[#009640]"
 						value={newDimension.name}
 						onClick={(e) => e.stopPropagation()}
@@ -68,7 +70,7 @@ const NewRow = memo(function NewRow({
 			</td>
 			<td className="px-4 py-2">
 				<Input
-					placeholder="Sett type"
+					placeholder={t("typePlaceholder")}
 					className="w-full cursor-pointer border-[#C1C4C2] bg-[#F3FAF7] hover:border-[#009640] focus:border-[#009640] focus:ring-1 focus:ring-[#009640]"
 					value={newDimension.type}
 					onClick={(e) => {
@@ -101,7 +103,7 @@ const NewRow = memo(function NewRow({
 							setNewDimension((p) => ({ ...p, cents: value }));
 						}}
 					/>
-					<span> kr</span>
+					<span> {t("currency")}</span>
 				</div>
 			</td>
 			<td className="px-4 py-2">
@@ -110,7 +112,7 @@ const NewRow = memo(function NewRow({
 						variant="green"
 						onClick={handleAddDimension}
 						size="sm">
-						Lagre
+						{t("save")}
 					</Button>
 					<Button
 						variant="outline"

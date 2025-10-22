@@ -6,6 +6,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
 	ShoppingCart,
@@ -55,6 +56,7 @@ export function HoseActionsDropdown({
 	triggerButton,
 	align = "start",
 }: HoseActionsDropdownProps) {
+	const t = useTranslations("HoseActionsDropdown");
 	const defaultTrigger = (
 		<button
 			className={cn(
@@ -63,7 +65,7 @@ export function HoseActionsDropdown({
 					? "border-[#0E7B34] bg-[#005522] text-white"
 					: "border-[#C1C4C2] text-[#5A615D] data-[state=open]:bg-[#003D1A] data-[state=open]:text-white",
 			)}>
-			<span className="tracking-wide">HANDLING</span>
+			<span className="tracking-wide">{t("action")}</span>
 			<ChevronDown
 				className={cn(
 					"h-4 w-4 transition-colors",
@@ -85,7 +87,7 @@ export function HoseActionsDropdown({
 				align={align}
 				className="w-[300px]">
 				<div className="text-muted-foreground px-3 pt-1 pb-2 text-xs">
-					Valgt: {selectedCount}
+					{t("selected")}: {selectedCount}
 				</div>
 
 				<DropdownMenuItem
@@ -97,7 +99,7 @@ export function HoseActionsDropdown({
 					})}>
 					<ShoppingCart className="mr-3 h-4 w-4 text-[#005522]" />
 					<span>
-						{isAddingToCart ? "Legger til..." : "Legg til i handlekurv"}
+						{isAddingToCart ? t("adding") : t("addToCart")}
 					</span>
 				</DropdownMenuItem>
 
@@ -108,7 +110,7 @@ export function HoseActionsDropdown({
 					})}
 					disabled>
 					<Mail className="mr-3 h-4 w-4 text-[#005522]" />
-					<span>Kontakt TESS support</span>
+					<span>{t("contactSupport")}</span>
 				</DropdownMenuItem>
 
 				<DropdownMenuItem
@@ -118,7 +120,7 @@ export function HoseActionsDropdown({
 					})}
 					disabled>
 					<FileText className="mr-3 h-4 w-4 text-[#005522]" />
-					<span>Rapporter slangebytter</span>
+					<span>{t("reportReplacement")}</span>
 				</DropdownMenuItem>
 
 				<DropdownMenuItem
@@ -128,14 +130,14 @@ export function HoseActionsDropdown({
 					})}
 					disabled>
 					<Trash2 className="mr-3 h-4 w-4 text-[#005522]" />
-					<span>Kasser utstyr</span>
+					<span>{t("discardEquipment")}</span>
 				</DropdownMenuItem>
 
 				<DropdownMenuItem
 					disabled
 					onClick={onPrintCertificate}>
 					<Printer className="mr-3 h-4 w-4 text-[#005522]" />
-					<span>Skriv ut TESS trykktest-sertifikat</span>
+					<span>{t("printCertificate")}</span>
 				</DropdownMenuItem>
 
 				<DropdownMenuItem
@@ -145,21 +147,21 @@ export function HoseActionsDropdown({
 					})}
 					disabled>
 					<Printer className="mr-3 h-4 w-4 text-[#005522]" />
-					<span>Skriv ut visuelle ID-merker (strekkode)</span>
+					<span>{t("printTags")}</span>
 				</DropdownMenuItem>
 
 				<DropdownMenuItem
 					onClick={onPrintTestCertificates}
 					disabled>
 					<Printer className="mr-3 h-4 w-4 text-[#005522]" />
-					<span>Skriv ut trykktest-sertifikater</span>
+					<span>{t("printTestCertificates")}</span>
 				</DropdownMenuItem>
 
 				<DropdownMenuItem
 					disabled
 					onClick={onExport}>
 					<CreditCard className="mr-3 h-4 w-4 text-[#005522]" />
-					<span>Eksporter oversiktsdata til Excel</span>
+					<span>{t("exportToExcel")}</span>
 				</DropdownMenuItem>
 
 				{onSelectAll && (
@@ -167,7 +169,7 @@ export function HoseActionsDropdown({
 						onClick={onSelectAll}
 						className="rounded-none border-t">
 						<CheckSquare className="mr-3 h-4 w-4 text-[#005522]" />
-						<span>{allSelected ? "Fjern alle" : "Velg alle"}</span>
+						<span>{allSelected ? t("deselectAll") : t("selectAll")}</span>
 					</DropdownMenuItem>
 				)}
 
@@ -176,8 +178,8 @@ export function HoseActionsDropdown({
 						<CheckSquare className="mr-3 h-4 w-4 text-[#005522]" />
 						<span>
 							{allSelectedOnPage
-								? "Fjern alle på denne siden"
-								: "Velg alle på denne siden"}
+								? t("deselectAllOnPage")
+								: t("selectAllOnPage")}
 						</span>
 					</DropdownMenuItem>
 				)}

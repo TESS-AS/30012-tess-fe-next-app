@@ -21,6 +21,7 @@ import { useAppContext } from "@/lib/appContext";
 import { postCartKit } from "@/services/carts.service";
 import { MapPin, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
 import { CartAddedModal } from "./cart-added-modal";
@@ -53,6 +54,7 @@ interface HosesAndEquipmentsProps {
 }
 
 export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
+	const t = useTranslations("HosesAndEquipments");
 	const { data: profile } = usePunchoutProfile();
 	const [customerNumber, setCustomerNumber] = useState<string>("");
 	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
@@ -68,10 +70,8 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 
 	const {
 		assets,
-		setAssets,
 		pagination,
 		loading,
-		setLoading,
 		fetchAssets,
 		s1Codes,
 		s1CodesPagination,
@@ -86,13 +86,13 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedColumns, setSelectedColumns] = useState<string[]>([
-		"ID",
-		"Kunde-ID",
-		"Beskrivelse",
-		"S1 anlegg, fartøy, enhet",
-		"S2 utstyr",
-		"Ordrenummer (PO)",
-		"Handling",
+		"id",
+		"customerId",
+		"description",
+		"s1Location",
+		"s2Equipment",
+		"orderNumber",
+		"actions",
 	]);
 
 	const [selectedRows, setSelectedRows] = useState<string[]>(() => {
@@ -113,7 +113,7 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 	const transformedAssets: HoseOrder[] = assets.map((asset: any) => ({
 		id: asset?.hoseLine?.hexagonId?.toString?.() || "",
 		hexagonId: asset?.hoseLine?.hexagonId?.toString?.() || "",
-		orderId: String(asset?.hoseHeader?.extDocSequenceId ?? ""),
+		orderId: asset?.hoseHeader?.extDocSequenceId ?? "",
 		kunde_id: asset?.hoseHeader?.customerNumber ?? "",
 		beskrivelse: asset?.hoseLine?.itemDescription ?? "",
 		status: asset?.hoseLine?.currentStatus ?? "",
@@ -129,7 +129,6 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 		neste_inspeksjonsdato: asset?.hoseLine?.nextInspectionDate ?? undefined,
 	}));
 
-	// === selection derived ===
 	const isRowSelected = (id: string) => {
 		if (allAcrossPages) return !deselectedIds.has(id);
 		return selectedRows.includes(id);
@@ -141,8 +140,6 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 
 	const selectedItems = useMemo(() => {
 		const set = new Set(selectedRows);
-		// NOTE: when allAcrossPages = true, selectedItems may not include off-page items.
-		// Use selectedCount for counts and pass only visible "selectedItems" to actions that need concrete IDs from the page.
 		return transformedAssets.filter((a) =>
 			allAcrossPages
 				? !deselectedIds.has(String(a.orderId))
@@ -163,7 +160,6 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 
 	const allSelectedGlobally = allAcrossPages && selectedCount > 0;
 
-	// === handlers ===
 	const handleSelectRow = (key: string, checked: boolean | "indeterminate") => {
 		const on = checked === true;
 		if (allAcrossPages) {
@@ -265,8 +261,6 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 			const handleAddToCart = async () => {
 				setIsAddingToCart(true);
 				try {
-					// If allAcrossPages, you'd normally send a server-side query representing the current filters
-					// plus exclusions (deselectedIds) instead of explicit IDs. Here, we only map visible items.
 					const rowsToUse = allAcrossPages
 						? transformedAssets.filter(
 								(a) => !deselectedIds.has(String(a.orderId)),
@@ -333,81 +327,81 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 	};
 
 	const columnOptions = [
-		"ID",
-		"Kunde-ID",
-		"Beskrivelse",
-		"S1 anlegg, fartøy, enhet",
-		"S2 utstyr",
-		"Ordrenummer (PO)",
-		"Handling",
-		"Installasjonsdato",
-		"Produksjonsdato",
-		"Påfyllingsdato",
-		"Neste inspeksjonsdato",
+		"id",
+		"customerId",
+		"description",
+		"s1Location",
+		"s2Equipment",
+		"orderNumber",
+		"actions",
+		"installationDate",
+		"productionDate",
+		"fillingDate",
+		"nextInspectionDate",
 	];
 
 	const allColumns: Record<string, Column<HoseOrder>> = {
-		ID: {
+		id: {
 			key: "id",
-			header: "ID",
+			header: t("columns.id"),
 			cell: (o) => <span>{o.id}</span>,
 			sortable: true,
 		},
-		"Kunde-ID": {
+		customerId: {
 			key: "kunde_id",
-			header: "KUNDE-ID",
+			header: t("columns.customerId"),
 			cell: (o) => <span>{o.kunde_id}</span>,
 			sortable: true,
 		},
-		Beskrivelse: {
+		description: {
 			key: "beskrivelse",
-			header: "BESKRIVELSE",
+			header: t("columns.description"),
 			cell: (o) => <span>{o.beskrivelse}</span>,
 			sortable: true,
 		},
-		"S1 anlegg, fartøy, enhet": {
+		s1Location: {
 			key: "s1_anlegg",
-			header: "S1 ANLEGG, FARTØY, ENHET",
+			header: t("columns.s1Location"),
 			cell: (o) => <span>{o.s1_anlegg}</span>,
 			sortable: true,
 		},
-		"S2 utstyr": {
+		s2Equipment: {
 			key: "s2_utstyr",
-			header: "S2 UTSTYR",
+			header: t("columns.s2Equipment"),
 			cell: (o) => <span>{o.s2_utstyr}</span>,
 			sortable: true,
 		},
-		"Ordrenummer (PO)": {
+		orderNumber: {
 			key: "ordrenr",
-			header: "ORDRENUMMER (PO)",
+			header: t("columns.orderNumber"),
 			cell: (o) => <span>{o.ordrenr}</span>,
 			sortable: true,
 		},
-		Installasjonsdato: {
+		installationDate: {
 			key: "installasjonsdato",
-			header: "INSTALLASJONSDATO",
+			header: t("columns.installationDate"),
 			cell: (o) => <span>{o.installasjonsdato ?? "-"}</span>,
 			sortable: true,
 		},
-		Produksjonsdato: {
+		productionDate: {
 			key: "produksjonsdato",
-			header: "PRODUKSJONSDATO",
+			header: t("columns.productionDate"),
 			cell: (o) => <span>{o.produksjonsdato ?? "-"}</span>,
 			sortable: true,
 		},
-		Påfyllingsdato: {
+		fillingDate: {
 			key: "pafyllingsdato",
-			header: "PÅFYLLINGSDATO",
+			header: t("columns.fillingDate"),
 			cell: (o) => <span>{o.pafyllingsdato ?? "-"}</span>,
 			sortable: true,
 		},
-		"Neste inspeksjonsdato": {
+		nextInspectionDate: {
 			key: "neste_inspeksjonsdato",
-			header: "NESTE INSPEKSJONSDATO",
+			header: t("columns.nextInspectionDate"),
 			cell: (o) => <span>{o.neste_inspeksjonsdato ?? "-"}</span>,
 			sortable: true,
 		},
-		Handling: {
+		actions: {
 			key: "handling",
 			header: () => (
 				<HoseActionsDropdown
@@ -416,7 +410,7 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 					onAddToCart={() => setCartModalOpen(true)}
 					onContactSupport={() => {
 						if (selectedCount === 0) {
-							toast.error("Vennligst velg elementer å kontakte om");
+							toast.error(t("errors.selectItemsFirst"));
 							return;
 						}
 						setSupportOpen(true);
@@ -447,19 +441,22 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 			),
 			cell: (order: HoseOrder) => (
 				<Checkbox
+					onClick={(e) => e.stopPropagation()}
 					checked={isRowSelected(String(order.orderId))}
-					onCheckedChange={(val) => handleSelectRow(String(order.orderId), val)}
+					onCheckedChange={(val) => {
+						handleSelectRow(String(order.orderId), val);
+					}}
 				/>
 			),
 		},
 	};
 
 	const activeColumns = useMemo(() => {
-		const nonHandling = selectedColumns.filter((n) => n !== "Handling");
-		const cols: Column<HoseOrder>[] = nonHandling
+		const nonActions = selectedColumns.filter((n) => n !== "actions");
+		const cols: Column<HoseOrder>[] = nonActions
 			.map((n) => allColumns[n])
 			.filter(Boolean) as Column<HoseOrder>[];
-		if (selectedColumns.includes("Handling")) cols.push(allColumns["Handling"]);
+		if (selectedColumns.includes("actions")) cols.push(allColumns["actions"]);
 		return cols;
 	}, [
 		selectedColumns,
@@ -529,7 +526,7 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 				}
 				onRemoveId={handleRemoveSelectedId}
 				onSubmit={async () => {
-					toast.success("Meldingen ble sendt til TESS support");
+					toast.success(t("success.supportMessageSent"));
 				}}
 			/>
 
@@ -545,7 +542,7 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 				}
 				onRemoveId={handleRemoveSelectedId}
 				onSubmit={async () => {
-					toast.success("Forespørselen ble sendt");
+					toast.success(t("success.requestSent"));
 				}}
 			/>
 
@@ -561,7 +558,7 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 				}
 				onRemoveId={handleRemoveSelectedId}
 				onSubmit={async () => {
-					toast.success("Utstyr utrangert");
+					toast.success(t("success.equipmentDiscarded"));
 				}}
 			/>
 
@@ -596,11 +593,13 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 			<div className="space-y-6">
 				<div className="flex items-baseline space-x-4">
 					<div className="flex items-center">
-						<h1 className="text-2xl font-semibold">Slanger og utstyr</h1>
+						<h1 className="text-2xl font-semibold">{t("title")}</h1>
 					</div>
 
 					<div className="flex w-[280px] items-center gap-3">
-						<p className="text-base font-normal text-[#5A615D]">Lokasjon:</p>
+						<p className="text-base font-normal text-[#5A615D]">
+							{t("location")}:
+						</p>
 						<div className="relative">
 							<Select
 								value={selectedS1Code || ""}
@@ -618,7 +617,7 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 										<MapPin className="h-4 w-4 shrink-0 text-[#0F1912]" />
 										<SelectValue
 											className="truncate"
-											placeholder="Velg S1 anlegg"
+											placeholder={t("selectS1Location")}
 										/>
 									</div>
 								</SelectTrigger>
@@ -651,7 +650,7 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 										))}
 									{loading && s1CodesPagination.currentPage > 1 && (
 										<div className="py-2 text-center text-sm text-gray-500">
-											Laster flere...
+											{t("loadingMore")}
 										</div>
 									)}
 								</SelectContent>
@@ -667,7 +666,7 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 									}}
 									className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none">
 									<X className="h-4 w-4 text-[#5A615D]" />
-									<span className="sr-only">Fjern lokasjon</span>
+									<span className="sr-only">{t("removeLocation")}</span>
 								</button>
 							)}
 						</div>
@@ -678,7 +677,7 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 							SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
 							<div className="flex w-[280px] items-center gap-3">
 								<p className="text-base font-normal text-[#5A615D]">
-									Customer:
+									{t("customer")}:
 								</p>
 								<div className="relative">
 									<Select
@@ -690,7 +689,7 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 										<SelectTrigger className="relative w-[200px] border-[#C1C4C2] bg-white pr-8 font-medium text-[#0F1912]">
 											<SelectValue
 												className="truncate"
-												placeholder="Velg customer"
+												placeholder={t("selectCustomer")}
 											/>
 										</SelectTrigger>
 										<SelectContent className="max-h-[300px] overflow-y-auto">

@@ -45,8 +45,8 @@ interface DataTableProps<T> {
 	className?: string;
 	isDropdownColumn?: boolean;
 
-	selectedIds?: string[]; // to tint selected rows
-	selectedRowBgClass?: string; // the class to apply for selected rows
+	selectedIds?: string[];
+	selectedRowBgClass?: string;
 	onHoseClick?: (hoseId: string) => void;
 }
 
@@ -125,7 +125,6 @@ export function DataTable<T extends { orderId: string }>({
 														"min-w-[120px]": column.key === "createdDate",
 														"min-w-[100px]": column.key === "price",
 														"min-w-[180px]": column.key === "status",
-														// Pin the Handling header on the far right
 														"sticky right-0 z-10": column.key === "action",
 														"p-0": column.key === "handling",
 													},
@@ -198,7 +197,6 @@ export function DataTable<T extends { orderId: string }>({
 														key={column.key}
 														className={cn(
 															"px-4 py-4 font-medium text-[#0F1912]",
-															// Keep the pinned action column visible and blend with row background
 															column.key === "action" &&
 																"sticky right-0 bg-inherit",
 														)}>

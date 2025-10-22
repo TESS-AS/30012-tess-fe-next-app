@@ -7,10 +7,12 @@ import { DataTable, type Column } from "@/components/ui/data-table";
 import { cn } from "@/lib/utils";
 import { CircleX } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { getStatusIcons } from "./mine-bestillinger";
 
 const HoseRequests = () => {
+	const t = useTranslations("HoseRequests");
 	const router = useRouter();
 	const pathname = usePathname();
 	const [view, setView] = React.useState<"empty" | "list">("empty");
@@ -24,11 +26,10 @@ const HoseRequests = () => {
 		<div className="space-y-6">
 			<div className="flex items-baseline gap-3">
 				<h1 className="text-2xl font-semibold text-[#0F1912]">
-					Mine forespørsler
+					{t("title")}
 				</h1>
 				<p className="text-sm text-[#5A615D]">
-					Samleside med alle forespørsler knyttet til ditt kundenummer (Request
-					for quote)
+					{t("subtitle")}
 				</p>
 			</div>
 
@@ -36,15 +37,15 @@ const HoseRequests = () => {
 				<div className="rounded-lg border border-[#C1C4C2] bg-white shadow-xs">
 					<div className="m-6 rounded-md bg-[#F3FAF7] p-4">
 						<p className="mb-2 font-bold text-[#005522]">
-							Ingen forespørsler ennå.
+							{t("emptyState.title")}
 						</p>
 						<div className="text-sm leading-relaxed text-[#005522]">
 							<p>
-								Slik gjør du: beskriv behovet, velg produkter og send til TESS.
+								{t("emptyState.instruction1")}
 							</p>
-							<p>Etter sending vises RFQ-en her med status og dato.</p>
+							<p>{t("emptyState.instruction2")}</p>
 							<p>
-								Fra Utstyrsliste: velg enheter → Handlinger → Send forespørsel.
+								{t("emptyState.instruction3")}
 							</p>
 						</div>
 
@@ -54,7 +55,7 @@ const HoseRequests = () => {
 								variant="default"
 								className="px-4"
 								onClick={goToEquipmentList}>
-								Gå til utstyrsliste
+								{t("emptyState.goToEquipmentList")}
 							</Button>
 						</div>
 					</div>
@@ -69,6 +70,7 @@ const HoseRequests = () => {
 export default HoseRequests;
 
 function RFQListView() {
+	const t = useTranslations("HoseRequests");
 	// Mock data to illustrate the UI per the provided design
 	type RFQItem = {
 		orderId: string;
@@ -154,13 +156,13 @@ function RFQListView() {
 	const columns: Column<RFQItem>[] = [
 		{
 			key: "orderId",
-			header: "RFQ#",
+			header: t("columns.rfqNumber"),
 			cell: (item) => <span className="text-[#0F1912]">{item.orderId}</span>,
 			sortable: true,
 		},
 		{
 			key: "requestType",
-			header: "Forespørselstype",
+			header: t("columns.requestType"),
 			cell: (item) => (
 				<span className="text-[#0F1912]">{item.requestType}</span>
 			),
@@ -168,7 +170,7 @@ function RFQListView() {
 		},
 		{
 			key: "createdDate",
-			header: "Opprettet",
+			header: t("columns.created"),
 			cell: (item) => (
 				<span className="text-[#0F1912]">{item.createdDate}</span>
 			),
@@ -176,7 +178,7 @@ function RFQListView() {
 		},
 		{
 			key: "status",
-			header: "Status",
+			header: t("columns.status"),
 			cell: (item) => (
 				<div className="flex items-center gap-2">
 					<span
@@ -198,7 +200,7 @@ function RFQListView() {
 				{/* Left: RFQ table */}
 				<div className="lg:col-span-8">
 					<h3 className="mb-2 text-base font-semibold text-[#0F1912]">
-						Forespørsler (RFQ)
+						{t("rfqListTitle")}
 					</h3>
 					<div className="overflow-hidden rounded-lg border border-[#C1C4C2] bg-white">
 						<DataTable<RFQItem>
@@ -219,21 +221,21 @@ function RFQListView() {
 				<div className="lg:col-span-4">
 					<div className="mb-2 flex items-center justify-between">
 						<h3 className="text-base font-bold text-[#0F1912]">
-							Utstyr på RFQ# 2211879
+							{t("equipmentOnRfq")}
 						</h3>
 						<Button
 							variant="outline"
 							size="sm"
 							className="border-[#B42318] text-[#434B46] hover:bg-[#FFF1F1]">
-							<CircleX /> Kanseller forespørsel
+							<CircleX /> {t("cancelRequest")}
 						</Button>
 					</div>
 					<div className="rounded-lg border border-[#C1C4C2] bg-white">
 						<table className="w-full text-sm">
 							<thead className="bg-[#F8F9F8] text-left text-[#5A615D]">
 								<tr>
-									<th className="px-4 py-2">Utstyr</th>
-									<th className="px-4 py-2">Beskrivelse</th>
+									<th className="px-4 py-2">{t("equipmentTable.equipment")}</th>
+									<th className="px-4 py-2">{t("equipmentTable.description")}</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -250,7 +252,7 @@ function RFQListView() {
 							</tbody>
 						</table>
 						<div className="border-t border-[#E5E7EB] p-3 text-sm text-[#5A615D]">
-							Viser <span className="font-medium">1-10</span> av{" "}
+							{t("equipmentTable.showing")} <span className="font-medium">1-10</span> {t("equipmentTable.of")}{" "}
 							<span className="font-medium">1000</span>
 						</div>
 					</div>

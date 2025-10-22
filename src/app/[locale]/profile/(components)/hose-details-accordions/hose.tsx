@@ -12,6 +12,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Info } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Cell } from "./cell";
 
@@ -21,12 +22,13 @@ interface Props {
 }
 
 export const HoseAccordion = ({ isEditMode, setIsProductModalOpen }: Props) => {
+	const t = useTranslations("HoseAccordion");
 	return (
 		<AccordionItem
 			value="slange"
 			className="border-none">
 			<AccordionTrigger className="text-decoration-none cursor-pointer rounded-none border-b border-[#C1C4C2] p-4 px-0 text-lg font-bold text-[#0F1912] hover:no-underline">
-				Slange
+				{t("title")}
 			</AccordionTrigger>
 			<AccordionContent className="p-0">
 				<div className="flex">
@@ -117,7 +119,7 @@ export const HoseAccordion = ({ isEditMode, setIsProductModalOpen }: Props) => {
 												onClick={() => setIsProductModalOpen(true)}
 												className="flex items-center gap-1 text-xs">
 												<Info className="h-4 w-4" />
-												Se detaljer
+												{t("seeDetails")}
 											</Button>
 										</div>
 									)}

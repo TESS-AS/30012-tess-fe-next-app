@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 type Item = { beskrivelse: string };
 
@@ -28,6 +29,7 @@ export function CartAddedModal({
 	isNavigating,
 	onConfirm,
 }: CartAddedModalProps) {
+	const t = useTranslations("CartAddedModal");
 	return (
 		<Modal
 			className="max-w-[400px]"
@@ -44,8 +46,7 @@ export function CartAddedModal({
 						/>
 						<span>
 							{selectedItems.length}{" "}
-							{selectedItems.length === 1 ? "vare" : "varer"} lagt til i
-							handlekurv
+							{selectedItems.length === 1 ? t("item") : t("items")} {t("addedToCart")}
 						</span>
 					</ModalTitle>
 				</ModalHeader>
@@ -53,7 +54,7 @@ export function CartAddedModal({
 				<div className="space-y-4 py-4">
 					<div className="space-y-2">
 						{selectedItems.length === 0 ? (
-							<div className="text-sm text-gray-600">Ingen varer valgt</div>
+							<div className="text-sm text-gray-600">{t("noItemsSelected")}</div>
 						) : (
 							<>
 								{selectedItems
@@ -71,12 +72,12 @@ export function CartAddedModal({
 										className="mt-2 flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
 										{showAllItems ? (
 											<>
-												Vis færre{" "}
+												{t("showLess")}{" "}
 												<Loader2 className="h-4 w-4 rotate-180 transform" />
 											</>
 										) : (
 											<>
-												Vis alle <Loader2 className="h-4 w-4" />
+												{t("showAll")} <Loader2 className="h-4 w-4" />
 											</>
 										)}
 									</button>
@@ -94,11 +95,11 @@ export function CartAddedModal({
 						onClick={onConfirm}>
 						{isNavigating ? (
 							<>
-								<span className="mr-2">Navigerer til handlekurv</span>
+								<span className="mr-2">{t("navigatingToCart")}</span>
 								<Loader2 className="h-4 w-4 animate-spin" />
 							</>
 						) : (
-							"Til handlekurven"
+							t("goToCart")
 						)}
 					</Button>
 				</div>

@@ -4,6 +4,7 @@ import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout"
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { cn, isImageSource } from "@/lib/utils";
 import { SidebarNavProps } from "@/types/sidebar.types";
+import { useTranslations } from "next-intl";
 import {
 	LucideIcon,
 	ArrowRight,
@@ -25,6 +26,7 @@ export function SidebarNav({
 	onTabChange,
 	onCollapse,
 }: SidebarNavProps) {
+	const t = useTranslations("SidebarNav");
 	const pathname = usePathname();
 	const [expandedItems, setExpandedItems] = useState<string[]>([]);
 	const [isCollapsed, setIsCollapsed] = useState(false);
@@ -69,7 +71,7 @@ export function SidebarNav({
 								height={24}
 							/>
 						</div>
-						<span>Hose Management</span>
+						<span>{t("hoseManagement")}</span>
 					</button>
 					{profile?.defaultCustomerNumber !==
 						SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
@@ -90,7 +92,7 @@ export function SidebarNav({
 									height={24}
 								/>
 							</div>
-							<span>E-handel</span>
+							<span>{t("eCommerce")}</span>
 						</button>
 					)}
 				</div>
@@ -99,7 +101,7 @@ export function SidebarNav({
 					{!isCollapsed && (
 						<div className="flex w-full flex-col">
 							<p className="mt-4 ml-6 text-[14px] font-medium uppercase">
-								{activeMode === "ehandel" ? "E-handel" : "Hose Management"}
+								{activeMode === "ehandel" ? t("eCommerce") : t("hoseManagement")}
 							</p>
 							<div className="flex w-full flex-col py-2 pl-4">
 								{items.map((item, index) => {

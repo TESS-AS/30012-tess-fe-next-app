@@ -13,6 +13,7 @@ import { OrderItems } from "@/types/orderHistory.types";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import { Search } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 type Order = OrderItems & { orderId: string };
 
@@ -71,8 +72,9 @@ export const getStatusIcons = (status: string) => {
 };
 
 export function OrdreHistorikk() {
+	const t = useTranslations("OrdreHistorikk");
 	const [searchQuery, setSearchQuery] = useState("");
-	const [selectedStatus, setSelectedStatus] = useState<string>("Alle");
+	const [selectedStatus, setSelectedStatus] = useState<string>(t("all"));
 	const [currentPage, setCurrentPage] = useState(1);
 
 	const ITEMS_PER_PAGE = 10;
@@ -93,13 +95,13 @@ export function OrdreHistorikk() {
 	} = useGetOrders(currentPage, ITEMS_PER_PAGE, filters);
 
 	const statuses = [
-		"Alle",
-		"Mottatt",
-		"Bekreftet",
-		"Plukket",
-		"Under transport",
-		"Levert",
-		"Kansellert",
+		t("all"),
+		t("received"),
+		t("confirmed"),
+		t("picked"),
+		t("inTransit"),
+		t("delivered"),
+		t("cancelled"),
 	];
 
 	const getStatusColor = (status: string) => {
@@ -159,25 +161,25 @@ export function OrdreHistorikk() {
 	const columns = [
 		{
 			key: "id",
-			header: "ORDRENUMMER",
+			header: t("orderNumber").toUpperCase(),
 			cell: (order: Order) => <span className="">#{order.orderNumber}</span>,
 			sortable: true,
 		},
 		{
 			key: "date",
-			header: "BESTILLINGSDATO",
+			header: t("orderDate").toUpperCase(),
 			cell: (order: Order) => <span>{formatDate(order.date)}</span>,
 			sortable: true,
 		},
 		{
 			key: "total",
-			header: "PRIS",
+			header: t("price").toUpperCase(),
 			cell: (order: Order) => formatNorwegianCurrency(order.total ?? 0),
 			sortable: true,
 		},
 		{
 			key: "status",
-			header: "STATUS",
+			header: t("status").toUpperCase(),
 			cell: (order: Order) => (
 				<span
 					className={cn(
@@ -196,10 +198,9 @@ export function OrdreHistorikk() {
 		<div className="space-y-6">
 			<div className="flex items-baseline justify-between">
 				<div className="flex items-center">
-					<h1 className="text-2xl font-semibold">Ordrehistorikk</h1>
+					<h1 className="text-2xl font-semibold">{t("title")}</h1>
 					<p className="ml-4 text-[#5A615D]">
-						<span className="font-semibold">Alle selskapets ordre </span>
-						(e-handel,service senter, forsyningsløsninger, per e-post etc)
+						{t("subtitle")}
 					</p>
 				</div>
 			</div>
@@ -209,7 +210,7 @@ export function OrdreHistorikk() {
 					<div className="relative flex w-full max-w-[480px]">
 						<Search className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-[#5A615D]" />
 						<Input
-							placeholder="Søk etter ordre-ID eller kundenavn"
+							placeholder={t("searchPlaceholder")}
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
 							className="font-sm h-10 flex-1 rounded-md border border-[#8A8F8C] bg-[#F8F9F8] pr-24 pl-12 text-base text-[#5A615D]"
@@ -220,12 +221,12 @@ export function OrdreHistorikk() {
 								/* optional manual trigger; filtering is instant */
 							}}
 							className="absolute top-1/2 right-0 h-10 -translate-y-1/2 rounded-none rounded-r-md border-1 border-l-2 border-[#8A8F8C] bg-white px-4 font-medium text-[#0F1912] hover:bg-white">
-							Søk
+							{t("search")}
 						</Button>
 					</div>
 
 					<div className="flex items-center gap-3 border-t border-[#C1C4C2] pt-6">
-						<p className="text-sm font-bold text-[#0F1912]">Status:</p>
+						<p className="text-sm font-bold text-[#0F1912]">{t("status")}:</p>
 						<RadioGroup
 							value={selectedStatus}
 							onValueChange={setSelectedStatus}

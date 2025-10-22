@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AddUserModal } from "./add-user-modal";
+import { DeleteUserModal } from "./delete-user-modal";
+import { useTranslations } from "next-intl";
 
 interface User {
 	id: string;
@@ -33,9 +35,12 @@ interface User {
 }
 
 const UsersBrukere = () => {
+	const t = useTranslations("UsersBrukere");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 	const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
 	const users: User[] = [
 		{
@@ -87,6 +92,19 @@ const UsersBrukere = () => {
 		}
 	};
 
+	const handleDeleteClick = (user: User) => {
+		setUserToDelete(user);
+		setIsDeleteModalOpen(true);
+	};
+
+	const handleDeleteConfirm = () => {
+		if (userToDelete) {
+			// Handle user deletion logic here
+			console.log("Deleting user:", userToDelete);
+			setUserToDelete(null);
+		}
+	};
+
 	const getRoleBadgeClass = (role: User["role"]) => {
 		switch (role) {
 			case "Administrator":
@@ -103,8 +121,8 @@ const UsersBrukere = () => {
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center">
-				<h1 className="text-2xl font-semibold">Brukere</h1>
-				<p className="ml-4 text-[#5A615D]">Her kan du administrere brukere.</p>
+				<h1 className="text-2xl font-semibold">{t("title")}</h1>
+				<p className="ml-4 text-[#5A615D]">{t("subtitle")}</p>
 			</div>
 			<div className="rounded-lg border border-[#C1C4C2] bg-white">
 				<div className="space-y-6 p-6">
@@ -112,7 +130,7 @@ const UsersBrukere = () => {
 						<div className="relative flex w-full max-w-[480px]">
 							<Search className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-[#5A615D]" />
 							<Input
-								placeholder="Søk etter brukere"
+								placeholder={t("searchPlaceholder")}
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
 								className="font-sm h-10 flex-1 rounded-md border border-[#8A8F8C] bg-[#F8F9F8] pr-24 pl-12 text-base text-[#5A615D]"
@@ -123,7 +141,7 @@ const UsersBrukere = () => {
 							variant="default"
 							onClick={() => setIsAddUserModalOpen(true)}
 							className="bg-[#009640] hover:bg-[#008036]">
-							<Plus className="mr-2 h-4 w-4" /> Legg til ny bruker
+							<Plus className="mr-2 h-4 w-4" /> {t("addUser")}
 						</Button>
 					</div>
 				</div>
@@ -142,25 +160,25 @@ const UsersBrukere = () => {
 									/>
 								</th>
 								<th className="px-4 py-3 text-left text-sm font-medium text-[#0F1912]">
-									NAVN
+									{t("columns.name")}
 								</th>
 								<th className="px-4 py-3 text-left text-sm font-medium text-[#0F1912]">
-									BRUKERROLLE
+									{t("columns.role")}
 								</th>
 								<th className="px-4 py-3 text-left text-sm font-medium text-[#0F1912]">
-									KUNDETILGANG
+									{t("columns.customerAccess")}
 								</th>
 								<th className="px-4 py-3 text-left text-sm font-medium text-[#0F1912]">
-									KATALOG
+									{t("columns.catalog")}
 								</th>
 								<th className="px-4 py-3 text-left text-sm font-medium text-[#0F1912]">
-									LAGER
+									{t("columns.warehouse")}
 								</th>
 								<th className="px-4 py-3 text-left text-sm font-medium text-[#0F1912]">
-									TESS FIRMA
+									{t("columns.company")}
 								</th>
 								<th className="w-16 px-4 py-3 text-left text-sm font-medium text-[#0F1912]">
-									HANDLING
+									{t("columns.action")}
 								</th>
 							</tr>
 						</thead>
@@ -214,15 +232,17 @@ const UsersBrukere = () => {
 											<DropdownMenuContent align="end">
 												<DropdownMenuItem>
 													<Eye className="mr-2 h-4 w-4" />
-													Vis detaljer
+													{t("actions.viewDetails")}
 												</DropdownMenuItem>
 												<DropdownMenuItem>
 													<Edit className="mr-2 h-4 w-4" />
-													Rediger bruker
+													{t("actions.editUser")}
 												</DropdownMenuItem>
-												<DropdownMenuItem className="text-red-600">
+												<DropdownMenuItem 
+													className="text-red-600"
+													onClick={() => handleDeleteClick(user)}>
 													<Trash2 className="mr-2 h-4 w-4" />
-													Slett bruker
+													{t("actions.deleteUser")}
 												</DropdownMenuItem>
 											</DropdownMenuContent>
 										</DropdownMenu>
@@ -235,7 +255,7 @@ const UsersBrukere = () => {
 
 				<div className="border-t border-[#C1C4C2] px-6 py-4">
 					<p className="text-right text-sm text-[#5A615D]">
-						Brukere totalt:{" "}
+						{t("totalUsers")}:{" "}
 						<span className="font-medium">{filteredUsers.length}</span>
 					</p>
 				</div>
@@ -244,6 +264,13 @@ const UsersBrukere = () => {
 			<AddUserModal
 				open={isAddUserModalOpen}
 				onOpenChange={setIsAddUserModalOpen}
+			/>
+
+			<DeleteUserModal
+				open={isDeleteModalOpen}
+				onOpenChange={setIsDeleteModalOpen}
+				onConfirm={handleDeleteConfirm}
+				userName={userToDelete?.name}
 			/>
 		</div>
 	);

@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { RiskPieChartFilled } from "@/components/ui/risk-pie-chart";
 import { ChevronDown, ChevronRight, MoreHorizontal } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type RiskClass = {
 	class: number;
@@ -19,12 +20,14 @@ const RiskClassCard = ({
 	rk: number;
 	count: number;
 	color: string;
-}) => (
+}) => {
+	const t = useTranslations("HoseRiskClass");
+	return (
 	<div className="group relative flex cursor-pointer items-center justify-between rounded-lg bg-white p-4 pl-12 shadow-sm ring-1 ring-[#E6E7E6] transition-all hover:translate-x-0.5 hover:shadow-md">
 		<div className="flex items-center gap-3">
 			<div className="text-sm">
 				<div className="flex items-center gap-2 font-medium text-[#5A615D]">
-					Risikoklasse
+					{t("riskClass")}
 					<div
 						className="flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold text-white transition-transform group-hover:scale-110"
 						style={{ background: color }}
@@ -37,9 +40,11 @@ const RiskClassCard = ({
 		</div>
 		<ChevronRight className="h-8 w-8 text-[#C1C4C2] transition-transform group-hover:translate-x-1" />
 	</div>
-);
+	);
+};
 
 const HoseRiskClass = () => {
+	const t = useTranslations("HoseRiskClass");
 	const [hovered, setHovered] = useState<number | null>(null);
 
 	const riskClasses: RiskClass[] = [
@@ -74,9 +79,9 @@ const HoseRiskClass = () => {
 					<div className="flex items-start justify-between">
 						<div className="flex flex-col">
 							<div className="flex gap-3 space-y-1">
-								<h1 className="text-2xl font-semibold">Kritikalitet</h1>
+								<h1 className="text-2xl font-semibold">{t("title")}</h1>
 								<h2 className="text-base text-[#5A615D]">
-									Prosent av (S1) TESS Princess IMO: 789548
+									{t("subtitle")}
 								</h2>
 							</div>
 							<p className="text-sm text-[#009640]">
@@ -116,7 +121,7 @@ const HoseRiskClass = () => {
 					</div>
 
 					<p className="mt-4 text-center text-sm text-[#5A615D]">
-						RK = Risikoklasse
+						{t("rkLabel")}
 					</p>
 				</div>
 

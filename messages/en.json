@@ -543,5 +543,474 @@
 				"manual": "Manual"
 			}
 		}
+	},
+	"HosesAndEquipments": {
+		"title": "Hoses and Equipment",
+		"location": "Location",
+		"customer": "Customer",
+		"selectS1Location": "Select S1 location",
+		"selectCustomer": "Select customer",
+		"loadingMore": "Loading more...",
+		"removeLocation": "Remove location",
+		"columns": {
+			"id": "ID",
+			"customerId": "CUSTOMER ID",
+			"description": "DESCRIPTION",
+			"s1Location": "S1 LOCATION, VESSEL, UNIT",
+			"s2Equipment": "S2 EQUIPMENT",
+			"orderNumber": "ORDER NUMBER (PO)",
+			"installationDate": "INSTALLATION DATE",
+			"productionDate": "PRODUCTION DATE",
+			"fillingDate": "FILLING DATE",
+			"nextInspectionDate": "NEXT INSPECTION DATE"
+		},
+		"errors": {
+			"selectItemsFirst": "Please select items to contact about"
+		},
+		"success": {
+			"supportMessageSent": "Message sent to TESS support",
+			"requestSent": "Request sent",
+			"equipmentDiscarded": "Equipment discarded"
+		}
+	},
+	"HoseOverview": {
+		"title": "My Overview",
+		"equipmentOverview": "Equipment Overview",
+		"structure": "STRUCTURE (S1+S2)",
+		"noUnits": "No units",
+		"legend": {
+			"s2": "S2",
+			"equipment": "Equipment",
+			"equipmentSubcategory": "Equipment Subcategory"
+		},
+		"inspection": {
+			"title": "Inspection",
+			"rejected": "Rejected inspections",
+			"approvedWithRemarks": "Approved with remarks",
+			"overdue": "Overdue inspections",
+			"planned": "Planned inspections"
+		},
+		"replacement": {
+			"title": "Hose Replacement",
+			"overdue": "Overdue replacements",
+			"planned": "Planned replacements"
+		}
+	},
+	"HoseDetailsPage": {
+		"hoseEquipment": "Hose/Equipment",
+		"keyInformation": "Key Information",
+		"images": "Images",
+		"viewAll": "View all",
+		"status": "Status",
+		"edit": "Edit",
+		"cancel": "Cancel",
+		"addToCart": "Add to cart",
+		"export": "Export",
+		"more": "More"
+	},
+	"HoseAccordion": {
+		"title": "Hose",
+		"seeDetails": "See details"
+	},
+	"S2EquipmentsAccordion": {
+		"title": "S2 Equipment"
+	},
+	"AdditionalEquipmentAccordion": {
+		"title": "Additional Equipment on Hose"
+	},
+	"OtherDetailsAccordion": {
+		"title": "Other Details"
+	},
+	"InspectionsAccordion": {
+		"title": "Inspection"
+	},
+	"DocumentsAccordion": {
+		"title": "Documents",
+		"addDocument": "Add document"
+	},
+	"HistoricAccordion": {
+		"title": "History",
+		"current": "(current)",
+		"columns": {
+			"workOrderNumber": "WORK ORDER NUMBER (WO)",
+			"description": "DESCRIPTION",
+			"content": "CONTENT"
+		}
+	},
+	"HoseInspections": {
+		"title": "Inspections",
+		"location": "Location",
+		"selectS1Location": "Select S1 location",
+		"loadingMore": "Loading more...",
+		"removeLocation": "Remove location",
+		"type": "Type",
+		"completedInspections": "Completed inspections",
+		"plannedInspections": "Planned inspections",
+		"period": "Period",
+		"selectPeriod": "Select period",
+		"last12Months": "Last 12 months",
+		"last24Months": "Last 24 months",
+		"currentYear": "Current Year",
+		"next12Months": "Next 12 months",
+		"next24Months": "Next 24 months",
+		"loadingData": "Loading data...",
+		"couldNotLoadData": "Could not load data.",
+		"noDataInPeriod": "No data in selected period.",
+		"completed": "Completed",
+		"planned": "Planned"
+	},
+	"HoseReplacement": {
+		"title": "Future Hose Replacements",
+		"notificationTitle": "Some items are out of stock",
+		"notificationMessage": "Some items are not in stock at your selected warehouse, and it may take up to 3 extra days to get them delivered.",
+		"structure": "STRUCTURE (S1+S2)",
+		"total": "TOTAL",
+		"estimatedCosts": "Estimated costs"
+	},
+	"HoseRiskClass": {
+		"title": "Criticality",
+		"subtitle": "Percentage of (S1) TESS Princess IMO: 789548",
+		"riskClass": "Risk Class",
+		"rkLabel": "RK = Risk Class"
+	},
+	"HoseRequests": {
+		"title": "My Requests",
+		"subtitle": "Collection page with all requests linked to your customer number (Request for quote)",
+		"emptyState": {
+			"title": "No requests yet.",
+			"instruction1": "How to do it: describe the need, select products and send to TESS.",
+			"instruction2": "After sending, the RFQ will appear here with status and date.",
+			"instruction3": "From Equipment List: select units \u2192 Actions \u2192 Send request.",
+			"goToEquipmentList": "Go to equipment list"
+		},
+		"rfqListTitle": "Requests (RFQ)",
+		"equipmentOnRfq": "Equipment on RFQ# 2211879",
+		"cancelRequest": "Cancel request",
+		"columns": {
+			"rfqNumber": "RFQ#",
+			"requestType": "Request Type",
+			"created": "Created",
+			"status": "Status"
+		},
+		"equipmentTable": {
+			"equipment": "Equipment",
+			"description": "Description",
+			"showing": "Showing",
+			"of": "of"
+		}
+	},
+	"AssetIdSelector": {
+		"status": "Status"
+	},
+	"CartAddedModal": {
+		"item": "item",
+		"items": "items",
+		"addedToCart": "added to cart",
+		"noItemsSelected": "No items selected",
+		"showLess": "Show less",
+		"showAll": "Show all",
+		"navigatingToCart": "Navigating to cart",
+		"goToCart": "Go to cart"
+	},
+	"HoseSearchBar": {
+		"placeholder": "Search by ID number, order number, vessel or equipment...",
+		"clearSearch": "Clear search",
+		"search": "Search"
+	},
+	"HoseActionsDropdown": {
+		"action": "ACTION",
+		"selected": "Selected",
+		"addToCart": "Add to cart",
+		"adding": "Adding...",
+		"contactSupport": "Contact TESS support",
+		"reportReplacement": "Report hose replacements",
+		"discardEquipment": "Discard equipment",
+		"printCertificate": "Print TESS pressure test certificate",
+		"printTags": "Print visual ID tags (barcode)",
+		"printTestCertificates": "Print pressure test certificates",
+		"exportToExcel": "Export overview data to Excel",
+		"selectAll": "Select all",
+		"deselectAll": "Deselect all",
+		"selectAllOnPage": "Select all on this page",
+		"deselectAllOnPage": "Deselect all on this page"
+	},
+	"SidebarNav": {
+		"hoseManagement": "Hose Management",
+		"eCommerce": "E-Commerce"
+	},
+	"MineBestillinger": {
+		"title": "My Orders",
+		"subtitle": "Your completed orders here in the e-commerce.",
+		"searchPlaceholder": "Search by order ID or customer name",
+		"search": "Search",
+		"status": "Status",
+		"all": "All",
+		"received": "Received",
+		"confirmed": "Confirmed",
+		"picked": "Picked",
+		"inTransit": "In Transit",
+		"delivered": "Delivered",
+		"cancelled": "Cancelled",
+		"orderNumber": "Order Number",
+		"orderDate": "Order Date",
+		"price": "Price"
+	},
+	"AddUserModal": {
+		"title": "Add New User",
+		"contactInfo": "Contact Information",
+		"firstName": "First Name",
+		"lastName": "Last Name",
+		"email": "Email",
+		"emailPlaceholder": "name@company.com",
+		"titlePlaceholder": "Title",
+		"phone": "Phone Number",
+		"phonePlaceholder": "+47 444 44 444",
+		"permissions": "Permissions",
+		"superuserInfoTitle": "Users you create will inherit your settings",
+		"superuserInfoDesc": "As a superuser, you can create users with the same customer number. New users will automatically inherit your settings.",
+		"customerAccess": "Customer Access",
+		"defaultWarehouse": "Default TESS Warehouse",
+		"customerCatalog": "Customer Catalog",
+		"tessCompany": "TESS Company",
+		"selectCustomers": "Select relevant customers",
+		"selectCatalog": "Select catalog",
+		"selectWarehouse": "Select warehouse",
+		"selectCompany": "Select company",
+		"userRights": "User Rights and Status",
+		"role": "Role",
+		"superuser": "Superuser",
+		"superuserDesc": "Create new users with custom settings, approve requisitions, set budgets for employees, create dimensions",
+		"employee": "Employee",
+		"employeeDesc": "Purchase products (within assigned budget), view order history, contact customer service",
+		"addUser": "Add User",
+		"close": "Close"
+	},
+	"DeleteUserModal": {
+		"title": "Delete user?",
+		"message": "The user will lose access to all orders, order history and will not be able to log in.",
+		"warning": "This action cannot be undone.",
+		"cancel": "No, cancel",
+		"confirm": "Yes, delete user"
+	},
+	"UsersBrukere": {
+		"title": "Users",
+		"subtitle": "Here you can manage users.",
+		"searchPlaceholder": "Search for users",
+		"addUser": "Add new user",
+		"totalUsers": "Total users",
+		"columns": {
+			"name": "NAME",
+			"role": "USER ROLE",
+			"customerAccess": "CUSTOMER ACCESS",
+			"catalog": "CATALOG",
+			"warehouse": "WAREHOUSE",
+			"company": "TESS COMPANY",
+			"action": "ACTION"
+		},
+		"actions": {
+			"viewDetails": "View details",
+			"editUser": "Edit user",
+			"deleteUser": "Delete user"
+		}
+	},
+	"HoseColumnsDropdown": {
+		"addColumn": "Add column"
+	},
+	"HoseFiltersDropdown": {
+		"filter": "Filter",
+		"inspection": "Inspection",
+		"rejectedInspections": "Rejected inspections",
+		"withRemarks": "With remarks",
+		"overdue": "Overdue",
+		"hoseReplacement": "Hose Replacement",
+		"activeTemporary": "Active temporary hose replacements",
+		"dueInSixMonths": "Due in less than 6 months",
+		"byAge": "By age",
+		"age5to6": "5-6 years old",
+		"age7to8": "7-8 years old"
+	},
+	"Dimensions": {
+		"title": "Accounting Dimensions",
+		"subtitle": "Organize projects, departments, work orders, etc. in hierarchical structure with budgets. Accounting dimensions you add here will appear in checkout for all your users.",
+		"showingProjectFor": "Showing project for",
+		"projects": {
+			"all": "All"
+		},
+		"defaultTypes": {
+			"department": "Department",
+			"project": "Project",
+			"workorder": "Work Order"
+		},
+		"emptyState": {
+			"title": "No dimensions yet",
+			"description": "Get started by creating your first dimension. You can organize it into categories and elements."
+		},
+		"actions": {
+			"createNew": "Create new dimension",
+			"editTypes": "Edit dimension types"
+		},
+		"table": {
+			"name": "NAME",
+			"nameTooltip": "This field is used to identify the dimension.",
+			"type": "TYPE",
+			"typeTooltip": "Select a dimension type from the list.",
+			"budget": "BUDGET",
+			"budgetTooltip": "Set a budget for the dimension.",
+			"action": "ACTION"
+		},
+		"validation": {
+			"nameRequired": "Please fill in name",
+			"typeRequired": "Please select type",
+			"budgetRequired": "Please fill in budget",
+			"dimensionTypeRequired": "Please select a dimension type"
+		},
+		"messages": {
+			"created": "Dimension created",
+			"createError": "Could not create dimension. Please try again.",
+			"updated": "Dimension updated",
+			"updateError": "An error occurred while updating dimension",
+			"deleted": "The dimension was deleted",
+			"deleteError": "Could not delete the dimension. Please try again.",
+			"notFound": "Could not find the dimension to update"
+		}
+	},
+	"DimensionsDeleteModal": {
+		"confirmMessage": "Are you sure you want to delete \"{name}\"?",
+		"warningMessage": "This will also delete all underlying elements.",
+		"cancel": "No, cancel",
+		"confirm": "Yes, I'm sure"
+	},
+	"DimensionsNewRow": {
+		"namePlaceholder": "Enter name",
+		"typePlaceholder": "Set type",
+		"currency": "kr",
+		"save": "Save"
+	},
+	"DimensionsDimensionRow": {
+		"expand": "Expand",
+		"collapse": "Collapse",
+		"currency": "kr",
+		"cancel": "Cancel",
+		"save": "Save",
+		"addSubcategory": "Add subcategory",
+		"editDimension": "Edit dimension",
+		"deleteDimension": "Delete dimension"
+	},
+	"DimensionsTypeModal": {
+		"title": "Set dimension types",
+		"dimension": "Dimension",
+		"active": "Active",
+		"type": "Type",
+		"typePlaceholder": "Enter type",
+		"example": "Example: Project, department, work order, etc.",
+		"checkoutInfo": "Dimension appears at checkout\nand is required to be filled out by all employees",
+		"successMessage": "Dimension types updated",
+		"errorMessage": "Could not update dimension types",
+		"saveButton": "Save dimension types"
+	},
+	"DimensionsProjectPicker": {
+		"searchPlaceholder": " Search project...",
+		"noProjectsFound": "No projects found."
+	},
+	"OrdreDetaljer": {
+		"contactPerson": "Contact Person",
+		"address": "Address",
+		"delivery": "Delivery",
+		"estimatedDeliveryTime": "Estimated delivery time",
+		"payment": "Payment",
+		"yourItems": "Your Items",
+		"orderSummary": "Order Summary",
+		"originalPrice": "Original price (excl. VAT)",
+		"discount": "Discount",
+		"subtotal": "Sum after discount (excl. VAT)",
+		"vat": "VAT ({rate}%)",
+		"currency": "kr"
+	},
+	"OrdreHistorikk": {
+		"title": "Order History",
+		"subtitle": "All company orders (e-commerce, service center, supply solutions, via email, etc.)",
+		"searchPlaceholder": "Search by order ID or customer name",
+		"search": "Search",
+		"status": "Status",
+		"all": "All",
+		"received": "Received",
+		"confirmed": "Confirmed",
+		"picked": "Picked",
+		"inTransit": "In Transit",
+		"delivered": "Delivered",
+		"cancelled": "Cancelled",
+		"orderNumber": "Order Number",
+		"orderDate": "Order Date",
+		"price": "Price"
+	},
+	"ProductDetailsModal": {
+		"title": "Product Details",
+		"description": "Description",
+		"productDetails": "Product Details",
+		"insert": "Insert",
+		"inner": "Inner",
+		"marking": "Marking",
+		"temperature": "Temperature \u00b0c:",
+		"outer": "Outer",
+		"closeWindow": "Close Window"
+	},
+	"Rekvisisjoner": {
+		"title": "Requisitions",
+		"subtitle": "Manage and approve incoming requisitions from employees and external systems.",
+		"searchPlaceholder": "Search by order ID or customer name",
+		"search": "Search",
+		"status": "Status",
+		"orderId": "Order ID",
+		"orderer": "Orderer",
+		"created": "Created",
+		"price": "Price",
+		"approve": "Approve",
+		"reject": "Reject",
+		"restore": "Restore",
+		"units": "Units",
+		"quantity": "Quantity",
+		"itemsAddedToCart": "{count} items added to cart",
+		"showLess": "Show less",
+		"showAll": "Show all",
+		"goToCart": "Go to cart"
+	},
+	"ProfilePage": {
+		"tabs": {
+			"myOrders": "My Orders",
+			"requisitions": "Requisitions",
+			"orderHistory": "Order History",
+			"dimensions": "Dimensions",
+			"usage": "Usage",
+			"users": "Users",
+			"catalog": "Catalog",
+			"settings": "Settings",
+			"overview": "Overview",
+			"hosesEquipment": "Hoses/Equipment",
+			"inspections": "Inspections",
+			"hoseReplacement": "Hose Replacement",
+			"riskClass": "Risk Class",
+			"requests": "Requests",
+			"recentActivities": "Recent Activities"
+		},
+		"sidebar": {
+			"orders": "Orders",
+			"myOrders": "My Orders",
+			"requisitions": "Requisitions",
+			"orderHistory": "Order History",
+			"dimensions": "Dimensions",
+			"usage": "Usage",
+			"users": "Users",
+			"catalog": "Catalog",
+			"settings": "Settings",
+			"logout": "Log out",
+			"overview": "Overview",
+			"hosesEquipment": "Hoses/Equipment",
+			"inspections": "Inspections",
+			"hoseReplacement": "Hose Replacement",
+			"riskClass": "Risk Class",
+			"requests": "Requests",
+			"recentActivities": "Recent Activities",
+			"support": "Support"
+		}
 	}
 }

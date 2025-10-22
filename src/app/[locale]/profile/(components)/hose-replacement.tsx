@@ -33,7 +33,7 @@ type Group = {
 };
 
 const HoseReplacement = () => {
-	const t = useTranslations();
+	const t = useTranslations("HoseReplacement");
 	const [notificationCard, setNotificationCard] = useState(true);
 	const [selectedLocation, setSelectedLocation] = useState<string>("");
 	const [selectedS1Code] = useState<string | undefined>(undefined);
@@ -98,7 +98,7 @@ const HoseReplacement = () => {
 		<div className="space-y-6">
 			<div className="flex items-baseline space-x-4">
 				<div className="flex items-center">
-					<h1 className="text-2xl font-semibold">Fremtidige slangebytter</h1>
+					<h1 className="text-2xl font-semibold">{t("title")}</h1>
 				</div>
 			</div>
 
@@ -108,15 +108,15 @@ const HoseReplacement = () => {
 						<NotificationCard
 							className="bg-[#FDFDEA]"
 							icon={<CircleAlert className="h-4 w-4" />}
-							title={t("Cart.outOfStock")}
-							message={t("Cart.outOfStockMessage")}
+							title={t("notificationTitle")}
+							message={t("notificationMessage")}
 							onClose={() => setNotificationCard(false)}
 						/>
 					)}
 
 					<div className="mt-4">
 						<div className="grid [grid-template-columns:3fr_1fr_1fr_1fr_1fr_1fr] items-center rounded-t-lg border-b border-[#E7E9E8] bg-[#F8F9F8] p-4 text-xs font-medium text-[#5A615D]">
-							<div className="ps-6">STRUKTUR (S1+S2)</div>
+							<div className="ps-6">{t("structure")}</div>
 							<div className="flex items-center gap-1">
 								2025
 								<Image
@@ -153,7 +153,7 @@ const HoseReplacement = () => {
 									height={8}
 								/>
 							</div>
-							<div>TOTAL</div>
+							<div>{t("total")}</div>
 						</div>
 
 						<div className="divide-y divide-[#E7E9E8]">
@@ -254,7 +254,7 @@ const HoseReplacement = () => {
 
 														{group.estimatedCost && (
 															<div className="grid [grid-template-columns:3fr_1fr_1fr_1fr_1fr_1fr] items-center border-t border-[#003D1A] bg-[#F0FCF2] py-3 pr-4 text-sm text-[#0F1912]">
-																<div className="ps-18">Estimerte kostnader</div>
+																<div className="ps-18">{t("estimatedCosts")}</div>
 																<div>{group.estimatedCost}</div>
 																<div>{group.estimatedCost}</div>
 																<div>{group.estimatedCost}</div>

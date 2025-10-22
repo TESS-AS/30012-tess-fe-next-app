@@ -1,42 +1,37 @@
-import { GetHoseHistory } from "@/types/assets.types";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { getHoseHistory } from "../services/assets.service";
 
+export const hoseHistoryKeys = {
+	all: ["hoseHistory"] as const,
+	detail: (hexagonId: string) => [...hoseHistoryKeys.all, hexagonId] as const,
+};
+
 export const useGetHoseHistory = (hexagonId: string) => {
-	const [hoseHistory, setHoseHistory] = useState<GetHoseHistory | null>(null);
-	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState<Error | null>(null);
-
-	useEffect(() => {
-		if (!hexagonId) {
-			setHoseHistory(null);
-			return;
-		}
-
-		const loadHoseHistory = async () => {
-			setIsLoading(true);
-			setError(null);
+	const { data, isLoading, error, refetch } = useQuery({
+		queryKey: hoseHistoryKeys.detail(hexagonId),
+		queryFn: async () => {
 			try {
 				const response = await getHoseHistory(hexagonId);
-				setHoseHistory(response);
+				return response;
 			} catch (err: any) {
 				const errorMessage =
 					err?.response?.data?.message ||
 					err?.message ||
 					"Failed to load hose history";
-				setError(new Error(errorMessage));
-			} finally {
-				setIsLoading(false);
+				throw new Error(errorMessage);
 			}
-		};
-
-		loadHoseHistory();
-	}, [hexagonId]);
+		},
+		enabled: !!hexagonId,
+		staleTime: 5 * 60 * 1000,
+		refetchOnMount: false,
+		refetchOnWindowFocus: false,
+	});
 
 	return {
-		hoseHistory,
+		hoseHistory: data ?? [],
 		isLoading,
-		error,
-		setHoseHistory,
+		error: error as Error | null,
+		setHoseHistory: () => {},
+		refetch,
 	};
 };

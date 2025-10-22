@@ -228,7 +228,7 @@ export interface S1Codes {
 	S2Name: string;
 }
 
-export interface GetHoseHistory {
+export interface HoseHistoryItem {
 	assetId: number;
 	hoseLineId: number;
 	workOrderNumber: number;
@@ -237,3 +237,5 @@ export interface GetHoseHistory {
 	description: string;
 	userId: number;
 }
+
+export type GetHoseHistory = HoseHistoryItem[];

@@ -6,6 +6,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Barcode } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface AssetOption {
 	value: string;
@@ -24,6 +25,7 @@ export function AssetIdSelector({
 	options,
 	onValueChange,
 }: AssetIdSelectorProps) {
+	const t = useTranslations("AssetIdSelector");
 	const selectedOption = options.find((opt) => opt.value === value);
 
 	return (
@@ -70,7 +72,7 @@ export function AssetIdSelector({
 									</span>
 								</span>
 								<span className="text-xs text-[#5A615D]">
-									Status: {option.status}
+									{t("status")}: {option.status}
 								</span>
 							</div>
 						</div>

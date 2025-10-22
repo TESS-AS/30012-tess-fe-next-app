@@ -85,23 +85,23 @@ export default function ProfilePage() {
 
 		const tabLabels: Record<string, string> = {
 			// E-handel tabs
-			"mine-bestillinger": "Mine bestillinger",
-			rekvisisjoner: "Rekvisisjoner",
-			ordrehistorikk: "Ordrehistorikk",
-			dimensions: "Dimensjoner",
-			usage: "Forbruk",
-			users: "Brukere",
-			catalog: "Katalog",
-			settings: "Innstillinger",
+			"mine-bestillinger": t("ProfilePage.tabs.myOrders"),
+			rekvisisjoner: t("ProfilePage.tabs.requisitions"),
+			ordrehistorikk: t("ProfilePage.tabs.orderHistory"),
+			dimensions: t("ProfilePage.tabs.dimensions"),
+			usage: t("ProfilePage.tabs.usage"),
+			users: t("ProfilePage.tabs.users"),
+			catalog: t("ProfilePage.tabs.catalog"),
+			settings: t("ProfilePage.tabs.settings"),
 			// Hose tabs
-			"hose-oversikt": "Oversikt",
-			"hose-orders": "Slanger/utstyr",
-			"hose-inspections": "Inspeksjoner",
-			"hose-replacement": "Slangebytte",
-			"hose-risk-class": "Risikoklasse",
-			"hose-requests": "Forespørsler",
-			"hose-activities": "Siste aktiviteter",
-			"hose-settings": "Innstillinger",
+			"hose-oversikt": t("ProfilePage.tabs.overview"),
+			"hose-orders": t("ProfilePage.tabs.hosesEquipment"),
+			"hose-inspections": t("ProfilePage.tabs.inspections"),
+			"hose-replacement": t("ProfilePage.tabs.hoseReplacement"),
+			"hose-risk-class": t("ProfilePage.tabs.riskClass"),
+			"hose-requests": t("ProfilePage.tabs.requests"),
+			"hose-activities": t("ProfilePage.tabs.recentActivities"),
+			"hose-settings": t("ProfilePage.tabs.settings"),
 		};
 
 		const modeLabel =
@@ -181,56 +181,56 @@ export default function ProfilePage() {
 									? [
 											{
 												href: "#",
-												label: "Ordre",
+												label: t("ProfilePage.sidebar.orders"),
 												icon: ShoppingCart,
 												subitems: [
 													{
 														href: "mine-bestillinger",
-														label: "Mine bestillinger",
+														label: t("ProfilePage.sidebar.myOrders"),
 													},
 													{
 														href: "rekvisisjoner",
-														label: "Rekvisisjoner",
+														label: t("ProfilePage.sidebar.requisitions"),
 													},
 													{
 														href: "ordrehistorikk",
-														label: "Ordrehistorikk",
+														label: t("ProfilePage.sidebar.orderHistory"),
 													},
 												],
 											},
 											{
 												href: "dimensions",
-												label: "Dimensjoner",
+												label: t("ProfilePage.sidebar.dimensions"),
 												icon: "/icons/profile/navbar/folder-outline.svg",
 											},
 											{
 												href: "usage",
-												label: "Forbruk",
+												label: t("ProfilePage.sidebar.usage"),
 												icon: "/icons/profile/navbar/lock-time-outline.svg",
 											},
 											{
 												href: "users",
-												label: "Brukere",
+												label: t("ProfilePage.sidebar.users"),
 												icon: "/icons/profile/navbar/user-settings-outline.svg",
 											},
 											{
 												href: "catalog",
-												label: "Katalog",
+												label: t("ProfilePage.sidebar.catalog"),
 												icon: "/icons/profile/navbar/lock-time-outline.svg",
 											},
 											{
 												href: "settings",
-												label: "Innstillinger",
+												label: t("ProfilePage.sidebar.settings"),
 												icon: Settings,
 											},
 											{
 												href: "settings-alt",
-												label: "Innstillinger",
+												label: t("ProfilePage.sidebar.settings"),
 												icon: Settings,
 											},
 											{
 												href: "logout",
-												label: "Log out",
+												label: t("ProfilePage.sidebar.logout"),
 												icon: LogOut,
 												variant: "logout",
 											},
@@ -238,52 +238,52 @@ export default function ProfilePage() {
 									: [
 											{
 												href: "hose-oversikt",
-												label: "Oversikt",
+												label: t("ProfilePage.sidebar.overview"),
 												icon: "/icons/profile/navbar/overview.svg",
 											},
 											{
 												href: "hose-orders",
-												label: "Slanger/utstyr",
+												label: t("ProfilePage.sidebar.hosesEquipment"),
 												icon: "/icons/profile/navbar/list.svg",
 											},
 											{
 												href: "hose-inspections",
-												label: "Inspeksjoner",
+												label: t("ProfilePage.sidebar.inspections"),
 												icon: "/icons/profile/navbar/inspectioner.svg",
 											},
 											{
 												href: "hose-replacement",
-												label: "Slangebytte",
+												label: t("ProfilePage.sidebar.hoseReplacement"),
 												icon: "/icons/profile/navbar/hose-changer.svg",
 											},
 											{
 												href: "hose-risk-class",
-												label: "Risikoklasse",
+												label: t("ProfilePage.sidebar.riskClass"),
 												icon: "/icons/profile/navbar/risk-classes.svg",
 											},
 											{
 												href: "hose-requests",
-												label: "Forespørsler",
+												label: t("ProfilePage.sidebar.requests"),
 												icon: "/icons/profile/navbar/requirments.svg",
 											},
 											{
 												href: "hose-activities",
-												label: "Siste aktiviteter",
+												label: t("ProfilePage.sidebar.recentActivities"),
 												icon: "/icons/profile/navbar/activities.svg",
 											},
 											{
 												href: "hose-settings",
-												label: "Innstillinger",
+												label: t("ProfilePage.sidebar.settings"),
 												icon: "/icons/profile/navbar/settings.svg",
 											},
 											{
 												href: "support",
-												label: "Support",
+												label: t("ProfilePage.sidebar.support"),
 												icon: "/icons/profile/navbar/support.svg",
 											},
 											{
 												href: "logout",
-												label: "Log out",
+												label: t("ProfilePage.sidebar.logout"),
 												icon: LogOut,
 												variant: "logout",
 											},

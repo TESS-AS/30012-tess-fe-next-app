@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 interface OrdreDetaljerProps {
 	orderId: string;
@@ -8,6 +9,7 @@ interface OrdreDetaljerProps {
 }
 
 export function OrdreDetaljer({ orderId, onBack }: OrdreDetaljerProps) {
+	const t = useTranslations("OrdreDetaljer");
 	const orderDetails = {
 		orderId: orderId,
 		status: "Mottatt",
@@ -74,7 +76,7 @@ export function OrdreDetaljer({ orderId, onBack }: OrdreDetaljerProps) {
 									fill="currentColor"
 								/>
 							</svg>
-							Kontaktperson
+							{t("contactPerson")}
 						</h2>
 						<div className="space-y-2 text-sm">
 							<p className="font-medium">{orderDetails.contact.name}</p>
@@ -96,7 +98,7 @@ export function OrdreDetaljer({ orderId, onBack }: OrdreDetaljerProps) {
 									fill="currentColor"
 								/>
 							</svg>
-							Adresse
+							{t("address")}
 						</h2>
 						<div className="space-y-2 text-sm">
 							<p className="font-medium">{orderDetails.address.type}</p>
@@ -121,12 +123,12 @@ export function OrdreDetaljer({ orderId, onBack }: OrdreDetaljerProps) {
 									fill="currentColor"
 								/>
 							</svg>
-							Levering
+							{t("delivery")}
 						</h2>
 						<div className="space-y-2 text-sm">
 							<p className="font-medium">{orderDetails.delivery.type}</p>
 							<p className="text-[#5A615D]">
-								Estimert leveringstid: {orderDetails.delivery.estimatedTime}
+								{t("estimatedDeliveryTime")}: {orderDetails.delivery.estimatedTime}
 							</p>
 						</div>
 					</div>
@@ -145,7 +147,7 @@ export function OrdreDetaljer({ orderId, onBack }: OrdreDetaljerProps) {
 									fill="currentColor"
 								/>
 							</svg>
-							Betaling
+							{t("payment")}
 						</h2>
 						<div className="space-y-2 text-sm">
 							<p className="font-medium">{orderDetails.payment.type}</p>
@@ -161,7 +163,7 @@ export function OrdreDetaljer({ orderId, onBack }: OrdreDetaljerProps) {
 				{/* Products */}
 				<div className="mt-8">
 					<h2 className="mb-4 text-lg font-semibold text-[#0F1912]">
-						Dine varer
+						{t("yourItems")}
 					</h2>
 					<div className="space-y-4">
 						{orderDetails.items.map((item, index) => (
@@ -186,7 +188,7 @@ export function OrdreDetaljer({ orderId, onBack }: OrdreDetaljerProps) {
 										<p className="mr-40 text-sm text-[#0F1912]">
 											x{item.quantity}
 										</p>
-										<p className="font-bold text-[#0F1912]">{item.price} kr</p>
+										<p className="font-bold text-[#0F1912]">{item.price} {t("currency")}</p>
 									</div>
 								</div>
 							</Card>
@@ -197,37 +199,37 @@ export function OrdreDetaljer({ orderId, onBack }: OrdreDetaljerProps) {
 				{/* Order Summary */}
 				<div className="mt-8 rounded-lg border border-[#C1C4C2] p-6 shadow-sm">
 					<h2 className="mb-4 text-lg font-semibold text-[#0F1912]">
-						Ordreoversikt
+						{t("orderSummary")}
 					</h2>
 					<div className="space-y-2">
 						<div className="flex justify-between text-sm">
 							<span className="text-[#5A615D]">
-								Opprinnelig pris (eks. mva.)
+								{t("originalPrice")}
 							</span>
 							<span className="text-[#0F1912]">
-								{orderDetails.summary.originalPrice} kr
+								{orderDetails.summary.originalPrice} {t("currency")}
 							</span>
 						</div>
 						<div className="flex justify-between text-sm">
-							<span className="text-[#5A615D]">Rabatt</span>
+							<span className="text-[#5A615D]">{t("discount")}</span>
 							<span className="text-[#22C55E]">
-								{orderDetails.summary.discount} kr
+								{orderDetails.summary.discount} {t("currency")}
 							</span>
 						</div>
 						<div className="flex justify-between text-sm">
 							<span className="text-[#5A615D]">
-								Sum etter rabatt (eks. mva.)
+								{t("subtotal")}
 							</span>
 							<span className="text-[#0F1912]">
-								{orderDetails.summary.subtotal} kr
+								{orderDetails.summary.subtotal} {t("currency")}
 							</span>
 						</div>
 						<div className="flex justify-between text-sm">
 							<span className="text-[#5A615D]">
-								MVA ({orderDetails.summary.vatRate}%)
+								{t("vat", { rate: orderDetails.summary.vatRate })}
 							</span>
 							<span className="text-[#0F1912]">
-								{orderDetails.summary.vat} kr
+								{orderDetails.summary.vat} {t("currency")}
 							</span>
 						</div>
 					</div>
