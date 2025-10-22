@@ -30,6 +30,7 @@ import { HoseFiltersDropdown } from "./hose-filters-dropdown";
 import { HoseSearchBar } from "./hose-search-bar";
 
 export interface HoseOrder {
+	hexagonId: string;
 	orderId: string;
 	id: string;
 	kunde_id: string;
@@ -94,8 +95,6 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 		"Handling",
 	]);
 
-	// === NEW SELECTION MODEL ===
-	// explicit selections (when not in global-select mode)
 	const [selectedRows, setSelectedRows] = useState<string[]>(() => {
 		if (typeof window !== "undefined") {
 			const saved = localStorage.getItem("selectedHoseRows");
@@ -104,9 +103,7 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 		return [];
 	});
 
-	// global select across all pages
 	const [allAcrossPages, setAllAcrossPages] = useState(false);
-	// exceptions when global select is ON (these are excluded)
 	const [deselectedIds, setDeselectedIds] = useState<Set<string>>(new Set());
 
 	const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
@@ -115,6 +112,7 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 
 	const transformedAssets: HoseOrder[] = assets.map((asset: any) => ({
 		id: asset?.hoseLine?.hexagonId?.toString?.() || "",
+		hexagonId: asset?.hoseLine?.hexagonId?.toString?.() || "",
 		orderId: String(asset?.hoseHeader?.extDocSequenceId ?? ""),
 		kunde_id: asset?.hoseHeader?.customerNumber ?? "",
 		beskrivelse: asset?.hoseLine?.itemDescription ?? "",

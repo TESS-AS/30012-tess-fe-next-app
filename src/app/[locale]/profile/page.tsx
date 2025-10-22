@@ -65,7 +65,9 @@ export default function ProfilePage() {
 	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 	const [supportOpen, setSupportOpen] = useState(false);
 	const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
-	const [selectedHoseId, setSelectedHoseId] = useState<string | null>(null);
+	const [selectedHexagonId, setSelectedHexagonId] = useState<string | null>(
+		null,
+	);
 
 	if (!profile) {
 		return (
@@ -115,7 +117,7 @@ export default function ProfilePage() {
 			onClick: (e: React.MouseEvent) => {
 				e.preventDefault();
 				setActiveTab(defaultTab);
-				setSelectedHoseId(null);
+				setSelectedHexagonId(null);
 				setSelectedOrderId(null);
 			},
 		});
@@ -128,16 +130,16 @@ export default function ProfilePage() {
 				onClick: (e: React.MouseEvent) => {
 					e.preventDefault();
 					setActiveTab(activeTab);
-					setSelectedHoseId(null);
+					setSelectedHexagonId(null);
 					setSelectedOrderId(null);
 				},
 			});
 		}
 
-		if (selectedHoseId && activeTab === "hose-orders") {
+		if (selectedHexagonId && activeTab === "hose-orders") {
 			items.push({
 				href: "#",
-				label: selectedHoseId,
+				label: selectedHexagonId,
 			} as any);
 		}
 
@@ -341,13 +343,13 @@ export default function ProfilePage() {
 						<TabsContent
 							value="hose-orders"
 							className="mt-0">
-							{selectedHoseId ? (
+							{selectedHexagonId ? (
 								<HoseDetailsPage
-									hoseId={selectedHoseId}
-									onBack={() => setSelectedHoseId(null)}
+									hexagonId={selectedHexagonId}
+									onBack={() => setSelectedHexagonId(null)}
 								/>
 							) : (
-								<HosesAndEquipments goToHose={setSelectedHoseId} />
+								<HosesAndEquipments goToHose={setSelectedHexagonId} />
 							)}
 						</TabsContent>
 

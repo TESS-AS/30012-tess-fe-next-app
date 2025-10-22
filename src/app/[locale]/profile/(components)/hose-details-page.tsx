@@ -25,21 +25,25 @@ import { OtherDetailsAccordion } from "./hose-details-accordions/other-details";
 import { S2EquipmentsAccordion } from "./hose-details-accordions/s2-equipments";
 import { StructureAccordion } from "./hose-details-accordions/structure";
 import ProductDetailsModal from "./product-details-modal";
+import { useGetHoseHistory } from "@/hooks/useGetHoseHistory";
 
 interface Props {
-	hoseId: string;
-	onBack: (hoseId: string) => void;
+	hexagonId: string;
+	onBack: () => void;
 }
 
-export default function HoseDetailsPage({ onBack }: Props) {
+export default function HoseDetailsPage({ hexagonId, onBack }: Props) {
+	const { hoseHistory, isLoading, error } = useGetHoseHistory(hexagonId);
+
+	console.log(hoseHistory, hexagonId, "hosehistory");
+
 	const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 	const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 	const [isEditMode, setIsEditMode] = useState(false);
 	const [selectedAssetId, setSelectedAssetId] = useState("25252525");
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-	const hoseId = "HOSE ECB81-08";
-	const title = `${hoseId} · 55220PSI SISTEMA CO2 x 700 mm`;
+	const title = `${hexagonId} · 55220PSI SISTEMA CO2 x 700 mm`;
 
 	const keyInfo = {
 		location: "Deck crane port side",

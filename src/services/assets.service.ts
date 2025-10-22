@@ -1,4 +1,8 @@
-import { GetAssetsResponse, S1Codes } from "@/types/assets.types";
+import {
+	GetAssetsResponse,
+	GetHoseHistory,
+	S1Codes,
+} from "@/types/assets.types";
 
 import axiosClient from "./axiosClient";
 
@@ -104,7 +108,12 @@ export const getS1Codes = async (
 	s2?: boolean,
 ): Promise<S1CodesResponse> => {
 	const url = `/asset/getS1?page=${page}&pageSize=${pageSize}&s2=${s2}`;
-	console.log('🌐 getS1Codes service called with:', { page, pageSize, s2, url });
+	console.log("🌐 getS1Codes service called with:", {
+		page,
+		pageSize,
+		s2,
+		url,
+	});
 	try {
 		const response = await axiosClient.get(url);
 		return (
@@ -203,4 +212,11 @@ export const getHoseInspection = async ({
 			meta: { page, pageSize, totalItems: 0, totalPages: 0 },
 		};
 	}
+};
+
+export const getHoseHistory = async (
+	hexagonId: string,
+): Promise<GetHoseHistory> => {
+	const response = await axiosClient.get(`/asset/getHoseHistory`);
+	return response.data;
 };
