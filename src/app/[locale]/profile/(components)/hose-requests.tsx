@@ -25,12 +25,8 @@ const HoseRequests = () => {
 	return (
 		<div className="space-y-6">
 			<div className="flex items-baseline gap-3">
-				<h1 className="text-2xl font-semibold text-[#0F1912]">
-					{t("title")}
-				</h1>
-				<p className="text-sm text-[#5A615D]">
-					{t("subtitle")}
-				</p>
+				<h1 className="text-2xl font-semibold text-[#0F1912]">{t("title")}</h1>
+				<p className="text-sm text-[#5A615D]">{t("subtitle")}</p>
 			</div>
 
 			{view === "empty" ? (
@@ -40,13 +36,9 @@ const HoseRequests = () => {
 							{t("emptyState.title")}
 						</p>
 						<div className="text-sm leading-relaxed text-[#005522]">
-							<p>
-								{t("emptyState.instruction1")}
-							</p>
+							<p>{t("emptyState.instruction1")}</p>
 							<p>{t("emptyState.instruction2")}</p>
-							<p>
-								{t("emptyState.instruction3")}
-							</p>
+							<p>{t("emptyState.instruction3")}</p>
 						</div>
 
 						<div className="pt-4">
@@ -73,6 +65,7 @@ function RFQListView() {
 	const t = useTranslations("HoseRequests");
 	// Mock data to illustrate the UI per the provided design
 	type RFQItem = {
+		hexagonId?: string;
 		orderId: string;
 		requestType: string;
 		createdDate: string;
@@ -235,7 +228,9 @@ function RFQListView() {
 							<thead className="bg-[#F8F9F8] text-left text-[#5A615D]">
 								<tr>
 									<th className="px-4 py-2">{t("equipmentTable.equipment")}</th>
-									<th className="px-4 py-2">{t("equipmentTable.description")}</th>
+									<th className="px-4 py-2">
+										{t("equipmentTable.description")}
+									</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -252,7 +247,8 @@ function RFQListView() {
 							</tbody>
 						</table>
 						<div className="border-t border-[#E5E7EB] p-3 text-sm text-[#5A615D]">
-							{t("equipmentTable.showing")} <span className="font-medium">1-10</span> {t("equipmentTable.of")}{" "}
+							{t("equipmentTable.showing")}{" "}
+							<span className="font-medium">1-10</span> {t("equipmentTable.of")}{" "}
 							<span className="font-medium">1000</span>
 						</div>
 					</div>
