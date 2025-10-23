@@ -1,5 +1,6 @@
+import React from "react";
+
 import { getAssets, getS1Codes, searchAssets } from "@/services/assets.service";
-import { GetAssetsResponse, S1Codes } from "@/types/assets.types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export interface FilterOptions {
@@ -18,13 +19,6 @@ type InitOptions = {
 	initAssets?: boolean;
 	initS1Codes?: boolean;
 	s2Filter?: boolean;
-};
-
-type UseGetAssetsParams = {
-	customerNumber?: string;
-	s1Code?: string;
-	filters?: FilterOptions;
-	options?: InitOptions;
 };
 
 export const assetsKeys = {
@@ -49,15 +43,56 @@ export const useGetAssets = (
 	},
 ) => {
 	const queryClient = useQueryClient();
+	const [currentFilters, setCurrentFilters] = React.useState<FilterOptions>({
+		page: 1,
+		pageSize: 10,
+	});
 
 	const assetsQuery = useQuery({
 		queryKey: assetsKeys.list({
 			customerNumber,
 			s1Code,
-			filters: { page: 1, pageSize: 10 },
+			filters: currentFilters,
 		}),
 		queryFn: async () => {
-			return await getAssets(customerNumber, s1Code, 1, 10);
+			const {
+				page = 1,
+				pageSize = 10,
+				ageSize,
+				approved,
+				overdue,
+				replacementDue,
+				spareSet,
+				rejected,
+				search,
+			} = currentFilters;
+
+			return search
+				? await searchAssets(
+						search,
+						customerNumber,
+						s1Code,
+						page,
+						pageSize,
+						ageSize,
+						approved,
+						overdue,
+						replacementDue,
+						spareSet,
+						rejected,
+					)
+				: await getAssets(
+						customerNumber,
+						s1Code,
+						page,
+						pageSize,
+						ageSize,
+						approved,
+						overdue,
+						replacementDue,
+						spareSet,
+						rejected,
+					);
 		},
 		enabled: options.initAssets !== false,
 		staleTime: 5 * 60 * 1000,
@@ -81,51 +116,7 @@ export const useGetAssets = (
 	});
 
 	const fetchAssets = async (filters: FilterOptions = {}) => {
-		const {
-			page = 1,
-			pageSize = 10,
-			ageSize,
-			approved,
-			overdue,
-			replacementDue,
-			spareSet,
-			rejected,
-			search,
-		} = filters;
-
-		const result = search
-			? await searchAssets(
-					search,
-					customerNumber,
-					s1Code,
-					page,
-					pageSize,
-					ageSize,
-					approved,
-					overdue,
-					replacementDue,
-					spareSet,
-					rejected,
-				)
-			: await getAssets(
-					customerNumber,
-					s1Code,
-					page,
-					pageSize,
-					ageSize,
-					approved,
-					overdue,
-					replacementDue,
-					spareSet,
-					rejected,
-				);
-
-		queryClient.setQueryData(
-			assetsKeys.list({ customerNumber, s1Code, filters }),
-			result,
-		);
-
-		return result;
+		setCurrentFilters(filters);
 	};
 
 	const fetchS1Codes = async (
@@ -143,33 +134,9 @@ export const useGetAssets = (
 		return response;
 	};
 
-	const ensureS1Codes = async () => {
-		const cached = queryClient.getQueryData(
-			assetsKeys.s1Codes({ page: 1, pageSize: 100, s2: options.s2Filter }),
-		);
-		if (cached) return cached;
-		return await fetchS1Codes(1, 100, options.s2Filter);
-	};
-
 	return {
 		assets: assetsQuery.data?.data ?? [],
-		setAssets: (data: GetAssetsResponse[]) => {
-			queryClient.setQueryData(
-				assetsKeys.list({
-					customerNumber,
-					s1Code,
-					filters: { page: 1, pageSize: 10 },
-				}),
-				(old: any) => ({ ...old, data }),
-			);
-		},
 		s1Codes: s1CodesQuery.data?.data ?? [],
-		setS1Codes: (data: S1Codes[]) => {
-			queryClient.setQueryData(
-				assetsKeys.s1Codes({ page: 1, pageSize: 100, s2: options.s2Filter }),
-				(old: any) => ({ ...old, data }),
-			);
-		},
 		loading: assetsQuery.isLoading || s1CodesQuery.isLoading,
 		setLoading: () => {},
 		error: assetsQuery.error || s1CodesQuery.error,
@@ -187,7 +154,6 @@ export const useGetAssets = (
 		},
 		fetchAssets,
 		fetchS1Codes,
-		ensureS1Codes,
 		refetch: () => {
 			assetsQuery.refetch();
 			s1CodesQuery.refetch();

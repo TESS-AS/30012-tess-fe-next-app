@@ -590,49 +590,6 @@ const CartPage = () => {
 														</span>
 													</div>
 													<div className="flex items-center gap-6">
-														<QuantityButtons
-															disabled={true}
-															isLoading={!!loadingItems[item.hose.itemNumber]}
-															quantity={item.hose.quantity}
-															onIncrease={async (e) => {
-																e.stopPropagation();
-																setLoadingItems((prev) => ({
-																	...prev,
-																	[item.hose.itemNumber]: true,
-																}));
-																try {
-																	await updateQuantity(
-																		item.cartLine,
-																		item.hexagonId,
-																		item.hose.quantity + 1,
-																	);
-																} finally {
-																	setLoadingItems((prev) => ({
-																		...prev,
-																		[item.hose.itemNumber]: false,
-																	}));
-																}
-															}}
-															onDecrease={async (e) => {
-																e.stopPropagation();
-																setLoadingItems((prev) => ({
-																	...prev,
-																	[item.hose.itemNumber]: true,
-																}));
-																try {
-																	await updateQuantity(
-																		item.cartLine,
-																		item.hexagonId,
-																		item.hose.quantity - 1,
-																	);
-																} finally {
-																	setLoadingItems((prev) => ({
-																		...prev,
-																		[item.hose.itemNumber]: false,
-																	}));
-																}
-															}}
-														/>
 														<div className="flex items-center gap-6">
 															<span className="font-semibold">
 																{formatNorwegianCurrency(

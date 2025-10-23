@@ -671,53 +671,6 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 							)}
 						</div>
 					</div>
-
-					{profile?.defaultCustomerNumber &&
-						profile.defaultCustomerNumber !==
-							SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
-							<div className="flex w-[280px] items-center gap-3">
-								<p className="text-base font-normal text-[#5A615D]">
-									{t("customer")}:
-								</p>
-								<div className="relative">
-									<Select
-										value={customerNumber || ""}
-										onValueChange={(value) => {
-											if (!value) setCustomerNumber("");
-											setCustomerNumber(value);
-										}}>
-										<SelectTrigger className="relative w-[200px] border-[#C1C4C2] bg-white pr-8 font-medium text-[#0F1912]">
-											<SelectValue
-												className="truncate"
-												placeholder={t("selectCustomer")}
-											/>
-										</SelectTrigger>
-										<SelectContent className="max-h-[300px] overflow-y-auto">
-											{(profile?.customerNumbers || []).map((num) => (
-												<SelectItem
-													key={num}
-													value={num}>
-													{num}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-									{customerNumber && (
-										<button
-											type="button"
-											onClick={(e) => {
-												e.stopPropagation();
-												e.preventDefault();
-												setCustomerNumber("");
-											}}
-											className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none">
-											<X className="h-4 w-4 text-[#5A615D]" />
-											<span className="sr-only">Fjern customer</span>
-										</button>
-									)}
-								</div>
-							</div>
-						)}
 				</div>
 
 				<div className="rounded-lg border border-[#C1C4C2] bg-white">

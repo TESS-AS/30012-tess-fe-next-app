@@ -181,86 +181,89 @@ export default function Header() {
 							height={144}
 						/>
 					</Link>
-					<form
-						onSubmit={handleSearch}
-						className="hidden h-[50px] w-[537px] px-4 md:flex">
-						<div
-							className="relative w-[537px]"
-							ref={isModalIdOpen ? null : searchRef}>
-							<Search className="text-muted-foreground absolute top-4.5 left-2.5 h-4 w-4" />
-							<Input
-								type="search"
-								placeholder={t("Common.searchProducts")}
-								className="bg-background color-[#5A615D] h-[50px] w-[537px] border-[#001E00] pl-8"
-								value={searchQuery}
-								ref={inputRef}
-								onChange={(e) => setSearchQuery(e.target.value)}
-							/>
-							<Button
-								variant="default"
-								className="absolute top-[7px] right-[7px] text-xs font-medium">
-								Søk
-							</Button>
-							{searchQuery && (
-								<div className="animate-in fade-in-0 zoom-in-95 fixed top-34 left-1/2 z-[11] grid max-h-[80vh] w-[80vw] -translate-x-1/2 grid-cols-3 gap-4 overflow-y-auto bg-white p-4 shadow-lg duration-200">
-									<div className="col-span-1 space-y-4 pr-4">
-										<SearchAside
-											suggestions={
-												(searchData?.suggestions ?? []) as unknown as string[]
-											}
-											categories={searchCategories}
-											query={searchQuery}
-											onPick={handlePick}
-										/>
-									</div>
-									<div className="col-span-2">
-										<div className="mb-3 flex items-center justify-between">
-											<h3 className="text-lg font-semibold">
-												{t("Search.resultsTitle", { default: "Dine treff" })}
-											</h3>
-											{searchData && (
-												<span className="text-sm text-gray-500">
-													{searchData.productRes?.length} /{" "}
-													{searchData.productRes.length} produkter
-												</span>
+					{profile?.defaultCustomerNumber !==
+						SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
+						<form
+							onSubmit={handleSearch}
+							className="hidden h-[50px] w-[537px] px-4 md:flex">
+							<div
+								className="relative w-[537px]"
+								ref={isModalIdOpen ? null : searchRef}>
+								<Search className="text-muted-foreground absolute top-4.5 left-2.5 h-4 w-4" />
+								<Input
+									type="search"
+									placeholder={t("Common.searchProducts")}
+									className="bg-background color-[#5A615D] h-[50px] w-[537px] border-[#001E00] pl-8"
+									value={searchQuery}
+									ref={inputRef}
+									onChange={(e) => setSearchQuery(e.target.value)}
+								/>
+								<Button
+									variant="default"
+									className="absolute top-[7px] right-[7px] text-xs font-medium">
+									Søk
+								</Button>
+								{searchQuery && (
+									<div className="animate-in fade-in-0 zoom-in-95 fixed top-34 left-1/2 z-[11] grid max-h-[80vh] w-[80vw] -translate-x-1/2 grid-cols-3 gap-4 overflow-y-auto bg-white p-4 shadow-lg duration-200">
+										<div className="col-span-1 space-y-4 pr-4">
+											<SearchAside
+												suggestions={
+													(searchData?.suggestions ?? []) as unknown as string[]
+												}
+												categories={searchCategories}
+												query={searchQuery}
+												onPick={handlePick}
+											/>
+										</div>
+										<div className="col-span-2">
+											<div className="mb-3 flex items-center justify-between">
+												<h3 className="text-lg font-semibold">
+													{t("Search.resultsTitle", { default: "Dine treff" })}
+												</h3>
+												{searchData && (
+													<span className="text-sm text-gray-500">
+														{searchData.productRes?.length} /{" "}
+														{searchData.productRes.length} produkter
+													</span>
+												)}
+											</div>
+
+											{isSearchLoading ? (
+												<div className="flex items-center justify-center py-8">
+													<div className="h-6 w-6 animate-spin rounded-full border-b-2 border-green-600"></div>
+												</div>
+											) : searchData?.productRes?.length ? (
+												searchData.productRes.map((product: IProductSearch) => {
+													return (
+														<ProductItem
+															key={product.productNumber}
+															product={product}
+															currentLocale={currentLocale}
+															setSearchQuery={setSearchQuery}
+															isModalIdOpen={isModalIdOpen}
+															setIsModalIdOpen={setIsModalIdOpen}
+															getProductVariations={getProductVariations}
+															setVariations={setVariations}
+															variations={variations}
+															searchQuery={searchQuery}
+														/>
+													);
+												})
+											) : searchData ? (
+												<NoResults query={searchQuery} />
+											) : (
+												<div className="flex items-center justify-center py-8">
+													<span className="text-gray-500">
+														Skriv for å søke...
+													</span>
+												</div>
 											)}
 										</div>
-
-										{isSearchLoading ? (
-											<div className="flex items-center justify-center py-8">
-												<div className="h-6 w-6 animate-spin rounded-full border-b-2 border-green-600"></div>
-											</div>
-										) : searchData?.productRes?.length ? (
-											searchData.productRes.map((product: IProductSearch) => {
-												return (
-													<ProductItem
-														key={product.productNumber}
-														product={product}
-														currentLocale={currentLocale}
-														setSearchQuery={setSearchQuery}
-														isModalIdOpen={isModalIdOpen}
-														setIsModalIdOpen={setIsModalIdOpen}
-														getProductVariations={getProductVariations}
-														setVariations={setVariations}
-														variations={variations}
-														searchQuery={searchQuery}
-													/>
-												);
-											})
-										) : searchData ? (
-											<NoResults query={searchQuery} />
-										) : (
-											<div className="flex items-center justify-center py-8">
-												<span className="text-gray-500">
-													Skriv for å søke...
-												</span>
-											</div>
-										)}
 									</div>
-								</div>
-							)}
-						</div>
-					</form>
+								)}
+							</div>
+						</form>
+					)}
 				</div>
 				<div className="flex items-center">
 					{profile && <CustomerNumberSwitcher profile={profile} />}
