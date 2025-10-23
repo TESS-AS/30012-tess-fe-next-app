@@ -16,6 +16,7 @@ import {
 	SelectContent,
 	SelectItem,
 } from "../ui/select";
+import { Input } from "../ui/input";
 
 interface Props {
 	orderData: Order;
@@ -151,13 +152,13 @@ export const UserDimensionsInput: React.FC<Props> = ({
 						/>
 						<Label htmlFor="search">{t("modes.search")}</Label>
 					</div>
-					{/* <div className="flex items-center gap-1">
+					<div className="flex items-center gap-1">
 						<RadioGroupItem
 							value="manual"
 							id="manual"
 						/>
 						<Label htmlFor="manual">{t("modes.manual")}</Label>
-					</div> */}
+					</div>
 				</RadioGroup>
 			</div>
 
@@ -340,7 +341,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 				</div>
 			)}
 
-			{/* {dimensionInputMode === "manual" && (
+			{dimensionInputMode === "manual" && (
 				<>
 					<Input
 						type="text"
@@ -388,7 +389,7 @@ export const UserDimensionsInput: React.FC<Props> = ({
 						}}
 					/>
 				</>
-			)} */}
+			)}
 		</div>
 	);
 };
