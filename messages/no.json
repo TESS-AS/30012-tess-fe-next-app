@@ -349,6 +349,21 @@
 		"termsLink": "vilk\u00e5rene",
 		"termsEnd": "for kj\u00f8p"
 	},
+	"OrderConfirmation": {
+		"title": "Takk for kj\u00f8pet!",
+		"description": "Bestillingen din behandles innen 24 timer p\u00e5 virkedager. Vi sender deg en e-post n\u00e5r den er sendt.",
+		"trackOrder": "Spor bestillingen",
+		"continueShopping": "Fortsett \u00e5 handle",
+		"orderNumber": "Ordrenummer",
+		"date": "Dato",
+		"paymentMethod": "Betalingsmetode",
+		"name": "Navn",
+		"company": "Firma",
+		"address": "Adresse",
+		"phone": "Telefon",
+		"email": "E-post",
+		"helpText": "Trenger du hjelp i mellomtiden? Kontakt oss p\u00e5"
+	},
 	"Checkout": {
 		"modals": {
 			"feedback": {

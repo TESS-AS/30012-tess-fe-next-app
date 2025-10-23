@@ -348,6 +348,21 @@
 		"termsLink": "terms",
 		"termsEnd": "for purchase"
 	},
+	"OrderConfirmation": {
+		"title": "Thank you for your purchase!",
+		"description": "Your order will be processed within 24 hours on business days. We will send you an email when it is shipped.",
+		"trackOrder": "Track order",
+		"continueShopping": "Continue shopping",
+		"orderNumber": "Order number",
+		"date": "Date",
+		"paymentMethod": "Payment method",
+		"name": "Name",
+		"company": "Company",
+		"address": "Address",
+		"phone": "Phone",
+		"email": "Email",
+		"helpText": "Need help in the meantime? Contact us at"
+	},
 	"Checkout": {
 		"modals": {
 			"feedback": {

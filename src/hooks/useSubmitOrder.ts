@@ -1,10 +1,10 @@
 import { salesOrder } from "@/services/orders.service";
 import { Order } from "@/types/orders.types";
-import { SalesOrderAddress } from "@/types/user.types";
+import { ProfileUser, SalesOrderAddress } from "@/types/user.types";
 
 export const useSubmitOrder = (
 	isPunchoutUser: boolean,
-	profile: any,
+	profile: ProfileUser | null,
 	selectedAddress: SalesOrderAddress,
 	handleArchiveCart: () => Promise<void>,
 ) => {
@@ -15,8 +15,8 @@ export const useSubmitOrder = (
 				...orderData.salesOrderHeader,
 				customersOrderNumberEdifact: "EDIFACT123",
 				orderType: "KM",
-				customerNumber: "169999",
-				warehouseNumber: String(profile.defaultWarehouseNumber),
+				customerNumber: profile?.defaultCustomerNumber ?? "",
+				warehouseNumber: String(profile?.defaultWarehouseNumber ?? ""),
 				termsOfDelivery: "DAP",
 				// termsOfPayment: "NET",
 				dispatchDate: new Date().toISOString().split("T")[0],
