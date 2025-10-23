@@ -1,7 +1,7 @@
-import { getAssets, getS1Codes, searchAssets } from "@/services/assets.service";
-import { GetAssetsResponse, S1Codes } from "@/types/assets.types";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
+
+import { getAssets, getS1Codes, searchAssets } from "@/services/assets.service";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export interface FilterOptions {
 	page?: number;
