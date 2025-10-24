@@ -227,6 +227,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					...prev,
 					...calculatedPrices,
 				}));
+				//we need to handle quantity here correctly
 
 				const allItemsForPricing: Array<{
 					itemNumber: string;
