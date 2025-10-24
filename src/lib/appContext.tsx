@@ -227,6 +227,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					...prev,
 					...calculatedPrices,
 				}));
+				//we need to handle quantity here correctly
 
 				const allItemsForPricing: Array<{
 					itemNumber: string;
@@ -338,15 +339,21 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		}, 0);
 
 		const kitsTotal = (cartItems?.cartKit ?? []).reduce((sum, kit) => {
-			const unitSum =
-				(calculatedPrices[kit.hose.itemNumber] ?? 0) +
-				(calculatedPrices[kit.ferrule1.itemNumber] ?? 0) +
-				(calculatedPrices[kit.ferrule2.itemNumber] ?? 0) +
-				(calculatedPrices[kit.insert1.itemNumber] ?? 0) +
-				(calculatedPrices[kit.insert2.itemNumber] ?? 0);
-			const qty = kit.hose.quantity || 1;
-			return sum + unitSum * qty;
+			// we may need these quantities when we implement quantity buttons to send to BE for ferrule 1&2 and insert 1&2 because HOSEQTY is calculated in BE
+			const hoseQty = kit.hose?.quantity;
+			const ferrule1Qty = kit.ferrule1?.quantity ?? 1;
+			const ferrule2Qty = kit.ferrule2?.quantity ?? 1;
+			const insert1Qty = kit.insert1?.quantity ?? 1;
+			const insert2Qty = kit.insert2?.quantity ?? 1;
+
+			const hose = calculatedPrices[kit.hose.itemNumber] ?? 0;
+			const ferrule1 = calculatedPrices[kit.ferrule1.itemNumber] ?? 0;
+			const ferrule2 = calculatedPrices[kit.ferrule2.itemNumber] ?? 0;
+			const insert1 = calculatedPrices[kit.insert1.itemNumber] ?? 0;
+			const insert2 = calculatedPrices[kit.insert2.itemNumber] ?? 0;
+			return sum + hose + ferrule1 + ferrule2 + insert1 + insert2;
 		}, 0);
+		console.log(regularTotal, kitsTotal, "kitstotal");
 
 		return regularTotal + kitsTotal;
 	}, [cartItems?.cart, cartItems?.cartKit, calculatedPrices]);
@@ -368,18 +375,28 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 	const cartKitTotals = useMemo(() => {
 		const totals: Record<string, number> = {};
+
 		for (const kit of cartItems?.cartKit ?? []) {
-			const unitSum =
-				(calculatedPrices[kit.hose.itemNumber] ?? 0) +
-				(calculatedPrices[kit.ferrule1.itemNumber] ?? 0) +
-				(calculatedPrices[kit.ferrule2.itemNumber] ?? 0) +
-				(calculatedPrices[kit.insert1.itemNumber] ?? 0) +
-				(calculatedPrices[kit.insert2.itemNumber] ?? 0);
-			const qty = kit.hose.quantity || 1;
-			totals[kit.hexagonId] = unitSum * qty;
+			// we may need these quantities when we implement quantity buttons to send to BE for ferrule 1&2 and insert 1&2 because HOSEQTY is calculated in BE
+			const hoseQty = kit.hose?.quantity;
+			const ferrule1Qty = kit.ferrule1?.quantity ?? 1;
+			const ferrule2Qty = kit.ferrule2?.quantity ?? 1;
+			const insert1Qty = kit.insert1?.quantity ?? 1;
+			const insert2Qty = kit.insert2?.quantity ?? 1;
+
+			const hosePrice = calculatedPrices[kit.hose?.itemNumber] ?? 0;
+			const ferrule1Price = calculatedPrices[kit.ferrule1?.itemNumber] ?? 0;
+			const ferrule2Price = calculatedPrices[kit.ferrule2?.itemNumber] ?? 0;
+			const insert1Price = calculatedPrices[kit.insert1?.itemNumber] ?? 0;
+			const insert2Price = calculatedPrices[kit.insert2?.itemNumber] ?? 0;
+
+			totals[kit.hexagonId] =
+				hosePrice + ferrule1Price + ferrule2Price + insert1Price + insert2Price;
 		}
+
 		return totals;
 	}, [cartItems?.cartKit, calculatedPrices]);
+	console.log(cartKitTotals, "cartKitTotals");
 
 	const updateQuantity = async (
 		cartLine: number,

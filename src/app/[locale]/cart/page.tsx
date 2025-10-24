@@ -594,7 +594,7 @@ const CartPage = () => {
 															<span className="font-semibold">
 																{formatNorwegianCurrency(
 																	cartKitTotals[item.hexagonId],
-																) ?? 0}
+																)}
 															</span>
 
 															<Button
@@ -636,8 +636,8 @@ const CartPage = () => {
 																	</div>
 																	<p className="font-bold">
 																		{formatNorwegianCurrency(
-																			(calculatedPrices[item.hose.itemNumber] ??
-																				0) * (item.hose.quantity || 1),
+																			calculatedPrices[item.hose.itemNumber] ??
+																				0,
 																		)}
 																	</p>
 																</div>
@@ -653,9 +653,9 @@ const CartPage = () => {
 
 																	<p className="font-bold">
 																		{formatNorwegianCurrency(
-																			(calculatedPrices[
+																			calculatedPrices[
 																				item.ferrule1.itemNumber
-																			] ?? 0) * (item.hose.quantity || 1),
+																			] ?? 0,
 																		)}
 																	</p>
 																</div>
@@ -670,9 +670,9 @@ const CartPage = () => {
 																	</div>
 																	<p className="font-bold">
 																		{formatNorwegianCurrency(
-																			(calculatedPrices[
+																			calculatedPrices[
 																				item.ferrule2.itemNumber
-																			] ?? 0) * (item.hose.quantity || 1),
+																			] ?? 0,
 																		)}
 																	</p>
 																</div>
@@ -687,9 +687,9 @@ const CartPage = () => {
 																	</div>
 																	<p className="font-bold">
 																		{formatNorwegianCurrency(
-																			(calculatedPrices[
+																			calculatedPrices[
 																				item.insert1.itemNumber
-																			] ?? 0) * (item.hose.quantity || 1),
+																			] ?? 0,
 																		)}
 																	</p>
 																</div>
@@ -704,9 +704,9 @@ const CartPage = () => {
 																	</div>
 																	<p className="font-bold">
 																		{formatNorwegianCurrency(
-																			(calculatedPrices[
+																			calculatedPrices[
 																				item.insert2.itemNumber
-																			] ?? 0) * (item.hose.quantity || 1),
+																			] ?? 0,
 																		)}
 																	</p>
 																</div>
