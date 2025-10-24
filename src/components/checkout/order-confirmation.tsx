@@ -31,11 +31,9 @@ export const OrderConfirmation: React.FC<OrderConfirmationProps> = ({
 	const t = useTranslations("OrderConfirmation");
 
 	return (
-		<div className="py-6">
+		<div className="pb-6">
 			<h1 className="mb-2 text-2xl font-semibold">{t("title")}</h1>
-			<p className="text-muted-foreground mb-6">
-				{t("description")}
-			</p>
+			<p className="text-muted-foreground mb-6">{t("description")}</p>
 
 			<div className="mb-8 flex gap-4">
 				<Button
