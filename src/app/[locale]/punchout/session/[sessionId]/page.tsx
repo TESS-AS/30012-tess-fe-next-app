@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
+import { triggerProfileRefetch } from "@/hooks/usePunchoutProfile";
 import axiosClient from "@/services/axiosClient";
 import { useParams, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -38,13 +39,17 @@ export default function PunchoutSessionPage() {
 
 				const { data: user } = await axiosClient.get("/user");
 
+				triggerProfileRefetch();
+
+				await new Promise((resolve) => setTimeout(resolve, 200));
+
 				if (
 					user[0]?.defaultCustomerNumber ===
 					SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
 				) {
-					router.replace("/profile");
+					router.push("/profile");
 				} else {
-					router.replace("/");
+					router.push("/");
 				}
 			} catch (err) {
 				console.error("PunchOut token validation failed", err);

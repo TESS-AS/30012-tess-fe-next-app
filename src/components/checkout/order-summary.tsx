@@ -32,9 +32,8 @@ export default function OrderSummary({
 	const { data: profile } = usePunchoutProfile();
 	const { cartItems, isLoading } = useAppContext();
 	const isCartEmpty =
-		!cartItems ||
-		(cartItems.cart?.length === 0 && cartItems.cartKit?.length === 0) ||
-		isLoading;
+		(!cartItems?.cart || cartItems.cart.length === 0) &&
+		(!cartItems?.cartKit || cartItems.cartKit.length === 0);
 
 	const summary = useOrderSummary();
 

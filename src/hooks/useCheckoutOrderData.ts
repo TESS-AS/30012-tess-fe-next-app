@@ -74,19 +74,19 @@ export function useCheckoutOrderData(
 					},
 					{
 						itemNumber: kitItem.ferrule1.itemNumber,
-						quantity: kitItem.hose.quantity,
+						quantity: kitItem.ferrule1.quantity,
 					},
 					{
 						itemNumber: kitItem.ferrule2.itemNumber,
-						quantity: kitItem.hose.quantity,
+						quantity: kitItem.ferrule2.quantity,
 					},
 					{
 						itemNumber: kitItem.insert1.itemNumber,
-						quantity: kitItem.hose.quantity,
+						quantity: kitItem.insert1.quantity,
 					},
 					{
 						itemNumber: kitItem.insert2.itemNumber,
-						quantity: kitItem.hose.quantity,
+						quantity: kitItem.insert2.quantity,
 					},
 				];
 
@@ -101,7 +101,7 @@ export function useCheckoutOrderData(
 					accountPart3: "",
 					accountPart4: String(userId || ""),
 					accountPart5: "",
-					text: kitItem.hexagonId, // Add hexagonId to text field for all kit components
+					text: `${kitItem.hexagonId};${kitItem.hose.itemDescription}`,
 				}));
 
 				salesOrderLines = [...salesOrderLines, ...kitLines];
