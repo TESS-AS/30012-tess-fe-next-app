@@ -3,6 +3,7 @@
 import React, { useRef } from "react";
 import { useEffect, useState, useMemo } from "react";
 
+import CustomerNumberSwitcher from "@/components/customer-profile/customer-number-switcher";
 import { NoResults } from "@/components/empty-search-result";
 import CategoryNavigationMenu from "@/components/layouts/NavigationMenu/NavigationMenu";
 import { ProductItem } from "@/components/products/product-item-search";
@@ -435,7 +436,6 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 					)}
 				</div>
 				<div className="flex items-center">
-					{/*{profile && <CustomerNumberSwitcher profile={profile} />}*/}
 					{profile && (
 						<Button
 							variant="ghost"
@@ -487,6 +487,8 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								<DropdownMenuItem className="text-gray-700">
 									Endre innstillinger
 								</DropdownMenuItem>
+								<DropdownMenuSeparator />
+								<CustomerNumberSwitcher profile={profile} />
 								<DropdownMenuSeparator />
 								<DropdownMenuItem
 									onClick={handleLogout}
