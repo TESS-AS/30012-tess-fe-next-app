@@ -12,6 +12,7 @@
 	},
 	"Home": {
 		"title": "Home Page No",
+        "myProfile": "My Profile",
 		"bannerTitle": "Velkommen til TESS!",
 		"browseOurTopCategories": "Bla gjennom våre toppkategorier",
 		"ourCategories": "Our categories",

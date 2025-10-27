@@ -3,12 +3,10 @@
 import React, { useRef } from "react";
 import { useEffect, useState, useMemo } from "react";
 
-import CustomerNumberSwitcher from "@/components/customer-profile/customer-number-switcher";
 import { NoResults } from "@/components/empty-search-result";
 import CategoryNavigationMenu from "@/components/layouts/NavigationMenu/NavigationMenu";
 import { ProductItem } from "@/components/products/product-item-search";
-import SearchAside, { CategoryLink } from "@/components/search-aside";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import SearchAside from "@/components/search-aside";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import AuthDialog from "@/components/ui/dialogs/auth-dialog";
@@ -17,6 +15,7 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
+	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -25,6 +24,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useProfile } from "@/contexts/ProfileContext";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { useGetAssortments } from "@/hooks/useGetAssortments";
 import { useInstantSearch } from "@/hooks/useInstantSearch";
 import { useOrderSummary } from "@/hooks/useOrderSummary";
 import { useRouter } from "@/i18n/navigation";
@@ -35,14 +35,17 @@ import axiosClient from "@/services/axiosClient";
 import { getProductVariations } from "@/services/product.service";
 import { Category } from "@/types/categories.types";
 import { IProductSearch } from "@/types/search.types";
-import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import {
-	Building,
+	BookOpen,
 	ChevronDown,
+	ChevronUp,
+	LogOut,
 	MessageSquareText,
+	Plus,
 	Search,
 	ShoppingCart,
 	User,
+	UserIcon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -51,7 +54,12 @@ import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 
 export default function Header() {
-	const { categories, loading, error } = useCategories();
+	const {
+		categories,
+		loading,
+		error,
+		refetch: refetchCategories,
+	} = useCategories();
 
 	const currentLocale = useLocale();
 	const t = useTranslations();
@@ -75,6 +83,10 @@ export default function Header() {
 	const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const { shouldFocus, resetFocus } = useSearchStore();
+	const [selectedAssortment, setSelectedAssortment] = useState("");
+	const [isSaving, setIsSaving] = useState(false);
+	const [isAssortmentDropdownOpen, setIsAssortmentDropdownOpen] =
+		useState(false);
 
 	const searchCategories = useMemo(() => {
 		if (!searchData?.categories) return [];
@@ -87,6 +99,22 @@ export default function Header() {
 	}, [searchData?.categories]);
 
 	const { profile } = useProfile();
+	const { assortments } = useGetAssortments(!!profile);
+
+	useEffect(() => {
+		if (
+			assortments.length &&
+			!selectedAssortment &&
+			profile?.defaultAssortmentNumber
+		) {
+			const match = assortments.find(
+				(a: any) => a.assortmentnumber === profile.defaultAssortmentNumber,
+			);
+			if (match) {
+				setSelectedAssortment(match.assortmentnumber);
+			}
+		}
+	}, [assortments, selectedAssortment, profile]);
 
 	useEffect(() => {
 		if (shouldFocus) {
@@ -134,46 +162,64 @@ export default function Header() {
 		await signOut();
 	};
 
+	const handleAssortmentChange = async (assortmentNumber: string) => {
+		if (!profile || isSaving) return;
+
+		setIsSaving(true);
+		try {
+			await axiosClient.post("/user/defaultVariables", {
+				companyNumber: profile.defaultCompanyNumber,
+				customerNumber: profile.defaultCustomerNumber,
+				warehouseNumber: profile.defaultWarehouseNumber,
+				assortmentNumber: assortmentNumber,
+			});
+			setSelectedAssortment(assortmentNumber);
+			await refetchCategories();
+			setIsAssortmentDropdownOpen(false);
+		} catch (err) {
+			console.error("Failed to update default assortment", err);
+		} finally {
+			setIsSaving(false);
+		}
+	};
+
+	const getSelectedAssortmentName = () => {
+		if (!selectedAssortment || !assortments.length) return "";
+		const match = assortments.find(
+			(a: any) => a.assortmentnumber === selectedAssortment,
+		);
+		return match?.assortmentname || "";
+	};
+
+	const assortmentDropdownRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (
+				assortmentDropdownRef.current &&
+				!assortmentDropdownRef.current.contains(event.target as Node)
+			) {
+				setIsAssortmentDropdownOpen(false);
+			}
+		};
+
+		if (isAssortmentDropdownOpen) {
+			document.addEventListener("mousedown", handleClickOutside);
+		}
+
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, [isAssortmentDropdownOpen]);
+
 	return (
 		<header
 			className={`bg-background w-full border-t ${profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER ? "h-[132px]" : "h-[182px]"}`}>
 			<div className="container m-auto flex h-16 items-center justify-between">
-				<div className="flex items-center gap-6">
-					<Button
-						variant="ghost"
-						className="mb-2 rounded-none border-b border-[#013d1a] px-0 pb-0 text-sm font-medium hover:bg-transparent">
-						E-handel{" "}
-						<Badge className="-mb-1.5 rounded-[6px_6px_0_6px] bg-[#003D1A] text-xs text-white">
-							Beta
-						</Badge>
-					</Button>
-					<Button
-						variant="ghost"
-						className="px-0 text-sm font-medium hover:bg-transparent">
-						THM KundeWEB
-					</Button>
-				</div>
-				{profile && (
-					<div className="flex items-center gap-2 rounded-md bg-[#FDFDEA] px-3 py-1.5">
-						<Button
-							variant="ghost"
-							className="text-sm font-medium text-[#003D1A] hover:bg-transparent">
-							<MessageSquareText className="h-4 w-4" /> Vær med på utviklingen
-						</Button>
-						<Button
-							variant="darkGreen"
-							className="text-xs"
-							onClick={() => setIsFeedbackDialogOpen(true)}>
-							Gi tilbakemelding
-						</Button>
-					</div>
-				)}
-			</div>
-			<div className="container m-auto mb-1 flex h-16 items-center justify-between">
-				<div className="flex items-center gap-2">
+				<div className="flex items-center gap-4">
 					<Link
 						href="/"
-						className="flex items-center gap-2">
+						className="flex items-center gap-4">
 						<Image
 							src="/icons/TESSLogo.svg"
 							alt="Logo"
@@ -181,208 +227,292 @@ export default function Header() {
 							height={144}
 						/>
 					</Link>
+					<div className="flex items-center gap-8">
+						<Button
+							variant="ghost"
+							className={`text-md mb-2 rounded-none px-0 pb-2 hover:bg-transparent ${
+								!pathname.includes("/profile") &&
+								(pathname === "/" ||
+									pathname.startsWith("/en") ||
+									pathname.startsWith("/no"))
+									? "border-b-2 border-[#003D1A] font-bold rounded-none"
+									: "font-normal text-[#5A615D] hover:border-b-2 hover:border-[#003D1A] hover:rounded-none"
+							}`}
+							onClick={() => router.push("/")}>
+							E-handel
+						</Button>
+						<Button
+							variant="ghost"
+							className={`text-md mb-2 px-0 pb-2 hover:bg-transparent ${
+								pathname.includes("/profile")
+									? "border-b-2 border-[#003D1A] font-bold rounded-none"
+									: "font-normal text-[#5A615D] hover:border-b-2 hover:border-[#003D1A] hover:rounded-none"
+							}`}
+							onClick={() =>
+								profile ? router.push("/profile") : setIsAuthOpen(true)
+							}>
+							{t("Home.myProfile")}
+						</Button>
+					</div>
+				</div>
+				{profile && (
+					<div className="flex items-center gap-2 rounded-md bg-[#F0FCF2] px-3 py-1.5">
+						<Button
+							variant="ghost"
+							className="text-sm font-medium text-[#003D1A] hover:bg-transparent">
+							<MessageSquareText className="h-4 w-4" /> Vær med på utviklingen
+						</Button>
+						<Button
+							variant="outlineGrey"
+							onClick={() => setIsFeedbackDialogOpen(true)}>
+							<Plus className="h-4 w-4" /> Gi tilbakemelding
+						</Button>
+					</div>
+				)}
+			</div>
+			<div className="container m-auto mb-1 flex h-16 items-center justify-between">
+				<div className="flex items-center gap-2">
 					{profile?.defaultCustomerNumber !==
 						SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
-						<form
-							onSubmit={handleSearch}
-							className="hidden h-[50px] w-[537px] px-4 md:flex">
-							<div
-								className="relative w-[537px]"
-								ref={isModalIdOpen ? null : searchRef}>
-								<Search className="text-muted-foreground absolute top-4.5 left-2.5 h-4 w-4" />
-								<Input
-									type="search"
-									placeholder={t("Common.searchProducts")}
-									className="bg-background color-[#5A615D] h-[50px] w-[537px] border-[#001E00] pl-8"
-									value={searchQuery}
-									ref={inputRef}
-									onChange={(e) => setSearchQuery(e.target.value)}
-								/>
-								<Button
-									variant="default"
-									className="absolute top-[7px] right-[7px] text-xs font-medium">
-									Søk
-								</Button>
-								{searchQuery && (
-									<div className="animate-in fade-in-0 zoom-in-95 fixed top-34 left-1/2 z-[11] grid max-h-[80vh] w-[80vw] -translate-x-1/2 grid-cols-3 gap-4 overflow-y-auto bg-white p-4 shadow-lg duration-200">
-										<div className="col-span-1 space-y-4 pr-4">
-											<SearchAside
-												suggestions={
-													(searchData?.suggestions ?? []) as unknown as string[]
-												}
-												categories={searchCategories}
-												query={searchQuery}
-												onPick={handlePick}
-											/>
-										</div>
-										<div className="col-span-2">
-											<div className="mb-3 flex items-center justify-between">
-												<h3 className="text-lg font-semibold">
-													{t("Search.resultsTitle", { default: "Dine treff" })}
-												</h3>
-												{searchData && (
-													<span className="text-sm text-gray-500">
-														{searchData.productRes?.length} /{" "}
-														{searchData.productRes.length} produkter
-													</span>
-												)}
-											</div>
+						<div
+							className="relative hidden md:flex"
+							ref={assortmentDropdownRef}>
+							<div className="h-[50px] w-[max-content] overflow-hidden rounded-r-lg border border-gray-300 bg-white">
+								<form
+									onSubmit={handleSearch}
+									className="flex items-center">
+									<div
+										className="relative min-w-[400px] flex-1"
+										ref={isModalIdOpen ? null : searchRef}>
+										<Input
+											type="search"
+											placeholder={t("Common.searchProducts")}
+											className="h-[50px] !rounded-none !border-0 !border-none bg-transparent px-4 text-[#5A615D] focus-visible:ring-0 focus-visible:ring-offset-0"
+											value={searchQuery}
+											ref={inputRef}
+											onChange={(e) => setSearchQuery(e.target.value)}
+										/>
+										{searchQuery && (
+											<div className="animate-in fade-in-0 zoom-in-95 fixed top-34 left-1/2 z-[11] grid max-h-[80vh] w-[80vw] -translate-x-1/2 grid-cols-3 gap-4 overflow-y-auto bg-white p-4 shadow-lg duration-200">
+												<div className="col-span-1 space-y-4 pr-4">
+													<SearchAside
+														suggestions={
+															(searchData?.suggestions ??
+																[]) as unknown as string[]
+														}
+														categories={searchCategories}
+														query={searchQuery}
+														onPick={handlePick}
+													/>
+												</div>
+												<div className="col-span-2">
+													<div className="mb-3 flex items-center justify-between">
+														<h3 className="text-lg font-semibold">
+															{t("Search.resultsTitle", {
+																default: "Dine treff",
+															})}
+														</h3>
+														{searchData && (
+															<span className="text-sm text-gray-500">
+																{searchData.productRes?.length} /{" "}
+																{searchData.productRes.length} produkter
+															</span>
+														)}
+													</div>
 
-											{isSearchLoading ? (
-												<div className="flex items-center justify-center py-8">
-													<div className="h-6 w-6 animate-spin rounded-full border-b-2 border-green-600"></div>
+													{isSearchLoading ? (
+														<div className="flex items-center justify-center py-8">
+															<div className="h-6 w-6 animate-spin rounded-full border-b-2 border-green-600"></div>
+														</div>
+													) : searchData?.productRes?.length ? (
+														searchData.productRes.map(
+															(product: IProductSearch) => {
+																return (
+																	<ProductItem
+																		key={product.productNumber}
+																		product={product}
+																		currentLocale={currentLocale}
+																		setSearchQuery={setSearchQuery}
+																		isModalIdOpen={isModalIdOpen}
+																		setIsModalIdOpen={setIsModalIdOpen}
+																		getProductVariations={getProductVariations}
+																		setVariations={setVariations}
+																		variations={variations}
+																		searchQuery={searchQuery}
+																	/>
+																);
+															},
+														)
+													) : searchData ? (
+														<NoResults query={searchQuery} />
+													) : (
+														<div className="flex items-center justify-center py-8">
+															<span className="text-gray-500">
+																Skriv for å søke...
+															</span>
+														</div>
+													)}
 												</div>
-											) : searchData?.productRes?.length ? (
-												searchData.productRes.map((product: IProductSearch) => {
-													return (
-														<ProductItem
-															key={product.productNumber}
-															product={product}
-															currentLocale={currentLocale}
-															setSearchQuery={setSearchQuery}
-															isModalIdOpen={isModalIdOpen}
-															setIsModalIdOpen={setIsModalIdOpen}
-															getProductVariations={getProductVariations}
-															setVariations={setVariations}
-															variations={variations}
-															searchQuery={searchQuery}
-														/>
+											</div>
+										)}
+									</div>
+									{profile && assortments.length > 0 && (
+										<div className="max-w-[175px] border-l border-gray-300">
+											<Button
+												type="button"
+												variant="ghost"
+												className="flex h-[50px] w-full max-w-[175px] min-w-[175px] items-center gap-2 rounded-none bg-gray-100 px-4 text-[#0F1912]"
+												onClick={(e) => {
+													e.preventDefault();
+													e.stopPropagation();
+													setIsAssortmentDropdownOpen(
+														!isAssortmentDropdownOpen,
 													);
-												})
-											) : searchData ? (
-												<NoResults query={searchQuery} />
-											) : (
-												<div className="flex items-center justify-center py-8">
-													<span className="text-gray-500">
-														Skriv for å søke...
-													</span>
-												</div>
-											)}
+												}}
+												disabled={isSaving}>
+												<BookOpen className="h-5 w-5 flex-shrink-0 text-[#003D1A]" />
+												<span className="truncate text-sm font-medium">
+													{getSelectedAssortmentName() ||
+														t("CustomerSwitcher.selectAssortmentPlaceholder")}
+												</span>
+												{isAssortmentDropdownOpen ? (
+													<ChevronUp className="h-4 w-4 flex-shrink-0" />
+												) : (
+													<ChevronDown className="h-4 w-4 flex-shrink-0" />
+												)}
+											</Button>
 										</div>
+									)}
+									{!profile && (
+										<div className="max-w-[175px] border-l border-gray-300">
+											<Button
+												type="button"
+												variant="ghost"
+												className="flex h-[50px] w-full max-w-[175px] min-w-[175px] items-center gap-2 rounded-none bg-gray-100 px-4 text-[#0F1912]">
+												<BookOpen className="h-5 w-5 flex-shrink-0 text-[#003D1A]" />
+												<span className="truncate text-sm font-medium">
+													TESS katalog
+												</span>
+											</Button>
+										</div>
+									)}
+									<Button
+										type="submit"
+										className="h-[50px] rounded-l-none rounded-r-lg border-0 bg-[#009640] px-5 hover:bg-[#007a2e]">
+										<Search className="h-5 w-5 text-white" />
+									</Button>
+								</form>
+							</div>
+							{profile &&
+								assortments.length > 0 &&
+								isAssortmentDropdownOpen && (
+									<div className="absolute top-[50px] right-0 z-[9999] w-[232px] max-w-[232px] rounded-b-lg bg-white py-2">
+										{assortments.map((a: any) => (
+											<button
+												key={a.assortmentnumber}
+												type="button"
+												onClick={(e) => {
+													e.preventDefault();
+													e.stopPropagation();
+													handleAssortmentChange(a.assortmentnumber);
+												}}
+												className="flex w-full items-center gap-2 px-4 py-2 text-left transition-colors hover:bg-gray-50">
+												<div className="flex h-5 w-5 min-w-[20px] items-center justify-center">
+													{selectedAssortment === a.assortmentnumber ? (
+														<div className="h-4 w-4 rounded-full border-2 border-[#009640] bg-white" />
+													) : (
+														<div className="h-4 w-4 rounded-full border-2 border-gray-300" />
+													)}
+												</div>
+												<span className="truncate text-sm font-medium text-[#0F1912]">
+													{a.assortmentname}
+												</span>
+											</button>
+										))}
 									</div>
 								)}
-							</div>
-						</form>
+						</div>
 					)}
 				</div>
 				<div className="flex items-center">
-					{profile && <CustomerNumberSwitcher profile={profile} />}
-					<Button
-						variant="ghost"
-						className="relative hover:bg-transparent"
-						onClick={() => router.push("/cart")}>
-						<div className="relative mr-2 flex items-center">
-							<ShoppingCart className="h-5 w-5" />
-							<Badge className="absolute -top-2.5 -right-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#005522] p-0 text-xs">
-								{(cartItems?.cart?.length || 0) +
-									(cartItems?.cartKit?.length || 0)}
-							</Badge>
-						</div>
-						{(cartItems?.cart?.length || 0) +
-							(cartItems?.cartKit?.length || 0) >
-						0 ? (
-							<PriceDisplay amount={sumAfterDiscount} />
-						) : (
-							""
-						)}
-						<span className="sr-only">Cart</span>
-					</Button>
+					{/*{profile && <CustomerNumberSwitcher profile={profile} />}*/}
+					{profile && (
+						<Button
+							variant="ghost"
+							className="relative hover:bg-transparent"
+							onClick={() => router.push("/cart")}>
+							<div className="relative mr-2 flex items-center">
+								<ShoppingCart className="h-5 w-5" />
+								<Badge className="absolute -top-2.5 -right-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#005522] p-0 text-xs">
+									{(cartItems?.cart?.length || 0) +
+										(cartItems?.cartKit?.length || 0)}
+								</Badge>
+							</div>
+							{(cartItems?.cart?.length || 0) +
+								(cartItems?.cartKit?.length || 0) >
+							0 ? (
+								<PriceDisplay amount={sumAfterDiscount} />
+							) : (
+								""
+							)}
+							<span className="sr-only">Cart</span>
+						</Button>
+					)}
 					{profile ? (
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button
 									variant="ghost"
 									className="gap-1 px-0 font-medium text-[#1A211C] hover:bg-transparent">
-									<Building />
+									<UserIcon />
 									{profile.firstName ?? "Profile"}
 									<ChevronDown className="ml-1 h-4 w-4" />
 								</Button>
 							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end">
-								<div className="flex items-center gap-3 px-3 py-2">
-									<Avatar className="h-9 w-9">
-										<AvatarImage alt={profile.firstName ?? "User"} />
-										<AvatarFallback>
-											{profile.firstName
-												?.split(" ")
-												.map((n: string) => n[0])
-												.join("")}
-										</AvatarFallback>
-									</Avatar>
-									<div className="flex-1 overflow-hidden">
-										<div className="leading-none font-medium">
-											{profile.firstName}
-										</div>
-										<div className="text-muted-foreground max-w-[160px] truncate text-sm">
-											{profile.email}
-										</div>
+							<DropdownMenuContent
+								align="end"
+								className="rounded-b-lg">
+								<div className="px-3 py-3">
+									<div className="text-[14px] font-medium">
+										{profile.firstName}
 									</div>
+									<div className="text-[14px]">{profile.email}</div>
 								</div>
-								<DropdownMenuItem onClick={() => router.push("/profile")}>
-									My Profile
+								<DropdownMenuSeparator />
+								<DropdownMenuItem
+									className="text-gray-700"
+									onClick={() => router.push("/profile")}>
+									Gå til din side
 								</DropdownMenuItem>
-								<DropdownMenuItem onClick={() => router.push("/wishlist")}>
-									Wishlist
+								<DropdownMenuItem className="text-gray-700">
+									Endre innstillinger
 								</DropdownMenuItem>
-								{!profile.punchout && (
-									<DropdownMenuItem
-										onClick={handleLogout}
-										className="text-green-600">
-										Log out
-									</DropdownMenuItem>
-								)}
+								<DropdownMenuSeparator />
+								<DropdownMenuItem
+									onClick={handleLogout}
+									className="text-red-700">
+									<LogOut className="mr-2 h-4 w-4 text-red-700" />
+									Logg ut
+								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
 					) : (
-						<Button
-							variant="ghost"
-							className="hover:bg-transparent"
-							onClick={() => setIsAuthOpen(true)}>
-							<User className="h-5 w-5" />
-						</Button>
+						<div className="flex items-center gap-4 rounded-md bg-[#F0FCF2] px-3 py-1.5">
+							<div className="flex items-center gap-2">
+								<MessageSquareText className="h-4 w-4 text-[#003D1A]" />
+								<span className="text-sm font-medium text-[#003D1A]">
+									Du er besøkende
+								</span>
+							</div>
+							<Button
+								variant="outlineGrey"
+								onClick={() => setIsAuthOpen(true)}>
+								<User className="h-4 w-4" />
+								<span className="text-sm">Logg inn</span>
+							</Button>
+						</div>
 					)}
 
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button
-								variant="ghost"
-								className="hidden hover:bg-transparent md:flex">
-								<div className="flex items-center gap-1">
-									<Image
-										src={`/icons/${currentLocale === "en" ? "en" : "Flagg"}.svg`}
-										alt="Language"
-										width={22}
-										height={22}
-									/>
-									<ChevronDown className="h-4 w-4" />
-								</div>
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
-							<DropdownMenuItem onClick={() => handleLanguageChange("en")}>
-								<div className="flex items-center gap-2">
-									<Image
-										src="/icons/en.svg"
-										alt="English"
-										width={22}
-										height={22}
-									/>
-									English
-								</div>
-							</DropdownMenuItem>
-							<DropdownMenuItem onClick={() => handleLanguageChange("no")}>
-								<div className="flex items-center gap-2">
-									<Image
-										src="/icons/Flagg.svg"
-										alt="Norwegian"
-										width={22}
-										height={22}
-									/>
-									Norsk
-								</div>
-							</DropdownMenuItem>
-						</DropdownMenuContent>
-					</DropdownMenu>
 					<Sheet
 						open={isSearchOpen}
 						onOpenChange={setIsSearchOpen}>
