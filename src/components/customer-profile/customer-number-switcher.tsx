@@ -116,13 +116,12 @@ export default function CustomerNumberSwitcher({
 
 	return (
 		<>
-			<Button
-				variant="outline"
-				size="sm"
+			<button
 				onClick={() => setIsCustomerModalOpen(true)}
-				className="hidden text-sm text-[#0F1912] md:flex">
-				<UserRoundCog /> Velg kunde/lager/sortilog
-			</Button>
+				className="hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-gray-700 transition-colors outline-none">
+				<UserRoundCog className="h-4 w-4" />
+				<span>Velg kunde/lager/sortiment</span>
+			</button>
 
 			<Modal
 				open={isCustomerModalOpen}
@@ -130,7 +129,7 @@ export default function CustomerNumberSwitcher({
 				<ModalHeader>
 					<ModalTitle>{t("CustomerSwitcher.title")}</ModalTitle>
 				</ModalHeader>
-				<div className="space-y-4 p-4">
+				<div className="space-y-4 py-4">
 					<div className="space-y-2">
 						<Label htmlFor="customerSelect">
 							{t("CustomerSwitcher.selectCustomerLabel")}
