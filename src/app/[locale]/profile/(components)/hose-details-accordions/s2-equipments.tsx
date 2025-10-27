@@ -3,15 +3,17 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
+import type { GetAssetsResponse } from "@/types/assets.types";
 import { useTranslations } from "next-intl";
 
 import { Cell } from "./cell";
 
-export const S2EquipmentsAccordion = ({
-	isEditMode,
-}: {
+interface Props {
 	isEditMode: boolean;
-}) => {
+	hoseDetails: GetAssetsResponse | null;
+}
+
+export const S2EquipmentsAccordion = ({ isEditMode, hoseDetails }: Props) => {
 	const t = useTranslations("S2EquipmentsAccordion");
 	return (
 		<AccordionItem
@@ -27,7 +29,7 @@ export const S2EquipmentsAccordion = ({
 							<td className="px-4 py-3 text-[#5A615D]">S2-utstyr</td>
 							<td className="px-4 py-3 text-[#0F1912]">
 								<Cell
-									value="Deck crane port side"
+									value={hoseDetails?.hoseLine?.s2?.s2Name || "—"}
 									placeholder="Angi S2-utstyr"
 									isEditMode={isEditMode}
 								/>
@@ -38,7 +40,7 @@ export const S2EquipmentsAccordion = ({
 							<td className="px-4 py-3 text-[#5A615D]">Kundeutstyr nr</td>
 							<td className="px-4 py-3 text-[#0F1912]">
 								<Cell
-									value="4521-39.80"
+									value={hoseDetails?.hoseLine?.customerEq || "—"}
 									placeholder="Kundeutstyr nr"
 									isEditMode={isEditMode}
 								/>

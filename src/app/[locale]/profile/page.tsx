@@ -8,9 +8,11 @@ import UserAddressesTab from "@/app/[locale]/profile/(components)/tabs/UserAdres
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
-import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
+import { useGetHoseSystems } from "@/hooks/useGetHoseSystems";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
 import { cn } from "@/lib/utils";
 import { ShoppingCart, Folder, User, Settings, LogOut } from "lucide-react";
@@ -33,11 +35,14 @@ import UsersBrukere from "./(components)/users-brukere";
 
 export default function ProfilePage() {
 	const { setIsAuthOpen } = useAppContext();
-	const { data: profile } = usePunchoutProfile();
+	const { data: profile, isLoading: isLoadingProfile } = useGetProfileData();
 	const t = useTranslations();
 
 	const [activeMode, setActiveMode] = useState<"hose" | "ehandel">("ehandel");
 	const [activeTab, setActiveTab] = useState("mine-bestillinger");
+
+	const shouldFetchHoseSystems = !!profile && activeMode === "hose";
+	const hoseSystems = useGetHoseSystems(shouldFetchHoseSystems);
 
 	useEffect(() => {
 		if (!profile) return;
@@ -68,6 +73,27 @@ export default function ProfilePage() {
 	const [selectedHexagonId, setSelectedHexagonId] = useState<string | null>(
 		null,
 	);
+
+	if (isLoadingProfile) {
+		return (
+			<main className="my-6 min-h-screen">
+				<Skeleton className="mb-4 h-6 w-64" />
+
+				<div className="mx-auto flex gap-6 pt-4">
+					<div className="h-full w-[350px] space-y-4">
+						<Skeleton className="h-24 w-full rounded-lg" />
+						<Skeleton className="h-[600px] w-full rounded-lg" />
+					</div>
+
+					<div className="w-[calc(100%-350px)] space-y-4">
+						<Skeleton className="h-16 w-full rounded-lg" />
+						<Skeleton className="h-[200px] w-full rounded-lg" />
+						<Skeleton className="h-[400px] w-full rounded-lg" />
+					</div>
+				</div>
+			</main>
+		);
+	}
 
 	if (!profile) {
 		return (
@@ -176,6 +202,7 @@ export default function ProfilePage() {
 								setActiveTab(tab);
 							}}
 							onCollapse={setIsSidebarCollapsed}
+							profile={profile}
 							items={
 								activeMode === "ehandel"
 									? [
@@ -343,20 +370,25 @@ export default function ProfilePage() {
 						<TabsContent
 							value="hose-orders"
 							className="mt-0">
-							{selectedHexagonId ? (
-								<HoseDetailsPage
-									hexagonId={selectedHexagonId}
-									onBack={() => setSelectedHexagonId(null)}
-								/>
-							) : (
-								<HosesAndEquipments goToHose={setSelectedHexagonId} />
-							)}
+							{activeTab === "hose-orders" &&
+								(selectedHexagonId ? (
+									<HoseDetailsPage
+										hexagonId={selectedHexagonId}
+										onBack={() => setSelectedHexagonId(null)}
+										hoseSystems={hoseSystems}
+									/>
+								) : (
+									<HosesAndEquipments
+										goToHose={setSelectedHexagonId}
+										profile={profile}
+									/>
+								))}
 						</TabsContent>
 
 						<TabsContent
 							value="hose-inspections"
 							className="mt-0">
-							<HoseInspections />
+							{activeTab === "hose-inspections" && <HoseInspections />}
 						</TabsContent>
 
 						<TabsContent value="orders">
@@ -364,11 +396,15 @@ export default function ProfilePage() {
 						</TabsContent>
 
 						<TabsContent value="hose-oversikt">
-							<HoseOverview />
+							{activeTab === "hose-oversikt" && (
+								<HoseOverview hoseSystems={hoseSystems} />
+							)}
 						</TabsContent>
 
-						<TabsContent value="hose-replacement">
-							<HoseReplacement />
+						<TabsContent
+							value="hose-replacement"
+							className="mt-0">
+							{activeTab === "hose-replacement" && <HoseReplacement />}
 						</TabsContent>
 
 						<TabsContent value="hose-risk-class">

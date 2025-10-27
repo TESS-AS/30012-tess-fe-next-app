@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, type Column } from "@/components/ui/data-table";
@@ -19,6 +19,7 @@ import { FilterOptions, useGetAssets } from "@/hooks/useGetAssets";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useAppContext } from "@/lib/appContext";
 import { postCartKit } from "@/services/carts.service";
+import { ProfileUser } from "@/types/user.types";
 import { MapPin, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -51,11 +52,14 @@ export interface HoseOrder {
 
 interface HosesAndEquipmentsProps {
 	goToHose?: (hoseId: string) => void;
+	profile: ProfileUser;
 }
 
-export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
+export function HosesAndEquipments({
+	goToHose,
+	profile,
+}: HosesAndEquipmentsProps) {
 	const t = useTranslations("HosesAndEquipments");
-	const { data: profile } = usePunchoutProfile();
 	const [customerNumber, setCustomerNumber] = useState<string>("");
 	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
 		() => {
@@ -68,6 +72,23 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 
 	const { setIsCartChanging, isCartChanging } = useAppContext();
 
+	// Set customerNumber when profile loads
+	useEffect(() => {
+		if (
+			profile?.defaultCustomerNumber &&
+			profile.defaultCustomerNumber !==
+				SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+		) {
+			setCustomerNumber(profile.defaultCustomerNumber);
+		}
+	}, [profile?.defaultCustomerNumber]);
+
+	// Determine the effective customer number to use
+	const effectiveCustomerNumber =
+		profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+			? profile.defaultCustomerNumber
+			: customerNumber;
+
 	const {
 		assets,
 		pagination,
@@ -76,13 +97,11 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 		s1Codes,
 		s1CodesPagination,
 		fetchS1Codes,
-	} = useGetAssets(
-		profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
-			? profile?.defaultCustomerNumber
-			: customerNumber,
-		selectedS1Code,
-		{ initAssets: true, initS1Codes: true, s2Filter: false },
-	);
+	} = useGetAssets(effectiveCustomerNumber, selectedS1Code, {
+		initAssets: true,
+		initS1Codes: true,
+		s2Filter: false,
+	});
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedColumns, setSelectedColumns] = useState<string[]>([
@@ -407,7 +426,11 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 				<HoseActionsDropdown
 					selectedCount={selectedCount}
 					isAddingToCart={isAddingToCart}
-					onAddToCart={() => setCartModalOpen(true)}
+					onAddToCart={async () => {
+						setCartModalOpen(true);
+						await handleBulkAction("cart");
+						localStorage.setItem("selectedHoseRows", JSON.stringify([]));
+					}}
 					onContactSupport={() => {
 						if (selectedCount === 0) {
 							toast.error(t("errors.selectItemsFirst"));
@@ -509,8 +532,7 @@ export function HosesAndEquipments({ goToHose }: HosesAndEquipmentsProps) {
 				isNavigating={isNavigating}
 				onConfirm={async () => {
 					setCartModalOpen(false);
-					await handleBulkAction("cart");
-					localStorage.setItem("selectedHoseRows", JSON.stringify([]));
+					router.push("/cart");
 				}}
 			/>
 

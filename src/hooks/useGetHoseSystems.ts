@@ -22,12 +22,12 @@ export type LocationNode = {
 	children?: ChildNode[];
 };
 
-export const useGetHoseSystems = () => {
+export const useGetHoseSystems = (enabled: boolean = true) => {
 	const [selectedS1Code] = useState<string | undefined>(undefined);
 
 	const { loading, s1Codes = [] } = useGetAssets("", selectedS1Code, {
 		initAssets: false,
-		initS1Codes: true,
+		initS1Codes: enabled,
 		s2Filter: true,
 	});
 

@@ -94,7 +94,7 @@ export const useGetAssets = (
 						rejected,
 					);
 		},
-		enabled: options.initAssets !== false,
+		enabled: options.initAssets !== false && !!customerNumber,
 		staleTime: 5 * 60 * 1000,
 		refetchOnMount: false,
 		refetchOnWindowFocus: false,

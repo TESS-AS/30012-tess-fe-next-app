@@ -3,6 +3,7 @@
 import { ReactNode, useEffect } from "react";
 
 import Header from "@/components/layouts/Header/Header";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { cn } from "@/lib/utils";
 import { useNavMenuStore } from "@/stores/useNavMenuStore";
 import { usePathname } from "next/navigation";
@@ -10,6 +11,7 @@ import { usePathname } from "next/navigation";
 export default function Main({ children }: { children?: ReactNode }) {
 	const pathname = usePathname();
 	const { isOpen, setIsOpen } = useNavMenuStore();
+	const { data: profile } = useGetProfileData();
 
 	useEffect(() => {
 		setIsOpen(false);
@@ -17,7 +19,7 @@ export default function Main({ children }: { children?: ReactNode }) {
 
 	return (
 		<div className="relative flex flex-1 flex-col min-md:overflow-hidden">
-			<Header />
+			<Header profile={profile} />
 			<div
 				className={cn(
 					"h-[calc(100vh-114px)] overflow-x-hidden overflow-y-auto transition-all duration-300",

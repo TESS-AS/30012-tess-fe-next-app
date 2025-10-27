@@ -3,15 +3,18 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
+import type { GetAssetsResponse } from "@/types/assets.types";
 import { useTranslations } from "next-intl";
 
 import { Cell } from "./cell";
 
-export const OtherDetailsAccordion = ({
-	isEditMode,
-}: {
+interface Props {
 	isEditMode: boolean;
-}) => {
+	hoseDetails: GetAssetsResponse | null;
+}
+
+export const OtherDetailsAccordion = ({ isEditMode, hoseDetails }: Props) => {
+	const customerData = hoseDetails?.customerData;
 	const t = useTranslations("OtherDetailsAccordion");
 	return (
 		<AccordionItem
@@ -27,7 +30,7 @@ export const OtherDetailsAccordion = ({
 							<td className="px-4 py-3 text-[#5A615D]">Kunde-ID nr.</td>
 							<td className="px-4 py-3 text-[#0F1912]">
 								<Cell
-									value="Individual/SAP/SFI/MMS ID"
+									value={hoseDetails?.hoseLine?.customerId?.toString() || "—"}
 									placeholder="Kunde-ID (Individual/SAP/SFI/MMS)"
 									searchable
 									isEditMode={isEditMode}
@@ -39,7 +42,7 @@ export const OtherDetailsAccordion = ({
 							<td className="px-4 py-3 text-[#5A615D]">Utstyrsdel</td>
 							<td className="px-4 py-3 text-[#0F1912]">
 								<Cell
-									value="Lifeboat Davit Port"
+									value={hoseDetails?.hoseLine?.equipmentSubunit || "—"}
 									placeholder="Utstyrsdel"
 									isEditMode={isEditMode}
 								/>
@@ -61,7 +64,7 @@ export const OtherDetailsAccordion = ({
 							<td className="px-4 py-3 text-[#5A615D]">Tegningsnummer</td>
 							<td className="px-4 py-3 text-[#0F1912]">
 								<Cell
-									value="—"
+									value={customerData?.drawingNumber || "—"}
 									placeholder="Tegningsnummer"
 									isEditMode={isEditMode}
 								/>
@@ -72,7 +75,7 @@ export const OtherDetailsAccordion = ({
 							<td className="px-4 py-3 text-[#5A615D]">Pos.nr. på tegning</td>
 							<td className="px-4 py-3 text-[#0F1912]">
 								<Cell
-									value="—"
+									value={customerData?.posNumber || "—"}
 									placeholder="Pos.nr. på tegning"
 									isEditMode={isEditMode}
 								/>
@@ -85,7 +88,7 @@ export const OtherDetailsAccordion = ({
 							</td>
 							<td className="px-4 py-3 text-[#0F1912]">
 								<Cell
-									value="—"
+									value={customerData?.artNumber || "—"}
 									placeholder="Artikkelnummer i tegning"
 									isEditMode={isEditMode}
 								/>
@@ -96,7 +99,7 @@ export const OtherDetailsAccordion = ({
 							<td className="px-4 py-3 text-[#5A615D]">Pinpricket</td>
 							<td className="px-4 py-3 text-[#0F1912]">
 								<Cell
-									value="Yes"
+									value={hoseDetails?.hoseData?.pinPricked ? "Yes" : "No"}
 									placeholder="Yes/No"
 									isEditMode={isEditMode}
 								/>
@@ -109,7 +112,7 @@ export const OtherDetailsAccordion = ({
 							</td>
 							<td className="px-4 py-3 text-[#0F1912]">
 								<Cell
-									value="Internal, not exposed"
+									value={customerData?.pollutionExposure || "—"}
 									placeholder="Eksponering (f.eks. Internal, not exposed)"
 									isEditMode={isEditMode}
 								/>
@@ -120,7 +123,7 @@ export const OtherDetailsAccordion = ({
 							<td className="px-4 py-3 text-[#5A615D]">UV-eksponering</td>
 							<td className="px-4 py-3 text-[#0F1912]">
 								<Cell
-									value="Internal, not exposed"
+									value={customerData?.uxExposure || "—"}
 									placeholder="UV-eksponering"
 									isEditMode={isEditMode}
 								/>

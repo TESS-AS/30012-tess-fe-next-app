@@ -3,15 +3,17 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
+import type { GetAssetsResponse } from "@/types/assets.types";
 import { useTranslations } from "next-intl";
 
 import { Cell } from "./cell";
 
-export const AdditionalEquipmentAccordion = ({
-	isEditMode,
-}: {
+interface Props {
 	isEditMode: boolean;
-}) => {
+	hoseDetails: GetAssetsResponse | null;
+}
+
+export const AdditionalEquipmentAccordion = ({ isEditMode, hoseDetails }: Props) => {
 	const t = useTranslations("AdditionalEquipmentAccordion");
 	return (
 		<AccordionItem
@@ -78,9 +80,9 @@ export const AdditionalEquipmentAccordion = ({
 								<td className="px-4 py-3 text-[#5A615D]">Slangetrommel</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
+										value={hoseDetails?.hoseLine?.hoseReel || "—"}
 										placeholder="Slangetrommel"
 										isEditMode={isEditMode}
-										value="—"
 									/>
 								</td>
 							</tr>
@@ -88,9 +90,9 @@ export const AdditionalEquipmentAccordion = ({
 								<td className="px-4 py-3 text-[#5A615D]">Spiralvern</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
+										value={hoseDetails?.hoseLine?.spiralGuard || "—"}
 										placeholder="Spiralvern"
 										isEditMode={isEditMode}
-										value="—"
 									/>
 								</td>
 							</tr>
@@ -98,9 +100,9 @@ export const AdditionalEquipmentAccordion = ({
 								<td className="px-4 py-3 text-[#5A615D]">Slangebeskyttelse</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
+										value={hoseDetails?.hoseLine?.hoseProtection || "—"}
 										placeholder="Slangebeskyttelse"
 										isEditMode={isEditMode}
-										value="—"
 									/>
 								</td>
 							</tr>
@@ -163,9 +165,9 @@ export const AdditionalEquipmentAccordion = ({
 								<td className="px-4 py-3 text-[#5A615D]">Krok (Hookie)</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
+										value={hoseDetails?.hoseLine?.hookie || "—"}
 										placeholder="Krok (Hookie)"
 										isEditMode={isEditMode}
-										value="—"
 									/>
 								</td>
 							</tr>
@@ -175,9 +177,9 @@ export const AdditionalEquipmentAccordion = ({
 								</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
+										value={hoseDetails?.hoseLine?.whipcheck || "—"}
 										placeholder="Sikkerhetswire (whipcheck)"
 										isEditMode={isEditMode}
-										value="—"
 									/>
 								</td>
 							</tr>
@@ -187,9 +189,9 @@ export const AdditionalEquipmentAccordion = ({
 								</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
+										value={hoseDetails?.hoseLine?.breakaway || "—"}
 										placeholder="Nødkobling / bruddkobling"
 										isEditMode={isEditMode}
-										value="—"
 									/>
 								</td>
 							</tr>

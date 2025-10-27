@@ -3,15 +3,18 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
+import type { GetAssetsResponse } from "@/types/assets.types";
 import { useTranslations } from "next-intl";
 
 import { Cell } from "./cell";
 
-export const InspectionsAccordion = ({
-	isEditMode,
-}: {
+interface Props {
 	isEditMode: boolean;
-}) => {
+	hoseDetails: GetAssetsResponse | null;
+}
+
+export const InspectionsAccordion = ({ isEditMode, hoseDetails }: Props) => {
+	const maintenanceDetails = hoseDetails?.maintenanceDetails;
 	const t = useTranslations("InspectionsAccordion");
 	return (
 		<AccordionItem
@@ -27,7 +30,7 @@ export const InspectionsAccordion = ({
 							<td className="px-4 py-3 text-[#5A615D]">Tilstand</td>
 							<td className="px-4 py-3 text-[#0F1912]">
 								<Cell
-									value="In good/perfect condition"
+									value={maintenanceDetails?.hoseCondition || "—"}
 									placeholder="Beskriv tilstanden"
 									isEditMode={isEditMode}
 								/>
@@ -38,7 +41,7 @@ export const InspectionsAccordion = ({
 							<td className="px-4 py-3 text-[#5A615D]">Godkjent</td>
 							<td className="px-4 py-3 text-[#0F1912]">
 								<Cell
-									value="YES"
+									value={maintenanceDetails?.approved ? "YES" : "NO"}
 									placeholder="YES / NO"
 									isEditMode={isEditMode}
 								/>
@@ -49,7 +52,7 @@ export const InspectionsAccordion = ({
 							<td className="px-4 py-3 text-[#5A615D]">Kommentar</td>
 							<td className="px-4 py-3 text-[#0F1912]">
 								<Cell
-									value="Hose is a little short but not..."
+									value={maintenanceDetails?.inspectionComment || "—"}
 									placeholder="Legg til kommentar"
 									isEditMode={isEditMode}
 								/>
