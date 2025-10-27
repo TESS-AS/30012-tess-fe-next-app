@@ -35,6 +35,7 @@ import axiosClient from "@/services/axiosClient";
 import { getProductVariations } from "@/services/product.service";
 import { Category } from "@/types/categories.types";
 import { IProductSearch } from "@/types/search.types";
+import { ProfileUser } from "@/types/user.types";
 import {
 	BookOpen,
 	ChevronDown,
@@ -53,7 +54,7 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 
-export default function Header() {
+export default function Header({ profile }: { profile: ProfileUser | null }) {
 	const {
 		categories,
 		loading,
@@ -98,7 +99,6 @@ export default function Header() {
 		}));
 	}, [searchData?.categories]);
 
-	const { profile } = useProfile();
 	const { assortments } = useGetAssortments(!!profile);
 
 	useEffect(() => {
@@ -235,8 +235,8 @@ export default function Header() {
 								(pathname === "/" ||
 									pathname.startsWith("/en") ||
 									pathname.startsWith("/no"))
-									? "border-b-2 border-[#003D1A] font-bold rounded-none"
-									: "font-normal text-[#5A615D] hover:border-b-2 hover:border-[#003D1A] hover:rounded-none"
+									? "rounded-none border-b-2 border-[#003D1A] font-bold"
+									: "font-normal text-[#5A615D] hover:rounded-none hover:border-b-2 hover:border-[#003D1A]"
 							}`}
 							onClick={() => router.push("/")}>
 							E-handel
@@ -245,8 +245,8 @@ export default function Header() {
 							variant="ghost"
 							className={`text-md mb-2 px-0 pb-2 hover:bg-transparent ${
 								pathname.includes("/profile")
-									? "border-b-2 border-[#003D1A] font-bold rounded-none"
-									: "font-normal text-[#5A615D] hover:border-b-2 hover:border-[#003D1A] hover:rounded-none"
+									? "rounded-none border-b-2 border-[#003D1A] font-bold"
+									: "font-normal text-[#5A615D] hover:rounded-none hover:border-b-2 hover:border-[#003D1A]"
 							}`}
 							onClick={() =>
 								profile ? router.push("/profile") : setIsAuthOpen(true)

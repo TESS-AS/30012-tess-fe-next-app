@@ -4,6 +4,8 @@ import { SVGProps } from "react";
 import { LucideIcon } from "lucide-react";
 import { StaticImageData } from "next/image";
 
+import { ProfileUser } from "./user.types";
+
 export interface SubItem {
 	href: string;
 	label: string;
@@ -28,4 +30,5 @@ export interface SidebarNavProps {
 	onModeChange: (mode: "hose" | "ehandel") => void;
 	onTabChange: (tab: string) => void;
 	onCollapse: (isCollapsed: boolean) => void;
+	profile: ProfileUser;
 }

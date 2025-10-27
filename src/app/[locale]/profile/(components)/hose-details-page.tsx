@@ -4,8 +4,12 @@ import { useState } from "react";
 
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { useGetHoseDetails } from "@/hooks/useGetHoseDetails";
 import { useGetHoseHistory } from "@/hooks/useGetHoseHistory";
-import { useGetHoseSystems } from "@/hooks/useGetHoseSystems";
+import type { LocationNode } from "@/hooks/useGetHoseSystems";
+import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
+import { useAppContext } from "@/lib/appContext";
+import { postCartKit } from "@/services/carts.service";
 import {
 	ChevronRight,
 	Download,
@@ -16,6 +20,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { toast } from "react-toastify";
 
 import { AssetIdSelector } from "./asset-id-selector";
 import { HoseActionsDropdown } from "./hose-actions-dropdown";
@@ -32,53 +37,66 @@ import ProductDetailsModal from "./product-details-modal";
 interface Props {
 	hexagonId: string;
 	onBack: () => void;
+	hoseSystems: {
+		loading: boolean;
+		locations: LocationNode[];
+		selectedS1Code: string | undefined;
+	};
 }
 
-export default function HoseDetailsPage({ hexagonId, onBack }: Props) {
+export default function HoseDetailsPage({
+	hexagonId,
+	onBack,
+	hoseSystems,
+}: Props) {
 	const t = useTranslations("HoseDetailsPage");
+	const { data: profile } = usePunchoutProfile();
+	const { setIsCartChanging } = useAppContext();
 	const { hoseHistory, isLoading, error } = useGetHoseHistory(hexagonId);
-	const { locations, loading, selectedS1Code } = useGetHoseSystems();
+	const { hoseDetails, isLoading: isLoadingDetails } = useGetHoseDetails(
+		hexagonId,
+		profile?.defaultCustomerNumber,
+	);
+	const { locations, loading, selectedS1Code } = hoseSystems;
 
 	const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 	const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 	const [isEditMode, setIsEditMode] = useState(false);
-	const [selectedAssetId, setSelectedAssetId] = useState("25252525");
+	const [selectedAssetId, setSelectedAssetId] = useState(
+		hoseDetails?.hoseLine?.assetId?.toString() || "",
+	);
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-	const title = `${hexagonId} · 55220PSI SISTEMA CO2 x 700 mm`;
+	// Update selectedAssetId when hoseDetails loads
+	const title = hoseDetails?.hoseLine?.itemDescription
+		? `${hexagonId} · ${hoseDetails.hoseLine.itemDescription}`
+		: `${hexagonId}`;
 
 	const keyInfo = {
-		location: "Deck crane port side",
-		assetId: "a5454545 (gjeldende)",
-		images: 32,
+		location: hoseDetails?.hoseLine?.s2?.s2Name || "—",
+		assetId: hoseDetails?.hoseLine?.assetId?.toString() || "—",
+		images: 0, // TODO: Get from API when available
 		status: [
-			{ label: "Levert, aktiv", ok: true },
-			{ label: "Mangler opplysninger", ok: false },
+			{
+				label: hoseDetails?.hoseLine?.currentStatus || "Unknown",
+				ok: hoseDetails?.hoseLine?.currentStatus === "Processed",
+			},
+			{
+				label: hoseDetails?.hoseLine?.state || "UNKNOWN",
+				ok: hoseDetails?.hoseLine?.state === "GOOD",
+			},
 		],
 	};
 
-	const assetIdOptions = [
-		{
-			value: "25252525",
-			label: "000000000000000000025252525",
-			status: "Levert",
-		},
-		{
-			value: "25252826",
-			label: "000000000000000000025252826",
-			status: "Installert",
-		},
-		{
-			value: "25252827",
-			label: "000000000000000000025252827",
-			status: "Utrangert",
-		},
-		{
-			value: "25252828",
-			label: "000000000000000000025252828",
-			status: "Resirkulert",
-		},
-	];
+	const assetIdOptions = hoseDetails?.hoseLine?.assetId
+		? [
+				{
+					value: hoseDetails.hoseLine.assetId.toString(),
+					label: hoseDetails.hoseLine.assetId.toString().padStart(27, "0"),
+					status: hoseDetails.hoseLine.currentStatus || "Unknown",
+				},
+			]
+		: [];
 
 	const documents = [
 		{ id: "doc1", name: "Dokument 1" },
@@ -86,6 +104,36 @@ export default function HoseDetailsPage({ hexagonId, onBack }: Props) {
 	];
 
 	console.log(locations, "locations");
+
+	const handleAddToCart = async () => {
+		if (!hoseDetails?.hoseLine?.hexagonId || !profile) {
+			toast.error("Missing required information to add to cart");
+			return;
+		}
+
+		setIsAddingToCart(true);
+		try {
+			const items = [
+				{
+					hexagonId: parseInt(hoseDetails.hoseLine.hexagonId),
+					quantity: 1,
+					warehouseNumber: profile.defaultWarehouseNumber || "",
+					companyNumber: profile.defaultCompanyNumber || "",
+				},
+			];
+
+			await postCartKit(items);
+
+			setIsCartChanging(true);
+			setTimeout(() => setIsCartChanging(false), 100);
+
+			toast.success("Item added to cart successfully");
+		} catch (error) {
+			toast.error("Failed to add item to cart");
+		} finally {
+			setIsAddingToCart(false);
+		}
+	};
 
 	const toggleRow = (id: string) => {
 		setExpandedRows((prev) => {
@@ -203,11 +251,14 @@ export default function HoseDetailsPage({ hexagonId, onBack }: Props) {
 						<SquarePen /> {isEditMode ? t("cancel") : t("edit")}
 					</Button>
 					<Button
+						onClick={handleAddToCart}
+						disabled={isAddingToCart || !hoseDetails}
 						className="border-[#C1C4C2] text-[#0F1912]"
 						variant="outline">
-						<ShoppingCart /> {t("addToCart")}
+						<ShoppingCart /> {isAddingToCart ? t("adding") : t("addToCart")}
 					</Button>
 					<Button
+						disabled
 						className="border-[#C1C4C2] text-[#0F1912]"
 						variant="outline">
 						<Download /> {t("export")}
@@ -215,11 +266,7 @@ export default function HoseDetailsPage({ hexagonId, onBack }: Props) {
 					<HoseActionsDropdown
 						selectedCount={1}
 						isAddingToCart={isAddingToCart}
-						onAddToCart={() => {
-							setIsAddingToCart(true);
-							// Add to cart logic here
-							setTimeout(() => setIsAddingToCart(false), 1000);
-						}}
+						onAddToCart={handleAddToCart}
 						onContactSupport={() => console.log("Contact support")}
 						onReportReplacement={() => console.log("Report replacement")}
 						onDiscardEquipment={() => console.log("Discard equipment")}
@@ -245,18 +292,32 @@ export default function HoseDetailsPage({ hexagonId, onBack }: Props) {
 				<Accordion
 					type="multiple"
 					className="space-y-3">
-					<S2EquipmentsAccordion isEditMode={isEditMode} />
+					<S2EquipmentsAccordion
+						isEditMode={isEditMode}
+						hoseDetails={hoseDetails}
+					/>
 
 					<HoseAccordion
 						isEditMode={isEditMode}
 						setIsProductModalOpen={setIsProductModalOpen}
+						hoseDetails={hoseDetails}
+						isLoading={isLoadingDetails}
 					/>
 
-					<AdditionalEquipmentAccordion isEditMode={isEditMode} />
+					<AdditionalEquipmentAccordion
+						isEditMode={isEditMode}
+						hoseDetails={hoseDetails}
+					/>
 
-					<OtherDetailsAccordion isEditMode={isEditMode} />
+					<OtherDetailsAccordion
+						isEditMode={isEditMode}
+						hoseDetails={hoseDetails}
+					/>
 
-					<InspectionsAccordion isEditMode={isEditMode} />
+					<InspectionsAccordion
+						isEditMode={isEditMode}
+						hoseDetails={hoseDetails}
+					/>
 
 					<DocumentsAccordion
 						documents={documents}

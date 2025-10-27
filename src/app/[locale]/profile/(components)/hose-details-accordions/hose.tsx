@@ -11,6 +11,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import type { GetAssetsResponse } from "@/types/assets.types";
 import { Info } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -19,10 +20,21 @@ import { Cell } from "./cell";
 interface Props {
 	isEditMode: boolean;
 	setIsProductModalOpen: (isOpen: boolean) => void;
+	hoseDetails: GetAssetsResponse | null;
+	isLoading: boolean;
 }
 
-export const HoseAccordion = ({ isEditMode, setIsProductModalOpen }: Props) => {
+export const HoseAccordion = ({
+	isEditMode,
+	setIsProductModalOpen,
+	hoseDetails,
+	isLoading,
+}: Props) => {
 	const t = useTranslations("HoseAccordion");
+
+	const hoseData = hoseDetails?.hoseData;
+	const customerData = hoseDetails?.customerData;
+	const hoseLine = hoseDetails?.hoseLine;
 	return (
 		<AccordionItem
 			value="slange"
@@ -35,10 +47,10 @@ export const HoseAccordion = ({ isEditMode, setIsProductModalOpen }: Props) => {
 					<table className="w-1/2 border-r border-[#E8EAE9] text-sm">
 						<tbody>
 							<tr className="bg-[#F8F9F8]">
-								<td className="px-4 py-3 text-[#5A615D]">POS ID:</td>
+								<td className="px-4 py-3 text-[#5A615D]">{t("posId")}</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										value="2343052"
+										value={customerData?.posNumber || "—"}
 										searchable
 										isEditMode={isEditMode}
 									/>
@@ -46,52 +58,56 @@ export const HoseAccordion = ({ isEditMode, setIsProductModalOpen }: Props) => {
 							</tr>
 
 							<tr className="bg-white">
-								<td className="px-4 py-3 text-[#5A615D]">Beskrivelse</td>
+								<td className="px-4 py-3 text-[#5A615D]">{t("description")}</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										value="5256-08 × 1000 mm"
+										value={hoseLine?.itemDescription || "—"}
 										isEditMode={isEditMode}
 									/>
 								</td>
 							</tr>
 
 							<tr className="bg-[#F8F9F8]">
-								<td className="px-4 py-3 text-[#5A615D]">Lengde (mm)</td>
+								<td className="px-4 py-3 text-[#5A615D]">{t("lengthMm")}</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										value="1000"
+										value={
+											hoseData?.hoselengthMm
+												? String(hoseData.hoselengthMm)
+												: "—"
+										}
 										isEditMode={isEditMode}
 									/>
 								</td>
 							</tr>
 
 							<tr className="bg-white">
-								<td className="px-4 py-3 text-[#5A615D]">Arbeidstrykk (BAR)</td>
+								<td className="px-4 py-3 text-[#5A615D]">{t("workingPressureBar")}</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										value="12500-04"
+										value={hoseData?.wpBar ? String(hoseData.wpBar) : "—"}
 										isEditMode={isEditMode}
 									/>
 								</td>
 							</tr>
 
 							<tr className="bg-[#F8F9F8]">
-								<td className="px-4 py-3 text-[#5A615D]">Arbeidstrykk (PSI)</td>
+								<td className="px-4 py-3 text-[#5A615D]">{t("workingPressurePsi")}</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										value="—"
-										placeholder="PSI"
+										value={hoseData?.wpPsi ? String(hoseData.wpPsi) : "—"}
+										placeholder={t("placeholders.psi")}
 										isEditMode={isEditMode}
 									/>
 								</td>
 							</tr>
 
 							<tr className="bg-white">
-								<td className="px-4 py-3 text-[#5A615D]">Slangetype</td>
+								<td className="px-4 py-3 text-[#5A615D]">{t("hoseType")}</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									{isEditMode ? (
 										<Cell
-											value="5256-08"
+											value={hoseData?.hoseType?.hoseTypeName || "—"}
 											searchable
 											isEditMode={isEditMode}
 										/>
@@ -100,15 +116,23 @@ export const HoseAccordion = ({ isEditMode, setIsProductModalOpen }: Props) => {
 											<TooltipProvider>
 												<Tooltip>
 													<TooltipTrigger asChild>
-														<span className="cursor-default">5256-08</span>
+														<span className="cursor-default">
+															{hoseData?.hoseType?.hoseTypeName || "—"}
+														</span>
 													</TooltipTrigger>
 													<TooltipContent
 														side="top"
 														className="bg-[#1F2421] p-3 text-white">
 														<div className="space-y-1">
-															<p className="font-semibold">12500-04</p>
-															<p className="text-sm">TEFLONHOSE 1/4&quot;</p>
-															<p className="text-sm">TYPE AFX</p>
+															<p className="font-semibold">
+																{hoseData?.hoseType?.hoseTypeName || "—"}
+															</p>
+															<p className="text-sm">
+																{hoseData?.hoseDimension?.hoseDimension || "—"}
+															</p>
+															<p className="text-sm">
+																{hoseData?.type?.typeName || "—"}
+															</p>
 														</div>
 													</TooltipContent>
 												</Tooltip>
@@ -127,74 +151,50 @@ export const HoseAccordion = ({ isEditMode, setIsProductModalOpen }: Props) => {
 							</tr>
 
 							<tr className="bg-[#F8F9F8]">
-								<td className="px-4 py-3 text-[#5A615D]">Klasse</td>
+								<td className="px-4 py-3 text-[#5A615D]">{t("class")}</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										value="Høytrykksslange"
+										value={hoseData?.class?.className || "—"}
 										isEditMode={isEditMode}
 									/>
 								</td>
 							</tr>
 
 							<tr className="bg-white">
-								<td className="px-4 py-3 text-[#5A615D]">Hylse 1</td>
+								<td className="px-4 py-3 text-[#5A615D]">{t("ferrule1")}</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										value="65125-08"
+										value={hoseData?.ferrule1 || "—"}
 										isEditMode={isEditMode}
 									/>
 								</td>
 							</tr>
 
 							<tr className="bg-[#F8F9F8]">
-								<td className="px-4 py-3 text-[#5A615D]">Hylse 2</td>
+								<td className="px-4 py-3 text-[#5A615D]">{t("ferrule2")}</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										value="65125-08"
+										value={hoseData?.ferrule2 || "—"}
 										isEditMode={isEditMode}
 									/>
 								</td>
 							</tr>
 
 							<tr className="bg-white">
-								<td className="px-4 py-3 text-[#5A615D]">Innstikk 1</td>
+								<td className="px-4 py-3 text-[#5A615D]">{t("insert1")}</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										value="6505-08-08"
+										value={hoseData?.insert1 || "—"}
 										isEditMode={isEditMode}
 									/>
 								</td>
 							</tr>
 
 							<tr className="bg-[#F8F9F8]">
-								<td className="px-4 py-3 text-[#5A615D]">Innstikk 2</td>
+								<td className="px-4 py-3 text-[#5A615D]">{t("insert2")}</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										value="6501-08"
-										isEditMode={isEditMode}
-									/>
-								</td>
-							</tr>
-
-							<tr className="bg-white">
-								<td className="px-4 py-3 text-[#5A615D]">
-									Koblingsorientering
-								</td>
-								<td className="px-4 py-3 text-[#0F1912]">
-									<Cell
-										value="0°"
-										placeholder="0°"
-										isEditMode={isEditMode}
-									/>
-								</td>
-							</tr>
-
-							<tr className="bg-[#F8F9F8]">
-								<td className="px-4 py-3 text-[#5A615D]">Priklet</td>
-								<td className="px-4 py-3 text-[#0F1912]">
-									<Cell
-										value="Nei"
-										placeholder="Ja/Nei"
+										value={hoseData?.insert2 || "—"}
 										isEditMode={isEditMode}
 									/>
 								</td>
@@ -202,32 +202,60 @@ export const HoseAccordion = ({ isEditMode, setIsProductModalOpen }: Props) => {
 
 							<tr className="bg-white">
 								<td className="px-4 py-3 text-[#5A615D]">
-									Medium / temperatur
+									{t("couplingOrientation")}
 								</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										placeholder="Angi medium / temperatur"
+										value={
+											hoseData?.couplingOrientation?.orientationCode || "—"
+										}
+										placeholder={t("placeholders.angle")}
 										isEditMode={isEditMode}
 									/>
 								</td>
 							</tr>
 
 							<tr className="bg-[#F8F9F8]">
-								<td className="px-4 py-3 text-[#5A615D]">Funksjon</td>
+								<td className="px-4 py-3 text-[#5A615D]">{t("pinPricked")}</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										placeholder="Angi funksjon"
+										value={hoseData?.pinPricked ? "Ja" : "Nei"}
+										placeholder={t("placeholders.yesNo")}
 										isEditMode={isEditMode}
 									/>
 								</td>
 							</tr>
 
 							<tr className="bg-white">
-								<td className="px-4 py-3 text-[#5A615D]">Slangegaranti</td>
+								<td className="px-4 py-3 text-[#5A615D]">
+									{t("mediumTemperature")}
+								</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										value="Nei"
-										placeholder="Ja/Nei"
+										value={hoseData?.hoseMediumTemperature || ""}
+										placeholder={t("placeholders.mediumTemperature")}
+										isEditMode={isEditMode}
+									/>
+								</td>
+							</tr>
+
+							<tr className="bg-[#F8F9F8]">
+								<td className="px-4 py-3 text-[#5A615D]">{t("function")}</td>
+								<td className="px-4 py-3 text-[#0F1912]">
+									<Cell
+										value={hoseData?.hoseFunction || ""}
+										placeholder={t("placeholders.function")}
+										isEditMode={isEditMode}
+									/>
+								</td>
+							</tr>
+
+							<tr className="bg-white">
+								<td className="px-4 py-3 text-[#5A615D]">{t("hoseWarranty")}</td>
+								<td className="px-4 py-3 text-[#0F1912]">
+									<Cell
+										value={hoseData?.hoseWarranty === "YES" ? "Ja" : "Nei"}
+										placeholder={t("placeholders.yesNo")}
 										isEditMode={isEditMode}
 									/>
 								</td>
@@ -235,11 +263,12 @@ export const HoseAccordion = ({ isEditMode, setIsProductModalOpen }: Props) => {
 
 							<tr className="bg-[#F8F9F8]">
 								<td className="px-4 py-3 text-[#5A615D]">
-									Kommentar til garanti
+									{t("warrantyComment")}
 								</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										placeholder="Legg til kommentar"
+										value={hoseData?.hoseWarrantyComment || ""}
+										placeholder={t("placeholders.addComment")}
 										isEditMode={isEditMode}
 									/>
 								</td>
@@ -250,10 +279,11 @@ export const HoseAccordion = ({ isEditMode, setIsProductModalOpen }: Props) => {
 					<table className="w-1/2 text-sm">
 						<tbody>
 							<tr className="bg-[#F8F9F8]">
-								<td className="px-4 py-3 text-[#5A615D]">RFID</td>
+								<td className="px-4 py-3 text-[#5A615D]">{t("rfid")}</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										placeholder="RFID"
+										value={hoseLine?.rfid || ""}
+										placeholder={t("placeholders.rfid")}
 										isEditMode={isEditMode}
 									/>
 								</td>
@@ -261,11 +291,14 @@ export const HoseAccordion = ({ isEditMode, setIsProductModalOpen }: Props) => {
 
 							<tr className="bg-white">
 								<td className="px-4 py-3 text-[#5A615D]">
-									Generisk slangetype
+									{t("genericHoseType")}
 								</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										placeholder="Angi generisk slangetype"
+										value={
+											hoseLine?.genericHoseTypeId?.genericHoseTypeName || ""
+										}
+										placeholder={t("placeholders.genericHoseType")}
 										isEditMode={isEditMode}
 									/>
 								</td>
@@ -273,11 +306,11 @@ export const HoseAccordion = ({ isEditMode, setIsProductModalOpen }: Props) => {
 
 							<tr className="bg-[#F8F9F8]">
 								<td className="px-4 py-3 text-[#5A615D]">
-									Type kobling ende 1
+									{t("couplingTypeEnd1")}
 								</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										placeholder="Angi kobling (ende 1)"
+										placeholder={t("placeholders.couplingEnd1")}
 										isEditMode={isEditMode}
 									/>
 								</td>
@@ -285,31 +318,31 @@ export const HoseAccordion = ({ isEditMode, setIsProductModalOpen }: Props) => {
 
 							<tr className="bg-white">
 								<td className="px-4 py-3 text-[#5A615D]">
-									Generisk dim ende 1
+									{t("genericDimEnd1")}
 								</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										placeholder="Dimensjon (ende 1)"
+										placeholder={t("placeholders.dimensionEnd1")}
 										isEditMode={isEditMode}
 									/>
 								</td>
 							</tr>
 
 							<tr className="bg-[#F8F9F8]">
-								<td className="px-4 py-3 text-[#5A615D]">Kjønn ende 1</td>
+								<td className="px-4 py-3 text-[#5A615D]">{t("genderEnd1")}</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										placeholder="Hann/ Hunn"
+										placeholder={t("placeholders.gender")}
 										isEditMode={isEditMode}
 									/>
 								</td>
 							</tr>
 
 							<tr className="bg-white">
-								<td className="px-4 py-3 text-[#5A615D]">Vinkel ende 1</td>
+								<td className="px-4 py-3 text-[#5A615D]">{t("angleEnd1")}</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										placeholder="Vinkel (ende 1)"
+										placeholder={t("placeholders.angleEnd1")}
 										isEditMode={isEditMode}
 									/>
 								</td>
@@ -317,55 +350,11 @@ export const HoseAccordion = ({ isEditMode, setIsProductModalOpen }: Props) => {
 
 							<tr className="bg-[#F8F9F8]">
 								<td className="px-4 py-3 text-[#5A615D]">
-									Materialkvalitet ende 1
+									{t("materialQualityEnd1")}
 								</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										placeholder="Materiale (ende 1)"
-										isEditMode={isEditMode}
-									/>
-								</td>
-							</tr>
-
-							<tr className="bg-white">
-								<td className="px-4 py-3 text-[#5A615D]">
-									Type kobling ende 2
-								</td>
-								<td className="px-4 py-3 text-[#0F1912]">
-									<Cell
-										placeholder="Angi kobling (ende 2)"
-										isEditMode={isEditMode}
-									/>
-								</td>
-							</tr>
-
-							<tr className="bg-[#F8F9F8]">
-								<td className="px-4 py-3 text-[#5A615D]">
-									Generisk dim ende 2
-								</td>
-								<td className="px-4 py-3 text-[#0F1912]">
-									<Cell
-										placeholder="Dimensjon (ende 2)"
-										isEditMode={isEditMode}
-									/>
-								</td>
-							</tr>
-
-							<tr className="bg-white">
-								<td className="px-4 py-3 text-[#5A615D]">Kjønn ende 2</td>
-								<td className="px-4 py-3 text-[#0F1912]">
-									<Cell
-										placeholder="Hann/ Hunn"
-										isEditMode={isEditMode}
-									/>
-								</td>
-							</tr>
-
-							<tr className="bg-[#F8F9F8]">
-								<td className="px-4 py-3 text-[#5A615D]">Vinkel ende 2</td>
-								<td className="px-4 py-3 text-[#0F1912]">
-									<Cell
-										placeholder="Vinkel (ende 2)"
+										placeholder={t("placeholders.materialEnd1")}
 										isEditMode={isEditMode}
 									/>
 								</td>
@@ -373,11 +362,11 @@ export const HoseAccordion = ({ isEditMode, setIsProductModalOpen }: Props) => {
 
 							<tr className="bg-white">
 								<td className="px-4 py-3 text-[#5A615D]">
-									Materialkvalitet ende 2
+									{t("couplingTypeEnd2")}
 								</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										placeholder="Materiale (ende 2)"
+										placeholder={t("placeholders.couplingEnd2")}
 										isEditMode={isEditMode}
 									/>
 								</td>
@@ -385,11 +374,31 @@ export const HoseAccordion = ({ isEditMode, setIsProductModalOpen }: Props) => {
 
 							<tr className="bg-[#F8F9F8]">
 								<td className="px-4 py-3 text-[#5A615D]">
-									Generell kommentar (PTC)
+									{t("genericDimEnd2")}
 								</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										placeholder="Legg til kommentar"
+										placeholder={t("placeholders.dimensionEnd2")}
+										isEditMode={isEditMode}
+									/>
+								</td>
+							</tr>
+
+							<tr className="bg-white">
+								<td className="px-4 py-3 text-[#5A615D]">{t("genderEnd2")}</td>
+								<td className="px-4 py-3 text-[#0F1912]">
+									<Cell
+										placeholder={t("placeholders.gender")}
+										isEditMode={isEditMode}
+									/>
+								</td>
+							</tr>
+
+							<tr className="bg-[#F8F9F8]">
+								<td className="px-4 py-3 text-[#5A615D]">{t("angleEnd2")}</td>
+								<td className="px-4 py-3 text-[#0F1912]">
+									<Cell
+										placeholder={t("placeholders.angleEnd2")}
 										isEditMode={isEditMode}
 									/>
 								</td>
@@ -397,11 +406,11 @@ export const HoseAccordion = ({ isEditMode, setIsProductModalOpen }: Props) => {
 
 							<tr className="bg-white">
 								<td className="px-4 py-3 text-[#5A615D]">
-									Kommentar ende 1 (PTC)
+									{t("materialQualityEnd2")}
 								</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										placeholder="Kommentar for ende 1"
+										placeholder={t("placeholders.materialEnd2")}
 										isEditMode={isEditMode}
 									/>
 								</td>
@@ -409,21 +418,24 @@ export const HoseAccordion = ({ isEditMode, setIsProductModalOpen }: Props) => {
 
 							<tr className="bg-[#F8F9F8]">
 								<td className="px-4 py-3 text-[#5A615D]">
-									Kommentar ende 2 (PTC)
+									{t("generalCommentPtc")}
 								</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										placeholder="Kommentar for ende 2"
+										value={hoseLine?.generalCommentPtc || ""}
+										placeholder={t("placeholders.addComment")}
 										isEditMode={isEditMode}
 									/>
 								</td>
 							</tr>
 
 							<tr className="bg-white">
-								<td className="px-4 py-3 text-[#5A615D]">Tilleggskommentar</td>
+								<td className="px-4 py-3 text-[#5A615D]">
+									{t("commentEnd1Ptc")}
+								</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										placeholder="Tilleggsinfo"
+										placeholder={t("placeholders.commentEnd1")}
 										isEditMode={isEditMode}
 									/>
 								</td>
@@ -431,11 +443,35 @@ export const HoseAccordion = ({ isEditMode, setIsProductModalOpen }: Props) => {
 
 							<tr className="bg-[#F8F9F8]">
 								<td className="px-4 py-3 text-[#5A615D]">
-									Opprinnelig slangekommentar
+									{t("commentEnd2Ptc")}
 								</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
-										placeholder="Opprinnelig kommentar"
+										placeholder={t("placeholders.commentEnd2")}
+										isEditMode={isEditMode}
+									/>
+								</td>
+							</tr>
+
+							<tr className="bg-white">
+								<td className="px-4 py-3 text-[#5A615D]">{t("additionalComment")}</td>
+								<td className="px-4 py-3 text-[#0F1912]">
+									<Cell
+										value={hoseLine?.additionalComment || ""}
+										placeholder={t("placeholders.additionalInfo")}
+										isEditMode={isEditMode}
+									/>
+								</td>
+							</tr>
+
+							<tr className="bg-[#F8F9F8]">
+								<td className="px-4 py-3 text-[#5A615D]">
+									{t("originalHoseComment")}
+								</td>
+								<td className="px-4 py-3 text-[#0F1912]">
+									<Cell
+										value={hoseLine?.originalHoseComment || ""}
+										placeholder={t("placeholders.originalComment")}
 										isEditMode={isEditMode}
 									/>
 								</td>

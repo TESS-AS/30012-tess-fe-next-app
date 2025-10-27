@@ -25,12 +25,12 @@ export function SidebarNav({
 	onModeChange,
 	onTabChange,
 	onCollapse,
+	profile,
 }: SidebarNavProps) {
 	const t = useTranslations("SidebarNav");
 	const pathname = usePathname();
 	const [expandedItems, setExpandedItems] = useState<string[]>([]);
 	const [isCollapsed, setIsCollapsed] = useState(false);
-	const { data: profile } = useGetProfileData();
 
 	const toggleCollapse = () => {
 		const newCollapsed = !isCollapsed;

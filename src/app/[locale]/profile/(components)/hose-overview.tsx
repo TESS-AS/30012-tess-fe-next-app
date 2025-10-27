@@ -7,16 +7,24 @@ import {
 	AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { useGetHoseSystems } from "@/hooks/useGetHoseSystems";
+import type { LocationNode } from "@/hooks/useGetHoseSystems";
 import { useHoseInspectionCounts } from "@/hooks/useHoseInspectionCounts";
 import { Separator } from "@radix-ui/react-select";
 import { ChevronRight, Ellipsis, MapPin, Settings } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
-const HoseOverview = () => {
+interface Props {
+	hoseSystems: {
+		loading: boolean;
+		locations: LocationNode[];
+		selectedS1Code: string | undefined;
+	};
+}
+
+const HoseOverview = ({ hoseSystems }: Props) => {
 	const t = useTranslations("HoseOverview");
-	const { locations, loading, selectedS1Code } = useGetHoseSystems();
+	const { locations, loading, selectedS1Code } = hoseSystems;
 
 	const { counts } = useHoseInspectionCounts(selectedS1Code);
 

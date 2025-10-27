@@ -1,31 +1,23 @@
-import { useEffect, useState } from "react";
-
 import axiosClient from "@/services/axiosClient";
 import { ProfileUser } from "@/types/user.types";
-import { useSession } from "next-auth/react";
+import { useQuery } from "@tanstack/react-query";
+
+export const profileKeys = {
+	all: ["profile"] as const,
+	detail: () => [...profileKeys.all, "detail"] as const,
+};
 
 export function useGetProfileData() {
-	const [data, setData] = useState<ProfileUser | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<unknown>(null);
-
-	const { data: session, status } = useSession();
-
-	const fetchUserData = async () => {
-		try {
-			setIsLoading(true);
+	const { data, isLoading, error } = useQuery({
+		queryKey: profileKeys.detail(),
+		queryFn: async () => {
 			const response = await axiosClient.get<ProfileUser[]>("/user");
-			setData(response.data[0]);
-		} catch (err) {
-			setError(err);
-		} finally {
-			setIsLoading(false);
-		}
-	};
+			return response.data[0] || null;
+		},
+		staleTime: 5 * 60 * 1000, // 5 minutes
+		refetchOnMount: false,
+		refetchOnWindowFocus: false,
+	});
 
-	useEffect(() => {
-		fetchUserData();
-	}, []);
-
-	return { data, isLoading, error };
+	return { data: data || null, isLoading, error };
 }
