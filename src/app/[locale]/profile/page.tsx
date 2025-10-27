@@ -47,7 +47,7 @@ export default function ProfilePage() {
 			SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
 		) {
 			setActiveMode("hose");
-			setActiveTab("hose-oversikt");
+			setActiveTab("hose-orders");
 		} else {
 			setActiveMode("ehandel");
 			setActiveTab("mine-bestillinger");
@@ -59,7 +59,7 @@ export default function ProfilePage() {
 		if (mode === "ehandel") {
 			setActiveTab("mine-bestillinger");
 		} else if (mode === "hose") {
-			setActiveTab("hose-oversikt");
+			setActiveTab("hose-orders");
 		}
 	};
 	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -236,57 +236,57 @@ export default function ProfilePage() {
 											},
 										]
 									: [
-											{
-												href: "hose-oversikt",
-												label: t("ProfilePage.sidebar.overview"),
-												icon: "/icons/profile/navbar/overview.svg",
-											},
+											// {
+											// 	href: "hose-oversikt",
+											// 	label: t("ProfilePage.sidebar.overview"),
+											// 	icon: "/icons/profile/navbar/overview.svg",
+											// },
 											{
 												href: "hose-orders",
 												label: t("ProfilePage.sidebar.hosesEquipment"),
 												icon: "/icons/profile/navbar/list.svg",
 											},
-											{
-												href: "hose-inspections",
-												label: t("ProfilePage.sidebar.inspections"),
-												icon: "/icons/profile/navbar/inspectioner.svg",
-											},
-											{
-												href: "hose-replacement",
-												label: t("ProfilePage.sidebar.hoseReplacement"),
-												icon: "/icons/profile/navbar/hose-changer.svg",
-											},
-											{
-												href: "hose-risk-class",
-												label: t("ProfilePage.sidebar.riskClass"),
-												icon: "/icons/profile/navbar/risk-classes.svg",
-											},
-											{
-												href: "hose-requests",
-												label: t("ProfilePage.sidebar.requests"),
-												icon: "/icons/profile/navbar/requirments.svg",
-											},
-											{
-												href: "hose-activities",
-												label: t("ProfilePage.sidebar.recentActivities"),
-												icon: "/icons/profile/navbar/activities.svg",
-											},
-											{
-												href: "hose-settings",
-												label: t("ProfilePage.sidebar.settings"),
-												icon: "/icons/profile/navbar/settings.svg",
-											},
-											{
-												href: "support",
-												label: t("ProfilePage.sidebar.support"),
-												icon: "/icons/profile/navbar/support.svg",
-											},
-											{
-												href: "logout",
-												label: t("ProfilePage.sidebar.logout"),
-												icon: LogOut,
-												variant: "logout",
-											},
+											// {
+											// 	href: "hose-inspections",
+											// 	label: t("ProfilePage.sidebar.inspections"),
+											// 	icon: "/icons/profile/navbar/inspectioner.svg",
+											// },
+											// {
+											// 	href: "hose-replacement",
+											// 	label: t("ProfilePage.sidebar.hoseReplacement"),
+											// 	icon: "/icons/profile/navbar/hose-changer.svg",
+											// },
+											// {
+											// 	href: "hose-risk-class",
+											// 	label: t("ProfilePage.sidebar.riskClass"),
+											// 	icon: "/icons/profile/navbar/risk-classes.svg",
+											// },
+											// {
+											// 	href: "hose-requests",
+											// 	label: t("ProfilePage.sidebar.requests"),
+											// 	icon: "/icons/profile/navbar/requirments.svg",
+											// },
+											// {
+											// 	href: "hose-activities",
+											// 	label: t("ProfilePage.sidebar.recentActivities"),
+											// 	icon: "/icons/profile/navbar/activities.svg",
+											// },
+											// {
+											// 	href: "hose-settings",
+											// 	label: t("ProfilePage.sidebar.settings"),
+											// 	icon: "/icons/profile/navbar/settings.svg",
+											// },
+											// {
+											// 	href: "support",
+											// 	label: t("ProfilePage.sidebar.support"),
+											// 	icon: "/icons/profile/navbar/support.svg",
+											// },
+											// {
+											// 	href: "logout",
+											// 	label: t("ProfilePage.sidebar.logout"),
+											// 	icon: LogOut,
+											// 	variant: "logout",
+											// },
 										]
 							}
 						/>
