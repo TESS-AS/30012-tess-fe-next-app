@@ -613,6 +613,7 @@
 		}
 	},
 	"HoseDetailsPage": {
+		"backToList": "Back to list",
 		"hoseEquipment": "Hose/Equipment",
 		"keyInformation": "Key Information",
 		"images": "Images",

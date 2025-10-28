@@ -614,6 +614,7 @@
 		}
 	},
 	"HoseDetailsPage": {
+		"backToList": "Tilbake til listen",
 		"hoseEquipment": "Slange/utstyr",
 		"keyInformation": "N\u00f8kkel informasjon",
 		"images": "Bilder",
