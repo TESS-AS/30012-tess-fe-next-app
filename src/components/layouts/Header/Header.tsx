@@ -229,19 +229,22 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 						/>
 					</Link>
 					<div className="flex items-center gap-8">
-						<Button
-							variant="ghost"
-							className={`text-md mb-2 rounded-none px-0 pb-2 hover:bg-transparent ${
-								!pathname.includes("/profile") &&
-								(pathname === "/" ||
-									pathname.startsWith("/en") ||
-									pathname.startsWith("/no"))
-									? "rounded-none border-b-2 border-[#003D1A] font-bold"
-									: "font-normal text-[#5A615D] hover:rounded-none hover:border-b-2 hover:border-[#003D1A]"
-							}`}
-							onClick={() => router.push("/")}>
-							E-handel
-						</Button>
+						{profile?.defaultCustomerNumber !==
+							SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
+							<Button
+								variant="ghost"
+								className={`text-md mb-2 rounded-none px-0 pb-2 hover:bg-transparent ${
+									!pathname.includes("/profile") &&
+									(pathname === "/" ||
+										pathname.startsWith("/en") ||
+										pathname.startsWith("/no"))
+										? "rounded-none border-b-2 border-[#003D1A] font-bold"
+										: "font-normal text-[#5A615D] hover:rounded-none hover:border-b-2 hover:border-[#003D1A]"
+								}`}
+								onClick={() => router.push("/")}>
+								E-handel
+							</Button>
+						)}
 						<Button
 							variant="ghost"
 							className={`text-md mb-2 px-0 pb-2 hover:bg-transparent ${
@@ -479,17 +482,22 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 									<div className="text-[14px]">{profile.email}</div>
 								</div>
 								<DropdownMenuSeparator />
-								<DropdownMenuItem
-									className="text-gray-700"
-									onClick={() => router.push("/profile")}>
-									Gå til din side
-								</DropdownMenuItem>
-								<DropdownMenuItem className="text-gray-700">
-									Endre innstillinger
-								</DropdownMenuItem>
-								<DropdownMenuSeparator />
-								<CustomerNumberSwitcher profile={profile} />
-								<DropdownMenuSeparator />
+								{profile?.defaultCustomerNumber !==
+									SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
+									<>
+										<DropdownMenuItem
+											className="text-gray-700"
+											onClick={() => router.push("/profile")}>
+											Gå til din side
+										</DropdownMenuItem>
+										<DropdownMenuItem className="text-gray-700">
+											Endre innstillinger
+										</DropdownMenuItem>
+										<DropdownMenuSeparator />
+										<CustomerNumberSwitcher profile={profile} />
+										<DropdownMenuSeparator />
+									</>
+								)}
 								<DropdownMenuItem
 									onClick={handleLogout}
 									className="text-red-700">

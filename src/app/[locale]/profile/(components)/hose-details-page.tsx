@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useGetHoseDetails } from "@/hooks/useGetHoseDetails";
 import { useGetHoseHistory } from "@/hooks/useGetHoseHistory";
 import type { LocationNode } from "@/hooks/useGetHoseSystems";
@@ -11,6 +12,7 @@ import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useAppContext } from "@/lib/appContext";
 import { postCartKit } from "@/services/carts.service";
 import {
+	ChevronLeft,
 	ChevronRight,
 	Download,
 	Ellipsis,
@@ -150,6 +152,16 @@ export default function HoseDetailsPage({
 	return (
 		<div className="mx-auto max-w-[1200px] space-y-4">
 			<div className="rounded-lg bg-white shadow">
+				<div className="border-b border-[#E8EAE9] px-6 py-3">
+					<Button
+						variant="ghost"
+						onClick={onBack}
+						className="gap-2 px-0 text-[#0F1912] hover:bg-transparent hover:text-[#003D1A]">
+						<ChevronLeft className="h-5 w-5" />
+						{t("backToList")}
+					</Button>
+				</div>
+
 				<div className="flex items-stretch justify-between gap-4 px-6 py-4">
 					<div className="flex flex-1 flex-col border-r border-[#E8EAE9] pr-4">
 						<h3 className="mb-2 font-bold text-[#0F1912]">
@@ -245,6 +257,10 @@ export default function HoseDetailsPage({
 				</div>
 				<div className="flex justify-end gap-4 rounded-b-lg bg-[#F8F9F8] px-6 py-3">
 					<Button
+						disabled={
+							profile?.defaultCustomerNumber ===
+							SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+						}
 						onClick={() => setIsEditMode(!isEditMode)}
 						className="border-[#C1C4C2] text-[#0F1912]"
 						variant="outline">
@@ -319,22 +335,27 @@ export default function HoseDetailsPage({
 						hoseDetails={hoseDetails}
 					/>
 
-					<DocumentsAccordion
-						documents={documents}
-						isEditMode={isEditMode}
-					/>
+					{profile?.defaultCustomerNumber !==
+						SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
+						<>
+							<DocumentsAccordion
+								documents={documents}
+								isEditMode={isEditMode}
+							/>
 
-					<StructureAccordion
-						isEditMode={isEditMode}
-						s1Codes={locations}
-					/>
+							<StructureAccordion
+								isEditMode={isEditMode}
+								s1Codes={locations}
+							/>
 
-					<HistoricAccordion
-						historyData={hoseHistory}
-						expandedRows={expandedRows}
-						toggleRow={toggleRow}
-						isEditMode={isEditMode}
-					/>
+							<HistoricAccordion
+								historyData={hoseHistory}
+								expandedRows={expandedRows}
+								toggleRow={toggleRow}
+								isEditMode={isEditMode}
+							/>
+						</>
+					)}
 				</Accordion>
 			</div>
 
