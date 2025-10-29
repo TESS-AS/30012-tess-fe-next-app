@@ -37,11 +37,13 @@ export default function AuthDialog({
 	};
 
 	useEffect(() => {
-		if (status === "authenticated" && session) {
+		if (isOpen && status === "authenticated" && session) {
 			closeDialog();
-			router.push("/");
+			setTimeout(() => {
+				router.push("/");
+			}, 100);
 		}
-	}, [status, session]);
+	}, [isOpen, status, session]);
 
 	const handleSignIn = async (provider: string) => {
 		setAuthenticatingProvider(provider);
