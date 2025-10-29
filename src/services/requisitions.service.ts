@@ -22,11 +22,13 @@ export interface RequisitionResponse {
 
 export const getRequisition = async (
 	customerNumber: string,
+	status?: string,
 ): Promise<RequisitionResponse[]> => {
 	try {
-		const response = await axiosInstance.get(
-			`/requisition/getRequisition/${customerNumber}`,
-		);
+		const url = `/requisition/getRequisition/${customerNumber}`;
+		const response = await axiosInstance.get(url, {
+			params: status ? { status } : {},
+		});
 		return response.data;
 	} catch (error) {
 		console.error("Error getting requisition:", error);

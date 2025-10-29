@@ -217,6 +217,8 @@ export const getHoseInspection = async ({
 export const getHoseHistory = async (
 	hexagonId: string,
 ): Promise<GetHoseHistory> => {
-	const response = await axiosClient.get(`/asset/getHoseHistory`);
+	const response = await axiosClient.get(`/asset/getHoseHistory`, {
+		params: { hexagonId },
+	});
 	return response.data;
 };

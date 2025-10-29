@@ -27,7 +27,7 @@ export interface Rekvisisjon {
 
 const mapApiStatus = (apiStatus: string): Status => {
 	switch (apiStatus.toLowerCase()) {
-		case "pending":
+		case "awaiting":
 			return "Venter godkjenning";
 		case "approved":
 			return "Godkjent";
@@ -38,7 +38,22 @@ const mapApiStatus = (apiStatus: string): Status => {
 	}
 };
 
-export const useRequisitions = (customerNumber: string) => {
+const mapStatusToApi = (status: string): string | undefined => {
+	switch (status) {
+		case "Alle":
+			return undefined;
+		case "Venter godkjenning":
+			return "awaiting";
+		case "Godkjent":
+			return "approved";
+		case "Avvist":
+			return "rejected";
+		default:
+			return undefined;
+	}
+};
+
+export const useRequisitions = (customerNumber: string, status?: string) => {
 	const [requisitions, setRequisitions] = useState<Rekvisisjon[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -46,7 +61,8 @@ export const useRequisitions = (customerNumber: string) => {
 	const getRequisitions = async () => {
 		setLoading(true);
 		try {
-			const response = await getRequisition(customerNumber);
+			const apiStatus = mapStatusToApi(status || "Alle");
+			const response = await getRequisition(customerNumber, apiStatus);
 			const transformedRequisitions = response.map((req) => ({
 				orderId: req.requisitionId.toString(),
 				bestiller: req.description,
@@ -74,7 +90,7 @@ export const useRequisitions = (customerNumber: string) => {
 
 	useEffect(() => {
 		getRequisitions();
-	}, [customerNumber]);
+	}, [customerNumber, status]);
 
 	return { requisitions, loading, error, getRequisitions };
 };
