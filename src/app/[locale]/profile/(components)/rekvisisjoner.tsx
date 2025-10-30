@@ -77,6 +77,7 @@ export function Rekvisisjoner() {
 
 	const { requisitions, loading, error } = useRequisitions(
 		profile?.defaultCustomerNumber ?? "110667",
+		selectedStatus,
 	);
 
 	const getRadioStatusStyle = (status: Status) => {
@@ -183,9 +184,7 @@ export function Rekvisisjoner() {
 			<div className="flex items-baseline justify-between">
 				<div className="flex items-center">
 					<h1 className="text-2xl font-semibold">{t("title")}</h1>
-					<p className="ml-4 text-[#5A615D]">
-						{t("subtitle")}
-					</p>
+					<p className="ml-4 text-[#5A615D]">{t("subtitle")}</p>
 				</div>
 			</div>
 
@@ -317,7 +316,9 @@ export function Rekvisisjoner() {
 								height={20}
 							/>
 							<span>
-								{t("itemsAddedToCart", { count: selectedOrder?.items?.length || 0 })}
+								{t("itemsAddedToCart", {
+									count: selectedOrder?.items?.length || 0,
+								})}
 							</span>
 						</ModalTitle>
 					</ModalHeader>
