@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
-
 import { getRequisition } from "@/services/requisitions.service";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
+import { useQuery } from "@tanstack/react-query";
 
 type Status = "Alle" | "Venter godkjenning" | "Godkjent" | "Avvist";
 
@@ -15,6 +14,7 @@ interface OrderItem {
 export interface Rekvisisjon {
 	orderId: string;
 	bestiller: string;
+	fullName: string;
 	opprettet: string;
 	pris: string;
 	status: Status;
@@ -29,7 +29,7 @@ const mapApiStatus = (apiStatus: string): Status => {
 	switch (apiStatus.toLowerCase()) {
 		case "awaiting":
 			return "Venter godkjenning";
-		case "approved":
+		case "closed":
 			return "Godkjent";
 		case "rejected":
 			return "Avvist";
@@ -53,21 +53,27 @@ const mapStatusToApi = (status: string): string | undefined => {
 	}
 };
 
-export const useRequisitions = (customerNumber: string, status?: string) => {
-	const [requisitions, setRequisitions] = useState<Rekvisisjon[]>([]);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
+export const requisitionsKeys = {
+	all: ["requisitions"] as const,
+	lists: () => [...requisitionsKeys.all, "list"] as const,
+	list: (customerNumber: string, status?: string) =>
+		[...requisitionsKeys.lists(), customerNumber, status] as const,
+};
 
-	const getRequisitions = async () => {
-		if (!customerNumber) return;
-		
-		setLoading(true);
-		try {
+export const useRequisitions = (customerNumber: string, status?: string) => {
+	const {
+		data: requisitions = [],
+		isLoading: loading,
+		error,
+		refetch: getRequisitions,
+	} = useQuery({
+		queryKey: requisitionsKeys.list(customerNumber, status),
+		queryFn: async () => {
 			const apiStatus = mapStatusToApi(status || "Alle");
 			const response = await getRequisition(customerNumber, apiStatus);
 			const transformedRequisitions = response.map((req) => ({
 				orderId: req.requisitionId.toString(),
-				bestiller: req.description,
+				bestiller: req.fullName,
 				opprettet: req.requestDate,
 				pris: formatNorwegianCurrency(req.totalPrice) || "N/A",
 				status: mapApiStatus(req.status),
@@ -82,17 +88,12 @@ export const useRequisitions = (customerNumber: string, status?: string) => {
 				requestTime: req.requestTime,
 				description: req.description,
 			}));
-			setRequisitions(transformedRequisitions);
-		} catch (error) {
-			setError(error as string);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	useEffect(() => {
-		getRequisitions();
-	}, [customerNumber, status]);
+			return transformedRequisitions;
+		},
+		enabled: !!customerNumber,
+		staleTime: 1000 * 60 * 5,
+		gcTime: 1000 * 60 * 10,
+	});
 
 	return { requisitions, loading, error, getRequisitions };
 };

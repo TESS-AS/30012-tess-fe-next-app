@@ -8,6 +8,7 @@ export interface RequisitionResponse {
 	description: string;
 	status: string;
 	totalPrice: number;
+	fullName: string;
 	requisitionLines: [
 		{
 			requisitionLineId: number;
