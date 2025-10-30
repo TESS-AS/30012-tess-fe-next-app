@@ -8,10 +8,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useRequisitions } from "@/hooks/useRequisitions";
 import { cn, formatDate } from "@/lib/utils";
+import { addToCart } from "@/services/carts.service";
 import { Label } from "@radix-ui/react-label";
 import {
 	Search,
-	X,
 	ChevronDown as ChevronDownIcon,
 	CircleX,
 	CircleCheck,
@@ -186,7 +186,7 @@ export function Rekvisisjoner() {
 			),
 		},
 	];
-
+	console.log(selectedOrder, "selectedOrder");
 	return (
 		<div className="space-y-6">
 			<div className="flex items-baseline justify-between">
@@ -366,8 +366,17 @@ export function Rekvisisjoner() {
 						<Button
 							variant="default"
 							className="w-full bg-[#1C6D2C] text-white hover:bg-[#164B1F]"
-							onClick={() => {
+							onClick={async () => {
 								setApprovalModalOpen(false);
+
+								// const response = await addToCart({
+								// 	productNumber: selectedOrder?.items[0].itemNumber,
+								// 	itemNumber: selectedOrder?.items[0].itemNumber,
+								// 	quantity: selectedOrder?.items[0].quantity,
+								// 	warehouseNumber: selectedOrder?.items[0].warehouseNumber,
+								// 	companyNumber:
+								// 		profile?.defaultCompanyNumber.toString() || "1",
+								// });
 								router.push("/cart");
 							}}>
 							{t("goToCart")}
