@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
@@ -74,11 +74,21 @@ export function Rekvisisjoner() {
 	const [approvalModalOpen, setApprovalModalOpen] = useState(false);
 	const [selectedOrder, setSelectedOrder] = useState<Rekvisisjon | null>(null);
 	const [showAllItems, setShowAllItems] = useState(false);
+	const [allRequisitionsCache, setAllRequisitionsCache] = useState<
+		Rekvisisjon[]
+	>([]);
 
 	const { requisitions, loading, error } = useRequisitions(
 		profile?.defaultCustomerNumber ?? "110667",
 		selectedStatus,
 	);
+
+	// Cache all requisitions when "Alle" is selected for accurate counts
+	useEffect(() => {
+		if (selectedStatus === "Alle" && requisitions.length > 0) {
+			setAllRequisitionsCache(requisitions);
+		}
+	}, [selectedStatus, requisitions]);
 
 	const getRadioStatusStyle = (status: Status) => {
 		switch (status) {
@@ -100,9 +110,7 @@ export function Rekvisisjoner() {
 				.toLowerCase()
 				.includes(searchQuery.toLowerCase()) ||
 			rekvisisjon.description.toLowerCase().includes(searchQuery.toLowerCase());
-		const matchesStatus =
-			selectedStatus === "Alle" || rekvisisjon.status === selectedStatus;
-		return matchesSearch && matchesStatus;
+		return matchesSearch;
 	});
 
 	const columns = [
@@ -211,7 +219,11 @@ export function Rekvisisjoner() {
 							onValueChange={setSelectedStatus}
 							className="flex flex-wrap gap-3">
 							{statuses.map((status) => {
-								const count = getStatusCount(status, requisitions);
+								const dataForCount =
+									allRequisitionsCache.length > 0
+										? allRequisitionsCache
+										: requisitions;
+								const count = getStatusCount(status, dataForCount);
 								const badgeStyle = getRadioStatusStyle(status);
 								return (
 									<div
@@ -257,6 +269,7 @@ export function Rekvisisjoner() {
 					itemsPerPage={10}
 					totalItems={filteredRekvisisjoner.length}
 					onPageChange={setCurrentPage}
+					isLoading={loading}
 					isExpandable
 					expandableContent={(rekvisisjon) => {
 						return (
