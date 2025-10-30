@@ -49,7 +49,7 @@ export function SidebarNav({
 	return (
 		<nav
 			className={cn(
-				"flex h-[600px] flex-col rounded-lg bg-white transition-all duration-300",
+				"flex h-[650px] flex-col rounded-lg bg-white transition-all duration-300",
 				isCollapsed ? "w-20" : "min-w-[350px]",
 			)}>
 			<div className="flex h-full gap-1">

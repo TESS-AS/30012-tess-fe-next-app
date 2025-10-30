@@ -267,7 +267,6 @@ export function HosesAndEquipments({
 	const [printOpen, setPrintOpen] = useState(false);
 	const [printTagsOpen, setPrintTagsOpen] = useState(false);
 	const [showAllItems, setShowAllItems] = useState(false);
-	const [isNavigating, setIsNavigating] = useState(false);
 	const router = useRouter();
 
 	const handleBulkAction = async (action: string): Promise<void> => {
@@ -296,18 +295,13 @@ export function HosesAndEquipments({
 					}));
 
 					await postCartKit(cartItems);
-					setCartModalOpen(true);
 					toast.success("Elementer lagt til i handlekurven");
-					setIsNavigating(true);
+					setCartModalOpen(true);
 					setIsCartChanging(!isCartChanging);
-					router.push("/cart");
 				} catch (error) {
 					toast.error("Kunne ikke legge til elementer i handlekurven");
 				} finally {
 					setIsAddingToCart(false);
-					setSelectedRows([]);
-					setAllAcrossPages(false);
-					setDeselectedIds(new Set());
 				}
 			};
 
@@ -525,14 +519,21 @@ export function HosesAndEquipments({
 		<>
 			<CartAddedModal
 				open={cartModalOpen}
-				onOpenChange={setCartModalOpen}
+				onOpenChange={(open) => {
+					setCartModalOpen(open);
+					setSelectedRows([]);
+					setAllAcrossPages(false);
+					setDeselectedIds(new Set());
+				}}
 				selectedItems={selectedItems}
 				showAllItems={showAllItems}
 				setShowAllItems={setShowAllItems}
-				isNavigating={isNavigating}
 				onConfirm={async () => {
 					setCartModalOpen(false);
 					router.push("/cart");
+					setSelectedRows([]);
+					setAllAcrossPages(false);
+					setDeselectedIds(new Set());
 				}}
 			/>
 

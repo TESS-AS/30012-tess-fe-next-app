@@ -16,7 +16,6 @@ export interface CartAddedModalProps {
 	selectedItems: Item[];
 	showAllItems: boolean;
 	setShowAllItems: (val: boolean) => void;
-	isNavigating: boolean;
 	onConfirm: () => Promise<void> | void;
 }
 
@@ -26,7 +25,6 @@ export function CartAddedModal({
 	selectedItems,
 	showAllItems,
 	setShowAllItems,
-	isNavigating,
 	onConfirm,
 }: CartAddedModalProps) {
 	const t = useTranslations("CartAddedModal");
@@ -46,7 +44,8 @@ export function CartAddedModal({
 						/>
 						<span>
 							{selectedItems.length}{" "}
-							{selectedItems.length === 1 ? t("item") : t("items")} {t("addedToCart")}
+							{selectedItems.length === 1 ? t("item") : t("items")}{" "}
+							{t("addedToCart")}
 						</span>
 					</ModalTitle>
 				</ModalHeader>
@@ -54,7 +53,9 @@ export function CartAddedModal({
 				<div className="space-y-4 py-4">
 					<div className="space-y-2">
 						{selectedItems.length === 0 ? (
-							<div className="text-sm text-gray-600">{t("noItemsSelected")}</div>
+							<div className="text-sm text-gray-600">
+								{t("noItemsSelected")}
+							</div>
 						) : (
 							<>
 								{selectedItems
@@ -91,16 +92,8 @@ export function CartAddedModal({
 					<Button
 						variant="default"
 						className="w-full bg-[#1C6D2C] text-white hover:bg-[#164B1F]"
-						disabled={isNavigating}
 						onClick={onConfirm}>
-						{isNavigating ? (
-							<>
-								<span className="mr-2">{t("navigatingToCart")}</span>
-								<Loader2 className="h-4 w-4 animate-spin" />
-							</>
-						) : (
-							t("goToCart")
-						)}
+						{t("goToCart")}
 					</Button>
 				</div>
 			</div>

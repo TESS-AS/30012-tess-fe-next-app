@@ -59,6 +59,8 @@ export const useRequisitions = (customerNumber: string, status?: string) => {
 	const [error, setError] = useState<string | null>(null);
 
 	const getRequisitions = async () => {
+		if (!customerNumber) return;
+		
 		setLoading(true);
 		try {
 			const apiStatus = mapStatusToApi(status || "Alle");
