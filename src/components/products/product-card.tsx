@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { IProduct } from "@/types/product.types";
@@ -31,7 +32,7 @@ export function ProductCard({
 	return (
 		<div
 			className={cn(
-				"group bg-background cursor-pointer overflow-hidden rounded-lg border transition-all hover:shadow-md",
+				"group bg-background cursor-pointer overflow-hidden rounded-sm border border-gray-200 transition-all hover:shadow-md",
 				variant === "default" ? "p-4" : "p-2",
 				viewLayout === "list" && "flex flex-row",
 				className,
@@ -70,8 +71,13 @@ export function ProductCard({
 					variant === "default" ? "mt-4" : "mt-2",
 				)}>
 				<h3 className="min-h-[30px] text-sm font-medium">{productName}</h3>
-				<div className="text-muted-foreground mt-2 flex items-center justify-between text-sm">
-					<p>{productNumber}</p>
+				<div className="text-muted-foreground mt-2 flex items-center justify-end text-sm">
+					<Button
+						variant="outlineGrey"
+						size="sm"
+						className="h-[35px] !text-sm">
+						Vis mer
+					</Button>
 				</div>
 				{viewLayout === "list" && shortDesc && (
 					<div className="text-muted-foreground mt-2 flex items-center justify-between text-sm">
