@@ -9,6 +9,7 @@ import { ProductStockStatus } from "@/components/products/product-stock-status";
 import { ProductDetailsTable } from "@/components/products/product-table-details";
 import { ProductVariantInfo } from "@/components/products/product-variant-info";
 import { RelatedProducts } from "@/components/products/related-products";
+import { Separator } from "@/components/ui/separator";
 import { useGetVariantInfo } from "@/hooks/useGetVariantInfo";
 import { useTranslations } from "next-intl";
 
@@ -44,8 +45,10 @@ export function ProductPageClient({
 		? productData.mediaId
 		: [productData.mediaId];
 
+	console.log(productData, "dataaa");
+
 	return (
-		<div className="container mx-auto space-y-12 px-4 py-8">
+		<div className="container mx-auto space-y-12 px-4 pt-8 pb-0">
 			<ProductBreadcrumbs
 				segment={segment}
 				productName={
@@ -53,7 +56,7 @@ export function ProductPageClient({
 				}
 			/>
 
-			<div className="mb-5 grid grid-cols-12 gap-x-8 gap-y-2">
+			<div className="mb-0 grid grid-cols-12 gap-x-8 gap-y-2">
 				<div className="col-span-12 md:col-span-4">
 					<ProductGallery images={productImages} />
 				</div>
@@ -75,11 +78,13 @@ export function ProductPageClient({
 					<ProductStockStatus
 						name={
 							locale === "en"
-								? productData.productNameEn
-								: productData.productName
+								? productData.applicationEn
+								: productData.applicationNo
 						}
 						availability="På hovedlager"
 					/>
+
+					<Separator className="mt-3" />
 
 					<ProductVariantInfo
 						locale={locale}
@@ -89,6 +94,7 @@ export function ProductPageClient({
 						variantData={variantData}
 						isLoading={isLoading}
 						productNumber={productData.productNumber}
+						itemVariantCount={productData.itemVariantCount}
 					/>
 				</div>
 			</div>
