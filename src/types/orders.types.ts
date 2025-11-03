@@ -78,3 +78,19 @@ export interface OrderResponse {
 }
 
 export type PaymentMethod = "card" | "paypal" | "invoice";
+
+export interface UserOrderResponse {
+	orderNumber: string;
+	status: string;
+	order_id: number;
+	requestDate: string;
+	requestTime: string;
+	totalOrderPrice: number;
+	orderLines: Array<{
+		lineId: number;
+		itemNumber: string;
+		quantity: number;
+		unitPris: number;
+		totalLinePrice: number;
+	}>;
+}
