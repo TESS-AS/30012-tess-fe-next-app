@@ -7,15 +7,15 @@ import { DataTable } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { OrderFilters, useGetOrders } from "@/hooks/useGetOrders";
+import { useUserOrders } from "@/hooks/useUserOrders";
 import { cn, formatDate } from "@/lib/utils";
-import { OrderItems } from "@/types/orderHistory.types";
+import { UserOrderResponse } from "@/types/orders.types";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import { Search } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
-type Order = OrderItems & {
+type Order = UserOrderResponse & {
 	orderId: string;
 };
 
@@ -89,34 +89,25 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedStatus, setSelectedStatus] = useState<string>(t("all"));
 	const [currentPage, setCurrentPage] = useState(1);
-	const [filters, setFilters] = useState<OrderFilters>({
-		orderNumber: undefined,
-		invoiceNumber: "",
-		fromDate: "",
-		toDate: "",
-		status: undefined,
-	});
 
 	const ITEMS_PER_PAGE = 10;
 
-	const {
-		data: orders,
-		isLoading,
-		totalPages,
-		totalItems,
-	} = useGetOrders(currentPage, ITEMS_PER_PAGE, filters);
+	const { orders, isLoading } = useUserOrders(currentPage, ITEMS_PER_PAGE);
 
-	useEffect(() => {
-		const orderNumber = searchQuery
-			? parseInt(searchQuery.replace(/#/g, ""))
-			: undefined;
-		setFilters((prev) => ({
-			...prev,
-			orderNumber: orderNumber || undefined,
-			status:
-				selectedStatus === "Alle" ? undefined : getStatusNumber(selectedStatus),
+	// Client-side filtering and mapping
+	const filteredOrders = orders
+		.filter((order) => {
+			const matchesSearch = searchQuery
+				? order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase())
+				: true;
+			const matchesStatus =
+				selectedStatus === t("all") || order.status === selectedStatus;
+			return matchesSearch && matchesStatus;
+		})
+		.map((order) => ({
+			...order,
+			orderId: order.order_id.toString(),
 		}));
-	}, [searchQuery, selectedStatus]);
 
 	const statuses = [
 		t("all"),
@@ -166,11 +157,6 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
 		}
 	};
 
-	const filteredOrders = (orders || []).map((order) => ({
-		...order,
-		orderId: order.id.toString(),
-	}));
-
 	const columns = [
 		{
 			key: "id",
@@ -182,14 +168,30 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
 			key: "date",
 			header: t("orderDate").toUpperCase(),
 			cell: (order: Order) => {
-				return <span>{formatDate(order.date)}</span>;
+				const dateTime = `${order.requestDate}T${order.requestTime}`;
+				const date = new Date(dateTime);
+				const formattedDate = date.toLocaleDateString("no-NO", {
+					day: "2-digit",
+					month: "2-digit",
+					year: "numeric",
+				});
+				const formattedTime = date.toLocaleTimeString("no-NO", {
+					hour: "2-digit",
+					minute: "2-digit",
+				});
+				return (
+					<span>
+						{formattedDate} {formattedTime}
+					</span>
+				);
 			},
 			sortable: true,
 		},
 		{
 			key: "total",
 			header: t("price").toUpperCase(),
-			cell: (order: Order) => formatNorwegianCurrency(order.total ?? 0),
+			cell: (order: Order) =>
+				formatNorwegianCurrency(order.totalOrderPrice ?? 0),
 			sortable: true,
 		},
 		{
@@ -270,8 +272,8 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
 						data={filteredOrders}
 						columns={columns}
 						currentPage={currentPage}
-						totalPages={totalPages}
-						totalItems={totalItems}
+						totalPages={Math.ceil(filteredOrders.length / ITEMS_PER_PAGE)}
+						totalItems={filteredOrders.length}
 						itemsPerPage={ITEMS_PER_PAGE}
 						onPageChange={(page) => {
 							setCurrentPage(page);

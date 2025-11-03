@@ -1,6 +1,7 @@
-import { Order } from "@/types/orders.types";
+import { Order, OrderLines, UserOrderResponse } from "@/types/orders.types";
 
 import axiosInstance from "./axiosClient";
+import { OrderItems } from "@/types/orderHistory.types";
 
 interface SalesOrderResponse {
 	data?: any; //TODO: Add response type
@@ -45,6 +46,62 @@ export async function getPostalCode(
 		return response.data;
 	} catch (error) {
 		console.error("Error fetching postal code:", error);
+		throw error;
+	}
+}
+
+export interface OrderHistoryResponse {
+	data: OrderItems[];
+	meta: {
+		page: number;
+		pageSize: number;
+		totalPages: number;
+		totalItems: number;
+	};
+}
+
+export async function getOrderHistory(
+	customerNumber: string,
+	search: string,
+	page: number,
+	pageSize: number,
+): Promise<OrderHistoryResponse> {
+	try {
+		const params: Record<string, any> = {
+			page,
+			pageSize,
+		};
+
+		if (search && search.trim()) {
+			params.search = search;
+		}
+
+		const response = await axiosInstance.get(
+			`/searchOrderHistory/${customerNumber}`,
+			{
+				params,
+			},
+		);
+		return response.data;
+	} catch (error) {
+		console.error("Error fetching order history:", error);
+		throw error;
+	}
+}
+
+export async function getUserOrders(
+	page: number,
+	pageSize: number,
+): Promise<UserOrderResponse[]> {
+	try {
+		const params: Record<string, any> = {
+			page,
+			pageSize,
+		};
+		const response = await axiosInstance.get("/userOrder", { params });
+		return response.data;
+	} catch (error) {
+		console.error("Error fetching user orders:", error);
 		throw error;
 	}
 }

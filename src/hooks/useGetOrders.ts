@@ -1,5 +1,4 @@
-// useGetOrders.ts
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import axiosClient from "@/services/axiosClient";
@@ -27,68 +26,74 @@ export interface OrderFilters {
 	status?: number;
 }
 
+export const ordersKeys = {
+	all: ["orders"] as const,
+	lists: () => [...ordersKeys.all, "list"] as const,
+	list: (
+		customerNumber: string,
+		page: number,
+		perPage: number,
+		filters: OrderFilters,
+	) => [...ordersKeys.lists(), customerNumber, page, perPage, filters] as const,
+};
+
 export function useGetOrders(
 	page: number,
 	perPage: number = 10,
 	filters: OrderFilters = {},
+	enabled: boolean = true,
 ) {
 	const { data: profile, isLoading: isProfileLoading } = useGetProfileData();
-	const [data, setData] = useState<OrderItems[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [totalPages, setTotalPages] = useState(1);
-	const [totalItems, setTotalItems] = useState(0);
+	const customerNumber = profile?.customerNumbers?.[0] || "";
 
-	useEffect(() => {
-		if (isProfileLoading || !profile?.customerNumbers?.length) return;
+	const { data, isLoading, error, refetch } = useQuery({
+		queryKey: ordersKeys.list(customerNumber, page, perPage, filters),
+		queryFn: async () => {
+			const params = {
+				page,
+				pageSize: perPage,
+				ordernumber: filters.orderNumber,
+				invoicenumber: filters.invoiceNumber,
+				fromDate: filters.fromDate,
+				toDate: filters.toDate,
+				status: filters.status,
+			};
 
-		const customerNumber = profile.customerNumbers[0];
-		setIsLoading(true);
+			const response = await axiosClient.get<OrdersApiResponse>(
+				`/order/${customerNumber}`,
+				{ params },
+			);
 
-		const params = {
-			page,
-			pageSize: perPage,
-			ordernumber: filters.orderNumber,
-			invoicenumber: filters.invoiceNumber,
-			fromDate: filters.fromDate,
-			toDate: filters.toDate,
-			status: filters.status,
-		};
-
-		axiosClient
-			.get<OrdersApiResponse>(`/order/${customerNumber}`, { params })
-			.then((res) => {
-				const mapped: OrderItems[] = res.data.data.map((order) => {
-					const maxStatus = Math.max(
-						...order.orderLines.map((line) => line.lineStatus),
-					);
-					return {
-						id: order.orderId,
-						orderNumber: order.orderNumber,
-						date: order.date,
-						status: mapLineStatusToOrderStatus(maxStatus),
-						total: order.sum,
-						items: order.orderLines,
-					};
-				});
-				setData(mapped);
-				setTotalPages(res.data.meta.totalPages);
-				setTotalItems(res.data.meta.totalItems);
-			})
-			.catch((err) => {
-				console.error("Failed to fetch orders:", err);
-				setData([]);
-				setTotalPages(0);
-				setTotalItems(0);
-			})
-			.finally(() => {
-				setIsLoading(false);
+			const mapped: OrderItems[] = response.data.data.map((order) => {
+				const maxStatus = Math.max(
+					...order.orderLines.map((line) => line.lineStatus),
+				);
+				return {
+					order_id: order.order_id,
+					orderNumber: order.orderNumber,
+					date: order.date,
+					status: mapLineStatusToOrderStatus(maxStatus),
+					total: order.sum,
+					items: order.orderLines,
+				};
 			});
-	}, [page, perPage, profile, isProfileLoading, filters]);
+
+			return {
+				data: mapped,
+				meta: response.data.meta,
+			};
+		},
+		enabled: enabled && !!customerNumber && !isProfileLoading,
+		staleTime: 1000 * 60 * 5, // 5 minutes
+		gcTime: 1000 * 60 * 10, // 10 minutes
+	});
 
 	return {
-		data,
-		isLoading,
-		totalPages,
-		totalItems,
+		data: data?.data || [],
+		isLoading: isLoading || isProfileLoading,
+		totalPages: data?.meta.totalPages || 0,
+		totalItems: data?.meta.totalItems || 0,
+		error,
+		refetch,
 	};
 }

@@ -75,7 +75,7 @@ export function getStatusBadgeProps(status: OrderStatus) {
 }
 
 export interface OrderItems {
-	id: number;
+	order_id: number;
 	orderNumber: string;
 	date: string;
 	status: OrderStatus;
@@ -95,7 +95,7 @@ export interface OrderLine {
 }
 
 export interface OrderResponse {
-	orderId: number;
+	order_id: number;
 	orderNumber: string;
 	date: string;
 	customerNumber: string;
