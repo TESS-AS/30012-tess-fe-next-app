@@ -3,20 +3,13 @@
 import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
 import { addToCart, getCart } from "@/services/carts.service";
 import { calculateItemPrice } from "@/services/product.service";
 import { useProductTabs } from "@/stores/useProductTabs";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
-import { ShoppingCart, Loader2 } from "lucide-react";
+import { ShoppingCart, Loader2, Files, Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
@@ -28,6 +21,7 @@ interface ProductVariantInfoProps {
 	variantData: any;
 	isLoading: boolean;
 	productNumber: string;
+	itemVariantCount?: number;
 }
 
 export function ProductVariantInfo({
@@ -36,6 +30,7 @@ export function ProductVariantInfo({
 	variantData,
 	isLoading,
 	productNumber,
+	itemVariantCount,
 }: ProductVariantInfoProps) {
 	const t = useTranslations("Product");
 	const { isCartChanging, setIsCartChanging } = useAppContext();
@@ -45,6 +40,8 @@ export function ProductVariantInfo({
 	const [loadingPrice, setLoadingPrice] = useState(false);
 	const [adding, setAdding] = useState(false);
 	const { setActiveTab } = useProductTabs();
+	const [showAllAttributes, setShowAllAttributes] = useState(false);
+	const [copied, setCopied] = useState(false);
 
 	const handleSeeAllVariants = () => {
 		setActiveTab("variants");
@@ -52,7 +49,25 @@ export function ProductVariantInfo({
 		target?.scrollIntoView({ behavior: "smooth" });
 	};
 
+	console.log(variantData, "variantDataaa");
+
 	const { data: profile } = useGetProfileData();
+
+	// Get stock balance for main warehouse
+	const mainWarehouseBalance = profile?.defaultWarehouseNumber
+		? variantData?.stockByWarehouse?.find(
+				(w: any) => w.warehouse_number === profile.defaultWarehouseNumber,
+			)?.balance ?? null
+		: null;
+
+	const handleCopyGtin = () => {
+		const gtin =
+			variantData?.itemTechnicalSpec?.gtin ||
+			variantData?.itemTechnicalSpec?.GTIN;
+		navigator.clipboard.writeText(gtin);
+		setCopied(true);
+		setTimeout(() => setCopied(false), 1000);
+	};
 
 	const attributes =
 		variantData?.itemTechnicalSpec?.itemAttributes?.filter((attr: any) =>
@@ -157,111 +172,143 @@ export function ProductVariantInfo({
 	};
 
 	return (
-		<div className="space-y-3">
-			<div className="space-y-3 rounded-md border border-gray-200 bg-gray-50 p-4">
-				<h3 className="flex items-center justify-between text-lg font-semibold text-[#0F1912]">
-					{t("variantTitle")}
-					<button
-						type="button"
-						onClick={handleSeeAllVariants}
-						className="cursor-pointer text-sm font-medium text-green-600 hover:underline">
-						{t("seeAllVariants")}
-					</button>
-				</h3>
-
-				{isLoading && <p className="text-gray-500">{t("loadingVariant")}</p>}
-
-				{!isLoading && variantData && (
-					<>
-						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
-							{attributes.map((attr: any) => (
-								<div
-									key={attr.attribute_identifier}
-									className="space-y-2">
-									<label className="block text-sm font-medium text-gray-900">
-										{attr.name ||
-											attr.name_key_language ||
-											t("unknownAttribute")}
-									</label>
-
-									<Select
-										disabled
-										defaultValue={attr.value_def}>
-										<SelectTrigger className="w-full">
-											<SelectValue placeholder="-" />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value={attr.value_def}>
-												{attr.value_def}
-											</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
-							))}
-						</div>
-
-						<div className="flex items-center justify-between rounded-md border bg-white p-3">
-							<div>
-								<p className="text-md font-normal">
-									{t("itemNumber")}: {variantData.itemTechnicalSpec.itemNumber}
-								</p>
-								<p className="text-md font-normal text-[#5A615D]">
-									{t("inStockDelivery")}
-								</p>
-							</div>
-
-							<div className="text-right">
-								<p className="text-md font-semibold text-[#009640]">
-									{loadingPrice
-										? t("loadingPrice")
-										: price !== null
-											? formatNorwegianCurrency(price)
-											: "-"}
-								</p>
-								<p className="text-md text-[#5A615D]">
-									{t("excludingVat")}
-								</p>{" "}
-							</div>
-						</div>
-					</>
-				)}
+		<div className="space-y-4 py-4">
+			<div className="mb-2 flex items-center justify-between">
+				<div className="flex items-center gap-2">
+					<h3 className="text-lg font-semibold text-[#0F1912]">
+						Produktvariant
+					</h3>
+					{mainWarehouseBalance !== null && mainWarehouseBalance > 0 ? (
+						<span className="inline-flex items-center gap-1 rounded-sm bg-[#DCF7E0] px-5 py-0.5 text-sm font-medium text-green-800">
+							<Check className="h-4 w-4 text-green-800" />
+							{mainWarehouseBalance} stk på hovedlager
+						</span>
+					) : (
+						<span className="inline-flex items-center gap-1 rounded-sm bg-[#DCF7E0] px-5 py-0.5 text-sm font-medium text-green-800">
+							<Check className="h-4 w-4 text-green-800" />
+							På hovedlager
+						</span>
+					)}
+				</div>
+				<button
+					type="button"
+					onClick={handleSeeAllVariants}
+					className="text-sm font-medium text-green-600 hover:underline">
+					{t("seeAllVariants")}{" "}
+					{itemVariantCount ? `${itemVariantCount} variants` : ""} →
+				</button>
 			</div>
 
-			<div className="flex items-center gap-2 rounded-md border border-gray-200 p-4">
-				<Button
-					className="h-[32px] w-[34px] border-[#C1C4C2] text-[#0F1912]"
-					variant="outline"
-					size="icon"
-					onClick={() => setQuantity((q) => Math.max(1, q - 1))}>
-					-
-				</Button>
-				<span className="flex h-[32px] w-[34px] items-center justify-center border border-gray-100 text-center">
-					{quantity}
-				</span>
-				<Button
-					variant="outline"
-					className="h-[32px] w-[34px] border-[#C1C4C2] text-[#0F1912]"
-					size="icon"
-					onClick={() => setQuantity((q) => q + 1)}>
-					+
-				</Button>
-
-				<Button
-					disabled={adding || !selectedItemNumber}
-					className="ml-4 flex flex-1 items-center justify-center gap-2 bg-green-600 text-white hover:bg-green-700 disabled:opacity-60"
-					onClick={handleAddToCart}>
-					{adding ? (
-						<>
-							<Loader2 className="h-4 w-4 animate-spin" />
-							{t("adding")}
-						</>
-					) : (
-						<>
-							<ShoppingCart className="h-4 w-4" />
-							{t("addToCart")}
-						</>
+			<div className="mb-0 flex flex-col gap-1">
+				<p className="text-md font-light text-gray-500">
+					<span className="font-semibold text-black">{t("itemNumber")}:</span>{" "}
+					{variantData?.itemTechnicalSpec?.itemNumber}
+				</p>
+				<div className="relative">
+					<button
+						type="button"
+						onClick={handleCopyGtin}
+						className="text-md inline-flex items-center gap-1.5 font-light text-gray-500">
+						<span className="font-semibold text-black">GTIN:</span>
+						<span>
+							{variantData?.itemTechnicalSpec?.gtin ||
+								variantData?.itemTechnicalSpec?.GTIN ||
+								"-"}
+						</span>
+						<Files className="h-4 w-4 cursor-pointer text-gray-500" />
+					</button>
+					{copied && (
+						<div className="absolute top-full left-0 mt-1 rounded-md bg-gray-800 px-2 py-1 text-xs text-white shadow">
+							{t("copied")}
+						</div>
 					)}
-				</Button>
+				</div>
+				<p className="text-md font-semibold text-[#0F1912]">Attributer:</p>
+			</div>
+			<div className="mt-2 flex items-end justify-between gap-6">
+				<div className="flex flex-1 flex-col gap-2">
+					<div className="flex max-w-[350px] flex-wrap gap-2">
+						{(showAllAttributes ? attributes : attributes.slice(0, 3)).map(
+							(attr: any) => (
+								<span
+									key={attr.attribute_identifier}
+									className="rounded-md border border-gray-300 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-500">
+									{`${attr.name}: ${attr.value_def}`}
+								</span>
+							),
+						)}
+
+						{!showAllAttributes && attributes.length > 3 && (
+							<button
+								type="button"
+								onClick={() => setShowAllAttributes(true)}
+								className="rounded-md border border-green-600 bg-white px-4 py-1 text-xs font-medium text-green-600 hover:bg-green-50">
+								+{attributes.length - 3} ›
+							</button>
+						)}
+
+						{showAllAttributes && attributes.length > 3 && (
+							<button
+								type="button"
+								onClick={() => setShowAllAttributes(false)}
+								className="rounded-md border border-green-600 bg-white px-4 py-1 text-xs font-medium text-green-600 hover:bg-green-50">
+								‹
+							</button>
+						)}
+					</div>
+				</div>
+
+				<div className="flex items-center gap-4">
+					<div className="flex items-center gap-2">
+						<Button
+							className="h-8 w-8 border-[#C1C4C2] text-[#0F1912]"
+							variant="outline"
+							size="icon"
+							onClick={() => setQuantity((q) => Math.max(1, q - 1))}>
+							-
+						</Button>
+
+						<span className="flex h-8 w-8 items-center justify-center border border-gray-200 px-5 text-sm">
+							{quantity}
+						</span>
+
+						<Button
+							className="h-8 w-8 border-[#C1C4C2] text-[#0F1912]"
+							variant="outline"
+							size="icon"
+							onClick={() => setQuantity((q) => q + 1)}>
+							+
+						</Button>
+					</div>
+
+					<Button
+						disabled={adding || !selectedItemNumber}
+						className="rounded-md bg-green-600 px-4 text-white hover:bg-green-700 disabled:opacity-60"
+						onClick={handleAddToCart}>
+						{adding ? (
+							<>
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								{t("adding")}
+							</>
+						) : (
+							<>
+								<ShoppingCart className="mr-2 h-4 w-4" />
+								{t("addToCart")}
+							</>
+						)}
+					</Button>
+
+					<div className="ml-6 text-right">
+						<p className="truncate text-xl leading-none font-semibold">
+							{loadingPrice
+								? t("loadingPrice")
+								: price !== null
+									? formatNorwegianCurrency(price)
+									: "-"}
+						</p>
+						<p className="text-md text-left font-light">{t("excludingVat")}</p>
+					</div>
+				</div>
 			</div>
 		</div>
 	);

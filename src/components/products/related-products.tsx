@@ -1,6 +1,5 @@
 "use client";
 
-import { Separator } from "@/components/ui/separator";
 import { IProduct } from "@/types/product.types";
 import { IRelatedProductRaw } from "@/types/product.types"; // new type
 import { useKeenSlider } from "keen-slider/react";
@@ -67,58 +66,65 @@ export function RelatedProducts({ products, category }: RelatedProductsProps) {
 	}
 
 	return (
-		<section className="mt-8 rounded-lg border border-gray-200 bg-white p-6">
-			<h2 className="pb-3 text-2xl font-semibold text-[#0F1912]">
-				{t("Product.relatedProducts")}
-			</h2>
-			<Separator />
+		<div className="relative right-1/2 left-1/2 mt-8 -mr-[50vw] -ml-[50vw] w-screen bg-gray-50 py-14 pb-16">
+			<section className="container mx-auto px-4">
+				<div className="mb-6 flex items-center justify-between">
+					<h2 className="text-2xl font-semibold text-[#0F1912]">
+						{t("Product.relatedProducts")}
+					</h2>
 
-			{isEmpty ? (
-				<p className="mt-4 text-sm text-gray-500">
-					{t("Product.noRelatedProducts")}
-				</p>
-			) : (
-				<div className="relative mt-6 flex items-center px-6">
-					<Button
-						variant="outline"
-						size="icon"
-						className="absolute top-1/2 -left-4 z-10 -translate-y-1/2 rounded-md shadow-md"
-						onClick={() => instanceRef.current?.prev()}
-						disabled={currentSlide === 0}>
-						<ChevronLeft className="h-3 w-3" />
-					</Button>
+					{!isEmpty && (
+						<div className="flex items-center gap-2">
+							<Button
+								variant="ghost"
+								size="icon"
+								className="h-8 w-8 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-900 hover:text-white disabled:opacity-50"
+								onClick={() => instanceRef.current?.prev()}
+								disabled={currentSlide === 0}>
+								<ChevronLeft className="h-4 w-4" />
+							</Button>
 
-					<div
-						ref={sliderRef}
-						className="keen-slider w-full">
-						{normalizedProducts.map((product) => (
-							<div
-								key={product.productNumber}
-								className="keen-slider__slide">
-								<Link href={product.productNumber}>
-									<ProductCard
-										{...product}
-										variant="compact"
-									/>
-								</Link>
-							</div>
-						))}
-					</div>
-
-					<Button
-						variant="outline"
-						size="icon"
-						className="absolute top-1/2 -right-4 z-10 -translate-y-1/2 rounded-md shadow-md"
-						onClick={() => instanceRef.current?.next()}
-						disabled={
-							currentSlide >=
-							(instanceRef.current?.track.details.slides.length ?? 1) -
-								getPerView()
-						}>
-						<ChevronRight className="h-2 w-2" />
-					</Button>
+							<Button
+								variant="ghost"
+								size="icon"
+								className="h-8 w-8 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-900 hover:text-white disabled:opacity-50"
+								onClick={() => instanceRef.current?.next()}
+								disabled={
+									currentSlide >=
+									(instanceRef.current?.track.details.slides.length ?? 1) -
+										getPerView()
+								}>
+								<ChevronRight className="h-4 w-4" />
+							</Button>
+						</div>
+					)}
 				</div>
-			)}
-		</section>
+
+				{isEmpty ? (
+					<p className="mt-4 text-sm text-gray-500">
+						{t("Product.noRelatedProducts")}
+					</p>
+				) : (
+					<div className="px-0">
+						<div
+							ref={sliderRef}
+							className="keen-slider w-full">
+							{normalizedProducts.map((product) => (
+								<div
+									key={product.productNumber}
+									className="keen-slider__slide">
+									<Link href={product.productNumber}>
+										<ProductCard
+											{...product}
+											variant="compact"
+										/>
+									</Link>
+								</div>
+							))}
+						</div>
+					</div>
+				)}
+			</section>
+		</div>
 	);
 }

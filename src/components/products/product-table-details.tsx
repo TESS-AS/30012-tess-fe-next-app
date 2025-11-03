@@ -37,24 +37,21 @@ export function ProductDetailsTable({
 		) ?? [];
 
 	return (
-		<div
-			className="rounded-md border border-gray-200 p-4"
-			id="product-table-details">
+		<div id="product-table-details">
 			<Tabs
 				value={activeTab}
 				onValueChange={setActiveTab}
-				defaultValue="description"
+				defaultValue="variants"
 				className="w-full py-5">
-				<TabsList className="grid w-full grid-cols-4 overflow-hidden rounded-none bg-gray-50 p-0">
+				<TabsList className="flex h-auto w-full justify-start gap-6 rounded-none border-b border-gray-200 bg-transparent p-0">
 					{[
-						{ value: "description", label: t("description") },
-						{ value: "technical", label: t("specifications") },
 						{
 							value: "variants",
 							label: `${t("allVariants")} (${
 								variantData.itemVariants?.length || 0
 							})`,
 						},
+						{ value: "description", label: t("productDescription") },
 						{
 							value: "documents",
 							label: `${t("documentsTitle")} (${
@@ -65,7 +62,7 @@ export function ProductDetailsTable({
 						<TabsTrigger
 							key={tab.value}
 							value={tab.value}
-							className="rounded-none px-4 py-2 text-sm font-medium text-gray-500 data-[state=active]:bg-gray-100 data-[state=active]:font-semibold data-[state=active]:text-gray-900 data-[state=active]:shadow-none">
+							className="justify-start rounded-none border-b-2 border-transparent bg-transparent px-3 py-2 text-left text-sm font-medium text-gray-500 shadow-none data-[state=active]:border-green-700 data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:text-green-700 data-[state=active]:shadow-none">
 							{tab.label}
 						</TabsTrigger>
 					))}
@@ -73,33 +70,73 @@ export function ProductDetailsTable({
 
 				<TabsContent
 					value="description"
-					className="mt-4 text-sm">
+					className="mt-8 text-sm">
 					{variantData?.description?.itemRemarks ||
-					variantData?.description?.itemSpec ? (
-						<div className="space-y-4">
-							{variantData?.description?.itemRemarks && (
-								<p className="whitespace-pre-line text-gray-700">
-									{variantData.description.itemRemarks}
-								</p>
-							)}
+					variantData?.description?.itemSpec ||
+					filteredAttributes.length > 0 ? (
+						<div className="grid grid-cols-12 gap-6">
+							{/* Left side - Description text (60% width) */}
+							<div className="col-span-12 lg:col-span-7">
+								{variantData?.description?.itemRemarks && (
+									<div className="space-y-4">
+										<p className="whitespace-pre-line text-black">
+											{variantData.description.itemRemarks}
+										</p>
+									</div>
+								)}
 
-							{Object.values(variantData?.description?.itemSpec ?? {}).filter(
-								(usp: any) => usp && usp.trim() !== "",
-							).length > 0 && (
-								<div>
-									<h3 className="text-base font-semibold text-gray-900">
-										{t("uniqueSellingPoints")}
-									</h3>
-									<ul className="list-disc pl-5 text-gray-700">
+								{Object.values(variantData?.description?.itemSpec ?? {}).filter(
+									(usp: any) => usp && usp.trim() !== "",
+								).length > 0 && (
+									<div className="mt-4 space-y-4">
 										{Object.values(variantData.description.itemSpec ?? {})
 											.filter(
 												(usp): usp is string =>
 													typeof usp === "string" && usp.trim() !== "",
 											)
 											.map((usp, i) => (
-												<li key={i}>{usp}</li>
+												<p
+													key={i}
+													className="text-black">
+													{usp}
+												</p>
 											))}
-									</ul>
+									</div>
+								)}
+
+								{!variantData?.description?.itemRemarks &&
+									!variantData?.description?.itemSpec && (
+										<p className="text-gray-500">
+											{t("noDescriptionAvailable")}
+										</p>
+									)}
+							</div>
+
+							{/* Right side - Specifications box (40% width) */}
+							{filteredAttributes.length > 0 && (
+								<div className="col-span-12 lg:col-span-5">
+									<div className="rounded-md border border-gray-100 bg-gray-50 p-4">
+										<h3 className="mb-4 text-lg font-semibold text-gray-900">
+											{t("specifications")}
+										</h3>
+										<div className="space-y-0">
+											{filteredAttributes.map((attr: any, index: number) => (
+												<div key={attr.attribute_identifier || index}>
+													<div className="grid grid-cols-2 gap-4 py-3">
+														<dt className="text-left text-sm font-medium text-gray-900">
+															{attr.name || attr.name_key_language}
+														</dt>
+														<dd className="text-right text-sm text-gray-500">
+															{attr.value_def || "-"}
+														</dd>
+													</div>
+													{index < filteredAttributes.length - 1 && (
+														<hr className="border-gray-200" />
+													)}
+												</div>
+											))}
+										</div>
+									</div>
 								</div>
 							)}
 						</div>
@@ -109,39 +146,8 @@ export function ProductDetailsTable({
 				</TabsContent>
 
 				<TabsContent
-					value="technical"
-					className="mt-4 text-sm">
-					{filteredAttributes.length ? (
-						<div className="space-y-6">
-							<h3 className="text-base font-semibold text-gray-900">
-								{t("technicalData")}
-							</h3>
-
-							<div className="max-w-[50%]">
-								<dl>
-									{filteredAttributes.map((attr: any, index: number) => (
-										<div
-											key={attr.attribute_identifier || index}
-											className={`grid grid-cols-2 gap-x-4 p-2 text-sm ${
-												index % 2 === 0 ? "bg-gray-50" : "bg-white"
-											}`}>
-											<dt className="text-gray-700">
-												{attr.name || attr.name_key_language}
-											</dt>
-											<dd className="text-gray-900">{attr.value_def}</dd>
-										</div>
-									))}
-								</dl>
-							</div>
-						</div>
-					) : (
-						<p className="text-gray-500">{t("noSpecifications")}</p>
-					)}
-				</TabsContent>
-
-				<TabsContent
 					value="variants"
-					className="mt-4 text-sm">
+					className="mt-8 text-sm">
 					{variantData.itemVariants?.length ? (
 						<ProductVariantTable
 							variants={variantData.itemVariants}
@@ -159,7 +165,7 @@ export function ProductDetailsTable({
 
 				<TabsContent
 					value="documents"
-					className="mt-4 text-sm">
+					className="mt-8 text-sm">
 					{variantData.itemDocuments?.length ? (
 						<ul className="list-disc pl-5">
 							{variantData.itemDocuments.map((doc: string, i: number) => (

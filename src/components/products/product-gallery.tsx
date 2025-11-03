@@ -2,11 +2,8 @@
 
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 
-import { Skeleton } from "../ui/skeleton";
 import { ZoomImage } from "../ui/zoom-image";
 
 interface ProductImage {
@@ -46,7 +43,7 @@ export function ProductGallery({ images, className }: ProductGalleryProps) {
 	return (
 		<div className={cn("grid grid-cols-12 items-stretch gap-4", className)}>
 			<div className="col-span-12">
-				<div className="rounded-lg border border-gray-200 p-4">
+				<div className="p-4">
 					<ZoomImage
 						src={selectedImage.url}
 						alt={selectedImage.filename}
