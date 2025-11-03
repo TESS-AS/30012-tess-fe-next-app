@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { OrderFilters, useGetOrders } from "@/hooks/useGetOrders";
+import { useOrderHistory } from "@/hooks/useOrderHistory";
 import { cn, formatDate } from "@/lib/utils";
 import { OrderItems } from "@/types/orderHistory.types";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
@@ -71,13 +72,15 @@ export const getStatusIcons = (status: string) => {
 	}
 };
 
-export function OrdreHistorikk() {
+export function OrdreHistorikk({ customerNumber }: { customerNumber: string }) {
 	const t = useTranslations("OrdreHistorikk");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedStatus, setSelectedStatus] = useState<string>(t("all"));
 	const [currentPage, setCurrentPage] = useState(1);
-
 	const ITEMS_PER_PAGE = 10;
+
+	// Use search query to determine which hook to use
+	const hasSearch = searchQuery.trim().length > 0;
 
 	const [filters, setFilters] = useState<OrderFilters>({
 		orderNumber: undefined,
@@ -87,12 +90,33 @@ export function OrdreHistorikk() {
 		status: undefined,
 	});
 
+	// Use useOrderHistory when searching (only enabled when hasSearch is true)
 	const {
-		data: orders,
-		isLoading,
-		totalPages,
-		totalItems,
-	} = useGetOrders(currentPage, ITEMS_PER_PAGE, filters);
+		orders: searchOrders,
+		isLoading: searchLoading,
+		totalPages: searchTotalPages,
+		totalItems: searchTotalItems,
+	} = useOrderHistory(
+		customerNumber,
+		searchQuery,
+		currentPage,
+		ITEMS_PER_PAGE,
+		hasSearch,
+	);
+
+	// Use useGetOrders for initial load and filters (only enabled when hasSearch is false)
+	const {
+		data: filterOrders,
+		isLoading: filterLoading,
+		totalPages: filterTotalPages,
+		totalItems: filterTotalItems,
+	} = useGetOrders(currentPage, ITEMS_PER_PAGE, filters, !hasSearch);
+
+	// Select which data to use based on search state
+	const orders = hasSearch ? searchOrders : filterOrders;
+	const isLoading = hasSearch ? searchLoading : filterLoading;
+	const totalPages = hasSearch ? searchTotalPages : filterTotalPages;
+	const totalItems = hasSearch ? searchTotalItems : filterTotalItems;
 
 	const statuses = [
 		t("all"),
@@ -155,7 +179,7 @@ export function OrdreHistorikk() {
 
 	const tableData = (orders || []).map((order) => ({
 		...order,
-		orderId: String(order.id),
+		orderId: String(order.order_id),
 	}));
 
 	const columns = [
@@ -199,9 +223,7 @@ export function OrdreHistorikk() {
 			<div className="flex items-baseline justify-between">
 				<div className="flex items-center">
 					<h1 className="text-2xl font-semibold">{t("title")}</h1>
-					<p className="ml-4 text-[#5A615D]">
-						{t("subtitle")}
-					</p>
+					<p className="ml-4 text-[#5A615D]">{t("subtitle")}</p>
 				</div>
 			</div>
 

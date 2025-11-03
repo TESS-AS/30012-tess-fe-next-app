@@ -352,7 +352,7 @@ export default function ProfilePage() {
 						<TabsContent
 							value="ordrehistorikk"
 							className="mt-0">
-							<OrdreHistorikk />
+							<OrdreHistorikk customerNumber={profile.defaultCustomerNumber} />
 						</TabsContent>
 
 						<TabsContent value="users">
