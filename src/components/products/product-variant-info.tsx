@@ -194,8 +194,12 @@ export function ProductVariantInfo({
 					type="button"
 					onClick={handleSeeAllVariants}
 					className="text-sm font-medium text-green-600 hover:underline">
-					{t("seeAllVariants")}{" "}
-					{itemVariantCount ? `${itemVariantCount} variants` : ""} →
+					{itemVariantCount
+						? locale === "no"
+							? `Se alle ${itemVariantCount} varianter`
+							: `See all ${itemVariantCount} variants`
+						: t("seeAllVariants")}{" "}
+					→
 				</button>
 			</div>
 
