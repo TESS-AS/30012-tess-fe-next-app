@@ -1,5 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
-
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import axiosClient from "@/services/axiosClient";
 import {
@@ -7,6 +5,7 @@ import {
 	OrderItems,
 	OrderResponse,
 } from "@/types/orderHistory.types";
+import { useQuery } from "@tanstack/react-query";
 
 interface OrdersApiResponse {
 	data: OrderResponse[];

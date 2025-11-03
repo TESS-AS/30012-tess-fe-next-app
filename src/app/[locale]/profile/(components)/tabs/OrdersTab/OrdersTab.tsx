@@ -55,11 +55,13 @@ export default function OrdersTab() {
 			) : (
 				orders.map((order) => (
 					<Card
-						key={order.id}
+						key={order.order_id}
 						className="flex flex-col gap-4 p-4">
 						<div className="flex flex-col text-sm md:flex-row md:items-center md:justify-between">
 							<div className="flex flex-wrap items-center gap-3">
-								<span className="font-medium text-black">#{order.id}</span>
+								<span className="font-medium text-black">
+									#{order.order_id}
+								</span>
 								<span>{new Date(order.date).toLocaleDateString()}</span>
 							</div>
 							<span className="mt-2 text-base font-semibold text-black md:mt-0">

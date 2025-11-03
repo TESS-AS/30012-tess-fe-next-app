@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
@@ -8,13 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { OrderFilters, useGetOrders } from "@/hooks/useGetOrders";
+import { useOrderHistory } from "@/hooks/useOrderHistory";
 import { cn, formatDate } from "@/lib/utils";
 import { OrderItems } from "@/types/orderHistory.types";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import { Search } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useOrderHistory } from "@/hooks/useOrderHistory";
 
 type Order = OrderItems & { orderId: string };
 

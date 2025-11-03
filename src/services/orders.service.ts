@@ -1,7 +1,7 @@
-import { Order, OrderLines, UserOrderResponse } from "@/types/orders.types";
+import { OrderItems } from "@/types/orderHistory.types";
+import { Order, UserOrderResponse } from "@/types/orders.types";
 
 import axiosInstance from "./axiosClient";
-import { OrderItems } from "@/types/orderHistory.types";
 
 interface SalesOrderResponse {
 	data?: any; //TODO: Add response type
