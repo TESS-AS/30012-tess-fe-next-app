@@ -73,6 +73,18 @@ export function ProductPageClient({
 						productNumber={productData.productNumber}
 						pdfUrl={productData.pdfUrl}
 						gtin={selectedVariant?.gtin ?? "-"}
+						imageUrl={
+							productImages?.[0]?.url ||
+							productImages?.[0]?.thumbnail_url ||
+							undefined
+						}
+						application={
+							locale === "en"
+								? productData.applicationEn
+								: productData.applicationNo
+						}
+						variantData={variantData}
+						locale={locale}
 					/>
 
 					<ProductStockStatus
