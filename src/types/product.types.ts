@@ -5,6 +5,9 @@ export interface IProduct {
 	mediaM: string;
 	productNumber: string;
 	shortDesc?: string;
+	price?: number;
+	attribute1?: string | null;
+	attribute2?: string | null;
 }
 
 export interface IVariation {
