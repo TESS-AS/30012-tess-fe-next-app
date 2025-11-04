@@ -117,9 +117,9 @@ export function SidebarNav({
 											key={item.href}
 											className={cn(
 												"flex flex-col",
-												isLastTwoItems &&
-													index === items.length - 2 &&
-													"mt-4 border-t pt-4",
+												// isLastTwoItems &&
+												// 	index === items.length - 2 &&
+												// 	"mt-4 border-t pt-4",
 											)}>
 											<button
 												onClick={() => {

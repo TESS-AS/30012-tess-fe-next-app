@@ -57,7 +57,7 @@ export default function CheckoutPage() {
 	const { currentStep, setCurrentStep, goToNext } = useOrderStepper();
 
 	const [paymentMethod, setPaymentMethod] = useState("faktura");
-	const [dimensionInputMode, setDimensionInputMode] = useState("select");
+	const [dimensionInputMode, setDimensionInputMode] = useState("manual");
 	const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 	const [showTrackingModal, setShowTrackingModal] = useState(false);
 	const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
