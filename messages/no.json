@@ -49,7 +49,7 @@
 		"addedToCart": "Vare lagt i handlekurv",
 		"errorAddingToCart": "Kunne ikke legge til i kassen",
 		"selectWarehouse": "Velg lager",
-		"selectWarehouseFirst": "Vennligst velg en lagerstasjon f\u00f8rst",
+		"selectWarehouseFirst": "Logg inn for å legge til handlekurv",
 		"noBalanceForWarehouse": "Ingen balanse tilgjengelig for denne lagerstasjonen",
 		"noWarehouses": "Ingen lager",
 		"noWarehousesAvailable": "Ingen lager tilgjengelig",
@@ -315,7 +315,7 @@
 	},
 	"Login": {
 		"title": "Login",
-		"loginToViewCart": "Please login to view your cart"
+		"loginToViewCart": "Logg inn for å se din handlekurv"
 	},
 	"AuthDialog": {
 		"welcome": "Velkommen",

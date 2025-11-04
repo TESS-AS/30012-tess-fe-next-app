@@ -140,6 +140,13 @@ export const UserDimensionsInput: React.FC<Props> = ({
 					className="flex items-center gap-4">
 					<div className="flex items-center gap-1">
 						<RadioGroupItem
+							value="manual"
+							id="manual"
+						/>
+						<Label htmlFor="manual">{t("modes.manual")}</Label>
+					</div>
+					<div className="flex items-center gap-1">
+						<RadioGroupItem
 							value="select"
 							id="select"
 						/>
@@ -151,13 +158,6 @@ export const UserDimensionsInput: React.FC<Props> = ({
 							id="search"
 						/>
 						<Label htmlFor="search">{t("modes.search")}</Label>
-					</div>
-					<div className="flex items-center gap-1">
-						<RadioGroupItem
-							value="manual"
-							id="manual"
-						/>
-						<Label htmlFor="manual">{t("modes.manual")}</Label>
 					</div>
 				</RadioGroup>
 			</div>

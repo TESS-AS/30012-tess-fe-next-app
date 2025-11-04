@@ -39,7 +39,7 @@ export default function ProfilePage() {
 	const t = useTranslations();
 
 	const [activeMode, setActiveMode] = useState<"hose" | "ehandel">("ehandel");
-	const [activeTab, setActiveTab] = useState("mine-bestillinger");
+	const [activeTab, setActiveTab] = useState("rekvisisjoner");
 
 	const shouldFetchHoseSystems = !!profile && activeMode === "hose";
 	const hoseSystems = useGetHoseSystems(shouldFetchHoseSystems);
@@ -55,14 +55,14 @@ export default function ProfilePage() {
 			setActiveTab("hose-orders");
 		} else {
 			setActiveMode("ehandel");
-			setActiveTab("mine-bestillinger");
+			setActiveTab("rekvisisjoner");
 		}
 	}, [profile]);
 
 	const handleModeChange = (mode: "hose" | "ehandel") => {
 		setActiveMode(mode);
 		if (mode === "ehandel") {
-			setActiveTab("mine-bestillinger");
+			setActiveTab("rekvisisjoner");
 		} else if (mode === "hose") {
 			setActiveTab("hose-orders");
 		}
@@ -211,10 +211,10 @@ export default function ProfilePage() {
 												label: t("ProfilePage.sidebar.orders"),
 												icon: ShoppingCart,
 												subitems: [
-													{
-														href: "mine-bestillinger",
-														label: t("ProfilePage.sidebar.myOrders"),
-													},
+													// {
+													// 	href: "mine-bestillinger",
+													// 	label: t("ProfilePage.sidebar.myOrders"),
+													// },
 													{
 														href: "rekvisisjoner",
 														label: t("ProfilePage.sidebar.requisitions"),
@@ -225,11 +225,11 @@ export default function ProfilePage() {
 													},
 												],
 											},
-											{
-												href: "dimensions",
-												label: t("ProfilePage.sidebar.dimensions"),
-												icon: "/icons/profile/navbar/folder-outline.svg",
-											},
+											// {
+											// 	href: "dimensions",
+											// 	label: t("ProfilePage.sidebar.dimensions"),
+											// 	icon: "/icons/profile/navbar/folder-outline.svg",
+											// },
 											{
 												href: "usage",
 												label: t("ProfilePage.sidebar.usage"),
@@ -250,17 +250,12 @@ export default function ProfilePage() {
 												label: t("ProfilePage.sidebar.settings"),
 												icon: Settings,
 											},
-											{
-												href: "settings-alt",
-												label: t("ProfilePage.sidebar.settings"),
-												icon: Settings,
-											},
-											{
-												href: "logout",
-												label: t("ProfilePage.sidebar.logout"),
-												icon: LogOut,
-												variant: "logout",
-											},
+											// {
+											// 	href: "logout",
+											// 	label: t("ProfilePage.sidebar.logout"),
+											// 	icon: LogOut,
+											// 	variant: "logout",
+											// },
 										]
 									: [
 											// {
