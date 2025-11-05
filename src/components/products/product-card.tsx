@@ -37,12 +37,6 @@ export function ProductCard({
 		return `fra ${formatNorwegianCurrency(amount)}`;
 	};
 
-	// Use fallbacks for attributes - always show them
-	const displayAttribute1 = attribute1 || "attribute 1";
-	const displayAttribute2 = attribute2 || "attribute 2";
-	// Use fallback description if shortDesc is missing
-	const displayDescription = shortDesc || "description";
-
 	return (
 		<div
 			className={cn(
@@ -87,17 +81,25 @@ export function ProductCard({
 				<h3 className="text-md line-clamp-2 flex min-h-[3.5rem] items-start font-medium text-gray-900">
 					{productName}
 				</h3>
-				<p className="mt-2 line-clamp-2 text-sm font-light text-[#5A615D]">
-					{displayDescription}
-				</p>
-				<div className="mt-2 flex flex-shrink-0 flex-wrap gap-2">
-					<span className="inline-flex items-center rounded-md border border-gray-300 bg-gray-50 px-2.5 py-0.5 text-xs text-gray-500">
-						{displayAttribute1}
-					</span>
-					<span className="inline-flex items-center rounded-md border border-gray-300 bg-gray-50 px-2.5 py-0.5 text-xs text-gray-500">
-						{displayAttribute2}
-					</span>
-				</div>
+				{shortDesc && (
+					<p className="mt-2 line-clamp-2 text-sm font-light text-[#5A615D]">
+						{shortDesc}
+					</p>
+				)}
+				{(attribute1 || attribute2) && (
+					<div className="mt-2 flex flex-shrink-0 flex-wrap gap-2">
+						{attribute1 && (
+							<span className="inline-flex items-center rounded-md border border-gray-300 bg-gray-50 px-2.5 py-0.5 text-xs text-gray-500">
+								{attribute1}
+							</span>
+						)}
+						{attribute2 && (
+							<span className="inline-flex items-center rounded-md border border-gray-300 bg-gray-50 px-2.5 py-0.5 text-xs text-gray-500">
+								{attribute2}
+							</span>
+						)}
+					</div>
+				)}
 				<div className="mt-auto flex items-center justify-between gap-2 pt-4">
 					{price !== undefined && (
 						<p className="text-md font-light text-gray-900">
