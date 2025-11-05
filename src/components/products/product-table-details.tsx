@@ -52,12 +52,12 @@ export function ProductDetailsTable({
 							})`,
 						},
 						{ value: "description", label: t("productDescription") },
-						{
-							value: "documents",
-							label: `${t("documentsTitle")} (${
-								variantData.itemDocuments?.length || 0
-							})`,
-						},
+						// {
+						// 	value: "documents",
+						// 	label: `${t("documentsTitle")} (${
+						// 		variantData.itemDocuments?.length || 0
+						// 	})`,
+						// },
 					].map((tab) => (
 						<TabsTrigger
 							key={tab.value}
@@ -163,7 +163,7 @@ export function ProductDetailsTable({
 					)}
 				</TabsContent>
 
-				<TabsContent
+				{/* <TabsContent
 					value="documents"
 					className="mt-8 text-sm">
 					{variantData.itemDocuments?.length ? (
@@ -175,7 +175,7 @@ export function ProductDetailsTable({
 					) : (
 						<p className="text-gray-500">{t("noDocumentsAvailable")}</p>
 					)}
-				</TabsContent>
+				</TabsContent> */}
 			</Tabs>
 		</div>
 	);
