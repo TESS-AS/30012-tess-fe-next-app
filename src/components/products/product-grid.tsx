@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useCallback, useState } from "react";
 
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useProductFilter } from "@/hooks/useProductFilter";
 import { cn } from "@/lib/utils";
+import { getProductPrice } from "@/services/product.service";
 import { FilterValues } from "@/types/filter.types";
 import { LayoutGrid, AlignJustify, X } from "lucide-react";
 import Link from "next/link";
@@ -61,12 +63,18 @@ export function ProductGrid({
 }: ProductGridProps) {
 	const t = useTranslations();
 	const pathname = usePathname();
+	const { data: profile } = useGetProfileData();
 	const [isFiltering, setIsFiltering] = useState(false);
 	const [viewLayout, setViewLayout] = useState<string>("grid");
 	const observerTarget = useRef<HTMLDivElement>(null);
 	const [sort, setSort] = useState<string>("");
 	const [filtersState, setFiltersState] = useState(filters);
-	const filterRef = useRef<{ clearRangeFilter: (filterKey: string) => void } | null>(null);
+	const [productPrices, setProductPrices] = useState<Record<string, number>>(
+		{},
+	);
+	const filterRef = useRef<{
+		clearRangeFilter: (filterKey: string) => void;
+	} | null>(null);
 	const {
 		products,
 		isLoading,
@@ -103,6 +111,56 @@ export function ProductGrid({
 			setIsFiltering(false);
 		}
 	}, [isLoading]);
+
+	// Fetch prices for products
+	useEffect(() => {
+		const fetchPrices = async () => {
+			if (
+				!products.length ||
+				!profile?.defaultCustomerNumber ||
+				!profile?.defaultCompanyNumber
+			) {
+				return;
+			}
+
+			const pricePromises = products.map(async (product) => {
+				try {
+					const priceData = await getProductPrice(
+						profile.defaultCustomerNumber || "169999",
+						profile.defaultCompanyNumber || "01",
+						product.productNumber,
+						profile.defaultWarehouseNumber || "L01",
+					);
+					// Get the minimum price from all variants (bestPrice)
+					const prices = priceData.map(
+						(p: any) => p.bestPrice || p.basePriceTotal || 0,
+					);
+					const minPrice =
+						prices.length > 0
+							? Math.min(...prices.filter((p: number) => p > 0))
+							: undefined;
+					return { productNumber: product.productNumber, price: minPrice };
+				} catch (error) {
+					console.error(
+						`Error fetching price for ${product.productNumber}:`,
+						error,
+					);
+					return { productNumber: product.productNumber, price: undefined };
+				}
+			});
+
+			const priceResults = await Promise.all(pricePromises);
+			const priceMap: Record<string, number> = {};
+			priceResults.forEach(({ productNumber, price }) => {
+				if (price !== undefined) {
+					priceMap[productNumber] = price;
+				}
+			});
+			setProductPrices(priceMap);
+		};
+
+		fetchPrices();
+	}, [products, profile]);
 
 	useEffect(() => {
 		const observer = new IntersectionObserver((entries) => {
@@ -226,8 +284,9 @@ export function ProductGrid({
 					<div className="flex flex-wrap gap-2">
 						{Object.entries(selectedFilters).map(([key, values]) => {
 							// Check if this is a range filter (has exactly 2 numeric values)
-							const isRangeFilter = values.length === 2 && 
-								values.every(val => !isNaN(Number(val))) &&
+							const isRangeFilter =
+								values.length === 2 &&
+								values.every((val) => !isNaN(Number(val))) &&
 								values[0] !== values[1];
 
 							if (isRangeFilter) {
@@ -263,7 +322,7 @@ export function ProductGrid({
 													filterRef.current.clearRangeFilter(key);
 												} else {
 													// Fallback: remove the entire range filter
-													values.forEach(value => removeFilter(key, value));
+													values.forEach((value) => removeFilter(key, value));
 												}
 											}}
 											className="hover:bg-primary/20 ml-1 rounded-md p-0.5">
@@ -311,7 +370,7 @@ export function ProductGrid({
 				</div>
 				<div
 					className={cn(
-						"grid gap-6",
+						"grid items-stretch gap-6",
 						variant === "compact"
 							? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
 							: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
@@ -333,18 +392,28 @@ export function ProductGrid({
 							))}
 						</>
 					) : products.length > 0 ? (
-						products.map((product, idx) => (
-							<Link
-								key={idx}
-								href={`${pathname}/${product.productNumber}`}>
-								<ProductCard
-									{...product}
-									variant={variant}
-									viewLayout={viewLayout}
-									priority={idx < 4}
-								/>
-							</Link>
-						))
+						products.map((product, idx) => {
+							const { attributes } = product as any;
+							const attribute1 = product.attribute1 || attributes?.attribute1;
+							const attribute2 = product.attribute2 || attributes?.attribute2;
+
+							return (
+								<Link
+									key={idx}
+									href={`${pathname}/${product.productNumber}`}
+									className="h-full">
+									<ProductCard
+										{...product}
+										attribute1={attribute1}
+										attribute2={attribute2}
+										price={productPrices[product.productNumber]}
+										variant={variant}
+										viewLayout={viewLayout}
+										priority={idx < 4}
+									/>
+								</Link>
+							);
+						})
 					) : (
 						<div
 							className={cn(

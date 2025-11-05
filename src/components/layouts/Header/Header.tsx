@@ -51,7 +51,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -67,6 +67,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 	const t = useTranslations();
 	const router = useRouter();
 	const pathname = usePathname();
+	const searchParams = useSearchParams();
 
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [isModalIdOpen, setIsModalIdOpen] = useState<string | null>(null);
@@ -82,8 +83,27 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		isFetching: isSearchFetching,
 		clearSearch,
 	} = useInstantSearch({ minQueryLength: 1 });
+
+	const [urlQueryForDisplay, setUrlQueryForDisplay] = useState<string>("");
+	const [isInputFocused, setIsInputFocused] = useState(false);
+	const isUserEditingRef = useRef(false);
+
+	useEffect(() => {
+		const urlQuery = searchParams.get("query");
+		if (urlQuery) {
+			setUrlQueryForDisplay(urlQuery);
+			if (!isUserEditingRef.current && searchQuery !== urlQuery) {
+				/* empty */
+			}
+			justNavigatedRef.current = false;
+		} else {
+			setUrlQueryForDisplay("");
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [searchParams]);
 	const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
+	const justNavigatedRef = useRef(false);
 	const { shouldFocus, resetFocus } = useSearchStore();
 	const [selectedAssortment, setSelectedAssortment] = useState("");
 	const [isSaving, setIsSaving] = useState(false);
@@ -94,7 +114,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		if (!searchData?.categories) return [];
 
 		return searchData.categories.map((category) => ({
-			id: category.name, // Use name as ID since we don't have category numbers
+			id: category.name,
 			name: category.name,
 			count: parseInt(category.productVariantCount) || 0,
 		}));
@@ -125,7 +145,16 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 	}, [shouldFocus, resetFocus]);
 
 	const searchRef = useClickOutside<HTMLDivElement>(() => {
-		clearSearch();
+		if (justNavigatedRef.current) {
+			justNavigatedRef.current = false;
+			setIsSearchOpen(false);
+			return;
+		}
+		const urlQuery = searchParams.get("query");
+		const isOnSearchPage = pathname.includes("/search");
+		if (!urlQuery && !isOnSearchPage) {
+			clearSearch();
+		}
 		setIsSearchOpen(false);
 	});
 
@@ -136,11 +165,15 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();
-		if (searchQuery.trim()) {
-			router.push(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+		const queryToSearch = searchQuery.trim() || urlQueryForDisplay.trim();
+		if (queryToSearch) {
+			justNavigatedRef.current = true;
+			router.push(`/search?query=${encodeURIComponent(queryToSearch)}`);
+			setSearchQuery("");
+			inputRef.current?.blur();
+			setIsInputFocused(false);
 		}
 		setIsSearchOpen(false);
-		clearSearch();
 	};
 
 	const handleLanguageChange = (locale: string) => {
@@ -290,11 +323,34 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 										ref={isModalIdOpen ? null : searchRef}>
 										<Input
 											type="search"
-											placeholder={t("Common.searchProducts")}
+											placeholder={
+												isInputFocused
+													? t("Common.searchProducts")
+													: urlQueryForDisplay || t("Common.searchProducts")
+											}
 											className="h-[50px] !rounded-none !border-0 !border-none bg-transparent px-4 text-[#5A615D] focus-visible:ring-0 focus-visible:ring-offset-0"
 											value={searchQuery}
 											ref={inputRef}
-											onChange={(e) => setSearchQuery(e.target.value)}
+											onChange={(e) => {
+												isUserEditingRef.current = true;
+												setSearchQuery(e.target.value);
+											}}
+											onFocus={() => {
+												setIsInputFocused(true);
+												isUserEditingRef.current = true;
+												if (
+													urlQueryForDisplay &&
+													searchQuery === urlQueryForDisplay
+												) {
+													setSearchQuery("");
+												}
+											}}
+											onBlur={() => {
+												setIsInputFocused(false);
+												setTimeout(() => {
+													isUserEditingRef.current = false;
+												}, 200);
+											}}
 										/>
 										{searchQuery && (
 											<div className="animate-in fade-in-0 zoom-in-95 fixed top-34 left-1/2 z-[11] grid max-h-[80vh] w-[80vw] -translate-x-1/2 grid-cols-3 gap-4 overflow-y-auto bg-white p-4 shadow-lg duration-200">
@@ -545,10 +601,33 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 									<Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
 									<Input
 										type="search"
-										placeholder={t("Common.searchProducts")}
+										placeholder={
+											isInputFocused
+												? t("Common.searchProducts")
+												: urlQueryForDisplay || t("Common.searchProducts")
+										}
 										className="bg-background w-full pl-8"
 										value={searchQuery}
-										onChange={(e) => setSearchQuery(e.target.value)}
+										onChange={(e) => {
+											isUserEditingRef.current = true;
+											setSearchQuery(e.target.value);
+										}}
+										onFocus={() => {
+											setIsInputFocused(true);
+											isUserEditingRef.current = true;
+											if (
+												urlQueryForDisplay &&
+												searchQuery === urlQueryForDisplay
+											) {
+												setSearchQuery("");
+											}
+										}}
+										onBlur={() => {
+											setIsInputFocused(false);
+											setTimeout(() => {
+												isUserEditingRef.current = false;
+											}, 200);
+										}}
 										autoFocus
 									/>
 								</div>

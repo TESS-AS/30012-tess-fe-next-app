@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { IProduct } from "@/types/product.types";
+import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import Image from "next/image";
 
 interface ProductCardProps extends Partial<IProduct> {
@@ -21,6 +22,9 @@ export function ProductCard({
 	productName = "",
 	mediaM,
 	shortDesc,
+	price,
+	attribute1,
+	attribute2,
 	className,
 	aspectRatio = "square",
 	variant = "default",
@@ -29,17 +33,21 @@ export function ProductCard({
 }: ProductCardProps) {
 	const [isLoaded, setIsLoaded] = useState(false);
 
+	const formatPrice = (amount: number): string => {
+		return `fra ${formatNorwegianCurrency(amount)}`;
+	};
+
 	return (
 		<div
 			className={cn(
-				"group bg-background cursor-pointer overflow-hidden rounded-sm border border-gray-200 transition-all hover:shadow-md",
+				"group flex h-full cursor-pointer flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:shadow-lg",
 				variant === "default" ? "p-4" : "p-2",
-				viewLayout === "list" && "flex flex-row",
+				viewLayout === "list" && "flex-row",
 				className,
 			)}>
 			<div
 				className={cn(
-					"relative overflow-hidden rounded-md",
+					"relative flex-shrink-0 overflow-hidden rounded-md",
 					aspectRatio === "portrait" ? "aspect-[3/4]" : "aspect-square",
 					viewLayout === "list" ? "me-4 w-[250px]" : "",
 				)}>
@@ -67,23 +75,44 @@ export function ProductCard({
 
 			<div
 				className={cn(
-					"flex flex-col",
+					"flex flex-1 flex-col",
 					variant === "default" ? "mt-4" : "mt-2",
 				)}>
-				<h3 className="min-h-[30px] text-sm font-medium">{productName}</h3>
-				<div className="text-muted-foreground mt-2 flex items-center justify-end text-sm">
+				<h3 className="text-md line-clamp-2 flex min-h-[3.5rem] items-start font-medium text-gray-900">
+					{productName}
+				</h3>
+				{shortDesc && (
+					<p className="mt-2 line-clamp-2 text-sm font-light text-[#5A615D]">
+						{shortDesc}
+					</p>
+				)}
+				{(attribute1 || attribute2) && (
+					<div className="mt-2 flex flex-shrink-0 flex-wrap gap-2">
+						{attribute1 && (
+							<span className="inline-flex items-center rounded-md border border-gray-300 bg-gray-50 px-2.5 py-0.5 text-xs text-gray-500">
+								{attribute1}
+							</span>
+						)}
+						{attribute2 && (
+							<span className="inline-flex items-center rounded-md border border-gray-300 bg-gray-50 px-2.5 py-0.5 text-xs text-gray-500">
+								{attribute2}
+							</span>
+						)}
+					</div>
+				)}
+				<div className="mt-auto flex items-center justify-between gap-2 pt-4">
+					{price !== undefined && (
+						<p className="text-md font-light text-gray-900">
+							{formatPrice(price)}
+						</p>
+					)}
 					<Button
 						variant="outlineGrey"
 						size="sm"
-						className="h-[35px] !text-sm">
-						Vis mer
+						className="h-[35px] !text-sm text-gray-900 transition-colors group-hover:border-[#00B84C] group-hover:bg-[#00B84C] group-hover:text-white hover:!bg-[#F0FCF2] hover:text-gray-900">
+						Vis produkt
 					</Button>
 				</div>
-				{viewLayout === "list" && shortDesc && (
-					<div className="text-muted-foreground mt-2 flex items-center justify-between text-sm">
-						<p>{shortDesc}</p>
-					</div>
-				)}
 			</div>
 		</div>
 	);
