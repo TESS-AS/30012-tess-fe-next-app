@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
 import { useProfile } from "@/contexts/ProfileContext";
 import { useGetColumnAttributes } from "@/hooks/useGetColumnAttributes";
-import { cn } from "@/lib/utils";
+import { Link, useRouter } from "@/i18n/navigation";
+import { categoryTreeToUrlPath, cn } from "@/lib/utils";
+import { loadCategoryTree } from "@/services/categories.service";
 import { IProductSearch } from "@/types/search.types";
 import { BadgeCheck } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 import ProductVariantTable from "../checkout/product-variant-table";
 
@@ -44,11 +44,47 @@ export function ProductItem({
 }: Props) {
 	const { profile } = useProfile();
 	const t = useTranslations();
+	const locale = useLocale();
 	const [selectedVariantNumber, setSelectedVariantNumber] = useState<
 		string | null
 	>(null);
+	const [productLink, setProductLink] = useState<string>(
+		`/product/${product.productNumber}`,
+	);
+	const [isLoadingCategory, setIsLoadingCategory] = useState(false);
 	const router = useRouter();
-	const productLink = `/product/${product.productNumber}`;
+
+	// Fetch category tree and build proper URL path
+	useEffect(() => {
+		const fetchCategoryPath = async () => {
+			try {
+				setIsLoadingCategory(true);
+				const categoryTree = await loadCategoryTree(product.productNumber);
+				if (categoryTree && categoryTree.length > 0) {
+					const pathSlugs = categoryTreeToUrlPath(categoryTree, locale);
+					// Build URL: /category/subcategory/segment/productNumber
+					// Fill with __default if we don't have enough categories
+					const pathParts = [...pathSlugs];
+					while (pathParts.length < 3) {
+						pathParts.push("__default");
+					}
+					pathParts.push(product.productNumber);
+					setProductLink(`/${pathParts.join("/")}`);
+				} else {
+					// Fallback: use product number even without category tree
+					setProductLink(`/product/${product.productNumber}`);
+				}
+			} catch (error) {
+				console.error("Error loading category tree for product:", error);
+				// Fallback to default product link with product number
+				setProductLink(`/product/${product.productNumber}`);
+			} finally {
+				setIsLoadingCategory(false);
+			}
+		};
+
+		fetchCategoryPath();
+	}, [product.productNumber, product.productName, locale]);
 
 	const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 	const highlightParts = (text: string, matches: string[] = []) => {
@@ -88,13 +124,18 @@ export function ProductItem({
 	const { data: columnAttributes, isLoading: loadingAttrs } =
 		useGetColumnAttributes(selectedVariantNumber ?? undefined);
 
+	const handleProductClick = () => {
+		setSearchQuery("");
+		if (!isLoadingCategory) {
+			router.push(productLink);
+		}
+	};
+
 	return (
 		<div>
 			<div
-				onClick={() => {
-					setSearchQuery("");
-					router.push(productLink);
-				}}>
+				onClick={handleProductClick}
+				className={isLoadingCategory ? "cursor-wait opacity-50" : ""}>
 				<div key={product.productNumber}>
 					<div className="group mb-3 flex w-full cursor-pointer items-center gap-4 rounded-md border border-gray-200 p-3 hover:border-gray-400">
 						<div className="flex h-32 w-32 min-w-32 items-center justify-center overflow-hidden rounded-md">

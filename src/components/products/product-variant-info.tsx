@@ -53,12 +53,12 @@ export function ProductVariantInfo({
 
 	const { data: profile } = useGetProfileData();
 
-	// Get stock balance for main warehouse
-	const mainWarehouseBalance = profile?.defaultWarehouseNumber
+	// Get stock balance for selected warehouse (default warehouse)
+	const selectedWarehouseBalance = profile?.defaultWarehouseNumber
 		? variantData?.stockByWarehouse?.find(
 				(w: any) => w.warehouse_number === profile.defaultWarehouseNumber,
-			)?.balance ?? null
-		: null;
+			)?.balance ?? 0
+		: 0;
 
 	const handleCopyGtin = () => {
 		const gtin =
@@ -178,17 +178,10 @@ export function ProductVariantInfo({
 					<h3 className="text-lg font-semibold text-[#0F1912]">
 						Produktvariant
 					</h3>
-					{mainWarehouseBalance !== null && mainWarehouseBalance > 0 ? (
-						<span className="inline-flex items-center gap-1 rounded-sm bg-[#DCF7E0] px-5 py-0.5 text-sm font-medium text-green-800">
-							<Check className="h-4 w-4 text-green-800" />
-							{mainWarehouseBalance} stk på hovedlager
-						</span>
-					) : (
-						<span className="inline-flex items-center gap-1 rounded-sm bg-[#DCF7E0] px-5 py-0.5 text-sm font-medium text-green-800">
-							<Check className="h-4 w-4 text-green-800" />
-							På hovedlager
-						</span>
-					)}
+					<span className="inline-flex items-center gap-1 rounded-sm bg-[#DCF7E0] px-5 py-0.5 text-sm font-medium text-green-800">
+						<Check className="h-4 w-4 text-green-800" />
+						{selectedWarehouseBalance} stk på hovedlager
+					</span>
 				</div>
 				<button
 					type="button"

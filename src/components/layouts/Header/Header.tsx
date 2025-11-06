@@ -22,6 +22,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { PriceDisplay } from "@/components/ui/price-display";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useProfile } from "@/contexts/ProfileContext";
 import { useClickOutside } from "@/hooks/useClickOutside";
@@ -466,29 +472,39 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 							{profile &&
 								assortments.length > 0 &&
 								isAssortmentDropdownOpen && (
-									<div className="absolute top-[50px] right-0 z-[9999] w-[232px] max-w-[232px] rounded-b-lg bg-white py-2">
-										{assortments.map((a: any) => (
-											<button
-												key={a.assortmentnumber}
-												type="button"
-												onClick={(e) => {
-													e.preventDefault();
-													e.stopPropagation();
-													handleAssortmentChange(a.assortmentnumber);
-												}}
-												className="flex w-full items-center gap-2 px-4 py-2 text-left transition-colors hover:bg-gray-50">
-												<div className="flex h-5 w-5 min-w-[20px] items-center justify-center">
-													{selectedAssortment === a.assortmentnumber ? (
-														<div className="h-4 w-4 rounded-full border-2 border-[#009640] bg-white" />
-													) : (
-														<div className="h-4 w-4 rounded-full border-2 border-gray-300" />
+									<div className="absolute top-[50px] right-0 z-[9999] w-[300px] max-w-[400px] rounded-b-lg bg-white py-2 shadow-lg">
+										<TooltipProvider>
+											{assortments.map((a: any) => (
+												<Tooltip key={a.assortmentnumber}>
+													<TooltipTrigger asChild>
+														<button
+															type="button"
+															onClick={(e) => {
+																e.preventDefault();
+																e.stopPropagation();
+																handleAssortmentChange(a.assortmentnumber);
+															}}
+															className="flex w-full items-center gap-2 px-4 py-2 text-left transition-colors hover:bg-gray-50">
+															<div className="flex h-5 w-5 min-w-[20px] shrink-0 items-center justify-center">
+																{selectedAssortment === a.assortmentnumber ? (
+																	<div className="h-4 w-4 rounded-full border-2 border-[#009640] bg-white" />
+																) : (
+																	<div className="h-4 w-4 rounded-full border-2 border-gray-300" />
+																)}
+															</div>
+															<span className="break-words text-sm font-medium text-[#0F1912]">
+																{a.assortmentname}
+															</span>
+														</button>
+													</TooltipTrigger>
+													{a.assortmentname.length > 30 && (
+														<TooltipContent side="right" className="max-w-[300px]">
+															<p className="break-words">{a.assortmentname}</p>
+														</TooltipContent>
 													)}
-												</div>
-												<span className="truncate text-sm font-medium text-[#0F1912]">
-													{a.assortmentname}
-												</span>
-											</button>
-										))}
+												</Tooltip>
+											))}
+										</TooltipProvider>
 									</div>
 								)}
 						</div>
