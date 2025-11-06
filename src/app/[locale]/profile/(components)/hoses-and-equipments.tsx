@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/select";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { FilterOptions, useGetAssets } from "@/hooks/useGetAssets";
-import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useAppContext } from "@/lib/appContext";
 import { postCartKit } from "@/services/carts.service";
 import { ProfileUser } from "@/types/user.types";
@@ -148,9 +147,9 @@ export function HosesAndEquipments({
 		neste_inspeksjonsdato: asset?.hoseLine?.nextInspectionDate ?? undefined,
 	}));
 
-	const isRowSelected = (id: string) => {
-		if (allAcrossPages) return !deselectedIds.has(id);
-		return selectedRows.includes(id);
+	const isRowSelected = (hexagonId: string) => {
+		if (allAcrossPages) return !deselectedIds.has(hexagonId);
+		return selectedRows.includes(hexagonId);
 	};
 
 	const selectedCount = allAcrossPages
@@ -160,21 +159,17 @@ export function HosesAndEquipments({
 	const selectedItems = useMemo(() => {
 		const set = new Set(selectedRows);
 		return transformedAssets.filter((a) =>
-			allAcrossPages
-				? !deselectedIds.has(String(a.orderId))
-				: set.has(String(a.orderId)),
+			allAcrossPages ? !deselectedIds.has(a.hexagonId) : set.has(a.hexagonId),
 		);
 	}, [selectedRows, transformedAssets, allAcrossPages, deselectedIds]);
 
 	const allSelectedOnPage = useMemo(() => {
 		if (!transformedAssets.length) return false;
 		if (allAcrossPages) {
-			return transformedAssets.every(
-				(a) => !deselectedIds.has(String(a.orderId)),
-			);
+			return transformedAssets.every((a) => !deselectedIds.has(a.hexagonId));
 		}
 		const set = new Set(selectedRows);
-		return transformedAssets.every((a) => set.has(String(a.orderId)));
+		return transformedAssets.every((a) => set.has(a.hexagonId));
 	}, [transformedAssets, selectedRows, allAcrossPages, deselectedIds]);
 
 	const allSelectedGlobally = allAcrossPages && selectedCount > 0;
@@ -225,7 +220,7 @@ export function HosesAndEquipments({
 	};
 
 	const handleSelectAllOnPage = (checked: boolean) => {
-		const ids = transformedAssets.map((a) => String(a.orderId));
+		const ids = transformedAssets.map((a) => a.hexagonId);
 		handleBulkSelect(ids, checked);
 	};
 
@@ -279,16 +274,14 @@ export function HosesAndEquipments({
 			const handleAddToCart = async () => {
 				setIsAddingToCart(true);
 				try {
-					const rowsToUse = allAcrossPages
-						? transformedAssets.filter(
-								(a) => !deselectedIds.has(String(a.orderId)),
-							)
-						: transformedAssets.filter((a) =>
-								selectedRows.includes(String(a.orderId)),
-							);
+					const hexagonIds = allAcrossPages
+						? transformedAssets
+								.filter((a) => !deselectedIds.has(a.hexagonId))
+								.map((a) => a.hexagonId)
+						: selectedRows;
 
-					const cartItems = rowsToUse.map((asset) => ({
-						hexagonId: Number(asset.id),
+					const cartItems = hexagonIds.map((hexagonId) => ({
+						hexagonId: Number(hexagonId),
 						quantity: 1,
 						warehouseNumber: "L01",
 						companyNumber: "1",
@@ -459,9 +452,9 @@ export function HosesAndEquipments({
 			cell: (order: HoseOrder) => (
 				<Checkbox
 					onClick={(e) => e.stopPropagation()}
-					checked={isRowSelected(String(order.orderId))}
+					checked={isRowSelected(order.hexagonId)}
 					onCheckedChange={(val) => {
-						handleSelectRow(String(order.orderId), val);
+						handleSelectRow(order.hexagonId, val);
 					}}
 				/>
 			),
@@ -514,6 +507,7 @@ export function HosesAndEquipments({
 			return next;
 		});
 	};
+	console.log(selectedRows, "selectedRows");
 
 	return (
 		<>
@@ -525,7 +519,7 @@ export function HosesAndEquipments({
 					setAllAcrossPages(false);
 					setDeselectedIds(new Set());
 				}}
-				selectedItems={selectedItems}
+				selectedItems={selectedRows}
 				showAllItems={showAllItems}
 				setShowAllItems={setShowAllItems}
 				onConfirm={async () => {
@@ -543,8 +537,8 @@ export function HosesAndEquipments({
 				selectedIds={
 					allAcrossPages
 						? transformedAssets
-								.filter((a) => !deselectedIds.has(String(a.orderId)))
-								.map((a) => String(a.orderId))
+								.filter((a) => !deselectedIds.has(a.hexagonId))
+								.map((a) => a.hexagonId)
 						: selectedRows
 				}
 				onRemoveId={handleRemoveSelectedId}
@@ -559,8 +553,8 @@ export function HosesAndEquipments({
 				selectedIds={
 					allAcrossPages
 						? transformedAssets
-								.filter((a) => !deselectedIds.has(String(a.orderId)))
-								.map((a) => String(a.orderId))
+								.filter((a) => !deselectedIds.has(a.hexagonId))
+								.map((a) => a.hexagonId)
 						: selectedRows
 				}
 				onRemoveId={handleRemoveSelectedId}
@@ -575,8 +569,8 @@ export function HosesAndEquipments({
 				selectedIds={
 					allAcrossPages
 						? transformedAssets
-								.filter((a) => !deselectedIds.has(String(a.orderId)))
-								.map((a) => String(a.orderId))
+								.filter((a) => !deselectedIds.has(a.hexagonId))
+								.map((a) => a.hexagonId)
 						: selectedRows
 				}
 				onRemoveId={handleRemoveSelectedId}
@@ -591,8 +585,8 @@ export function HosesAndEquipments({
 				selectedIds={
 					allAcrossPages
 						? transformedAssets
-								.filter((a) => !deselectedIds.has(String(a.orderId)))
-								.map((a) => String(a.orderId))
+								.filter((a) => !deselectedIds.has(a.hexagonId))
+								.map((a) => a.hexagonId)
 						: selectedRows
 				}
 				onRemoveId={handleRemoveSelectedId}
@@ -605,8 +599,8 @@ export function HosesAndEquipments({
 				selectedIds={
 					allAcrossPages
 						? transformedAssets
-								.filter((a) => !deselectedIds.has(String(a.orderId)))
-								.map((a) => String(a.orderId))
+								.filter((a) => !deselectedIds.has(a.hexagonId))
+								.map((a) => a.hexagonId)
 						: selectedRows
 				}
 				onRemoveId={handleRemoveSelectedId}
@@ -728,24 +722,27 @@ export function HosesAndEquipments({
 								onToggle={handleColumnChange}
 							/>
 
-							<HoseFiltersDropdown
-								selectedFilters={selectedFilters}
-								selectedAgeRanges={selectedAgeRanges}
-								onToggleFilter={(value) => handleFilterChange(value)}
-								onToggleAgeRange={async (value) => {
-									const newRanges = selectedAgeRanges.includes(value)
-										? selectedAgeRanges.filter((r) => r !== value)
-										: [...selectedAgeRanges, value];
-									setSelectedAgeRanges(newRanges);
-									await fetchAssets({
-										page: 1,
-										pageSize: pagination.pageSize,
-										ageSize: newRanges.join(","),
-										...getActiveFilters(),
-										...(searchQuery ? { search: searchQuery } : {}),
-									});
-								}}
-							/>
+							{profile?.defaultCustomerNumber !==
+								SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
+								<HoseFiltersDropdown
+									selectedFilters={selectedFilters}
+									selectedAgeRanges={selectedAgeRanges}
+									onToggleFilter={(value) => handleFilterChange(value)}
+									onToggleAgeRange={async (value) => {
+										const newRanges = selectedAgeRanges.includes(value)
+											? selectedAgeRanges.filter((r) => r !== value)
+											: [...selectedAgeRanges, value];
+										setSelectedAgeRanges(newRanges);
+										await fetchAssets({
+											page: 1,
+											pageSize: pagination.pageSize,
+											ageSize: newRanges.join(","),
+											...getActiveFilters(),
+											...(searchQuery ? { search: searchQuery } : {}),
+										});
+									}}
+								/>
+							)}
 						</div>
 					</div>
 

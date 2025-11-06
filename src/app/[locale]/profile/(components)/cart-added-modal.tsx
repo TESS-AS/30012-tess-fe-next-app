@@ -8,12 +8,10 @@ import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
-type Item = { beskrivelse: string };
-
 export interface CartAddedModalProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
-	selectedItems: Item[];
+	selectedItems: string[];
 	showAllItems: boolean;
 	setShowAllItems: (val: boolean) => void;
 	onConfirm: () => Promise<void> | void;
@@ -64,7 +62,7 @@ export function CartAddedModal({
 										<div
 											key={index}
 											className="text-sm text-gray-600">
-											1 × {item.beskrivelse}
+											1 × {item}
 										</div>
 									))}
 								{selectedItems.length > 5 && (

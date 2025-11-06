@@ -537,10 +537,10 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 									</div>
 									<div className="text-[14px]">{profile.email}</div>
 								</div>
-								<DropdownMenuSeparator />
 								{profile?.defaultCustomerNumber !==
 									SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
 									<>
+										<DropdownMenuSeparator />
 										<DropdownMenuItem
 											className="text-gray-700"
 											onClick={() => router.push("/profile")}>
@@ -552,14 +552,14 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 										<DropdownMenuSeparator />
 										<CustomerNumberSwitcher profile={profile} />
 										<DropdownMenuSeparator />
+										<DropdownMenuItem
+											onClick={handleLogout}
+											className="text-red-700">
+											<LogOut className="mr-2 h-4 w-4 text-red-700" />
+											Logg ut
+										</DropdownMenuItem>
 									</>
 								)}
-								<DropdownMenuItem
-									onClick={handleLogout}
-									className="text-red-700">
-									<LogOut className="mr-2 h-4 w-4 text-red-700" />
-									Logg ut
-								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
 					) : (
