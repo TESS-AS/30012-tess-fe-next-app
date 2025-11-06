@@ -38,6 +38,7 @@ export async function generateMetadata({
 interface Params {
 	locale: string;
 	category: string;
+	subcategory: string;
 	product: string;
 	segment: string;
 }
@@ -57,7 +58,7 @@ export default async function ProductPage({
 	params: Promise<Params>;
 }) {
 	const locale = await getLocale();
-	const { category, product, segment } = await params;
+	const { category, subcategory, product, segment } = await params;
 
 	const _productData = await getProducts(product);
 	const [productData] = _productData;
