@@ -44,8 +44,7 @@ export async function removeFromCart(
 	id: number | string,
 ): Promise<CartResponse> {
 	try {
-		const url =
-			typeof id === "string" ? `/cart/cartKit/${id}` : `/cart/deleteLine/${id}`;
+		const url = `/cart/deleteLine/${id}`;
 		const response: AxiosResponse<CartResponse> = await axiosClient.delete(url);
 		return response.data;
 	} catch (error) {

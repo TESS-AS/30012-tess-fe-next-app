@@ -601,7 +601,6 @@ const CartPage = () => {
 																className="w-4 p-0"
 																size="icon"
 																variant="ghost"
-																disabled={true}
 																onClick={async (e) => {
 																	e.stopPropagation();
 																	try {
