@@ -27,13 +27,11 @@ export const { auth, handlers } = NextAuth({
 		async jwt({ token, account }: any) {
 			if (account) {
 				token.accessToken = account.access_token;
-				token.idToken = account.id_token;
 			}
 			return token;
 		},
 		async session({ session, token }: any) {
 			session.accessToken = token.accessToken;
-			session.idToken = token.idToken;
 			return session;
 		},
 	},

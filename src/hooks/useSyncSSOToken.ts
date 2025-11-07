@@ -10,14 +10,9 @@ export function useSyncSSOToken() {
 
 	useEffect(() => {
 		const sync = async () => {
-			if (
-				status === "authenticated" &&
-				session?.accessToken &&
-				session?.idToken
-			) {
+			if (status === "authenticated" && session?.accessToken) {
 				try {
 					await axiosClient.post("/login/cookie", {
-						idToken: session.idToken,
 						accessToken: session.accessToken,
 					});
 					await axiosClient.get("/user");
