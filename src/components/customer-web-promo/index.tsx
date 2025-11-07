@@ -19,8 +19,9 @@ export function CustomerWebPromo() {
 		<section className="relative mt-[-65px] pt-28 pb-5">
 			<div className="relative container">
 				{/* Switcher */}
-				<div className="mb-8 inline-flex items-center rounded-full bg-[#ECEEEC] p-1 text-sm">
-					<button
+				{/* Commented out switcher 
+				<div className="mb-8 inline-flex items-center rounded-full bg-[#ECEEEC] p-1 text-sm">	
+					/*<button
 						className={cn(
 							"rounded-full px-4 py-1.5 font-medium transition-colors",
 							isCustomerWeb
@@ -39,8 +40,9 @@ export function CustomerWebPromo() {
 						)}
 						onClick={() => setSelectedView("somethingElse")}>
 						{t("switcher.future")}
-					</button>
+					</button>	
 				</div>
+				*/}
 
 				<div className="grid grid-cols-1 gap-12 md:grid-cols-2">
 					{isCustomerWeb ? (
