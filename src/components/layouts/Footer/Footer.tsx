@@ -22,7 +22,7 @@ const footerLinks = {
 		{ label: "Slangevakt 02018", href: "https://www.tess.no/slangevakt" },
 	],
 	detteErTess: [
-		{ label: "Om oss", href: "www.tess.no/om-oss" },
+		{ label: "Om oss", href: "https://www.tess.no/om-oss" },
 		{ label: "Bærekraft", href: "https://www.tess.no/barekraft" },
 		{ label: "Sertifiseringer", href: "https://www.tess.no/sertifiseringer" },
 		{ label: "Jobb og karriere", href: "https://www.tess.no/karriere" },
