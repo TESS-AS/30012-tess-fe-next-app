@@ -230,26 +230,26 @@ export default function ProfilePage() {
 											// 	label: t("ProfilePage.sidebar.dimensions"),
 											// 	icon: "/icons/profile/navbar/folder-outline.svg",
 											// },
-											{
-												href: "usage",
-												label: t("ProfilePage.sidebar.usage"),
-												icon: "/icons/profile/navbar/lock-time-outline.svg",
-											},
-											{
-												href: "users",
-												label: t("ProfilePage.sidebar.users"),
-												icon: "/icons/profile/navbar/user-settings-outline.svg",
-											},
-											{
-												href: "catalog",
-												label: t("ProfilePage.sidebar.catalog"),
-												icon: "/icons/profile/navbar/lock-time-outline.svg",
-											},
-											{
-												href: "settings",
-												label: t("ProfilePage.sidebar.settings"),
-												icon: Settings,
-											},
+											// {
+											// 	href: "usage",
+											// 	label: t("ProfilePage.sidebar.usage"),
+											// 	icon: "/icons/profile/navbar/lock-time-outline.svg",
+											// },
+											// {
+											// 	href: "users",
+											// 	label: t("ProfilePage.sidebar.users"),
+											// 	icon: "/icons/profile/navbar/user-settings-outline.svg",
+											// },
+											// {
+											// 	href: "catalog",
+											// 	label: t("ProfilePage.sidebar.catalog"),
+											// 	icon: "/icons/profile/navbar/lock-time-outline.svg",
+											// },
+											// {
+											// 	href: "settings",
+											// 	label: t("ProfilePage.sidebar.settings"),
+											// 	icon: Settings,
+											// },
 											// {
 											// 	href: "logout",
 											// 	label: t("ProfilePage.sidebar.logout"),
