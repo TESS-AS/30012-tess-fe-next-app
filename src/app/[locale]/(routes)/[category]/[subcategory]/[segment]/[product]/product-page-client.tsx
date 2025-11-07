@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { ProductBreadcrumbs } from "@/components/products/product-breadcrumbs";
 import { ProductGallery } from "@/components/products/product-gallery";
@@ -18,6 +18,7 @@ interface Props {
 	category: string;
 	segment: string;
 	productData: any;
+	preselectedItemNumber?: string;
 }
 
 export function ProductPageClient({
@@ -25,11 +26,36 @@ export function ProductPageClient({
 	category,
 	segment,
 	productData,
+	preselectedItemNumber,
 }: Props) {
 	const t = useTranslations("Product");
+
+	const getInitialItemNumber = () => {
+		if (preselectedItemNumber) {
+			const itemExists = productData.items?.some(
+				(item: any) => item.itemNumber === preselectedItemNumber,
+			);
+			if (itemExists) {
+				return preselectedItemNumber;
+			}
+		}
+		return productData.items[0]?.itemNumber;
+	};
+
 	const [selectedItemNumber, setSelectedItemNumber] = useState(
-		productData.items[0]?.itemNumber,
+		getInitialItemNumber(),
 	);
+
+	useEffect(() => {
+		if (preselectedItemNumber) {
+			const itemExists = productData.items?.some(
+				(item: any) => item.itemNumber === preselectedItemNumber,
+			);
+			if (itemExists && selectedItemNumber !== preselectedItemNumber) {
+				setSelectedItemNumber(preselectedItemNumber);
+			}
+		}
+	}, [preselectedItemNumber, productData.items, selectedItemNumber]);
 
 	const { data: variantData, isLoading } = useGetVariantInfo(
 		productData.items,

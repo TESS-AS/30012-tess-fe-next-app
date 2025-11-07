@@ -7,6 +7,8 @@ export interface IProductSearch {
 	thumbnail: string;
 	attribute1?: string | null;
 	attribute2?: string | null;
+	redirect?: string;
+	itemNumberMatch?: boolean;
 }
 
 export interface ProductAttributes {
