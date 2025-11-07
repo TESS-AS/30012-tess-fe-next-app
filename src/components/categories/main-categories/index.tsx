@@ -27,8 +27,7 @@ export default function MainCategorySection() {
         						netthandel@tess.no
     						</a>
 							<br/>
-							Ønsker du å bruke den gamle løsningen? Gå til {" "} <a href="https://ny.tess.no">www.ny.TESS.no</a>
-
+							Ønsker du å bruke den gamle løsningen? Gå til {" "} <a href="https://ny.tess.no" className="underline text-[#00315B]">www.ny.tess.no</a>
 							</p>
 							{/** Commenting out till we have a link we want to use 
 							<Button
