@@ -14,13 +14,19 @@ export default function MainCategorySection() {
 					<div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
 						<div className="space-y-6">
 							<h2 className="text-6xl leading-tight font-light text-gray-900">
-								Tjenester og bærekraftige løsninger
+								Velkommen til TESSIX Netthandel
 							</h2>
 							<p className="text-lg leading-relaxed text-[#5A615D]">
-								Vi har levert slanger til alle formål i mer enn 55 år. I dag er
-								vi en ledende leverandør av sveiseutstyr, drifts- og
-								vedlikeholdsprodukter, og andre kritiske, kostnadseffektive
-								løsninger for bedrifter.
+							TESSIX Netthandel gir deg tilgang til et langt raskere og mer presist søk, 
+							bedre oversikt over produkter og en kundetilpasset handelsopplevelse.<br/>  
+							Netthandelen er fremdeles under utvikling, og din erfaring hjelper oss å videreutvikle en løsning som skal gi mer verdi og 
+							gjøre hverdagen enklere.<br/> 
+							Opplever du feil, mangler eller har forslag til forbedringer, 
+							setter vi stor pris på tilbakemeldinger, enten via skjema eller på e-post til {" "}       
+							<a href="mailto:netthandel@tess.no" className="underline text-[#00315B]">
+        						netthandel@tess.no
+    						</a>
+
 							</p>
 							{/** Commenting out till we have a link we want to use 
 							<Button
