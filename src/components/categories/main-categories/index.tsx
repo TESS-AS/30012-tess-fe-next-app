@@ -22,12 +22,14 @@ export default function MainCategorySection() {
 								vedlikeholdsprodukter, og andre kritiske, kostnadseffektive
 								løsninger for bedrifter.
 							</p>
+							{/** Commenting out till we have a link we want to use 
 							<Button
 								variant="outline"
 								className="bg-white text-sm text-black"
 								onClick={() => {}}>
-								Les mer om våre løsninger
+								Les mer om Tess
 							</Button>
+							*/}
 						</div>
 
 						<div className="flex justify-center md:justify-end">
