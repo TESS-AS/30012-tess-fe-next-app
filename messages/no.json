@@ -147,12 +147,14 @@
 		"saving": "Lagrer..."
 	},
 	"CustomerWebPromo": {
+		
 		"switcher": {
 			"news": "Nyhet",
 			"future": "Fremtidens kundeweb for THM"
 		},
+		
 		"customerWeb": {
-			"title": "Fremtidens kundeweb for THM sammen former vi l\u00f8sningen",
+			"title": "Fremtidens kundeweb for THM",
 			"description": "Vi bygger n\u00e5 neste generasjon kundeweb for TESS Hose Management (THM). Dette er mer enn en oppdatering \u2013 vi utvikler en moderne plattform som kombinerer e-handel og avansert beslutningsst\u00f8tte, slik at du f\u00e5r full oversikt og kontroll over slanger og utstyr.",
 			"feedbackPrompt": "Vær med og påvirk hvordan vi former løsningen",
 			"feedbackSubtext": "si oss dine behov, ønsker eller legg igjen et forslag.",
