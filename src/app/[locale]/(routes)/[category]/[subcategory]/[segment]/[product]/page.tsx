@@ -54,11 +54,14 @@ async function getProducts(productId: string) {
 
 export default async function ProductPage({
 	params,
+	searchParams,
 }: {
 	params: Promise<Params>;
+	searchParams: Promise<{ itemNumber?: string }>;
 }) {
 	const locale = await getLocale();
 	const { category, subcategory, product, segment } = await params;
+	const { itemNumber } = await searchParams;
 
 	const _productData = await getProducts(product);
 	const [productData] = _productData;
@@ -75,6 +78,7 @@ export default async function ProductPage({
 			category={category}
 			segment={segment}
 			productData={productData}
+			preselectedItemNumber={itemNumber}
 		/>
 	);
 }

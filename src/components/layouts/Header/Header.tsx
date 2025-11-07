@@ -173,6 +173,30 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		e.preventDefault();
 		const queryToSearch = searchQuery.trim() || urlQueryForDisplay.trim();
 		if (queryToSearch) {
+			const firstProduct = searchData?.productRes?.[0];
+			if (firstProduct?.redirect && firstProduct?.itemNumberMatch) {
+				justNavigatedRef.current = true;
+				let redirectPath = firstProduct.redirect.trim();
+
+				if (!redirectPath.startsWith("/")) {
+					redirectPath = `/${redirectPath}`;
+				}
+
+				try {
+					const url = new URL(redirectPath, window.location.origin);
+					url.searchParams.set("itemNumber", queryToSearch);
+					redirectPath = url.pathname + url.search;
+				} catch {
+					const separator = redirectPath.includes("?") ? "&" : "?";
+					redirectPath = `${redirectPath}${separator}itemNumber=${encodeURIComponent(queryToSearch)}`;
+				}
+				router.push(redirectPath);
+				setSearchQuery("");
+				inputRef.current?.blur();
+				setIsInputFocused(false);
+				setIsSearchOpen(false);
+				return;
+			}
 			justNavigatedRef.current = true;
 			router.push(`/search?query=${encodeURIComponent(queryToSearch)}`);
 			setSearchQuery("");
@@ -378,12 +402,13 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 																default: "Dine treff",
 															})}
 														</h3>
-														{searchData && (
-															<span className="text-sm text-gray-500">
-																{searchData.productRes?.length} /{" "}
-																{searchData.productRes.length} produkter
-															</span>
-														)}
+														{searchData?.productRes &&
+															Array.isArray(searchData.productRes) && (
+																<span className="text-sm text-gray-500">
+																	{searchData.productRes.length} /{" "}
+																	{searchData.productRes.length} produkter
+																</span>
+															)}
 													</div>
 
 													{isSearchLoading ? (
@@ -492,13 +517,15 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 																	<div className="h-4 w-4 rounded-full border-2 border-gray-300" />
 																)}
 															</div>
-															<span className="break-words text-sm font-medium text-[#0F1912]">
+															<span className="text-sm font-medium break-words text-[#0F1912]">
 																{a.assortmentname}
 															</span>
 														</button>
 													</TooltipTrigger>
 													{a.assortmentname.length > 30 && (
-														<TooltipContent side="right" className="max-w-[300px]">
+														<TooltipContent
+															side="right"
+															className="max-w-[300px]">
 															<p className="break-words">{a.assortmentname}</p>
 														</TooltipContent>
 													)}
