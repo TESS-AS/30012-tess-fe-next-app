@@ -17,10 +17,8 @@ export default function MainCategorySection() {
 								Velkommen til TESSIX Netthandel
 							</h2>
 							<p className="text-lg leading-relaxed text-[#5A615D]">
-							TESSIX Netthandel gir deg tilgang til et langt raskere og mer presist søk, 
-							bedre oversikt over produkter og en kundetilpasset handelsopplevelse.<br/>  
 							Netthandelen er fremdeles under utvikling, og din erfaring hjelper oss å videreutvikle en løsning som skal gi mer verdi og 
-							gjøre hverdagen enklere.<br/> 
+							gjøre hverdagen enklere.<br/><b>OBS for en detaljert visning må du være innlogget</b><br/> 
 							Opplever du feil, mangler eller har forslag til forbedringer, 
 							setter vi stor pris på tilbakemeldinger, enten via skjema eller på e-post til {" "}       
 							<a href="mailto:netthandel@tess.no" className="underline text-[#00315B]">
