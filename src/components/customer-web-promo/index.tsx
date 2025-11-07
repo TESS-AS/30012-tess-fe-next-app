@@ -60,11 +60,13 @@ export function CustomerWebPromo() {
 									</span>
 									{t("customerWeb.feedbackSubtext")}
 								</p>
+								{/* Commented out till functionality is added
 								<Button
 									variant="outline"
 									className="mt-6 w-max bg-white text-black">
 									{t("customerWeb.feedbackButton")}
 								</Button>
+								*/}
 							</div>
 							<div className="flex justify-center md:justify-end">
 								<figure className="w-[640px] max-w-full text-center">
