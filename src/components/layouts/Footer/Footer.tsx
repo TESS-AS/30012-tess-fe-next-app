@@ -5,10 +5,10 @@ import Link from "next/link";
 
 const footerLinks = {
 	hjelp: [
-		{ label: "Kontakt oss", href: "/kontakt" },
+		{ label: "Kontakt oss", href: "https://www.tess.no/kontakt-oss" },
 		{ label: "Vanlige spørsmål", href: "/faq" },
-		{ label: "Kjøpsbetingelser(e-handel)", href: "/kjopsbetingelser" },
-		{ label: "Slangehåndbok", href: "/slangehandbok" },
+		{ label: "Kjøpsbetingelser(e-handel)", href: "https://www.tess.no/contentassets/4aa7934af5954974ac3a623fbe7faa61/salgsvilkar-for-varer.pdf" },
+		{ label: "Slangehåndbok", href: "https://viewer.ipaper.io/tess-as/slangehaandbok-2025-2026/" },
 		{
 			label: "Salgs- og leveringsbetingelser",
 			href: "/salgs-leveringsbetingelser",
@@ -16,25 +16,25 @@ const footerLinks = {
 		{ label: "Personvernerklæring", href: "/personvern" },
 	],
 	tjenester: [
-		{ label: "Slangekontroll THM", href: "/slangekontroll" },
-		{ label: "Integrerte forsyningsløsninger", href: "/forsyningslosninger" },
-		{ label: "Mobilservice", href: "/mobilservice" },
-		{ label: "Slangevakt 02018", href: "/slangevakt" },
+		{ label: "Slangekontroll THM", href: "https://www.tess.no/thm" },
+		{ label: "Integrerte forsyningsløsninger", href: "https://www.tess.no/forsyningslosninger" },
+		{ label: "Mobilservice", href: "https://www.tess.no/mobilservice" },
+		{ label: "Slangevakt 02018", href: "https://www.tess.no/slangevakt" },
 	],
 	detteErTess: [
-		{ label: "Om oss", href: "/om-oss" },
-		{ label: "Bærekraft", href: "/baerekraft" },
-		{ label: "Sertifiseringer", href: "/sertifiseringer" },
-		{ label: "Jobb og karriere", href: "/karriere" },
+		{ label: "Om oss", href: "www.tess.no/om-oss" },
+		{ label: "Bærekraft", href: "https://www.tess.no/barekraft" },
+		{ label: "Sertifiseringer", href: "https://www.tess.no/sertifiseringer" },
+		{ label: "Jobb og karriere", href: "https://www.tess.no/karriere" },
 	],
 };
 
 const socialLinks = [
 	{
 		name: "LinkedIn",
-		href: "https://linkedin.com",
+		href: "https://www.linkedin.com/company/tess/posts/?feedView=all",
 		icon: Linkedin,
-	},
+	}/*,
 	{
 		name: "Instagram",
 		href: "https://instagram.com",
@@ -44,7 +44,7 @@ const socialLinks = [
 		name: "Facebook",
 		href: "https://facebook.com",
 		icon: Facebook,
-	},
+	},*/
 ];
 
 export function Footer() {
