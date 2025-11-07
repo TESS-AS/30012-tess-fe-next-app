@@ -26,6 +26,8 @@ export default function MainCategorySection() {
 							<a href="mailto:netthandel@tess.no" className="underline text-[#00315B]">
         						netthandel@tess.no
     						</a>
+							<br/>
+							Ønsker du å bruke den gamle løsningen? Gå til {" "} <a href="https://ny.tess.no">www.ny.TESS.no</a>
 
 							</p>
 							{/** Commenting out till we have a link we want to use 
