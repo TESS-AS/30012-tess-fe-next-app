@@ -31,7 +31,7 @@ export default function Home() {
 										Finn riktig slange, kobling eller utstyr – når du trenger
 										det.
 										<br />
-										Vi har over 130 servicesentre klare til å levere.
+										Vi har over 140 servicesentre klare til å levere.
 									</p>
 								</div>
 							</div>
