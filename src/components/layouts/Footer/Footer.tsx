@@ -6,7 +6,7 @@ import Link from "next/link";
 const footerLinks = {
 	hjelp: [
 		{ label: "Kontakt oss", href: "https://www.tess.no/kontakt-oss" },
-		{ label: "Vanlige spørsmål", href: "/faq" },
+		/*{ label: "Vanlige spørsmål", href: "/faq" },*/
 		{ label: "Kjøpsbetingelser(e-handel)", href: "https://www.tess.no/contentassets/4aa7934af5954974ac3a623fbe7faa61/salgsvilkar-for-varer.pdf" },
 		{ label: "Slangehåndbok", href: "https://viewer.ipaper.io/tess-as/slangehaandbok-2025-2026/" },
 		{
