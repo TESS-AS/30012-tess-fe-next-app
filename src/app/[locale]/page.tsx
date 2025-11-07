@@ -10,6 +10,7 @@ export default function Home() {
 
 	return (
 		<div className="mt-[-20px] grid min-h-screen grid-rows-[auto_1fr_20px] gap-16">
+			
 			<div className="relative right-1/2 left-1/2 -mr-[50vw] -ml-[50vw] w-screen">
 				<Card className="w-full overflow-hidden rounded-none">
 					<CardContent className="relative h-[600px] p-0 shadow-md">
@@ -40,8 +41,8 @@ export default function Home() {
 				</Card>
 			</div>
 			<div className="flex flex-col justify-between gap-5">
-				<Quote />
 				<MainCategorySection />
+				<Quote />
 				<CustomerWebPromo />
 			</div>
 		</div>
