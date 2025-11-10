@@ -135,12 +135,7 @@ export default function AuthDialog({
 								{authenticatingProvider === "microsoft-entra-id"
 									? "Logging in..."
 									: t("AuthDialog.loginAs")}
-								<Image
-									src="/icons/TESSLogo.svg"
-									alt="TESS"
-									width={70}
-									height={70}
-								/>
+
 								{authenticatingProvider === "microsoft-entra-id"
 									? ""
 									: t("AuthDialog.employee")}

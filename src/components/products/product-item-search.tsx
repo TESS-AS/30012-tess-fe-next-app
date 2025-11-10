@@ -105,11 +105,12 @@ export function ProductItem({
 	};
 
 	const matchedAttributes: string[] = (() => {
-		const q = (searchQuery || "").trim().toLowerCase();
+		const trimmedQuery = (searchQuery || "").trim();
+		const q = trimmedQuery.toLowerCase();
 		if (!q) return [];
 		const set = new Set<string>();
 
-		if (product.productName?.toLowerCase().includes(q)) set.add(searchQuery);
+		if (product.productName?.toLowerCase().includes(q)) set.add(trimmedQuery);
 
 		(product as any)?.attributes?.forEach?.((a: any) => {
 			const k = String(a?.key ?? "").toLowerCase();

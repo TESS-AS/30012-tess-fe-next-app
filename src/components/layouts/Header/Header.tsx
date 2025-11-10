@@ -69,6 +69,8 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		refetch: refetchCategories,
 	} = useCategories();
 
+	console.log(categories, "useee");
+
 	const currentLocale = useLocale();
 	const t = useTranslations();
 	const router = useRouter();

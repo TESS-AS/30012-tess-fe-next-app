@@ -11,4 +11,5 @@ export interface Category {
 	slug: string;
 	groupId: string;
 	subcategories?: Category[];
+	image?: string;
 }

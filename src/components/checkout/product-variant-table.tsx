@@ -486,435 +486,425 @@ export default function ProductVariantTable({
 			)}
 
 			<div className="mt-5 max-h-[70vh] overflow-y-auto">
-				<div className="overflow-x-auto">
-					<Table className="w-full min-w-max rounded-md">
-						<TableHeader className="bg-muted text-muted-foreground">
-							<TableRow>
-								{renderColumns()
-									.filter(
-										(col) => !["quantity", "warehouse", "cart"].includes(col),
-									)
-									.map((col) => {
-										return (
-											<TableHead
-												key={col}
-												className={
-													col === "image"
-														? "min-w-[80px]"
-														: col === "itemNumber"
-															? "min-w-[120px]"
-															: col === "unspsc"
-																? "min-w-[100px]"
-																: col === "contentUnit"
-																	? "min-w-[80px]"
-																	: col === "price"
-																		? "min-w-[100px]"
-																		: "min-w-[120px]"
-												}>
-												{columnLabels[col]}
-											</TableHead>
-										);
-									})}
-								{allAttributeNames
-									.filter((name) => visibleAttributes[name])
-									.map((name) => (
+				<Table
+					noOverflow
+					className="w-full min-w-max rounded-md">
+					<TableHeader className="bg-muted text-muted-foreground sticky top-0">
+						<TableRow>
+							{renderColumns()
+								.filter(
+									(col) => !["quantity", "warehouse", "cart"].includes(col),
+								)
+								.map((col) => {
+									return (
 										<TableHead
-											key={name}
-											className="min-w-[120px]">
-											{name}
-										</TableHead>
-									))}
-								{renderColumns()
-									.filter((col) =>
-										["quantity", "warehouse", "cart"].includes(col),
-									)
-									.map((col) => {
-										return (
-											<TableHead
-												key={col}
-												className={
-													col === "quantity"
+											key={col}
+											className={
+												col === "image"
+													? "min-w-[80px]"
+													: col === "itemNumber"
 														? "min-w-[120px]"
-														: col === "warehouse"
-															? "min-w-[200px]"
-															: col === "cart"
-																? "min-w-[140px]"
-																: "min-w-[120px]"
-												}>
-												{columnLabels[col]}
-											</TableHead>
-										);
-									})}
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{filteredVariants.map((variant) => {
-								const qty = quantities[variant.itemNumber] || 1;
-								const selectedWarehouse = warehouse[variant.itemNumber];
+														: col === "unspsc"
+															? "min-w-[100px]"
+															: col === "contentUnit"
+																? "min-w-[80px]"
+																: col === "price"
+																	? "min-w-[100px]"
+																	: "min-w-[120px]"
+											}>
+											{columnLabels[col]}
+										</TableHead>
+									);
+								})}
+							{allAttributeNames
+								.filter((name) => visibleAttributes[name])
+								.map((name) => (
+									<TableHead
+										key={name}
+										className="min-w-[120px]">
+										{name}
+									</TableHead>
+								))}
+							{renderColumns()
+								.filter((col) =>
+									["quantity", "warehouse", "cart"].includes(col),
+								)
+								.map((col) => {
+									return (
+										<TableHead
+											key={col}
+											className={
+												col === "quantity"
+													? "min-w-[120px]"
+													: col === "warehouse"
+														? "min-w-[200px]"
+														: col === "cart"
+															? "min-w-[140px]"
+															: "min-w-[120px]"
+											}>
+											{columnLabels[col]}
+										</TableHead>
+									);
+								})}
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{filteredVariants.map((variant) => {
+							const qty = quantities[variant.itemNumber] || 1;
+							const selectedWarehouse = warehouse[variant.itemNumber];
 
-								return (
-									<TableRow
-										key={variant.itemNumber}
-										className="hover:bg-[#F0FCF2]">
-										{renderColumns()
-											.filter(
-												(col) =>
-													!["quantity", "warehouse", "cart"].includes(col),
-											)
-											.map((col) => {
-												switch (col) {
-													case "image":
-														const imageUrl =
-															columnAttributes?.[variant.itemNumber]
-																?.mediaId?.[0]?.url ||
-															variant.mediaId?.[0]?.url;
-														return (
-															<TableCell
-																key="image"
-																className="min-w-[80px]">
-																{imageUrl ? (
-																	<Image
-																		src={imageUrl}
-																		alt={variant.itemNumber.toString()}
-																		width={60}
-																		height={60}
-																		className="object-contain"
-																	/>
-																) : (
-																	<div className="bg-muted h-[60px] w-[60px]" />
-																)}
-															</TableCell>
-														);
-													case "itemNumber":
-														return (
-															<TableCell
-																key="itemNumber"
-																className="min-w-[120px]">
-																{variant.itemNumber}
-															</TableCell>
-														);
-													case "unspsc":
-														const unspscValue =
-															columnAttributes?.[
-																variant.itemNumber
-															]?.attributes?.find((attr: any) => attr.unspsc)
-																?.unspsc ||
-															columnAttributes?.[
-																variant.itemNumber
-															]?.attributes?.find(
-																(attr: any) =>
-																	attr.attributeIdentifier === "unspsc" ||
-																	attr.name?.toLowerCase().includes("unspsc"),
-															)?.valueDef ||
-															variant.unspsc ||
-															"-";
-														return (
-															<TableCell
-																key="unspsc"
-																className="min-w-[100px]">
-																{unspscValue}
-															</TableCell>
-														);
-													case "contentUnit":
-														const contentUnitValue =
-															columnAttributes?.[
-																variant.itemNumber
-															]?.attributes?.find(
-																(attr: any) => attr.contentUnit,
-															)?.contentUnit ||
-															columnAttributes?.[
-																variant.itemNumber
-															]?.attributes?.find(
-																(attr: any) =>
-																	attr.attributeIdentifier === "contentUnit" ||
-																	attr.name
-																		?.toLowerCase()
-																		.includes("contentunit") ||
-																	attr.name
-																		?.toLowerCase()
-																		.includes("content unit"),
-															)?.valueDef ||
-															variant.contentUnit ||
-															"-";
-														return (
-															<TableCell
-																key="contentUnit"
-																className="min-w-[80px]">
-																{contentUnitValue}
-															</TableCell>
-														);
-													case "price":
-														return (
-															<TableCell
-																key="price"
-																className="min-w-[100px]">
-																{loading[variant.itemNumber] ? (
-																	<div className="flex items-center gap-2">
-																		<Loader2 className="h-4 w-4 animate-spin" />
-																		<span className="text-muted-foreground text-sm">
-																			{t("Product.loadingPrice")}
-																		</span>
-																	</div>
-																) : (
-																	formatNorwegianCurrency(
-																		prices[variant.itemNumber] ?? 0,
-																	)
-																)}
-															</TableCell>
-														);
-													default:
-														return null;
-												}
-											})}
-										{allAttributeNames
-											.filter((name) => visibleAttributes[name])
-											.map((name) => {
-												const attrs =
-													columnAttributes?.[variant.itemNumber]?.attributes ??
-													[];
-												const attr = attrs.find((a: any) => a.name === name);
-
-												return (
-													<TableCell
-														key={`${variant.itemNumber}-${name}`}
-														className="min-w-[120px]">
-														{attr?.valueDef ?? "-"}
-													</TableCell>
-												);
-											})}
-										{renderColumns()
-											.filter((col) =>
-												["quantity", "warehouse", "cart"].includes(col),
-											)
-											.map((col) => {
-												switch (col) {
-													case "quantity":
-														return (
-															<TableCell
-																key="quantity"
-																className="min-w-[120px]">
-																<QuantityButtons
-																	quantity={qty}
-																	onIncrease={() =>
-																		setQuantities((prev) => ({
-																			...prev,
-																			[variant.itemNumber]: qty + 1,
-																		}))
-																	}
-																	onDecrease={() =>
-																		setQuantities((prev) => ({
-																			...prev,
-																			[variant.itemNumber]: Math.max(
-																				1,
-																				qty - 1,
-																			),
-																		}))
-																	}
+							return (
+								<TableRow
+									key={variant.itemNumber}
+									className="hover:bg-[#F0FCF2]">
+									{renderColumns()
+										.filter(
+											(col) => !["quantity", "warehouse", "cart"].includes(col),
+										)
+										.map((col) => {
+											switch (col) {
+												case "image":
+													const imageUrl =
+														columnAttributes?.[variant.itemNumber]?.mediaId?.[0]
+															?.url || variant.mediaId?.[0]?.url;
+													return (
+														<TableCell
+															key="image"
+															className="min-w-[80px]">
+															{imageUrl ? (
+																<Image
+																	src={imageUrl}
+																	alt={variant.itemNumber.toString()}
+																	width={60}
+																	height={60}
+																	className="object-contain"
 																/>
-															</TableCell>
-														);
-													case "warehouse":
-														const warehouseOptions =
-															getWarehouseOptions[variant.itemNumber] || [];
-														const hasManyOptions = warehouseOptions.length > 20;
+															) : (
+																<div className="bg-muted h-[60px] w-[60px]" />
+															)}
+														</TableCell>
+													);
+												case "itemNumber":
+													return (
+														<TableCell
+															key="itemNumber"
+															className="min-w-[120px]">
+															{variant.itemNumber}
+														</TableCell>
+													);
+												case "unspsc":
+													const unspscValue =
+														columnAttributes?.[
+															variant.itemNumber
+														]?.attributes?.find((attr: any) => attr.unspsc)
+															?.unspsc ||
+														columnAttributes?.[
+															variant.itemNumber
+														]?.attributes?.find(
+															(attr: any) =>
+																attr.attributeIdentifier === "unspsc" ||
+																attr.name?.toLowerCase().includes("unspsc"),
+														)?.valueDef ||
+														variant.unspsc ||
+														"-";
+													return (
+														<TableCell
+															key="unspsc"
+															className="min-w-[100px]">
+															{unspscValue}
+														</TableCell>
+													);
+												case "contentUnit":
+													const contentUnitValue =
+														columnAttributes?.[
+															variant.itemNumber
+														]?.attributes?.find((attr: any) => attr.contentUnit)
+															?.contentUnit ||
+														columnAttributes?.[
+															variant.itemNumber
+														]?.attributes?.find(
+															(attr: any) =>
+																attr.attributeIdentifier === "contentUnit" ||
+																attr.name
+																	?.toLowerCase()
+																	.includes("contentunit") ||
+																attr.name
+																	?.toLowerCase()
+																	.includes("content unit"),
+														)?.valueDef ||
+														variant.contentUnit ||
+														"-";
+													return (
+														<TableCell
+															key="contentUnit"
+															className="min-w-[80px]">
+															{contentUnitValue}
+														</TableCell>
+													);
+												case "price":
+													return (
+														<TableCell
+															key="price"
+															className="min-w-[100px]">
+															{loading[variant.itemNumber] ? (
+																<div className="flex items-center gap-2">
+																	<Loader2 className="h-4 w-4 animate-spin" />
+																	<span className="text-muted-foreground text-sm">
+																		{t("Product.loadingPrice")}
+																	</span>
+																</div>
+															) : (
+																formatNorwegianCurrency(
+																	prices[variant.itemNumber] ?? 0,
+																)
+															)}
+														</TableCell>
+													);
+												default:
+													return null;
+											}
+										})}
+									{allAttributeNames
+										.filter((name) => visibleAttributes[name])
+										.map((name) => {
+											const attrs =
+												columnAttributes?.[variant.itemNumber]?.attributes ??
+												[];
+											const attr = attrs.find((a: any) => a.name === name);
 
-														return (
-															<TableCell
-																key="warehouse"
-																className="min-w-[200px]">
-																<Select
-																	value={selectedWarehouse || ""}
-																	onValueChange={async (value) => {
-																		setWarehouse((prev) => ({
-																			...prev,
-																			[variant.itemNumber]: value,
-																		}));
-																		await calculatePriceForVariant(variant);
-																	}}>
-																	<SelectTrigger className="w-[180px]">
-																		<SelectValue
-																			placeholder={
-																				warehouseOptions.length === 0
-																					? t("Product.noWarehouses")
-																					: t("Product.selectWarehouse")
-																			}
-																		/>
-																	</SelectTrigger>
-																	<SelectContent className="max-h-[300px] overflow-y-auto">
-																		{warehouseOptions.length === 0 ? (
-																			<div className="px-2 py-1 text-sm text-gray-500">
-																				{t("Product.noWarehousesAvailable")}
-																			</div>
-																		) : (
-																			<>
-																				{hasManyOptions && (
-																					<div className="border-b px-2 py-1 text-xs text-gray-500">
-																						{t("Product.showingFirst")}{" "}
-																						{warehouseOptions.length}{" "}
-																						{t("Product.warehouses")}
-																					</div>
-																				)}
-																				{warehouseOptions.map(
-																					(w: any, index: number) => (
-																						<SelectItem
-																							key={`${variant.itemNumber}-${w.warehouseId}-${index}`}
-																							value={w.warehouseId.toString()}>
-																							<div className="flex items-center gap-2">
-																								<CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
-																								<span className="truncate">
-																									({w.balance}){" "}
-																									{w.warehouseName}
-																								</span>
-																							</div>
-																						</SelectItem>
-																					),
-																				)}
-																			</>
-																		)}
-																	</SelectContent>
-																</Select>
-															</TableCell>
-														);
-													case "cart":
-														return (
-															<TableCell
-																key="cart"
-																className="min-w-[140px]">
-																{!hasAddToCart ? (
-																	selectedItemNumber ===
-																	variant.itemNumber.toString() ? (
-																		<Button
-																			size="sm"
-																			className="bg-green-600 text-white">
-																			<Check className="h-4 w-4" />
-																			{t("Product.selected")}
-																		</Button>
+											return (
+												<TableCell
+													key={`${variant.itemNumber}-${name}`}
+													className="min-w-[120px]">
+													{attr?.valueDef ?? "-"}
+												</TableCell>
+											);
+										})}
+									{renderColumns()
+										.filter((col) =>
+											["quantity", "warehouse", "cart"].includes(col),
+										)
+										.map((col) => {
+											switch (col) {
+												case "quantity":
+													return (
+														<TableCell
+															key="quantity"
+															className="min-w-[120px]">
+															<QuantityButtons
+																quantity={qty}
+																onIncrease={() =>
+																	setQuantities((prev) => ({
+																		...prev,
+																		[variant.itemNumber]: qty + 1,
+																	}))
+																}
+																onDecrease={() =>
+																	setQuantities((prev) => ({
+																		...prev,
+																		[variant.itemNumber]: Math.max(1, qty - 1),
+																	}))
+																}
+															/>
+														</TableCell>
+													);
+												case "warehouse":
+													const warehouseOptions =
+														getWarehouseOptions[variant.itemNumber] || [];
+													const hasManyOptions = warehouseOptions.length > 20;
+
+													return (
+														<TableCell
+															key="warehouse"
+															className="min-w-[200px]">
+															<Select
+																value={selectedWarehouse || ""}
+																onValueChange={async (value) => {
+																	setWarehouse((prev) => ({
+																		...prev,
+																		[variant.itemNumber]: value,
+																	}));
+																	await calculatePriceForVariant(variant);
+																}}>
+																<SelectTrigger className="w-[180px]">
+																	<SelectValue
+																		placeholder={
+																			warehouseOptions.length === 0
+																				? t("Product.noWarehouses")
+																				: t("Product.selectWarehouse")
+																		}
+																	/>
+																</SelectTrigger>
+																<SelectContent className="max-h-[300px] overflow-y-auto">
+																	{warehouseOptions.length === 0 ? (
+																		<div className="px-2 py-1 text-sm text-gray-500">
+																			{t("Product.noWarehousesAvailable")}
+																		</div>
 																	) : (
-																		<Button
-																			size="sm"
-																			variant="outline"
-																			onClick={() =>
-																				onSelectVariant?.(
-																					variant.itemNumber.toString(),
-																				)
-																			}>
-																			{t("Product.select")}
-																		</Button>
-																	)
+																		<>
+																			{hasManyOptions && (
+																				<div className="border-b px-2 py-1 text-xs text-gray-500">
+																					{t("Product.showingFirst")}{" "}
+																					{warehouseOptions.length}{" "}
+																					{t("Product.warehouses")}
+																				</div>
+																			)}
+																			{warehouseOptions.map(
+																				(w: any, index: number) => (
+																					<SelectItem
+																						key={`${variant.itemNumber}-${w.warehouseId}-${index}`}
+																						value={w.warehouseId.toString()}>
+																						<div className="flex items-center gap-2">
+																							<CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
+																							<span className="truncate">
+																								{w.balance} stk på {w.warehouseName}
+																							</span>
+																						</div>
+																					</SelectItem>
+																				),
+																			)}
+																		</>
+																	)}
+																</SelectContent>
+															</Select>
+														</TableCell>
+													);
+												case "cart":
+													return (
+														<TableCell
+															key="cart"
+															className="min-w-[140px]">
+															{!hasAddToCart ? (
+																selectedItemNumber ===
+																variant.itemNumber.toString() ? (
+																	<Button
+																		size="sm"
+																		className="bg-green-600 text-white">
+																		<Check className="h-4 w-4" />
+																		{t("Product.selected")}
+																	</Button>
 																) : (
 																	<Button
-																		variant="outlineGreen"
 																		size="sm"
-																		disabled={loading[variant.itemNumber]}
-																		onClick={async () => {
-																			if (!selectedWarehouse) {
-																				toast(
-																					t("Product.selectWarehouseFirst"),
-																					{
-																						type: "warning",
-																						position: "bottom-right",
-																						autoClose: 2000,
-																					},
-																				);
-																				return;
-																			}
-																			const selectedWarehouseData =
-																				variant.warehouses?.find(
-																					(w) =>
-																						w.warehouseNumber ===
-																						selectedWarehouse,
-																				);
+																		variant="outline"
+																		onClick={() =>
+																			onSelectVariant?.(
+																				variant.itemNumber.toString(),
+																			)
+																		}>
+																		{t("Product.select")}
+																	</Button>
+																)
+															) : (
+																<Button
+																	variant="outlineGreen"
+																	size="sm"
+																	disabled={loading[variant.itemNumber]}
+																	onClick={async () => {
+																		if (!selectedWarehouse) {
+																			toast(t("Product.selectWarehouseFirst"), {
+																				type: "warning",
+																				position: "bottom-right",
+																				autoClose: 2000,
+																			});
+																			return;
+																		}
+																		const selectedWarehouseData =
+																			variant.warehouses?.find(
+																				(w) =>
+																					w.warehouseNumber ===
+																					selectedWarehouse,
+																			);
+																		if (
+																			!selectedWarehouseData?.balance &&
+																			selectedWarehouseData?.balance !== 0
+																		) {
+																			toast(
+																				t("Product.noBalanceForWarehouse"),
+																				{
+																					type: "warning",
+																					position: "bottom-right",
+																					autoClose: 2000,
+																				},
+																			);
+																			return;
+																		}
+
+																		setLoading((prev) => ({
+																			...prev,
+																			[variant.itemNumber]: true,
+																		}));
+																		try {
+																			const response = await addToCart({
+																				productNumber,
+																				itemNumber:
+																					variant.itemNumber.toString(),
+																				quantity: qty,
+																				warehouseNumber: selectedWarehouse,
+																				companyNumber: "1",
+																			});
+
+																			setIsCartChanging(!isCartChanging);
+
 																			if (
-																				!selectedWarehouseData?.balance &&
-																				selectedWarehouseData?.balance !== 0
+																				response.message ===
+																				"Error adding to cart"
 																			) {
-																				toast(
-																					t("Product.noBalanceForWarehouse"),
-																					{
-																						type: "warning",
-																						position: "bottom-right",
-																						autoClose: 2000,
-																					},
-																				);
-																				return;
+																				throw new Error(response.message);
 																			}
 
+																			toast(t("Product.addedToCart"), {
+																				type: "success",
+																				position: "bottom-right",
+																				autoClose: 2000,
+																			});
+
+																			setQuantities((prev) => ({
+																				...prev,
+																				[variant.itemNumber]: 1,
+																			}));
+																			await getCart();
+																		} catch (err) {
+																			console.error(
+																				"Error adding to cart:",
+																				err,
+																			);
+																			toast(t("Product.errorAddingToCart"), {
+																				type: "error",
+																				position: "bottom-right",
+																				autoClose: 2000,
+																			});
+																		} finally {
 																			setLoading((prev) => ({
 																				...prev,
-																				[variant.itemNumber]: true,
+																				[variant.itemNumber]: false,
 																			}));
-																			try {
-																				const response = await addToCart({
-																					productNumber,
-																					itemNumber:
-																						variant.itemNumber.toString(),
-																					quantity: qty,
-																					warehouseNumber: selectedWarehouse,
-																					companyNumber: "1",
-																				});
-
-																				setIsCartChanging(!isCartChanging);
-
-																				if (
-																					response.message ===
-																					"Error adding to cart"
-																				) {
-																					throw new Error(response.message);
-																				}
-
-																				toast(t("Product.addedToCart"), {
-																					type: "success",
-																					position: "bottom-right",
-																					autoClose: 2000,
-																				});
-
-																				setQuantities((prev) => ({
-																					...prev,
-																					[variant.itemNumber]: 1,
-																				}));
-																				await getCart();
-																			} catch (err) {
-																				console.error(
-																					"Error adding to cart:",
-																					err,
-																				);
-																				toast(t("Product.errorAddingToCart"), {
-																					type: "error",
-																					position: "bottom-right",
-																					autoClose: 2000,
-																				});
-																			} finally {
-																				setLoading((prev) => ({
-																					...prev,
-																					[variant.itemNumber]: false,
-																				}));
-																			}
-																		}}>
-																		{loading[variant.itemNumber] ? (
-																			<>
-																				<Loader2 className="inline h-4 w-4 animate-spin" />
-																				{t("Product.adding")}
-																			</>
-																		) : (
-																			<>
-																				<ShoppingCart className="h-4 w-4" />
-																				{t("Product.addToCart")}
-																			</>
-																		)}
-																	</Button>
-																)}
-															</TableCell>
-														);
-													default:
-														return null;
-												}
-											})}
-									</TableRow>
-								);
-							})}
-						</TableBody>
-					</Table>
-				</div>
+																		}
+																	}}>
+																	{loading[variant.itemNumber] ? (
+																		<>
+																			<Loader2 className="inline h-4 w-4 animate-spin" />
+																			{t("Product.adding")}
+																		</>
+																	) : (
+																		<>
+																			<ShoppingCart className="h-4 w-4" />
+																			{t("Product.addToCart")}
+																		</>
+																	)}
+																</Button>
+															)}
+														</TableCell>
+													);
+												default:
+													return null;
+											}
+										})}
+								</TableRow>
+							);
+						})}
+					</TableBody>
+				</Table>
 			</div>
 		</div>
 	);

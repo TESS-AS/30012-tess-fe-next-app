@@ -45,7 +45,7 @@ const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
 					)}
 					{items.map((item, index) => {
 						const isLast = index === items.length - 1;
-						const linkClassName = cn("hover:text-foreground capitalize", {
+						const linkClassName = cn("hover:text-foreground", {
 							"text-foreground pointer-events-none font-semibold":
 								item.current || isLast,
 							"text-muted-foreground": !item.current && !isLast,

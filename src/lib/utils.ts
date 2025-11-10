@@ -22,6 +22,7 @@ export function mapCategoryTree(node: RawCategory, locale: string): Category {
 			.replace(/-+/g, "-")
 			.replace(/^-|-$/g, ""),
 		groupId: node.groupId,
+		image: node.image,
 		subcategories:
 			node.children?.map((child) => mapCategoryTree(child, locale)) ?? [],
 	};
@@ -52,13 +53,53 @@ export function formatDate(date: string | Date, time?: string) {
 export function formatUrlToDisplayName(urlString: string): string {
 	if (!urlString) return "";
 	const decodedString = decodeURIComponent(urlString);
-	const spacedString = decodedString.replace(/-/g, " ");
+	// Replace hyphens with spaces and normalize to lowercase first
+	const normalizedString = decodedString.replace(/-/g, " ").toLowerCase();
 
-	return spacedString
-		.split(" ")
-		.map((word) => {
+	// Norwegian lowercase words that should remain lowercase (unless first word)
+	const norwegianLowercaseWords = new Set([
+		"og",
+		"i",
+		"på",
+		"av",
+		"til",
+		"for",
+		"med",
+		"om",
+		"ved",
+		"over",
+		"under",
+		"etter",
+		"før",
+		"siden",
+		"mot",
+		"fra",
+		"inn",
+		"ut",
+		"opp",
+		"ned",
+		"som",
+		"enn",
+		"ennå",
+		"bare",
+		"selv",
+		"når",
+		"hvis",
+		"hvor",
+		"hvorfor",
+		"hvordan",
+	]);
+
+	const words = normalizedString.split(" ").filter((w) => w.length > 0);
+	return words
+		.map((word, index) => {
 			if (word.length === 0) return "";
-			return word[0].toUpperCase() + word.slice(1);
+			// First word is always capitalized
+			if (index === 0) {
+				return word[0].toUpperCase() + word.slice(1);
+			}
+			// All other words stay lowercase (Norwegian sentence case)
+			return word;
 		})
 		.join(" ");
 }
