@@ -70,17 +70,26 @@ export default function CategoryNavigationMenu({
 													<li
 														key={subcategory.slug}
 														className="mb-8 break-inside-avoid">
-														<div className="text-md mb-2 font-bold">
-														<Link
-															onClick={() => setOpenMenu(false)}
-															href={`/${category.slug}/${subcategory.slug}`}
-															className="hover:underline">
-															{subcategory.name}
-														</Link>
+														<div className="relative mb-2">
+															{subcategory.image && (
+																<img
+																	src={subcategory.image}
+																	alt={subcategory.name}
+																	className="absolute left-0 top-0 h-20 w-20 object-contain"
+																/>
+															)}
+															<div className={`text-md font-bold ${subcategory.image ? "pl-24" : ""}`}>
+																<Link
+																	onClick={() => setOpenMenu(false)}
+																	href={`/${category.slug}/${subcategory.slug}`}
+																	className="hover:underline">
+																	{subcategory.name}
+																</Link>
+															</div>
 														</div>
 														{Array.isArray(subcategory.subcategories) &&
 															subcategory.subcategories && (
-																<ul className="space-y-1">
+																<ul className={`space-y-1 ${subcategory.image ? "pl-24" : ""}`}>
 																	{subcategory.subcategories.map((child) => (
 																		<li key={child.slug}>
 																			<Link
