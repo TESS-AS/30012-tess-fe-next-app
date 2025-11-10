@@ -135,10 +135,6 @@ export default function AuthDialog({
 								{authenticatingProvider === "microsoft-entra-id"
 									? "Logging in..."
 									: t("AuthDialog.loginAs")}
-
-								{authenticatingProvider === "microsoft-entra-id"
-									? ""
-									: t("AuthDialog.employee")}
 							</Button>
 						</div>
 
