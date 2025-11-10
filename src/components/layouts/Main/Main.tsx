@@ -19,7 +19,9 @@ export default function Main({ children }: { children?: ReactNode }) {
 
 	return (
 		<div className="relative flex flex-1 flex-col min-md:overflow-hidden">
-			<Header profile={profile} />
+			<div className="relative z-50">
+				<Header profile={profile} />
+			</div>
 			<div
 				className={cn(
 					"h-[calc(100vh-114px)] overflow-x-hidden overflow-y-auto transition-all duration-300",
