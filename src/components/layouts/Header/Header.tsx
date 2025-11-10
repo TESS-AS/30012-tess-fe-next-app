@@ -280,7 +280,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 
 	return (
 		<header
-			className={`bg-background w-full border-t ${profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER ? "h-[132px]" : "h-[182px]"}`}>
+			className={`bg-background relative z-50 w-full border-t ${profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER ? "h-[132px]" : "h-[182px]"}`}>
 			<div className="container m-auto flex h-16 items-center justify-between">
 				<div className="flex items-center gap-4">
 					<Link
@@ -687,7 +687,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 				<div className="border-t">
 					<div className="m-auto flex h-12 w-full items-center justify-between gap-4">
 						<CategoryNavigationMenu
-							categories={categories as Category[]}
+							categories={categories ?? []}
 							loading={loading}
 						/>
 					</div>
