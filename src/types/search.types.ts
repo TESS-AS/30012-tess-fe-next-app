@@ -9,6 +9,7 @@ export interface IProductSearch {
 	attribute2?: string | null;
 	redirect?: string;
 	itemNumberMatch?: boolean;
+	sapNumberMatch?: boolean;
 }
 
 export interface ProductAttributes {

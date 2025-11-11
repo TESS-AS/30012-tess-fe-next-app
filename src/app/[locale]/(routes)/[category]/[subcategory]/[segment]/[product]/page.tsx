@@ -57,11 +57,11 @@ export default async function ProductPage({
 	searchParams,
 }: {
 	params: Promise<Params>;
-	searchParams: Promise<{ itemNumber?: string }>;
+	searchParams: Promise<{ itemNumber?: string; sapNumber?: string }>;
 }) {
 	const locale = await getLocale();
 	const { category, subcategory, product, segment } = await params;
-	const { itemNumber } = await searchParams;
+	const { itemNumber, sapNumber } = await searchParams;
 
 	const _productData = await getProducts(product);
 	const [productData] = _productData;
@@ -79,6 +79,7 @@ export default async function ProductPage({
 			segment={segment}
 			productData={productData}
 			preselectedItemNumber={itemNumber}
+			preselectedSapNumber={sapNumber}
 		/>
 	);
 }

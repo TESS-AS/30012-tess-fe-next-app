@@ -1,16 +1,36 @@
-import { mapCategoryTree } from "@/lib/utils";
-import axiosInstance from "@/services/axiosServer";
-import { RawCategory } from "@/types/categories.types";
+"use client";
+
+import { Skeleton } from "@/components/ui/skeleton";
+import { useCategories } from "@/lib/CategoriesProvider";
 import Link from "next/link";
-import { getLocale } from "next-intl/server";
 
-export default async function CategoriesPage() {
-	const locale = await getLocale();
+export default function CategoriesPage() {
+	const { categories, loading, error } = useCategories();
 
-	const response = await axiosInstance.get(`/categories/${locale}`);
-	const rawCategories: RawCategory[] = response.data;
+	if (loading) {
+		return (
+			<div className="container mx-auto px-4 py-8">
+				<h1 className="mb-8 text-3xl font-bold">All Categories</h1>
+				<div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4">
+					{Array.from({ length: 8 }).map((_, i) => (
+						<Skeleton
+							key={i}
+							className="h-24 w-full rounded-lg"
+						/>
+					))}
+				</div>
+			</div>
+		);
+	}
 
-	const categories = rawCategories.map((node) => mapCategoryTree(node, locale));
+	if (!categories || categories.length === 0) {
+		return (
+			<div className="container mx-auto px-4 py-8">
+				<h1 className="mb-8 text-3xl font-bold">All Categories</h1>
+				<p className="text-muted-foreground">No categories available</p>
+			</div>
+		);
+	}
 
 	return (
 		<div className="container mx-auto px-4 py-8">
