@@ -19,6 +19,7 @@ interface Props {
 	segment: string;
 	productData: any;
 	preselectedItemNumber?: string;
+	preselectedSapNumber?: string;
 }
 
 export function ProductPageClient({
@@ -27,10 +28,22 @@ export function ProductPageClient({
 	segment,
 	productData,
 	preselectedItemNumber,
+	preselectedSapNumber,
 }: Props) {
 	const t = useTranslations("Product");
 
 	const getInitialItemNumber = () => {
+		// Priority: SAP number first, then item number
+		if (preselectedSapNumber) {
+			const itemBySap = productData.items?.find(
+				(item: any) =>
+					item.sapNumber === preselectedSapNumber ||
+					item.itemNumber?.toString() === preselectedSapNumber,
+			);
+			if (itemBySap) {
+				return itemBySap.itemNumber;
+			}
+		}
 		if (preselectedItemNumber) {
 			const itemExists = productData.items?.some(
 				(item: any) => item.itemNumber === preselectedItemNumber,
@@ -47,15 +60,26 @@ export function ProductPageClient({
 	);
 
 	useEffect(() => {
+		if (preselectedSapNumber) {
+			const itemBySap = productData.items?.find(
+				(item: any) =>
+					item.sapNumber === preselectedSapNumber ||
+					item.itemNumber?.toString() === preselectedSapNumber,
+			);
+			if (itemBySap) {
+				setSelectedItemNumber(itemBySap.itemNumber);
+				return;
+			}
+		}
 		if (preselectedItemNumber) {
 			const itemExists = productData.items?.some(
 				(item: any) => item.itemNumber === preselectedItemNumber,
 			);
-			if (itemExists && selectedItemNumber !== preselectedItemNumber) {
+			if (itemExists) {
 				setSelectedItemNumber(preselectedItemNumber);
 			}
 		}
-	}, [preselectedItemNumber, productData.items, selectedItemNumber]);
+	}, [preselectedItemNumber, preselectedSapNumber, productData.items]);
 
 	const { data: variantData, isLoading } = useGetVariantInfo(
 		productData.items,

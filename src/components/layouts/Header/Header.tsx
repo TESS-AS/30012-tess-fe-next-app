@@ -69,8 +69,6 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		refetch: refetchCategories,
 	} = useCategories();
 
-	console.log(categories, "useee");
-
 	const currentLocale = useLocale();
 	const t = useTranslations();
 	const router = useRouter();
@@ -191,6 +189,29 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 				} catch {
 					const separator = redirectPath.includes("?") ? "&" : "?";
 					redirectPath = `${redirectPath}${separator}itemNumber=${encodeURIComponent(queryToSearch)}`;
+				}
+				router.push(redirectPath);
+				setSearchQuery("");
+				inputRef.current?.blur();
+				setIsInputFocused(false);
+				setIsSearchOpen(false);
+				return;
+			}
+			if (firstProduct?.redirect && firstProduct?.sapNumberMatch) {
+				justNavigatedRef.current = true;
+				let redirectPath = firstProduct.redirect.trim();
+
+				if (!redirectPath.startsWith("/")) {
+					redirectPath = `/${redirectPath}`;
+				}
+
+				try {
+					const url = new URL(redirectPath, window.location.origin);
+					url.searchParams.set("sapNumber", queryToSearch);
+					redirectPath = url.pathname + url.search;
+				} catch {
+					const separator = redirectPath.includes("?") ? "&" : "?";
+					redirectPath = `${redirectPath}${separator}sapNumber=${encodeURIComponent(queryToSearch)}`;
 				}
 				router.push(redirectPath);
 				setSearchQuery("");
