@@ -339,6 +339,7 @@
 		"vat": "VAT(25%)",
 		"totalIncVat": "Total incl. VAT",
 		"continueToPayment": "Continue to delivery",
+		"exportToExcel": "Export to Excel",
 		"punchoutCart": "Punchout Cart",
 		"punchoutCartStep1": "Continue to payment",
 		"punchoutCartStep2": "Complete order",

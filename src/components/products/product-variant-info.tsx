@@ -55,9 +55,9 @@ export function ProductVariantInfo({
 
 	// Get stock balance for selected warehouse (default warehouse)
 	const selectedWarehouseBalance = profile?.defaultWarehouseNumber
-		? variantData?.stockByWarehouse?.find(
+		? (variantData?.stockByWarehouse?.find(
 				(w: any) => w.warehouse_number === profile.defaultWarehouseNumber,
-			)?.balance ?? 0
+			)?.balance ?? 0)
 		: 0;
 
 	const handleCopyGtin = () => {
@@ -111,14 +111,14 @@ export function ProductVariantInfo({
 		if (!selectedItemNumber) return;
 
 		const warehouseNumber = profile?.defaultWarehouseNumber || "";
-		if (!warehouseNumber) {
-			toast(t("selectWarehouseFirst"), {
-				type: "warning",
-				position: "bottom-right",
-				autoClose: 2000,
-			});
-			return;
-		}
+		// if (!warehouseNumber) {
+		// 	toast(t("selectWarehouseFirst"), {
+		// 		type: "warning",
+		// 		position: "bottom-right",
+		// 		autoClose: 2000,
+		// 	});
+		// 	return;
+		// }
 
 		const balance =
 			variantData?.stockByWarehouse?.find(

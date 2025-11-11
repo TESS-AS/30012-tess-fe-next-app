@@ -342,6 +342,7 @@
 		"vat": "MVA(25%)",
 		"totalIncVat": "Total inkl. mva.",
 		"continueToPayment": "Fortsett til levering",
+		"exportToExcel": "Eksporter til Excel",
 		"punchoutCart": "Punchout Handlekurv",
 		"punchoutCartStep1": "Fortsett til betaling",
 		"punchoutCartStep2": "Fullf\u00f8r ordre",

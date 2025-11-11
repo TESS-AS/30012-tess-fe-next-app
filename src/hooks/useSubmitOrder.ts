@@ -1,4 +1,5 @@
-import { salesOrder } from "@/services/orders.service";
+import { SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER } from "@/constants/checkout";
+import { salesOrder, excelOrderConfirmation } from "@/services/orders.service";
 import { Order } from "@/types/orders.types";
 import { ProfileUser, SalesOrderAddress } from "@/types/user.types";
 
@@ -25,38 +26,64 @@ export const useSubmitOrder = (
 		};
 
 		try {
-			const response = await salesOrder(payload);
+			const customerNumber = profile?.defaultCustomerNumber;
+			const isExcelCustomer =
+				customerNumber === SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER;
 
-			localStorage.removeItem("selectedHoseRows");
+			if (isExcelCustomer) {
+				const { blob, filename } = await excelOrderConfirmation(payload);
+				
+				// Create download link and trigger download
+				const url = window.URL.createObjectURL(blob);
+				const link = document.createElement("a");
+				link.href = url;
+				link.download = filename;
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				window.URL.revokeObjectURL(url);
 
-			if (!isPunchoutUser && typeof response !== "string" && response?.order) {
+				localStorage.removeItem("selectedHoseRows");
 				await handleArchiveCart();
-				return response.order;
-			} else {
-				const parser = new DOMParser();
-				const doc = parser.parseFromString(response as string, "text/html");
-				const form = doc.getElementById("punchoutForm") as HTMLFormElement;
-
-				if (form) {
-					const actionUrl = form.action;
-					const submitForm = document.createElement("form");
-					submitForm.method = form.method;
-					submitForm.action = actionUrl;
-
-					Array.from(form.getElementsByTagName("input")).forEach((input) => {
-						const hiddenInput = document.createElement("input");
-						hiddenInput.type = "hidden";
-						hiddenInput.name = input.name;
-						hiddenInput.value = input.value;
-						submitForm.appendChild(hiddenInput);
-					});
-
-					document.body.appendChild(submitForm);
-					submitForm.submit();
-					document.body.removeChild(submitForm);
-				}
-
 				return null;
+			} else {
+				const response = await salesOrder(payload);
+
+				localStorage.removeItem("selectedHoseRows");
+
+				if (
+					!isPunchoutUser &&
+					typeof response !== "string" &&
+					response?.order
+				) {
+					await handleArchiveCart();
+					return response.order;
+				} else {
+					const parser = new DOMParser();
+					const doc = parser.parseFromString(response as string, "text/html");
+					const form = doc.getElementById("punchoutForm") as HTMLFormElement;
+
+					if (form) {
+						const actionUrl = form.action;
+						const submitForm = document.createElement("form");
+						submitForm.method = form.method;
+						submitForm.action = actionUrl;
+
+						Array.from(form.getElementsByTagName("input")).forEach((input) => {
+							const hiddenInput = document.createElement("input");
+							hiddenInput.type = "hidden";
+							hiddenInput.name = input.name;
+							hiddenInput.value = input.value;
+							submitForm.appendChild(hiddenInput);
+						});
+
+						document.body.appendChild(submitForm);
+						submitForm.submit();
+						document.body.removeChild(submitForm);
+					}
+
+					return null;
+				}
 			}
 		} catch (err) {
 			console.error("Order submission failed:", err);

@@ -5,7 +5,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PriceDisplay } from "@/components/ui/price-display";
-import { HIDE_CHECKOUT_FOR_SPECIFIC_CUSTOMER_NUMBER } from "@/constants/checkout";
+import {
+	HIDE_CHECKOUT_FOR_SPECIFIC_CUSTOMER_NUMBER,
+	SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER,
+} from "@/constants/checkout";
 import { useOrderSummary } from "@/hooks/useOrderSummary";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useRouter } from "@/i18n/navigation";
@@ -142,6 +145,9 @@ export default function OrderSummary({
 							onClick={handleCheckout}>
 							{isCheckoutLoading || isLoading ? (
 								<Loader2 className="h-4 w-4 animate-spin" />
+							) : profile?.defaultCustomerNumber ===
+							  SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER ? (
+								t("OrderSummary.exportToExcel")
 							) : (
 								t(
 									currentStep === null
