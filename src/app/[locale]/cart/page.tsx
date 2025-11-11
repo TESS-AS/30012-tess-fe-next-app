@@ -17,6 +17,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { WarehouseCombobox } from "@/components/warehouse-combobox";
+import { SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useCheckoutOrderData } from "@/hooks/useCheckoutOrderData";
 import { useGetWarehouses } from "@/hooks/useGetWarehouse";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
@@ -207,17 +208,32 @@ const CartPage = () => {
 	const handleCheckout = async () => {
 		setIsCheckoutLoading(true);
 		try {
-			if (profile?.punchout) {
+			const isExcelCustomer =
+				profile?.defaultCustomerNumber === SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER;
+
+			if (profile?.punchout || isExcelCustomer) {
 				const result = await submitOrder(orderData);
-				handleArchiveCart();
-				if (result) {
-					setSubmittedOrder(result);
-					setShowOrderConfirmation(true);
-					setTimeout(() => setShowFeedbackModal(true), 2000);
+				if (isExcelCustomer) {
+					toast.success(
+						t("Checkout.excelExportSuccess") ||
+							"Excel file exported successfully",
+					);
+				} else {
+					handleArchiveCart();
+					if (result) {
+						setSubmittedOrder(result);
+						setShowOrderConfirmation(true);
+						setTimeout(() => setShowFeedbackModal(true), 2000);
+					}
 				}
 			} else {
 				router.push("/checkout");
 			}
+		} catch (error) {
+			console.error("Checkout failed:", error);
+			toast.error(
+				t("Checkout.errors.orderSubmissionFailed") || "Failed to process order",
+			);
 		} finally {
 			setIsCheckoutLoading(false);
 		}
