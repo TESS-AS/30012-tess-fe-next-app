@@ -162,14 +162,14 @@ export function HoseActionsDropdown({
 					<span>{t("exportToExcel")}</span>
 				</DropdownMenuItem>
 
-				{onSelectAll && (
+				{/* {onSelectAll && (
 					<DropdownMenuItem
 						onClick={onSelectAll}
 						className="rounded-none border-t">
 						<CheckSquare className="mr-3 h-4 w-4 text-[#005522]" />
 						<span>{allSelected ? t("deselectAll") : t("selectAll")}</span>
 					</DropdownMenuItem>
-				)}
+				)} */}
 
 				{onSelectAllOnPage && (
 					<DropdownMenuItem onClick={onSelectAllOnPage}>
