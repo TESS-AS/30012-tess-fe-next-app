@@ -4,8 +4,8 @@ import { useEffect, useRef, useCallback, useState } from "react";
 
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useProductFilter } from "@/hooks/useProductFilter";
+import { useProductPrices } from "@/hooks/useProductPrices";
 import { cn } from "@/lib/utils";
-import { getProductPrice } from "@/services/product.service";
 import { FilterValues } from "@/types/filter.types";
 import { LayoutGrid, AlignJustify, X } from "lucide-react";
 import Link from "next/link";
@@ -69,15 +69,15 @@ export function ProductGrid({
 	const observerTarget = useRef<HTMLDivElement>(null);
 	const [sort, setSort] = useState<string>("");
 	const [filtersState, setFiltersState] = useState(filters);
-	const [productPrices, setProductPrices] = useState<Record<string, number>>(
-		{},
-	);
 	const filterRef = useRef<{
 		clearRangeFilter: (filterKey: string) => void;
 	} | null>(null);
+	const isLoadingMoreRef = useRef(false);
+	const loadMoreTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const {
 		products,
 		isLoading,
+		isFetchingNextPage,
 		hasMore,
 		handleFilterChange,
 		loadMore,
@@ -90,6 +90,16 @@ export function ProductGrid({
 		categoryName,
 		query,
 	});
+
+	// Use React Query for prices - much faster with caching
+	const { prices: productPrices, isFetching: isFetchingPrices } =
+		useProductPrices({
+			productNumbers: products.map((p) => p.productNumber),
+			customerNumber: profile?.defaultCustomerNumber,
+			companyNumber: profile?.defaultCompanyNumber,
+			warehouseNumber: profile?.defaultWarehouseNumber,
+			enabled: !!profile?.defaultCustomerNumber && products.length > 0,
+		});
 
 	const onFilterChange = useCallback(
 		async (newFilters: FilterValues[]) => {
@@ -104,6 +114,12 @@ export function ProductGrid({
 		if (filters.length > 0) {
 			setFiltersState(filters);
 		}
+		// Reset loading state when filters or query change
+		isLoadingMoreRef.current = false;
+		if (loadMoreTimeoutRef.current) {
+			clearTimeout(loadMoreTimeoutRef.current);
+			loadMoreTimeoutRef.current = null;
+		}
 	}, [filters, query]);
 
 	useEffect(() => {
@@ -112,77 +128,66 @@ export function ProductGrid({
 		}
 	}, [isLoading]);
 
-	// Fetch prices for products
-	useEffect(() => {
-		const fetchPrices = async () => {
-			if (
-				!products.length ||
-				!profile?.defaultCustomerNumber ||
-				!profile?.defaultCompanyNumber
-			) {
-				return;
-			}
-
-			const pricePromises = products.map(async (product) => {
-				try {
-					const priceData = await getProductPrice(
-						profile.defaultCustomerNumber || "169999",
-						profile.defaultCompanyNumber || "01",
-						product.productNumber,
-						profile.defaultWarehouseNumber || "L01",
-					);
-					// Get the minimum price from all variants (bestPrice)
-					const prices = priceData.map(
-						(p: any) => p.bestPrice || p.basePriceTotal || 0,
-					);
-					const minPrice =
-						prices.length > 0
-							? Math.min(...prices.filter((p: number) => p > 0))
-							: undefined;
-					return { productNumber: product.productNumber, price: minPrice };
-				} catch (error) {
-					console.error(
-						`Error fetching price for ${product.productNumber}:`,
-						error,
-					);
-					return { productNumber: product.productNumber, price: undefined };
-				}
-			});
-
-			const priceResults = await Promise.all(pricePromises);
-			const priceMap: Record<string, number> = {};
-			priceResults.forEach(({ productNumber, price }) => {
-				if (price !== undefined) {
-					priceMap[productNumber] = price;
-				}
-			});
-			setProductPrices(priceMap);
-		};
-
-		fetchPrices();
-	}, [products, profile]);
 
 	useEffect(() => {
-		const observer = new IntersectionObserver((entries) => {
-			if (entries[0].isIntersecting && hasMore && !isLoading) {
-				const timer = setTimeout(() => {
-					loadMore();
-				}, 500);
+		const target = observerTarget.current;
+		if (!target) return;
 
-				return () => clearTimeout(timer);
-			}
-		});
-
-		if (observerTarget.current) {
-			observer.observe(observerTarget.current);
+		// Clear any pending timeout
+		if (loadMoreTimeoutRef.current) {
+			clearTimeout(loadMoreTimeoutRef.current);
+			loadMoreTimeoutRef.current = null;
 		}
 
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const entry = entries[0];
+				if (
+					entry.isIntersecting &&
+					hasMore &&
+					!isLoading &&
+					!isFetchingNextPage &&
+					!isLoadingMoreRef.current
+				) {
+					// Use requestAnimationFrame to ensure smooth scrolling
+					requestAnimationFrame(() => {
+						if (isLoadingMoreRef.current) return;
+
+						// Small delay to prevent interrupting scroll momentum
+						loadMoreTimeoutRef.current = setTimeout(() => {
+							if (isLoadingMoreRef.current || !hasMore || isLoading || isFetchingNextPage) {
+								if (loadMoreTimeoutRef.current) {
+									loadMoreTimeoutRef.current = null;
+								}
+								return;
+							}
+							isLoadingMoreRef.current = true;
+
+							loadMore()
+								.finally(() => {
+									isLoadingMoreRef.current = false;
+									loadMoreTimeoutRef.current = null;
+								});
+						}, 100);
+					});
+				}
+			},
+			{
+				rootMargin: "300px", // Start loading well before reaching the bottom
+				threshold: 0.1,
+			}
+		);
+
+		observer.observe(target);
+
 		return () => {
-			if (observerTarget.current) {
-				observer.unobserve(observerTarget.current);
+			observer.disconnect();
+			if (loadMoreTimeoutRef.current) {
+				clearTimeout(loadMoreTimeoutRef.current);
+				loadMoreTimeoutRef.current = null;
 			}
 		};
-	}, [hasMore, isLoading, loadMore]);
+	}, [hasMore, isLoading, isFetchingNextPage, loadMore]);
 
 	const onSortChange = (value: string) => {
 		setSort(value);
@@ -396,17 +401,22 @@ export function ProductGrid({
 							const { attributes } = product as any;
 							const attribute1 = product.attribute1 || attributes?.attribute1;
 							const attribute2 = product.attribute2 || attributes?.attribute2;
+							const productPrice = productPrices[product.productNumber];
+							// Show loading skeleton if we're fetching and don't have the price yet
+							const isPriceLoading =
+								isFetchingPrices && productPrice === undefined;
 
 							return (
 								<Link
-									key={idx}
+									key={product.productNumber}
 									href={`${pathname}/${product.productNumber}`}
 									className="h-full">
 									<ProductCard
 										{...product}
 										attribute1={attribute1}
 										attribute2={attribute2}
-										price={productPrices[product.productNumber]}
+										price={productPrice}
+										isPriceLoading={isPriceLoading}
 										variant={variant}
 										viewLayout={viewLayout}
 										priority={idx < 4}
@@ -429,60 +439,30 @@ export function ProductGrid({
 				</div>
 				<div
 					ref={observerTarget}
-					className="flex h-[500px] items-center justify-center">
-					{hasMore ? (
-						isLoading && !isFiltering ? (
-							<div className="text-muted-foreground flex items-start gap-2 pt-3">
-								<svg
-									fill="#00b84c"
-									viewBox="0 0 24 24"
-									xmlns="http://www.w3.org/2000/svg"
-									className="h-6 w-6">
-									<path
-										d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
-										opacity=".25"
+					className="flex min-h-[200px] items-center justify-center py-8">
+					{hasMore && (isLoading || isFetchingNextPage) && !isFiltering ? (
+						<div className="text-muted-foreground flex items-center gap-2">
+							<svg
+								fill="#00b84c"
+								viewBox="0 0 24 24"
+								xmlns="http://www.w3.org/2000/svg"
+								className="h-6 w-6">
+								<path
+									d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+									opacity=".25"
+								/>
+								<path d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z">
+									<animateTransform
+										attributeName="transform"
+										type="rotate"
+										dur="0.75s"
+										values="0 12 12;360 12 12"
+										repeatCount="indefinite"
 									/>
-									<path d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z">
-										<animateTransform
-											attributeName="transform"
-											type="rotate"
-											dur="0.75s"
-											values="0 12 12;360 12 12"
-											repeatCount="indefinite"
-										/>
-									</path>
-								</svg>
-							</div>
-						) : (
-							<div className="text-muted-foreground flex h-[500px] items-start gap-2 pt-3">
-								<svg
-									fill="#00b84c"
-									viewBox="0 0 24 24"
-									xmlns="http://www.w3.org/2000/svg"
-									className="h-10 w-10">
-									<path
-										d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
-										opacity=".25"
-									/>
-									<path d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z">
-										<animateTransform
-											attributeName="transform"
-											type="rotate"
-											dur="0.75s"
-											values="0 12 12;360 12 12"
-											repeatCount="indefinite"
-										/>
-									</path>
-								</svg>
-							</div>
-						)
-					) : (
-						products.length > 9 && (
-							<div className="text-muted-foreground text-center">
-								{t("Category.noResults")}
-							</div>
-						)
-					)}
+								</path>
+							</svg>
+						</div>
+					) : null}
 				</div>
 			</div>
 		</div>

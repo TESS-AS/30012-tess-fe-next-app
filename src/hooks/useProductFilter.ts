@@ -2,13 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 
 import { FilterCategory } from "@/components/ui/filter";
 import { loadFilterParents } from "@/services/categories.service";
-import { searchProducts } from "@/services/product.service";
 import {
 	CategoryFilterResponseItem,
 	FilterResponseItem,
 	FilterValues,
 } from "@/types/filter.types";
-import { IProduct } from "@/types/product.types";
+
+import { useProductInfiniteQuery } from "./useProductInfiniteQuery";
 
 interface UseProductFilterProps {
 	categoryNumber: string;
@@ -21,10 +21,6 @@ export function useProductFilter({
 	query,
 }: UseProductFilterProps) {
 	const [categoryNumber, setCategoryNumber] = useState(initialCategoryNumber);
-	const [products, setProducts] = useState<IProduct[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [currentPage, setCurrentPage] = useState(1);
-	const [hasMore, setHasMore] = useState(true);
 	const [currentFilters, setCurrentFilters] = useState<FilterValues[] | null>(
 		null,
 	);
@@ -33,111 +29,41 @@ export function useProductFilter({
 	>({});
 	const [sort, setSort] = useState<string | null>(null);
 
-	useEffect(() => {
-		let isMounted = true;
-
-		async function fetchInitialProducts() {
-			try {
-				const response = await searchProducts(
-					1,
-					9,
-					query,
-					categoryNumber,
-					currentFilters,
-					sort,
-				);
-
-				if (isMounted) {
-					setProducts(response.product || []);
-					setHasMore(response.product && response.product.length === 9);
-					setIsLoading(false);
-				}
-			} catch (err) {
-				console.error("Error fetching initial products:", err);
-				if (isMounted) {
-					setIsLoading(false);
-				}
-			}
-		}
-
-		setIsLoading(true);
-		setCurrentPage(1);
-		fetchInitialProducts();
-
-		return () => {
-			isMounted = false;
-		};
-	}, [categoryNumber, query, currentFilters, sort]);
+	const {
+		products,
+		isLoading,
+		isFetchingNextPage,
+		hasNextPage,
+		fetchNextPage,
+		refetch,
+	} = useProductInfiniteQuery({
+		categoryNumber,
+		query,
+		filters: currentFilters,
+		sort,
+		enabled: !!categoryNumber,
+	});
 
 	const loadMore = useCallback(async () => {
-		if (!hasMore || isLoading) return;
-
-		try {
-			setIsLoading(true);
-			const nextPage = currentPage + 1;
-			const response = await searchProducts(
-				nextPage,
-				9,
-				query,
-				categoryNumber,
-				currentFilters,
-				sort,
-			);
-
-			if (response.product && response.product.length > 0) {
-				setProducts((prev) => [...prev, ...response.product]);
-				setCurrentPage(nextPage);
-				setHasMore(response.product.length === 9);
-			} else {
-				setHasMore(false);
-			}
-		} catch (error) {
-			console.error("Error loading more products:", error);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [
-		categoryNumber,
-		currentFilters,
-		currentPage,
-		hasMore,
-		isLoading,
-		query,
-		sort,
-	]);
+		if (!hasNextPage || isFetchingNextPage) return;
+		await fetchNextPage();
+	}, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
 	const handleFilterChange = useCallback(
 		async (filters: FilterValues[]) => {
-			try {
-				setIsLoading(true);
-				setCurrentFilters(filters);
-				setCurrentPage(1);
+			setCurrentFilters(filters?.length > 0 ? filters : null);
 
-				// Update selected filters state
-				const newSelectedFilters: Record<string, string[]> = {};
-				filters.forEach((filter) => {
-					newSelectedFilters[filter.key] = filter.values;
-				});
-				setSelectedFilters(newSelectedFilters);
+			// Update selected filters state
+			const newSelectedFilters: Record<string, string[]> = {};
+			filters.forEach((filter) => {
+				newSelectedFilters[filter.key] = filter.values;
+			});
+			setSelectedFilters(newSelectedFilters);
 
-				const response = await searchProducts(
-					1,
-					9,
-					query,
-					categoryNumber,
-					filters?.length > 0 ? filters : null,
-					sort,
-				);
-
-				setProducts(response.product || []);
-				setHasMore(response.product && response.product.length === 9);
-			} catch (error) {
-				console.error("Error applying filters:", error);
-			} finally {
-				setIsLoading(false);
-			}
+			// React Query will automatically refetch when filters change
+			await refetch();
 		},
-		[categoryNumber, query, sort],
+		[refetch],
 	);
 
 	const handleCategoryChange = useCallback(
@@ -147,10 +73,6 @@ export function useProductFilter({
 			setFiltersFn: (filters: FilterCategory[]) => void,
 		) => {
 			setCategoryNumber(newCategoryNumber);
-			setCurrentPage(1);
-			setProducts([]);
-			setCategoryNumber(newCategoryNumber);
-
 			setSelectedFilters({
 				category: [newCategoryName],
 			});
@@ -192,29 +114,11 @@ export function useProductFilter({
 
 	const handleSortChange = useCallback(
 		async (newSort: string) => {
-			try {
-				setIsLoading(true);
-				setSort(newSort);
-				setCurrentPage(1);
-
-				const response = await searchProducts(
-					1,
-					9,
-					query,
-					categoryNumber,
-					currentFilters,
-					newSort,
-				);
-
-				setProducts(response.product || []);
-				setHasMore(response.product && response.product.length === 9);
-			} catch (error) {
-				console.error("Error sorting products:", error);
-			} finally {
-				setIsLoading(false);
-			}
+			setSort(newSort === " " ? null : newSort);
+			// React Query will automatically refetch when sort changes
+			await refetch();
 		},
-		[categoryNumber, query, currentFilters],
+		[refetch],
 	);
 
 	const removeFilter = useCallback(
@@ -252,13 +156,13 @@ export function useProductFilter({
 		setCategoryNumber("");
 		setSelectedFilters({});
 		setCurrentFilters(null);
-		setCurrentPage(1);
 	}, [query]);
 
 	return {
 		products,
 		isLoading,
-		hasMore,
+		isFetchingNextPage,
+		hasMore: hasNextPage ?? false,
 		handleFilterChange,
 		handleSortChange,
 		loadMore,

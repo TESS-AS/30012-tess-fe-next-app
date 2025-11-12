@@ -15,6 +15,7 @@ interface ProductCardProps extends Partial<IProduct> {
 	variant?: "default" | "compact";
 	viewLayout?: string;
 	priority?: boolean;
+	isPriceLoading?: boolean;
 }
 
 export function ProductCard({
@@ -30,6 +31,7 @@ export function ProductCard({
 	variant = "default",
 	viewLayout,
 	priority = false,
+	isPriceLoading = false,
 }: ProductCardProps) {
 	const [isLoaded, setIsLoaded] = useState(false);
 
@@ -101,11 +103,13 @@ export function ProductCard({
 					</div>
 				)}
 				<div className="mt-auto flex items-center justify-between gap-2 pt-4">
-					{price !== undefined && (
+					{isPriceLoading ? (
+						<Skeleton className="h-5 w-24" />
+					) : price !== undefined ? (
 						<p className="text-md font-light text-gray-900">
 							{formatPrice(price)}
 						</p>
-					)}
+					) : null}
 					<Button
 						variant="outlineGrey"
 						size="sm"
