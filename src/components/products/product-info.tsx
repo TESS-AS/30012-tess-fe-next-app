@@ -21,6 +21,7 @@ interface ProductInfoProps {
 	application?: string;
 	variantData?: any;
 	locale: string;
+	selectedItemNumber?: string;
 }
 
 export function ProductInfo({
@@ -33,6 +34,7 @@ export function ProductInfo({
 	application,
 	variantData,
 	locale,
+	selectedItemNumber,
 }: ProductInfoProps) {
 	const t = useTranslations("Product");
 	const { data: profile } = useGetProfileData();
@@ -149,9 +151,14 @@ export function ProductInfo({
 						.join(" ")
 				: "";
 
+			const itemNumberForPdf =
+				selectedItemNumber?.toString() ||
+				variantData?.itemVariants?.[0]?.itemNumber?.toString() ||
+				"-";
+
 			await generateProductPdf({
 				name,
-				productNumber: productNumber || "-",
+				itemNumber: itemNumberForPdf,
 				gtin: gtin || null,
 				imageUrl,
 				application: applicationText,

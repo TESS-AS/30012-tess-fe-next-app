@@ -16,9 +16,15 @@ export function mapCategoryTree(node: RawCategory, locale: string): Category {
 		name,
 		slug: name
 			.toLowerCase()
+			.replace(/å/g, "a")
+			.replace(/ø/g, "o")
+			.replace(/æ/g, "ae")
+			.replace(/Å/g, "a")
+			.replace(/Ø/g, "o")
+			.replace(/Æ/g, "ae")
 			.normalize("NFKD")
 			.replace(/\s+/g, "-")
-			.replace(/[^a-z0-9æøå-]/gi, "")
+			.replace(/[^a-z0-9-]/gi, "")
 			.replace(/-+/g, "-")
 			.replace(/^-|-$/g, ""),
 		groupId: node.groupId,
@@ -53,8 +59,16 @@ export function formatDate(date: string | Date, time?: string) {
 export function formatUrlToDisplayName(urlString: string): string {
 	if (!urlString) return "";
 	const decodedString = decodeURIComponent(urlString);
-	// Replace hyphens with spaces and normalize to lowercase first
-	const normalizedString = decodedString.replace(/-/g, " ").toLowerCase();
+	// Replace hyphens with spaces, normalize Norwegian characters, and convert to lowercase
+	const normalizedString = decodedString
+		.replace(/-/g, " ")
+		.replace(/å/g, "a")
+		.replace(/ø/g, "o")
+		.replace(/æ/g, "ae")
+		.replace(/Å/g, "a")
+		.replace(/Ø/g, "o")
+		.replace(/Æ/g, "ae")
+		.toLowerCase();
 
 	// Norwegian lowercase words that should remain lowercase (unless first word)
 	const norwegianLowercaseWords = new Set([
@@ -133,9 +147,15 @@ export function categoryTreeToUrlPath(
 		// Convert to slug (same logic as mapCategoryTree)
 		return name
 			.toLowerCase()
+			.replace(/å/g, "a")
+			.replace(/ø/g, "o")
+			.replace(/æ/g, "ae")
+			.replace(/Å/g, "a")
+			.replace(/Ø/g, "o")
+			.replace(/Æ/g, "ae")
 			.normalize("NFKD")
 			.replace(/\s+/g, "-")
-			.replace(/[^a-z0-9æøå-]/gi, "")
+			.replace(/[^a-z0-9-]/gi, "")
 			.replace(/-+/g, "-")
 			.replace(/^-|-$/g, "");
 	});
@@ -149,9 +169,15 @@ export function productNameToSlug(productName: string): string {
 
 	return productName
 		.toLowerCase()
+		.replace(/å/g, "a")
+		.replace(/ø/g, "o")
+		.replace(/æ/g, "ae")
+		.replace(/Å/g, "a")
+		.replace(/Ø/g, "o")
+		.replace(/Æ/g, "ae")
 		.normalize("NFKD")
 		.replace(/\s+/g, "-")
-		.replace(/[^a-z0-9æøå-]/gi, "")
+		.replace(/[^a-z0-9-]/gi, "")
 		.replace(/-+/g, "-")
 		.replace(/^-|-$/g, "");
 }

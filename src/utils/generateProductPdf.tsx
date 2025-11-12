@@ -14,7 +14,7 @@ import { formatNorwegianCurrency } from "./formatCurrency";
 
 interface ProductPdfData {
 	name: string;
-	productNumber: string;
+	itemNumber: string;
 	gtin: string | null;
 	imageUrl?: string;
 	application?: string;
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
 const ProductPdfDocument = ({ data }: { data: ProductPdfData }) => {
 	const {
 		name,
-		productNumber,
+		itemNumber,
 		gtin,
 		imageUrl,
 		application,
@@ -251,7 +251,7 @@ const ProductPdfDocument = ({ data }: { data: ProductPdfData }) => {
 						<View style={{ marginBottom: 4 }}>
 							<Text style={styles.productMeta}>Varenummer:</Text>
 							<Text style={styles.productMetaValue}>
-								{productNumber || "-"}
+								{itemNumber || "-"}
 							</Text>
 						</View>
 						<View style={{ marginBottom: 4 }}>
@@ -419,7 +419,7 @@ export async function generateProductPdf(data: ProductPdfData) {
 	const url = URL.createObjectURL(blob);
 	const link = document.createElement("a");
 	link.href = url;
-	link.download = `${data.name.replace(/[^a-z0-9]/gi, "_")}_${data.productNumber}.pdf`;
+	link.download = `${data.name.replace(/[^a-z0-9]/gi, "_")}_${data.itemNumber}.pdf`;
 	document.body.appendChild(link);
 	link.click();
 	document.body.removeChild(link);

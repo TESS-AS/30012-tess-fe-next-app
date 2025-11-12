@@ -9,19 +9,15 @@ export function Quote() {
 	const categories = [
 		{
 			title: "Slanger og Rør",
-			subcategories: "6 underkategorier",
 		},
 		{
 			title: "Verktøy og maskiner",
-			subcategories: "2 underkategorier",
 		},
 		{
 			title: "Vern, klær og sko",
-			subcategories: "8 underkategorier",
 		},
 		{
 			title: "Sveis",
-			subcategories: "6 underkategorier",
 		},
 	];
 
@@ -71,9 +67,6 @@ export function Quote() {
 									/>
 									<div className="flex h-[100px] flex-col items-center justify-end text-center">
 										<h3 className="text-lg font-medium">{category.title}</h3>
-										<p className="text-muted-foreground text-sm">
-											{category.subcategories}
-										</p>
 									</div>
 								</div>
 

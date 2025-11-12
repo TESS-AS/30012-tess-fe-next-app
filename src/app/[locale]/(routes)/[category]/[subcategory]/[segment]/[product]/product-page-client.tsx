@@ -135,6 +135,7 @@ export function ProductPageClient({
 						}
 						variantData={variantData}
 						locale={locale}
+						selectedItemNumber={selectedItemNumber}
 					/>
 
 					<ProductStockStatus

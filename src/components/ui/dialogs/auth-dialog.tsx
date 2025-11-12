@@ -78,7 +78,7 @@ export default function AuthDialog({
 
 				<div className="pointer-events-none fixed inset-0 z-[5] flex items-start justify-center pt-8">
 					<Image
-						src="/images/tess-logo-white.svg"
+						src="/images/logo-white.svg"
 						alt="TESS"
 						width={320}
 						height={72}

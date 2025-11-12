@@ -43,9 +43,6 @@ export default function CategoriesPage() {
 						href={`/${category.slug}`}
 						className="rounded-lg border p-4 transition hover:shadow-md">
 						<div className="text-lg font-semibold">{category.name}</div>
-						<p className="text-muted-foreground text-sm">
-							{category.subcategories?.length || 0} subcategories
-						</p>
 					</Link>
 				))}
 			</div>

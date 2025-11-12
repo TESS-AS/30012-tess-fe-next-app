@@ -43,6 +43,8 @@ export function ProductVariantInfo({
 	const [showAllAttributes, setShowAllAttributes] = useState(false);
 	const [copied, setCopied] = useState(false);
 
+	console.log(variantData, "variantDataa");
+
 	const handleSeeAllVariants = () => {
 		setActiveTab("variants");
 		const target = document.querySelector("#product-table-details");

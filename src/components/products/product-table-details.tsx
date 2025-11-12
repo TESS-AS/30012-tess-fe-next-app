@@ -30,7 +30,7 @@ export function ProductDetailsTable({
 		useGetColumnAttributes(firstVariant);
 
 	const filteredAttributes =
-		variantData?.itemTechnicalSpec?.itemAttributes?.filter((attr: any) =>
+		variantData?.description?.productAttributes?.filter((attr: any) =>
 			locale === "no"
 				? attr.language === "Norwegian"
 				: attr.language === "English",
