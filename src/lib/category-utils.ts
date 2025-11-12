@@ -1,49 +1,17 @@
+import type { FilterCategory } from "@/components/ui/filter";
 import { formatUrlToDisplayName, mapCategoryTree } from "@/lib/utils";
 import axiosInstance from "@/services/axiosServer";
 import { searchProducts } from "@/services/product.service";
 import { Category, RawCategory } from "@/types/categories.types";
-
-// Cache for categories with TTL
-let categoriesCache: {
-	data: Category[] | null;
-	timestamp: number;
-	locale: string;
-} = {
-	data: null,
-	timestamp: 0,
-	locale: "",
-};
-
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
+import { FilterValues } from "@/types/filter.types";
 
 export async function fetchCategories(locale: string) {
-	// Check if we have valid cached data
-	const now = Date.now();
-	if (
-		categoriesCache.data &&
-		categoriesCache.locale === locale &&
-		now - categoriesCache.timestamp < CACHE_TTL
-	) {
-		return categoriesCache.data;
-	}
-
 	try {
-		const response = await axiosInstance.get<RawCategory[]>("/categories", {
-			headers: {
-				"Accept-Language": locale,
-			},
-		});
+		const response = await axiosInstance.get<RawCategory[]>("/categories");
 
 		const categories = response.data.map((node) =>
 			mapCategoryTree(node, locale),
 		);
-
-		// Update cache
-		categoriesCache = {
-			data: categories,
-			timestamp: now,
-			locale,
-		};
 
 		return categories;
 	} catch (error) {
@@ -106,4 +74,58 @@ export async function fetchProducts(
 		console.error("Error fetching products:", error);
 		throw error;
 	}
+}
+
+/**
+ * Normalizes the filter response from loadFilterParents into FilterCategory format
+ * Handles both SearchFilterResponseItem and CategoryFilterResponseItem response types
+ */
+export function normalizeFilterResponse(
+	filtersResponse: any[],
+): FilterCategory[] {
+	const result: FilterCategory[] = [];
+
+	for (const item of filtersResponse) {
+		// Handle SearchFilterResponseItem (has categoryFilters and filter)
+		if ("categoryFilters" in item && "filter" in item) {
+			result.push({
+				category: item.category,
+				filters: (item.filter as { key: string; productCount: number }[]).map(
+					(f) => ({
+						key: f.key,
+						values: [
+							{
+								value: f.key,
+								productcount: f.productCount,
+							},
+						],
+					}),
+				) as unknown as FilterValues[],
+			});
+			continue;
+		}
+		// Handle CategoryFilterResponseItem (has filters and categoryNumber)
+		if ("filters" in item) {
+			result.push({
+				category: item.category,
+				categoryNumber: item.categoryNumber,
+				filters: (item.filters as { key: string; productCount: number }[]).map(
+					(f) => ({
+						key: f.key,
+						values: [
+							{
+								value: f.key,
+								productcount: f.productCount,
+							},
+						],
+					}),
+				) as unknown as FilterValues[],
+			});
+			continue;
+		}
+		// Unknown format, log warning and skip
+		console.warn("Unexpected item in filter response", item);
+	}
+
+	return result;
 }
