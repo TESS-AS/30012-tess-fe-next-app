@@ -1,29 +1,18 @@
+"use client";
+
+import { useEffect, useMemo, useState, use } from "react";
+
 import CategoryContent from "@/components/category/category-content";
+import type { FilterCategory } from "@/components/ui/filter";
+import { useCategories } from "@/lib/CategoriesProvider";
 import {
-	fetchCategories,
 	findSubCategoryRecursive,
+	normalizeFilterResponse,
 } from "@/lib/category-utils";
-import { getSeoMetadata } from "@/lib/seo";
 import { formatUrlToDisplayName } from "@/lib/utils";
-import { loadFilterParents, loadFilters } from "@/services/categories.service";
-import { notFound } from "next/navigation";
-import { getLocale, getTranslations } from "next-intl/server";
-
-export async function generateMetadata({
-	params,
-}: {
-	params: Promise<{ locale: string; segment: string }>;
-}) {
-	const { locale, segment } = await params;
-	const t = await getTranslations({ locale, namespace: "Category" });
-
-	return await getSeoMetadata({
-		title: `${segment}`,
-		description: t("viewAll"),
-		path: `/segment/${segment}`,
-		locale,
-	});
-}
+import { loadFilterParents } from "@/services/categories.service";
+import type { Category } from "@/types/categories.types";
+import { useLocale } from "next-intl";
 
 interface SegmentPageProps {
 	params: Promise<{
@@ -33,17 +22,26 @@ interface SegmentPageProps {
 	}>;
 }
 
-export default async function SegmentPage({ params }: SegmentPageProps) {
-	try {
-		const { category, subcategory, segment } = await params;
-		const locale = await getLocale();
+export default function SegmentPage({ params }: SegmentPageProps) {
+	const { category, subcategory, segment } = use(params);
+	const locale = useLocale();
 
-		const formattedSubCategory = formatUrlToDisplayName(subcategory);
-		const formattedSegment = segment
-			? formatUrlToDisplayName(segment)
-			: undefined;
+	const { categories } = useCategories();
 
-		const categories = await fetchCategories(locale);
+	const [filters, setFilters] = useState<FilterCategory[]>([]);
+	const [categoryData, setCategoryData] = useState<Category | null>(null);
+
+	const formattedSubCategory = useMemo(
+		() => formatUrlToDisplayName(subcategory),
+		[subcategory],
+	);
+	const formattedSegment = useMemo(
+		() => (segment ? formatUrlToDisplayName(segment) : undefined),
+		[segment],
+	);
+
+	useEffect(() => {
+		if (!categories) return;
 
 		const subCategoryData = findSubCategoryRecursive(
 			categories,
@@ -51,27 +49,30 @@ export default async function SegmentPage({ params }: SegmentPageProps) {
 			formattedSegment,
 		);
 
-		if (!subCategoryData) {
-			notFound();
-		}
+		setCategoryData(subCategoryData);
 
 		const categoryNumber = subCategoryData?.groupId || null;
 
-		const filters = await loadFilterParents({
+		loadFilterParents({
 			categoryNumber,
 			searchTerm: null,
 			language: locale,
-		});
+		})
+			.then((filtersResponse) => {
+				const mappedFilters = normalizeFilterResponse(filtersResponse);
+				setFilters(mappedFilters);
+			})
+			.catch((error) => {
+				console.error("Error loading filters:", error);
+				setFilters([]);
+			});
+	}, [categories, formattedSubCategory, formattedSegment, locale]);
 
-		return (
-			<CategoryContent
-				categoryData={subCategoryData}
-				filters={filters}
-				segment={segment}
-			/>
-		);
-	} catch (error) {
-		console.error("Error in SegmentPage:", error);
-		throw error;
-	}
+	return (
+		<CategoryContent
+			categoryData={categoryData || undefined}
+			filters={filters}
+			segment={segment}
+		/>
+	);
 }

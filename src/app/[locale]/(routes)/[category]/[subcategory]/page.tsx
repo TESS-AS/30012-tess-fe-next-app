@@ -1,31 +1,18 @@
+"use client";
+
+import { useEffect, useMemo, useState, use } from "react";
+
 import CategoryContent from "@/components/category/category-content";
+import type { FilterCategory } from "@/components/ui/filter";
+import { useCategories } from "@/lib/CategoriesProvider";
 import {
-	fetchCategories,
-	fetchProducts,
 	findSubCategoryRecursive,
+	normalizeFilterResponse,
 } from "@/lib/category-utils";
-import { getSeoMetadata } from "@/lib/seo";
 import { formatUrlToDisplayName } from "@/lib/utils";
-import { loadFilterParents, loadFilters } from "@/services/categories.service";
-import { notFound } from "next/navigation";
-import { getLocale } from "next-intl/server";
-import { getTranslations } from "next-intl/server";
-
-export async function generateMetadata({
-	params,
-}: {
-	params: Promise<{ locale: string; subcategory: string }>;
-}) {
-	const { locale, subcategory } = await params;
-	const t = await getTranslations({ locale, namespace: "Category" });
-
-	return await getSeoMetadata({
-		title: `${subcategory}`,
-		description: t("viewAll"),
-		path: `/subcategory/${subcategory}`,
-		locale,
-	});
-}
+import { loadFilterParents } from "@/services/categories.service";
+import type { Category } from "@/types/categories.types";
+import { useLocale } from "next-intl";
 
 interface SubCategoryPageProps {
 	params: Promise<{
@@ -33,41 +20,51 @@ interface SubCategoryPageProps {
 	}>;
 }
 
-export default async function SubCategoryPage({
-	params,
-}: SubCategoryPageProps) {
-	try {
-		const { subcategory } = await params;
-		const locale = await getLocale();
+export default function SubCategoryPage({ params }: SubCategoryPageProps) {
+	const { subcategory } = use(params);
+	const locale = useLocale();
 
-		const formattedSubCategory = formatUrlToDisplayName(subcategory);
+	const { categories } = useCategories();
 
-		const categories = await fetchCategories(locale);
+	const [filters, setFilters] = useState<FilterCategory[]>([]);
+	const [categoryData, setCategoryData] = useState<Category | null>(null);
+
+	const formattedSubCategory = useMemo(
+		() => formatUrlToDisplayName(subcategory),
+		[subcategory],
+	);
+
+	useEffect(() => {
+		if (!categories) return;
+
 		const subCategoryData = findSubCategoryRecursive(
 			categories,
 			formattedSubCategory,
 		);
 
-		if (!subCategoryData) {
-			notFound();
-		}
+		setCategoryData(subCategoryData);
 
 		const categoryNumber = subCategoryData?.groupId || null;
 
-		const filters = await loadFilterParents({
+		loadFilterParents({
 			categoryNumber,
 			searchTerm: null,
 			language: locale,
-		});
+		})
+			.then((filtersResponse) => {
+				const mappedFilters = normalizeFilterResponse(filtersResponse);
+				setFilters(mappedFilters);
+			})
+			.catch((error) => {
+				console.error("Error loading filters:", error);
+				setFilters([]);
+			});
+	}, [categories, formattedSubCategory, locale]);
 
-		return (
-			<CategoryContent
-				categoryData={subCategoryData}
-				filters={filters}
-			/>
-		);
-	} catch (error) {
-		console.error("Error in SubCategoryPage:", error);
-		throw error;
-	}
+	return (
+		<CategoryContent
+			categoryData={categoryData || undefined}
+			filters={filters}
+		/>
+	);
 }
