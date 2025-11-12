@@ -4,7 +4,7 @@ import { IProduct } from "@/types/product.types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 interface UseProductInfiniteQueryProps {
-	categoryNumber: string;
+	categoryNumber: string | null;
 	query: string | null;
 	filters: FilterValues[] | null;
 	sort: string | null;
@@ -49,7 +49,7 @@ export function useProductInfiniteQuery({
 			return allPages.length + 1;
 		},
 		initialPageParam: 1,
-		enabled: enabled && !!categoryNumber,
+		enabled: enabled && (!!categoryNumber || !!query),
 		staleTime: 1 * 60 * 1000, // 1 minute
 		gcTime: 5 * 60 * 1000, // 5 minutes
 	});

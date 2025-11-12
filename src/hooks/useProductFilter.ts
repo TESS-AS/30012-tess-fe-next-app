@@ -41,7 +41,7 @@ export function useProductFilter({
 		query,
 		filters: currentFilters,
 		sort,
-		enabled: !!categoryNumber,
+		enabled: !!categoryNumber || !!query,
 	});
 
 	const loadMore = useCallback(async () => {
