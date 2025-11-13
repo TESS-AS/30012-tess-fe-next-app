@@ -12,6 +12,7 @@ interface ProductDetailsTableProps {
 	locale: string;
 	selectedItemNumber?: string;
 	onSelectVariant?: (itemNumber: string) => void;
+	onWarehouseChange?: (itemNumber: string, warehouseNumber: string) => void;
 }
 
 export function ProductDetailsTable({
@@ -20,6 +21,7 @@ export function ProductDetailsTable({
 	locale,
 	selectedItemNumber,
 	onSelectVariant,
+	onWarehouseChange,
 }: ProductDetailsTableProps) {
 	const t = useTranslations("Product");
 	const { activeTab, setActiveTab } = useProductTabs();
@@ -157,6 +159,7 @@ export function ProductDetailsTable({
 							onSelectVariant={onSelectVariant}
 							columnAttributes={columnAttributes ?? undefined}
 							loadingAttributes={loadingAttributes}
+							onWarehouseChange={onWarehouseChange}
 						/>
 					) : (
 						<p className="text-gray-500">{t("noVariants")}</p>

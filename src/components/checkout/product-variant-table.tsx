@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -90,6 +90,7 @@ interface ProductVariantTableProps {
 	columnAttributes?: Record<string, any> | null;
 	loadingAttributes?: boolean;
 	hasQuantity?: boolean;
+	onWarehouseChange?: (itemNumber: string, warehouseNumber: string) => void;
 }
 
 export default function ProductVariantTable({
@@ -102,6 +103,7 @@ export default function ProductVariantTable({
 	columnAttributes,
 	loadingAttributes,
 	hasQuantity = false,
+	onWarehouseChange,
 }: ProductVariantTableProps) {
 	const t = useTranslations();
 	const { data: profile } = useGetProfileData();
@@ -116,6 +118,12 @@ export default function ProductVariantTable({
 	>([]);
 	const [prices, setPrices] = useState<Record<number, number>>({});
 	const [loading, setLoading] = useState<Record<number, boolean>>({});
+	const initializedWarehousesRef = useRef<Set<number>>(new Set());
+
+	// Reset initialized warehouses when variants change
+	useEffect(() => {
+		initializedWarehousesRef.current.clear();
+	}, [variants]);
 
 	const [visibleCols, setVisibleCols] = useState<Record<ColumnKey, boolean>>({
 		image: false,
@@ -344,10 +352,29 @@ export default function ProductVariantTable({
 					}));
 
 					if (warehouses.length > 0) {
-						setWarehouse((prev) => ({
-							...prev,
-							[variant.itemNumber]: warehouses[0].warehouseNumber,
-						}));
+						const firstWarehouse = warehouses[0].warehouseNumber;
+						const variantKey = variant.itemNumber;
+						
+						// Only initialize warehouse if not already initialized for this variant
+						if (!initializedWarehousesRef.current.has(variantKey)) {
+							setWarehouse((prev) => {
+								// Only set warehouse if not already set (to preserve user selection)
+								if (prev[variantKey]) {
+									initializedWarehousesRef.current.add(variantKey);
+									return prev; // Keep existing selection
+								}
+								// Preselect first available warehouse and notify parent
+								onWarehouseChange?.(
+									variantKey.toString(),
+									firstWarehouse,
+								);
+								initializedWarehousesRef.current.add(variantKey);
+								return {
+									...prev,
+									[variantKey]: firstWarehouse,
+								};
+							});
+						}
 					}
 
 					return { ...variant, warehouses };
@@ -364,6 +391,7 @@ export default function ProductVariantTable({
 
 		setIsLoading(true);
 		loadWarehousesData();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [variants, columnAttributes]);
 
 	const renderColumns = () => {
@@ -724,6 +752,10 @@ export default function ProductVariantTable({
 																		...prev,
 																		[variant.itemNumber]: value,
 																	}));
+																	onWarehouseChange?.(
+																		variant.itemNumber.toString(),
+																		value,
+																	);
 																	await calculatePriceForVariant(variant);
 																}}>
 																<SelectTrigger className="w-[180px]">
