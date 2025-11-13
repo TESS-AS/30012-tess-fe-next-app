@@ -22,6 +22,8 @@ interface ProductVariantInfoProps {
 	isLoading: boolean;
 	productNumber: string;
 	itemVariantCount?: number;
+	selectedWarehouse?: string;
+	columnAttributes?: Record<string, any> | null;
 }
 
 export function ProductVariantInfo({
@@ -31,6 +33,8 @@ export function ProductVariantInfo({
 	isLoading,
 	productNumber,
 	itemVariantCount,
+	selectedWarehouse,
+	columnAttributes,
 }: ProductVariantInfoProps) {
 	const t = useTranslations("Product");
 	const { isCartChanging, setIsCartChanging } = useAppContext();
@@ -55,20 +59,54 @@ export function ProductVariantInfo({
 
 	const { data: profile } = useGetProfileData();
 
-	// Get stock balance for selected warehouse (default warehouse)
-	const selectedWarehouseBalance = profile?.defaultWarehouseNumber
-		? (variantData?.stockByWarehouse?.find(
-				(w: any) => w.warehouse_number === profile.defaultWarehouseNumber,
-			)?.balance ?? 0)
-		: 0;
+	// Get stock balance and warehouse name for selected warehouse (from table selection or default warehouse)
+	const warehouseNumber = selectedWarehouse || profile?.defaultWarehouseNumber;
+	
+	// Get warehouse info from columnAttributes (inventory data) if available
+	const getWarehouseInfo = () => {
+		if (!selectedItemNumber || !columnAttributes) return null;
+		
+		const inventory = columnAttributes[selectedItemNumber]?.inventory || [];
+		if (!warehouseNumber) return null;
+		
+		const warehouseId = parseInt(warehouseNumber);
+		const warehouseInfo = inventory.find(
+			(inv: any) => inv.warehouseId === warehouseId,
+		);
+		
+		if (warehouseInfo) {
+			return {
+				balance: warehouseInfo.balance || 0,
+				warehouseName: warehouseInfo.warehouseName || `Lager ${warehouseId}`,
+			};
+		}
+		
+		return null;
+	};
+	
+	// Fallback to stockByWarehouse if columnAttributes not available
+	const warehouseInfo = getWarehouseInfo();
+	const selectedWarehouseBalance = warehouseInfo
+		? warehouseInfo.balance
+		: warehouseNumber
+			? (variantData?.stockByWarehouse?.find(
+					(w: any) => w.warehouse_number === warehouseNumber,
+				)?.balance ?? 0)
+			: 0;
+	
+	const selectedWarehouseName = warehouseInfo
+		? warehouseInfo.warehouseName
+		: warehouseNumber
+			? `Lager ${warehouseNumber}`
+			: "hovedlager";
 
 	const handleCopyGtin = () => {
-		const gtin =
-			variantData?.itemTechnicalSpec?.gtin ||
-			variantData?.itemTechnicalSpec?.GTIN;
-		navigator.clipboard.writeText(gtin);
-		setCopied(true);
-		setTimeout(() => setCopied(false), 1000);
+		const gtin = variantData?.itemHeader?.GTIN;
+		if (gtin) {
+			navigator.clipboard.writeText(gtin);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 1000);
+		}
 	};
 
 	const attributes =
@@ -182,7 +220,7 @@ export function ProductVariantInfo({
 					</h3>
 					<span className="inline-flex items-center gap-1 rounded-sm bg-[#DCF7E0] px-5 py-0.5 text-sm font-medium text-green-800">
 						<Check className="h-4 w-4 text-green-800" />
-						{selectedWarehouseBalance} stk på hovedlager
+						{selectedWarehouseBalance} stk på {selectedWarehouseName}
 					</span>
 				</div>
 				<button
@@ -210,9 +248,7 @@ export function ProductVariantInfo({
 						className="text-md inline-flex items-center gap-1.5 font-light text-gray-500">
 						<span className="font-semibold text-black">GTIN:</span>
 						<span>
-							{variantData?.itemTechnicalSpec?.gtin ||
-								variantData?.itemTechnicalSpec?.GTIN ||
-								"-"}
+							{variantData?.itemHeader?.GTIN || "-"}
 						</span>
 						<Files className="h-4 w-4 cursor-pointer text-gray-500" />
 					</button>

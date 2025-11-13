@@ -44,7 +44,8 @@ export const useSubmitOrder = (
 				window.URL.revokeObjectURL(url);
 
 				localStorage.removeItem("selectedHoseRows");
-				await handleArchiveCart();
+				// Don't clear cart when exporting to Excel
+				// await handleArchiveCart();
 				return null;
 			} else {
 				const response = await salesOrder(payload);

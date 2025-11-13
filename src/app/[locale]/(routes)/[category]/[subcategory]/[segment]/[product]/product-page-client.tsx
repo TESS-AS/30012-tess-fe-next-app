@@ -10,6 +10,7 @@ import { ProductDetailsTable } from "@/components/products/product-table-details
 import { ProductVariantInfo } from "@/components/products/product-variant-info";
 import { RelatedProducts } from "@/components/products/related-products";
 import { Separator } from "@/components/ui/separator";
+import { useGetColumnAttributes } from "@/hooks/useGetColumnAttributes";
 import { useGetVariantInfo } from "@/hooks/useGetVariantInfo";
 import { useTranslations } from "next-intl";
 
@@ -58,6 +59,9 @@ export function ProductPageClient({
 	const [selectedItemNumber, setSelectedItemNumber] = useState(
 		getInitialItemNumber(),
 	);
+	const [selectedWarehouse, setSelectedWarehouse] = useState<
+		Record<string, string>
+	>({});
 
 	useEffect(() => {
 		if (preselectedSapNumber) {
@@ -85,6 +89,19 @@ export function ProductPageClient({
 		productData.items,
 		selectedItemNumber,
 	);
+
+	const firstVariant = variantData?.itemVariants?.[0]?.itemNumber;
+	const { data: columnAttributes } = useGetColumnAttributes(firstVariant);
+
+	const handleWarehouseChange = (
+		itemNumber: string,
+		warehouseNumber: string,
+	) => {
+		setSelectedWarehouse((prev) => ({
+			...prev,
+			[itemNumber]: warehouseNumber,
+		}));
+	};
 
 	const selectedVariant =
 		variantData?.itemVariants?.find(
@@ -158,6 +175,8 @@ export function ProductPageClient({
 						isLoading={isLoading}
 						productNumber={productData.productNumber}
 						itemVariantCount={productData.itemVariantCount}
+						selectedWarehouse={selectedWarehouse[selectedItemNumber || ""]}
+						columnAttributes={columnAttributes ?? undefined}
 					/>
 				</div>
 			</div>
@@ -169,6 +188,7 @@ export function ProductPageClient({
 						locale={locale}
 						selectedItemNumber={selectedItemNumber}
 						onSelectVariant={setSelectedItemNumber}
+						onWarehouseChange={handleWarehouseChange}
 					/>
 				)}
 			</div>
