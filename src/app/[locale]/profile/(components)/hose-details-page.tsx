@@ -105,8 +105,6 @@ export default function HoseDetailsPage({
 		{ id: "doc2", name: "Dokument 2" },
 	];
 
-	console.log(locations, "locations");
-
 	const handleAddToCart = async () => {
 		if (!hoseDetails?.hoseLine?.hexagonId || !profile) {
 			toast.error("Missing required information to add to cart");
@@ -288,9 +286,7 @@ export default function HoseDetailsPage({
 						onDiscardEquipment={() => console.log("Discard equipment")}
 						onPrintCertificate={() => console.log("Print certificate")}
 						onPrintTags={() => console.log("Print tags")}
-						onPrintTestCertificates={() =>
-							console.log("Print test certificates")
-						}
+						onPrintTestCertificates={() => {}}
 						onExport={() => console.log("Export")}
 						triggerButton={
 							<Button

@@ -65,7 +65,6 @@ export function useCheckoutOrderData(
 		// Handle cartKit items
 		if (cartKit?.length) {
 			cartKit.forEach((kitItem) => {
-				console.log(kitItem, "kiteitem");
 				// Add each component of the kit with its hexagonId
 				const kitComponents = [
 					{

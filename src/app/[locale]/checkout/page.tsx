@@ -178,13 +178,11 @@ export default function CheckoutPage() {
 
 			try {
 				const result = await submitOrder(orderData);
-				console.log("Order submission result:", result);
 				if (result) {
 					const orderResponse: OrderResponse = {
 						data: "",
 						order: result as any,
 					};
-					console.log("Formatted order response:", orderResponse);
 					setSubmittedOrder(orderResponse);
 					setShowOrderConfirmation(true);
 					setTimeout(() => setShowFeedbackModal(true), 1000);

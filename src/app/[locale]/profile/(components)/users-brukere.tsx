@@ -114,7 +114,6 @@ const UsersBrukere = () => {
 
 	const handleDeleteConfirm = () => {
 		if (userToDelete) {
-			console.log("Deleting user:", userToDelete);
 			setUserToDelete(null);
 		}
 	};
@@ -124,9 +123,7 @@ const UsersBrukere = () => {
 		setIsViewModalOpen(true);
 	};
 
-	const handleEditClick = (user: User) => {
-		console.log("Editing user:", user);
-	};
+	const handleEditClick = (user: User) => {};
 
 	const handleBulkEditClick = () => {
 		if (selectedUsers.length > 0) {
@@ -142,12 +139,6 @@ const UsersBrukere = () => {
 
 	const handleFinalConfirm = () => {
 		if (pendingBulkChanges) {
-			console.log(
-				"Applying bulk changes:",
-				pendingBulkChanges,
-				"to users:",
-				selectedUsers,
-			);
 			// Apply the changes here
 			setPendingBulkChanges(null);
 			setSelectedUsers([]);

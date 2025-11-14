@@ -50,7 +50,6 @@ export const getInspectionSummary = async (
 		);
 		return res.data ?? { data: [] };
 	} catch (error) {
-		console.log(error);
 		return { data: [] };
 	}
 };
@@ -108,12 +107,6 @@ export const getS1Codes = async (
 	s2?: boolean,
 ): Promise<S1CodesResponse> => {
 	const url = `/asset/getS1?page=${page}&pageSize=${pageSize}&s2=${s2}`;
-	console.log("🌐 getS1Codes service called with:", {
-		page,
-		pageSize,
-		s2,
-		url,
-	});
 	try {
 		const response = await axiosClient.get(url);
 		return (
