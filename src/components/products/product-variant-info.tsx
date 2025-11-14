@@ -47,43 +47,39 @@ export function ProductVariantInfo({
 	const [showAllAttributes, setShowAllAttributes] = useState(false);
 	const [copied, setCopied] = useState(false);
 
-	console.log(variantData, "variantDataa");
-
 	const handleSeeAllVariants = () => {
 		setActiveTab("variants");
 		const target = document.querySelector("#product-table-details");
 		target?.scrollIntoView({ behavior: "smooth" });
 	};
 
-	console.log(variantData, "variantDataaa");
-
 	const { data: profile } = useGetProfileData();
 
 	// Get stock balance and warehouse name for selected warehouse (from table selection or default warehouse)
 	const warehouseNumber = selectedWarehouse || profile?.defaultWarehouseNumber;
-	
+
 	// Get warehouse info from columnAttributes (inventory data) if available
 	const getWarehouseInfo = () => {
 		if (!selectedItemNumber || !columnAttributes) return null;
-		
+
 		const inventory = columnAttributes[selectedItemNumber]?.inventory || [];
 		if (!warehouseNumber) return null;
-		
+
 		const warehouseId = parseInt(warehouseNumber);
 		const warehouseInfo = inventory.find(
 			(inv: any) => inv.warehouseId === warehouseId,
 		);
-		
+
 		if (warehouseInfo) {
 			return {
 				balance: warehouseInfo.balance || 0,
 				warehouseName: warehouseInfo.warehouseName || `Lager ${warehouseId}`,
 			};
 		}
-		
+
 		return null;
 	};
-	
+
 	// Fallback to stockByWarehouse if columnAttributes not available
 	const warehouseInfo = getWarehouseInfo();
 	const selectedWarehouseBalance = warehouseInfo
@@ -93,7 +89,7 @@ export function ProductVariantInfo({
 					(w: any) => w.warehouse_number === warehouseNumber,
 				)?.balance ?? 0)
 			: 0;
-	
+
 	const selectedWarehouseName = warehouseInfo
 		? warehouseInfo.warehouseName
 		: warehouseNumber
@@ -218,10 +214,12 @@ export function ProductVariantInfo({
 					<h3 className="text-lg font-semibold text-[#0F1912]">
 						Produktvariant
 					</h3>
-					<span className="inline-flex items-center gap-1 rounded-sm bg-[#DCF7E0] px-5 py-0.5 text-sm font-medium text-green-800">
-						<Check className="h-4 w-4 text-green-800" />
-						{selectedWarehouseBalance} stk på {selectedWarehouseName}
-					</span>
+					{selectedWarehouseBalance > 0 && (
+						<span className="inline-flex items-center gap-1 rounded-sm bg-[#DCF7E0] px-5 py-0.5 text-sm font-medium text-green-800">
+							<Check className="h-4 w-4 text-green-800" />
+							{selectedWarehouseBalance} stk på {selectedWarehouseName}
+						</span>
+					)}
 				</div>
 				<button
 					type="button"
@@ -247,9 +245,7 @@ export function ProductVariantInfo({
 						onClick={handleCopyGtin}
 						className="text-md inline-flex items-center gap-1.5 font-light text-gray-500">
 						<span className="font-semibold text-black">GTIN:</span>
-						<span>
-							{variantData?.itemHeader?.GTIN || "-"}
-						</span>
+						<span>{variantData?.itemHeader?.GTIN || "-"}</span>
 						<Files className="h-4 w-4 cursor-pointer text-gray-500" />
 					</button>
 					{copied && (

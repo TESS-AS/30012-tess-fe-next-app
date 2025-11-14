@@ -136,7 +136,6 @@ export const EditAddressModal: React.FC<EditAddressModalProps> = ({
 						}}
 						onAddNewClick={() => {
 							// Handle new address creation
-							console.log("Add new address");
 						}}
 					/>
 				</div>

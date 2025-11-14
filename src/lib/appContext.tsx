@@ -195,7 +195,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 						warehouseNumber: profile?.defaultWarehouseNumber || "",
 					},
 				]) ?? [];
-			console.log(cartKitPriceRequests, "cartKitPriceRequests");
 
 			const allPriceRequests = [...priceRequests, ...cartKitPriceRequests];
 
@@ -206,8 +205,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					profile?.defaultCompanyNumber,
 				);
 
-				console.log(priceResults, "priceresults");
-
 				const initialPrices: Record<string, number> = {};
 				const calculatedPrices: Record<string, number> = {};
 
@@ -216,8 +213,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 					calculatedPrices[item.itemNumber] = item.bestPrice || 0;
 				}
-
-				console.log(initialPrices, calculatedPrices, "inital");
 
 				setPrices((prev) => ({
 					...prev,
@@ -353,7 +348,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			const insert2 = calculatedPrices[kit.insert2.itemNumber] ?? 0;
 			return sum + hose + ferrule1 + ferrule2 + insert1 + insert2;
 		}, 0);
-		console.log(regularTotal, kitsTotal, "kitstotal");
 
 		return regularTotal + kitsTotal;
 	}, [cartItems?.cart, cartItems?.cartKit, calculatedPrices]);
@@ -396,7 +390,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 		return totals;
 	}, [cartItems?.cartKit, calculatedPrices]);
-	console.log(cartKitTotals, "cartKitTotals");
 
 	const updateQuantity = async (
 		cartLine: number,
@@ -443,7 +436,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		}
 	};
 
-	console.log(calculatedPrices, prices, "prices and cal");
 	const removeItemOptimistic = async (cartLine: number | string) => {
 		const numericLine = Number(cartLine);
 

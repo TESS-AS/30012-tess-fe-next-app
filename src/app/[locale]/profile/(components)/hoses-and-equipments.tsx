@@ -299,8 +299,6 @@ export function HosesAndEquipments({
 			};
 
 			handleAddToCart();
-		} else {
-			console.log(`Bulk action ${action} for rows:`, selectedRows);
 		}
 	};
 
@@ -507,7 +505,6 @@ export function HosesAndEquipments({
 			return next;
 		});
 	};
-	console.log(selectedRows, "selectedRows");
 
 	return (
 		<>

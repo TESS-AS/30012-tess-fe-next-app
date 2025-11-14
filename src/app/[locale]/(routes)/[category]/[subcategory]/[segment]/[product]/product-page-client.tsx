@@ -112,8 +112,6 @@ export function ProductPageClient({
 		? productData.mediaId
 		: [productData.mediaId];
 
-	console.log(productData, "dataaa");
-
 	return (
 		<div className="container mx-auto space-y-12 px-4 pt-8 pb-0">
 			<ProductBreadcrumbs

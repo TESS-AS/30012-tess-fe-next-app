@@ -68,7 +68,6 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		// Handle form submission
-		console.log("Form data:", formData);
 		onOpenChange(false);
 	};
 

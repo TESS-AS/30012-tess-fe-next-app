@@ -186,7 +186,6 @@ export function Rekvisisjoner() {
 			),
 		},
 	];
-	console.log(selectedOrder, "selectedOrder");
 	return (
 		<div className="space-y-6">
 			<div className="flex items-baseline justify-between">
