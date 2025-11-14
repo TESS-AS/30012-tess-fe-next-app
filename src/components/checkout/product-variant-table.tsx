@@ -343,8 +343,30 @@ export default function ProductVariantTable({
 				if (!variants?.length) return;
 
 				const updatedVariants = variants.map((variant) => {
-					const warehouseOptions =
-						getWarehouseOptions[variant.itemNumber] || [];
+					// Compute warehouse options directly from variants and columnAttributes
+					const inventory = columnAttributes?.[variant.itemNumber]?.inventory || [];
+					const warehouseMap = new Map();
+					inventory
+						.filter((inv: any) => inv.balance > 0)
+						.forEach((inv: any) => {
+							const key = inv.warehouseId;
+							if (warehouseMap.has(key)) {
+								warehouseMap.get(key).balance += inv.balance;
+							} else {
+								warehouseMap.set(key, {
+									warehouseId: inv.warehouseId,
+									warehouseName:
+										inv.warehouseName ||
+										`${t("Product.warehouses")} ${inv.warehouseId}`,
+									balance: inv.balance,
+								});
+							}
+						});
+
+					const warehouseOptions = Array.from(warehouseMap.values())
+						.slice(0, 50)
+						.sort((a: any, b: any) => b.balance - a.balance);
+
 					const warehouses = warehouseOptions.map((w) => ({
 						warehouseNumber: w.warehouseId.toString(),
 						warehouseName: w.warehouseName,
