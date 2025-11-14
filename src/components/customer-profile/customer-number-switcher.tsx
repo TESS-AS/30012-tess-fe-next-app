@@ -113,7 +113,7 @@ export default function CustomerNumberSwitcher({
 			setIsSaving(false);
 		}
 	};
-
+	console.log(assortments, "assortments");
 	return (
 		<>
 			<button
@@ -223,7 +223,7 @@ export default function CustomerNumberSwitcher({
 											<SelectItem
 												key={a.assortmentnumber}
 												value={a.assortmentnumber}>
-												{a.assortmentname} ({a.assortmentnumber})
+												{a.nameNo} ({a.assortmentnumber})
 											</SelectItem>
 										))}
 									</>

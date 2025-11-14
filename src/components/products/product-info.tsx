@@ -22,6 +22,7 @@ interface ProductInfoProps {
 	variantData?: any;
 	locale: string;
 	selectedItemNumber?: string;
+	shortDescription?: string;
 }
 
 export function ProductInfo({
@@ -35,6 +36,7 @@ export function ProductInfo({
 	variantData,
 	locale,
 	selectedItemNumber,
+	shortDescription,
 }: ProductInfoProps) {
 	const t = useTranslations("Product");
 	const { data: profile } = useGetProfileData();
@@ -210,6 +212,9 @@ export function ProductInfo({
 						)}
 					</Button>
 				</div>
+			</div>
+			<div className="flex items-center">
+				<p className="mt-2">{shortDescription}</p>
 			</div>
 
 			{price && (

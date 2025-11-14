@@ -6,6 +6,6 @@ interface ProductTabsState {
 }
 
 export const useProductTabs = create<ProductTabsState>((set) => ({
-	activeTab: "description",
+	activeTab: "variants",
 	setActiveTab: (tab) => set({ activeTab: tab }),
 }));
