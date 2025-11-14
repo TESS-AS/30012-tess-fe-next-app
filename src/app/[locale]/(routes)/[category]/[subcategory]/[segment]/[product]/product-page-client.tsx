@@ -90,6 +90,8 @@ export function ProductPageClient({
 		selectedItemNumber,
 	);
 
+	console.log(variantData, "variantDate");
+
 	const firstVariant = variantData?.itemVariants?.[0]?.itemNumber;
 	const { data: columnAttributes } = useGetColumnAttributes(firstVariant);
 
@@ -151,6 +153,9 @@ export function ProductPageClient({
 						variantData={variantData}
 						locale={locale}
 						selectedItemNumber={selectedItemNumber}
+						shortDescription={
+							variantData?.itemHeader?.extShortText?.[1]?.value_def
+						}
 					/>
 
 					<ProductStockStatus
