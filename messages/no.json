@@ -36,7 +36,7 @@
 		"adding": "Legger til i kassen...",
 		"addToCart": "Legg til",
 		"addToWishlist": "Legg til i \u00f8nskeliste",
-		"relatedProducts": "Relaterte produkter",
+		"relatedProducts": "Tilhørende produkter",
 		"viewAll": "Vis alle",
 		"specifications": "Spesifikasjoner",
 		"technicalInfo": "Teknisk informasjon",
@@ -147,12 +147,11 @@
 		"saving": "Lagrer..."
 	},
 	"CustomerWebPromo": {
-		
 		"switcher": {
 			"news": "Nyhet",
 			"future": "Fremtidens kundeweb for THM"
 		},
-		
+
 		"customerWeb": {
 			"title": "Fremtidens kundeweb for THM",
 			"description": "Vi bygger n\u00e5 neste generasjon kundeweb for TESS Hose Management (THM). Dette er mer enn en oppdatering \u2013 vi utvikler en moderne plattform som kombinerer e-handel og avansert beslutningsst\u00f8tte, slik at du f\u00e5r full oversikt og kontroll over slanger og utstyr.",
