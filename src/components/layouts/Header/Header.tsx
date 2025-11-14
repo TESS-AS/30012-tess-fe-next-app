@@ -299,9 +299,13 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		};
 	}, [isAssortmentDropdownOpen]);
 
+	const isHoseManagementCustomer =
+		profile?.defaultCustomerNumber ===
+		SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
+
 	return (
 		<header
-			className={`bg-background relative z-50 w-full border-t ${profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER ? "h-[132px]" : "h-[182px]"}`}>
+			className={`bg-background relative z-50 w-full border-t ${isHoseManagementCustomer ? "h-[132px]" : "h-[182px]"}`}>
 			<div className="container m-auto flex h-16 items-center justify-between">
 				<div className="flex items-center gap-4">
 					<Link
@@ -315,8 +319,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 						/>
 					</Link>
 					<div className="flex items-center gap-8">
-						{profile?.defaultCustomerNumber !==
-							SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
+						{!isHoseManagementCustomer && (
 							<Button
 								variant="ghost"
 								className={`text-md mb-2 rounded-none px-0 pb-2 hover:bg-transparent ${
@@ -362,8 +365,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 			</div>
 			<div className="container m-auto mb-1 flex h-16 items-center justify-between">
 				<div className="flex items-center gap-2">
-					{profile?.defaultCustomerNumber !==
-						SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
+					{!isHoseManagementCustomer && (
 						<div
 							className="relative hidden md:flex"
 							ref={assortmentDropdownRef}>
@@ -603,8 +605,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 									</div>
 									<div className="text-[14px]">{profile.email}</div>
 								</div>
-								{profile?.defaultCustomerNumber !==
-									SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
+								{!isHoseManagementCustomer && (
 									<>
 										<DropdownMenuSeparator />
 										<DropdownMenuItem
@@ -703,8 +704,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 				</div>
 			</div>
 
-			{profile?.defaultCustomerNumber !==
-				SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
+			{!isHoseManagementCustomer && (
 				<div className="border-t">
 					<div className="m-auto flex h-12 w-full items-center justify-between gap-4">
 						<CategoryNavigationMenu

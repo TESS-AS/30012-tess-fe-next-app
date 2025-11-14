@@ -254,7 +254,7 @@ export function ProductVariantInfo({
 						</div>
 					)}
 				</div>
-				<p className="text-md font-semibold text-[#0F1912]">Attributer:</p>
+				<p className="text-md font-semibold text-[#0F1912]">Attributter:</p>
 			</div>
 			<div className="mt-2 flex items-end justify-between gap-6">
 				<div className="flex flex-1 flex-col gap-2">
