@@ -79,17 +79,6 @@ export function ProductDetailsTable({
 						<div className="grid grid-cols-12 gap-6">
 							{/* Left side - Description text (60% width) */}
 							<div className="col-span-12 lg:col-span-7">
-								{variantData.itemHeader.extShortText?.[1]
-									?.attribute_identifier && (
-									<div className="space-y-4">
-										<p className="whitespace-pre-line text-black">
-											{
-												variantData.itemHeader.extShortText?.[1]
-													?.attribute_identifier
-											}
-										</p>
-									</div>
-								)}
 								{variantData?.description?.itemRemarks && (
 									<div className="space-y-4">
 										<p className="whitespace-pre-line text-black">
