@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { ProductBreadcrumbs } from "@/components/products/product-breadcrumbs";
 import { ProductGallery } from "@/components/products/product-gallery";
 import { ProductInfo } from "@/components/products/product-info";
-import { ProductStockStatus } from "@/components/products/product-stock-status";
 import { ProductDetailsTable } from "@/components/products/product-table-details";
 import { ProductVariantInfo } from "@/components/products/product-variant-info";
 import { RelatedProducts } from "@/components/products/related-products";
@@ -156,15 +155,6 @@ export function ProductPageClient({
 						shortDescription={
 							variantData?.itemHeader?.extShortText?.[1]?.value_def
 						}
-					/>
-
-					<ProductStockStatus
-						name={
-							locale === "en"
-								? productData.applicationEn
-								: productData.applicationNo
-						}
-						availability="På hovedlager"
 					/>
 
 					<Separator className="mt-3" />

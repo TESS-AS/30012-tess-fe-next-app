@@ -214,7 +214,9 @@ export function ProductInfo({
 				</div>
 			</div>
 			<div className="flex items-center">
-				<p className="mt-2">{shortDescription}</p>
+				<p className="text-md mt-2 font-normal text-[#5A615D]">
+					{shortDescription}
+				</p>
 			</div>
 
 			{price && (
