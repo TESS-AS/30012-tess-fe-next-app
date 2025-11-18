@@ -11,13 +11,16 @@ import { RelatedProducts } from "@/components/products/related-products";
 import { Separator } from "@/components/ui/separator";
 import { useGetColumnAttributes } from "@/hooks/useGetColumnAttributes";
 import { useGetVariantInfo } from "@/hooks/useGetVariantInfo";
+import { useProductFetch } from "@/hooks/useProductFetch";
+import { Loader2 } from "lucide-react";
+import { notFound } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 interface Props {
 	locale: string;
 	category: string;
 	segment: string;
-	productData: any;
+	productId: string;
 	preselectedItemNumber?: string;
 	preselectedSapNumber?: string;
 }
@@ -26,16 +29,27 @@ export function ProductPageClient({
 	locale,
 	category,
 	segment,
-	productData,
+	productId,
 	preselectedItemNumber,
 	preselectedSapNumber,
 }: Props) {
 	const t = useTranslations("Product");
+	const {
+		data: productDataArray,
+		isLoading,
+		error,
+	} = useProductFetch({
+		productName: productId,
+	});
+
+	// Extract the first product from the array (productFetch returns an array)
+	const productData = productDataArray?.[0];
 
 	const getInitialItemNumber = () => {
+		if (!productData?.items) return undefined;
 		// Priority: SAP number first, then item number
 		if (preselectedSapNumber) {
-			const itemBySap = productData.items?.find(
+			const itemBySap = productData.items.find(
 				(item: any) =>
 					item.sapNumber === preselectedSapNumber ||
 					item.itemNumber?.toString() === preselectedSapNumber,
@@ -45,7 +59,7 @@ export function ProductPageClient({
 			}
 		}
 		if (preselectedItemNumber) {
-			const itemExists = productData.items?.some(
+			const itemExists = productData.items.some(
 				(item: any) => item.itemNumber === preselectedItemNumber,
 			);
 			if (itemExists) {
@@ -63,8 +77,9 @@ export function ProductPageClient({
 	>({});
 
 	useEffect(() => {
+		if (!productData?.items) return;
 		if (preselectedSapNumber) {
-			const itemBySap = productData.items?.find(
+			const itemBySap = productData.items.find(
 				(item: any) =>
 					item.sapNumber === preselectedSapNumber ||
 					item.itemNumber?.toString() === preselectedSapNumber,
@@ -75,21 +90,19 @@ export function ProductPageClient({
 			}
 		}
 		if (preselectedItemNumber) {
-			const itemExists = productData.items?.some(
+			const itemExists = productData.items.some(
 				(item: any) => item.itemNumber === preselectedItemNumber,
 			);
 			if (itemExists) {
 				setSelectedItemNumber(preselectedItemNumber);
 			}
 		}
-	}, [preselectedItemNumber, preselectedSapNumber, productData.items]);
+	}, [preselectedItemNumber, preselectedSapNumber, productData?.items]);
 
-	const { data: variantData, isLoading } = useGetVariantInfo(
-		productData.items,
+	const { data: variantData, isLoading: isLoadingVariant } = useGetVariantInfo(
+		productData?.items || [],
 		selectedItemNumber,
 	);
-
-	console.log(variantData, "variantDate");
 
 	const firstVariant = variantData?.itemVariants?.[0]?.itemNumber;
 	const { data: columnAttributes } = useGetColumnAttributes(firstVariant);
@@ -108,6 +121,20 @@ export function ProductPageClient({
 		variantData?.itemVariants?.find(
 			(v: any) => v.itemNumber === selectedItemNumber,
 		) || null;
+
+	// Handle loading state
+	if (isLoading) {
+		return (
+			<div className="container mx-auto flex min-h-screen items-center justify-center px-4">
+				<Loader2 className="text-primary h-8 w-8 animate-spin" />
+			</div>
+		);
+	}
+
+	// Handle error state or no product found
+	if (error || !productData) {
+		notFound();
+	}
 
 	const productImages = Array.isArray(productData.mediaId)
 		? productData.mediaId
@@ -165,7 +192,7 @@ export function ProductPageClient({
 						selectedItemNumber={selectedItemNumber}
 						onSelectVariant={setSelectedItemNumber}
 						variantData={variantData}
-						isLoading={isLoading}
+						isLoading={isLoadingVariant}
 						productNumber={productData.productNumber}
 						itemVariantCount={productData.itemVariantCount}
 						selectedWarehouse={selectedWarehouse[selectedItemNumber || ""]}

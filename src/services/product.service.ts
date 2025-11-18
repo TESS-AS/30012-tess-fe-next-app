@@ -36,21 +36,11 @@ interface FilterValues {
 	values: string[];
 }
 
-const productsCache: {
-	[key: string]: {
-		data: any;
-		timestamp: number;
-	};
-} = {};
-
-const PRODUCTS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
 export async function productFetch(productName: string) {
 	try {
 		const url = `/searchResult/${productName}`;
-		const apires = await axiosInstance.get(url);
-
-		return apires.data;
+		const response = await axiosInstance.get(url);
+		return response.data;
 	} catch (error) {
 		console.error("Error fetching product:", error);
 		throw error;
@@ -211,20 +201,6 @@ export async function searchProducts(
 	sort?: string | null,
 ): Promise<SearchListResponse> {
 	try {
-		// Create cache key
-		const cacheKey = `${categoryNumber}-${page}-${pageSize}${searchTerm ? `-${searchTerm}` : ""}${
-			filters ? `-${JSON.stringify(filters)}` : ""
-		}${sort ? `-${sort}` : ""}`;
-		const now = Date.now();
-
-		// Check cache
-		if (
-			productsCache[cacheKey] &&
-			now - productsCache[cacheKey].timestamp < PRODUCTS_CACHE_TTL
-		) {
-			return productsCache[cacheKey].data;
-		}
-
 		// Build query parameters
 		const params = new URLSearchParams();
 		if (categoryNumber) {
@@ -244,12 +220,6 @@ export async function searchProducts(
 			filters && filters.length > 0
 				? await axiosInstance.post(url, { filters })
 				: await axiosInstance.post(url);
-
-		// Update cache
-		productsCache[cacheKey] = {
-			data: response.data,
-			timestamp: now,
-		};
 
 		return response.data;
 	} catch (error) {
