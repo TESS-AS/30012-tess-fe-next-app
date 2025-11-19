@@ -45,39 +45,17 @@ export function ProductPageClient({
 	// Extract the first product from the array (productFetch returns an array)
 	const productData = productDataArray?.[0];
 
-	const getInitialItemNumber = () => {
-		if (!productData?.items) return undefined;
-		// Priority: SAP number first, then item number
-		if (preselectedSapNumber) {
-			const itemBySap = productData.items.find(
-				(item: any) =>
-					item.sapNumber === preselectedSapNumber ||
-					item.itemNumber?.toString() === preselectedSapNumber,
-			);
-			if (itemBySap) {
-				return itemBySap.itemNumber;
-			}
-		}
-		if (preselectedItemNumber) {
-			const itemExists = productData.items.some(
-				(item: any) => item.itemNumber === preselectedItemNumber,
-			);
-			if (itemExists) {
-				return preselectedItemNumber;
-			}
-		}
-		return productData.items[0]?.itemNumber;
-	};
-
-	const [selectedItemNumber, setSelectedItemNumber] = useState(
-		getInitialItemNumber(),
-	);
+	const [selectedItemNumber, setSelectedItemNumber] = useState<
+		string | undefined
+	>(undefined);
 	const [selectedWarehouse, setSelectedWarehouse] = useState<
 		Record<string, string>
 	>({});
 
 	useEffect(() => {
-		if (!productData?.items) return;
+		if (!productData?.items || productData.items.length === 0) return;
+
+		// Priority: SAP number first, then item number, then first item
 		if (preselectedSapNumber) {
 			const itemBySap = productData.items.find(
 				(item: any) =>
@@ -95,9 +73,19 @@ export function ProductPageClient({
 			);
 			if (itemExists) {
 				setSelectedItemNumber(preselectedItemNumber);
+				return;
 			}
 		}
-	}, [preselectedItemNumber, preselectedSapNumber, productData?.items]);
+		// If no preselection and no current selection, select the first item
+		if (!selectedItemNumber) {
+			setSelectedItemNumber(productData.items[0]?.itemNumber);
+		}
+	}, [
+		preselectedItemNumber,
+		preselectedSapNumber,
+		productData?.items,
+		selectedItemNumber,
+	]);
 
 	const { data: variantData, isLoading: isLoadingVariant } = useGetVariantInfo(
 		productData?.items || [],
@@ -220,3 +208,4 @@ export function ProductPageClient({
 		</div>
 	);
 }
+
