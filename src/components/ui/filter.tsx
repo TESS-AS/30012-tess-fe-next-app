@@ -104,6 +104,9 @@ export const Filter = React.forwardRef<
 		const t = useTranslations();
 		const [searchTerm, setSearchTerm] = React.useState("");
 		const [showAllCategories, setShowAllCategories] = React.useState(false);
+		const [expandedFilterChildren, setExpandedFilterChildren] = React.useState<
+			Record<string, boolean>
+		>({});
 		const [selectedCategory, setSelectedCategory] = React.useState<
 			string | null
 		>(null);
@@ -144,6 +147,7 @@ export const Filter = React.forwardRef<
 			setSelectedCategory(null);
 			setOpenAccordions([]);
 			setLoadedChildren({});
+			setExpandedFilterChildren({});
 			loadingInitiatedRef.current.clear();
 		}, [query]);
 
@@ -840,7 +844,10 @@ export const Filter = React.forwardRef<
 														</div>
 													) : children.values.length > 0 ? (
 														<div className="space-y-2 pl-2">
-															{children.values.map((child) => (
+															{(expandedFilterChildren[filter.key]
+																? children.values
+																: children.values.slice(0, 5)
+															).map((child) => (
 																<div
 																	key={child.value}
 																	className="mb-5 flex items-center justify-between space-x-2 font-normal"
@@ -869,6 +876,23 @@ export const Filter = React.forwardRef<
 																	</label>
 																</div>
 															))}
+															{children.values.length > 5 && (
+																<Button
+																	variant="link"
+																	size="sm"
+																	onClick={(e) => {
+																		e.stopPropagation();
+																		setExpandedFilterChildren((prev) => ({
+																			...prev,
+																			[filter.key]: !prev[filter.key],
+																		}));
+																	}}
+																	className="text-primary px-0 text-sm hover:underline">
+																	{expandedFilterChildren[filter.key]
+																		? "Vis mindre"
+																		: `Vis mer (${children.values.length - 5})`}
+																</Button>
+															)}
 														</div>
 													) : (
 														<div className="text-muted-foreground pl-2 text-sm italic">
