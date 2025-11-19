@@ -543,7 +543,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 																)}
 															</div>
 															<span className="text-sm font-medium break-words text-[#0F1912]">
-																{a.assortmentname}
+																{a.nameNo} ({a.assortmentnumber})
 															</span>
 														</button>
 													</TooltipTrigger>
