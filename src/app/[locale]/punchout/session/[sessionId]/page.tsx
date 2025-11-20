@@ -23,10 +23,7 @@ export default function PunchoutSessionPage() {
 
 		const authenticatePunchOut = async () => {
 			try {
-				await axiosClient.post("/logout");
-				await signOut({ redirect: false });
-
-				await axiosClient.post(
+				const response = await axiosClient.post(
 					"/login/validatepunchout",
 					{},
 					{
@@ -36,6 +33,12 @@ export default function PunchoutSessionPage() {
 						withCredentials: true,
 					},
 				);
+
+				console.log("Punchout validation successful:", response.status);
+
+				await signOut({ redirect: false });
+
+				await new Promise((resolve) => setTimeout(resolve, 200));
 
 				const { data: user } = await axiosClient.get("/user");
 
