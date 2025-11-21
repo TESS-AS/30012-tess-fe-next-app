@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -27,6 +27,12 @@ export function ProductGallery({ images, className }: ProductGalleryProps) {
 			url: "",
 		},
 	);
+
+	useEffect(() => {
+		if (images && images.length > 0) {
+			setSelectedImage(images[0]);
+		}
+	}, [images]);
 
 	if (!images || images.length === 0) {
 		return (

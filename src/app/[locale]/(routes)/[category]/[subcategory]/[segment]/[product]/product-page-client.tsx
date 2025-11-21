@@ -124,9 +124,38 @@ export function ProductPageClient({
 		notFound();
 	}
 
-	const productImages = Array.isArray(productData.mediaId)
-		? productData.mediaId
-		: [productData.mediaId];
+	const getProductImages = () => {
+		if (variantData?.itemHeader?.itemImage) {
+			const itemImage = variantData.itemHeader.itemImage;
+
+			if (Array.isArray(itemImage)) {
+				return itemImage.length > 0 ? itemImage : [];
+			}
+
+			if (itemImage && typeof itemImage === "object" && itemImage.url) {
+				return [itemImage];
+			}
+
+			if (typeof itemImage === "string" && itemImage.trim() !== "") {
+				return [
+					{
+						url: itemImage,
+						filename: "",
+						picture_type: "MainImage",
+						thumbnail_url: itemImage,
+					},
+				];
+			}
+		}
+
+		return Array.isArray(productData.mediaId)
+			? productData.mediaId
+			: productData.mediaId
+				? [productData.mediaId]
+				: [];
+	};
+
+	const productImages = getProductImages();
 
 	return (
 		<div className="container mx-auto space-y-12 px-4 pt-8 pb-0">
@@ -208,4 +237,3 @@ export function ProductPageClient({
 		</div>
 	);
 }
-
