@@ -9,8 +9,8 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function mapCategoryTree(node: RawCategory, locale: string): Category {
-	const nameKey = `name_${locale}`;
-	const name = node[nameKey] || node.nameEn || node.nameNo;
+	// Always prefer Norwegian name first, then fallback to English
+	const name = node.nameNo || node.name_no || node.nameEn || node.name_en || node[`name_${locale}`] || "";
 
 	return {
 		name,
@@ -141,8 +141,8 @@ export function categoryTreeToUrlPath(
 	const categories = categoryTree.slice(0, 3);
 
 	return categories.map((category) => {
-		const nameKey = `name_${locale}`;
-		const name = category[nameKey] || category.nameEn || category.nameNo || "";
+		// Always prefer Norwegian name first, then fallback to English
+		const name = category.nameNo || category.name_no || category.nameEn || category.name_en || "";
 
 		// Convert to slug (same logic as mapCategoryTree)
 		return name

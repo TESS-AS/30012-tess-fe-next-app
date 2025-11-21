@@ -61,7 +61,8 @@ export function ProductItem({
 				setIsLoadingCategory(true);
 				const categoryTree = await loadCategoryTree(product.productNumber);
 				if (categoryTree && categoryTree.length > 0) {
-					const pathSlugs = categoryTreeToUrlPath(categoryTree, locale);
+					// Always use Norwegian for URL paths
+					const pathSlugs = categoryTreeToUrlPath(categoryTree, "no");
 					// Build URL: /category/subcategory/segment/productNumber
 					// Fill with __default if we don't have enough categories
 					const pathParts = [...pathSlugs];

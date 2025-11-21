@@ -13,7 +13,6 @@ import {
 import { mapCategoryTree } from "@/lib/utils";
 import axiosClient from "@/services/axiosClient";
 import type { RawCategory, Category } from "@/types/categories.types";
-import { useLocale } from "next-intl";
 
 interface CategoriesContextValue {
 	categories: Category[] | null;
@@ -30,7 +29,6 @@ export const CategoriesProvider = ({ children }: { children: ReactNode }) => {
 	const [categories, setCategories] = useState<Category[] | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const locale = useLocale();
 
 	const fetchCategories = useCallback(async () => {
 		setLoading(true);
@@ -38,14 +36,15 @@ export const CategoriesProvider = ({ children }: { children: ReactNode }) => {
 		try {
 			const res = await axiosClient.get("/categories");
 			const raw: RawCategory[] = res.data;
-			const mapped = raw.map((node) => mapCategoryTree(node, locale));
+			// Always use Norwegian for category names
+			const mapped = raw.map((node) => mapCategoryTree(node, "no"));
 			setCategories(mapped);
 		} catch (err: any) {
 			setError(err?.response?.data?.message || "Failed to load categories");
 		} finally {
 			setLoading(false);
 		}
-	}, [locale]);
+	}, []);
 
 	useEffect(() => {
 		fetchCategories();
