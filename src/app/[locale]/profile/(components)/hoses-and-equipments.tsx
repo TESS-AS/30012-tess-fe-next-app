@@ -71,7 +71,6 @@ export function HosesAndEquipments({
 
 	const { setIsCartChanging, isCartChanging } = useAppContext();
 
-	// Set customerNumber when profile loads
 	useEffect(() => {
 		if (
 			profile?.defaultCustomerNumber &&
@@ -82,7 +81,6 @@ export function HosesAndEquipments({
 		}
 	}, [profile?.defaultCustomerNumber]);
 
-	// Determine the effective customer number to use
 	const effectiveCustomerNumber =
 		profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
 			? profile.defaultCustomerNumber
@@ -283,8 +281,8 @@ export function HosesAndEquipments({
 					const cartItems = hexagonIds.map((hexagonId) => ({
 						hexagonId: Number(hexagonId),
 						quantity: 1,
-						warehouseNumber: "L01",
-						companyNumber: "1",
+						warehouseNumber: profile?.defaultWarehouseNumber,
+						companyNumber: profile?.defaultCompanyNumber,
 					}));
 
 					await postCartKit(cartItems);
