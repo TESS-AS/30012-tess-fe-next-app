@@ -24,7 +24,7 @@ import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { Link } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
-import { getItemBalanceArray } from "@/services/carts.service";
+import { getItemBalanceArray, postCartKit } from "@/services/carts.service";
 import { loadCategoryTree } from "@/services/categories.service";
 import {
 	getProductVariations,
@@ -568,6 +568,7 @@ const CartPage = () => {
 							{cartItems?.cartKit && cartItems.cartKit.length > 0 && (
 								<div className="space-y-4">
 									{cartItems.cartKit.map((item, idx) => {
+										console.log(item, "item.");
 										return (
 											<div
 												key={idx}
@@ -606,6 +607,50 @@ const CartPage = () => {
 														</span>
 													</div>
 													<div className="flex items-center gap-6">
+														<QuantityButtons
+															isLoading={!!loadingItems[item.hose.itemNumber]}
+															quantity={item.ferrule1.quantity}
+															onIncrease={async (e) => {
+																e.stopPropagation();
+																setLoadingItems((prev) => ({
+																	...prev,
+																	[item.hose.itemNumber]: true,
+																}));
+																try {
+																	await postCartKit([
+																		{
+																			hexagonId: Number(item.hexagonId),
+																			quantity: 1,
+																			warehouseNumber:
+																				profile?.defaultWarehouseNumber,
+																			companyNumber:
+																				profile?.defaultCompanyNumber,
+																		},
+																	]);
+																} finally {
+																	setLoadingItems((prev) => ({
+																		...prev,
+																		[item.hexagonId]: false,
+																	}));
+																}
+															}}
+															onDecrease={async (e) => {
+																e.stopPropagation();
+																setLoadingItems((prev) => ({
+																	...prev,
+																	[item.hose.itemNumber]: true,
+																}));
+																try {
+																	await removeItemOptimistic(item.cartLine);
+																} finally {
+																	setLoadingItems((prev) => ({
+																		...prev,
+																		[item.hose.itemNumber]: false,
+																	}));
+																}
+															}}
+															disabled
+														/>
 														<div className="flex items-center gap-6">
 															<span className="font-semibold">
 																{formatNorwegianCurrency(
