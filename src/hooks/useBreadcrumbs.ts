@@ -40,8 +40,14 @@ export function useBreadcrumbs(query?: string | null, productName?: string) {
 				try {
 					const categoryTree = await loadCategoryTree(product);
 					if (categoryTree && categoryTree.length > 0) {
+						// Filter out assortments (items with assortmentNumber) and take only category, subcategory, segment
+						const filteredTree = categoryTree.filter(
+							(cat: any) => !cat.assortmentNumber && !cat.assortmentnumber,
+						);
+						
 						// Extract both slugs and names from category tree (always use Norwegian)
-						const resolved: ResolvedCategory[] = categoryTree
+						// Take only first 3 levels: category, subcategory, segment
+						const resolved: ResolvedCategory[] = filteredTree
 							.slice(0, 3)
 							.map((cat: any) => {
 								// Always use Norwegian name (preserve special characters: å, ø, æ)

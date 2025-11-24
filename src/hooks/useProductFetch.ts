@@ -16,7 +16,7 @@ export function useProductFetch({
 			return await productFetch(productName);
 		},
 		enabled: enabled && !!productName,
-		staleTime: 1 * 60 * 1000, // 1 minute
+		staleTime: 1 * 60 * 1000,
 		gcTime: 5 * 60 * 1000, // 5 minutes
 		refetchOnMount: false,
 		refetchOnWindowFocus: false,

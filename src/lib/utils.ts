@@ -137,8 +137,13 @@ export function categoryTreeToUrlPath(
 ): string[] {
 	if (!categoryTree || categoryTree.length === 0) return [];
 
+	// Filter out assortments (items with assortmentNumber) and take only category, subcategory, segment
+	const filteredTree = categoryTree.filter(
+		(cat: any) => !cat.assortmentNumber && !cat.assortmentnumber,
+	);
+
 	// Take up to 3 categories (category, subcategory, segment)
-	const categories = categoryTree.slice(0, 3);
+	const categories = filteredTree.slice(0, 3);
 
 	return categories.map((category) => {
 		// Always prefer Norwegian name first, then fallback to English

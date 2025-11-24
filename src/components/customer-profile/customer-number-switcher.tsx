@@ -20,6 +20,7 @@ import { useGetWarehouses } from "@/hooks/useGetWarehouse";
 import { useCategories } from "@/lib/CategoriesProvider";
 import axiosClient from "@/services/axiosClient";
 import { ProfileUser } from "@/types/user.types";
+import { useQueryClient } from "@tanstack/react-query";
 import { UserRoundCog } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -34,6 +35,7 @@ export default function CustomerNumberSwitcher({
 	const t = useTranslations();
 	const { refetch: refetchCategories } = useCategories();
 	const router = useRouter();
+	const queryClient = useQueryClient();
 
 	const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
 	const [newCustomerNumber, setNewCustomerNumber] = useState("");
@@ -104,7 +106,25 @@ export default function CustomerNumberSwitcher({
 				assortmentNumber: selectedAssortment,
 			});
 			setDefaultCustomerNumber(newCustomerNumber);
-			await refetchCategories();
+
+			// Invalidate and refetch all product and price queries since company/customer/warehouse context changed
+			// This ensures prices and products are immediately refetched with the new context
+			await Promise.all([
+				queryClient.invalidateQueries({
+					queryKey: ["productPrice"],
+					refetchType: "active", // Immediately refetch active queries
+				}),
+				queryClient.invalidateQueries({
+					queryKey: ["product"],
+					refetchType: "active",
+				}),
+				queryClient.invalidateQueries({
+					queryKey: ["products"],
+					refetchType: "active",
+				}),
+				refetchCategories(),
+			]);
+
 			setIsCustomerModalOpen(false);
 			router.push("/");
 		} catch (err) {

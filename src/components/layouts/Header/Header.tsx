@@ -43,6 +43,7 @@ import { getProductVariations } from "@/services/product.service";
 import { Category } from "@/types/categories.types";
 import { IProductSearch } from "@/types/search.types";
 import { ProfileUser } from "@/types/user.types";
+import { useQueryClient } from "@tanstack/react-query";
 import {
 	BookOpen,
 	ChevronDown,
@@ -68,6 +69,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		error,
 		refetch: refetchCategories,
 	} = useCategories();
+	const queryClient = useQueryClient();
 
 	const currentLocale = useLocale();
 	const t = useTranslations();
@@ -261,7 +263,25 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 				assortmentNumber: assortmentNumber,
 			});
 			setSelectedAssortment(assortmentNumber);
-			await refetchCategories();
+
+			// Invalidate and refetch all product and price queries since assortment context changed
+			// This ensures prices and products are immediately refetched with the new context
+			await Promise.all([
+				queryClient.invalidateQueries({
+					queryKey: ["productPrice"],
+					refetchType: "active", // Immediately refetch active queries
+				}),
+				queryClient.invalidateQueries({
+					queryKey: ["product"],
+					refetchType: "active",
+				}),
+				queryClient.invalidateQueries({
+					queryKey: ["products"],
+					refetchType: "active",
+				}),
+				refetchCategories(),
+			]);
+
 			setIsAssortmentDropdownOpen(false);
 		} catch (err) {
 			console.error("Failed to update default assortment", err);
@@ -275,7 +295,9 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		const match = assortments.find(
 			(a: any) => a.assortmentnumber === selectedAssortment,
 		);
-		return match?.assortmentname || "";
+
+		console.log(match);
+		return match?.nameNo || "";
 	};
 
 	const assortmentDropdownRef = useRef<HTMLDivElement>(null);

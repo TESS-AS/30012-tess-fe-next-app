@@ -75,10 +75,11 @@ export default function CategoryNavigationMenu({
 																<img
 																	src={subcategory.image}
 																	alt={subcategory.name}
-																	className="absolute left-0 top-0 h-20 w-20 object-contain"
+																	className="absolute top-0 left-5 h-15 w-15 object-contain"
 																/>
 															)}
-															<div className={`text-md font-bold ${subcategory.image ? "pl-24" : ""}`}>
+															<div
+																className={`text-md font-bold ${subcategory.image ? "pl-24" : ""}`}>
 																<Link
 																	onClick={() => setOpenMenu(false)}
 																	href={`/${category.slug}/${subcategory.slug}`}
@@ -89,7 +90,8 @@ export default function CategoryNavigationMenu({
 														</div>
 														{Array.isArray(subcategory.subcategories) &&
 															subcategory.subcategories && (
-																<ul className={`space-y-1 ${subcategory.image ? "pl-24" : ""}`}>
+																<ul
+																	className={`space-y-1 ${subcategory.image ? "pl-24" : ""}`}>
 																	{subcategory.subcategories.map((child) => (
 																		<li key={child.slug}>
 																			<Link
