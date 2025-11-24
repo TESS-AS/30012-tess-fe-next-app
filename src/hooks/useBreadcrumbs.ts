@@ -40,14 +40,25 @@ export function useBreadcrumbs(query?: string | null, productName?: string) {
 				try {
 					const categoryTree = await loadCategoryTree(product);
 					if (categoryTree && categoryTree.length > 0) {
-						// Filter out assortments (items with assortmentNumber) and take only category, subcategory, segment
-						const filteredTree = categoryTree.filter(
-							(cat: any) => !cat.assortmentNumber && !cat.assortmentnumber,
-						);
+						// Take first 3 non-assortment items ONLY (strictly filter out assortments)
+						// Never include assortments in breadcrumbs
+						const filteredCategories: any[] = [];
+						for (const cat of categoryTree) {
+							// Strictly skip if it's an assortment (has assortmentNumber or assortmentnumber)
+							if (cat.assortmentNumber || cat.assortmentnumber) {
+								continue;
+							}
+							// Only add if it has a name
+							if (cat.nameNo || cat.name_no || cat.nameEn || cat.name_en) {
+								filteredCategories.push(cat);
+								if (filteredCategories.length >= 3) break;
+							}
+						}
 						
 						// Extract both slugs and names from category tree (always use Norwegian)
 						// Take only first 3 levels: category, subcategory, segment
-						const resolved: ResolvedCategory[] = filteredTree
+						// Use only non-assortment categories (even if less than 3)
+						const resolved: ResolvedCategory[] = filteredCategories
 							.slice(0, 3)
 							.map((cat: any) => {
 								// Always use Norwegian name (preserve special characters: å, ø, æ)

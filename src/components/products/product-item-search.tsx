@@ -49,7 +49,7 @@ export function ProductItem({
 		string | null
 	>(null);
 	const [productLink, setProductLink] = useState<string>(
-		`/product/${product.productNumber}`,
+		`/produkt/${product.productNumber}`,
 	);
 	const [isLoadingCategory, setIsLoadingCategory] = useState(false);
 	const router = useRouter();
@@ -64,21 +64,24 @@ export function ProductItem({
 					// Always use Norwegian for URL paths
 					const pathSlugs = categoryTreeToUrlPath(categoryTree, "no");
 					// Build URL: /category/subcategory/segment/productNumber
-					// Fill with __default if we don't have enough categories
+					// Use only the categories we have (no __default, no assortments)
 					const pathParts = [...pathSlugs];
-					while (pathParts.length < 3) {
-						pathParts.push("__default");
+					// Only add product number if we have at least one category
+					if (pathParts.length > 0) {
+						pathParts.push(product.productNumber);
+						setProductLink(`/${pathParts.join("/")}`);
+					} else {
+						// Fallback: use product number only if no categories available
+						setProductLink(`/produkt/${product.productNumber}`);
 					}
-					pathParts.push(product.productNumber);
-					setProductLink(`/${pathParts.join("/")}`);
 				} else {
 					// Fallback: use product number even without category tree
-					setProductLink(`/product/${product.productNumber}`);
+					setProductLink(`/produkt/${product.productNumber}`);
 				}
 			} catch (error) {
 				console.error("Error loading category tree for product:", error);
 				// Fallback to default product link with product number
-				setProductLink(`/product/${product.productNumber}`);
+				setProductLink(`/produkt/${product.productNumber}`);
 			} finally {
 				setIsLoadingCategory(false);
 			}

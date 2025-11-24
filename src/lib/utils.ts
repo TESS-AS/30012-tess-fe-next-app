@@ -137,14 +137,23 @@ export function categoryTreeToUrlPath(
 ): string[] {
 	if (!categoryTree || categoryTree.length === 0) return [];
 
-	// Filter out assortments (items with assortmentNumber) and take only category, subcategory, segment
-	const filteredTree = categoryTree.filter(
-		(cat: any) => !cat.assortmentNumber && !cat.assortmentnumber,
-	);
+	// Take first 3 non-assortment items ONLY (strictly filter out assortments)
+	// Never include assortments in the URL path
+	const categories: any[] = [];
+	for (const cat of categoryTree) {
+		// Strictly skip if it's an assortment (has assortmentNumber or assortmentnumber)
+		if (cat.assortmentNumber || cat.assortmentnumber) {
+			continue;
+		}
+		// Only add if it has a name
+		if (cat.nameNo || cat.name_no || cat.nameEn || cat.name_en) {
+			categories.push(cat);
+			if (categories.length >= 3) break;
+		}
+	}
 
-	// Take up to 3 categories (category, subcategory, segment)
-	const categories = filteredTree.slice(0, 3);
-
+	// Return only non-assortment categories (even if less than 3)
+	// Do NOT fall back to assortments - better to have fewer categories than include assortments
 	return categories.map((category) => {
 		// Always prefer Norwegian name first, then fallback to English
 		const name = category.nameNo || category.name_no || category.nameEn || category.name_en || "";

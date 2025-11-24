@@ -306,32 +306,44 @@ export default function ProductVariantTable({
 		const loadPrices = async () => {
 			if (!variants?.length || !profile) return;
 
-			const newPrices: Record<number, number> = {};
+			try {
+				// Batch all price requests into a single API call
+				const priceRequests = variants.map((variant) => ({
+					itemNumber: variant.itemNumber.toString(),
+					quantity: 1,
+					warehouseNumber: profile.defaultWarehouseNumber || "",
+				}));
 
-			for (const variant of variants) {
-				try {
-					const [priceResult] = await calculateItemPrice(
-						[
-							{
-								itemNumber: variant.itemNumber.toString(),
-								quantity: 1,
-								warehouseNumber: profile.defaultWarehouseNumber || "",
-							},
-						],
-						profile.defaultCustomerNumber,
-						profile.defaultCompanyNumber,
-					);
+				const priceResults = await calculateItemPrice(
+					priceRequests,
+					profile.defaultCustomerNumber,
+					profile.defaultCompanyNumber,
+				);
 
-					if (priceResult) {
-						newPrices[variant.itemNumber] = priceResult.bestPrice || 0;
+				const priceMap = new Map<string, number>();
+				priceResults?.forEach((result: any) => {
+					if (result.itemNumber && result.bestPrice !== undefined) {
+						// Use string itemNumber as key to handle both numeric and alphanumeric item numbers
+						priceMap.set(result.itemNumber.toString(), result.bestPrice);
 					}
-				} catch (err) {
-					console.error("Price fetch failed for", variant.itemNumber, err);
-					newPrices[variant.itemNumber] = 0;
-				}
-			}
+				});
 
-			setPrices(newPrices);
+				const newPrices: Record<number, number> = {};
+				variants.forEach((variant) => {
+					const variantItemNumberStr = variant.itemNumber.toString();
+					const price = priceMap.get(variantItemNumberStr) ?? 0;
+					newPrices[variant.itemNumber] = price;
+				});
+
+				setPrices(newPrices);
+			} catch (err) {
+				console.error("Price fetch failed", err);
+				const errorPrices: Record<number, number> = {};
+				variants.forEach((variant) => {
+					errorPrices[variant.itemNumber] = 0;
+				});
+				setPrices(errorPrices);
+			}
 		};
 
 		loadPrices();
@@ -344,7 +356,8 @@ export default function ProductVariantTable({
 
 				const updatedVariants = variants.map((variant) => {
 					// Compute warehouse options directly from variants and columnAttributes
-					const inventory = columnAttributes?.[variant.itemNumber]?.inventory || [];
+					const inventory =
+						columnAttributes?.[variant.itemNumber]?.inventory || [];
 					const warehouseMap = new Map();
 					inventory
 						.filter((inv: any) => inv.balance > 0)
@@ -376,7 +389,7 @@ export default function ProductVariantTable({
 					if (warehouses.length > 0) {
 						const firstWarehouse = warehouses[0].warehouseNumber;
 						const variantKey = variant.itemNumber;
-						
+
 						// Only initialize warehouse if not already initialized for this variant
 						if (!initializedWarehousesRef.current.has(variantKey)) {
 							setWarehouse((prev) => {
@@ -386,10 +399,7 @@ export default function ProductVariantTable({
 									return prev; // Keep existing selection
 								}
 								// Preselect first available warehouse and notify parent
-								onWarehouseChange?.(
-									variantKey.toString(),
-									firstWarehouse,
-								);
+								onWarehouseChange?.(variantKey.toString(), firstWarehouse);
 								initializedWarehousesRef.current.add(variantKey);
 								return {
 									...prev,
@@ -811,7 +821,8 @@ export default function ProductVariantTable({
 																						<div className="flex items-center gap-2">
 																							<CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
 																							<span className="truncate">
-																								{w.balance} stk på {w.warehouseName}
+																								{w.balance} stk på{" "}
+																								{w.warehouseName}
 																							</span>
 																						</div>
 																					</SelectItem>
