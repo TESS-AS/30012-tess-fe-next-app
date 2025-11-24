@@ -42,8 +42,6 @@ export function ProductPageClient({
 		productName: productId,
 	});
 
-	console.log(productDataArray, "productDataArray");
-
 	// Extract the first product from the array (productFetch returns an array)
 	const productData = productDataArray?.[0];
 
@@ -120,8 +118,6 @@ export function ProductPageClient({
 			</div>
 		);
 	}
-
-	console.log(productData, "productDataaa");
 
 	// Handle error state or no product found
 	if (error || !productData) {

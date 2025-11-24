@@ -34,8 +34,6 @@ export default function PunchoutSessionPage() {
 					},
 				);
 
-				console.log("Punchout validation successful:", response.status);
-
 				await signOut({ redirect: false });
 
 				await new Promise((resolve) => setTimeout(resolve, 200));
