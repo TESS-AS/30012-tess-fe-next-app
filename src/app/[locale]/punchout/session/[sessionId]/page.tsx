@@ -3,14 +3,20 @@
 import { useEffect, useState } from "react";
 
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
-import { triggerProfileRefetch } from "@/hooks/usePunchoutProfile";
+import { profileKeys } from "@/hooks/useGetProfileData";
+import {
+	clearPunchoutProfile,
+	triggerProfileRefetch,
+} from "@/hooks/usePunchoutProfile";
 import axiosClient from "@/services/axiosClient";
+import { useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 
 export default function PunchoutSessionPage() {
 	const params = useParams();
 	const router = useRouter();
+	const queryClient = useQueryClient();
 
 	const sessionId = Array.isArray(params.sessionId)
 		? params.sessionId[0]
@@ -36,11 +42,23 @@ export default function PunchoutSessionPage() {
 
 				await signOut({ redirect: false });
 
+				clearPunchoutProfile();
+				queryClient.invalidateQueries({
+					queryKey: profileKeys.detail(),
+				});
+				queryClient.removeQueries({
+					queryKey: profileKeys.detail(),
+				});
+
 				await new Promise((resolve) => setTimeout(resolve, 200));
 
 				const { data: user } = await axiosClient.get("/user");
 
 				triggerProfileRefetch();
+
+				await new Promise((resolve) => setTimeout(resolve, 500));
+
+				router.refresh();
 
 				await new Promise((resolve) => setTimeout(resolve, 200));
 
@@ -59,7 +77,7 @@ export default function PunchoutSessionPage() {
 		};
 
 		authenticatePunchOut();
-	}, [sessionId, router]);
+	}, [sessionId, router, queryClient]);
 
 	return (
 		<main className="p-8">

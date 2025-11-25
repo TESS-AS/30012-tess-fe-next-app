@@ -449,13 +449,6 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 																default: "Dine treff",
 															})}
 														</h3>
-														{searchData?.productRes &&
-															Array.isArray(searchData.productRes) && (
-																<span className="text-sm text-gray-500">
-																	{searchData.productRes.length} /{" "}
-																	{searchData.productRes.length} produkter
-																</span>
-															)}
 													</div>
 
 													{isSearchLoading ? (
