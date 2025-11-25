@@ -5,10 +5,15 @@ import { ProfileUser } from "@/types/user.types";
 
 let refetchTrigger = 0;
 const listeners = new Set<() => void>();
+const clearListeners = new Set<() => void>();
 
 export const triggerProfileRefetch = () => {
 	refetchTrigger++;
 	listeners.forEach((listener) => listener());
+};
+
+export const clearPunchoutProfile = () => {
+	clearListeners.forEach((listener) => listener());
 };
 
 export function usePunchoutProfile() {
@@ -22,6 +27,17 @@ export function usePunchoutProfile() {
 		listeners.add(listener);
 		return () => {
 			listeners.delete(listener);
+		};
+	}, []);
+
+	useEffect(() => {
+		const clearListener = () => {
+			setData(null);
+			setIsLoading(true);
+		};
+		clearListeners.add(clearListener);
+		return () => {
+			clearListeners.delete(clearListener);
 		};
 	}, []);
 
