@@ -96,6 +96,36 @@ export function ProductVariantInfo({
 			? `Lager ${warehouseNumber}`
 			: "hovedlager";
 
+	// Get unit (enhet) for the selected item
+	const getUnit = () => {
+		if (!selectedItemNumber || !columnAttributes) return "STK";
+
+		const attrs = columnAttributes[selectedItemNumber]?.attributes || [];
+		
+		// Try to find contentUnit from attributes
+		const contentUnitAttr = attrs.find((attr: any) => attr.contentUnit);
+		if (contentUnitAttr?.contentUnit) {
+			return contentUnitAttr.contentUnit;
+		}
+
+		// Try to find by attribute identifier or name
+		const unitAttr = attrs.find(
+			(attr: any) =>
+				attr.attributeIdentifier === "contentUnit" ||
+				attr.name?.toLowerCase().includes("contentunit") ||
+				attr.name?.toLowerCase().includes("content unit") ||
+				attr.name?.toLowerCase().includes("enhet"),
+		);
+		if (unitAttr?.valueDef) {
+			return unitAttr.valueDef;
+		}
+
+		// Fallback to STK
+		return "STK";
+	};
+
+	const unit = getUnit();
+
 	const handleCopyGtin = () => {
 		const gtin = variantData?.itemHeader?.GTIN;
 		if (gtin) {
@@ -217,7 +247,7 @@ export function ProductVariantInfo({
 					{selectedWarehouseBalance > 0 && (
 						<span className="inline-flex items-center gap-1 rounded-sm bg-[#DCF7E0] px-5 py-0.5 text-sm font-medium text-green-800">
 							<Check className="h-4 w-4 text-green-800" />
-							{selectedWarehouseBalance} stk på {selectedWarehouseName}
+							{selectedWarehouseBalance} {unit} på {selectedWarehouseName}
 						</span>
 					)}
 				</div>

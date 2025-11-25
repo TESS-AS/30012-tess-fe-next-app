@@ -773,6 +773,35 @@ export default function ProductVariantTable({
 														getWarehouseOptions[variant.itemNumber] || [];
 													const hasManyOptions = warehouseOptions.length > 20;
 
+													// Get unit (enhet) for this variant
+													const getVariantUnit = () => {
+														const attrs =
+															columnAttributes?.[variant.itemNumber]?.attributes || [];
+														
+														// Try to find contentUnit from attributes
+														const contentUnitAttr = attrs.find((attr: any) => attr.contentUnit);
+														if (contentUnitAttr?.contentUnit) {
+															return contentUnitAttr.contentUnit;
+														}
+
+														// Try to find by attribute identifier or name
+														const unitAttr = attrs.find(
+															(attr: any) =>
+																attr.attributeIdentifier === "contentUnit" ||
+																attr.name?.toLowerCase().includes("contentunit") ||
+																attr.name?.toLowerCase().includes("content unit") ||
+																attr.name?.toLowerCase().includes("enhet"),
+														);
+														if (unitAttr?.valueDef) {
+															return unitAttr.valueDef;
+														}
+
+														// Fallback to variant.contentUnit or STK
+														return variant.contentUnit || "STK";
+													};
+
+													const variantUnit = getVariantUnit();
+
 													return (
 														<TableCell
 															key="warehouse"
@@ -821,7 +850,7 @@ export default function ProductVariantTable({
 																						<div className="flex items-center gap-2">
 																							<CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
 																							<span className="truncate">
-																								{w.balance} stk på{" "}
+																								{w.balance} {variantUnit} på{" "}
 																								{w.warehouseName}
 																							</span>
 																						</div>
