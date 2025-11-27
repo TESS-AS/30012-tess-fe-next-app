@@ -8,6 +8,7 @@ import {
 	clearPunchoutProfile,
 	triggerProfileRefetch,
 } from "@/hooks/usePunchoutProfile";
+import { useCategories } from "@/lib/CategoriesProvider";
 import axiosClient from "@/services/axiosClient";
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
@@ -17,6 +18,7 @@ export default function PunchoutSessionPage() {
 	const params = useParams();
 	const router = useRouter();
 	const queryClient = useQueryClient();
+	const { refetch: refetchCategories } = useCategories();
 
 	const sessionId = Array.isArray(params.sessionId)
 		? params.sessionId[0]
@@ -55,6 +57,8 @@ export default function PunchoutSessionPage() {
 				const { data: user } = await axiosClient.get("/user");
 
 				triggerProfileRefetch();
+
+				await refetchCategories();
 
 				await new Promise((resolve) => setTimeout(resolve, 500));
 
