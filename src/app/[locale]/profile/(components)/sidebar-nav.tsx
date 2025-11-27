@@ -30,7 +30,7 @@ export function SidebarNav({
 	const t = useTranslations("SidebarNav");
 	const pathname = usePathname();
 	const [expandedItems, setExpandedItems] = useState<string[]>([]);
-	const [isCollapsed, setIsCollapsed] = useState(false);
+	const [isCollapsed, setIsCollapsed] = useState(true);
 
 	const toggleCollapse = () => {
 		const newCollapsed = !isCollapsed;

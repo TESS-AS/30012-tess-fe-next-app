@@ -67,7 +67,7 @@ export default function ProfilePage() {
 			setActiveTab("hose-orders");
 		}
 	};
-	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 	const [supportOpen, setSupportOpen] = useState(false);
 	const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 	const [selectedHexagonId, setSelectedHexagonId] = useState<string | null>(
