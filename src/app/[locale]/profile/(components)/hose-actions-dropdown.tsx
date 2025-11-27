@@ -22,6 +22,7 @@ import { useTranslations } from "next-intl";
 interface HoseActionsDropdownProps {
 	selectedCount: number;
 	isAddingToCart?: boolean;
+	isLoading?: boolean;
 	onAddToCart: () => void;
 	onContactSupport: () => void;
 	onReportReplacement: () => void;
@@ -41,6 +42,7 @@ interface HoseActionsDropdownProps {
 export function HoseActionsDropdown({
 	selectedCount,
 	isAddingToCart = false,
+	isLoading = false,
 	onAddToCart,
 	onContactSupport,
 	onReportReplacement,
@@ -172,7 +174,16 @@ export function HoseActionsDropdown({
 				)} */}
 
 				{onSelectAllOnPage && (
-					<DropdownMenuItem onClick={onSelectAllOnPage}>
+					<DropdownMenuItem
+						disabled={isLoading}
+						className={cn({
+							"cursor-not-allowed opacity-50": isLoading,
+						})}
+						onClick={(e) => {
+							if (isLoading) return;
+							e.preventDefault();
+							onSelectAllOnPage();
+						}}>
 						<CheckSquare className="mr-3 h-4 w-4 text-[#005522]" />
 						<span>
 							{allSelectedOnPage

@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, type Column } from "@/components/ui/data-table";
@@ -145,6 +151,12 @@ export function HosesAndEquipments({
 		neste_inspeksjonsdato: asset?.hoseLine?.nextInspectionDate ?? undefined,
 	}));
 
+	// Keep a ref to always have the latest transformed assets
+	const transformedAssetsRef = useRef(transformedAssets);
+	useEffect(() => {
+		transformedAssetsRef.current = transformedAssets;
+	}, [transformedAssets]);
+
 	const isRowSelected = (hexagonId: string) => {
 		if (allAcrossPages) return !deselectedIds.has(hexagonId);
 		return selectedRows.includes(hexagonId);
@@ -195,31 +207,50 @@ export function HosesAndEquipments({
 		});
 	};
 
-	const handleBulkSelect = (ids: string[], checked: boolean) => {
-		if (allAcrossPages) {
-			setDeselectedIds((prev) => {
-				const next = new Set(prev);
-				for (const id of ids) {
-					if (checked) next.delete(id);
-					else next.add(id);
-				}
+	const handleBulkSelect = useCallback(
+		(ids: string[], checked: boolean) => {
+			if (allAcrossPages) {
+				setDeselectedIds((prev) => {
+					const next = new Set(prev);
+					for (const id of ids) {
+						if (checked) next.delete(id);
+						else next.add(id);
+					}
+					return next;
+				});
+				return;
+			}
+
+			setSelectedRows((prev) => {
+				const next = checked
+					? Array.from(new Set([...prev, ...ids]))
+					: prev.filter((id) => !ids.includes(id));
+				localStorage.setItem("selectedHoseRows", JSON.stringify(next));
 				return next;
 			});
+		},
+		[allAcrossPages],
+	);
+
+	const handleSelectAllOnPage = () => {
+		const currentAssets = transformedAssetsRef.current;
+		const ids = currentAssets.map((a) => a.hexagonId);
+
+		if (ids.length === 0) {
 			return;
 		}
 
-		setSelectedRows((prev) => {
-			const next = checked
-				? Array.from(new Set([...prev, ...ids]))
-				: prev.filter((id) => !ids.includes(id));
-			localStorage.setItem("selectedHoseRows", JSON.stringify(next));
-			return next;
-		});
-	};
+		// Calculate current selection state directly to avoid stale closure
+		let currentlyAllSelected: boolean;
+		if (allAcrossPages) {
+			currentlyAllSelected = ids.every((id) => !deselectedIds.has(id));
+		} else {
+			const set = new Set(selectedRows);
+			currentlyAllSelected = ids.every((id) => set.has(id));
+		}
 
-	const handleSelectAllOnPage = (checked: boolean) => {
-		const ids = transformedAssets.map((a) => a.hexagonId);
-		handleBulkSelect(ids, checked);
+		const shouldSelect = !currentlyAllSelected;
+		handleBulkSelect(ids, shouldSelect);
 	};
 
 	const handleSelectAllGlobally = (on: boolean) => {
@@ -440,7 +471,7 @@ export function HosesAndEquipments({
 					}}
 					onExport={() => handleBulkAction("export")}
 					onSelectAll={() => handleSelectAllGlobally(!allAcrossPages)}
-					onSelectAllOnPage={() => handleSelectAllOnPage(!allSelectedOnPage)}
+					onSelectAllOnPage={handleSelectAllOnPage}
 					allSelected={allSelectedGlobally}
 					allSelectedOnPage={allSelectedOnPage}
 				/>
