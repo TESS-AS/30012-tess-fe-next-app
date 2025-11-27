@@ -1,7 +1,7 @@
 "use client";
 
 import { IProduct } from "@/types/product.types";
-import { IRelatedProductRaw } from "@/types/product.types"; // new type
+import { IRelatedProductRaw } from "@/types/product.types";
 import { useKeenSlider } from "keen-slider/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
@@ -14,7 +14,12 @@ import "keen-slider/keen-slider.min.css";
 import { Button } from "@/components/ui/button";
 
 // eslint-disable-next-line import/order
-import { useState } from "react";
+import { useState, useMemo } from "react";
+
+// eslint-disable-next-line import/order
+import { useGetProfileData } from "@/hooks/useGetProfileData";
+// eslint-disable-next-line import/order
+import { useProductPrices } from "@/hooks/useProductPrices";
 
 interface RelatedProductsProps {
 	products: IRelatedProductRaw[];
@@ -24,14 +29,32 @@ interface RelatedProductsProps {
 export function RelatedProducts({ products, category }: RelatedProductsProps) {
 	const t = useTranslations();
 	const isEmpty = !products || products.length === 0;
+	const { data: profile } = useGetProfileData();
 
-	const normalizedProducts: IProduct[] = products.map(
-		(p: IRelatedProductRaw) => ({
-			productNumber: p.product_number,
-			productName: p.product_name_no,
-			mediaM: p.media_id?.[0]?.url ?? "",
-			shortDesc: p.short_desc_no ?? "",
-		}),
+	const productNumbers = useMemo(
+		() => products.map((p) => p.product_number),
+		[products],
+	);
+
+	const { prices: productPrices, isFetching: isFetchingPrices } =
+		useProductPrices({
+			productNumbers,
+			customerNumber: profile?.defaultCustomerNumber,
+			companyNumber: profile?.defaultCompanyNumber,
+			warehouseNumber: profile?.defaultWarehouseNumber,
+			enabled: !!profile?.defaultCustomerNumber && products.length > 0,
+		});
+
+	const normalizedProducts: IProduct[] = useMemo(
+		() =>
+			products.map((p: IRelatedProductRaw) => ({
+				productNumber: p.product_number,
+				productName: p.product_name_no,
+				mediaM: p.media_id?.[0]?.url ?? "",
+				shortDesc: p.short_desc_no ?? "",
+				price: productPrices[p.product_number],
+			})),
+		[products, productPrices],
 	);
 
 	const [currentSlide, setCurrentSlide] = useState(0);
@@ -54,8 +77,6 @@ export function RelatedProducts({ products, category }: RelatedProductsProps) {
 			setCurrentSlide(slider.track.details.rel);
 		},
 	});
-
-	const slidesLength = instanceRef.current?.track.details.slides.length ?? 1;
 
 	function getPerView(): number {
 		const slidesOpt = instanceRef.current?.options.slides;
@@ -116,7 +137,8 @@ export function RelatedProducts({ products, category }: RelatedProductsProps) {
 									<Link href={product.productNumber}>
 										<ProductCard
 											{...product}
-											variant="compact"
+											variant="default"
+											isPriceLoading={isFetchingPrices}
 										/>
 									</Link>
 								</div>
