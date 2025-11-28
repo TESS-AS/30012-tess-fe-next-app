@@ -6,7 +6,7 @@ import { Order, OrderLines } from "@/types/orders.types";
 export function useCheckoutOrderData(
 	cartItems: CartKitResponse,
 	profile: any,
-	calculatedPrices: Record<string, number>,
+	unitPrices: Record<string, number>,
 ): [Order, React.Dispatch<React.SetStateAction<Order>>] {
 	const cart = cartItems?.cart;
 	const cartKit = cartItems?.cartKit;
@@ -47,19 +47,22 @@ export function useCheckoutOrderData(
 
 		// Handle regular cart items
 		if (cart?.length) {
-			salesOrderLines = cart.map((item) => ({
-				customerOrderLine: lineCounter++,
-				warehouseNumber: warehouseNumber,
-				orderType: "S2",
-				itemCode: item.itemNumber,
-				orderedQuantity: item.quantity,
-				salesPrice: calculatedPrices[item.itemNumber] || 0,
-				requestedDeliveryDate: new Date().toISOString().split("T")[0],
-				accountPart3: "",
-				accountPart4: String(profile.userId || ""),
-				accountPart5: "",
-				text: "",
-			}));
+			salesOrderLines = cart.map((item) => {
+				const unitPrice = unitPrices[item.itemNumber] || 0;
+				return {
+					customerOrderLine: lineCounter++,
+					warehouseNumber: warehouseNumber,
+					orderType: "S2",
+					itemCode: item.itemNumber,
+					orderedQuantity: item.quantity,
+					salesPrice: unitPrice,
+					requestedDeliveryDate: new Date().toISOString().split("T")[0],
+					accountPart3: "",
+					accountPart4: String(profile.userId || ""),
+					accountPart5: "",
+					text: "",
+				};
+			});
 		}
 
 		// Handle cartKit items
@@ -95,7 +98,7 @@ export function useCheckoutOrderData(
 					orderType: "S2",
 					itemCode: component.itemNumber,
 					orderedQuantity: component.quantity,
-					salesPrice: calculatedPrices[component.itemNumber] || 0,
+					salesPrice: unitPrices[component.itemNumber] || 0,
 					requestedDeliveryDate: new Date().toISOString().split("T")[0],
 					accountPart3: "",
 					accountPart4: String(userId || ""),
@@ -112,7 +115,7 @@ export function useCheckoutOrderData(
 			documentControl: { companyCode },
 			salesOrderLines,
 		}));
-	}, [cart, cartKit, companyNumber, warehouseNumber, userId, calculatedPrices]);
+	}, [cart, cartKit, companyNumber, warehouseNumber, userId, unitPrices]);
 
 	return [orderData, setOrderData] as const;
 }

@@ -71,6 +71,7 @@ const CartPage = () => {
 		cartItems,
 		isLoading,
 		calculatedPrices,
+		unitPrices,
 		prices,
 		updateQuantity,
 		updateWarehouse,
@@ -91,7 +92,7 @@ const CartPage = () => {
 			cartKit: cartItems?.cartKit as CartKitItem[],
 		},
 		profile,
-		calculatedPrices,
+		unitPrices,
 	);
 
 	const submitOrder = useSubmitOrder(
@@ -568,7 +569,6 @@ const CartPage = () => {
 							{cartItems?.cartKit && cartItems.cartKit.length > 0 && (
 								<div className="space-y-4">
 									{cartItems.cartKit.map((item, idx) => {
-										console.log(item, "item.");
 										return (
 											<div
 												key={idx}

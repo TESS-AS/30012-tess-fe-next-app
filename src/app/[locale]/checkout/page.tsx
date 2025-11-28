@@ -38,7 +38,7 @@ export default function CheckoutPage() {
 	const t = useTranslations("");
 	const {
 		cartItems,
-		calculatedPrices,
+		unitPrices,
 		handleArchiveCart,
 		updatedAddress,
 		setUpdatedAddress,
@@ -73,7 +73,7 @@ export default function CheckoutPage() {
 			cartKit: cartItems?.cartKit as CartKitItem[],
 		},
 		profile,
-		calculatedPrices,
+		unitPrices,
 	);
 	const submitOrder = useSubmitOrder(
 		profile?.punchout || false,
