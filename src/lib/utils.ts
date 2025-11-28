@@ -10,7 +10,13 @@ export function cn(...inputs: ClassValue[]) {
 
 export function mapCategoryTree(node: RawCategory, locale: string): Category {
 	// Always prefer Norwegian name first, then fallback to English
-	const name = node.nameNo || node.name_no || node.nameEn || node.name_en || node[`name_${locale}`] || "";
+	const name =
+		node.nameNo ||
+		node.name_no ||
+		node.nameEn ||
+		node.name_en ||
+		node[`name_${locale}`] ||
+		"";
 
 	return {
 		name,
@@ -156,7 +162,12 @@ export function categoryTreeToUrlPath(
 	// Do NOT fall back to assortments - better to have fewer categories than include assortments
 	return categories.map((category) => {
 		// Always prefer Norwegian name first, then fallback to English
-		const name = category.nameNo || category.name_no || category.nameEn || category.name_en || "";
+		const name =
+			category.nameNo ||
+			category.name_no ||
+			category.nameEn ||
+			category.name_en ||
+			"";
 
 		// Convert to slug (same logic as mapCategoryTree)
 		return name
@@ -211,7 +222,7 @@ export function createProductSlug(
 /**
  * Extracts product number from a product slug
  * Format: {productNumber}-{productNameSlug}
- * 
+ *
  * Strategy: Try to identify where the product number ends by checking patterns.
  * Product names are always lowercase with hyphens, while product numbers have specific patterns.
  */
@@ -222,10 +233,10 @@ export function extractProductNumberFromSlug(productSlug: string): string {
 	}
 
 	const parts = productSlug.split("-");
-	
+
 	// Check if first part matches product number patterns
 	const firstPart = parts[0];
-	
+
 	// Pure numeric product numbers
 	if (/^\d+$/.test(firstPart)) {
 		// Could be just the number, or number with more parts
@@ -238,24 +249,30 @@ export function extractProductNumberFromSlug(productSlug: string): string {
 		// Might be multi-part number like "123-456"
 		return productSlug;
 	}
-	
+
 	// Prefixed product numbers (P_, AT, TR, etc.)
-	if (/^(P_|p_|AT|TR|VH|VS|US|GW|KN|KF|CW|GK|AV|JB|AU|AS|AK|VM|ZS)/i.test(firstPart)) {
+	if (
+		/^(P_|p_|AT|TR|VH|VS|US|GW|KN|KF|CW|GK|AV|JB|AU|AS|AK|VM|ZS)/i.test(
+			firstPart,
+		)
+	) {
 		// Try to find where product number ends
 		// Product numbers with these prefixes usually have numbers after
 		for (let i = 1; i < parts.length; i++) {
 			const current = parts.slice(0, i + 1).join("-");
 			const nextPart = parts[i + 1];
-			
+
 			// If next part looks like it starts a product name (lowercase, longer)
 			if (nextPart && /^[a-z]/.test(nextPart) && nextPart.length > 3) {
 				return current;
 			}
-			
+
 			// Check if current matches a complete product number pattern
 			if (
 				/^P_[A-Za-z0-9_-]+$/.test(current) ||
-				/^(AT|TR|VH|VS|US|GW|KN|KF|CW|GK|AV|JB|AU|AS|AK|VM|ZS)\d+(?:-[A-Za-z0-9]+)?$/i.test(current) ||
+				/^(AT|TR|VH|VS|US|GW|KN|KF|CW|GK|AV|JB|AU|AS|AK|VM|ZS)\d+(?:-[A-Za-z0-9]+)?$/i.test(
+					current,
+				) ||
 				/^p_rw\d+$/i.test(current)
 			) {
 				// This could be complete, but check if next part is clearly a name
@@ -267,7 +284,7 @@ export function extractProductNumberFromSlug(productSlug: string): string {
 		// If we can't determine, return first few parts (likely the number)
 		return parts.slice(0, Math.min(3, parts.length)).join("-");
 	}
-	
+
 	// Fallback: if it starts with uppercase or numbers, likely product number
 	// Return first part or first two parts
 	if (/^[A-Z0-9]/.test(firstPart)) {
@@ -278,7 +295,39 @@ export function extractProductNumberFromSlug(productSlug: string): string {
 		// Might be multi-part product number
 		return parts.slice(0, 2).join("-");
 	}
-	
+
 	// If all else fails, return the whole slug (might be just a product number)
 	return productSlug;
+}
+
+export function serializeFilters(filters: Record<string, string[]>): string {
+	if (!filters || Object.keys(filters).length === 0) return "";
+
+	const parts: string[] = [];
+	Object.entries(filters).forEach(([key, values]) => {
+		if (values && values.length > 0) {
+			// Encode each value and join with comma
+			const encodedValues = values.map((v) => encodeURIComponent(v)).join(",");
+			parts.push(`${encodeURIComponent(key)}=${encodedValues}`);
+		}
+	});
+
+	return parts.join("&");
+}
+
+export function deserializeFilters(
+	filterString: string,
+): Record<string, string[]> {
+	const filters: Record<string, string[]> = {};
+
+	if (!filterString) return filters;
+
+	const params = new URLSearchParams(filterString);
+	params.forEach((value, key) => {
+		// Split comma-separated values
+		const values = value.split(",").map((v) => decodeURIComponent(v));
+		filters[decodeURIComponent(key)] = values;
+	});
+
+	return filters;
 }
