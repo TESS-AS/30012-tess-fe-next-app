@@ -38,6 +38,7 @@ interface AppContextType {
 
 	prices: Record<string, number>;
 	calculatedPrices: Record<string, number>;
+	unitPrices: Record<string, number>;
 	cartKitTotals: Record<string, number>;
 	isLoading: boolean;
 
@@ -100,6 +101,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const [calculatedPrices, setCalculatedPrices] = useState<
 		Record<string, number>
 	>({});
+	const [unitPrices, setUnitPrices] = useState<Record<string, number>>({});
 	const [surChargePrices, setSurChargePrices] = useState<
 		Record<string, number>
 	>({});
@@ -208,10 +210,17 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				const initialPrices: Record<string, number> = {};
 				const calculatedPrices: Record<string, number> = {};
 
+				const unitPricesMap: Record<string, number> = {};
+
 				for (const item of priceResults) {
 					initialPrices[item.itemNumber] = item.basePriceTotal || 0;
-
 					calculatedPrices[item.itemNumber] = item.bestPrice || 0;
+
+					const unitPrice =
+						item.quantity > 0
+							? (item.bestPrice || 0) / item.quantity
+							: item.bestPrice || 0;
+					unitPricesMap[item.itemNumber] = unitPrice;
 				}
 
 				setPrices((prev) => ({
@@ -222,7 +231,12 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					...prev,
 					...calculatedPrices,
 				}));
-				//we need to handle quantity here correctly
+				setUnitPrices((prev) => {
+					return {
+						...prev,
+						...unitPricesMap,
+					};
+				});
 
 				const allItemsForPricing: Array<{
 					itemNumber: string;
@@ -277,12 +291,22 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 						);
 						const fallbackCalculated: Record<string, number> = {};
 						const fallbackInitial: Record<string, number> = {};
+						const fallbackUnitPrices: Record<string, number> = {};
+
 						for (const item of fallbackResults) {
 							fallbackInitial[item.itemNumber] = item.basePriceTotal || 0;
 							fallbackCalculated[item.itemNumber] = item.bestPrice || 0;
+
+							// Calculate unit price for fallback items
+							const unitPrice =
+								item.quantity > 0
+									? (item.bestPrice || 0) / item.quantity
+									: item.bestPrice || 0;
+							fallbackUnitPrices[item.itemNumber] = unitPrice;
 						}
 						setPrices((prev) => ({ ...prev, ...fallbackInitial }));
 						setCalculatedPrices((prev) => ({ ...prev, ...fallbackCalculated }));
+						setUnitPrices((prev) => ({ ...prev, ...fallbackUnitPrices }));
 					} catch (e) {
 						console.warn("Fallback batch pricing failed", e);
 					}
@@ -609,6 +633,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 				prices,
 				calculatedPrices,
+				unitPrices,
 				cartKitTotals,
 				isLoading,
 
