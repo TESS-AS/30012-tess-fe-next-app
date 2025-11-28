@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { FilterValues } from "@/types/filter.types";
 import { LayoutGrid, AlignJustify, X } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { ProductCard } from "./product-card";
@@ -63,6 +63,7 @@ export function ProductGrid({
 }: ProductGridProps) {
 	const t = useTranslations();
 	const pathname = usePathname();
+	const searchParams = useSearchParams();
 	const { data: profile } = useGetProfileData();
 	const [isFiltering, setIsFiltering] = useState(false);
 	const [viewLayout, setViewLayout] = useState<string>("grid");
@@ -406,10 +407,16 @@ export function ProductGrid({
 							const isPriceLoading =
 								isFetchingPrices && productPrice === undefined;
 
+							// Preserve current search params in product link for back navigation
+							const currentParams = searchParams.toString();
+							const productHref = currentParams
+								? `${pathname}/${product.productNumber}?${currentParams}`
+								: `${pathname}/${product.productNumber}`;
+
 							return (
 								<Link
 									key={product.productNumber}
-									href={`${pathname}/${product.productNumber}`}
+									href={productHref}
 									className="h-full">
 									<ProductCard
 										{...product}

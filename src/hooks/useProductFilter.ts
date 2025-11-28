@@ -1,12 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 
 import { FilterCategory } from "@/components/ui/filter";
+import { deserializeFilters, serializeFilters } from "@/lib/utils";
 import { loadFilterParents } from "@/services/categories.service";
 import {
 	CategoryFilterResponseItem,
 	FilterResponseItem,
 	FilterValues,
 } from "@/types/filter.types";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
 
 import { useProductInfiniteQuery } from "./useProductInfiniteQuery";
 
@@ -20,6 +22,11 @@ export function useProductFilter({
 	categoryNumber: initialCategoryNumber,
 	query,
 }: UseProductFilterProps) {
+	const searchParams = useSearchParams();
+	const pathname = usePathname();
+	const router = useRouter();
+	const hasInitialized = useRef(false);
+
 	const [categoryNumber, setCategoryNumber] = useState(initialCategoryNumber);
 	const [currentFilters, setCurrentFilters] = useState<FilterValues[] | null>(
 		null,
@@ -60,10 +67,21 @@ export function useProductFilter({
 			});
 			setSelectedFilters(newSelectedFilters);
 
+			const params = new URLSearchParams(searchParams.toString());
+			if (Object.keys(newSelectedFilters).length > 0) {
+				const filtersString = serializeFilters(newSelectedFilters);
+				params.set("filters", filtersString);
+			} else {
+				params.delete("filters");
+			}
+
+			const newUrl = `${pathname}${params.toString() ? `?${params.toString()}` : ""}`;
+			router.replace(newUrl, { scroll: false });
+
 			// React Query will automatically refetch when filters change
 			await refetch();
 		},
-		[refetch],
+		[refetch, searchParams, pathname, router],
 	);
 
 	const handleCategoryChange = useCallback(
@@ -114,11 +132,22 @@ export function useProductFilter({
 
 	const handleSortChange = useCallback(
 		async (newSort: string) => {
-			setSort(newSort === " " ? null : newSort);
-			// React Query will automatically refetch when sort changes
+			const sortValue = newSort === " " ? null : newSort;
+			setSort(sortValue);
+
+			const params = new URLSearchParams(searchParams.toString());
+			if (sortValue) {
+				params.set("sort", sortValue);
+			} else {
+				params.delete("sort");
+			}
+
+			const newUrl = `${pathname}${params.toString() ? `?${params.toString()}` : ""}`;
+			router.replace(newUrl, { scroll: false });
+
 			await refetch();
 		},
-		[refetch],
+		[refetch, searchParams, pathname, router],
 	);
 
 	const removeFilter = useCallback(
@@ -151,11 +180,48 @@ export function useProductFilter({
 	);
 
 	useEffect(() => {
-		if (!query) return;
+		const filtersParam = searchParams.get("filters");
+		const sortParam = searchParams.get("sort");
 
-		setCategoryNumber("");
-		setSelectedFilters({});
-		setCurrentFilters(null);
+		if (filtersParam) {
+			const restoredFilters = deserializeFilters(filtersParam);
+			setSelectedFilters(restoredFilters);
+
+			const filterArray: FilterValues[] = Object.entries(restoredFilters)
+				.filter(([, vals]) => vals.length > 0)
+				.map(([k, vals]) => ({
+					key: k,
+					values: vals,
+				}));
+
+			setCurrentFilters(filterArray.length > 0 ? filterArray : null);
+		} else if (hasInitialized.current) {
+			setSelectedFilters({});
+			setCurrentFilters(null);
+		}
+
+		if (sortParam) {
+			setSort(sortParam);
+		} else if (hasInitialized.current) {
+			setSort(null);
+		}
+
+		if (!hasInitialized.current) {
+			hasInitialized.current = true;
+		}
+	}, [searchParams]); // Use searchParams object directly - React will handle changes
+
+	useEffect(() => {
+		if (initialCategoryNumber) {
+			setCategoryNumber(initialCategoryNumber);
+		}
+	}, [initialCategoryNumber]);
+
+	useEffect(() => {
+		if (query) {
+			setCategoryNumber("");
+			setCurrentFilters(null);
+		}
 	}, [query]);
 
 	return {
