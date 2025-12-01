@@ -99,13 +99,13 @@ export function ZoomImage({
 				<div
 					className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
 					onClick={() => setIsFullscreen(false)}>
-					<div className="relative max-h-[90vh] max-w-[90vw]">
+					<div className="relative h-[70%] max-h-[70%] max-w-[60vw]">
 						<Image
 							src={src}
 							alt={alt}
-							width={width * 2}
-							height={height * 2}
-							className="h-auto w-auto object-contain"
+							width={width}
+							height={height}
+							className="h-full max-h-[100vh] w-full object-contain"
 						/>
 						<Button
 							onClick={() => setIsFullscreen(false)}

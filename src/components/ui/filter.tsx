@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useCallback, useMemo, useImperativeHandle } from "react";
+import { useCallback, useMemo, useImperativeHandle, useRef } from "react";
 
 import {
 	Accordion,
@@ -27,7 +27,7 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "./button";
 import { Checkbox } from "./checkbox";
-import { Slider, SliderTrack, SliderRange, SliderThumb } from "./slider";
+import { SliderFilterInput } from "./slider-filter-input";
 
 export interface FilterCategory {
 	category: string;
@@ -105,6 +105,9 @@ export const Filter = React.forwardRef<
 		ref,
 	) => {
 		const t = useTranslations();
+		const debounceTimerRef = useRef<Record<string, NodeJS.Timeout>>({});
+		const loadingInitiatedRef = React.useRef<Set<string>>(new Set());
+
 		const [searchTerm, setSearchTerm] = React.useState("");
 		const [showAllCategories, setShowAllCategories] = React.useState(false);
 		const [expandedFilterChildren, setExpandedFilterChildren] = React.useState<
@@ -127,9 +130,6 @@ export const Filter = React.forwardRef<
 			Record<string, FilterChildrenResponse>
 		>({});
 
-		// Track which filters we've initiated loading for to avoid duplicate requests
-		const loadingInitiatedRef = React.useRef<Set<string>>(new Set());
-
 		const [rangeValues, setRangeValues] = React.useState<
 			Record<string, [number, number]>
 		>({});
@@ -138,7 +138,102 @@ export const Filter = React.forwardRef<
 			Record<string, [number, number]>
 		>({});
 
+		const [inputStrings, setInputStrings] = React.useState<
+			Record<string, [string, string]>
+		>({});
+
+		const handleInputRangeChange = useCallback(
+			(
+				filterKey: string,
+				index: 0 | 1,
+				value: number,
+				sliderConfig: SliderConfig,
+			) => {
+				setTempRangeValues((prev) => {
+					const currentValues = prev[filterKey] ||
+						rangeValues[filterKey] || [sliderConfig.min, sliderConfig.max];
+					const newValues: [number, number] = [...currentValues] as [
+						number,
+						number,
+					];
+					newValues[index] = value;
+					return { ...prev, [filterKey]: newValues };
+				});
+
+				if (debounceTimerRef.current[filterKey]) {
+					clearTimeout(debounceTimerRef.current[filterKey]);
+				}
+
+				debounceTimerRef.current[filterKey] = setTimeout(() => {
+					setTempRangeValues((prev) => {
+						const currentValues = prev[filterKey] ||
+							rangeValues[filterKey] || [sliderConfig.min, sliderConfig.max];
+						const newValues: [number, number] = [...currentValues] as [
+							number,
+							number,
+						];
+						newValues[index] = value;
+
+						setRangeValues((prevRange) => ({
+							...prevRange,
+							[filterKey]: newValues,
+						}));
+
+						return prev;
+					});
+				}, 500);
+			},
+			[rangeValues],
+		);
+
 		const selectedFilters = externalSelectedFilters;
+
+		// Helper functions for SliderFilterInput component
+		const handleSliderInputChange = useCallback(
+			(filterKey: string, index: 0 | 1, value: number) => {
+				if (!loadedChildren[filterKey]?.slider) return;
+				handleInputRangeChange(
+					filterKey,
+					index,
+					value,
+					loadedChildren[filterKey].slider!,
+				);
+			},
+			[loadedChildren, handleInputRangeChange],
+		);
+
+		const handleInputStringChange = useCallback(
+			(filterKey: string, index: 0 | 1, value: string) => {
+				setInputStrings((prev) => {
+					const current = prev[filterKey] || ["", ""];
+					const newValues: [string, string] = [...current] as [string, string];
+					newValues[index] = value;
+					return {
+						...prev,
+						[filterKey]: newValues,
+					};
+				});
+			},
+			[],
+		);
+
+		const handleInputBlur = useCallback((filterKey: string, index: 0 | 1) => {
+			setInputStrings((prev) => {
+				const newState = { ...prev };
+				if (newState[filterKey]) {
+					delete newState[filterKey];
+				}
+				return newState;
+			});
+		}, []);
+
+		React.useEffect(() => {
+			return () => {
+				Object.values(debounceTimerRef.current).forEach((timer) => {
+					if (timer) clearTimeout(timer);
+				});
+			};
+		}, []);
 
 		React.useEffect(() => {
 			setLocalSelectedFilters(externalSelectedFilters);
@@ -797,57 +892,18 @@ export const Filter = React.forwardRef<
 													</>
 												) : children ? (
 													children.slider ? (
-														<div className="space-y-4 pl-2">
-															<div className="space-y-2">
-																<div className="text-muted-foreground flex justify-between text-sm">
-																	<span>{children.slider.min}</span>
-																	<span>{children.slider.max}</span>
-																</div>
-																<Slider
-																	value={
-																		tempRangeValues[filter.key] ||
-																		rangeValues[filter.key] || [
-																			children.slider.min,
-																			children.slider.max,
-																		]
-																	}
-																	onValueChange={(values) =>
-																		handleRangeChange(
-																			filter.key,
-																			values as [number, number],
-																		)
-																	}
-																	min={children.slider.min}
-																	max={children.slider.max}
-																	step={1}
-																	className="w-full">
-																	<SliderTrack>
-																		<SliderRange />
-																	</SliderTrack>
-																	<SliderThumb />
-																	<SliderThumb />
-																</Slider>
-																<div className="flex items-center justify-between text-sm font-medium">
-																	<span>
-																		{tempRangeValues[filter.key]?.[0] ||
-																			rangeValues[filter.key]?.[0] ||
-																			children.slider.min}
-																	</span>
-																	<Button
-																		variant="ghost"
-																		size="sm"
-																		onClick={() => clearRangeFilter(filter.key)}
-																		className="h-6 px-2 text-xs">
-																		Clear
-																	</Button>
-																	<span>
-																		{tempRangeValues[filter.key]?.[1] ||
-																			rangeValues[filter.key]?.[1] ||
-																			children.slider.max}
-																	</span>
-																</div>
-															</div>
-														</div>
+														<SliderFilterInput
+															filterKey={filter.key}
+															sliderConfig={children.slider}
+															rangeValues={rangeValues}
+															tempRangeValues={tempRangeValues}
+															inputStrings={inputStrings}
+															onInputChange={handleSliderInputChange}
+															onSliderChange={handleRangeChange}
+															onInputStringChange={handleInputStringChange}
+															onInputBlur={handleInputBlur}
+															debounceTimerRef={debounceTimerRef}
+														/>
 													) : children.values.length > 0 ? (
 														<div className="space-y-2 pl-2">
 															{(expandedFilterChildren[filter.key]
