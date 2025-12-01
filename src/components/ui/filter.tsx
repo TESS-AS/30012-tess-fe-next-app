@@ -188,7 +188,6 @@ export const Filter = React.forwardRef<
 
 		const selectedFilters = externalSelectedFilters;
 
-		// Helper functions for SliderFilterInput component
 		const handleSliderInputChange = useCallback(
 			(filterKey: string, index: 0 | 1, value: number) => {
 				if (!loadedChildren[filterKey]?.slider) return;
