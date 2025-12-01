@@ -1,7 +1,9 @@
 import React from "react";
+
+import type { SliderConfig } from "@/types/filter.types";
+
 import { Input } from "./input";
 import { Slider, SliderRange, SliderThumb, SliderTrack } from "./slider";
-import type { SliderConfig } from "@/types/filter.types";
 
 interface SliderFilterInputProps {
 	filterKey: string;
