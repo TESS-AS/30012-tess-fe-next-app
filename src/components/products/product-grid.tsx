@@ -72,6 +72,7 @@ export function ProductGrid({
 	const [filtersState, setFiltersState] = useState(filters);
 	const filterRef = useRef<{
 		clearRangeFilter: (filterKey: string) => void;
+		refetchAllChildren: (filterArray: FilterValues[]) => Promise<void>;
 	} | null>(null);
 	const isLoadingMoreRef = useRef(false);
 	const loadMoreTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -90,6 +91,12 @@ export function ProductGrid({
 		categoryNumber,
 		categoryName,
 		query,
+		onFiltersUpdate: setFiltersState,
+		onRefetchChildren: async (filterArray) => {
+			if (filterRef.current?.refetchAllChildren) {
+				await filterRef.current.refetchAllChildren(filterArray);
+			}
+		},
 	});
 
 	// Use React Query for prices - much faster with caching

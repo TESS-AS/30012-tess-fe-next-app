@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 
 import { FilterCategory } from "@/components/ui/filter";
+import { normalizeFilterResponse } from "@/lib/category-utils";
 import { deserializeFilters, serializeFilters } from "@/lib/utils";
 import { loadFilterParents } from "@/services/categories.service";
 import {
@@ -16,11 +17,15 @@ interface UseProductFilterProps {
 	categoryNumber: string;
 	categoryName?: string;
 	query: string | null;
+	onFiltersUpdate?: (filters: FilterCategory[]) => void;
+	onRefetchChildren?: (filterArray: FilterValues[]) => Promise<void>;
 }
 
 export function useProductFilter({
 	categoryNumber: initialCategoryNumber,
 	query,
+	onFiltersUpdate,
+	onRefetchChildren,
 }: UseProductFilterProps) {
 	const searchParams = useSearchParams();
 	const pathname = usePathname();
@@ -174,9 +179,43 @@ export function useProductFilter({
 				setCategoryNumber("");
 			}
 
+			// Reload parent filters with updated filter array
+			if (onFiltersUpdate) {
+				try {
+					const result = await loadFilterParents({
+						categoryNumber: categoryNumber || undefined,
+						searchTerm: query || undefined,
+						language: "no",
+						filters: filterArray,
+					});
+
+					if (Array.isArray(result)) {
+						const normalized = normalizeFilterResponse(result);
+						onFiltersUpdate(normalized);
+					}
+				} catch (err) {
+					console.error("Failed to reload parent filters", err);
+				}
+			}
+
+			if (onRefetchChildren) {
+				try {
+					await onRefetchChildren(filterArray);
+				} catch (err) {
+					console.error("Failed to refetch filter children", err);
+				}
+			}
+
 			await handleFilterChange(filterArray);
 		},
-		[handleFilterChange, selectedFilters],
+		[
+			handleFilterChange,
+			selectedFilters,
+			categoryNumber,
+			query,
+			onFiltersUpdate,
+			onRefetchChildren,
+		],
 	);
 
 	useEffect(() => {

@@ -81,7 +81,10 @@ const filterVariants = cva(
 );
 
 export const Filter = React.forwardRef<
-	{ clearRangeFilter: (filterKey: string) => void },
+	{
+		clearRangeFilter: (filterKey: string) => void;
+		refetchAllChildren: (filterArray: FilterValues[]) => Promise<void>;
+	},
 	FilterProps
 >(
 	(
@@ -504,15 +507,18 @@ export const Filter = React.forwardRef<
 			0,
 		);
 
-		// Expose clearRangeFilter function to parent component
+		// Expose clearRangeFilter and refetchAllChildren functions to parent component
 		useImperativeHandle(
 			ref,
 			() => ({
 				clearRangeFilter: (filterKey: string) => {
 					clearRangeFilter(filterKey);
 				},
+				refetchAllChildren: async (filterArray: FilterValues[]) => {
+					await refetchAllOpenedFilterChildren(filterArray);
+				},
 			}),
-			[clearRangeFilter],
+			[clearRangeFilter, refetchAllOpenedFilterChildren],
 		);
 
 		const loadChildrenForFilter = async (
