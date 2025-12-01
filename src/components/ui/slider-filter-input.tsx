@@ -1,11 +1,7 @@
 import React from "react";
 import { Input } from "./input";
 import { Slider, SliderRange, SliderThumb, SliderTrack } from "./slider";
-
-interface SliderConfig {
-	min: number;
-	max: number;
-}
+import type { SliderConfig } from "@/types/filter.types";
 
 interface SliderFilterInputProps {
 	filterKey: string;
@@ -32,29 +28,50 @@ export const SliderFilterInput: React.FC<SliderFilterInputProps> = ({
 	onInputBlur,
 	debounceTimerRef,
 }) => {
+	const getUnit = () => {
+		if (sliderConfig.unit) {
+			return sliderConfig.unit;
+		}
+
+		const key = sliderConfig.attributeKey.toLowerCase();
+		if (key.includes("temperatur")) {
+			return "°C";
+		}
+		if (key.includes("arbeidstrykk") || key.includes("bar")) {
+			return " bar";
+		}
+		return "";
+	};
+
 	const handleInputChange = (
 		index: 0 | 1,
 		inputValue: string,
 		timerKey: string,
 	) => {
-		onInputStringChange(filterKey, index, inputValue);
+		let cleanValue = inputValue;
+		const unit = getUnit();
+		if (unit && inputValue.endsWith(unit)) {
+			cleanValue = inputValue.slice(0, -unit.length);
+		}
+
+		onInputStringChange(filterKey, index, cleanValue);
 
 		if (debounceTimerRef.current[timerKey]) {
 			clearTimeout(debounceTimerRef.current[timerKey]);
 		}
 
-		if (inputValue === "") {
+		if (cleanValue === "") {
 			return;
 		}
 
-		if (inputValue === "-" || inputValue === "-." || inputValue.endsWith(".")) {
+		if (cleanValue === "-" || cleanValue === "-." || cleanValue.endsWith(".")) {
 			debounceTimerRef.current[timerKey] = setTimeout(() => {
 				onInputStringChange(filterKey, index, "");
 			}, 2000);
 			return;
 		}
 
-		const value = Number(inputValue);
+		const value = Number(cleanValue);
 		if (!isNaN(value)) {
 			onInputChange(filterKey, index, value);
 		}
@@ -78,6 +95,26 @@ export const SliderFilterInput: React.FC<SliderFilterInputProps> = ({
 		e.preventDefault();
 	};
 
+	const formatValueWithUnit = (value: number | string) => {
+		const unit = getUnit();
+		if (unit) {
+			return `${value}${unit}`;
+		}
+		return value;
+	};
+
+	const getDisplayValue = (index: 0 | 1) => {
+		const inputString = inputStrings[filterKey]?.[index];
+		if (inputString !== undefined) {
+			return inputString;
+		}
+		const value =
+			tempRangeValues[filterKey]?.[index] ??
+			rangeValues[filterKey]?.[index] ??
+			(index === 0 ? sliderConfig.min : sliderConfig.max);
+		return formatValueWithUnit(value);
+	};
+
 	return (
 		<div className="space-y-4">
 			<div className="space-y-2">
@@ -85,13 +122,7 @@ export const SliderFilterInput: React.FC<SliderFilterInputProps> = ({
 					<Input
 						className="w-20"
 						placeholder="Min"
-						value={
-							inputStrings[filterKey]?.[0] !== undefined
-								? inputStrings[filterKey]?.[0]
-								: (tempRangeValues[filterKey]?.[0] ??
-									rangeValues[filterKey]?.[0] ??
-									sliderConfig.min)
-						}
+						value={getDisplayValue(0)}
 						onChange={(e) =>
 							handleInputChange(0, e.target.value, `${filterKey}-min`)
 						}
@@ -102,13 +133,7 @@ export const SliderFilterInput: React.FC<SliderFilterInputProps> = ({
 					<Input
 						className="w-20"
 						placeholder="Max"
-						value={
-							inputStrings[filterKey]?.[1] !== undefined
-								? inputStrings[filterKey]?.[1]
-								: (tempRangeValues[filterKey]?.[1] ??
-									rangeValues[filterKey]?.[1] ??
-									sliderConfig.max)
-						}
+						value={getDisplayValue(1)}
 						onChange={(e) =>
 							handleInputChange(1, e.target.value, `${filterKey}-max`)
 						}
