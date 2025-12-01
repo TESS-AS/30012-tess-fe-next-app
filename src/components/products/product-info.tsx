@@ -74,9 +74,32 @@ export function ProductInfo({
 				try {
 					const axiosClient = (await import("@/services/axiosClient")).default;
 					const response = await axiosClient.get(
-						`/columnAttributes/${firstVariantNumber}`,
+						`/columnAttributesNew/${firstVariantNumber}`,
 					);
-					columnAttributes = response.data;
+
+					// Transform array response to object format keyed by itemNumber
+					const transformedData: Record<string, any> = {};
+
+					response.data.forEach((item: any) => {
+						transformedData[item.itemNumber] = {
+							productNumber: item.productNumber,
+							itemNumber: item.itemNumber,
+							itemName: item.itemName,
+							itemCount: item.itemCount,
+							inventory: item.inventory?.map((inv: any) => ({
+								warehouseId: inv.wareHouseId,
+								warehouseNumber: inv.wareHouseNumber,
+								warehouseName: inv.wareHouseName,
+								companyId: inv.companyId,
+								companyNumber: inv.companyNumber,
+								balance: inv.balance,
+							})),
+							attributes: item.attributes,
+							mediaId: item.mediaId,
+						};
+					});
+
+					columnAttributes = transformedData;
 				} catch (err) {
 					console.warn("Kunne ikke hente kolonneattributter:", err);
 				}
