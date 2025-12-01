@@ -13,14 +13,40 @@ interface Attribute {
 	unspsc?: string;
 }
 
+interface ColumnAttributeItem {
+	productNumber: string;
+	itemNumber: string;
+	itemName?: string;
+	itemCount?: number | string;
+	inventory?: {
+		wareHouseId: number;
+		wareHouseNumber: string;
+		wareHouseName: string;
+		companyId: number;
+		companyNumber: number;
+		balance: number;
+	}[];
+	attributes: Attribute[];
+	mediaId?: Array<{
+		url: string;
+		filename: string;
+		picture_type: string;
+		thumbnail_url: string;
+	}>;
+}
+
 interface ColumnAttributeResponse {
 	[itemNumber: string]: {
 		productNumber: string;
 		itemNumber: string;
+		itemName?: string;
 		itemCount?: number | string;
 		inventory?: {
 			warehouseId: number;
+			warehouseNumber?: string;
+			warehouseName: string;
 			companyId: number;
+			companyNumber?: number;
 			balance: number;
 		}[];
 		attributes: Attribute[];
@@ -44,10 +70,33 @@ export function useGetColumnAttributes(variantNumber?: string) {
 		const fetchAttributes = async () => {
 			try {
 				setIsLoading(true);
-				const response = await axiosClient.get(
-					`/columnAttributes/${variantNumber}`,
+				const response = await axiosClient.get<ColumnAttributeItem[]>(
+					`/columnAttributesNew/${variantNumber}`,
 				);
-				setData(response.data);
+
+				// Transform array response to object format keyed by itemNumber
+				const transformedData: ColumnAttributeResponse = {};
+
+				response.data.forEach((item) => {
+					transformedData[item.itemNumber] = {
+						productNumber: item.productNumber,
+						itemNumber: item.itemNumber,
+						itemName: item.itemName,
+						itemCount: item.itemCount,
+						inventory: item.inventory?.map((inv) => ({
+							warehouseId: inv.wareHouseId,
+							warehouseNumber: inv.wareHouseNumber,
+							warehouseName: inv.wareHouseName,
+							companyId: inv.companyId,
+							companyNumber: inv.companyNumber,
+							balance: inv.balance,
+						})),
+						attributes: item.attributes,
+						mediaId: item.mediaId,
+					};
+				});
+
+				setData(transformedData);
 			} catch (err) {
 				setError(err);
 			} finally {
