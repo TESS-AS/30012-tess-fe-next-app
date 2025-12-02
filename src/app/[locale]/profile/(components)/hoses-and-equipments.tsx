@@ -144,7 +144,7 @@ export function HosesAndEquipments({
 		assetId: asset?.hoseHeader?.assetId?.toString?.() || "",
 		s1_anlegg: asset?.hoseLine?.s1?.s1Name ?? "",
 		s2_utstyr: asset?.hoseLine?.s2?.s2Name ?? "",
-		ordrenr: asset?.hoseHeader?.tessOrderNumber ?? "",
+		ordrenr: asset?.hoseHeader?.customerOrderNumber ?? "",
 		installasjonsdato: asset?.hoseLine?.installationDate ?? undefined,
 		produksjonsdato: asset?.hoseLine?.productionDate ?? undefined,
 		pafyllingsdato: asset?.hoseLine?.refillDate ?? undefined,

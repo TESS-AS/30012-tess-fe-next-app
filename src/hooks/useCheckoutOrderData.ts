@@ -27,7 +27,7 @@ export function useCheckoutOrderData(
 			// termsOfPayment: "",
 			paidAmount: 0,
 			cashRegister: "",
-			text: "",
+			text: profile?.email,
 		},
 		salesOrderAddresses: [],
 		salesOrderLines: [],
