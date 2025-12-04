@@ -3,10 +3,11 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { SAP_CUSTOMER } from "@/constants/checkout";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import { generateProductPdf } from "@/utils/generateProductPdf";
-import { FileText, Loader2 } from "lucide-react";
+import { FileText, Loader2, ExternalLink } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
@@ -41,6 +42,17 @@ export function ProductInfo({
 	const t = useTranslations("Product");
 	const { data: profile } = useGetProfileData();
 	const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+	const isSapCustomer = profile?.defaultCustomerNumber === SAP_CUSTOMER;
+
+	const currentItemNumber =
+		selectedItemNumber?.toString() ||
+		variantData?.itemVariants?.[0]?.itemNumber?.toString() ||
+		"";
+
+	const ecoonlineUrl = currentItemNumber
+		? `https://app.ecoonline.com/ecosuite/applic/shoplink/shoplink.php?msdsCid=1000435&applicationID=9&msdsLang=1&viewForm=pdf&msdsEr=${currentItemNumber}`
+		: "";
 
 	const handleDownloadPdf = async () => {
 		if (!variantData) {
@@ -234,6 +246,16 @@ export function ProductInfo({
 							</>
 						)}
 					</Button>
+					{isSapCustomer && ecoonlineUrl && (
+						<Button
+							variant="outlineGreen"
+							size="sm"
+							className="text-sm"
+							onClick={() => window.open(ecoonlineUrl, "_blank")}>
+							<ExternalLink className="h-4 w-4" />
+							Sikkerhetsdatablad(Ecoonline)
+						</Button>
+					)}
 				</div>
 			</div>
 			<div className="flex items-center">

@@ -65,3 +65,4 @@ export const shippingFields: Omit<FormFieldProps, "value" | "onChange">[] = [
 export const HIDE_CHECKOUT_FOR_SPECIFIC_CUSTOMER_NUMBER = "169999";
 export const SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER = "184200";
 export const SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER = "116476";
+export const SAP_CUSTOMER = "116476";

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
+import { SAP_CUSTOMER } from "@/constants/checkout";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
 import { addToCart, getCart } from "@/services/carts.service";
@@ -54,6 +55,24 @@ export function ProductVariantInfo({
 	};
 
 	const { data: profile } = useGetProfileData();
+
+	// Check if current customer is SAP customer
+	const isSapCustomer = profile?.defaultCustomerNumber === SAP_CUSTOMER;
+
+	// Get SAP number from columnAttributes for SAP customer
+	const getSapNumber = () => {
+		if (!isSapCustomer || !selectedItemNumber || !columnAttributes) return null;
+
+		const attrs = columnAttributes[selectedItemNumber]?.attributes || [];
+		const sapAttr = attrs.find(
+			(attr: any) =>
+				attr.attributeIdentifier === "CARD900000" ||
+				attr.name?.toLowerCase() === "sap nr",
+		);
+		return sapAttr?.valueDef || null;
+	};
+
+	const sapNumber = getSapNumber();
 
 	// Get stock balance and warehouse name for selected warehouse (from table selection or default warehouse)
 	const warehouseNumber = selectedWarehouse || profile?.defaultWarehouseNumber;
@@ -284,6 +303,11 @@ export function ProductVariantInfo({
 						</div>
 					)}
 				</div>
+				{isSapCustomer && sapNumber && (
+					<p className="text-md font-light text-gray-500">
+						<span className="font-semibold text-black">SAP nr:</span> {sapNumber}
+					</p>
+				)}
 				<p className="text-md font-semibold text-[#0F1912]">Attributter:</p>
 			</div>
 			<div className="mt-2 flex items-end justify-between gap-6">
