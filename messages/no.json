@@ -1119,6 +1119,8 @@
 		"title": "Endre innstillinger",
 		"selectedUsers": "Valgte brukere ({count})",
 		"changesWillApply": "Endringene vil gjelde for:",
+		"successUpdatingUsers": "Brukere oppdatert",
+		"errorUpdatingUsers": "Kunne ikke oppdatere brukere",
 		"warning": {
 			"title": "Velg kun feltene du vil endre",
 			"subtitle": "Du kan legge til flere valg for brukerne. Feltene du ikke velger, blir ikke endret.",

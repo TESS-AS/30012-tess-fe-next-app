@@ -13,27 +13,17 @@ import {
 import { Label } from "@/components/ui/label";
 import { MultiSelectWithTags } from "@/components/ui/multi-select";
 import { RadioSelect } from "@/components/ui/radio-select";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
+import { useGetUserDomainConfig } from "@/hooks/useGetUserDomainConfig";
+import { User } from "@/types/user.types";
 import { X, Info } from "lucide-react";
 import { useTranslations } from "next-intl";
-
-interface User {
-	id: string;
-	name: string;
-	role: string;
-}
 
 interface BulkEditConfirmationModalProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	selectedUsers: User[];
 	onConfirm: (changes: BulkEditChanges) => void;
+	removeUser?: (user: User) => void;
 }
 
 export interface BulkEditChanges {
@@ -48,40 +38,25 @@ export function BulkEditConfirmationModal({
 	onOpenChange,
 	selectedUsers,
 	onConfirm,
+	removeUser,
 }: BulkEditConfirmationModalProps) {
 	const t = useTranslations("BulkEditConfirmationModal");
 	const [showWarning, setShowWarning] = useState(true);
+	console.log(selectedUsers, "useri");
+	const {
+		customers,
+		companies,
+		warehouses,
+		assortments,
+		isLoading: userDomainConfigLoading,
+	} = useGetUserDomainConfig(selectedUsers[0]?.email ?? "", open);
 
 	const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
 	const [selectedCatalogs, setSelectedCatalogs] = useState<string[]>([]);
 	const [selectedWarehouses, setSelectedWarehouses] = useState<string[]>([]);
 	const [selectedCompany, setSelectedCompany] = useState<string>("");
 
-	// Options for dropdowns
-	const customerOptions = [
-		{ value: "kunde1", label: "Kunde 1" },
-		{ value: "kunde2", label: "Kunde 2" },
-		{ value: "equinor", label: "Equinor" },
-		{ value: "bilfinger", label: "Bilfinger" },
-	];
-
-	const catalogOptions = [
-		{ value: "netto", label: "Bilfinger nettopriser" },
-		{ value: "total", label: "TESS total sortiment" },
-	];
-
-	const warehouseOptions = [
-		{ value: "lager1", label: "Lager 1" },
-		{ value: "lager2", label: "Lager 2" },
-		{ value: "mo", label: "Mo i Rana" },
-	];
-
-	const tessFirmaOptions = [
-		{ value: "vest", label: "TESS Vest" },
-		{ value: "nord", label: "TESS Nord" },
-		{ value: "ost", label: "TESS Øst" },
-	];
-
+	console.log(selectedCompany, "selectedCompany");
 	const handleConfirm = () => {
 		const changes: BulkEditChanges = {
 			customerAccess: selectedCustomers,
@@ -89,6 +64,7 @@ export function BulkEditConfirmationModal({
 			warehouses: selectedWarehouses,
 			company: selectedCompany,
 		};
+
 		onConfirm(changes);
 		onOpenChange(false);
 	};
@@ -116,17 +92,18 @@ export function BulkEditConfirmationModal({
 							<div className="flex flex-wrap gap-2">
 								{selectedUsers.map((user) => (
 									<Badge
-										key={user.id}
+										key={user.userId}
 										variant="secondary"
 										className="h-[22px] gap-1 rounded-md bg-[#E8EAE9] px-2 py-0 text-xs font-normal text-[#0F1912] hover:bg-[#E8EAE9]">
-										{user.name}
+										{user.firstName + " " + user.lastName}
 										<button
 											onClick={(e) => {
 												e.preventDefault();
 												e.stopPropagation();
+												removeUser?.(user);
 											}}
 											className="ml-1 rounded-sm hover:bg-[#C1C4C2]"
-											aria-label={`Remove ${user.name}`}>
+											aria-label={`Remove ${user.firstName + " " + user.lastName}`}>
 											<X className="h-3 w-3 cursor-pointer" />
 										</button>
 									</Badge>
@@ -167,7 +144,12 @@ export function BulkEditConfirmationModal({
 							<div className="space-y-2">
 								<Label htmlFor="kundetilgang">{t("customerAccess")}</Label>
 								<MultiSelectWithTags
-									options={customerOptions}
+									options={customers.map((customer) => {
+										return {
+											value: customer.customerNumber,
+											label: customer.customerName,
+										};
+									})}
 									selected={selectedCustomers}
 									onChange={setSelectedCustomers}
 									placeholder={t("customerAccessPlaceholder", {
@@ -178,7 +160,12 @@ export function BulkEditConfirmationModal({
 							<div className="space-y-2">
 								<Label htmlFor="kundekatalog">{t("catalog")}</Label>
 								<MultiSelectWithTags
-									options={catalogOptions}
+									options={assortments.map((assortment) => {
+										return {
+											value: assortment.assortmentNumber,
+											label: assortment.assortmentName,
+										};
+									})}
 									selected={selectedCatalogs}
 									onChange={setSelectedCatalogs}
 									placeholder={t("catalogPlaceholder")}
@@ -190,31 +177,29 @@ export function BulkEditConfirmationModal({
 								<Label htmlFor="standardTessLager">
 									{t("standardWarehouse")}
 								</Label>
-								<Select
-									value={selectedWarehouses[0] || ""}
-									onValueChange={(value) => setSelectedWarehouses([value])}>
-									<SelectTrigger className="border-[#C1C4C2]">
-										<SelectValue
-											placeholder={t("warehousePlaceholder", {
-												count: selectedWarehouses.length,
-											})}
-										/>
-									</SelectTrigger>
-									<SelectContent>
-										{warehouseOptions.map((option) => (
-											<SelectItem
-												key={option.value}
-												value={option.value}>
-												{option.label}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
+								<MultiSelectWithTags
+									options={warehouses.map((warehouse) => {
+										return {
+											value: String(warehouse.warehouseId),
+											label: warehouse.warehouseName,
+										};
+									})}
+									selected={selectedWarehouses}
+									onChange={setSelectedWarehouses}
+									placeholder={t("warehousePlaceholder", {
+										count: selectedWarehouses.length,
+									})}
+								/>
 							</div>
 							<div className="space-y-2">
 								<Label htmlFor="tessFirma">{t("tessCompany")}</Label>
 								<RadioSelect
-									options={tessFirmaOptions}
+									options={companies.map((item) => {
+										return {
+											value: String(item.companyNumber),
+											label: item.companyName,
+										};
+									})}
 									value={selectedCompany}
 									onChange={setSelectedCompany}
 									placeholder={t("companyPlaceholder")}

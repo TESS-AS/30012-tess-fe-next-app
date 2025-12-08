@@ -235,11 +235,11 @@ export default function ProfilePage() {
 											// 	label: t("ProfilePage.sidebar.usage"),
 											// 	icon: "/icons/profile/navbar/lock-time-outline.svg",
 											// },
-											// {
-											// 	href: "users",
-											// 	label: t("ProfilePage.sidebar.users"),
-											// 	icon: "/icons/profile/navbar/user-settings-outline.svg",
-											// },
+											{
+												href: "users",
+												label: t("ProfilePage.sidebar.users"),
+												icon: "/icons/profile/navbar/user-settings-outline.svg",
+											},
 											// {
 											// 	href: "catalog",
 											// 	label: t("ProfilePage.sidebar.catalog"),
