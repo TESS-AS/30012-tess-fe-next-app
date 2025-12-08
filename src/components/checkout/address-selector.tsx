@@ -55,17 +55,6 @@ export const AddressSelector = ({
 						</SelectItem>
 					))}
 
-				<button
-					type="button"
-					className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-sm font-medium text-[#009640] transition-colors hover:bg-[#E6F3EC]"
-					onClick={(e) => {
-						e.preventDefault();
-						onAddNewClick();
-					}}>
-					<Plus className="h-4 w-4" />
-					<span>{t("addAddress")}</span>
-				</button>
-
 				<div className="mt-2 flex items-center justify-between border-t px-1 py-2 text-sm font-medium text-[#009640]">
 					<span>{t("customer")}</span>
 				</div>

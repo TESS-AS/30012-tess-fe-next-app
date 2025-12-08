@@ -12,7 +12,7 @@
 	},
 	"Home": {
 		"title": "Home Page No",
-        "myProfile": "My Profile",
+		"myProfile": "My Profile",
 		"bannerTitle": "Velkommen til TESS!",
 		"browseOurTopCategories": "Bla gjennom våre toppkategorier",
 		"ourCategories": "Our categories",
@@ -1117,6 +1117,8 @@
 		"title": "Change Settings",
 		"selectedUsers": "Selected Users ({count})",
 		"changesWillApply": "Changes will apply to:",
+		"successUpdatingUsers": "Users updated",
+		"errorUpdatingUsers": "Could not update users",
 		"warning": {
 			"title": "Select only the fields you want to change",
 			"subtitle": "You can add more options for the users. Fields you don't select will not be changed.",

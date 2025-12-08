@@ -58,3 +58,116 @@ export interface SalesOrderAddress {
 	partyQualifier: string;
 	country: string;
 }
+
+export interface User {
+	userId: number;
+	firstName: string;
+	lastName: string;
+	email: string;
+	role: string;
+	accessLevel: string;
+	customerAccess: string[];
+	warehouse: string[];
+	catalog: string[];
+	company: string[];
+	phone?: string;
+	firma?: string[];
+}
+
+export interface EditableUser {
+	success: boolean;
+	users: User[];
+	total: number;
+	page: number;
+	pageSize: number;
+	totalPages: number;
+}
+
+export interface UserDomainConfig {
+	success: boolean;
+	domainConfig: [
+		{
+			domain: string;
+			customers: [
+				{
+					customerId: number;
+					customerNumber: string;
+					customerName: string;
+				},
+			];
+			companies: [
+				{
+					companyId: number;
+					companyNumber: number;
+					companyName: string;
+				},
+			];
+			warehouses: [
+				{
+					warehouseId: number;
+					companyNumber: number;
+					warehouseNumber: string;
+					warehouseName: string;
+				},
+			];
+			assortments: [
+				{
+					assortmentId: number;
+					assortmentNumber: string;
+					assortmentName: string;
+					nameEn: string;
+					nameNo: string;
+				},
+			];
+		},
+	];
+}
+
+export interface UpdateUserRelationsPayload {
+	userId: number;
+	assortments: string[];
+	customers: string[];
+	warehouses: [
+		{
+			warehouseNumber: string;
+			companyNumber: string;
+			isDefault: boolean;
+		},
+		{
+			warehouseNumber: string;
+			companyNumber: string;
+		},
+	];
+}
+
+export interface UpdateUserRelationsResponse {
+	message: string;
+	results: {
+		assortments: [
+			{
+				assortmentNumber: string;
+				userId: number;
+				status: string;
+			},
+		];
+		customers: [
+			{
+				customerNumber: string;
+				customerName: string;
+				userId: number;
+				status: string;
+			},
+		];
+		warehouses: [
+			{
+				warehouseNumber: string;
+				companyNumber: string;
+				isDefault: boolean;
+				status: string;
+				message: string;
+				defaultWarehouseUpdate: boolean;
+				defaultWarehouseId: number;
+			},
+		];
+	};
+}

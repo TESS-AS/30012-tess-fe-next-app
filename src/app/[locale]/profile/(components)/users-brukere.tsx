@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -31,20 +32,25 @@ import {
 import { ConfirmChangesModal } from "./confirm-changes-modal";
 import { DeleteUserModal } from "./delete-user-modal";
 import { ViewUserModal } from "./view-user-modal";
+import {
+	useGetEditableUsers,
+	useSearchEditableUsers,
+} from "@/hooks/useGetEditableUsers";
+import { useUpdateUserRelations } from "@/hooks/useUpdateUserRelations";
+import { User, UpdateUserRelationsPayload } from "@/types/user.types";
+import { DataTable, type Column } from "@/components/ui/data-table";
+import { toast } from "react-toastify";
+import type { AxiosError } from "axios";
 
-interface User {
-	id: string;
-	name: string;
-	role: "Administrator" | "Superbruker" | "Ansatt";
-	customerAccess: string;
-	catalogs: string;
-	warehouses: string;
-	company: string;
-}
+type UserRow = {
+	orderId: string;
+	user: User;
+};
 
 const UsersBrukere = () => {
 	const t = useTranslations("UsersBrukere");
 	const [searchQuery, setSearchQuery] = useState("");
+	const [debouncedSearch, setDebouncedSearch] = useState("");
 	const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 	const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -56,54 +62,81 @@ const UsersBrukere = () => {
 		useState(false);
 	const [pendingBulkChanges, setPendingBulkChanges] =
 		useState<BulkEditChanges | null>(null);
+	const [currentPage, setCurrentPage] = useState(1);
+	const pageSize = 10;
 
-	const users: User[] = [
-		{
-			id: "1",
-			name: "Jon Jonsen",
-			role: "Administrator",
-			customerAccess: "Equinor, Bilfinger",
-			catalogs: "Bilfinger nettopriser, TESS total sortiment",
-			warehouses: "Mo i rana (primærlager) + 4 lager",
-			company: "TESS Vest",
-		},
-		{
-			id: "2",
-			name: "Kari Haugen",
-			role: "Superbruker",
-			customerAccess: "Equinor, Bilfinger",
-			catalogs: "2 kataloger",
-			warehouses: "2 lager",
-			company: "TESS Nord",
-		},
-		{
-			id: "3",
-			name: "Astrid Nordstrand",
-			role: "Ansatt",
-			customerAccess: "Equinor, Bilfinger",
-			catalogs: "2 kataloger",
-			warehouses: "2 lager",
-			company: "TESS Øst",
-		},
-	];
+	const tBulk = useTranslations("BulkEditConfirmationModal");
+	const { mutateAsync: updateUserRelations } = useUpdateUserRelations();
 
-	const filteredUsers = users.filter((user) =>
-		user.name.toLowerCase().includes(searchQuery.toLowerCase()),
+	useEffect(() => {
+		const handler = setTimeout(() => {
+			setDebouncedSearch(searchQuery);
+		}, 300);
+
+		return () => {
+			clearTimeout(handler);
+		};
+	}, [searchQuery]);
+
+	const isSearching = debouncedSearch.trim().length > 0;
+
+	const {
+		users: editableUsers,
+		total: editableTotal,
+		totalPages: editableTotalPages,
+		isLoading: isLoadingEditable,
+	} = useGetEditableUsers(currentPage, pageSize, !isSearching);
+
+	const {
+		users: searchedUsers,
+		total: searchedTotal,
+		totalPages: searchedTotalPages,
+		isLoading: isLoadingSearched,
+	} = useSearchEditableUsers(
+		currentPage,
+		pageSize,
+		debouncedSearch,
+		isSearching,
 	);
 
-	const toggleUserSelection = (userId: string) => {
+	const users = isSearching ? searchedUsers : editableUsers;
+	const total = isSearching ? searchedTotal : editableTotal;
+	const totalPages = isSearching ? searchedTotalPages : editableTotalPages;
+	const isLoading = isSearching ? isLoadingSearched : isLoadingEditable;
+
+	const tableData: UserRow[] = useMemo(
+		() =>
+			users.map((user) => ({
+				orderId: user.email,
+				user,
+			})),
+		[users],
+	);
+
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [debouncedSearch]);
+
+	const toggleUserSelection = (email: string) => {
 		setSelectedUsers((prev) =>
-			prev.includes(userId)
-				? prev.filter((id) => id !== userId)
-				: [...prev, userId],
+			prev.includes(email)
+				? prev.filter((id) => id !== email)
+				: [...prev, email],
 		);
 	};
 
-	const toggleAllUsers = () => {
-		if (selectedUsers.length === filteredUsers.length) {
-			setSelectedUsers([]);
+	const toggleAllUsersOnPage = () => {
+		const pageEmails = users.map((user) => user.email);
+		const allSelectedOnPage = pageEmails.every((email) =>
+			selectedUsers.includes(email),
+		);
+
+		if (allSelectedOnPage) {
+			setSelectedUsers((prev) =>
+				prev.filter((email) => !pageEmails.includes(email)),
+			);
 		} else {
-			setSelectedUsers(filteredUsers.map((user) => user.id));
+			setSelectedUsers((prev) => Array.from(new Set([...prev, ...pageEmails])));
 		}
 	};
 
@@ -125,10 +158,14 @@ const UsersBrukere = () => {
 
 	const handleEditClick = (user: User) => {};
 
-	const handleBulkEditClick = () => {
-		if (selectedUsers.length > 0) {
-			setIsBulkEditModalOpen(true);
+	const handleBulkEditClick = (user?: User) => {
+		if (user) {
+			setSelectedUsers((prev) =>
+				prev.includes(user.email) ? prev : [...prev, user.email],
+			);
 		}
+
+		setIsBulkEditModalOpen(true);
 	};
 
 	const handleBulkEditConfirm = (changes: BulkEditChanges) => {
@@ -137,15 +174,61 @@ const UsersBrukere = () => {
 		setIsConfirmChangesModalOpen(true);
 	};
 
-	const handleFinalConfirm = () => {
-		if (pendingBulkChanges) {
-			// Apply the changes here
+	const handleFinalConfirm = async () => {
+		if (!pendingBulkChanges) return;
+
+		const warehousesPayload: UpdateUserRelationsPayload["warehouses"] = [
+			{
+				warehouseNumber: pendingBulkChanges.warehouses?.[0] ?? "",
+				companyNumber: pendingBulkChanges.company || "",
+				isDefault: true,
+			},
+			{
+				warehouseNumber: pendingBulkChanges.warehouses?.[0] ?? "",
+				companyNumber: pendingBulkChanges.company || "",
+			},
+		];
+
+		const usersToUpdate = users.filter((u) => selectedUsers.includes(u.email));
+
+		try {
+			await Promise.all(
+				usersToUpdate.map((user) =>
+					updateUserRelations({
+						userId: user.userId,
+						assortments: pendingBulkChanges.catalogs ?? [],
+						customers: pendingBulkChanges.customerAccess ?? [],
+						warehouses: warehousesPayload,
+					}),
+				),
+			);
+
 			setPendingBulkChanges(null);
 			setSelectedUsers([]);
+
+			toast(tBulk("successUpdatingUsers"), {
+				type: "success",
+				position: "bottom-right",
+				autoClose: 2000,
+			});
+		} catch (error) {
+			console.error("Failed to bulk update user relations:", error);
+			let message = tBulk("errorUpdatingUsers");
+
+			if (typeof error === "object" && error !== null && "response" in error) {
+				const err = error as AxiosError<{ error?: string }>;
+				message = err.response?.data?.error ?? message;
+			}
+
+			toast(message, {
+				type: "error",
+				position: "bottom-right",
+				autoClose: 2000,
+			});
 		}
 	};
 
-	const getRoleBadgeClass = (role: User["role"]) => {
+	const getRoleBadgeClass = (role: string) => {
 		switch (role) {
 			case "Administrator":
 				return "bg-[#DCF7E0] text-[#005522] ";
@@ -157,6 +240,108 @@ const UsersBrukere = () => {
 				return "";
 		}
 	};
+
+	const columns: Column<UserRow>[] = useMemo(
+		() => [
+			{
+				key: "select",
+				header: (
+					<Checkbox
+						checked={
+							users.length > 0 &&
+							users.every((user) => selectedUsers.includes(user.email))
+						}
+						onCheckedChange={toggleAllUsersOnPage}
+					/>
+				),
+				cell: (row) => (
+					<Checkbox
+						checked={selectedUsers.includes(row.user.email)}
+						onCheckedChange={() => toggleUserSelection(row.user.email)}
+					/>
+				),
+			},
+			{
+				key: "name",
+				header: t("columns.name"),
+				cell: (row) =>
+					`${row.user.firstName ?? ""} ${row.user.lastName ?? ""}`.trim(),
+			},
+			{
+				key: "role",
+				header: t("columns.role"),
+				cell: (row) => (
+					<span
+						className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium ${getRoleBadgeClass(row.user.role)}`}>
+						{row.user.role === "admin" && <LockKeyhole size={12} />}
+						{row.user.role === "superuser" && <UserPen size={12} />}
+						{row.user.role === "user" && <Eye size={12} />}
+						{row.user.role}
+					</span>
+				),
+			},
+			{
+				key: "customerAccess",
+				header: t("columns.customerAccess"),
+				cell: (row) => row.user.customerAccess.join(", "),
+			},
+			{
+				key: "catalog",
+				header: t("columns.catalog"),
+				cell: (row) => row.user.catalog.join(", "),
+			},
+			{
+				key: "warehouse",
+				header: t("columns.warehouse"),
+				cell: (row) => row.user.warehouse.join(", "),
+			},
+			{
+				key: "company",
+				header: t("columns.company"),
+				cell: (row) => row.user.company?.join(", ") ?? "-",
+			},
+			{
+				key: "action",
+				header: t("columns.action"),
+				cell: (row) => (
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant="ghost"
+								size="sm"
+								className="h-8 w-8 p-0">
+								<MoreHorizontal className="h-4 w-4" />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							<DropdownMenuItem onClick={() => handleViewClick(row.user)}>
+								<Eye className="mr-2 h-4 w-4" />
+								{t("actions.viewDetails")}
+							</DropdownMenuItem>
+							<DropdownMenuItem onClick={() => handleBulkEditClick(row.user)}>
+								<Edit className="mr-2 h-4 w-4" />
+								{t("actions.editUser")}
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								className="text-red-600"
+								onClick={() => handleDeleteClick(row.user)}>
+								<Trash2 className="mr-2 h-4 w-4" />
+								{t("actions.deleteUser")}
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				),
+			},
+		],
+		[
+			handleBulkEditClick,
+			handleDeleteClick,
+			handleViewClick,
+			users,
+			selectedUsers,
+			t,
+		],
+	);
 
 	return (
 		<div className="space-y-6">
@@ -188,132 +373,20 @@ const UsersBrukere = () => {
 					</div>
 				</div>
 
-				<div className="overflow-x-auto">
-					<table className="w-full">
-						<thead className="border-y border-[#C1C4C2] bg-[#F8F9F8]">
-							<tr>
-								<th className="w-12 px-4 py-3">
-									<Checkbox
-										checked={
-											selectedUsers.length === filteredUsers.length &&
-											filteredUsers.length > 0
-										}
-										onCheckedChange={toggleAllUsers}
-									/>
-								</th>
-								<th className="px-4 py-3 text-left text-sm font-medium text-[#0F1912]">
-									{t("columns.name")}
-								</th>
-								<th className="px-4 py-3 text-left text-sm font-medium text-[#0F1912]">
-									{t("columns.role")}
-								</th>
-								<th className="px-4 py-3 text-left text-sm font-medium text-[#0F1912]">
-									{t("columns.customerAccess")}
-								</th>
-								<th className="px-4 py-3 text-left text-sm font-medium text-[#0F1912]">
-									{t("columns.catalog")}
-								</th>
-								<th className="px-4 py-3 text-left text-sm font-medium text-[#0F1912]">
-									{t("columns.warehouse")}
-								</th>
-								<th className="px-4 py-3 text-left text-sm font-medium text-[#0F1912]">
-									{t("columns.company")}
-								</th>
-								<th className="w-16 px-4 py-3 text-left text-sm font-medium text-[#0F1912]">
-									{t("columns.action")}
-								</th>
-							</tr>
-						</thead>
-						<tbody className="divide-y divide-[#E5E7E6]">
-							{filteredUsers.map((user) => (
-								<tr
-									key={user.id}
-									className="hover:bg-gray-50">
-									<td className="px-4 py-4">
-										<Checkbox
-											checked={selectedUsers.includes(user.id)}
-											onCheckedChange={() => toggleUserSelection(user.id)}
-										/>
-									</td>
-									<td className="px-4 py-4 text-sm text-[#0F1912]">
-										{user.name}
-									</td>
-									<td className="px-4 py-4">
-										<span
-											className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium ${getRoleBadgeClass(user.role)}`}>
-											{user.role === "Administrator" && (
-												<LockKeyhole size={12} />
-											)}
-											{user.role === "Superbruker" && <UserPen size={12} />}
-											{user.role === "Ansatt" && <Eye size={12} />}
-											{user.role}
-										</span>
-									</td>
-									<td className="px-4 py-4 text-sm text-[#5A615D]">
-										{user.customerAccess}
-									</td>
-									<td className="px-4 py-4 text-sm text-[#5A615D]">
-										{user.catalogs}
-									</td>
-									<td className="px-4 py-4 text-sm text-[#5A615D]">
-										{user.warehouses}
-									</td>
-									<td className="px-4 py-4 text-sm text-[#5A615D]">
-										{user.company}
-									</td>
-									<td className="px-4 py-4">
-										<DropdownMenu>
-											<DropdownMenuTrigger asChild>
-												<Button
-													variant="ghost"
-													size="sm"
-													className="h-8 w-8 p-0">
-													<MoreHorizontal className="h-4 w-4" />
-												</Button>
-											</DropdownMenuTrigger>
-											<DropdownMenuContent align="end">
-												<DropdownMenuItem onClick={() => handleViewClick(user)}>
-													<Eye className="mr-2 h-4 w-4" />
-													{t("actions.viewDetails")}
-												</DropdownMenuItem>
-												<DropdownMenuItem onClick={handleBulkEditClick}>
-													<Edit className="mr-2 h-4 w-4" />
-													{t("actions.editUser")}
-												</DropdownMenuItem>
-												<DropdownMenuItem
-													className="text-red-600"
-													onClick={() => handleDeleteClick(user)}>
-													<Trash2 className="mr-2 h-4 w-4" />
-													{t("actions.deleteUser")}
-												</DropdownMenuItem>
-											</DropdownMenuContent>
-										</DropdownMenu>
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
-				</div>
-
-				<div className="border-t border-[#C1C4C2] px-6 py-4">
-					<p className="text-right text-sm text-[#5A615D]">
-						{t("totalUsers")}:{" "}
-						<span className="font-medium">{filteredUsers.length}</span>
-					</p>
-				</div>
+				<DataTable<UserRow>
+					data={tableData}
+					columns={columns}
+					currentPage={currentPage}
+					totalPages={totalPages}
+					totalItems={total}
+					itemsPerPage={pageSize}
+					onPageChange={(page) => setCurrentPage(page)}
+					isLoading={isLoading}
+					selectedIds={selectedUsers}
+					selectedRowBgClass="bg-[#E6F7EA]"
+					className="border-t border-[#C1C4C2]"
+				/>
 			</div>
-
-			<AddUserModal
-				open={isAddUserModalOpen}
-				onOpenChange={setIsAddUserModalOpen}
-			/>
-
-			<DeleteUserModal
-				open={isDeleteModalOpen}
-				onOpenChange={setIsDeleteModalOpen}
-				onConfirm={handleDeleteConfirm}
-				userName={userToDelete?.name}
-			/>
 
 			<ViewUserModal
 				open={isViewModalOpen}
@@ -334,8 +407,11 @@ const UsersBrukere = () => {
 			<BulkEditConfirmationModal
 				open={isBulkEditModalOpen}
 				onOpenChange={setIsBulkEditModalOpen}
-				selectedUsers={users.filter((u) => selectedUsers.includes(u.id))}
+				selectedUsers={users.filter((u) => selectedUsers.includes(u.email))}
 				onConfirm={handleBulkEditConfirm}
+				removeUser={(user) =>
+					setSelectedUsers((prev) => prev.filter((u) => u !== user.email))
+				}
 			/>
 
 			<ConfirmChangesModal

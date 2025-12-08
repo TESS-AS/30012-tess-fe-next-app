@@ -44,7 +44,7 @@ export function RadioSelect({
 	const filteredOptions = React.useMemo(
 		() =>
 			options.filter((o) =>
-				o.label.toLowerCase().includes(searchQuery.toLowerCase()),
+				o?.label?.toLowerCase().includes(searchQuery.toLowerCase()),
 			),
 		[options, searchQuery],
 	);

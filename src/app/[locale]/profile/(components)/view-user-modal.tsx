@@ -7,23 +7,11 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useGetUserDomainConfig } from "@/hooks/useGetUserDomainConfig";
+import { User } from "@/types/user.types";
 import { SquarePen, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-
-interface User {
-	id: string;
-	name: string;
-	role: "Administrator" | "Superbruker" | "Ansatt";
-	customerAccess: string;
-	catalogs: string;
-	warehouses: string;
-	company: string;
-	email?: string;
-	phone?: string;
-	title?: string;
-	firstName?: string;
-	lastName?: string;
-}
 
 interface ViewUserModalProps {
 	open: boolean;
@@ -44,7 +32,7 @@ export function ViewUserModal({
 
 	if (!user) return null;
 
-	const getRoleDescription = (role: User["role"]) => {
+	const getRoleDescription = (role: string) => {
 		switch (role) {
 			case "Administrator":
 				return t("roleDescriptions.administrator");
@@ -66,9 +54,11 @@ export function ViewUserModal({
 					<div className="flex items-start justify-between">
 						<div>
 							<DialogTitle className="text-xl font-semibold text-[#0F1912]">
-								{user.name}
+								{user.firstName + " " + user.lastName}
 							</DialogTitle>
-							<p className="mt-1 text-sm text-[#5A615D]">{user.role}</p>
+							<p className="mt-1 text-sm text-[#5A615D] capitalize">
+								{user.role}
+							</p>
 						</div>
 					</div>
 				</DialogHeader>
@@ -82,31 +72,31 @@ export function ViewUserModal({
 							<div>
 								<p className="mb-1 text-sm text-[#5A615D]">{t("firstName")}</p>
 								<p className="text-sm font-medium text-[#0F1912]">
-									{user.firstName || user.name.split(" ")[0]}
+									{user.firstName}
 								</p>
 							</div>
 							<div>
 								<p className="mb-1 text-sm text-[#5A615D]">{t("lastName")}</p>
 								<p className="text-sm font-medium text-[#0F1912]">
-									{user.lastName || user.name.split(" ")[1]}
+									{user.lastName}
 								</p>
 							</div>
 							<div>
 								<p className="mb-1 text-sm text-[#5A615D]">{t("email")}</p>
 								<p className="text-sm font-medium text-[#0F1912]">
-									{user.email || "navn@selskap.no"}
+									{user.email}
 								</p>
 							</div>
 							<div>
 								<p className="mb-1 text-sm text-[#5A615D]">{t("title")}</p>
-								<p className="text-sm font-medium text-[#0F1912]">
-									{user.title || "Engineer"}
+								<p className="text-sm font-medium text-[#0F1912] capitalize">
+									{user.role}
 								</p>
 							</div>
 							<div>
 								<p className="mb-1 text-sm text-[#5A615D]">{t("phone")}</p>
 								<p className="text-sm font-medium text-[#0F1912]">
-									{user.phone || "+47 444 44 444"}
+									{user?.phone ?? ""}
 								</p>
 							</div>
 						</div>
@@ -122,13 +112,13 @@ export function ViewUserModal({
 									{t("customerAccess")}
 								</p>
 								<p className="text-sm font-medium text-[#0F1912]">
-									{user.customerAccess}
+									{user.customerAccess.join(", ") || "-"}
 								</p>
 							</div>
 							<div>
 								<p className="mb-1 text-sm text-[#5A615D]">{t("catalog")}</p>
 								<p className="text-sm font-medium text-[#0F1912]">
-									{user.catalogs}
+									{user.catalog.join(", ") || "-"}
 								</p>
 							</div>
 							<div>
@@ -136,7 +126,7 @@ export function ViewUserModal({
 									{t("standardWarehouse")}
 								</p>
 								<p className="text-sm font-medium text-[#0F1912]">
-									{user.warehouses}
+									{user.warehouse.join(", ") || "-"}
 								</p>
 							</div>
 							<div>
@@ -144,7 +134,7 @@ export function ViewUserModal({
 									{t("tessCompany")}
 								</p>
 								<p className="text-sm font-medium text-[#0F1912]">
-									{user.company}
+									{user.company.join(", ") || "-"}
 								</p>
 							</div>
 						</div>
@@ -156,7 +146,7 @@ export function ViewUserModal({
 						</h3>
 						<div>
 							<p className="mb-1 text-sm text-[#5A615D]">{t("role")}</p>
-							<p className="mb-2 text-sm font-semibold text-[#0F1912]">
+							<p className="mb-2 text-sm font-semibold text-[#0F1912] capitalize">
 								{user.role}
 							</p>
 							<p className="text-xs text-[#5A615D]">

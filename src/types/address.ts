@@ -18,3 +18,12 @@ export interface AddressFormState {
 	city: string;
 	isUserAddress: boolean;
 }
+
+export interface CreateNewUserAddress {
+	addressLine1: string;
+	addressLine2: string;
+	addressLine3: string;
+	city: string;
+	postal_code: number;
+	addressName: string;
+}
