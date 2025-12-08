@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Skeleton } from "@/components/ui/skeleton";
+import { DataTable, type Column } from "@/components/ui/data-table";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -12,6 +12,13 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import {
+	useGetEditableUsers,
+	useSearchEditableUsers,
+} from "@/hooks/useGetEditableUsers";
+import { useUpdateUserRelations } from "@/hooks/useUpdateUserRelations";
+import { User, UpdateUserRelationsPayload } from "@/types/user.types";
+import type { AxiosError } from "axios";
 import {
 	Plus,
 	Search,
@@ -23,24 +30,14 @@ import {
 	UserPen,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "react-toastify";
 
-import { AddUserModal } from "./add-user-modal";
 import {
 	BulkEditConfirmationModal,
 	BulkEditChanges,
 } from "./bulk-edit-confirmation-modal";
 import { ConfirmChangesModal } from "./confirm-changes-modal";
-import { DeleteUserModal } from "./delete-user-modal";
 import { ViewUserModal } from "./view-user-modal";
-import {
-	useGetEditableUsers,
-	useSearchEditableUsers,
-} from "@/hooks/useGetEditableUsers";
-import { useUpdateUserRelations } from "@/hooks/useUpdateUserRelations";
-import { User, UpdateUserRelationsPayload } from "@/types/user.types";
-import { DataTable, type Column } from "@/components/ui/data-table";
-import { toast } from "react-toastify";
-import type { AxiosError } from "axios";
 
 type UserRow = {
 	orderId: string;

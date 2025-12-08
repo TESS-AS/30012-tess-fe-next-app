@@ -13,21 +13,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { MultiSelectWithTags } from "@/components/ui/multi-select";
 import { RadioSelect } from "@/components/ui/radio-select";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
+import { useGetUserDomainConfig } from "@/hooks/useGetUserDomainConfig";
+import { User } from "@/types/user.types";
 import { X, Info } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { User } from "@/types/user.types";
-import { useGetCustomers } from "@/hooks/useGetCustomers";
-import { useGetWarehouses } from "@/hooks/useGetWarehouse";
-import { useGetAssortments } from "@/hooks/useGetAssortments";
-import { useGetCompanies } from "@/hooks/useGetCompanies";
-import { useGetUserDomainConfig } from "@/hooks/useGetUserDomainConfig";
 
 interface BulkEditConfirmationModalProps {
 	open: boolean;

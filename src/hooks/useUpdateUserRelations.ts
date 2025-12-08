@@ -4,6 +4,7 @@ import {
 	UpdateUserRelationsResponse,
 } from "@/types/user.types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { editableUsersKeys } from "./useGetEditableUsers";
 import { userDomainConfigKeys } from "./useGetUserDomainConfig";
 

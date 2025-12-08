@@ -1,11 +1,12 @@
+import { CreateNewUserAddress } from "@/types/address";
 import {
 	EditableUser,
 	UpdateUserRelationsPayload,
 	UpdateUserRelationsResponse,
 	UserDomainConfig,
 } from "@/types/user.types";
+
 import axiosInstance from "./axiosClient";
-import { CreateNewUserAddress } from "@/types/address";
 
 export async function updateUserProfile(
 	firstName: string,
