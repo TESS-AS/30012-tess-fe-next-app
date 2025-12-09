@@ -131,6 +131,7 @@ export function HosesAndEquipments({
 	const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 	const [selectedAgeRanges, setSelectedAgeRanges] = useState<string[]>([]);
 	const ITEMS_PER_PAGE = 10;
+	const HOSE_TABLE_PAGE_KEY = "hosesAndEquipments_page";
 
 	const transformedAssets: HoseOrder[] = assets.map((asset: any) => ({
 		id: asset?.hoseLine?.hexagonId?.toString?.() || "",
@@ -356,8 +357,27 @@ export function HosesAndEquipments({
 			...getActiveFilters(),
 		};
 		fetchAssets(filters);
+		if (typeof window !== "undefined") {
+			window.localStorage.setItem(HOSE_TABLE_PAGE_KEY, String(page));
+		}
 		window.scrollTo({ top: 0, behavior: "smooth" });
 	};
+
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		const storedPage = window.localStorage.getItem(HOSE_TABLE_PAGE_KEY);
+		if (!storedPage) return;
+		const page = Number(storedPage);
+		if (!Number.isFinite(page) || page <= 0) return;
+		if (page === pagination.currentPage) return;
+
+		const filters: FilterOptions = {
+			page,
+			pageSize: ITEMS_PER_PAGE,
+			...getActiveFilters(),
+		};
+		fetchAssets(filters);
+	}, []);
 
 	const columnOptions = [
 		"id",
@@ -783,7 +803,15 @@ export function HosesAndEquipments({
 						isLoading={loading}
 						selectedIds={selectedRows}
 						selectedRowBgClass="bg-[#DCF7E0]"
-						onHoseClick={goToHose}
+						onHoseClick={(hoseId) => {
+							if (typeof window !== "undefined") {
+								window.localStorage.setItem(
+									HOSE_TABLE_PAGE_KEY,
+									String(pagination.currentPage),
+								);
+							}
+							goToHose?.(hoseId);
+						}}
 					/>
 				</div>
 			</div>
