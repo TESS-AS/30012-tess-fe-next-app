@@ -29,7 +29,7 @@ export interface UserAddress {
 	city: string;
 	deliveryCode: string;
 	condition: string;
-	countryCode: string;
+	countryCode?: string;
 	type: "personal" | "business" | "organization";
 }
 

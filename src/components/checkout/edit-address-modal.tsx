@@ -22,6 +22,7 @@ export interface SavedAddressData {
 	city: string;
 	extraInfo?: string;
 	isUserAddress: boolean;
+	countryCode: string;
 }
 
 interface EditAddressModalProps {
@@ -48,6 +49,7 @@ export const EditAddressModal: React.FC<EditAddressModalProps> = ({
 		city: initialData?.city || "",
 		extraInfo: initialData?.extraInfo || "",
 		isUserAddress: initialData?.isUserAddress || false,
+		countryCode: initialData?.countryCode || "",
 	});
 
 	const [showExtra, setShowExtra] = useState(!!formData.extraInfo);
