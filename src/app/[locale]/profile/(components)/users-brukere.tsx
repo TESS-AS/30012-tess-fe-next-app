@@ -38,6 +38,7 @@ import {
 } from "./bulk-edit-confirmation-modal";
 import { ConfirmChangesModal } from "./confirm-changes-modal";
 import { ViewUserModal } from "./view-user-modal";
+import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 
 type UserRow = {
 	orderId: string;
@@ -46,6 +47,10 @@ type UserRow = {
 
 const UsersBrukere = () => {
 	const t = useTranslations("UsersBrukere");
+	const tBulk = useTranslations("BulkEditConfirmationModal");
+	const { mutateAsync: updateUserRelations } = useUpdateUserRelations();
+
+	const { data: profile } = usePunchoutProfile();
 	const [searchQuery, setSearchQuery] = useState("");
 	const [debouncedSearch, setDebouncedSearch] = useState("");
 	const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
@@ -61,9 +66,6 @@ const UsersBrukere = () => {
 		useState<BulkEditChanges | null>(null);
 	const [currentPage, setCurrentPage] = useState(1);
 	const pageSize = 10;
-
-	const tBulk = useTranslations("BulkEditConfirmationModal");
-	const { mutateAsync: updateUserRelations } = useUpdateUserRelations();
 
 	useEffect(() => {
 		const handler = setTimeout(() => {
@@ -82,7 +84,12 @@ const UsersBrukere = () => {
 		total: editableTotal,
 		totalPages: editableTotalPages,
 		isLoading: isLoadingEditable,
-	} = useGetEditableUsers(currentPage, pageSize, !isSearching);
+	} = useGetEditableUsers(
+		currentPage,
+		pageSize,
+		!isSearching,
+		profile?.userId?.toString() || "",
+	);
 
 	const {
 		users: searchedUsers,

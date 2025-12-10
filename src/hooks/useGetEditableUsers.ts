@@ -13,6 +13,7 @@ export function useGetEditableUsers(
 	page: number = 1,
 	pageSize: number = 10,
 	enabled: boolean = true,
+	userId: string,
 ) {
 	const { data, isLoading, error, refetch } = useQuery({
 		queryKey: editableUsersKeys.list(page, pageSize),
@@ -20,6 +21,7 @@ export function useGetEditableUsers(
 			const response = await getEditableUsers(
 				page.toString(),
 				pageSize.toString(),
+				userId,
 			);
 			return response;
 		},

@@ -7,6 +7,7 @@ export interface SavedAddress {
 	postalCode: string;
 	city: string;
 	extraInfo?: string;
+	countryCode: string;
 }
 
 export interface AddressFormState {
@@ -17,6 +18,7 @@ export interface AddressFormState {
 	postalCode: string;
 	city: string;
 	isUserAddress: boolean;
+	countryCode: string;
 }
 
 export interface CreateNewUserAddress {
@@ -24,6 +26,7 @@ export interface CreateNewUserAddress {
 	addressLine2: string;
 	addressLine3: string;
 	city: string;
-	postal_code: number;
+	postalCode: number;
 	addressName: string;
+	countryCode: string;
 }
