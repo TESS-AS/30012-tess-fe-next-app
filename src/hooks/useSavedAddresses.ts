@@ -26,6 +26,7 @@ export const useSavedAddresses = () => {
 				postalCode: address.postalCode,
 				city: address.city,
 				extraInfo: address.addressLine3 || "",
+				countryCode: address.countryCode,
 			})) ?? []),
 
 			...(businessAddresses?.map((address) => ({
@@ -37,6 +38,7 @@ export const useSavedAddresses = () => {
 				postalCode: address.postalCode,
 				city: address.city,
 				extraInfo: address.addressLine3 || "",
+				countryCode: address.countryCode,
 			})) ?? []),
 
 			...(orgAddresses?.map((address) => ({
@@ -48,6 +50,7 @@ export const useSavedAddresses = () => {
 				postalCode: address.postalCode,
 				city: address.city,
 				extraInfo: address.addressLine3 || "",
+				countryCode: address.countryCode,
 			})) ?? []),
 		];
 	}, [personalAddresses, businessAddresses, orgAddresses]);

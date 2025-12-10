@@ -5,6 +5,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { COUNTRIES } from "../../constants/countries";
 import { useCreateNewUserAddress } from "@/hooks/useCreateNewUserAddress";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useSavedAddresses } from "@/hooks/useSavedAddresses";
@@ -29,6 +37,7 @@ interface AddressCardProps {
 	houseNumber?: string;
 	extraInfo?: string;
 	isUserAddress?: boolean;
+	countryCode?: string;
 	onSave?: (data: AddressFormState) => void;
 }
 
@@ -43,18 +52,18 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 	addressName = "",
 	houseNumber = "",
 	extraInfo = "",
+	countryCode = "",
 	isUserAddress = false,
 	onSave,
 }) => {
 	const t = useTranslations("Checkout.address");
 	const savedAddresses = useSavedAddresses();
-	const { data: profile } = useGetProfileData();
-	const userName = profile?.username ?? "";
-	const { mutateAsync: createNewAddress } = useCreateNewUserAddress(userName);
+	const { mutateAsync: createNewAddress } = useCreateNewUserAddress();
 
 	const [editMode, setEditMode] = useState(false);
 	const [showExtra, setShowExtra] = useState(!!extraInfo);
 	const [isLoading, setIsLoading] = useState(false);
+	const [cityReadOnly, setCityReadOnly] = useState(true);
 
 	const [formData, setFormData] = useState<AddressFormState>({
 		addressName,
@@ -64,6 +73,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 		postalCode,
 		city,
 		isUserAddress,
+		countryCode,
 	});
 
 	const handleChange = async (
@@ -80,14 +90,15 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 	const handleSave = () => {
 		onSave?.(formData);
 
-		if (formData.isUserAddress && userName) {
+		if (formData.isUserAddress) {
 			const payload: CreateNewUserAddress = {
 				addressLine1: formData.street,
 				addressLine2: formData.houseNumber,
 				addressLine3: formData.extraInfo ?? "",
 				city: formData.city,
-				postal_code: Number(formData.postalCode) || 0,
+				postalCode: Number(formData.postalCode) || 0,
 				addressName: formData.addressName || "",
+				countryCode: formData.countryCode || "",
 			};
 
 			void createNewAddress(payload);
@@ -99,8 +110,6 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 	const handleCancel = () => {
 		setEditMode(false);
 	};
-
-	const [cityReadOnly, setCityReadOnly] = useState(true);
 
 	const fetchCityFromPostalCode = async (postalCode: string) => {
 		if (!POSTAL_CODE_REGEX.test(postalCode)) {
@@ -166,6 +175,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 									(address) => address.name !== "x",
 								)}
 								onAddressSelect={(selectedAddress) => {
+									console.log(selectedAddress, "selectedAddress");
 									setFormData((prev) => ({
 										...prev,
 										addressName: selectedAddress.name,
@@ -174,20 +184,18 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 										postalCode: selectedAddress.postalCode,
 										city: selectedAddress.city,
 										extraInfo: selectedAddress.extraInfo || "",
+										countryCode: selectedAddress.countryCode,
 									}));
 								}}
 								onAddNewClick={() => {
-									if (!userName) {
-										return;
-									}
-
 									const payload: CreateNewUserAddress = {
 										addressLine1: formData.street,
 										addressLine2: formData.houseNumber,
 										addressLine3: formData.extraInfo ?? "",
 										city: formData.city,
-										postal_code: Number(formData.postalCode) || 0,
+										postalCode: Number(formData.postalCode) || 0,
 										addressName: formData.addressName || "",
+										countryCode: formData.countryCode || "NO",
 									};
 
 									void createNewAddress(payload);
@@ -294,6 +302,28 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 									}
 								/>
 							</div>
+						</div>
+
+						<div>
+							<Label>Landskode</Label>
+							<Select
+								value={formData.countryCode}
+								onValueChange={(value) =>
+									setFormData((prev) => ({ ...prev, countryCode: value }))
+								}>
+								<SelectTrigger className="w-full">
+									<SelectValue placeholder="Velg land" />
+								</SelectTrigger>
+								<SelectContent>
+									{COUNTRIES.map((country) => (
+										<SelectItem
+											key={country.code}
+											value={country.code}>
+											{country.name}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 						</div>
 
 						<div className="flex items-center space-x-2">

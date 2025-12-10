@@ -37,12 +37,14 @@ export async function updateUserProfile(
 export async function getEditableUsers(
 	page: string,
 	pageSize: string,
+	userId?: string,
 ): Promise<EditableUser> {
 	try {
 		const response = await axiosInstance.get(`/userAdmin/getEditableUsers`, {
 			params: {
 				page,
 				pageSize,
+				userId,
 			},
 		});
 		return response.data;
@@ -102,14 +104,10 @@ export async function searchEditableUsers(
 }
 
 export async function createNewUserAddress(
-	userName: string,
 	payload: CreateNewUserAddress,
 ): Promise<string> {
 	try {
-		const response = await axiosInstance.post(
-			`/address/user/${userName}`,
-			payload,
-		);
+		const response = await axiosInstance.post(`/address/user`, payload);
 		return response.data;
 	} catch (error) {
 		console.error("Error creating new user address:", error);

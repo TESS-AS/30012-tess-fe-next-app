@@ -322,7 +322,7 @@ const CartPage = () => {
 							<p
 								onClick={() => setOpenModalId(item.productNumber)}
 								className="flex cursor-pointer items-center text-xs text-[#5A615D] hover:text-[#009640] hover:underline">
-								{item.itemNumber}, 300mm, 3/8”{" "}
+								{item.itemNumber}
 								<ChevronRight className="h-4 w-4" />
 							</p>
 						</div>
