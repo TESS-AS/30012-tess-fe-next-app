@@ -12,9 +12,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { COUNTRIES } from "../../constants/countries";
 import { useCreateNewUserAddress } from "@/hooks/useCreateNewUserAddress";
-import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useSavedAddresses } from "@/hooks/useSavedAddresses";
 import { cn } from "@/lib/utils";
 import { getPostalCode } from "@/services/orders.service";
@@ -22,6 +20,7 @@ import { MapPin, Pencil, Loader2, Plus, SquarePen } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { AddressSelector } from "./address-selector";
+import { COUNTRIES } from "../../constants/countries";
 import {
 	AddressFormState,
 	type CreateNewUserAddress,

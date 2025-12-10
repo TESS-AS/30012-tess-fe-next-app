@@ -16,6 +16,7 @@ import {
 	useGetEditableUsers,
 	useSearchEditableUsers,
 } from "@/hooks/useGetEditableUsers";
+import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useUpdateUserRelations } from "@/hooks/useUpdateUserRelations";
 import { User, UpdateUserRelationsPayload } from "@/types/user.types";
 import type { AxiosError } from "axios";
@@ -38,7 +39,6 @@ import {
 } from "./bulk-edit-confirmation-modal";
 import { ConfirmChangesModal } from "./confirm-changes-modal";
 import { ViewUserModal } from "./view-user-modal";
-import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 
 type UserRow = {
 	orderId: string;
