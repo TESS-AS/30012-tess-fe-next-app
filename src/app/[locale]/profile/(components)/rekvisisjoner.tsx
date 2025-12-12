@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { getStatusIcons } from "./mine-bestillinger";
+import { updateRequisition } from "@/services/requisitions.service";
 
 type Status = "Alle" | "Venter godkjenning" | "Godkjent" | "Avvist";
 
@@ -36,6 +37,8 @@ interface OrderItem {
 	sku: string;
 	quantity: number;
 	price: string;
+	productNumber: string;
+	itemNumber: string;
 }
 
 interface Rekvisisjon {
@@ -78,7 +81,7 @@ export function Rekvisisjoner() {
 		Rekvisisjon[]
 	>([]);
 
-	const { requisitions, loading, error } = useRequisitions(
+	const { requisitions, loading, error, getRequisitions } = useRequisitions(
 		profile?.defaultCustomerNumber ?? "110667",
 		selectedStatus,
 	);
@@ -157,10 +160,36 @@ export function Rekvisisjoner() {
 								variant="outline"
 								size="sm"
 								className="border-[#009640] text-[#009640] hover:border-[#005522] hover:bg-[#005522] hover:text-white"
-								onClick={() => {
+								onClick={async () => {
 									setSelectedOrder(rekvisisjon);
 									setShowAllItems(false);
 									setApprovalModalOpen(true);
+									try {
+										await updateRequisition({
+											customerNumber:
+												profile?.defaultCustomerNumber?.toString() ?? "",
+											requisitionId: rekvisisjon.requisitionId,
+											status: "approved",
+										});
+										await Promise.all(
+											rekvisisjon.items.map((item) =>
+												addToCart({
+													productNumber: item.productNumber,
+													itemNumber: item.itemNumber,
+													quantity: item.quantity,
+													warehouseNumber: "1",
+													companyNumber:
+														profile?.defaultCompanyNumber?.toString() || "1",
+												}),
+											),
+										);
+										getRequisitions();
+									} catch (error) {
+										console.error(
+											"Error approving requisition and adding items to cart",
+											error,
+										);
+									}
 								}}>
 								{t("approve")}
 								<CircleCheck />
@@ -168,7 +197,23 @@ export function Rekvisisjoner() {
 							<Button
 								variant="outline"
 								size="sm"
-								className="border-[#C81E1E] text-[#C81E1E] hover:border-[#9B1C1C] hover:bg-[#9B1C1C] hover:text-white">
+								className="border-[#C81E1E] text-[#C81E1E] hover:border-[#9B1C1C] hover:bg-[#9B1C1C] hover:text-white"
+								onClick={async () => {
+									try {
+										await updateRequisition({
+											customerNumber:
+												profile?.defaultCustomerNumber?.toString() ?? "",
+											requisitionId: rekvisisjon.requisitionId,
+											status: "rejected",
+										});
+										getRequisitions();
+									} catch (error) {
+										console.error(
+											"Error updating requisition status to rejected",
+											error,
+										);
+									}
+								}}>
 								{t("reject")}
 								<CircleX />
 							</Button>
@@ -178,7 +223,23 @@ export function Rekvisisjoner() {
 						<Button
 							variant="outline"
 							size="sm"
-							className="border-[#C1C4C2] text-[#0F1912] hover:bg-[#E8EAE9] hover:text-[#009640]">
+							className="border-[#C1C4C2] text-[#0F1912] hover:bg-[#E8EAE9] hover:text-[#009640]"
+							onClick={async () => {
+								try {
+									await updateRequisition({
+										customerNumber:
+											profile?.defaultCustomerNumber?.toString() ?? "",
+										requisitionId: rekvisisjon.requisitionId,
+										status: "awaiting",
+									});
+									getRequisitions();
+								} catch (error) {
+									console.error(
+										"Error updating requisition status to awaiting",
+										error,
+									);
+								}
+							}}>
 							{t("restore")}
 						</Button>
 					)}
@@ -297,7 +358,7 @@ export function Rekvisisjoner() {
 														<p className="font-medium text-[#0F1912]">
 															{item.name}
 														</p>
-														<p className="text-[#5A615D]">{item.sku}</p>
+														<p className="text-[#5A615D]">{item.itemNumber}</p>
 													</div>
 												</td>
 												<td className="py-4">{item.quantity}</td>

@@ -78,7 +78,9 @@ export const useRequisitions = (customerNumber: string, status?: string) => {
 				pris: formatNorwegianCurrency(req.totalPrice) || "N/A",
 				status: mapApiStatus(req.status),
 				items: req.requisitionLines.map((line) => ({
-					name: `Item ${line.itemId}`,
+					name: `${line.productName}`,
+					itemNumber: line.itemNumber,
+					productNumber: line.productNumber,
 					sku: line.itemId.toString(),
 					quantity: line.quantity,
 					price: formatNorwegianCurrency(line.unitPrice) || "N/A",

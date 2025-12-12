@@ -1,25 +1,9 @@
+import {
+	RequisitionResponse,
+	UpdateRequisitionPayload,
+	UpdateRequisitionResponse,
+} from "@/types/requisitions";
 import axiosInstance from "./axiosClient";
-
-export interface RequisitionResponse {
-	customerId: number;
-	requisitionId: number;
-	requestDate: string;
-	requestTime: string;
-	description: string;
-	status: string;
-	totalPrice: number;
-	fullName: string;
-	requisitionLines: [
-		{
-			requisitionLineId: number;
-			lineNumber: number;
-			itemId: number;
-			quantity: number;
-			itemNumber: string;
-			unitPrice: number;
-		},
-	];
-}
 
 export const getRequisition = async (
 	customerNumber: string,
@@ -30,6 +14,19 @@ export const getRequisition = async (
 		const response = await axiosInstance.get(url, {
 			params: status ? { status } : {},
 		});
+		return response.data;
+	} catch (error) {
+		console.error("Error getting requisition:", error);
+		throw error;
+	}
+};
+
+export const updateRequisition = async (
+	payload: UpdateRequisitionPayload,
+): Promise<UpdateRequisitionResponse> => {
+	try {
+		const url = `/requisition/updateRequisition`;
+		const response = await axiosInstance.put(url, payload);
 		return response.data;
 	} catch (error) {
 		console.error("Error getting requisition:", error);
