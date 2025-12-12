@@ -9,6 +9,7 @@ import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useRequisitions } from "@/hooks/useRequisitions";
 import { cn, formatDate } from "@/lib/utils";
 import { addToCart } from "@/services/carts.service";
+import { updateRequisition } from "@/services/requisitions.service";
 import { Label } from "@radix-ui/react-label";
 import {
 	Search,
@@ -21,7 +22,6 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { getStatusIcons } from "./mine-bestillinger";
-import { updateRequisition } from "@/services/requisitions.service";
 
 type Status = "Alle" | "Venter godkjenning" | "Godkjent" | "Avvist";
 
