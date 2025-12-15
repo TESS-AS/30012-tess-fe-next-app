@@ -40,7 +40,7 @@ import {
 } from "@/services/product.service";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import {
-	Plus,
+	Pencil,
 	Search,
 	ChevronUp,
 	ChevronDown,
@@ -128,8 +128,8 @@ export default function ProductVariantTable({
 	const [visibleCols, setVisibleCols] = useState<Record<ColumnKey, boolean>>({
 		image: false,
 		itemNumber: true,
-		unspsc: false,
-		contentUnit: false,
+		unspsc: true,
+		contentUnit: true,
 		price: true,
 		warehouse: true,
 		quantity: hasQuantity ?? true,
@@ -203,7 +203,7 @@ export default function ProductVariantTable({
 
 		const maxAttributeSlots = Math.max(
 			0,
-			6 - visibleStaticCount - fixedTailCount,
+			10 - visibleStaticCount - fixedTailCount,
 		);
 
 		setVisibleAttributes((prev) => {
@@ -211,14 +211,10 @@ export default function ProductVariantTable({
 			let visibleAttributeCount = 0;
 
 			for (const name of allAttributeNames) {
-				if (prev[name] !== undefined) {
-					next[name] = prev[name];
-					if (prev[name]) visibleAttributeCount++;
-				} else {
-					const shouldShow = visibleAttributeCount < maxAttributeSlots;
-					next[name] = shouldShow;
-					if (shouldShow) visibleAttributeCount++;
-				}
+				// Always respect the limit, even for previously selected attributes
+				const shouldShow = visibleAttributeCount < maxAttributeSlots;
+				next[name] = shouldShow;
+				if (shouldShow) visibleAttributeCount++;
 			}
 
 			return next;
@@ -443,7 +439,7 @@ export default function ProductVariantTable({
 		const fixedTail: ColumnKey[] = [];
 		if (hasQuantity && visibleCols.quantity) fixedTail.push("quantity");
 		if (visibleCols.warehouse) fixedTail.push("warehouse");
-		if (visibleCols.cart) fixedTail.push("cart");
+		if (hasAddToCart && visibleCols.cart) fixedTail.push("cart");
 
 		return [...orderedStaticFirst, ...fixedTail];
 	};
@@ -494,7 +490,7 @@ export default function ProductVariantTable({
 							<Button
 								variant="outline"
 								className="group h-9 rounded-md border px-2">
-								<Plus className="mr-2 h-5 w-4" />
+								<Pencil className="mr-2 h-5 w-4" />
 								Rediger tabell
 								<ChevronDown className="ml-2 inline h-5 w-5 group-data-[state=open]:hidden" />
 								<ChevronUp className="ml-2 hidden h-5 w-5 group-data-[state=open]:inline" />
@@ -549,7 +545,7 @@ export default function ProductVariantTable({
 				<Table
 					noOverflow
 					className="w-full min-w-max rounded-md">
-					<TableHeader className="bg-muted text-muted-foreground sticky top-0">
+					<TableHeader className="bg-gray-50 text-muted-foreground sticky top-0">
 						<TableRow>
 							{renderColumns()
 								.filter(
@@ -559,7 +555,7 @@ export default function ProductVariantTable({
 									return (
 										<TableHead
 											key={col}
-											className={
+											className={`py-2 ${
 												col === "image"
 													? "min-w-[80px]"
 													: col === "itemNumber"
@@ -571,7 +567,7 @@ export default function ProductVariantTable({
 																: col === "price"
 																	? "min-w-[100px]"
 																	: "min-w-[120px]"
-											}>
+											}`}>
 											{columnLabels[col]}
 										</TableHead>
 									);
@@ -581,8 +577,8 @@ export default function ProductVariantTable({
 								.map((name) => (
 									<TableHead
 										key={name}
-										className="min-w-[120px]">
-										{name}
+										className="min-w-[120px] py-2">
+										{name.toUpperCase()}
 									</TableHead>
 								))}
 							{renderColumns()
@@ -593,7 +589,7 @@ export default function ProductVariantTable({
 									return (
 										<TableHead
 											key={col}
-											className={
+											className={`py-2 ${
 												col === "quantity"
 													? "min-w-[120px]"
 													: col === "warehouse"
@@ -601,7 +597,7 @@ export default function ProductVariantTable({
 														: col === "cart"
 															? "min-w-[140px]"
 															: "min-w-[120px]"
-											}>
+											}`}>
 											{columnLabels[col]}
 										</TableHead>
 									);
@@ -613,10 +609,20 @@ export default function ProductVariantTable({
 							const qty = quantities[variant.itemNumber] || 1;
 							const selectedWarehouse = warehouse[variant.itemNumber];
 
+							const isSelected =
+								selectedItemNumber === variant.itemNumber.toString();
+
 							return (
 								<TableRow
 									key={variant.itemNumber}
-									className="hover:bg-[#F0FCF2]">
+									className={`cursor-pointer hover:bg-[#F0FCF2] ${
+										isSelected ? "bg-[#F0FCF2] border-l-4 border-l-green-700" : ""
+									}`}
+									onClick={() => {
+										if (!hasAddToCart && onSelectVariant) {
+											onSelectVariant(variant.itemNumber.toString());
+										}
+									}}>
 									{renderColumns()
 										.filter(
 											(col) => !["quantity", "warehouse", "cart"].includes(col),
@@ -630,17 +636,17 @@ export default function ProductVariantTable({
 													return (
 														<TableCell
 															key="image"
-															className="min-w-[80px]">
+															className="min-w-[80px] py-2">
 															{imageUrl ? (
 																<Image
 																	src={imageUrl}
 																	alt={variant.itemNumber.toString()}
-																	width={60}
-																	height={60}
+																	width={40}
+																	height={40}
 																	className="object-contain"
 																/>
 															) : (
-																<div className="bg-muted h-[60px] w-[60px]" />
+																<div className="bg-muted h-[40px] w-[40px]" />
 															)}
 														</TableCell>
 													);
@@ -648,7 +654,7 @@ export default function ProductVariantTable({
 													return (
 														<TableCell
 															key="itemNumber"
-															className="min-w-[120px]">
+															className="min-w-[120px] py-2">
 															{variant.itemNumber}
 														</TableCell>
 													);
@@ -670,7 +676,7 @@ export default function ProductVariantTable({
 													return (
 														<TableCell
 															key="unspsc"
-															className="min-w-[100px]">
+															className="min-w-[100px] py-2">
 															{unspscValue}
 														</TableCell>
 													);
@@ -697,7 +703,7 @@ export default function ProductVariantTable({
 													return (
 														<TableCell
 															key="contentUnit"
-															className="min-w-[80px]">
+															className="min-w-[80px] py-2">
 															{contentUnitValue}
 														</TableCell>
 													);
@@ -705,7 +711,7 @@ export default function ProductVariantTable({
 													return (
 														<TableCell
 															key="price"
-															className="min-w-[100px]">
+															className="min-w-[100px] py-2">
 															{loading[variant.itemNumber] ? (
 																<div className="flex items-center gap-2">
 																	<Loader2 className="h-4 w-4 animate-spin" />
@@ -735,7 +741,7 @@ export default function ProductVariantTable({
 											return (
 												<TableCell
 													key={`${variant.itemNumber}-${name}`}
-													className="min-w-[120px]">
+													className="min-w-[120px] py-2">
 													{attr?.valueDef ?? "-"}
 												</TableCell>
 											);
@@ -750,7 +756,8 @@ export default function ProductVariantTable({
 													return (
 														<TableCell
 															key="quantity"
-															className="min-w-[120px]">
+															className="min-w-[120px] py-2"
+															onClick={(e) => e.stopPropagation()}>
 															<QuantityButtons
 																quantity={qty}
 																onIncrease={() =>
@@ -805,7 +812,8 @@ export default function ProductVariantTable({
 													return (
 														<TableCell
 															key="warehouse"
-															className="min-w-[200px]">
+															className="min-w-[200px] py-2"
+															onClick={(e) => e.stopPropagation()}>
 															<Select
 																value={selectedWarehouse || ""}
 																onValueChange={async (value) => {
@@ -819,7 +827,7 @@ export default function ProductVariantTable({
 																	);
 																	await calculatePriceForVariant(variant);
 																}}>
-																<SelectTrigger className="w-[180px]">
+																<SelectTrigger className="w-[180px] border-0 shadow-none bg-transparent">
 																	<SelectValue
 																		placeholder={
 																			warehouseOptions.length === 0
@@ -867,29 +875,9 @@ export default function ProductVariantTable({
 													return (
 														<TableCell
 															key="cart"
-															className="min-w-[140px]">
-															{!hasAddToCart ? (
-																selectedItemNumber ===
-																variant.itemNumber.toString() ? (
-																	<Button
-																		size="sm"
-																		className="bg-green-600 text-white">
-																		<Check className="h-4 w-4" />
-																		{t("Product.selected")}
-																	</Button>
-																) : (
-																	<Button
-																		size="sm"
-																		variant="outline"
-																		onClick={() =>
-																			onSelectVariant?.(
-																				variant.itemNumber.toString(),
-																			)
-																		}>
-																		{t("Product.select")}
-																	</Button>
-																)
-															) : (
+															className="min-w-[140px] py-2"
+															onClick={(e) => e.stopPropagation()}>
+															{hasAddToCart ? (
 																<Button
 																	variant="outlineGreen"
 																	size="sm"
@@ -987,7 +975,7 @@ export default function ProductVariantTable({
 																		</>
 																	)}
 																</Button>
-															)}
+															) : null}
 														</TableCell>
 													);
 												default:

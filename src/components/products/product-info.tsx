@@ -47,7 +47,6 @@ interface ProductInfoProps {
 	columnAttributes?: Record<string, any> | null;
 	selectedWarehouse?: string;
 	onWarehouseChange?: (itemNumber: string, warehouseNumber: string) => void;
-	itemVariantCount?: number;
 }
 
 export function ProductInfo({
@@ -65,7 +64,6 @@ export function ProductInfo({
 	columnAttributes,
 	selectedWarehouse,
 	onWarehouseChange,
-	itemVariantCount,
 }: ProductInfoProps) {
 	const t = useTranslations("Product");
 	const { data: profile } = useGetProfileData();
@@ -84,8 +82,29 @@ export function ProductInfo({
 
 	const isSapCustomer = profile?.defaultCustomerNumber === SAP_CUSTOMER;
 
-	// Get long description from variantData
+	// Get short and long description from columnAttributes
+	const getShortDescription = () => {
+		if (!columnAttributes?.productData) return null;
+		return locale === "no"
+			? columnAttributes.productData.shortDescNo
+			: columnAttributes.productData.shortDescEn;
+	};
+
+	const getLongDescription = () => {
+		if (!columnAttributes?.productData) return null;
+		return locale === "no"
+			? columnAttributes.productData.longDescNo
+			: columnAttributes.productData.longDescEn;
+	};
+
+	// Use columnAttributes first, fallback to props/variantData
+	const shortDescFromAttributes = getShortDescription();
+	const longDescFromAttributes = getLongDescription();
+
+	const shortDescriptionValue =
+		shortDescFromAttributes || shortDescription || null;
 	const longDescription =
+		longDescFromAttributes ||
 		variantData?.description?.itemRemarks ||
 		variantData?.itemHeader?.extLongText?.[1]?.value_def ||
 		null;
@@ -93,21 +112,21 @@ export function ProductInfo({
 	// If no short description, use long description directly
 	// Otherwise, use show more/show less logic
 	const hasShortDescription =
-		shortDescription && shortDescription.trim() !== "";
+		shortDescriptionValue && shortDescriptionValue.trim() !== "";
 	const hasLongDescription = longDescription && longDescription.trim() !== "";
 	const shouldShowToggle =
 		hasShortDescription &&
 		hasLongDescription &&
-		shortDescription !== longDescription;
+		shortDescriptionValue !== longDescription;
 
 	const displayDescription = () => {
 		if (!hasShortDescription && hasLongDescription) {
 			return longDescription;
 		}
 		if (shouldShowToggle) {
-			return showFullDescription ? longDescription : shortDescription;
+			return showFullDescription ? longDescription : shortDescriptionValue;
 		}
-		return shortDescription || longDescription || "";
+		return shortDescriptionValue || longDescription || "";
 	};
 
 	const getSapNumber = () => {
@@ -454,11 +473,6 @@ export function ProductInfo({
 		}
 	};
 
-	const handleSeeAllVariants = () => {
-		const target = document.querySelector("#product-table-details");
-		target?.scrollIntoView({ behavior: "smooth" });
-	};
-
 	return (
 		<div>
 			<div className="flex items-center justify-between">
@@ -671,22 +685,6 @@ export function ProductInfo({
 				filteredAttributes.length > 0 ||
 				documentCount > 0) && (
 				<div className="mt-6 rounded-lg border border-gray-200 bg-white shadow-sm">
-					{/* See all variants button */}
-					{itemVariantCount && itemVariantCount > 0 && (
-						<div className="flex justify-end px-6 py-3">
-							<button
-								type="button"
-								onClick={handleSeeAllVariants}
-								className="text-sm font-medium text-green-600 hover:underline">
-								{itemVariantCount
-									? locale === "no"
-										? `Se alle ${itemVariantCount} varianter`
-										: `See all ${itemVariantCount} variants`
-									: t("seeAllVariants")}{" "}
-								→
-							</button>
-						</div>
-					)}
 					<Tabs
 						value={activeTab}
 						onValueChange={setActiveTab}
@@ -723,44 +721,30 @@ export function ProductInfo({
 								value="attributes"
 								className="mt-0">
 								<div className="p-6">
-									{showAllAttributes && allAttributes.length > 5 ? (
-										<div className="grid grid-cols-2 gap-x-8 gap-y-3">
-											{allAttributes.map((attr: any, index: number) => (
-												<div key={attr.attribute_identifier || index}>
-													<div className="grid grid-cols-2 gap-4 py-3">
-														<dt className="text-left text-sm font-medium text-gray-900">
-															{attr.name || attr.nameKeyLanguage || "-"}
-														</dt>
-														<dd className="text-right text-sm text-gray-500">
-															{attr.valueDef || attr.value_def || "-"}
-														</dd>
-													</div>
-													{index < allAttributes.length - 1 && (
-														<hr className="border-gray-200" />
-													)}
+									<div className="grid grid-cols-2 gap-x-8 gap-y-3">
+										{(showAllAttributes
+											? allAttributes
+											: allAttributes.slice(0, 10)
+										).map((attr: any, index: number) => (
+											<div key={attr.attribute_identifier || index}>
+												<div className="grid grid-cols-2 gap-4 py-3">
+													<dt className="text-left text-sm font-medium text-gray-900">
+														{attr.name || attr.nameKeyLanguage || "-"}
+													</dt>
+													<dd className="text-right text-sm text-gray-500">
+														{attr.valueDef || attr.value_def || "-"}
+													</dd>
 												</div>
-											))}
-										</div>
-									) : (
-										<div className="space-y-0">
-											{allAttributes.slice(0, 5).map((attr: any, index: number) => (
-												<div key={attr.attribute_identifier || index}>
-													<div className="grid grid-cols-2 gap-4 py-3">
-														<dt className="text-left text-sm font-medium text-gray-900">
-															{attr.name || attr.nameKeyLanguage || "-"}
-														</dt>
-														<dd className="text-right text-sm text-gray-500">
-															{attr.valueDef || attr.value_def || "-"}
-														</dd>
-													</div>
-													{index < allAttributes.slice(0, 5).length - 1 && (
-														<hr className="border-gray-200" />
-													)}
-												</div>
-											))}
-										</div>
-									)}
-									{allAttributes.length > 5 && (
+												{index <
+													(showAllAttributes
+														? allAttributes.length - 1
+														: Math.min(allAttributes.length, 10) - 1) && (
+													<hr className="border-gray-200" />
+												)}
+											</div>
+										))}
+									</div>
+									{allAttributes.length > 10 && (
 										<div className="mt-4 flex justify-center">
 											<button
 												type="button"
@@ -771,8 +755,8 @@ export function ProductInfo({
 														? "Vis mindre"
 														: "Show less"
 													: locale === "no"
-														? `Vis ${allAttributes.length - 5} flere`
-														: `Show ${allAttributes.length - 5} more`}
+														? `Vis ${allAttributes.length - 10} flere`
+														: `Show ${allAttributes.length - 10} more`}
 											</button>
 										</div>
 									)}
@@ -786,44 +770,30 @@ export function ProductInfo({
 								value="produktinfo"
 								className="mt-0">
 								<div className="p-6">
-									{showAllProductInfo && filteredAttributes.length > 5 ? (
-										<div className="grid grid-cols-2 gap-x-8 gap-y-3">
-											{filteredAttributes.map((attr: any, index: number) => (
-												<div key={attr.attribute_identifier || index}>
-													<div className="grid grid-cols-2 gap-4 py-3">
-														<dt className="text-left text-sm font-medium text-gray-900">
-															{attr.name || attr.nameKeyLanguage || "-"}
-														</dt>
-														<dd className="text-right text-sm text-gray-500">
-															{attr.valueDef || attr.value_def || "-"}
-														</dd>
-													</div>
-													{index < filteredAttributes.length - 1 && (
-														<hr className="border-gray-200" />
-													)}
+									<div className="grid grid-cols-2 gap-x-8 gap-y-3">
+										{(showAllProductInfo
+											? filteredAttributes
+											: filteredAttributes.slice(0, 10)
+										).map((attr: any, index: number) => (
+											<div key={attr.attribute_identifier || index}>
+												<div className="grid grid-cols-2 gap-4 py-3">
+													<dt className="text-left text-sm font-medium text-gray-900">
+														{attr.name || attr.nameKeyLanguage || "-"}
+													</dt>
+													<dd className="text-right text-sm text-gray-500">
+														{attr.valueDef || attr.value_def || "-"}
+													</dd>
 												</div>
-											))}
-										</div>
-									) : (
-										<div className="space-y-0">
-											{filteredAttributes.slice(0, 5).map((attr: any, index: number) => (
-												<div key={attr.attribute_identifier || index}>
-													<div className="grid grid-cols-2 gap-4 py-3">
-														<dt className="text-left text-sm font-medium text-gray-900">
-															{attr.name || attr.nameKeyLanguage || "-"}
-														</dt>
-														<dd className="text-right text-sm text-gray-500">
-															{attr.valueDef || attr.value_def || "-"}
-														</dd>
-													</div>
-													{index < filteredAttributes.slice(0, 5).length - 1 && (
-														<hr className="border-gray-200" />
-													)}
-												</div>
-											))}
-										</div>
-									)}
-									{filteredAttributes.length > 5 && (
+												{index <
+													(showAllProductInfo
+														? filteredAttributes.length - 1
+														: Math.min(filteredAttributes.length, 10) - 1) && (
+													<hr className="border-gray-200" />
+												)}
+											</div>
+										))}
+									</div>
+									{filteredAttributes.length > 10 && (
 										<div className="mt-4 flex justify-center">
 											<button
 												type="button"
@@ -834,8 +804,8 @@ export function ProductInfo({
 														? "Vis mindre"
 														: "Show less"
 													: locale === "no"
-														? `Vis ${filteredAttributes.length - 5} flere`
-														: `Show ${filteredAttributes.length - 5} more`}
+														? `Vis ${filteredAttributes.length - 10} flere`
+														: `Show ${filteredAttributes.length - 10} more`}
 											</button>
 										</div>
 									)}

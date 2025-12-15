@@ -11,14 +11,14 @@ export type ColumnKey =
 export const lockedCols: ColumnKey[] = ["itemNumber", "quantity", "cart"];
 
 export const columnLabels: Record<ColumnKey, string> = {
-	image: "Bilde",
-	itemNumber: "Varenummer",
+	image: "BILDE",
+	itemNumber: "VARENUMMER",
 	unspsc: "UNSPSC",
-	contentUnit: "Enhet",
-	price: "Pris",
-	quantity: "Antall",
-	warehouse: "Lager",
-	cart: "Handlekurv",
+	contentUnit: "ENHET",
+	price: "PRIS",
+	quantity: "ANTALL",
+	warehouse: "TILGJENGELIGHET",
+	cart: "HANDLEKURV",
 };
 
 export const dropdownOrder: ColumnKey[] = [

@@ -204,7 +204,6 @@ export function ProductPageClient({
 						columnAttributes={columnAttributes ?? undefined}
 						selectedWarehouse={selectedWarehouse[selectedItemNumber || ""]}
 						onWarehouseChange={handleWarehouseChange}
-						itemVariantCount={productData.itemVariantCount}
 					/>
 
 					{/*<ProductVariantInfo*/}

@@ -37,6 +37,7 @@ interface ColumnAttributeItem {
 
 interface ColumnAttributeResponse {
 	productAttributes?: any; // Product-level attributes from first object
+	productData?: any; // Full product-level object with shortDesc, longDesc, etc.
 	[itemNumber: string]:
 		| {
 				productNumber: string;
@@ -81,9 +82,11 @@ export function useGetColumnAttributes(variantNumber?: string) {
 				const transformedData: ColumnAttributeResponse = {};
 
 				response.data.forEach((item) => {
-					// First object without itemNumber contains product-level attributes
+					// First object without itemNumber contains product-level data
 					if (!item.itemNumber) {
 						transformedData.productAttributes = item.attributes || [];
+						// Store the full product-level object for access to shortDesc, longDesc, etc.
+						transformedData.productData = item as any;
 					} else {
 						transformedData[item.itemNumber] = {
 							productNumber: item.productNumber,
