@@ -136,7 +136,6 @@ export function ProductGrid({
 		}
 	}, [isLoading]);
 
-
 	useEffect(() => {
 		const target = observerTarget.current;
 		if (!target) return;
@@ -163,7 +162,12 @@ export function ProductGrid({
 
 						// Small delay to prevent interrupting scroll momentum
 						loadMoreTimeoutRef.current = setTimeout(() => {
-							if (isLoadingMoreRef.current || !hasMore || isLoading || isFetchingNextPage) {
+							if (
+								isLoadingMoreRef.current ||
+								!hasMore ||
+								isLoading ||
+								isFetchingNextPage
+							) {
 								if (loadMoreTimeoutRef.current) {
 									loadMoreTimeoutRef.current = null;
 								}
@@ -171,11 +175,10 @@ export function ProductGrid({
 							}
 							isLoadingMoreRef.current = true;
 
-							loadMore()
-								.finally(() => {
-									isLoadingMoreRef.current = false;
-									loadMoreTimeoutRef.current = null;
-								});
+							loadMore().finally(() => {
+								isLoadingMoreRef.current = false;
+								loadMoreTimeoutRef.current = null;
+							});
 						}, 100);
 					});
 				}
@@ -183,7 +186,7 @@ export function ProductGrid({
 			{
 				rootMargin: "300px", // Start loading well before reaching the bottom
 				threshold: 0.1,
-			}
+			},
 		);
 
 		observer.observe(target);
@@ -407,8 +410,10 @@ export function ProductGrid({
 					) : products.length > 0 ? (
 						products.map((product, idx) => {
 							const { attributes } = product as any;
-							const attribute1 = product.attribute1 || attributes?.attribute1;
-							const attribute2 = product.attribute2 || attributes?.attribute2;
+							const searchAttribute1 =
+								product.searchAttribute1 || attributes?.searchAttribute1;
+							const searchAttribute2 =
+								product.searchAttribute2 || attributes?.searchAttribute2;
 							const productPrice = productPrices[product.productNumber];
 							// Show loading skeleton if we're fetching and don't have the price yet
 							const isPriceLoading =
@@ -427,8 +432,8 @@ export function ProductGrid({
 									className="h-full">
 									<ProductCard
 										{...product}
-										attribute1={attribute1}
-										attribute2={attribute2}
+										searchAttribute1={searchAttribute1}
+										searchAttribute2={searchAttribute2}
 										price={productPrice}
 										isPriceLoading={isPriceLoading}
 										variant={variant}

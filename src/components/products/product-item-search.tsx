@@ -171,7 +171,7 @@ export function ProductItem({
 								</span>
 							</Link>
 							<div className="flex max-w-xs flex-col gap-2">
-								{["attribute1", "attribute2"].map((k) => (
+								{["searchAttribute1", "searchAttribute2"].map((k) => (
 									<div
 										key={k}
 										className="flex h-6 items-center rounded-sm bg-white text-[12px] text-gray-800">

@@ -24,8 +24,8 @@ export function ProductCard({
 	mediaM,
 	shortDesc,
 	price,
-	attribute1,
-	attribute2,
+	searchAttribute1,
+	searchAttribute2,
 	className,
 	aspectRatio = "square",
 	variant = "default",
@@ -88,16 +88,16 @@ export function ProductCard({
 						{shortDesc}
 					</p>
 				)}
-				{(attribute1 || attribute2) && (
+				{(searchAttribute1 || searchAttribute2) && (
 					<div className="mt-2 flex flex-shrink-0 flex-wrap gap-2">
-						{attribute1 && (
+						{searchAttribute1 && (
 							<span className="inline-flex items-center rounded-md border border-gray-300 bg-gray-50 px-2.5 py-0.5 text-xs text-gray-500">
-								{attribute1}
+								{searchAttribute1}
 							</span>
 						)}
-						{attribute2 && (
+						{searchAttribute2 && (
 							<span className="inline-flex items-center rounded-md border border-gray-300 bg-gray-50 px-2.5 py-0.5 text-xs text-gray-500">
-								{attribute2}
+								{searchAttribute2}
 							</span>
 						)}
 					</div>

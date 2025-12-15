@@ -182,7 +182,9 @@ export function ProductPageClient({
 						price={productData.price}
 						productNumber={productData.productNumber}
 						pdfUrl={productData.pdfUrl}
-						gtin={selectedVariant?.gtin ?? "-"}
+						gtin={
+							selectedVariant?.gtin ?? variantData?.itemHeader?.GTIN ?? null
+						}
 						imageUrl={
 							productImages?.[0]?.url ||
 							productImages?.[0]?.thumbnail_url ||
@@ -199,22 +201,24 @@ export function ProductPageClient({
 						shortDescription={
 							variantData?.itemHeader?.extShortText?.[1]?.value_def
 						}
-					/>
-
-					<Separator className="mt-3" />
-
-					<ProductVariantInfo
-						locale={locale}
-						variants={productData.items}
-						selectedItemNumber={selectedItemNumber}
-						onSelectVariant={setSelectedItemNumber}
-						variantData={variantData}
-						isLoading={isLoadingVariant}
-						productNumber={productData.productNumber}
-						itemVariantCount={productData.itemVariantCount}
-						selectedWarehouse={selectedWarehouse[selectedItemNumber || ""]}
 						columnAttributes={columnAttributes ?? undefined}
+						selectedWarehouse={selectedWarehouse[selectedItemNumber || ""]}
+						onWarehouseChange={handleWarehouseChange}
+						itemVariantCount={productData.itemVariantCount}
 					/>
+
+					{/*<ProductVariantInfo*/}
+					{/*	locale={locale}*/}
+					{/*	variants={productData.items}*/}
+					{/*	selectedItemNumber={selectedItemNumber}*/}
+					{/*	onSelectVariant={setSelectedItemNumber}*/}
+					{/*	variantData={variantData}*/}
+					{/*	isLoading={isLoadingVariant}*/}
+					{/*	productNumber={productData.productNumber}*/}
+					{/*	itemVariantCount={productData.itemVariantCount}*/}
+					{/*	selectedWarehouse={selectedWarehouse[selectedItemNumber || ""]}*/}
+					{/*	columnAttributes={columnAttributes ?? undefined}*/}
+					{/*/>*/}
 				</div>
 			</div>
 
