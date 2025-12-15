@@ -79,6 +79,8 @@ export function ProductInfo({
 	const [loadingPrice, setLoadingPrice] = useState(false);
 	const [adding, setAdding] = useState(false);
 	const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+	const [showAllAttributes, setShowAllAttributes] = useState(false);
+	const [showAllProductInfo, setShowAllProductInfo] = useState(false);
 
 	const isSapCustomer = profile?.defaultCustomerNumber === SAP_CUSTOMER;
 
@@ -726,21 +728,45 @@ export function ProductInfo({
 								value="attributes"
 								className="mt-0">
 								<div className="space-y-0 p-6">
-									{allAttributes.map((attr: any, index: number) => (
-										<div key={attr.attribute_identifier || index}>
-											<div className="grid grid-cols-2 gap-4 py-3">
-												<dt className="text-left text-sm font-medium text-gray-900">
-													{attr.name || attr.name_key_language}
-												</dt>
-												<dd className="text-right text-sm text-gray-500">
-													{attr.value_def || attr.valueDef || "-"}
-												</dd>
+									{(showAllAttributes
+										? allAttributes
+										: allAttributes.slice(0, 5)
+									).map((attr: any, index: number) => {
+										const displayedItems = showAllAttributes
+											? allAttributes
+											: allAttributes.slice(0, 5);
+										return (
+											<div key={attr.attribute_identifier || index}>
+												<div className="grid grid-cols-2 gap-4 py-3">
+													<dt className="text-left text-sm font-medium text-gray-900">
+														{attr.name || attr.name_key_language}
+													</dt>
+													<dd className="text-right text-sm text-gray-500">
+														{attr.value_def || attr.valueDef || "-"}
+													</dd>
+												</div>
+												{index < displayedItems.length - 1 && (
+													<hr className="border-gray-200" />
+												)}
 											</div>
-											{index < allAttributes.length - 1 && (
-												<hr className="border-gray-200" />
-											)}
+										);
+									})}
+									{allAttributes.length > 5 && (
+										<div className="mt-4 flex justify-center">
+											<button
+												type="button"
+												onClick={() => setShowAllAttributes(!showAllAttributes)}
+												className="text-sm font-medium text-green-600 hover:underline">
+												{showAllAttributes
+													? locale === "no"
+														? "Vis mindre"
+														: "Show less"
+													: locale === "no"
+														? `Vis ${allAttributes.length - 5} flere`
+														: `Show ${allAttributes.length - 5} more`}
+											</button>
 										</div>
-									))}
+									)}
 								</div>
 							</TabsContent>
 						)}
@@ -751,21 +777,45 @@ export function ProductInfo({
 								value="produktinfo"
 								className="mt-0">
 								<div className="space-y-0 p-6">
-									{filteredAttributes.map((attr: any, index: number) => (
-										<div key={attr.attribute_identifier || index}>
-											<div className="grid grid-cols-2 gap-4 py-3">
-												<dt className="text-left text-sm font-medium text-gray-900">
-													{attr.name || attr.name_key_language}
-												</dt>
-												<dd className="text-right text-sm text-gray-500">
-													{attr.value_def || "-"}
-												</dd>
+									{(showAllProductInfo
+										? filteredAttributes
+										: filteredAttributes.slice(0, 5)
+									).map((attr: any, index: number) => {
+										const displayedItems = showAllProductInfo
+											? filteredAttributes
+											: filteredAttributes.slice(0, 5);
+										return (
+											<div key={attr.attribute_identifier || index}>
+												<div className="grid grid-cols-2 gap-4 py-3">
+													<dt className="text-left text-sm font-medium text-gray-900">
+														{attr.name || attr.name_key_language}
+													</dt>
+													<dd className="text-right text-sm text-gray-500">
+														{attr.value_def || "-"}
+													</dd>
+												</div>
+												{index < displayedItems.length - 1 && (
+													<hr className="border-gray-200" />
+												)}
 											</div>
-											{index < filteredAttributes.length - 1 && (
-												<hr className="border-gray-200" />
-											)}
+										);
+									})}
+									{filteredAttributes.length > 5 && (
+										<div className="mt-4 flex justify-center">
+											<button
+												type="button"
+												onClick={() => setShowAllProductInfo(!showAllProductInfo)}
+												className="text-sm font-medium text-green-600 hover:underline">
+												{showAllProductInfo
+													? locale === "no"
+														? "Vis mindre"
+														: "Show less"
+													: locale === "no"
+														? `Vis ${filteredAttributes.length - 5} flere`
+														: `Show ${filteredAttributes.length - 5} more`}
+											</button>
 										</div>
-									))}
+									)}
 								</div>
 							</TabsContent>
 						)}
