@@ -36,27 +36,30 @@ interface ColumnAttributeItem {
 }
 
 interface ColumnAttributeResponse {
-	[itemNumber: string]: {
-		productNumber: string;
-		itemNumber: string;
-		itemName?: string;
-		itemCount?: number | string;
-		inventory?: {
-			warehouseId: number;
-			warehouseNumber?: string;
-			warehouseName: string;
-			companyId: number;
-			companyNumber?: number;
-			balance: number;
-		}[];
-		attributes: Attribute[];
-		mediaId?: Array<{
-			url: string;
-			filename: string;
-			picture_type: string;
-			thumbnail_url: string;
-		}>;
-	};
+	productAttributes?: any; // Product-level attributes from first object
+	[itemNumber: string]:
+		| {
+				productNumber: string;
+				itemNumber: string;
+				itemName?: string;
+				itemCount?: number | string;
+				inventory?: {
+					warehouseId: number;
+					warehouseNumber?: string;
+					warehouseName: string;
+					companyId: number;
+					companyNumber?: number;
+					balance: number;
+				}[];
+				attributes: Attribute[];
+				mediaId?: Array<{
+					url: string;
+					filename: string;
+					picture_type: string;
+					thumbnail_url: string;
+				}>;
+		  }
+		| Attribute[];
 }
 
 export function useGetColumnAttributes(variantNumber?: string) {
@@ -78,22 +81,27 @@ export function useGetColumnAttributes(variantNumber?: string) {
 				const transformedData: ColumnAttributeResponse = {};
 
 				response.data.forEach((item) => {
-					transformedData[item.itemNumber] = {
-						productNumber: item.productNumber,
-						itemNumber: item.itemNumber,
-						itemName: item.itemName,
-						itemCount: item.itemCount,
-						inventory: item.inventory?.map((inv) => ({
-							warehouseId: inv.wareHouseId,
-							warehouseNumber: inv.wareHouseNumber,
-							warehouseName: inv.wareHouseName,
-							companyId: inv.companyId,
-							companyNumber: inv.companyNumber,
-							balance: inv.balance,
-						})),
-						attributes: item.attributes,
-						mediaId: item.mediaId,
-					};
+					// First object without itemNumber contains product-level attributes
+					if (!item.itemNumber) {
+						transformedData.productAttributes = item.attributes || [];
+					} else {
+						transformedData[item.itemNumber] = {
+							productNumber: item.productNumber,
+							itemNumber: item.itemNumber,
+							itemName: item.itemName,
+							itemCount: item.itemCount,
+							inventory: item.inventory?.map((inv) => ({
+								warehouseId: inv.wareHouseId,
+								warehouseNumber: inv.wareHouseNumber,
+								warehouseName: inv.wareHouseName,
+								companyId: inv.companyId,
+								companyNumber: inv.companyNumber,
+								balance: inv.balance,
+							})),
+							attributes: item.attributes,
+							mediaId: item.mediaId,
+						};
+					}
 				});
 
 				setData(transformedData);

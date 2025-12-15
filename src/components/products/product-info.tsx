@@ -361,25 +361,20 @@ export function ProductInfo({
 		}
 	};
 
-	// Get all attributes (variant-specific + general)
-	const variantAttributes =
-		variantData?.itemTechnicalSpec?.itemAttributes?.filter((attr: any) =>
+	// Get attributes from columnAttributes for Variantinfo tab
+	// Item-specific attributes for Variantinfo tab
+	const allAttributes = useMemo(() => {
+		if (!selectedItemNumber || !columnAttributes) return [];
+		
+		const attrs = columnAttributes[selectedItemNumber]?.attributes || [];
+		return attrs.filter((attr: any) =>
 			locale === "no"
 				? attr.language === "Norwegian"
 				: attr.language === "English",
-		) ?? [];
+		);
+	}, [selectedItemNumber, columnAttributes, locale]);
 
-	const generalAttributes =
-		variantData?.description?.productAttributes?.filter((attr: any) =>
-			locale === "no"
-				? attr.language === "Norwegian"
-				: attr.language === "English",
-		) ?? [];
-
-	// Combine all attributes
-	const allAttributes = [...variantAttributes, ...generalAttributes];
-
-	// Get specifications (filtered attributes) - same as in product-table-details
+	// Get specifications (filtered attributes) from itemCard for Produktinfo tab - same as before
 	const filteredAttributes =
 		variantData?.description?.productAttributes?.filter((attr: any) =>
 			locale === "no"
@@ -727,30 +722,44 @@ export function ProductInfo({
 							<TabsContent
 								value="attributes"
 								className="mt-0">
-								<div className="space-y-0 p-6">
-									{(showAllAttributes
-										? allAttributes
-										: allAttributes.slice(0, 5)
-									).map((attr: any, index: number) => {
-										const displayedItems = showAllAttributes
-											? allAttributes
-											: allAttributes.slice(0, 5);
-										return (
-											<div key={attr.attribute_identifier || index}>
-												<div className="grid grid-cols-2 gap-4 py-3">
-													<dt className="text-left text-sm font-medium text-gray-900">
-														{attr.name || attr.name_key_language}
-													</dt>
-													<dd className="text-right text-sm text-gray-500">
-														{attr.value_def || attr.valueDef || "-"}
-													</dd>
+								<div className="p-6">
+									{showAllAttributes && allAttributes.length > 5 ? (
+										<div className="grid grid-cols-2 gap-x-8 gap-y-3">
+											{allAttributes.map((attr: any, index: number) => (
+												<div key={attr.attribute_identifier || index}>
+													<div className="grid grid-cols-2 gap-4 py-3">
+														<dt className="text-left text-sm font-medium text-gray-900">
+															{attr.name || attr.nameKeyLanguage || "-"}
+														</dt>
+														<dd className="text-right text-sm text-gray-500">
+															{attr.valueDef || attr.value_def || "-"}
+														</dd>
+													</div>
+													{index < allAttributes.length - 1 && (
+														<hr className="border-gray-200" />
+													)}
 												</div>
-												{index < displayedItems.length - 1 && (
-													<hr className="border-gray-200" />
-												)}
-											</div>
-										);
-									})}
+											))}
+										</div>
+									) : (
+										<div className="space-y-0">
+											{allAttributes.slice(0, 5).map((attr: any, index: number) => (
+												<div key={attr.attribute_identifier || index}>
+													<div className="grid grid-cols-2 gap-4 py-3">
+														<dt className="text-left text-sm font-medium text-gray-900">
+															{attr.name || attr.nameKeyLanguage || "-"}
+														</dt>
+														<dd className="text-right text-sm text-gray-500">
+															{attr.valueDef || attr.value_def || "-"}
+														</dd>
+													</div>
+													{index < allAttributes.slice(0, 5).length - 1 && (
+														<hr className="border-gray-200" />
+													)}
+												</div>
+											))}
+										</div>
+									)}
 									{allAttributes.length > 5 && (
 										<div className="mt-4 flex justify-center">
 											<button
@@ -776,30 +785,44 @@ export function ProductInfo({
 							<TabsContent
 								value="produktinfo"
 								className="mt-0">
-								<div className="space-y-0 p-6">
-									{(showAllProductInfo
-										? filteredAttributes
-										: filteredAttributes.slice(0, 5)
-									).map((attr: any, index: number) => {
-										const displayedItems = showAllProductInfo
-											? filteredAttributes
-											: filteredAttributes.slice(0, 5);
-										return (
-											<div key={attr.attribute_identifier || index}>
-												<div className="grid grid-cols-2 gap-4 py-3">
-													<dt className="text-left text-sm font-medium text-gray-900">
-														{attr.name || attr.name_key_language}
-													</dt>
-													<dd className="text-right text-sm text-gray-500">
-														{attr.value_def || "-"}
-													</dd>
+								<div className="p-6">
+									{showAllProductInfo && filteredAttributes.length > 5 ? (
+										<div className="grid grid-cols-2 gap-x-8 gap-y-3">
+											{filteredAttributes.map((attr: any, index: number) => (
+												<div key={attr.attribute_identifier || index}>
+													<div className="grid grid-cols-2 gap-4 py-3">
+														<dt className="text-left text-sm font-medium text-gray-900">
+															{attr.name || attr.nameKeyLanguage || "-"}
+														</dt>
+														<dd className="text-right text-sm text-gray-500">
+															{attr.valueDef || attr.value_def || "-"}
+														</dd>
+													</div>
+													{index < filteredAttributes.length - 1 && (
+														<hr className="border-gray-200" />
+													)}
 												</div>
-												{index < displayedItems.length - 1 && (
-													<hr className="border-gray-200" />
-												)}
-											</div>
-										);
-									})}
+											))}
+										</div>
+									) : (
+										<div className="space-y-0">
+											{filteredAttributes.slice(0, 5).map((attr: any, index: number) => (
+												<div key={attr.attribute_identifier || index}>
+													<div className="grid grid-cols-2 gap-4 py-3">
+														<dt className="text-left text-sm font-medium text-gray-900">
+															{attr.name || attr.nameKeyLanguage || "-"}
+														</dt>
+														<dd className="text-right text-sm text-gray-500">
+															{attr.valueDef || attr.value_def || "-"}
+														</dd>
+													</div>
+													{index < filteredAttributes.slice(0, 5).length - 1 && (
+														<hr className="border-gray-200" />
+													)}
+												</div>
+											))}
+										</div>
+									)}
 									{filteredAttributes.length > 5 && (
 										<div className="mt-4 flex justify-center">
 											<button
