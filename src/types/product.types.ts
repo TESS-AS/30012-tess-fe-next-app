@@ -6,8 +6,8 @@ export interface IProduct {
 	productNumber: string;
 	shortDesc?: string;
 	price?: number;
-	attribute1?: string | null;
-	attribute2?: string | null;
+	searchAttribute1?: string | null;
+	searchAttribute2?: string | null;
 }
 
 export interface IVariation {

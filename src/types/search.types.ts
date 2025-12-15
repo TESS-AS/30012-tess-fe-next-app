@@ -5,16 +5,16 @@ export interface IProductSearch {
 	productName: string;
 	productNumber: string;
 	thumbnail: string;
-	attribute1?: string | null;
-	attribute2?: string | null;
+	searchAttribute1?: string | null;
+	searchAttribute2?: string | null;
 	redirect?: string;
 	itemNumberMatch?: boolean;
 	sapNumberMatch?: boolean;
 }
 
 export interface ProductAttributes {
-	attribute1?: string | null;
-	attribute2?: string | null;
+	searchAttribute1?: string | null;
+	searchAttribute2?: string | null;
 	[k: string]: string | number | boolean | null | undefined;
 }
 
