@@ -725,6 +725,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 						<CategoryNavigationMenu
 							categories={categories ?? []}
 							loading={loading}
+							selectedAssortment={selectedAssortment}
 						/>
 					</div>
 				</div>
