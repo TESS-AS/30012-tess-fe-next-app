@@ -12,6 +12,8 @@ import {
 	NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useGetAssortments } from "@/hooks/useGetAssortments";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { cn } from "@/lib/utils";
 import { useNavMenuStore } from "@/stores/useNavMenuStore";
 import type { Category } from "@/types/categories.types";
@@ -22,14 +24,35 @@ import { useTranslations } from "next-intl";
 export default function CategoryNavigationMenu({
 	categories,
 	loading,
+	selectedAssortment,
 }: {
 	categories: Category[];
 	loading: boolean;
+	selectedAssortment?: string;
 }) {
 	const t = useTranslations();
 	const [query, setQuery] = useState("");
 	const [openMenu, setOpenMenu] = useState<any>(false);
 	const { setIsOpen } = useNavMenuStore();
+	const { data: profile } = useGetProfileData();
+	const { assortments } = useGetAssortments(!!profile);
+
+	// Check if current assortment is "Bane NOR Katalog"
+	// Use selectedAssortment prop if available (for immediate updates), otherwise fall back to profile
+	const isBaneNorKatalog = React.useMemo(() => {
+		if (!assortments.length) return false;
+		const assortmentNumber =
+			selectedAssortment || profile?.defaultAssortmentNumber;
+		if (!assortmentNumber) return false;
+		const currentAssortment = assortments.find(
+			(a: any) => a.assortmentnumber === assortmentNumber,
+		);
+		return (
+			currentAssortment?.nameNo === "Bane NOR Katalog" ||
+			currentAssortment?.nameEn === "Bane NOR Katalog" ||
+			currentAssortment?.assortmentname === "Bane NOR Katalog"
+		);
+	}, [selectedAssortment, profile, assortments]);
 
 	return (
 		<NavigationMenu
@@ -103,14 +126,16 @@ export default function CategoryNavigationMenu({
 																		</li>
 																	))}
 
-																	<li>
-																		<Link
-																			onClick={() => setOpenMenu(false)}
-																			href={`/${category.slug}/${subcategory.slug}`}
-																			className="text-md border-b-1 border-[#009640] pb-[1px] font-medium text-[#009640] hover:text-[#009640]">
-																			{`Alle ${subcategory.name}`}
-																		</Link>
-																	</li>
+																	{!isBaneNorKatalog && (
+																		<li>
+																			<Link
+																				onClick={() => setOpenMenu(false)}
+																				href={`/${category.slug}/${subcategory.slug}`}
+																				className="text-md border-b-1 border-[#009640] pb-[1px] font-medium text-[#009640] hover:text-[#009640]">
+																				{`Alle ${subcategory.name}`}
+																			</Link>
+																		</li>
+																	)}
 																</ul>
 															)}
 													</li>

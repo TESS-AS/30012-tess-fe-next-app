@@ -248,6 +248,38 @@ export const Filter = React.forwardRef<
 			loadingInitiatedRef.current.clear();
 		}, [query]);
 
+		// Initialize top 3 filters to be open by default
+		React.useEffect(() => {
+			if (filters && filters.length > 0 && openAccordions.length === 0) {
+				// Get all filters from all categories
+				const allFilters = filters.flatMap((category) => category.filters);
+				// Take the first 3 filter keys
+				const topThreeFilterKeys = allFilters
+					.slice(0, 3)
+					.map((filter) => filter.key);
+				if (topThreeFilterKeys.length > 0) {
+					setOpenAccordions(topThreeFilterKeys);
+					// Pre-load children for the top 3 filters
+					const filterArray: FilterValues[] = Object.entries(localSelectedFilters)
+						.filter(([key, values]) => key !== "category" && values.length > 0)
+						.map(([key, values]) => ({ key, values }));
+					topThreeFilterKeys.forEach((key) => {
+						if (!loadedChildren[key] && !loadingInitiatedRef.current.has(key)) {
+							loadingInitiatedRef.current.add(key);
+							loadChildrenForFilter(
+								key,
+								selectedCategory || categoryNumber,
+								filterArray,
+							).finally(() => {
+								loadingInitiatedRef.current.delete(key);
+							});
+						}
+					});
+				}
+			}
+			// eslint-disable-next-line react-hooks/exhaustive-deps
+		}, [filters]);
+
 		// Pre-load children for all filters when filters are received to check if they have 0 children
 		React.useEffect(() => {
 			if (!filters || filters.length === 0) return;
