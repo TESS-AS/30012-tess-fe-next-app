@@ -1,6 +1,7 @@
 import { CreateNewUserAddress } from "@/types/address";
 import {
 	EditableUser,
+	SearchAdminEditResponse,
 	UpdateUserRelationsPayload,
 	UpdateUserRelationsResponse,
 	UserDomainConfig,
@@ -111,6 +112,21 @@ export async function createNewUserAddress(
 		return response.data;
 	} catch (error) {
 		console.error("Error creating new user address:", error);
+		throw error;
+	}
+}
+
+export async function searchAdminEdit(
+	type: string,
+	searchTerm: string,
+): Promise<SearchAdminEditResponse> {
+	try {
+		const response = await axiosInstance.get(
+			`/userAdmin/searchAdminEdit/${type}?searchTerm=${searchTerm}`,
+		);
+		return response.data;
+	} catch (error) {
+		console.error("Error searching editable users:", error);
 		throw error;
 	}
 }

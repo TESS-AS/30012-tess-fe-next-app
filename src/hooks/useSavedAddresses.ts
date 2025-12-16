@@ -10,7 +10,7 @@ export const useSavedAddresses = () => {
 	const { data: profile } = useGetProfileData();
 	const { data: personalAddresses } = useGetUserAdresses();
 	const { data: businessAddresses } = useGetBusinessAddresses(
-		profile?.customerNumbers?.[0],
+		profile?.defaultCustomerNumber,
 		true,
 	);
 	const { data: orgAddresses } = useGetOrganizationAddresses("980386996");

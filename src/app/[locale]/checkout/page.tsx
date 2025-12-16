@@ -39,6 +39,7 @@ export default function CheckoutPage() {
 	const {
 		cartItems,
 		unitPrices,
+		calculatedPrices,
 		handleArchiveCart,
 		updatedAddress,
 		setUpdatedAddress,
@@ -73,7 +74,7 @@ export default function CheckoutPage() {
 			cartKit: cartItems?.cartKit as CartKitItem[],
 		},
 		profile,
-		unitPrices,
+		unitPrices, //unitPrices or calculatedPrices
 	);
 	const submitOrder = useSubmitOrder(
 		profile?.punchout || false,
@@ -115,7 +116,7 @@ export default function CheckoutPage() {
 					<StepContactDelivery
 						contactPerson={contactPerson}
 						handleContactPersonSave={handleContactPersonSave}
-						selectedAddress={selectedAddress || updatedAddress}
+						selectedAddress={updatedAddress || selectedAddress}
 						showWarning={showWarning}
 						setShowWarning={setShowWarning}
 						onSave={setUpdatedAddress}
@@ -136,7 +137,7 @@ export default function CheckoutPage() {
 				return (
 					<StepConfirmation
 						contactPerson={contactPerson}
-						selectedAddress={selectedAddress || updatedAddress}
+						selectedAddress={updatedAddress || selectedAddress}
 						orderData={orderData}
 						modals={modals}
 						paymentMethod={paymentMethod}

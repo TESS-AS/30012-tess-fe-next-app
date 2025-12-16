@@ -92,7 +92,7 @@ const CartPage = () => {
 			cartKit: cartItems?.cartKit as CartKitItem[],
 		},
 		profile,
-		unitPrices,
+		calculatedPrices,
 	);
 
 	const submitOrder = useSubmitOrder(
