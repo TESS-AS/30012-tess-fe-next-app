@@ -44,7 +44,7 @@ const POSTAL_CODE_REGEX = /^\d{4}$/;
 
 export const AddressCard: React.FC<AddressCardProps> = ({
 	name,
-	label = "Hjemmeadresse",
+	label = "",
 	street,
 	postalCode,
 	city,
@@ -170,11 +170,8 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 						<div>
 							<Label>{t("savedAddresses")}</Label>
 							<AddressSelector
-								savedAddresses={savedAddresses.filter(
-									(address) => address.name !== "x",
-								)}
+								savedAddresses={savedAddresses}
 								onAddressSelect={(selectedAddress) => {
-									console.log(selectedAddress, "selectedAddress");
 									setFormData((prev) => ({
 										...prev,
 										addressName: selectedAddress.name,

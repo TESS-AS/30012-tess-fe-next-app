@@ -172,3 +172,14 @@ export interface UpdateUserRelationsResponse {
 		];
 	};
 }
+
+export interface SearchAdminEditResponse {
+	success: boolean;
+	result: [
+		{
+			companyId: number;
+			companyNumber: number;
+			companyName: string;
+		},
+	];
+}

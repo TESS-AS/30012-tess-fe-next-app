@@ -18,7 +18,7 @@ export default function StepContactDelivery({
 			/>
 			<AddressCard
 				{...selectedAddress}
-				label="Leveringsadresse"
+				label=""
 				isUserAddress={false}
 				onSave={onSave}
 			/>
