@@ -82,32 +82,42 @@ export function ProductInfo({
 
 	const isSapCustomer = profile?.defaultCustomerNumber === SAP_CUSTOMER;
 
-	// Get short and long description from columnAttributes
+	// Get short and long description from columnAttributes productData
 	const getShortDescription = () => {
-		if (!columnAttributes?.productData) return null;
-		return locale === "no"
-			? columnAttributes.productData.shortDescNo
-			: columnAttributes.productData.shortDescEn;
+		if (!columnAttributes?.productData) return undefined;
+		const desc =
+			locale === "no"
+				? columnAttributes.productData.shortDescNo
+				: columnAttributes.productData.shortDescEn;
+		// Return undefined if field doesn't exist, otherwise return the value (even if empty string)
+		return desc !== undefined ? desc : undefined;
 	};
 
 	const getLongDescription = () => {
-		if (!columnAttributes?.productData) return null;
-		return locale === "no"
-			? columnAttributes.productData.longDescNo
-			: columnAttributes.productData.longDescEn;
+		if (!columnAttributes?.productData) return undefined;
+		const desc =
+			locale === "no"
+				? columnAttributes.productData.longDescNo
+				: columnAttributes.productData.longDescEn;
+		// Return undefined if field doesn't exist, otherwise return the value (even if empty string)
+		return desc !== undefined ? desc : undefined;
 	};
 
-	// Use columnAttributes first, fallback to props/variantData
+	// Use columnAttributes productData first, fallback to props/variantData only if productData not available
 	const shortDescFromAttributes = getShortDescription();
 	const longDescFromAttributes = getLongDescription();
 
+	// Use productData descriptions if available (empty string = no description, undefined = fallback)
 	const shortDescriptionValue =
-		shortDescFromAttributes || shortDescription || null;
+		shortDescFromAttributes !== undefined
+			? shortDescFromAttributes || null
+			: shortDescription || null;
 	const longDescription =
-		longDescFromAttributes ||
-		variantData?.description?.itemRemarks ||
-		variantData?.itemHeader?.extLongText?.[1]?.value_def ||
-		null;
+		longDescFromAttributes !== undefined
+			? longDescFromAttributes || null
+			: variantData?.description?.itemRemarks ||
+				variantData?.itemHeader?.extLongText?.[1]?.value_def ||
+				null;
 
 	// If no short description, use long description directly
 	// Otherwise, use show more/show less logic
@@ -384,7 +394,7 @@ export function ProductInfo({
 	// Item-specific attributes for Variantinfo tab
 	const allAttributes = useMemo(() => {
 		if (!selectedItemNumber || !columnAttributes) return [];
-		
+
 		const attrs = columnAttributes[selectedItemNumber]?.attributes || [];
 		return attrs.filter((attr: any) =>
 			locale === "no"
@@ -393,13 +403,15 @@ export function ProductInfo({
 		);
 	}, [selectedItemNumber, columnAttributes, locale]);
 
-	// Get specifications (filtered attributes) from itemCard for Produktinfo tab - same as before
-	const filteredAttributes =
-		variantData?.description?.productAttributes?.filter((attr: any) =>
+	// Get specifications (filtered attributes) from columnAttributes productData for Produktinfo tab
+	const filteredAttributes = useMemo(() => {
+		if (!columnAttributes?.productData?.attributes) return [];
+		return columnAttributes.productData.attributes.filter((attr: any) =>
 			locale === "no"
 				? attr.language === "Norwegian"
 				: attr.language === "English",
-		) ?? [];
+		);
+	}, [columnAttributes?.productData?.attributes, locale]);
 
 	// Count documents
 	const documentCount = 1 + (isSapCustomer && ecoonlineUrl ? 1 : 0);
@@ -797,7 +809,9 @@ export function ProductInfo({
 										<div className="mt-4 flex justify-center">
 											<button
 												type="button"
-												onClick={() => setShowAllProductInfo(!showAllProductInfo)}
+												onClick={() =>
+													setShowAllProductInfo(!showAllProductInfo)
+												}
 												className="text-sm font-medium text-green-600 hover:underline">
 												{showAllProductInfo
 													? locale === "no"
