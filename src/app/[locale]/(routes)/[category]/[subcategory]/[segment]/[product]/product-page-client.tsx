@@ -126,7 +126,7 @@ export function ProductPageClient({
 
 	const getProductImages = () => {
 		if (variantData?.itemHeader?.itemImage) {
-			const itemImage = variantData.itemHeader.itemImage;
+			const {itemImage} = variantData.itemHeader;
 
 			if (Array.isArray(itemImage)) {
 				return itemImage.length > 0 ? itemImage : [];

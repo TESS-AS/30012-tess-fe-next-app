@@ -9,35 +9,81 @@ interface Attribute {
 	dataType: string;
 	valueDef: string;
 	valueMax?: string;
+	nameKeyLanguage?: string;
 	contentUnit?: string;
 	unspsc?: string;
+	valueVector?: string;
 }
 
-interface ColumnAttributeItem {
-	productNumber: string;
-	itemNumber: string;
-	itemName?: string;
+interface InventoryItem {
+	wareHouseId: number;
+	wareHouseNumber: string;
+	wareHouseName: string;
+	companyId: number;
+	companyNumber: number;
+	balance: number;
+}
+
+interface MediaItem {
+	url: string;
+	filename: string;
+	picture_type: string;
+	thumbnail_url: string;
+}
+
+interface VariantItemData {
+	itemName: string;
+	SDS?: string;
+	GTIN?: string | null;
 	itemCount?: number | string;
-	inventory?: {
-		wareHouseId: number;
-		wareHouseNumber: string;
-		wareHouseName: string;
-		companyId: number;
-		companyNumber: number;
-		balance: number;
-	}[];
+	inventory: InventoryItem[];
 	attributes: Attribute[];
-	mediaId?: Array<{
-		url: string;
-		filename: string;
-		picture_type: string;
-		thumbnail_url: string;
-	}>;
+	mediaId: MediaItem[];
 }
 
-interface ColumnAttributeResponse {
-	productAttributes?: any; // Product-level attributes from first object
-	productData?: any; // Full product-level object with shortDesc, longDesc, etc.
+interface VariantData {
+	itemNumber: string;
+	itemData: VariantItemData;
+}
+
+interface ProductData {
+	campaign?: string;
+	multiple?: string;
+	countryOfOrigin?: string;
+	hsCode?: string;
+	status?: string;
+	salesCatGroup?: string;
+	productNameEn?: string;
+	productNameNo?: string;
+	usersEn?: string;
+	usersNo?: string;
+	remarksEn?: string;
+	remarksNo?: string;
+	shortDescEn?: string;
+	shortDescNo?: string;
+	longDescEn?: string;
+	longDescNo?: string;
+	uspEn?: Record<string, string>;
+	uspNo?: Record<string, string>;
+	bvp?: string;
+	mediaId?: MediaItem;
+	defaultAttributes?: Array<{
+		name: string;
+		attributeIdentifier: string;
+	}>;
+	attributes: Attribute[];
+}
+
+interface ColumnAttributeApiResponse {
+	productNumber: string;
+	productData: ProductData;
+	variantData: VariantData[];
+}
+
+type ColumnAttributeResponse = {
+	productAttributes?: Attribute[]; // Product-level attributes
+	productData?: ProductData; // Full product-level object with shortDesc, longDesc, etc.
+} & {
 	[itemNumber: string]:
 		| {
 				productNumber: string;
@@ -53,15 +99,11 @@ interface ColumnAttributeResponse {
 					balance: number;
 				}[];
 				attributes: Attribute[];
-				mediaId?: Array<{
-					url: string;
-					filename: string;
-					picture_type: string;
-					thumbnail_url: string;
-				}>;
+				mediaId?: MediaItem[];
 		  }
-		| Attribute[];
-}
+		| Attribute[]
+		| undefined;
+};
 
 export function useGetColumnAttributes(variantNumber?: string) {
 	const [data, setData] = useState<ColumnAttributeResponse | null>(null);
@@ -74,26 +116,34 @@ export function useGetColumnAttributes(variantNumber?: string) {
 		const fetchAttributes = async () => {
 			try {
 				setIsLoading(true);
-				const response = await axiosClient.get<ColumnAttributeItem[]>(
+				const response = await axiosClient.get<ColumnAttributeApiResponse>(
 					`/columnAttributesNew/${variantNumber}`,
 				);
 
-				// Transform array response to object format keyed by itemNumber
+				// Transform new response structure to expected format
 				const transformedData: ColumnAttributeResponse = {};
 
-				response.data.forEach((item) => {
-					// First object without itemNumber contains product-level data
-					if (!item.itemNumber) {
-						transformedData.productAttributes = item.attributes || [];
-						// Store the full product-level object for access to shortDesc, longDesc, etc.
-						transformedData.productData = item as any;
-					} else {
-						transformedData[item.itemNumber] = {
-							productNumber: item.productNumber,
-							itemNumber: item.itemNumber,
-							itemName: item.itemName,
-							itemCount: item.itemCount,
-							inventory: item.inventory?.map((inv) => ({
+				// Store product-level data
+				if (response.data.productData) {
+					transformedData.productData = response.data.productData;
+					transformedData.productAttributes =
+						response.data.productData.attributes || [];
+				}
+
+				// Transform variant data array to object format keyed by itemNumber
+				if (
+					response.data.variantData &&
+					Array.isArray(response.data.variantData)
+				) {
+					response.data.variantData.forEach((variant) => {
+						const { itemNumber, itemData } = variant;
+
+						transformedData[itemNumber] = {
+							productNumber: response.data.productNumber,
+							itemNumber: itemNumber,
+							itemName: itemData.itemName,
+							itemCount: itemData.itemCount,
+							inventory: itemData.inventory?.map((inv) => ({
 								warehouseId: inv.wareHouseId,
 								warehouseNumber: inv.wareHouseNumber,
 								warehouseName: inv.wareHouseName,
@@ -101,11 +151,11 @@ export function useGetColumnAttributes(variantNumber?: string) {
 								companyNumber: inv.companyNumber,
 								balance: inv.balance,
 							})),
-							attributes: item.attributes,
-							mediaId: item.mediaId,
+							attributes: itemData.attributes || [],
+							mediaId: itemData.mediaId || [],
 						};
-					}
-				});
+					});
+				}
 
 				setData(transformedData);
 			} catch (err) {
