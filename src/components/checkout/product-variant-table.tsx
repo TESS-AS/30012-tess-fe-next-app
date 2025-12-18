@@ -25,6 +25,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { SAP_CUSTOMER } from "@/constants/checkout";
 import {
 	ColumnKey,
 	columnLabels,
@@ -108,6 +109,7 @@ export default function ProductVariantTable({
 	const t = useTranslations();
 	const { data: profile } = useGetProfileData();
 	const { isCartChanging, setIsCartChanging } = useAppContext();
+	const isSapCustomer = profile?.defaultCustomerNumber === SAP_CUSTOMER;
 
 	const [searchQuery, setSearchQuery] = useState<string>("");
 	const [quantities, setQuantities] = useState<Record<number, number>>({});
@@ -141,7 +143,7 @@ export default function ProductVariantTable({
 	>({});
 
 	const allAttributeNames = useMemo(() => {
-		return Array.from(
+		const allNames = Array.from(
 			new Set(
 				variantsWithWarehouses.flatMap(
 					(variant) =>
@@ -151,7 +153,16 @@ export default function ProductVariantTable({
 				),
 			),
 		);
-	}, [variantsWithWarehouses, columnAttributes]);
+		// Filter out SAP NR for non-SAP customers
+		if (!isSapCustomer) {
+			return allNames.filter(
+				(name) =>
+					name?.toLowerCase() !== "sap nr" &&
+					name?.toLowerCase() !== "sap number",
+			);
+		}
+		return allNames;
+	}, [variantsWithWarehouses, columnAttributes, isSapCustomer]);
 
 	const getWarehouseOptions = useMemo(() => {
 		const optionsMap: Record<
@@ -211,6 +222,15 @@ export default function ProductVariantTable({
 			let visibleAttributeCount = 0;
 
 			for (const name of allAttributeNames) {
+				// Filter out SAP NR for non-SAP customers
+				if (
+					!isSapCustomer &&
+					(name?.toLowerCase() === "sap nr" ||
+						name?.toLowerCase() === "sap number")
+				) {
+					next[name] = false;
+					continue;
+				}
 				// Always respect the limit, even for previously selected attributes
 				const shouldShow = visibleAttributeCount < maxAttributeSlots;
 				next[name] = shouldShow;
@@ -219,7 +239,7 @@ export default function ProductVariantTable({
 
 			return next;
 		});
-	}, [allAttributeNames, visibleCols]);
+	}, [allAttributeNames, visibleCols, isSapCustomer]);
 
 	const getTotalVisibleColumns = () => {
 		const visibleStaticCount = Object.entries(visibleCols).filter(
@@ -545,7 +565,7 @@ export default function ProductVariantTable({
 				<Table
 					noOverflow
 					className="w-full min-w-max rounded-md">
-					<TableHeader className="bg-gray-50 text-muted-foreground sticky top-0">
+					<TableHeader className="text-muted-foreground sticky top-0 bg-gray-50">
 						<TableRow>
 							{renderColumns()
 								.filter(
@@ -616,7 +636,9 @@ export default function ProductVariantTable({
 								<TableRow
 									key={variant.itemNumber}
 									className={`cursor-pointer hover:bg-[#F0FCF2] ${
-										isSelected ? "bg-[#F0FCF2] border-l-4 border-l-green-700" : ""
+										isSelected
+											? "border-l-4 border-l-green-700 bg-[#F0FCF2]"
+											: ""
 									}`}
 									onClick={() => {
 										if (!hasAddToCart && onSelectVariant) {
@@ -783,10 +805,13 @@ export default function ProductVariantTable({
 													// Get unit (enhet) for this variant
 													const getVariantUnit = () => {
 														const attrs =
-															columnAttributes?.[variant.itemNumber]?.attributes || [];
-														
+															columnAttributes?.[variant.itemNumber]
+																?.attributes || [];
+
 														// Try to find contentUnit from attributes
-														const contentUnitAttr = attrs.find((attr: any) => attr.contentUnit);
+														const contentUnitAttr = attrs.find(
+															(attr: any) => attr.contentUnit,
+														);
 														if (contentUnitAttr?.contentUnit) {
 															return contentUnitAttr.contentUnit;
 														}
@@ -795,8 +820,12 @@ export default function ProductVariantTable({
 														const unitAttr = attrs.find(
 															(attr: any) =>
 																attr.attributeIdentifier === "contentUnit" ||
-																attr.name?.toLowerCase().includes("contentunit") ||
-																attr.name?.toLowerCase().includes("content unit") ||
+																attr.name
+																	?.toLowerCase()
+																	.includes("contentunit") ||
+																attr.name
+																	?.toLowerCase()
+																	.includes("content unit") ||
 																attr.name?.toLowerCase().includes("enhet"),
 														);
 														if (unitAttr?.valueDef) {
@@ -827,7 +856,7 @@ export default function ProductVariantTable({
 																	);
 																	await calculatePriceForVariant(variant);
 																}}>
-																<SelectTrigger className="w-[180px] border-0 shadow-none bg-transparent">
+																<SelectTrigger className="w-[180px] border-0 bg-transparent shadow-none">
 																	<SelectValue
 																		placeholder={
 																			warehouseOptions.length === 0

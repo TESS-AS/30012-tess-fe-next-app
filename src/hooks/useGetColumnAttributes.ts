@@ -90,6 +90,7 @@ type ColumnAttributeResponse = {
 				itemNumber: string;
 				itemName?: string;
 				itemCount?: number | string;
+				SDS?: string;
 				inventory?: {
 					warehouseId: number;
 					warehouseNumber?: string;
@@ -143,6 +144,7 @@ export function useGetColumnAttributes(variantNumber?: string) {
 							itemNumber: itemNumber,
 							itemName: itemData.itemName,
 							itemCount: itemData.itemCount,
+							SDS: itemData.SDS,
 							inventory: itemData.inventory?.map((inv) => ({
 								warehouseId: inv.wareHouseId,
 								warehouseNumber: inv.wareHouseNumber,

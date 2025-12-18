@@ -151,6 +151,13 @@ export function ProductInfo({
 
 	const sapNumber = getSapNumber();
 
+	// Check if SDS is available for the selected item
+	const hasSDS = useMemo(() => {
+		if (!selectedItemNumber || !columnAttributes) return false;
+		const sds = columnAttributes[selectedItemNumber]?.SDS;
+		return sds === "True" || sds === "true";
+	}, [selectedItemNumber, columnAttributes]);
+
 	const handleCopyGtin = () => {
 		if (gtin) {
 			navigator.clipboard.writeText(gtin);
@@ -274,12 +281,9 @@ export function ProductInfo({
 
 	const unit = getUnit();
 
-	// Initialize active tab to "attributes" on mount if not already set to a valid tab
+	// Always reset active tab to "attributes" when component mounts
 	useEffect(() => {
-		const validTabs = ["attributes", "produktinfo", "documents"];
-		if (!validTabs.includes(activeTab)) {
-			setActiveTab("attributes");
-		}
+		setActiveTab("attributes");
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -414,7 +418,7 @@ export function ProductInfo({
 	}, [columnAttributes?.productData?.attributes, locale]);
 
 	// Count documents
-	const documentCount = 1 + (isSapCustomer && ecoonlineUrl ? 1 : 0);
+	const documentCount = 1 + (hasSDS && ecoonlineUrl ? 1 : 0);
 
 	// Handle PDF download
 	const handleDownloadPdf = async () => {
@@ -508,7 +512,7 @@ export function ProductInfo({
 								)}
 							</div>
 						)}
-						{sapNumber && (
+						{sapNumber && isSapCustomer && (
 							<div className="relative">
 								<button
 									type="button"
@@ -850,7 +854,7 @@ export function ProductInfo({
 									</button>
 
 									{/* Ecoonline link */}
-									{isSapCustomer && ecoonlineUrl && (
+									{hasSDS && ecoonlineUrl && (
 										<button
 											type="button"
 											onClick={() => window.open(ecoonlineUrl, "_blank")}
