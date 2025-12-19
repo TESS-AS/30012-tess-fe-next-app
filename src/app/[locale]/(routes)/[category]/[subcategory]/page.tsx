@@ -7,7 +7,8 @@ import type { FilterCategory } from "@/components/ui/filter";
 import { useCategories } from "@/lib/CategoriesProvider";
 import {
 	findSubCategoryRecursive,
-	normalizeFilterResponse,
+	findCategoryByPath,
+	normalizeFilterResponse
 } from "@/lib/category-utils";
 import { formatUrlToDisplayName } from "@/lib/utils";
 import { loadFilterParents } from "@/services/categories.service";
@@ -16,12 +17,13 @@ import { useLocale } from "next-intl";
 
 interface SubCategoryPageProps {
 	params: Promise<{
+		category: string;
 		subcategory: string;
 	}>;
 }
 
 export default function SubCategoryPage({ params }: SubCategoryPageProps) {
-	const { subcategory } = use(params);
+	const { category, subcategory } = use(params);
 	const locale = useLocale();
 
 	const { categories } = useCategories();
@@ -37,10 +39,14 @@ export default function SubCategoryPage({ params }: SubCategoryPageProps) {
 	useEffect(() => {
 		if (!categories) return;
 
-		const subCategoryData = findSubCategoryRecursive(
-			categories,
-			formattedSubCategory,
-		);
+		//Old Recursive variant
+		// const subCategoryData = findSubCategoryRecursive(
+		// 	categories,
+		// 	formattedSubCategory,
+		// );
+		//New variant path-sensitive
+		const subCategoryData = findCategoryByPath(categories, [category, subcategory]);
+
 
 		setCategoryData(subCategoryData);
 

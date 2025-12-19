@@ -26,6 +26,7 @@ export async function findCategoryByName(categories: Category[], name: string) {
 	);
 }
 
+//Old Category Lookup: non-path sensitive (aka lookup on name)
 export function findSubCategoryRecursive(
 	categories: Category[],
 	subcategoryName: string,
@@ -56,6 +57,26 @@ export function findSubCategoryRecursive(
 	}
 	return null;
 }
+
+//new category lookup: path sensitive, forces match per slug, we send in top to bottom slugs, so
+//first top category, then subcategory, then segment, we can also only send 2 first  or just the main cat
+export function findCategoryByPath(
+	categories: Category[],
+	slugs: string[],
+): Category | null {
+	let current: Category | null = null;
+	let level = categories;
+
+	for (const slug of slugs) {
+		current = level.find((c) => c.slug === slug) ?? null;
+		if (!current) return null;
+		level = current.subcategories || [];
+	}
+
+	return current;
+}
+
+
 
 export async function fetchProducts(
 	categoryNumber: string | null,
