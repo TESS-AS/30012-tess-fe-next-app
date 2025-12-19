@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,10 +13,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { MultiSelectWithTags } from "@/components/ui/multi-select";
 import { RadioSelect } from "@/components/ui/radio-select";
-import { useGetUserDomainConfig } from "@/hooks/useGetUserDomainConfig";
 import { User } from "@/types/user.types";
 import { X, Info } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useFetchUserDataBrukere } from "@/hooks/useFetchUserDataBrukere";
 
 interface BulkEditConfirmationModalProps {
 	open: boolean;
@@ -33,6 +33,23 @@ export interface BulkEditChanges {
 	company?: string;
 }
 
+function mergePageItems<T, K extends keyof T>(
+	previous: T[],
+	pageItems: T[],
+	key: K,
+	isFirstPage: boolean,
+): T[] {
+	if (isFirstPage) return pageItems;
+	const existingKeys = new Set(
+		previous.map((item) => item[key] as unknown as string | number | undefined),
+	);
+	const nextItems = pageItems.filter(
+		(item) =>
+			!existingKeys.has(item[key] as unknown as string | number | undefined),
+	);
+	return [...previous, ...nextItems];
+}
+
 export function BulkEditConfirmationModal({
 	open,
 	onOpenChange,
@@ -42,21 +59,129 @@ export function BulkEditConfirmationModal({
 }: BulkEditConfirmationModalProps) {
 	const t = useTranslations("BulkEditConfirmationModal");
 	const [showWarning, setShowWarning] = useState(true);
-	console.log(selectedUsers, "useri");
-	const {
-		customers,
-		companies,
-		warehouses,
-		assortments,
-		isLoading: userDomainConfigLoading,
-	} = useGetUserDomainConfig(selectedUsers[0]?.email ?? "", open);
+
+	const [customerSearch, setCustomerSearch] = useState("");
+	const [assortmentSearch, setAssortmentSearch] = useState("");
+	const [warehouseSearch, setWarehouseSearch] = useState("");
+	const [customerPage, setCustomerPage] = useState(1);
+	const [assortmentPage, setAssortmentPage] = useState(1);
+	const [warehousePage, setWarehousePage] = useState(1);
+	const [companyPage, setCompanyPage] = useState(1);
+	const pageSize = 10;
+
+	const { data: customersData } = useFetchUserDataBrukere(
+		"customer",
+		customerPage,
+		pageSize,
+		customerSearch,
+		true,
+	);
+	const { data: assortmentData } = useFetchUserDataBrukere(
+		"assortment",
+		assortmentPage,
+		pageSize,
+		assortmentSearch,
+		true,
+	);
+	const { data: wareHouseData } = useFetchUserDataBrukere(
+		"warehouse",
+		warehousePage,
+		pageSize,
+		warehouseSearch,
+		true,
+	);
+	const { data: companyData } = useFetchUserDataBrukere(
+		"company",
+		companyPage,
+		pageSize,
+		"",
+		true,
+	);
+
+	const [customers, setCustomers] = useState<
+		{
+			customerId?: number;
+			customerNumber?: string;
+			customerName?: string;
+		}[]
+	>([]);
+	const [assortments, setAssortments] = useState<
+		{
+			assortmentId?: number;
+			assortmentNumber?: string;
+			assortmentName?: string;
+			nameEn?: string;
+			nameNo?: string;
+		}[]
+	>([]);
+	const [warehouses, setWarehouses] = useState<
+		{
+			warehouseId?: number;
+			warehouseNumber?: string;
+			warehouseName?: string;
+		}[]
+	>([]);
+	const [companies, setCompanies] = useState<
+		{
+			companyId?: number;
+			companyNumber?: number;
+			companyName?: string;
+		}[]
+	>([]);
+
+	const customersPageItems = customersData?.result ?? [];
+	const assortmentsPageItems = assortmentData?.result ?? [];
+	const warehousesPageItems = wareHouseData?.result ?? [];
+	const companiesPageItems = companyData?.result ?? [];
+
+	useEffect(() => {
+		if (!customersData) return;
+		setCustomers((prev) =>
+			mergePageItems(
+				prev,
+				customersPageItems,
+				"customerNumber",
+				customerPage === 1,
+			),
+		);
+	}, [customersData, customerPage, customersPageItems]);
+
+	useEffect(() => {
+		if (!assortmentData) return;
+		setAssortments((prev) =>
+			mergePageItems(
+				prev,
+				assortmentsPageItems,
+				"assortmentNumber",
+				assortmentPage === 1,
+			),
+		);
+	}, [assortmentData, assortmentPage, assortmentsPageItems]);
+
+	useEffect(() => {
+		if (!wareHouseData) return;
+		setWarehouses((prev) =>
+			mergePageItems(
+				prev,
+				warehousesPageItems,
+				"warehouseId",
+				warehousePage === 1,
+			),
+		);
+	}, [wareHouseData, warehousePage, warehousesPageItems]);
+
+	useEffect(() => {
+		if (!companyData) return;
+		setCompanies((prev) =>
+			mergePageItems(prev, companiesPageItems, "companyId", companyPage === 1),
+		);
+	}, [companyData, companyPage, companiesPageItems]);
 
 	const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
 	const [selectedCatalogs, setSelectedCatalogs] = useState<string[]>([]);
 	const [selectedWarehouses, setSelectedWarehouses] = useState<string[]>([]);
 	const [selectedCompany, setSelectedCompany] = useState<string>("");
 
-	console.log(selectedCompany, "selectedCompany");
 	const handleConfirm = () => {
 		const changes: BulkEditChanges = {
 			customerAccess: selectedCustomers,
@@ -64,6 +189,7 @@ export function BulkEditConfirmationModal({
 			warehouses: selectedWarehouses,
 			company: selectedCompany,
 		};
+		console.log(changes, "changes");
 
 		onConfirm(changes);
 		onOpenChange(false);
@@ -146,12 +272,29 @@ export function BulkEditConfirmationModal({
 								<MultiSelectWithTags
 									options={customers.map((customer) => {
 										return {
-											value: customer.customerNumber,
-											label: customer.customerName,
+											value: customer.customerNumber ?? "",
+											label: customer.customerName ?? "",
 										};
 									})}
 									selected={selectedCustomers}
 									onChange={setSelectedCustomers}
+									onSearchChange={(value) => {
+										setCustomerSearch(value);
+										setCustomerPage(1);
+									}}
+									page={customerPage}
+									onPrevPage={
+										customerPage > 1
+											? () => setCustomerPage((p) => p - 1)
+											: undefined
+									}
+									onNextPage={
+										customers.length >= pageSize
+											? () => setCustomerPage((p) => p + 1)
+											: undefined
+									}
+									canPrevPage={customerPage > 1}
+									canNextPage={customers.length >= pageSize}
 									placeholder={t("customerAccessPlaceholder", {
 										count: selectedCustomers.length,
 									})}
@@ -162,12 +305,29 @@ export function BulkEditConfirmationModal({
 								<MultiSelectWithTags
 									options={assortments.map((assortment) => {
 										return {
-											value: assortment.assortmentNumber,
-											label: assortment.assortmentName,
+											value: assortment.assortmentNumber ?? "",
+											label: assortment.assortmentName ?? "",
 										};
 									})}
 									selected={selectedCatalogs}
 									onChange={setSelectedCatalogs}
+									onSearchChange={(value) => {
+										setAssortmentSearch(value);
+										setAssortmentPage(1);
+									}}
+									page={assortmentPage}
+									onPrevPage={
+										assortmentPage > 1
+											? () => setAssortmentPage((p) => p - 1)
+											: undefined
+									}
+									onNextPage={
+										assortments.length >= pageSize
+											? () => setAssortmentPage((p) => p + 1)
+											: undefined
+									}
+									canPrevPage={assortmentPage > 1}
+									canNextPage={assortments.length >= pageSize}
 									placeholder={t("catalogPlaceholder")}
 								/>
 							</div>
@@ -181,11 +341,28 @@ export function BulkEditConfirmationModal({
 									options={warehouses.map((warehouse) => {
 										return {
 											value: String(warehouse.warehouseId),
-											label: warehouse.warehouseName,
+											label: warehouse.warehouseName ?? "",
 										};
 									})}
 									selected={selectedWarehouses}
 									onChange={setSelectedWarehouses}
+									onSearchChange={(value) => {
+										setWarehouseSearch(value);
+										setWarehousePage(1);
+									}}
+									page={warehousePage}
+									onPrevPage={
+										warehousePage > 1
+											? () => setWarehousePage((p) => p - 1)
+											: undefined
+									}
+									onNextPage={
+										warehouses.length >= pageSize
+											? () => setWarehousePage((p) => p + 1)
+											: undefined
+									}
+									canPrevPage={warehousePage > 1}
+									canNextPage={warehouses.length >= pageSize}
 									placeholder={t("warehousePlaceholder", {
 										count: selectedWarehouses.length,
 									})}
@@ -197,7 +374,7 @@ export function BulkEditConfirmationModal({
 									options={companies.map((item) => {
 										return {
 											value: String(item.companyNumber),
-											label: item.companyName,
+											label: item.companyName ?? "",
 										};
 									})}
 									value={selectedCompany}

@@ -125,7 +125,7 @@ export interface UserDomainConfig {
 }
 
 export interface UpdateUserRelationsPayload {
-	userId: number;
+	userId: number[];
 	assortments: string[];
 	customers: string[];
 	warehouses: [
@@ -139,6 +139,7 @@ export interface UpdateUserRelationsPayload {
 			companyNumber: string;
 		},
 	];
+	companyNumber: string;
 }
 
 export interface UpdateUserRelationsResponse {
@@ -173,13 +174,24 @@ export interface UpdateUserRelationsResponse {
 	};
 }
 
-export interface SearchAdminEditResponse {
+export interface FetchUserDataBrukereResponse {
 	success: boolean;
 	result: [
 		{
-			companyId: number;
-			companyNumber: number;
-			companyName: string;
+			customerId?: number;
+			customerNumber?: string;
+			customerName?: string;
+			companyId?: number;
+			companyNumber?: number;
+			companyName?: string;
+			warehouseId?: number;
+			warehouseNumber?: string;
+			warehouseName?: string;
+			assortmentId?: number;
+			assortmentNumber?: string;
+			assortmentName?: string;
+			nameEn?: string;
+			nameNo?: string;
 		},
 	];
 }

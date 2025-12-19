@@ -6,7 +6,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { editableUsersKeys } from "./useGetEditableUsers";
-import { userDomainConfigKeys } from "./useGetUserDomainConfig";
+import { userDataBrukereKeys } from "./useFetchUserDataBrukere";
 
 export function useUpdateUserRelations() {
 	const queryClient = useQueryClient();
@@ -26,7 +26,7 @@ export function useUpdateUserRelations() {
 			});
 
 			queryClient.invalidateQueries({
-				queryKey: userDomainConfigKeys.all,
+				queryKey: userDataBrukereKeys.all,
 			});
 		},
 		onError: (error) => {

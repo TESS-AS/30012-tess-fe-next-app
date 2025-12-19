@@ -1,7 +1,7 @@
 import { CreateNewUserAddress } from "@/types/address";
 import {
 	EditableUser,
-	SearchAdminEditResponse,
+	FetchUserDataBrukereResponse,
 	UpdateUserRelationsPayload,
 	UpdateUserRelationsResponse,
 	UserDomainConfig,
@@ -55,20 +55,6 @@ export async function getEditableUsers(
 	}
 }
 
-export async function getUserDomainConfig(
-	userEmail: string,
-): Promise<UserDomainConfig> {
-	try {
-		const response = await axiosInstance.get(
-			`/userAdmin/getDomainConfig/${userEmail}`,
-		);
-		return response.data;
-	} catch (error) {
-		console.error("Error fetching domain config:", error);
-		throw error;
-	}
-}
-
 export async function updateUserRelations(
 	payload: UpdateUserRelationsPayload,
 ): Promise<UpdateUserRelationsResponse> {
@@ -116,17 +102,24 @@ export async function createNewUserAddress(
 	}
 }
 
-export async function searchAdminEdit(
+export async function fetchUserDataBrukere(
 	type: string,
-	searchTerm: string,
-): Promise<SearchAdminEditResponse> {
+	page: number,
+	pageSize: number,
+	searchTerm?: string,
+): Promise<FetchUserDataBrukereResponse> {
 	try {
-		const response = await axiosInstance.get(
-			`/userAdmin/searchAdminEdit/${type}?searchTerm=${searchTerm}`,
-		);
+		const response = await axiosInstance.get(`/userAdmin/fetchUserData`, {
+			params: {
+				type,
+				page,
+				pageSize,
+				...(searchTerm ? { searchTerm } : {}),
+			},
+		});
 		return response.data;
 	} catch (error) {
-		console.error("Error searching editable users:", error);
+		console.error("Error fetching user data:", error);
 		throw error;
 	}
 }

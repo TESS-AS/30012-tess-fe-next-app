@@ -65,6 +65,17 @@ export function HosesAndEquipments({
 	profile,
 }: HosesAndEquipmentsProps) {
 	const t = useTranslations("HosesAndEquipments");
+	const router = useRouter();
+	const { setIsCartChanging, isCartChanging } = useAppContext();
+
+	const [isAddingToCart, setIsAddingToCart] = useState(false);
+	const [cartModalOpen, setCartModalOpen] = useState(false);
+	const [supportOpen, setSupportOpen] = useState(false);
+	const [rfqOpen, setRfqOpen] = useState(false);
+	const [discardOpen, setDiscardOpen] = useState(false);
+	const [printOpen, setPrintOpen] = useState(false);
+	const [printTagsOpen, setPrintTagsOpen] = useState(false);
+	const [showAllItems, setShowAllItems] = useState(false);
 	const [customerNumber, setCustomerNumber] = useState<string>("");
 	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
 		() => {
@@ -74,18 +85,6 @@ export function HosesAndEquipments({
 			return undefined;
 		},
 	);
-
-	const { setIsCartChanging, isCartChanging } = useAppContext();
-
-	useEffect(() => {
-		if (
-			profile?.defaultCustomerNumber &&
-			profile.defaultCustomerNumber !==
-				SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
-		) {
-			setCustomerNumber(profile.defaultCustomerNumber);
-		}
-	}, [profile?.defaultCustomerNumber]);
 
 	const effectiveCustomerNumber =
 		profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
@@ -106,7 +105,9 @@ export function HosesAndEquipments({
 		s2Filter: false,
 	});
 
-	const [searchQuery, setSearchQuery] = useState("");
+	const [searchQuery, setSearchQuery] = useState(
+		localStorage.getItem("searchQuery") ?? "",
+	);
 	const [selectedColumns, setSelectedColumns] = useState<string[]>([
 		"id",
 		"customerId",
@@ -151,6 +152,16 @@ export function HosesAndEquipments({
 		pafyllingsdato: asset?.hoseLine?.refillDate ?? undefined,
 		neste_inspeksjonsdato: asset?.hoseLine?.nextInspectionDate ?? undefined,
 	}));
+
+	useEffect(() => {
+		if (
+			profile?.defaultCustomerNumber &&
+			profile.defaultCustomerNumber !==
+				SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+		) {
+			setCustomerNumber(profile.defaultCustomerNumber);
+		}
+	}, [profile?.defaultCustomerNumber]);
 
 	// Keep a ref to always have the latest transformed assets
 	const transformedAssetsRef = useRef(transformedAssets);
@@ -283,16 +294,6 @@ export function HosesAndEquipments({
 			return next;
 		});
 	};
-
-	const [isAddingToCart, setIsAddingToCart] = useState(false);
-	const [cartModalOpen, setCartModalOpen] = useState(false);
-	const [supportOpen, setSupportOpen] = useState(false);
-	const [rfqOpen, setRfqOpen] = useState(false);
-	const [discardOpen, setDiscardOpen] = useState(false);
-	const [printOpen, setPrintOpen] = useState(false);
-	const [printTagsOpen, setPrintTagsOpen] = useState(false);
-	const [showAllItems, setShowAllItems] = useState(false);
-	const router = useRouter();
 
 	const handleBulkAction = async (action: string): Promise<void> => {
 		if (action === "cart") {
@@ -741,14 +742,15 @@ export function HosesAndEquipments({
 						<HoseSearchBar
 							value={searchQuery}
 							onChange={setSearchQuery}
-							onSearch={() =>
+							onSearch={() => {
 								fetchAssets({
 									page: 1,
 									pageSize: ITEMS_PER_PAGE,
 									search: searchQuery,
 									...getActiveFilters(),
-								})
-							}
+								});
+								localStorage.setItem("searchQuery", searchQuery);
+							}}
 							onClear={() => {
 								setSearchQuery("");
 								setSelectedRows([]);
@@ -758,6 +760,7 @@ export function HosesAndEquipments({
 								setSelectedFilters([]);
 								setSelectedAgeRanges([]);
 								fetchAssets({ page: 1, pageSize: ITEMS_PER_PAGE });
+								localStorage.removeItem("searchQuery");
 							}}
 						/>
 
