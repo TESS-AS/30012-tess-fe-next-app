@@ -1,7 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-
 import { fetchUserDataBrukere } from "@/services/user.service";
 import { FetchUserDataBrukereResponse } from "@/types/user.types";
+import { useQuery } from "@tanstack/react-query";
 
 export const userDataBrukereKeys = {
 	all: ["userDataBrukere"] as const,

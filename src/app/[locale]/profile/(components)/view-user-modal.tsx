@@ -7,8 +7,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useGetUserDomainConfig } from "@/hooks/useGetUserDomainConfig";
 import { User } from "@/types/user.types";
 import { SquarePen, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";

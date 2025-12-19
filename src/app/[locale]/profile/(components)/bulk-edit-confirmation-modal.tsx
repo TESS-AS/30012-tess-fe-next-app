@@ -13,10 +13,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { MultiSelectWithTags } from "@/components/ui/multi-select";
 import { RadioSelect } from "@/components/ui/radio-select";
+import { useFetchUserDataBrukere } from "@/hooks/useFetchUserDataBrukere";
 import { User } from "@/types/user.types";
 import { X, Info } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useFetchUserDataBrukere } from "@/hooks/useFetchUserDataBrukere";
 
 interface BulkEditConfirmationModalProps {
 	open: boolean;

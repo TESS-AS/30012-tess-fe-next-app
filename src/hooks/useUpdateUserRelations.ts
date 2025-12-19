@@ -5,8 +5,8 @@ import {
 } from "@/types/user.types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { editableUsersKeys } from "./useGetEditableUsers";
 import { userDataBrukereKeys } from "./useFetchUserDataBrukere";
+import { editableUsersKeys } from "./useGetEditableUsers";
 
 export function useUpdateUserRelations() {
 	const queryClient = useQueryClient();
