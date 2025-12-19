@@ -7,6 +7,7 @@ import type { FilterCategory } from "@/components/ui/filter";
 import { useCategories } from "@/lib/CategoriesProvider";
 import {
 	findSubCategoryRecursive,
+	findCategoryByPath,
 	normalizeFilterResponse,
 } from "@/lib/category-utils";
 import { formatUrlToDisplayName } from "@/lib/utils";
@@ -43,11 +44,16 @@ export default function SegmentPage({ params }: SegmentPageProps) {
 	useEffect(() => {
 		if (!categories) return;
 
-		const subCategoryData = findSubCategoryRecursive(
-			categories,
-			formattedSubCategory,
-			formattedSegment,
-		);
+		// const subCategoryData = findSubCategoryRecursive(
+		// 	categories,
+		// 	formattedSubCategory,
+		// 	formattedSegment,
+		// );
+		const subCategoryData = findCategoryByPath(categories, [
+			category,
+			subcategory,
+			segment,
+		]);
 
 		setCategoryData(subCategoryData);
 
