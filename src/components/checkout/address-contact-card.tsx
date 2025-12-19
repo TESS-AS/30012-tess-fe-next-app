@@ -63,6 +63,14 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 	const [showExtra, setShowExtra] = useState(!!extraInfo);
 	const [isLoading, setIsLoading] = useState(false);
 	const [cityReadOnly, setCityReadOnly] = useState(true);
+	const [errors, setErrors] = useState<{
+		addressName?: string;
+		street?: string;
+		houseNumber?: string;
+		postalCode?: string;
+		city?: string;
+		countryCode?: string;
+	}>({});
 
 	const [formData, setFormData] = useState<AddressFormState>({
 		addressName,
@@ -80,6 +88,14 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 	) => {
 		const { name, value } = e.target;
 		setFormData((prev) => ({ ...prev, [name]: value }));
+		setErrors((prev) => {
+			const next = { ...prev };
+			// Clear error for the field being edited
+			if (name in next) {
+				delete (next as any)[name];
+			}
+			return next;
+		});
 
 		if (name === "postalCode") {
 			await fetchCityFromPostalCode(value);
@@ -87,6 +103,35 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 	};
 
 	const handleSave = () => {
+		const validationErrors: typeof errors = {};
+
+		if (!formData.addressName?.trim()) {
+			validationErrors.addressName = "Dette feltet er påkrevd";
+		}
+		if (!formData.street?.trim()) {
+			validationErrors.street = "Dette feltet er påkrevd";
+		}
+		if (!formData.houseNumber?.trim()) {
+			validationErrors.houseNumber = "Dette feltet er påkrevd";
+		}
+		if (!formData.postalCode?.trim()) {
+			validationErrors.postalCode = "Dette feltet er påkrevd";
+		} else if (!POSTAL_CODE_REGEX.test(formData.postalCode)) {
+			validationErrors.postalCode = t("postalCodeExample");
+		}
+		if (!formData.city?.trim()) {
+			validationErrors.city = "Dette feltet er påkrevd";
+		}
+		if (!formData.countryCode?.trim()) {
+			validationErrors.countryCode = "Dette feltet er påkrevd";
+		}
+
+		if (Object.keys(validationErrors).length > 0) {
+			setErrors(validationErrors);
+			return;
+		}
+
+		setErrors({});
 		onSave?.(formData);
 
 		if (formData.isUserAddress) {
@@ -210,6 +255,11 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 							<p className="text-muted-foreground mt-1 text-xs font-medium">
 								{t("addressNameExample")}
 							</p>
+							{errors.addressName && (
+								<p className="mt-1 text-xs font-medium text-red-600">
+									{errors.addressName}
+								</p>
+							)}
 						</div>
 
 						<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -224,6 +274,11 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 								<p className="text-muted-foreground mt-1 text-xs font-medium">
 									{t("streetExample")}
 								</p>
+								{errors.street && (
+									<p className="mt-1 text-xs font-medium text-red-600">
+										{errors.street}
+									</p>
+								)}
 							</div>
 							<div>
 								<Label>{t("houseNumber")}</Label>
@@ -236,6 +291,11 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 								<p className="text-muted-foreground mt-1 text-xs font-medium">
 									{t("houseNumberExample")}
 								</p>
+								{errors.houseNumber && (
+									<p className="mt-1 text-xs font-medium text-red-600">
+										{errors.houseNumber}
+									</p>
+								)}
 							</div>
 						</div>
 
@@ -283,6 +343,11 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 								<p className="text-muted-foreground mt-1 text-xs font-medium">
 									{t("postalCodeExample")}
 								</p>
+								{errors.postalCode && (
+									<p className="mt-1 text-xs font-medium text-red-600">
+										{errors.postalCode}
+									</p>
+								)}
 							</div>
 							<div>
 								<Label>{t("city")}</Label>
@@ -297,6 +362,11 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 											: t("cityPlaceholderManual")
 									}
 								/>
+								{errors.city && (
+									<p className="mt-1 text-xs font-medium text-red-600">
+										{errors.city}
+									</p>
+								)}
 							</div>
 						</div>
 
@@ -320,6 +390,11 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 									))}
 								</SelectContent>
 							</Select>
+							{errors.countryCode && (
+								<p className="mt-1 text-xs font-medium text-red-600">
+									{errors.countryCode}
+								</p>
+							)}
 						</div>
 
 						<div className="flex items-center space-x-2">

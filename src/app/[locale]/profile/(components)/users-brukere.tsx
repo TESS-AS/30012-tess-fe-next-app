@@ -196,17 +196,13 @@ const UsersBrukere = () => {
 		const usersToUpdate = users.filter((u) => selectedUsers.includes(u.email));
 
 		try {
-			await Promise.all(
-				usersToUpdate.map((user) =>
-					updateUserRelations({
-						userId: user.userId,
-						assortments: pendingBulkChanges.catalogs ?? [],
-						customers: pendingBulkChanges.customerAccess ?? [],
-						warehouses: warehousesPayload,
-					}),
-				),
-			);
-
+			await updateUserRelations({
+				userId: usersToUpdate.map((u) => u.userId),
+				assortments: pendingBulkChanges.catalogs ?? [],
+				customers: pendingBulkChanges.customerAccess ?? [],
+				warehouses: warehousesPayload,
+				companyNumber: pendingBulkChanges.company ?? "",
+			});
 			setPendingBulkChanges(null);
 			setSelectedUsers([]);
 
