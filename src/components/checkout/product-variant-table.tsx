@@ -130,8 +130,8 @@ export default function ProductVariantTable({
 	const [visibleCols, setVisibleCols] = useState<Record<ColumnKey, boolean>>({
 		image: false,
 		itemNumber: true,
-		unspsc: true,
-		contentUnit: true,
+		unspsc: false,
+		contentUnit: false,
 		price: true,
 		warehouse: true,
 		quantity: hasQuantity ?? true,
@@ -446,7 +446,7 @@ export default function ProductVariantTable({
 		const orderedStaticFirst: ColumnKey[] = [];
 		dropdownOrder
 			.filter(
-				(key) => key !== "quantity" && key !== "warehouse" && key !== "cart",
+				(key) => key !== "quantity" && key !== "warehouse" && key !== "cart" && key !== "price",
 			)
 			.forEach((key) => {
 				if (visibleCols[key]) orderedStaticFirst.push(key);
@@ -460,6 +460,16 @@ export default function ProductVariantTable({
 		if (hasQuantity && visibleCols.quantity) fixedTail.push("quantity");
 		if (visibleCols.warehouse) fixedTail.push("warehouse");
 		if (hasAddToCart && visibleCols.cart) fixedTail.push("cart");
+
+		// Insert price right before the last column in fixedTail
+		if (visibleCols.price && fixedTail.length > 0) {
+			const lastColumn = fixedTail.pop()!;
+			fixedTail.push("price");
+			fixedTail.push(lastColumn);
+		} else if (visibleCols.price && fixedTail.length === 0) {
+			// If no fixedTail columns, add price at the end
+			fixedTail.push("price");
+		}
 
 		return [...orderedStaticFirst, ...fixedTail];
 	};
@@ -569,7 +579,7 @@ export default function ProductVariantTable({
 						<TableRow>
 							{renderColumns()
 								.filter(
-									(col) => !["quantity", "warehouse", "cart"].includes(col),
+									(col) => !["quantity", "warehouse", "cart", "price"].includes(col),
 								)
 								.map((col) => {
 									return (
@@ -603,7 +613,7 @@ export default function ProductVariantTable({
 								))}
 							{renderColumns()
 								.filter((col) =>
-									["quantity", "warehouse", "cart"].includes(col),
+									["quantity", "warehouse", "cart", "price"].includes(col),
 								)
 								.map((col) => {
 									return (
@@ -647,7 +657,7 @@ export default function ProductVariantTable({
 									}}>
 									{renderColumns()
 										.filter(
-											(col) => !["quantity", "warehouse", "cart"].includes(col),
+											(col) => !["quantity", "warehouse", "cart", "price"].includes(col),
 										)
 										.map((col) => {
 											switch (col) {
@@ -729,25 +739,6 @@ export default function ProductVariantTable({
 															{contentUnitValue}
 														</TableCell>
 													);
-												case "price":
-													return (
-														<TableCell
-															key="price"
-															className="min-w-[100px] py-2">
-															{loading[variant.itemNumber] ? (
-																<div className="flex items-center gap-2">
-																	<Loader2 className="h-4 w-4 animate-spin" />
-																	<span className="text-muted-foreground text-sm">
-																		{t("Product.loadingPrice")}
-																	</span>
-																</div>
-															) : (
-																formatNorwegianCurrency(
-																	prices[variant.itemNumber] ?? 0,
-																)
-															)}
-														</TableCell>
-													);
 												default:
 													return null;
 											}
@@ -770,7 +761,7 @@ export default function ProductVariantTable({
 										})}
 									{renderColumns()
 										.filter((col) =>
-											["quantity", "warehouse", "cart"].includes(col),
+											["quantity", "warehouse", "cart", "price"].includes(col),
 										)
 										.map((col) => {
 											switch (col) {
@@ -795,6 +786,25 @@ export default function ProductVariantTable({
 																	}))
 																}
 															/>
+														</TableCell>
+													);
+												case "price":
+													return (
+														<TableCell
+															key="price"
+															className="min-w-[100px] py-2">
+															{loading[variant.itemNumber] ? (
+																<div className="flex items-center gap-2">
+																	<Loader2 className="h-4 w-4 animate-spin" />
+																	<span className="text-muted-foreground text-sm">
+																		{t("Product.loadingPrice")}
+																	</span>
+																</div>
+															) : (
+																formatNorwegianCurrency(
+																	prices[variant.itemNumber] ?? 0,
+																)
+															)}
 														</TableCell>
 													);
 												case "warehouse":
