@@ -23,11 +23,11 @@ export const columnLabels: Record<ColumnKey, string> = {
 
 export const dropdownOrder: ColumnKey[] = [
 	"itemNumber",
-	"quantity",
-	"cart",
-	"price",
 	"image",
 	"unspsc",
 	"contentUnit",
+	"price",
+	"quantity",
+	"cart",
 	"warehouse",
 ];
