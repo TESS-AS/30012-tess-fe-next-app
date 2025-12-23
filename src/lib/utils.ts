@@ -18,7 +18,18 @@ export function mapCategoryTree(node: RawCategory, locale: string): Category {
 		node[`name_${locale}`] ||
 		"";
 
-	return {
+	// Handle mediaId if provided by backend (can be array or single object)
+	let imageUrl = node.image;
+	if (!imageUrl && (node as any).mediaId) {
+		const mediaId = (node as any).mediaId;
+		if (Array.isArray(mediaId) && mediaId.length > 0 && mediaId[0]?.url) {
+			imageUrl = mediaId[0].url;
+		} else if (mediaId?.url) {
+			imageUrl = mediaId.url;
+		}
+	}
+
+	const category: Category = {
 		name,
 		slug: name
 			.toLowerCase()
@@ -34,10 +45,17 @@ export function mapCategoryTree(node: RawCategory, locale: string): Category {
 			.replace(/-+/g, "-")
 			.replace(/^-|-$/g, ""),
 		groupId: node.groupId,
-		image: node.image,
+		image: imageUrl,
 		subcategories:
 			node.children?.map((child) => mapCategoryTree(child, locale)) ?? [],
 	};
+
+	// Preserve mediaId if provided by backend
+	if ((node as any).mediaId) {
+		category.mediaId = (node as any).mediaId;
+	}
+
+	return category;
 }
 
 export function formatDate(date: string | Date, time?: string) {

@@ -44,7 +44,7 @@ export function Quote() {
 						asChild
 						variant="outline"
 						className="bg-white text-sm text-black">
-						<Link href="/categories">Se alle kategorier</Link>
+						<Link href="/alle-kategorier">Se alle kategorier</Link>
 					</Button>
 				</div>
 

@@ -24,7 +24,9 @@
 	},
 	"Category": {
 		"noResults": "Ingen resultater funnet",
-		"viewAll": "Se alle kategorier"
+		"viewAll": "Se alle kategorier",
+		"subcategories": "underkategorier",
+		"customerSpecificProducts": "Kundespesifikke produkter"
 	},
 	"Product": {
 		"notFound": "Produkt ikke funnet",

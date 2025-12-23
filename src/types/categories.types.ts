@@ -12,4 +12,5 @@ export interface Category {
 	groupId: string;
 	subcategories?: Category[];
 	image?: string;
+	mediaId?: Array<{ url: string; filename?: string; picture_type?: string; thumbnail_url?: string }> | { url: string; filename?: string; picture_type?: string; thumbnail_url?: string };
 }
