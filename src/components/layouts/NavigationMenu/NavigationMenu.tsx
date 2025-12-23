@@ -159,7 +159,7 @@ export default function CategoryNavigationMenu({
 						<NavigationMenuLink asChild>
 							<div className="flex flex-shrink-0 flex-nowrap items-center overflow-hidden text-ellipsis whitespace-nowrap">
 								<Link
-									href="/categories"
+									href="/alle-kategorier"
 									className="text-foreground hover:text-foreground group flex items-center gap-2 rounded-none border-b-2 border-transparent bg-transparent px-4 py-2 text-sm font-medium transition-all duration-300 ease-out hover:border-emerald-500 hover:bg-transparent focus:bg-transparent">
 									{t("Category.viewAll")}
 									<ChevronRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5" />

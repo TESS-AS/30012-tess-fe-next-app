@@ -15,7 +15,7 @@ export default function SearchAside({
 		`/search?query=${encodeURIComponent(suggestion)}`,
 	buildCategoryHref = (c) =>
 		`/category/${encodeURIComponent(c.name.toLowerCase().replace(/\s+/g, "-"))}`,
-	seeMoreHref = `/categories`,
+	seeMoreHref = `/alle-kategorier`,
 }: {
 	suggestions: Suggestion[];
 	categories: CategoryLink[];
