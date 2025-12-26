@@ -59,7 +59,7 @@ export const EditDeliveryModal: React.FC<EditDeliveryModalProps> = ({
 					{t("cancel")}
 				</Button>
 				<Button
-					variant="default"
+					variant="greenSolid"
 					onClick={() => onSave(initialData)}>
 					{t("save")}
 				</Button>

@@ -389,8 +389,8 @@ export function BulkEditConfirmationModal({
 
 				<div className="flex gap-3 border-t border-[#E5E7E6] px-6 py-4">
 					<Button
-						variant="default"
-						className="flex-1 bg-[#009640] hover:bg-[#008036]"
+						variant="greenSolid"
+						className="flex-1"
 						onClick={handleConfirm}>
 						{t("updateUsers", { count: selectedUsers.length })}
 					</Button>

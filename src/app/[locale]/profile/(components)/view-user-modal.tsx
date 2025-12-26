@@ -156,8 +156,7 @@ export function ViewUserModal({
 
 				<div className="flex gap-3 border-t border-[#E5E7E6] px-6 py-4">
 					<Button
-						variant="default"
-						className="bg-[#009640] hover:bg-[#008036]"
+						variant="greenSolid"
 						onClick={() => {
 							onOpenChange(false);
 							onEdit?.();

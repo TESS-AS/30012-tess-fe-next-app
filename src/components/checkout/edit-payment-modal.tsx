@@ -78,7 +78,7 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
 					{t("cancel")}
 				</Button>
 				<Button
-					variant="default"
+					variant="greenSolid"
 					onClick={() =>
 						onSave({
 							method: paymentMethod,

@@ -559,7 +559,8 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 									)}
 									<Button
 										type="submit"
-										className="h-[50px] rounded-l-none rounded-r-lg border-0 bg-[#009640] px-5 hover:bg-[#007a2e]">
+										variant="greenSolid"
+										className="h-[50px] rounded-l-none rounded-r-lg border-0 px-5">
 										<Search className="h-5 w-5 text-white" />
 									</Button>
 								</form>

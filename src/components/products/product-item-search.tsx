@@ -190,11 +190,10 @@ export function ProductItem({
 
 							<Button
 								type="button"
+								variant="outlineGreen"
 								className={cn(
 									"mt-2 ml-auto self-center rounded-md px-5 py-2 text-sm font-medium transition-colors",
-									"border border-green-600 bg-white text-green-700",
-									"hover:border-green-700 hover:bg-green-700 hover:text-white",
-									"group-hover:border-green-600 group-hover:bg-green-600 group-hover:text-white",
+									"group-hover:border-green-700 group-hover:bg-green-700 group-hover:text-white",
 								)}
 								onClick={async (e) => {
 									e.stopPropagation();

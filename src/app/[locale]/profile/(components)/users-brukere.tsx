@@ -364,9 +364,8 @@ const UsersBrukere = () => {
 
 						<div className="flex gap-3">
 							<Button
-								variant="default"
-								onClick={() => setIsAddUserModalOpen(true)}
-								className="bg-[#009640] hover:bg-[#008036]">
+								variant="greenSolid"
+								onClick={() => setIsAddUserModalOpen(true)}>
 								<Plus className="mr-2 h-4 w-4" /> {t("addUser")}
 							</Button>
 						</div>

@@ -113,7 +113,7 @@ export const EditContactModal: React.FC<EditContactModalProps> = ({
 					{t("cancel")}
 				</Button>
 				<Button
-					variant="default"
+					variant="greenSolid"
 					onClick={handleSave}>
 					{t("save")}
 				</Button>

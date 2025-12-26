@@ -114,7 +114,7 @@ export const OrderTrackingModal: React.FC<OrderTrackingModalProps> = ({
 				</div>
 
 				<div className="flex gap-4 border-t border-[#C1C4C2] pt-4">
-					<Button variant="default">{t("buttons.orderDetails")}</Button>
+					<Button variant="greenSolid">{t("buttons.orderDetails")}</Button>
 					<Button
 						variant="outline"
 						className="font-medium"
