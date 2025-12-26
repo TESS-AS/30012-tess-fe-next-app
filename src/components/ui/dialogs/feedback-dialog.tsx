@@ -114,7 +114,8 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
 
 				<Button
 					disabled={!selectedType || !message.trim() || loading}
-					className="mt-6 w-full bg-green-600 text-white hover:bg-green-700"
+					variant="greenSolid"
+					className="mt-6 w-full"
 					onClick={handleSubmit}>
 					{loading ? "Sender..." : "Send tilbakemelding"}
 				</Button>

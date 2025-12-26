@@ -95,7 +95,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
 					<Button
 						onClick={handleSubmit}
 						disabled={rating === 0}
-						variant="default">
+						variant="greenSolid">
 						{t("submit")}
 					</Button>
 				</>

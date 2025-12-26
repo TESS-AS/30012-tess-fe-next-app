@@ -368,7 +368,8 @@ export function ProductVariantInfo({
 
 					<Button
 						disabled={adding || !selectedItemNumber}
-						className="rounded-md bg-green-600 px-4 text-white hover:bg-green-700 disabled:opacity-60"
+						variant="greenSolid"
+						className="rounded-md px-4 disabled:opacity-60"
 						onClick={handleAddToCart}>
 						{adding ? (
 							<>

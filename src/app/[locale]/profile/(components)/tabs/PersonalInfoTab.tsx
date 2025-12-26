@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 
+import { Button } from "@/components/ui/button";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import {
 	profileSchema,
@@ -99,11 +100,12 @@ export default function PersonalInfoTab() {
 				</div>
 
 				<div className="col-span-2 flex justify-end">
-					<button
+					<Button
 						type="submit"
-						className="rounded-full bg-green-600 px-6 py-2 font-semibold text-white">
+						variant="greenSolid"
+						className="rounded-full px-6 font-semibold">
 						Update Profile
-					</button>
+					</Button>
 				</div>
 			</form>
 		</div>

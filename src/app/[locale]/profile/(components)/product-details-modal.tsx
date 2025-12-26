@@ -97,9 +97,9 @@ export default function ProductDetailsModal({
 					</div>
 
 					<Button
-						variant="default"
+						variant="greenSolid"
 						onClick={onClose}
-						className="w-full bg-[#009640]">
+						className="w-full">
 						{t("closeWindow")}
 					</Button>
 				</div>

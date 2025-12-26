@@ -117,10 +117,15 @@ export default function TypeModal({
 							toast.error(t("errorMessage"));
 						}
 					}}
-					className={cn("w-fit text-white", {
-						"bg-[#009640] hover:bg-[#005522]":
+					variant={
+						editAll || dimensionTypes.some((d) => d.active)
+							? "greenSolid"
+							: undefined
+					}
+					className={cn("w-fit", {
+						"hover:bg-green-900":
 							editAll || dimensionTypes.some((d) => d.active),
-						"cursor-not-allowed bg-gray-400":
+						"cursor-not-allowed bg-gray-400 text-white":
 							!editAll && !dimensionTypes.some((d) => d.active),
 					})}
 					disabled={!editAll && !dimensionTypes.some((d) => d.active)}>

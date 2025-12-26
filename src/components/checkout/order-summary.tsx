@@ -136,6 +136,7 @@ export default function OrderSummary({
 					HIDE_CHECKOUT_FOR_SPECIFIC_CUSTOMER_NUMBER &&
 					(!profile?.punchout ? (
 						<Button
+							variant="greenSolid"
 							className="mt-6 w-full"
 							disabled={
 								isCartEmpty ||

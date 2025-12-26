@@ -350,7 +350,8 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 				<div className="flex justify-between gap-4 border-t border-[#E8EAE9] pt-6">
 					<Button
 						type="submit"
-						className="flex-1 bg-[#009640] hover:bg-[#008036]">
+						variant="greenSolid"
+						className="flex-1">
 						+ {t("addUser")}
 					</Button>
 					<Button

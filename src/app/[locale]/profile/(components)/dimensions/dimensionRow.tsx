@@ -244,7 +244,8 @@ export default function DimensionRow(props: Props): ReactElement {
 								</Button>
 								<Button
 									size="sm"
-									className="h-8 bg-[#009640] px-3 text-white hover:bg-[#005522]"
+									variant="greenSolid"
+									className="h-8 px-3 hover:bg-green-900"
 									onClick={saveEdit}>
 									{t("save")}
 								</Button>

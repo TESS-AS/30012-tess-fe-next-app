@@ -48,8 +48,7 @@ export function ConfirmChangesModal({
 						{t("cancel")}
 					</Button>
 					<Button
-						variant="default"
-						className="bg-[#009640] hover:bg-[#008036]"
+						variant="greenSolid"
 						onClick={() => {
 							onConfirm();
 							onOpenChange(false);
