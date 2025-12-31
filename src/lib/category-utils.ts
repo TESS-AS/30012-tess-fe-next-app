@@ -150,3 +150,28 @@ export function normalizeFilterResponse(
 
 	return result;
 }
+
+/**
+ * Gets the image URL for a category from mediaId or image property
+ */
+export function getCategoryImage(category: Category): string | null {
+	if (
+		(category as any).mediaId &&
+		Array.isArray((category as any).mediaId) &&
+		(category as any).mediaId.length > 0
+	) {
+		const media = (category as any).mediaId[0];
+		if (media?.url) return media.url;
+	}
+
+	if (category.image) return category.image;
+
+	return null;
+}
+
+/**
+ * Gets the count of subcategories for a category
+ */
+export function getSubcategoryCount(category: Category): number {
+	return category.subcategories?.length || 0;
+}

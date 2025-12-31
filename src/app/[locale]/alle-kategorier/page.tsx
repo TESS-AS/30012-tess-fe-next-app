@@ -3,30 +3,12 @@
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCategories } from "@/lib/CategoriesProvider";
+import { getCategoryImage, getSubcategoryCount } from "@/lib/category-utils";
 import { Category } from "@/types/categories.types";
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-
-function getCategoryImage(category: Category): string | null {
-	if (
-		(category as any).mediaId &&
-		Array.isArray((category as any).mediaId) &&
-		(category as any).mediaId.length > 0
-	) {
-		const media = (category as any).mediaId[0];
-		if (media?.url) return media.url;
-	}
-
-	if (category.image) return category.image;
-
-	return null;
-}
-
-function getSubcategoryCount(category: Category): number {
-	return category.subcategories?.length || 0;
-}
 
 export default function CategoriesPage() {
 	const { categories, loading, error } = useCategories();
