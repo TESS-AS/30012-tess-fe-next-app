@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { ProductGrid } from "@/components/products/product-grid";
 import { useBreadcrumbs } from "@/hooks/useBreadcrumbs";
-import { useGetAssortments } from "@/hooks/useGetAssortments";
-import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { useIsBaneNorKatalog } from "@/hooks/useIsBaneNorKatalog";
+import { getCategoryImage } from "@/lib/category-utils";
 import { Category } from "@/types/categories.types";
 import { IProduct } from "@/types/product.types";
 import Link from "next/link";
@@ -27,21 +27,6 @@ interface CategoryContentProps {
 	}[];
 }
 
-function getCategoryImage(category: Category): string | null {
-	if (
-		(category as any).mediaId &&
-		Array.isArray((category as any).mediaId) &&
-		(category as any).mediaId.length > 0
-	) {
-		const media = (category as any).mediaId[0];
-		if (media?.url) return media.url;
-	}
-
-	if (category.image) return category.image;
-
-	return null;
-}
-
 export default function CategoryContent({
 	categoryData,
 	filters,
@@ -51,8 +36,7 @@ export default function CategoryContent({
 }: CategoryContentProps) {
 	const t = useTranslations();
 	const breadcrumbs = useBreadcrumbs(segment);
-	const { data: profile } = useGetProfileData();
-	const { assortments } = useGetAssortments(!!profile);
+	const isBaneNorKatalog = useIsBaneNorKatalog();
 
 	// Check if user came from categories page
 	const [fromCategoriesPage, setFromCategoriesPage] = useState(false);
@@ -88,21 +72,6 @@ export default function CategoryContent({
 
 		return breadcrumbs;
 	}, [breadcrumbs, categoryData, segment, t]);
-
-	// Check if current assortment is "Bane NOR Katalog"
-	const isBaneNorKatalog = useMemo(() => {
-		if (!assortments.length) return false;
-		const assortmentNumber = profile?.defaultAssortmentNumber;
-		if (!assortmentNumber) return false;
-		const currentAssortment = assortments.find(
-			(a: any) => a.assortmentnumber === assortmentNumber,
-		);
-		return (
-			currentAssortment?.nameNo === "Bane NOR Katalog" ||
-			currentAssortment?.nameEn === "Bane NOR Katalog" ||
-			currentAssortment?.assortmentname === "Bane NOR Katalog"
-		);
-	}, [profile, assortments]);
 
 	const hasValidInput = !!categoryData?.groupId || !!query;
 

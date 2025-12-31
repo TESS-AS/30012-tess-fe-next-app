@@ -12,8 +12,8 @@ import {
 	NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useGetAssortments } from "@/hooks/useGetAssortments";
-import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { useIsBaneNorKatalog } from "@/hooks/useIsBaneNorKatalog";
+import { getCategoryImage } from "@/lib/category-utils";
 import { cn } from "@/lib/utils";
 import { useNavMenuStore } from "@/stores/useNavMenuStore";
 import type { Category } from "@/types/categories.types";
@@ -34,25 +34,7 @@ export default function CategoryNavigationMenu({
 	const [query, setQuery] = useState("");
 	const [openMenu, setOpenMenu] = useState<any>(false);
 	const { setIsOpen } = useNavMenuStore();
-	const { data: profile } = useGetProfileData();
-	const { assortments } = useGetAssortments(!!profile);
-
-	// Check if current assortment is "Bane NOR Katalog"
-	// Use selectedAssortment prop if available (for immediate updates), otherwise fall back to profile
-	const isBaneNorKatalog = React.useMemo(() => {
-		if (!assortments.length) return false;
-		const assortmentNumber =
-			selectedAssortment || profile?.defaultAssortmentNumber;
-		if (!assortmentNumber) return false;
-		const currentAssortment = assortments.find(
-			(a: any) => a.assortmentnumber === assortmentNumber,
-		);
-		return (
-			currentAssortment?.nameNo === "Bane NOR Katalog" ||
-			currentAssortment?.nameEn === "Bane NOR Katalog" ||
-			currentAssortment?.assortmentname === "Bane NOR Katalog"
-		);
-	}, [selectedAssortment, profile, assortments]);
+	const isBaneNorKatalog = useIsBaneNorKatalog(selectedAssortment);
 
 	return (
 		<NavigationMenu
@@ -89,32 +71,34 @@ export default function CategoryNavigationMenu({
 										</NavigationMenuTrigger>
 										<NavigationMenuContent>
 											<ul className="xs:columns-2 container min-h-[500px] min-w-[calc(100vw-200px)] gap-x-1 overflow-y-scroll p-2 sm:columns-3 md:columns-4">
-												{category.subcategories.map((subcategory) => (
-													<li
-														key={subcategory.slug}
-														className="mb-8 break-inside-avoid">
-														<div className="relative mb-2">
-															{subcategory.image && (
-																<img
-																	src={subcategory.image}
-																	alt={subcategory.name}
-																	className="absolute top-0 left-5 h-15 w-15 object-contain"
-																/>
-															)}
-															<div
-																className={`text-md font-bold ${subcategory.image ? "pl-24" : ""}`}>
-																<Link
-																	onClick={() => setOpenMenu(false)}
-																	href={`/${category.slug}/${subcategory.slug}`}
-																	className="hover:underline">
-																	{subcategory.name}
-																</Link>
+												{category.subcategories.map((subcategory) => {
+													const subcategoryImage = getCategoryImage(subcategory);
+													return (
+														<li
+															key={subcategory.slug}
+															className="mb-8 break-inside-avoid">
+															<div className="relative mb-2">
+																{subcategoryImage && (
+																	<img
+																		src={subcategoryImage}
+																		alt={subcategory.name}
+																		className="absolute top-0 left-5 h-15 w-15 object-contain"
+																	/>
+																)}
+																<div
+																	className={`text-md font-bold ${subcategoryImage ? "pl-24" : ""}`}>
+																	<Link
+																		onClick={() => setOpenMenu(false)}
+																		href={`/${category.slug}/${subcategory.slug}`}
+																		className="hover:underline">
+																		{subcategory.name}
+																	</Link>
+																</div>
 															</div>
-														</div>
-														{Array.isArray(subcategory.subcategories) &&
-															subcategory.subcategories && (
-																<ul
-																	className={`space-y-1 ${subcategory.image ? "pl-24" : ""}`}>
+															{Array.isArray(subcategory.subcategories) &&
+																subcategory.subcategories && (
+																	<ul
+																		className={`space-y-1 ${subcategoryImage ? "pl-24" : ""}`}>
 																	{subcategory.subcategories.map((child) => (
 																		<li key={child.slug}>
 																			<Link
@@ -138,8 +122,9 @@ export default function CategoryNavigationMenu({
 																	)}
 																</ul>
 															)}
-													</li>
-												))}
+														</li>
+													);
+												})}
 											</ul>
 										</NavigationMenuContent>
 									</>
@@ -156,7 +141,9 @@ export default function CategoryNavigationMenu({
 						))}
 				{!loading && categories?.length > 0 && (
 					<NavigationMenuItem className="flex items-center">
-						<NavigationMenuLink asChild>
+						<NavigationMenuLink
+							asChild
+							className="hover:!bg-transparent focus:!bg-transparent">
 							<div className="flex flex-shrink-0 flex-nowrap items-center overflow-hidden text-ellipsis whitespace-nowrap">
 								<Link
 									href="/alle-kategorier"
