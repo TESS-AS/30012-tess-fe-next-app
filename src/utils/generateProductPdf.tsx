@@ -30,6 +30,75 @@ interface ProductPdfData {
 	locale: string;
 }
 
+// Helper function to shorten attribute names for PDF headers
+const shortenAttributeName = (name: string, maxLength: number = 10): string => {
+	if (!name) return "";
+	if (name.length <= maxLength) return name;
+
+	// Common abbreviations (both Norwegian and English)
+	const abbreviations: Record<string, string> = {
+		// English
+		diameter: "Dia",
+		length: "Len",
+		width: "Wid",
+		height: "Hgt",
+		weight: "Wgt",
+		color: "Col",
+		material: "Mat",
+		size: "Sz",
+		thickness: "Thk",
+		pressure: "Pres",
+		temperature: "Temp",
+		standard: "Std",
+		certification: "Cert",
+		content: "Cont",
+		unit: "Unt",
+		number: "No",
+		code: "Cd",
+		type: "Typ",
+		// Norwegian
+		lengde: "Len",
+		bredde: "Brd",
+		høyde: "Høy",
+		vekt: "Vkt",
+		farge: "Frg",
+		materiale: "Mat",
+		størrelse: "Stør",
+		tykkelse: "Tyk",
+		trykk: "Tryk",
+		temperatur: "Temp",
+		sertifisering: "Cert",
+		innhold: "Innh",
+		enhet: "Enh",
+		nummer: "Nr",
+		kode: "Kd",
+	};
+
+	// Check if the name contains any of these words
+	const lowerName = name.toLowerCase();
+	for (const [key, abbrev] of Object.entries(abbreviations)) {
+		if (lowerName.includes(key)) {
+			const shortened = name.replace(new RegExp(key, "gi"), abbrev);
+			// If still too long, truncate
+			if (shortened.length <= maxLength) return shortened;
+		}
+	}
+
+	// If no abbreviation found or still too long, truncate intelligently
+	// Try to keep important parts (first word, numbers, etc.)
+	const words = name.split(/\s+/);
+	if (words.length > 1) {
+		// Take first word and abbreviate rest
+		const firstWord = words[0];
+		if (firstWord.length <= maxLength - 2) {
+			return firstWord.substring(0, maxLength - 2) + "..";
+		}
+	}
+
+	// Final fallback: truncate and add ellipsis
+	return name.substring(0, maxLength - 1) + ".";
+};
+
 const styles = StyleSheet.create({
 	page: {
 		padding: 40,
@@ -46,7 +115,9 @@ const styles = StyleSheet.create({
 	},
 	productImage: {
 		width: 150,
+		maxWidth: 150,
 		height: "auto",
+		maxHeight: 250,
 		objectFit: "contain",
 		marginTop: 0,
 	},
@@ -160,25 +231,25 @@ const styles = StyleSheet.create({
 		width: "100%",
 	},
 	tableCell: {
-		paddingHorizontal: 8,
-		fontSize: 11,
+		paddingHorizontal: 4,
+		fontSize: 10,
 		color: "#374151",
 		fontWeight: 400,
 		flex: 1,
 	},
 	tableCellPrice: {
-		paddingHorizontal: 8,
-		fontSize: 11,
+		paddingHorizontal: 4,
+		fontSize: 10,
 		color: "#374151",
 		fontWeight: 400,
 		flex: 1,
 		textAlign: "right",
 	},
 	tableHeaderCell: {
-		paddingHorizontal: 8,
-		fontSize: 11,
+		paddingHorizontal: 4,
+		fontSize: 9,
 		color: "#6B7280",
-		fontWeight: 400,
+		fontWeight: 600,
 		textTransform: "uppercase",
 		flex: 1,
 	},
@@ -250,9 +321,7 @@ const ProductPdfDocument = ({ data }: { data: ProductPdfData }) => {
 						<Text style={styles.productName}>{name}</Text>
 						<View style={{ marginBottom: 4 }}>
 							<Text style={styles.productMeta}>Varenummer:</Text>
-							<Text style={styles.productMetaValue}>
-								{itemNumber || "-"}
-							</Text>
+							<Text style={styles.productMetaValue}>{itemNumber || "-"}</Text>
 						</View>
 						<View style={{ marginBottom: 4 }}>
 							<Text style={styles.productMeta}>GTIN:</Text>
@@ -300,22 +369,22 @@ const ProductPdfDocument = ({ data }: { data: ProductPdfData }) => {
 					<View style={styles.section}>
 						<Text style={styles.sectionTitle}>Varianter</Text>
 						<View style={styles.tableHeader}>
-							<Text style={styles.tableHeaderCell}>VARENUMMER</Text>
-							{attributesWithData.length > 0 ? (
-								<Text style={styles.tableHeaderCell}>
-									{attributesWithData[0].toUpperCase()}
+							<Text style={[styles.tableHeaderCell, { flex: 1.2 }]}>VN</Text>
+							{attributesWithData.map((attrName, idx) => (
+								<Text
+									key={idx}
+									style={styles.tableHeaderCell}>
+									{shortenAttributeName(attrName, 10).toUpperCase()}
 								</Text>
-							) : (
+							))}
+							{attributesWithData.length === 0 && (
 								<Text style={styles.tableHeaderCell}>-</Text>
 							)}
-							{attributesWithData.length > 1 ? (
-								<Text style={styles.tableHeaderCell}>
-									{attributesWithData[1].toUpperCase()}
-								</Text>
-							) : (
-								<Text style={styles.tableHeaderCell}>-</Text>
-							)}
-							<Text style={[styles.tableHeaderCell, { textAlign: "right" }]}>
+							<Text
+								style={[
+									styles.tableHeaderCell,
+									{ textAlign: "right", flex: 0.8 },
+								]}>
 								PRIS
 							</Text>
 						</View>
@@ -323,26 +392,28 @@ const ProductPdfDocument = ({ data }: { data: ProductPdfData }) => {
 							<View
 								key={index}
 								style={styles.tableRow}>
-								<Text style={styles.tableCell}>{variant.itemNumber}</Text>
-								<Text style={styles.tableCell}>
-									{attributesWithData.length > 0
-										? variant.attributes?.[attributesWithData[0]] &&
-											variant.attributes[attributesWithData[0]] !== "-" &&
-											variant.attributes[attributesWithData[0]].trim() !== ""
-											? variant.attributes[attributesWithData[0]]
-											: "-"
-										: "-"}
+								<Text style={[styles.tableCell, { flex: 1.2 }]}>
+									{variant.itemNumber}
 								</Text>
-								<Text style={styles.tableCell}>
-									{attributesWithData.length > 1
-										? variant.attributes?.[attributesWithData[1]] &&
-											variant.attributes[attributesWithData[1]] !== "-" &&
-											variant.attributes[attributesWithData[1]].trim() !== ""
-											? variant.attributes[attributesWithData[1]]
-											: "-"
-										: "-"}
-								</Text>
-								<Text style={styles.tableCellPrice}>
+								{attributesWithData.map((attrName, idx) => {
+									const value =
+										variant.attributes?.[attrName] &&
+										variant.attributes[attrName] !== "-" &&
+										variant.attributes[attrName].trim() !== ""
+											? variant.attributes[attrName]
+											: "-";
+									return (
+										<Text
+											key={idx}
+											style={styles.tableCell}>
+											{value}
+										</Text>
+									);
+								})}
+								{attributesWithData.length === 0 && (
+									<Text style={styles.tableCell}>-</Text>
+								)}
+								<Text style={[styles.tableCellPrice, { flex: 0.8 }]}>
 									{variant.price && variant.price > 0
 										? formatNorwegianCurrency(variant.price)
 										: "-"}

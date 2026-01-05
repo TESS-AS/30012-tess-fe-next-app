@@ -451,6 +451,89 @@ export function ProductInfo({
 				variantData?.itemVariants?.[0]?.itemNumber?.toString() ||
 				"-";
 
+			// Extract variants and prepare variant data for PDF
+			const itemVariants = variantData?.itemVariants || [];
+			let variants: Array<{
+				itemNumber: string;
+				attributes?: Record<string, string>;
+				price?: number;
+			}> = [];
+			let visibleAttributeNames: string[] = [];
+
+			if (itemVariants.length > 0 && columnAttributes) {
+				// Get all attribute names from columnAttributes (similar to ProductVariantTable)
+				const allAttributeNames = Array.from(
+					new Set(
+						itemVariants.flatMap(
+							(variant: any) =>
+								columnAttributes?.[variant.itemNumber]?.attributes?.map(
+									(a: any) => a.name,
+								) ?? [],
+						),
+					),
+				).filter((name): name is string => typeof name === "string" && name.trim() !== "");
+
+				// Filter out SAP NR for non-SAP customers
+				const filteredAttributeNames = isSapCustomer
+					? allAttributeNames
+					: allAttributeNames.filter(
+							(name) =>
+								name.toLowerCase() !== "sap nr" &&
+								name.toLowerCase() !== "sap number",
+						);
+
+				// Take first 4-5 attribute names for PDF table columns (more columns with shorter headers)
+				visibleAttributeNames = filteredAttributeNames.slice(0, 5);
+
+				// Fetch prices for all variants
+				const variantPrices: Record<string, number> = {};
+				if (profile && itemVariants.length > 0) {
+					try {
+						const priceRequests = itemVariants.map((variant: any) => ({
+							itemNumber: variant.itemNumber?.toString() || "",
+							quantity: 1,
+							warehouseNumber: profile.defaultWarehouseNumber || "",
+						}));
+
+						const priceResults = await calculateItemPrice(
+							priceRequests,
+							profile.defaultCustomerNumber,
+							profile.defaultCompanyNumber,
+						);
+
+						priceResults?.forEach((result: any) => {
+							if (result.itemNumber && result.bestPrice !== undefined) {
+								variantPrices[result.itemNumber.toString()] =
+									result.bestPrice || 0;
+							}
+						});
+					} catch (err) {
+						console.error("Error fetching variant prices for PDF:", err);
+					}
+				}
+
+				// Map variants to PDF format
+				variants = itemVariants.map((variant: any) => {
+					const variantItemNumber = variant.itemNumber?.toString() || "";
+					const attrs =
+						columnAttributes?.[variant.itemNumber]?.attributes || [];
+
+					// Create attributes object from columnAttributes
+					const attributes: Record<string, string> = {};
+					attrs.forEach((attr: any) => {
+						if (attr.name && attr.valueDef) {
+							attributes[attr.name] = attr.valueDef;
+						}
+					});
+
+					return {
+						itemNumber: variantItemNumber,
+						attributes,
+						price: variantPrices[variantItemNumber] || 0,
+					};
+				});
+			}
+
 			await generateProductPdf({
 				name,
 				itemNumber: itemNumberForPdf,
@@ -459,8 +542,8 @@ export function ProductInfo({
 				application: application || "",
 				notes: variantData?.description?.itemRemarks || "",
 				specifications,
-				variants: [],
-				visibleAttributeNames: [],
+				variants,
+				visibleAttributeNames,
 				locale,
 			});
 
