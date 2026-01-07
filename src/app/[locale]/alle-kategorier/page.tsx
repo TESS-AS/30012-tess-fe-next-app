@@ -6,7 +6,6 @@ import { useCategories } from "@/lib/CategoriesProvider";
 import { getCategoryImage, getSubcategoryCount } from "@/lib/category-utils";
 import { Category } from "@/types/categories.types";
 import { ChevronRight } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
@@ -81,17 +80,30 @@ export default function CategoriesPage() {
 							}}
 							className="group relative flex flex-col rounded-lg border border-gray-200 bg-white p-6 transition-all hover:shadow-md">
 							{/* Category Icon */}
-							<div className="mb-4 flex h-24 items-center justify-center">
+							<div className="mb-4 flex h-[150px] items-center justify-center">
 								{categoryImage ? (
-									<Image
-										src={categoryImage}
-										alt={category.name}
-										width={80}
-										height={80}
-										className="object-contain opacity-60"
-									/>
+									<div className="relative h-[150px] w-[150px]">
+										{/* Default gray image */}
+										<img
+											src={categoryImage}
+											alt={category.name}
+											width={150}
+											height={150}
+											className="absolute inset-0 h-full w-full object-contain opacity-60 transition-opacity duration-300 group-hover:opacity-0"
+										/>
+										{/* Green image on hover */}
+										{category.imageGreen && (
+											<img
+												src={category.imageGreen}
+												alt={category.name}
+												width={150}
+												height={150}
+												className="absolute inset-0 h-full w-full object-contain opacity-0 transition-opacity duration-300 group-hover:opacity-60"
+											/>
+										)}
+									</div>
 								) : (
-									<div className="h-20 w-20 rounded bg-gray-100 opacity-60" />
+									<div className="h-[150px] w-[150px] rounded bg-gray-100 opacity-60" />
 								)}
 							</div>
 
