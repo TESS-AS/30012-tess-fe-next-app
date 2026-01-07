@@ -17,12 +17,12 @@ export function useSearchQuery({ query, enabled = true }: UseSearchQueryProps) {
 			return response.data;
 		},
 		enabled: enabled && query.length > 0,
-		staleTime: 30 * 1000,
+		staleTime: 0, // Always consider data stale for search to get fresh results
 		gcTime: 2 * 60 * 1000,
 		refetchOnMount: false,
 		refetchOnReconnect: false,
 		placeholderData: (previousData) => previousData,
-		notifyOnChangeProps: ["data", "error"],
+		notifyOnChangeProps: ["data", "error", "isLoading", "isFetching"],
 	});
 
 	return {
