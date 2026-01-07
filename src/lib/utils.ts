@@ -46,6 +46,8 @@ export function mapCategoryTree(node: RawCategory, locale: string): Category {
 			.replace(/^-|-$/g, ""),
 		groupId: node.groupId,
 		image: imageUrl,
+		imageGray: (node as any).imageGray,
+		imageGreen: (node as any).imageGreen,
 		subcategories:
 			node.children?.map((child) => mapCategoryTree(child, locale)) ?? [],
 	};

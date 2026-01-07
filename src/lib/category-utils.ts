@@ -153,8 +153,12 @@ export function normalizeFilterResponse(
 
 /**
  * Gets the image URL for a category from mediaId or image property
+ * Returns imageGray by default (for hover effect, use imageGreen)
  */
 export function getCategoryImage(category: Category): string | null {
+	// Prefer imageGray as default (for initial display)
+	if (category.imageGray) return category.imageGray;
+
 	if (
 		(category as any).mediaId &&
 		Array.isArray((category as any).mediaId) &&
