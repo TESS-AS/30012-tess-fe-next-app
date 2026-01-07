@@ -53,24 +53,14 @@ export function useSearch(query: string) {
 		}
 	}, []);
 
-	const debouncedFetchSearch = useCallback(
-		debounce((searchQuery: string) => fetchSearch(searchQuery), 15),
-		[fetchSearch],
-	);
-
 	useEffect(() => {
 		if (!query) {
 			setData(null);
 			return;
 		}
 
-		debouncedFetchSearch(query);
-
-		return () => {
-			// Cleanup any pending debounced calls when the component unmounts
-			debouncedFetchSearch.cancel?.();
-		};
-	}, [query, debouncedFetchSearch]);
+		fetchSearch(query);
+	}, [query, fetchSearch]);
 
 	return { data, isLoading, error };
 }

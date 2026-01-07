@@ -10,7 +10,6 @@ export function useInstantSearch({
 	minQueryLength = 2,
 }: UseInstantSearchProps = {}) {
 	const [query, setQuery] = useState("");
-	const [showLoading, setShowLoading] = useState(false);
 
 	const shouldSearch = query.length >= minQueryLength;
 
@@ -24,16 +23,7 @@ export function useInstantSearch({
 		return searchQuery.data;
 	}, [searchQuery.data, shouldSearch]);
 
-	useEffect(() => {
-		if (searchQuery.isLoading && !searchQuery.data) {
-			const timer = setTimeout(() => setShowLoading(true), 100);
-			return () => clearTimeout(timer);
-		} else {
-			setShowLoading(false);
-		}
-	}, [searchQuery.isLoading, searchQuery.data]);
-
-	const isLoading = shouldSearch ? showLoading : false;
+	const isLoading = shouldSearch ? searchQuery.isLoading : false;
 
 	return {
 		query,
