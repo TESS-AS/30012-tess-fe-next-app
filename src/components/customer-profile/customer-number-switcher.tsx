@@ -16,7 +16,9 @@ import {
 import { useGetAssortments } from "@/hooks/useGetAssortments";
 import { useGetCompanies } from "@/hooks/useGetCompanies";
 import { useGetCustomers } from "@/hooks/useGetCustomers";
+import { profileKeys } from "@/hooks/useGetProfileData";
 import { useGetWarehouses } from "@/hooks/useGetWarehouse";
+import { triggerProfileRefetch } from "@/hooks/usePunchoutProfile";
 import { useCategories } from "@/lib/CategoriesProvider";
 import axiosClient from "@/services/axiosClient";
 import { ProfileUser } from "@/types/user.types";
@@ -110,6 +112,13 @@ export default function CustomerNumberSwitcher({
 			// Invalidate and refetch all product and price queries since company/customer/warehouse context changed
 			// This ensures prices and products are immediately refetched with the new context
 			await Promise.all([
+				// Invalidate profile query to get updated default values
+				queryClient.invalidateQueries({
+					queryKey: profileKeys.all,
+					refetchType: "active",
+				}),
+				// Trigger punchout profile refetch if applicable
+				Promise.resolve(triggerProfileRefetch()),
 				queryClient.invalidateQueries({
 					queryKey: ["productPrice"],
 					refetchType: "active", // Immediately refetch active queries
