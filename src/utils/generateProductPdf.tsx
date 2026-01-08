@@ -307,6 +307,7 @@ const ProductPdfDocument = ({ data }: { data: ProductPdfData }) => {
 
 	return (
 		<Document>
+			{/* First Page: Product Info and Specifications */}
 			<Page
 				size="A4"
 				style={styles.page}>
@@ -365,7 +366,22 @@ const ProductPdfDocument = ({ data }: { data: ProductPdfData }) => {
 					</View>
 				)}
 
-				{variants.length > 0 && (
+				<View style={styles.footer}>
+					<Text style={styles.timestamp}>Print: {timestamp}</Text>
+					{logoUrl && (
+						<Image
+							src={logoUrl}
+							style={styles.logo}
+						/>
+					)}
+				</View>
+			</Page>
+
+			{/* Second Page: Variant Table (always on page 2) */}
+			{variants.length > 0 && (
+				<Page
+					size="A4"
+					style={styles.page}>
 					<View style={styles.section}>
 						<Text style={styles.sectionTitle}>Varianter</Text>
 						<View style={styles.tableHeader}>
@@ -421,18 +437,18 @@ const ProductPdfDocument = ({ data }: { data: ProductPdfData }) => {
 							</View>
 						))}
 					</View>
-				)}
 
-				<View style={styles.footer}>
-					<Text style={styles.timestamp}>Print: {timestamp}</Text>
-					{logoUrl && (
-						<Image
-							src={logoUrl}
-							style={styles.logo}
-						/>
-					)}
-				</View>
-			</Page>
+					<View style={styles.footer}>
+						<Text style={styles.timestamp}>Print: {timestamp}</Text>
+						{logoUrl && (
+							<Image
+								src={logoUrl}
+								style={styles.logo}
+							/>
+						)}
+					</View>
+				</Page>
+			)}
 		</Document>
 	);
 };
