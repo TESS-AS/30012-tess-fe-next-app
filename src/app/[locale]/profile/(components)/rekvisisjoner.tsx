@@ -70,6 +70,7 @@ export function Rekvisisjoner() {
 	const t = useTranslations("Rekvisisjoner");
 	const router = useRouter();
 	const { data: profile } = usePunchoutProfile();
+	const isCustomerRole = (profile?.role ?? "").toLowerCase() === "customer";
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedStatus, setSelectedStatus] = useState<string>("Alle");
@@ -82,7 +83,7 @@ export function Rekvisisjoner() {
 	>([]);
 
 	const { requisitions, loading, error, getRequisitions } = useRequisitions(
-		profile?.defaultCustomerNumber ?? "110667",
+		profile?.defaultCustomerNumber ?? "",
 		selectedStatus,
 	);
 
@@ -159,6 +160,7 @@ export function Rekvisisjoner() {
 							<Button
 								variant="outline"
 								size="sm"
+								disabled={isCustomerRole}
 								className="border-[#009640] text-[#009640] hover:border-[#005522] hover:bg-[#005522] hover:text-white"
 								onClick={async () => {
 									setSelectedOrder(rekvisisjon);
@@ -197,6 +199,7 @@ export function Rekvisisjoner() {
 							<Button
 								variant="outline"
 								size="sm"
+								disabled={isCustomerRole}
 								className="border-[#C81E1E] text-[#C81E1E] hover:border-[#9B1C1C] hover:bg-[#9B1C1C] hover:text-white"
 								onClick={async () => {
 									try {
@@ -223,8 +226,10 @@ export function Rekvisisjoner() {
 						<Button
 							variant="outline"
 							size="sm"
+							disabled={!isCustomerRole}
 							className="border-[#C1C4C2] text-[#0F1912] hover:bg-[#E8EAE9] hover:text-[#009640]"
 							onClick={async () => {
+								if (!isCustomerRole) return;
 								try {
 									await updateRequisition({
 										customerNumber:

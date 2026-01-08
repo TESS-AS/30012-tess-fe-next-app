@@ -1,5 +1,5 @@
 import {
-	RequisitionResponse,
+	RequisitionListResponse,
 	UpdateRequisitionPayload,
 	UpdateRequisitionResponse,
 } from "@/types/requisitions";
@@ -9,7 +9,7 @@ import axiosInstance from "./axiosClient";
 export const getRequisition = async (
 	customerNumber: string,
 	status?: string,
-): Promise<RequisitionResponse[]> => {
+): Promise<RequisitionListResponse> => {
 	try {
 		const url = `/requisition/getRequisition/${customerNumber}`;
 		const response = await axiosInstance.get(url, {

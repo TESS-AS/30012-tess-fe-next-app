@@ -9,6 +9,7 @@ import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type { SavedAddress } from "../../types/address";
+import { useState } from "react";
 
 interface AddressSelectorProps {
 	savedAddresses: SavedAddress[];
@@ -22,8 +23,11 @@ export const AddressSelector = ({
 	onAddNewClick,
 }: AddressSelectorProps) => {
 	const t = useTranslations("Checkout.modals.address.selector");
+	const [open, setOpen] = useState(false);
 	return (
 		<Select
+			open={open}
+			onOpenChange={setOpen}
 			onValueChange={(value) => {
 				const selectedAddress = savedAddresses.find(
 					(addr) => addr.id === value,
@@ -49,9 +53,11 @@ export const AddressSelector = ({
 							<span className="block truncate">
 								{addr.name} - {addr.street} {addr.houseNumber}
 							</span>
-							<span className="absolute top-1/2 right-2 -translate-y-1/2 rounded bg-[#DEF7EC] px-2 py-0.5 text-xs font-medium text-[#005522]">
-								{t("user")}
-							</span>
+							{open && (
+								<span className="absolute top-1/2 right-2 -translate-y-1/2 rounded bg-[#DEF7EC] px-2 py-0.5 text-xs font-medium text-[#005522]">
+									{t("user")}
+								</span>
+							)}
 						</SelectItem>
 					))}
 
@@ -68,9 +74,11 @@ export const AddressSelector = ({
 							<span className="block truncate">
 								{addr.name} - {addr.street} {addr.houseNumber}
 							</span>
-							<span className="absolute top-1/2 right-2 -translate-y-1/2 rounded bg-[#DEF7EC] px-2 py-0.5 text-xs font-medium text-[#005522]">
-								{t("customer")}
-							</span>
+							{open && (
+								<span className="absolute top-1/2 right-2 -translate-y-1/2 rounded bg-[#DEF7EC] px-2 py-0.5 text-xs font-medium text-[#005522]">
+									{t("customer")}
+								</span>
+							)}
 						</SelectItem>
 					))}
 
@@ -87,9 +95,11 @@ export const AddressSelector = ({
 							<span className="block truncate">
 								{addr.name} - {addr.street} {addr.houseNumber}
 							</span>
-							<span className="absolute top-1/2 right-2 -translate-y-1/2 rounded bg-[#DEF7EC] px-2 py-0.5 text-xs font-medium text-[#005522]">
-								{t("organization")}
-							</span>
+							{open && (
+								<span className="absolute top-1/2 right-2 -translate-y-1/2 rounded bg-[#DEF7EC] px-2 py-0.5 text-xs font-medium text-[#005522]">
+									{t("organization")}
+								</span>
+							)}
 						</SelectItem>
 					))}
 			</SelectContent>

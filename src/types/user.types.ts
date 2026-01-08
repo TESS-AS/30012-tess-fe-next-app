@@ -17,6 +17,7 @@ export interface ProfileUser {
 	defaultCompanyNumber: string;
 	defaultWarehouseNumber: string;
 	punchout: boolean;
+	role: string;
 }
 
 export interface UserAddress {

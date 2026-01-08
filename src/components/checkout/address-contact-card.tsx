@@ -191,12 +191,6 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 							{t("title")}
 						</h2>
 					</div>
-					{editMode && (
-						<div className="flex items-center gap-1 rounded bg-[#FDFDEA] px-3 py-2 text-xs font-bold text-[#633112] hover:bg-transparent">
-							<SquarePen className="h-4 w-4" />
-							{t("edit")}
-						</div>
-					)}
 				</div>
 
 				{!editMode ? (

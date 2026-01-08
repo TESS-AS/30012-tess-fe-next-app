@@ -182,6 +182,36 @@ export function BulkEditConfirmationModal({
 	const [selectedWarehouses, setSelectedWarehouses] = useState<string[]>([]);
 	const [selectedCompany, setSelectedCompany] = useState<string>("");
 
+	useEffect(() => {
+		if (!open || selectedUsers.length === 0) return;
+
+		const customerAccessSet = new Set<string>();
+		const catalogSet = new Set<string>();
+		const warehouseSet = new Set<string>();
+
+		selectedUsers.forEach((user) => {
+			user.customerAccess?.forEach((customer) => {
+				if (customer) customerAccessSet.add(customer);
+			});
+			user.catalog?.forEach((catalog) => {
+				if (catalog) catalogSet.add(catalog);
+			});
+			user.warehouse?.forEach((warehouse) => {
+				if (warehouse) warehouseSet.add(warehouse);
+			});
+		});
+
+		setSelectedCustomers(Array.from(customerAccessSet));
+		setSelectedCatalogs(Array.from(catalogSet));
+		setSelectedWarehouses(Array.from(warehouseSet));
+
+		const firstUserCompanies = selectedUsers[0]?.company ?? [];
+		const commonCompany = firstUserCompanies.find((company) =>
+			selectedUsers.every((user) => user.company?.includes(company)),
+		);
+		setSelectedCompany(commonCompany ?? "");
+	}, [open, selectedUsers]);
+
 	const handleConfirm = () => {
 		const changes: BulkEditChanges = {
 			customerAccess: selectedCustomers,
@@ -195,11 +225,13 @@ export function BulkEditConfirmationModal({
 		onOpenChange(false);
 	};
 
+	console.log(customers, "customers");
+
 	return (
 		<Dialog
 			open={open}
 			onOpenChange={onOpenChange}>
-			<DialogContent className="max-w-[680px] p-0">
+			<DialogContent className="max-h-[90vh] max-w-[680px] overflow-y-auto p-0">
 				<DialogHeader className="border-b border-[#E5E7E6] px-6 py-4">
 					<div className="flex items-start justify-between">
 						<DialogTitle className="text-xl font-semibold text-[#0F1912]">
