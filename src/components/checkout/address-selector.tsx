@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import {
 	Select,
 	SelectContent,
@@ -9,7 +11,6 @@ import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type { SavedAddress } from "../../types/address";
-import { useState } from "react";
 
 interface AddressSelectorProps {
 	savedAddresses: SavedAddress[];
