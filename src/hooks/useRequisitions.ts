@@ -1,4 +1,5 @@
 import { getRequisition } from "@/services/requisitions.service";
+import type { RequisitionResponse } from "@/types/requisitions";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import { useQuery } from "@tanstack/react-query";
 
@@ -6,6 +7,8 @@ type Status = "Alle" | "Venter godkjenning" | "Godkjent" | "Avvist";
 
 interface OrderItem {
 	name: string;
+	itemNumber: string;
+	productNumber: string;
 	sku: string;
 	quantity: number;
 	price: string;
@@ -66,30 +69,35 @@ export const useRequisitions = (customerNumber: string, status?: string) => {
 		isLoading: loading,
 		error,
 		refetch: getRequisitions,
-	} = useQuery({
+	} = useQuery<Rekvisisjon[]>({
 		queryKey: requisitionsKeys.list(customerNumber, status),
 		queryFn: async () => {
 			const apiStatus = mapStatusToApi(status || "Alle");
 			const response = await getRequisition(customerNumber, apiStatus);
-			const transformedRequisitions = response.map((req) => ({
-				orderId: req.requisitionId.toString(),
-				bestiller: req.fullName,
-				opprettet: req.requestDate,
-				pris: formatNorwegianCurrency(req.totalPrice) || "N/A",
-				status: mapApiStatus(req.status),
-				items: req.requisitionLines.map((line) => ({
-					name: `${line.productName}`,
-					itemNumber: line.itemNumber,
-					productNumber: line.productNumber,
-					sku: line.itemId.toString(),
-					quantity: line.quantity,
-					price: formatNorwegianCurrency(line.unitPrice) || "N/A",
-				})),
-				requisitionId: req.requisitionId,
-				requestDate: req.requestDate,
-				requestTime: req.requestTime,
-				description: req.description,
-			}));
+			const transformedRequisitions = response.requisitions.map(
+				(req: RequisitionResponse) => ({
+					orderId: req.requisitionId.toString(),
+					bestiller: req.fullName,
+					fullName: req.fullName,
+					opprettet: req.requestDate,
+					pris: formatNorwegianCurrency(req.totalPrice) || "N/A",
+					status: mapApiStatus(req.status),
+					items: req.requisitionLines.map(
+						(line: RequisitionResponse["requisitionLines"][number]) => ({
+							name: `${line.productName}`,
+							itemNumber: line.itemNumber,
+							productNumber: line.productNumber,
+							sku: line.itemId.toString(),
+							quantity: line.quantity,
+							price: formatNorwegianCurrency(line.unitPrice) || "N/A",
+						}),
+					),
+					requisitionId: req.requisitionId,
+					requestDate: req.requestDate,
+					requestTime: req.requestTime,
+					description: req.description,
+				}),
+			);
 			return transformedRequisitions;
 		},
 		enabled: !!customerNumber,

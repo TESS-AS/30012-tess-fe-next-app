@@ -99,6 +99,21 @@ export function MultiSelectWithTags({
 	canNextPage,
 	canPrevPage,
 }: BaseProps) {
+	const effectiveOptions = React.useMemo(() => {
+		const missingSelected = selected.filter(
+			(value) => !options.some((o) => o.value === value),
+		);
+
+		if (missingSelected.length === 0) return options;
+
+		const syntheticOptions = missingSelected.map((value) => ({
+			value,
+			label: value,
+		}));
+
+		return [...options, ...syntheticOptions];
+	}, [options, selected]);
+
 	const {
 		open,
 		setOpen,
@@ -108,7 +123,7 @@ export function MultiSelectWithTags({
 		toggleValue,
 		removeValue,
 	} = useMultiSelectLogic({
-		options,
+		options: effectiveOptions,
 		selected,
 		onChange,
 		onSearchChange,
@@ -211,7 +226,7 @@ export function MultiSelectWithTags({
 				<div className="flex flex-wrap gap-2">
 					{visibleValues.map((value) => {
 						const label =
-							options.find((o) => o.value === value)?.label ?? value;
+							effectiveOptions.find((o) => o.value === value)?.label ?? value;
 						return (
 							<Badge
 								key={value}
