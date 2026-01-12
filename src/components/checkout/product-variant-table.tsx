@@ -143,7 +143,14 @@ export default function ProductVariantTable({
 	>({});
 
 	const allAttributeNames = useMemo(() => {
-		const allNames = Array.from(
+		// Get default attributes from productData (prioritized first)
+		const defaultAttributes = columnAttributes?.productData?.defaultAttributes || [];
+		const defaultAttributeNames = defaultAttributes
+			.map((attr: any) => attr.name)
+			.filter((name: any): name is string => typeof name === "string" && name.trim() !== "");
+
+		// Get all attribute names from variants
+		const allVariantNames = Array.from(
 			new Set(
 				variantsWithWarehouses.flatMap(
 					(variant) =>
@@ -152,16 +159,27 @@ export default function ProductVariantTable({
 						) ?? [],
 				),
 			),
+		).filter((name): name is string => typeof name === "string" && name.trim() !== "");
+
+		// Create a Set of default attribute names for quick lookup
+		const defaultNamesSet = new Set(defaultAttributeNames);
+
+		// Combine: default attributes first, then other attributes (excluding duplicates)
+		const otherAttributes = allVariantNames.filter(
+			(name) => !defaultNamesSet.has(name),
 		);
+
+		const orderedNames = [...defaultAttributeNames, ...otherAttributes];
+
 		// Filter out SAP NR for non-SAP customers
 		if (!isSapCustomer) {
-			return allNames.filter(
+			return orderedNames.filter(
 				(name) =>
 					name?.toLowerCase() !== "sap nr" &&
 					name?.toLowerCase() !== "sap number",
 			);
 		}
-		return allNames;
+		return orderedNames;
 	}, [variantsWithWarehouses, columnAttributes, isSapCustomer]);
 
 	const getWarehouseOptions = useMemo(() => {
@@ -202,44 +220,71 @@ export default function ProductVariantTable({
 	useEffect(() => {
 		if (!allAttributeNames?.length) return;
 
-		const visibleStaticCount = Object.entries(visibleCols).filter(
-			([key, visible]) =>
-				visible && !["quantity", "warehouse", "cart"].includes(key),
-		).length;
-
-		const fixedTailCount = Object.entries(visibleCols).filter(
-			([key, visible]) =>
-				visible && ["quantity", "warehouse", "cart"].includes(key),
-		).length;
-
-		const maxAttributeSlots = Math.max(
-			0,
-			10 - visibleStaticCount - fixedTailCount,
-		);
+		// Check if defaultAttributes exist
+		const defaultAttributes = columnAttributes?.productData?.defaultAttributes || [];
+		const hasDefaultAttributes = defaultAttributes.length > 0;
 
 		setVisibleAttributes((prev) => {
 			const next: Record<string, boolean> = {};
-			let visibleAttributeCount = 0;
 
-			for (const name of allAttributeNames) {
-				// Filter out SAP NR for non-SAP customers
-				if (
-					!isSapCustomer &&
-					(name?.toLowerCase() === "sap nr" ||
-						name?.toLowerCase() === "sap number")
-				) {
-					next[name] = false;
-					continue;
+			if (hasDefaultAttributes) {
+				// If defaultAttributes exist, show ONLY those attributes
+				const defaultAttributeNames = defaultAttributes
+					.map((attr: any) => attr.name)
+					.filter((name: any): name is string => typeof name === "string" && name.trim() !== "");
+
+				for (const name of allAttributeNames) {
+					// Filter out SAP NR for non-SAP customers
+					if (
+						!isSapCustomer &&
+						(name?.toLowerCase() === "sap nr" ||
+							name?.toLowerCase() === "sap number")
+					) {
+						next[name] = false;
+						continue;
+					}
+					// Show only if it's in defaultAttributes
+					next[name] = defaultAttributeNames.includes(name);
 				}
-				// Always respect the limit, even for previously selected attributes
-				const shouldShow = visibleAttributeCount < maxAttributeSlots;
-				next[name] = shouldShow;
-				if (shouldShow) visibleAttributeCount++;
+			} else {
+				// Original behavior: show up to maxAttributeSlots
+				const visibleStaticCount = Object.entries(visibleCols).filter(
+					([key, visible]) =>
+						visible && !["quantity", "warehouse", "cart"].includes(key),
+				).length;
+
+				const fixedTailCount = Object.entries(visibleCols).filter(
+					([key, visible]) =>
+						visible && ["quantity", "warehouse", "cart"].includes(key),
+				).length;
+
+				const maxAttributeSlots = Math.max(
+					0,
+					10 - visibleStaticCount - fixedTailCount,
+				);
+
+				let visibleAttributeCount = 0;
+
+				for (const name of allAttributeNames) {
+					// Filter out SAP NR for non-SAP customers
+					if (
+						!isSapCustomer &&
+						(name?.toLowerCase() === "sap nr" ||
+							name?.toLowerCase() === "sap number")
+					) {
+						next[name] = false;
+						continue;
+					}
+					// Always respect the limit, even for previously selected attributes
+					const shouldShow = visibleAttributeCount < maxAttributeSlots;
+					next[name] = shouldShow;
+					if (shouldShow) visibleAttributeCount++;
+				}
 			}
 
 			return next;
 		});
-	}, [allAttributeNames, visibleCols, isSapCustomer]);
+	}, [allAttributeNames, visibleCols, isSapCustomer, columnAttributes]);
 
 	const getTotalVisibleColumns = () => {
 		const visibleStaticCount = Object.entries(visibleCols).filter(
@@ -749,7 +794,23 @@ export default function ProductVariantTable({
 											const attrs =
 												columnAttributes?.[variant.itemNumber]?.attributes ??
 												[];
-											const attr = attrs.find((a: any) => a.name === name);
+											
+											// Try to find by name first
+											let attr = attrs.find((a: any) => a.name === name);
+											
+											// If not found and this is a default attribute, try matching by attributeIdentifier
+											if (!attr) {
+												const defaultAttr = columnAttributes?.productData?.defaultAttributes?.find(
+													(da: any) => da.name === name,
+												);
+												if (defaultAttr?.attributeIdentifier) {
+													attr = attrs.find(
+														(a: any) =>
+															a.attributeIdentifier ===
+															defaultAttr.attributeIdentifier,
+													);
+												}
+											}
 
 											return (
 												<TableCell
