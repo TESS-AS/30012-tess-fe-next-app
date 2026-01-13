@@ -37,6 +37,10 @@ import { useOrderSummary } from "@/hooks/useOrderSummary";
 import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import { useCategories } from "@/lib/CategoriesProvider";
+import {
+	buildCategoryPath,
+	findCategoryByGroupId,
+} from "@/lib/category-utils";
 import { useSearchStore } from "@/lib/searchStore";
 import axiosClient from "@/services/axiosClient";
 import { getProductVariations } from "@/services/product.service";
@@ -149,14 +153,32 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		useState(false);
 
 	const searchCategories = useMemo(() => {
-		if (!searchData?.categories) return [];
+		if (!searchData?.categories || !categories) return [];
 
-		return searchData.categories.map((category) => ({
-			id: category.name,
-			name: category.name,
-			count: parseInt(category.productVariantCount) || 0,
-		}));
-	}, [searchData?.categories]);
+		return searchData.categories.map((searchCategory) => {
+			// Find the category in the category tree using categoryNumber (which matches groupId)
+			const categoryNumber = searchCategory.categoryNumber;
+			const foundCategory = categoryNumber
+				? findCategoryByGroupId(categories, categoryNumber)
+				: null;
+
+			// Build URL path from category tree if found
+			let urlPath: string[] | null = null;
+			if (foundCategory && categories) {
+				urlPath = buildCategoryPath(categories, foundCategory);
+			}
+
+			// Use category name from found category, or fallback to API name
+			const displayName = foundCategory?.name || searchCategory.name;
+
+			return {
+				id: categoryNumber || searchCategory.name,
+				name: displayName,
+				count: parseInt(searchCategory.productVariantCount) || 0,
+				slug: urlPath || searchCategory.slug || [], // Use path from category tree, fallback to API slug
+			};
+		});
+	}, [searchData?.categories, categories]);
 
 	const { assortments } = useGetAssortments(!!profile);
 
