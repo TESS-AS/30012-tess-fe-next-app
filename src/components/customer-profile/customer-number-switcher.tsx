@@ -60,7 +60,19 @@ export default function CustomerNumberSwitcher({
 		) {
 			setNewCustomerNumber(profile.defaultCustomerNumber);
 			setDefaultCustomerNumber(profile.defaultCustomerNumber);
-			setSelectedWarehouse(profile.defaultWarehouseNumber);
+		}
+
+		if (
+			warehouses.length &&
+			!selectedWarehouse &&
+			profile?.defaultWarehouseNumber
+		) {
+			const match = warehouses.find(
+				(w) => String(w.id) === String(profile.defaultWarehouseNumber),
+			);
+			if (match) {
+				setSelectedWarehouse(match.id);
+			}
 		}
 
 		if (
@@ -90,10 +102,12 @@ export default function CustomerNumberSwitcher({
 		}
 	}, [
 		customers,
+		warehouses,
 		assortments,
 		companies,
 		profile,
 		newCustomerNumber,
+		selectedWarehouse,
 		selectedAssortment,
 		selectedCompanyNumber,
 	]);
