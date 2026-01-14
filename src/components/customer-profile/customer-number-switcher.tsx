@@ -108,12 +108,16 @@ export default function CustomerNumberSwitcher({
 		}
 	}, [profile?.defaultCompanyNumber]);
 
-	// Set initial warehouse when warehouses first load (before company is selected)
+	// Set initial warehouse when warehouses first load (only if company matches profile default)
 	useEffect(() => {
 		if (!warehouses.length || selectedWarehouse) return;
+		
+		// Only auto-select if company matches profile default (initial load)
+		const currentCompanyMatchesDefault = 
+			selectedCompanyNumber && 
+			String(selectedCompanyNumber) === String(profile?.defaultCompanyNumber);
 
-		// Try to find the default warehouse from profile
-		if (profile?.defaultWarehouseNumber) {
+		if (currentCompanyMatchesDefault && profile?.defaultWarehouseNumber) {
 			const defaultWarehouseExists = warehouses.some(
 				(w) => String(w.id) === String(profile.defaultWarehouseNumber),
 			);
@@ -122,15 +126,9 @@ export default function CustomerNumberSwitcher({
 				return;
 			}
 		}
+	}, [warehouses, profile?.defaultWarehouseNumber, profile?.defaultCompanyNumber, selectedWarehouse, selectedCompanyNumber]);
 
-		// If no default or default not found, use the first warehouse
-		if (warehouses.length > 0) {
-			setSelectedWarehouse(warehouses[0].id);
-		}
-	}, [warehouses, profile?.defaultWarehouseNumber, selectedWarehouse]);
-
-	// Reset warehouse to default (or first) when company changes
-	// Note: warehouses, customers, and assortments automatically refetch when effectiveCompanyNumber changes
+	// Reset warehouse when company changes - warehouses automatically refetch
 	useEffect(() => {
 		if (!selectedCompanyNumber || !warehouses.length) return;
 
@@ -145,26 +143,20 @@ export default function CustomerNumberSwitcher({
 			}
 		}
 
-		// Company has changed or warehouse is invalid - reset warehouse to default or first available
-		let warehouseToSelect: string | null = null;
-
-		// First, try to find the default warehouse from profile
+		// Company has changed - try to select default warehouse
 		if (profile?.defaultWarehouseNumber) {
 			const defaultWarehouseExists = warehouses.some(
 				(w) => String(w.id) === String(profile.defaultWarehouseNumber),
 			);
 			if (defaultWarehouseExists) {
-				warehouseToSelect = String(profile.defaultWarehouseNumber);
+				setSelectedWarehouse(String(profile.defaultWarehouseNumber));
+			} else {
+				// Default warehouse doesn't exist for this company - clear selection
+				setSelectedWarehouse("");
 			}
-		}
-
-		// If no default or default not found, use the first warehouse
-		if (!warehouseToSelect) {
-			warehouseToSelect = warehouses[0]?.id || null;
-		}
-
-		if (warehouseToSelect) {
-			setSelectedWarehouse(warehouseToSelect);
+		} else {
+			// No default warehouse in profile - clear selection
+			setSelectedWarehouse("");
 		}
 
 		// Update ref to track the current company
@@ -173,6 +165,11 @@ export default function CustomerNumberSwitcher({
 
 
 	const handleSave = async () => {
+		// Validate required fields
+		if (!selectedWarehouse) {
+			return; // Warehouse is required
+		}
+
 		setIsSaving(true);
 		try {
 			await axiosClient.post("/user/defaultVariables", {
@@ -272,10 +269,15 @@ export default function CustomerNumberSwitcher({
 						<Select
 							value={selectedWarehouse}
 							onValueChange={setSelectedWarehouse}
-							disabled={warehouses.length === 0}>
+							disabled={warehouses.length === 0}
+							required>
 							<SelectTrigger
 								id="warehouseSelect"
-								className="w-full">
+								className={`w-full ${
+									!selectedWarehouse && selectedCompanyNumber
+										? "border-red-500 focus:border-red-500"
+										: ""
+								}`}>
 								<SelectValue
 									placeholder={
 										warehouses.length === 0
@@ -298,6 +300,11 @@ export default function CustomerNumberSwitcher({
 								</SelectGroup>
 							</SelectContent>
 						</Select>
+						{selectedCompanyNumber && !selectedWarehouse && warehouses.length > 0 && (
+							<p className="text-sm text-red-600">
+								Lager er påkrevd. Vennligst velg et lager.
+							</p>
+						)}
 					</div>
 
 					<div className="space-y-2">
@@ -372,7 +379,7 @@ export default function CustomerNumberSwitcher({
 
 					<Button
 						className="w-full"
-						disabled={isSaving}
+						disabled={isSaving || !selectedWarehouse}
 						onClick={handleSave}>
 						{isSaving
 							? t("CustomerSwitcher.saving")
