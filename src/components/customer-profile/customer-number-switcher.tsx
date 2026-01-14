@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -46,10 +46,14 @@ export default function CustomerNumberSwitcher({
 	const [selectedCompanyNumber, setSelectedCompanyNumber] = useState("");
 	const [defaultCustomerNumber, setDefaultCustomerNumber] = useState("");
 	const [isSaving, setIsSaving] = useState(false);
+	const previousCompanyRef = useRef<string>("");
 
-	const { customers } = useGetCustomers(true);
-	const { warehouses } = useGetWarehouses(true);
-	const { assortments } = useGetAssortments(true);
+	// Use selectedCompanyNumber or profile default for fetching filtered data
+	const effectiveCompanyNumber = selectedCompanyNumber || profile?.defaultCompanyNumber;
+
+	const { customers, refetch: refetchCustomers } = useGetCustomers(true, effectiveCompanyNumber);
+	const { warehouses, refetch: refetchWarehouses } = useGetWarehouses(true, effectiveCompanyNumber);
+	const { assortments, refetch: refetchAssortments } = useGetAssortments(true, effectiveCompanyNumber);
 	const { companies } = useGetCompanies(true);
 
 	useEffect(() => {
@@ -60,19 +64,6 @@ export default function CustomerNumberSwitcher({
 		) {
 			setNewCustomerNumber(profile.defaultCustomerNumber);
 			setDefaultCustomerNumber(profile.defaultCustomerNumber);
-		}
-
-		if (
-			warehouses.length &&
-			!selectedWarehouse &&
-			profile?.defaultWarehouseNumber
-		) {
-			const match = warehouses.find(
-				(w) => String(w.id) === String(profile.defaultWarehouseNumber),
-			);
-			if (match) {
-				setSelectedWarehouse(match.id);
-			}
 		}
 
 		if (
@@ -102,15 +93,84 @@ export default function CustomerNumberSwitcher({
 		}
 	}, [
 		customers,
-		warehouses,
 		assortments,
 		companies,
 		profile,
 		newCustomerNumber,
-		selectedWarehouse,
 		selectedAssortment,
 		selectedCompanyNumber,
 	]);
+
+	// Initialize previousCompanyRef with profile default
+	useEffect(() => {
+		if (profile?.defaultCompanyNumber && !previousCompanyRef.current) {
+			previousCompanyRef.current = String(profile.defaultCompanyNumber);
+		}
+	}, [profile?.defaultCompanyNumber]);
+
+	// Set initial warehouse when warehouses first load (before company is selected)
+	useEffect(() => {
+		if (!warehouses.length || selectedWarehouse) return;
+
+		// Try to find the default warehouse from profile
+		if (profile?.defaultWarehouseNumber) {
+			const defaultWarehouseExists = warehouses.some(
+				(w) => String(w.id) === String(profile.defaultWarehouseNumber),
+			);
+			if (defaultWarehouseExists) {
+				setSelectedWarehouse(String(profile.defaultWarehouseNumber));
+				return;
+			}
+		}
+
+		// If no default or default not found, use the first warehouse
+		if (warehouses.length > 0) {
+			setSelectedWarehouse(warehouses[0].id);
+		}
+	}, [warehouses, profile?.defaultWarehouseNumber, selectedWarehouse]);
+
+	// Reset warehouse to default (or first) when company changes
+	// Note: warehouses, customers, and assortments automatically refetch when effectiveCompanyNumber changes
+	useEffect(() => {
+		if (!selectedCompanyNumber || !warehouses.length) return;
+
+		const currentCompanyStr = String(selectedCompanyNumber);
+		const previousCompanyStr = previousCompanyRef.current;
+
+		// If company hasn't changed, don't reset warehouse (unless it's invalid)
+		if (previousCompanyStr && previousCompanyStr === currentCompanyStr) {
+			// Only reset if current warehouse selection is invalid
+			if (selectedWarehouse && warehouses.find((w) => w.id === selectedWarehouse)) {
+				return; // Valid warehouse, no need to reset
+			}
+		}
+
+		// Company has changed or warehouse is invalid - reset warehouse to default or first available
+		let warehouseToSelect: string | null = null;
+
+		// First, try to find the default warehouse from profile
+		if (profile?.defaultWarehouseNumber) {
+			const defaultWarehouseExists = warehouses.some(
+				(w) => String(w.id) === String(profile.defaultWarehouseNumber),
+			);
+			if (defaultWarehouseExists) {
+				warehouseToSelect = String(profile.defaultWarehouseNumber);
+			}
+		}
+
+		// If no default or default not found, use the first warehouse
+		if (!warehouseToSelect) {
+			warehouseToSelect = warehouses[0]?.id || null;
+		}
+
+		if (warehouseToSelect) {
+			setSelectedWarehouse(warehouseToSelect);
+		}
+
+		// Update ref to track the current company
+		previousCompanyRef.current = currentCompanyStr;
+	}, [selectedCompanyNumber, warehouses, profile?.defaultWarehouseNumber, selectedWarehouse]);
+
 
 	const handleSave = async () => {
 		setIsSaving(true);
