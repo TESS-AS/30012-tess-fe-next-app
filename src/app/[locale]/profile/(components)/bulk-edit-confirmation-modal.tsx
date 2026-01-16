@@ -29,7 +29,7 @@ interface BulkEditConfirmationModalProps {
 export interface BulkEditChanges {
 	customerAccess?: string[];
 	catalogs?: string[];
-	warehouses?: string[];
+	warehouses?: { warehouseNumber: string; companyNumber: string }[];
 	company?: string;
 }
 
@@ -60,6 +60,8 @@ export function BulkEditConfirmationModal({
 	const t = useTranslations("BulkEditConfirmationModal");
 	const [showWarning, setShowWarning] = useState(true);
 
+	const isNumericId = (value: string) => /^\d+$/.test(value.trim());
+
 	const [customerSearch, setCustomerSearch] = useState("");
 	const [assortmentSearch, setAssortmentSearch] = useState("");
 	const [warehouseSearch, setWarehouseSearch] = useState("");
@@ -67,6 +69,10 @@ export function BulkEditConfirmationModal({
 	const [assortmentPage, setAssortmentPage] = useState(1);
 	const [warehousePage, setWarehousePage] = useState(1);
 	const [companyPage, setCompanyPage] = useState(1);
+	const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
+	const [selectedCatalogs, setSelectedCatalogs] = useState<string[]>([]);
+	const [selectedWarehouses, setSelectedWarehouses] = useState<string[]>([]);
+	const [selectedCompany, setSelectedCompany] = useState<string>("");
 	const pageSize = 10;
 
 	const { data: customersData } = useFetchUserDataBrukere(
@@ -119,12 +125,13 @@ export function BulkEditConfirmationModal({
 			warehouseId?: number;
 			warehouseNumber?: string;
 			warehouseName?: string;
+			companyNumber?: string;
 		}[]
 	>([]);
 	const [companies, setCompanies] = useState<
 		{
 			companyId?: number;
-			companyNumber?: number;
+			companyNumber?: string;
 			companyName?: string;
 		}[]
 	>([]);
@@ -163,7 +170,13 @@ export function BulkEditConfirmationModal({
 		setWarehouses((prev) =>
 			mergePageItems(
 				prev,
-				warehousesPageItems,
+				warehousesPageItems.map((w) => ({
+					warehouseId: w.warehouseId,
+					warehouseNumber: w.warehouseNumber,
+					warehouseName: w.warehouseName,
+					companyNumber:
+						w.companyNumber != null ? String(w.companyNumber) : undefined,
+				})),
 				"warehouseId",
 				warehousePage === 1,
 			),
@@ -173,14 +186,69 @@ export function BulkEditConfirmationModal({
 	useEffect(() => {
 		if (!companyData) return;
 		setCompanies((prev) =>
-			mergePageItems(prev, companiesPageItems, "companyId", companyPage === 1),
+			mergePageItems(
+				prev,
+				companiesPageItems.map((c) => ({
+					companyId: c.companyId,
+					companyNumber:
+						c.companyNumber != null ? String(c.companyNumber) : undefined,
+					companyName: c.companyName,
+				})),
+				"companyId",
+				companyPage === 1,
+			),
 		);
 	}, [companyData, companyPage, companiesPageItems]);
 
-	const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
-	const [selectedCatalogs, setSelectedCatalogs] = useState<string[]>([]);
-	const [selectedWarehouses, setSelectedWarehouses] = useState<string[]>([]);
-	const [selectedCompany, setSelectedCompany] = useState<string>("");
+	const normalizeCustomerNumbers = (values: string[]) => {
+		const nameToNumber = new Map<string, string>();
+		customers.forEach((c) => {
+			if (c.customerName && c.customerNumber) {
+				nameToNumber.set(c.customerName, c.customerNumber);
+			}
+		});
+
+		const normalized = values
+			.map((v) => {
+				const trimmed = v.trim();
+				if (!trimmed) return "";
+				if (isNumericId(trimmed)) return trimmed;
+				return nameToNumber.get(trimmed) ?? trimmed;
+			})
+			.filter((v) => v);
+
+		return Array.from(new Set(normalized));
+	};
+
+	const warehouseNumberToCompanyNumber = new Map<string, string>();
+	warehouses.forEach((w) => {
+		if (w.warehouseNumber && w.companyNumber != null) {
+			warehouseNumberToCompanyNumber.set(
+				w.warehouseNumber,
+				String(w.companyNumber),
+			);
+		}
+	});
+
+	const normalizeAssortmentNumbers = (values: string[]) => {
+		const nameToNumber = new Map<string, string>();
+		assortments.forEach((a) => {
+			if (a.assortmentName && a.assortmentNumber) {
+				nameToNumber.set(a.assortmentName, a.assortmentNumber);
+			}
+		});
+
+		const normalized = values
+			.map((v) => {
+				const trimmed = v.trim();
+				if (!trimmed) return "";
+				if (isNumericId(trimmed)) return trimmed;
+				return nameToNumber.get(trimmed) ?? trimmed;
+			})
+			.filter((v) => v);
+
+		return Array.from(new Set(normalized));
+	};
 
 	useEffect(() => {
 		if (!open || selectedUsers.length === 0) return;
@@ -201,8 +269,10 @@ export function BulkEditConfirmationModal({
 			});
 		});
 
-		setSelectedCustomers(Array.from(customerAccessSet));
-		setSelectedCatalogs(Array.from(catalogSet));
+		setSelectedCustomers(
+			normalizeCustomerNumbers(Array.from(customerAccessSet)),
+		);
+		setSelectedCatalogs(normalizeAssortmentNumbers(Array.from(catalogSet)));
 		setSelectedWarehouses(Array.from(warehouseSet));
 
 		const firstUserCompanies = selectedUsers[0]?.company ?? [];
@@ -212,11 +282,30 @@ export function BulkEditConfirmationModal({
 		setSelectedCompany(commonCompany ?? "");
 	}, [open, selectedUsers]);
 
+	useEffect(() => {
+		if (!open) return;
+		setSelectedCustomers((prev) => normalizeCustomerNumbers(prev));
+	}, [customers, open]);
+
+	useEffect(() => {
+		if (!open) return;
+		setSelectedCatalogs((prev) => normalizeAssortmentNumbers(prev));
+	}, [assortments, open]);
+
 	const handleConfirm = () => {
+		const warehousesPayload = selectedWarehouses
+			.filter((warehouseNumber) => warehouseNumber.trim())
+			.map((warehouseNumber) => ({
+				warehouseNumber,
+				companyNumber:
+					warehouseNumberToCompanyNumber.get(warehouseNumber) ??
+					selectedCompany,
+			}));
+
 		const changes: BulkEditChanges = {
-			customerAccess: selectedCustomers,
-			catalogs: selectedCatalogs,
-			warehouses: selectedWarehouses,
+			customerAccess: selectedCustomers.filter(isNumericId),
+			catalogs: selectedCatalogs.filter(isNumericId),
+			warehouses: warehousesPayload,
 			company: selectedCompany,
 		};
 		console.log(changes, "changes");
@@ -225,7 +314,7 @@ export function BulkEditConfirmationModal({
 		onOpenChange(false);
 	};
 
-	console.log(customers, "customers");
+	console.log(warehouses, "warehouses");
 
 	return (
 		<Dialog
@@ -309,7 +398,9 @@ export function BulkEditConfirmationModal({
 										};
 									})}
 									selected={selectedCustomers}
-									onChange={setSelectedCustomers}
+									onChange={(value) => {
+										setSelectedCustomers(normalizeCustomerNumbers(value));
+									}}
 									onSearchChange={(value) => {
 										setCustomerSearch(value);
 										setCustomerPage(1);
@@ -342,7 +433,10 @@ export function BulkEditConfirmationModal({
 										};
 									})}
 									selected={selectedCatalogs}
-									onChange={setSelectedCatalogs}
+									onChange={(value) => {
+										console.log(value, "value");
+										setSelectedCatalogs(normalizeAssortmentNumbers(value));
+									}}
 									onSearchChange={(value) => {
 										setAssortmentSearch(value);
 										setAssortmentPage(1);
@@ -372,7 +466,9 @@ export function BulkEditConfirmationModal({
 								<MultiSelectWithTags
 									options={warehouses.map((warehouse) => {
 										return {
-											value: String(warehouse.warehouseId),
+											value:
+												warehouse.warehouseNumber ??
+												String(warehouse.warehouseId),
 											label: warehouse.warehouseName ?? "",
 										};
 									})}

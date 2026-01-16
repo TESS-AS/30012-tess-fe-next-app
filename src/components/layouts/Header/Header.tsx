@@ -76,17 +76,17 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
-	
+
 	// Check if user came from alle-kategorier page
 	const [fromAlleKategorier, setFromAlleKategorier] = useState(false);
-	
+
 	useEffect(() => {
 		// Check if currently on alle-kategorier page
 		if (pathname?.includes("/alle-kategorier")) {
 			setFromAlleKategorier(true);
 			return;
 		}
-		
+
 		// Check sessionStorage for flag (set when navigating from alle-kategorier to category)
 		const flag = sessionStorage.getItem("fromCategoriesPage");
 		if (flag === "true") {
@@ -94,7 +94,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 			// Path structure: /[locale]/[category] = 2 segments, /[locale]/[category]/[subcategory] = 3 segments
 			const pathSegments = pathname?.split("/").filter(Boolean) || [];
 			const isCategoryPage = pathSegments.length === 2; // Only locale and category
-			
+
 			if (isCategoryPage) {
 				setFromAlleKategorier(true);
 			} else {

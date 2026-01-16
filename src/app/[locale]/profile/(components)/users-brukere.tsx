@@ -181,18 +181,6 @@ const UsersBrukere = () => {
 	const handleFinalConfirm = async () => {
 		if (!pendingBulkChanges) return;
 
-		const warehousesPayload: UpdateUserRelationsPayload["warehouses"] = [
-			{
-				warehouseNumber: pendingBulkChanges.warehouses?.[0] ?? "",
-				companyNumber: pendingBulkChanges.company || "",
-				isDefault: true,
-			},
-			{
-				warehouseNumber: pendingBulkChanges.warehouses?.[0] ?? "",
-				companyNumber: pendingBulkChanges.company || "",
-			},
-		];
-
 		const usersToUpdate = users.filter((u) => selectedUsers.includes(u.email));
 
 		try {
@@ -200,7 +188,12 @@ const UsersBrukere = () => {
 				userId: usersToUpdate.map((u) => u.userId),
 				assortments: pendingBulkChanges.catalogs ?? [],
 				customers: pendingBulkChanges.customerAccess ?? [],
-				warehouses: warehousesPayload,
+				warehouses:
+					pendingBulkChanges.warehouses?.map((warehouse) => ({
+						warehouseNumber: warehouse.warehouseNumber,
+						companyNumber: warehouse.companyNumber ?? "",
+						isDefault: false,
+					})) ?? [],
 				companyNumber: pendingBulkChanges.company ?? "",
 			});
 			setPendingBulkChanges(null);
