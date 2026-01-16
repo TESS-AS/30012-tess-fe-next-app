@@ -129,17 +129,11 @@ export interface UpdateUserRelationsPayload {
 	userId: number[];
 	assortments: string[];
 	customers: string[];
-	warehouses: [
-		{
-			warehouseNumber: string;
-			companyNumber: string;
-			isDefault: boolean;
-		},
-		{
-			warehouseNumber: string;
-			companyNumber: string;
-		},
-	];
+	warehouses: {
+		warehouseNumber: string;
+		companyNumber: string;
+		isDefault: boolean;
+	}[];
 	companyNumber: string;
 }
 
@@ -183,7 +177,7 @@ export interface FetchUserDataBrukereResponse {
 			customerNumber?: string;
 			customerName?: string;
 			companyId?: number;
-			companyNumber?: number;
+			companyNumber?: number | string;
 			companyName?: string;
 			warehouseId?: number;
 			warehouseNumber?: string;

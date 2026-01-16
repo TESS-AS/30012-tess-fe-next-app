@@ -59,8 +59,8 @@ export async function updateUserRelations(
 	payload: UpdateUserRelationsPayload,
 ): Promise<UpdateUserRelationsResponse> {
 	try {
-		const response = await axiosInstance.post(
-			`/userAdmin/updateUserRelations`,
+		const response = await axiosInstance.put(
+			`/userAdmin/replaceUserRelations`,
 			payload,
 		);
 		return response.data;
