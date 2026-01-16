@@ -1,29 +1,30 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import axiosClient from "@/services/axiosClient";
 
-export function useGetAssortments(shouldFetch: boolean) {
+export function useGetAssortments(shouldFetch: boolean, companyNumber?: string | number) {
 	const [assortments, setAssortments] = useState<any[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<unknown>(null);
 
-	useEffect(() => {
+	const fetchAssortments = useCallback(async () => {
 		if (!shouldFetch) return;
 
-		const fetchAssortments = async () => {
-			try {
-				setIsLoading(true);
-				const response = await axiosClient.get("/assortment");
-				setAssortments(response.data ?? []);
-			} catch (err) {
-				setError(err);
-			} finally {
-				setIsLoading(false);
-			}
-		};
+		try {
+			setIsLoading(true);
+			const params = companyNumber ? { companyNumber: String(companyNumber) } : {};
+			const response = await axiosClient.get("/assortment", { params });
+			setAssortments(response.data ?? []);
+		} catch (err) {
+			setError(err);
+		} finally {
+			setIsLoading(false);
+		}
+	}, [shouldFetch, companyNumber]);
 
+	useEffect(() => {
 		fetchAssortments();
-	}, [shouldFetch]);
+	}, [fetchAssortments]);
 
-	return { assortments, isLoading, error };
+	return { assortments, isLoading, error, refetch: fetchAssortments };
 }

@@ -4,7 +4,12 @@ import { Search, ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export type Suggestion = string;
-export type CategoryLink = { id: string | number; name: string; count: number };
+export type CategoryLink = { 
+	id: string | number; 
+	name: string; 
+	count: number; 
+	slug?: string[]; // Optional slug array for building URLs
+};
 
 export default function SearchAside({
 	suggestions,
@@ -13,8 +18,14 @@ export default function SearchAside({
 	maxCategories = 5,
 	buildSuggestionHref = (suggestion) =>
 		`/search?query=${encodeURIComponent(suggestion)}`,
-	buildCategoryHref = (c) =>
-		`/category/${encodeURIComponent(c.name.toLowerCase().replace(/\s+/g, "-"))}`,
+	buildCategoryHref = (c) => {
+		// If slug array is available, use it to build the URL
+		if (c.slug && Array.isArray(c.slug) && c.slug.length > 0) {
+			return `/${c.slug.join("/")}`;
+		}
+		// Fallback to old behavior
+		return `/category/${encodeURIComponent(c.name.toLowerCase().replace(/\s+/g, "-"))}`;
+	},
 	seeMoreHref = `/alle-kategorier`,
 }: {
 	suggestions: Suggestion[];

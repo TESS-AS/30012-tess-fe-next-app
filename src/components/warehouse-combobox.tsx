@@ -91,7 +91,7 @@ export function WarehouseCombobox({
 							"border-[#ADEEBE bg-[#005522] text-white outline-[2px] outline-[#ADEEBE]",
 					)}>
 					<span className="truncate">
-						{selected ? `Mitt lager: ${selected.warehouseName}` : placeholder}
+						{selected ? selected.warehouseName : placeholder}
 					</span>
 					<ChevronDown
 						className={cn(

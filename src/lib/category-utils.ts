@@ -76,6 +76,52 @@ export function findCategoryByPath(
 	return current;
 }
 
+/**
+ * Finds a category by groupId (categoryNumber) recursively in the category tree
+ */
+export function findCategoryByGroupId(
+	categories: Category[],
+	groupId: string,
+): Category | null {
+	for (const category of categories) {
+		if (category.groupId === groupId) {
+			return category;
+		}
+		if (category.subcategories?.length) {
+			const found = findCategoryByGroupId(category.subcategories, groupId);
+			if (found) return found;
+		}
+	}
+	return null;
+}
+
+/**
+ * Builds the URL path from a category by traversing up the tree
+ * Returns an array of slugs from root to the target category
+ */
+export function buildCategoryPath(
+	categories: Category[],
+	targetCategory: Category,
+	path: string[] = [],
+): string[] | null {
+	// Check if target is at current level
+	for (const category of categories) {
+		if (category.groupId === targetCategory.groupId) {
+			return [...path, category.slug];
+		}
+		// Search in subcategories
+		if (category.subcategories?.length) {
+			const result = buildCategoryPath(
+				category.subcategories,
+				targetCategory,
+				[...path, category.slug],
+			);
+			if (result) return result;
+		}
+	}
+	return null;
+}
+
 
 
 export async function fetchProducts(

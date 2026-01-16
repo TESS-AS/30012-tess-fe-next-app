@@ -35,6 +35,9 @@ export interface SearchArray {
 }
 
 export interface SearchCategory {
+	categoryNumber?: string;
+	depth?: number;
+	slug?: string[];
 	name: string;
 	productVariantCount: string;
 }

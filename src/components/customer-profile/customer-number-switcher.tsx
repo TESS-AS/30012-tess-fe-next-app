@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -46,10 +46,14 @@ export default function CustomerNumberSwitcher({
 	const [selectedCompanyNumber, setSelectedCompanyNumber] = useState("");
 	const [defaultCustomerNumber, setDefaultCustomerNumber] = useState("");
 	const [isSaving, setIsSaving] = useState(false);
+	const previousCompanyRef = useRef<string>("");
 
-	const { customers } = useGetCustomers(true);
-	const { warehouses } = useGetWarehouses(true);
-	const { assortments } = useGetAssortments(true);
+	// Use selectedCompanyNumber or profile default for fetching filtered data
+	const effectiveCompanyNumber = selectedCompanyNumber || profile?.defaultCompanyNumber;
+
+	const { customers, refetch: refetchCustomers } = useGetCustomers(true, effectiveCompanyNumber);
+	const { warehouses, refetch: refetchWarehouses } = useGetWarehouses(true, effectiveCompanyNumber);
+	const { assortments, refetch: refetchAssortments } = useGetAssortments(true, effectiveCompanyNumber);
 	const { companies } = useGetCompanies(true);
 
 	useEffect(() => {
@@ -60,7 +64,6 @@ export default function CustomerNumberSwitcher({
 		) {
 			setNewCustomerNumber(profile.defaultCustomerNumber);
 			setDefaultCustomerNumber(profile.defaultCustomerNumber);
-			setSelectedWarehouse(profile.defaultWarehouseNumber);
 		}
 
 		if (
@@ -98,7 +101,75 @@ export default function CustomerNumberSwitcher({
 		selectedCompanyNumber,
 	]);
 
+	// Initialize previousCompanyRef with profile default
+	useEffect(() => {
+		if (profile?.defaultCompanyNumber && !previousCompanyRef.current) {
+			previousCompanyRef.current = String(profile.defaultCompanyNumber);
+		}
+	}, [profile?.defaultCompanyNumber]);
+
+	// Set initial warehouse when warehouses first load (only if company matches profile default)
+	useEffect(() => {
+		if (!warehouses.length || selectedWarehouse) return;
+		
+		// Only auto-select if company matches profile default (initial load)
+		const currentCompanyMatchesDefault = 
+			selectedCompanyNumber && 
+			String(selectedCompanyNumber) === String(profile?.defaultCompanyNumber);
+
+		if (currentCompanyMatchesDefault && profile?.defaultWarehouseNumber) {
+			const defaultWarehouseExists = warehouses.some(
+				(w) => String(w.id) === String(profile.defaultWarehouseNumber),
+			);
+			if (defaultWarehouseExists) {
+				setSelectedWarehouse(String(profile.defaultWarehouseNumber));
+				return;
+			}
+		}
+	}, [warehouses, profile?.defaultWarehouseNumber, profile?.defaultCompanyNumber, selectedWarehouse, selectedCompanyNumber]);
+
+	// Reset warehouse when company changes - warehouses automatically refetch
+	useEffect(() => {
+		if (!selectedCompanyNumber || !warehouses.length) return;
+
+		const currentCompanyStr = String(selectedCompanyNumber);
+		const previousCompanyStr = previousCompanyRef.current;
+
+		// If company hasn't changed, don't reset warehouse (unless it's invalid)
+		if (previousCompanyStr && previousCompanyStr === currentCompanyStr) {
+			// Only reset if current warehouse selection is invalid
+			if (selectedWarehouse && warehouses.find((w) => w.id === selectedWarehouse)) {
+				return; // Valid warehouse, no need to reset
+			}
+		}
+
+		// Company has changed - try to select default warehouse
+		if (profile?.defaultWarehouseNumber) {
+			const defaultWarehouseExists = warehouses.some(
+				(w) => String(w.id) === String(profile.defaultWarehouseNumber),
+			);
+			if (defaultWarehouseExists) {
+				setSelectedWarehouse(String(profile.defaultWarehouseNumber));
+			} else {
+				// Default warehouse doesn't exist for this company - clear selection
+				setSelectedWarehouse("");
+			}
+		} else {
+			// No default warehouse in profile - clear selection
+			setSelectedWarehouse("");
+		}
+
+		// Update ref to track the current company
+		previousCompanyRef.current = currentCompanyStr;
+	}, [selectedCompanyNumber, warehouses, profile?.defaultWarehouseNumber, selectedWarehouse]);
+
+
 	const handleSave = async () => {
+		// Validate required fields
+		if (!selectedWarehouse) {
+			return; // Warehouse is required
+		}
+
 		setIsSaving(true);
 		try {
 			await axiosClient.post("/user/defaultVariables", {
@@ -198,10 +269,15 @@ export default function CustomerNumberSwitcher({
 						<Select
 							value={selectedWarehouse}
 							onValueChange={setSelectedWarehouse}
-							disabled={warehouses.length === 0}>
+							disabled={warehouses.length === 0}
+							required>
 							<SelectTrigger
 								id="warehouseSelect"
-								className="w-full">
+								className={`w-full ${
+									!selectedWarehouse && selectedCompanyNumber
+										? "border-red-500 focus:border-red-500"
+										: ""
+								}`}>
 								<SelectValue
 									placeholder={
 										warehouses.length === 0
@@ -224,6 +300,11 @@ export default function CustomerNumberSwitcher({
 								</SelectGroup>
 							</SelectContent>
 						</Select>
+						{selectedCompanyNumber && !selectedWarehouse && warehouses.length > 0 && (
+							<p className="text-sm text-red-600">
+								Lager er påkrevd. Vennligst velg et lager.
+							</p>
+						)}
 					</div>
 
 					<div className="space-y-2">
@@ -298,7 +379,7 @@ export default function CustomerNumberSwitcher({
 
 					<Button
 						className="w-full"
-						disabled={isSaving}
+						disabled={isSaving || !selectedWarehouse}
 						onClick={handleSave}>
 						{isSaving
 							? t("CustomerSwitcher.saving")

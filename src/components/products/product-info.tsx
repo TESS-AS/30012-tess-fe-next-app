@@ -82,6 +82,17 @@ export function ProductInfo({
 
 	const isSapCustomer = profile?.defaultCustomerNumber === SAP_CUSTOMER;
 
+	const multiple = useMemo(() => {
+		const multipleValue = columnAttributes?.productData?.multiple;
+		if (!multipleValue) return 1;
+		const parsed = parseFloat(multipleValue);
+		return isNaN(parsed) || parsed <= 0 ? 1 : parsed;
+	}, [columnAttributes?.productData?.multiple]);
+
+	useEffect(() => {
+		setQuantity(multiple);
+	}, [multiple]);
+
 	// Get short and long description from columnAttributes productData
 	const getShortDescription = () => {
 		if (!columnAttributes?.productData) return undefined;
@@ -471,7 +482,10 @@ export function ProductInfo({
 								) ?? [],
 						),
 					),
-				).filter((name): name is string => typeof name === "string" && name.trim() !== "");
+				).filter(
+					(name): name is string =>
+						typeof name === "string" && name.trim() !== "",
+				);
 
 				// Filter out SAP NR for non-SAP customers
 				const filteredAttributeNames = isSapCustomer
@@ -727,19 +741,47 @@ export function ProductInfo({
 								className="h-8 w-8 border-[#C1C4C2] text-[#0F1912]"
 								variant="outline"
 								size="icon"
-								onClick={() => setQuantity((q) => Math.max(1, q - 1))}>
+								onClick={() =>
+									setQuantity((q) => Math.max(multiple, q - multiple))
+								}>
 								-
 							</Button>
 
-							<span className="flex h-8 w-8 items-center justify-center border border-gray-200 px-5 text-sm">
-								{quantity}
-							</span>
+							<input
+								type="text"
+								inputMode="numeric"
+								value={quantity}
+								onChange={(e) => {
+									const value = e.target.value;
+									if (value === "") {
+										setQuantity(0);
+										return;
+									}
+									const numValue = parseFloat(value);
+									if (!isNaN(numValue) && numValue >= 0) {
+										const roundedValue =
+											Math.round(numValue / multiple) * multiple;
+										setQuantity(roundedValue || multiple);
+									}
+								}}
+								onBlur={(e) => {
+									const value = parseFloat(e.target.value);
+									if (isNaN(value) || value < multiple) {
+										setQuantity(multiple);
+									} else {
+										const roundedValue =
+											Math.round(value / multiple) * multiple;
+										setQuantity(roundedValue || multiple);
+									}
+								}}
+								className="h-8 w-16 border border-gray-200 px-2 text-center text-sm focus:border-[#009640] focus:ring-2 focus:ring-[#009640] focus:outline-none"
+							/>
 
 							<Button
 								className="h-8 w-8 border-[#C1C4C2] text-[#0F1912]"
 								variant="outline"
 								size="icon"
-								onClick={() => setQuantity((q) => q + 1)}>
+								onClick={() => setQuantity((q) => q + multiple)}>
 								+
 							</Button>
 						</div>
