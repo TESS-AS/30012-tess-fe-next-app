@@ -31,6 +31,7 @@ export interface BaseProps {
 	onPrevPage?: () => void;
 	canNextPage?: boolean;
 	canPrevPage?: boolean;
+	isLoading?: boolean;
 }
 
 function useMultiSelectLogic({
@@ -50,16 +51,15 @@ function useMultiSelectLogic({
 		[onSearchChange],
 	);
 
-	const filteredOptions = React.useMemo(
-		() =>
-			options.filter((o) => {
-				const q = searchQuery.toLowerCase();
-				const matchLabel = o?.label?.toLowerCase().includes(q);
-				const matchValue = o?.value?.toLowerCase().includes(q);
-				return matchLabel || matchValue;
-			}),
-		[options, searchQuery],
-	);
+	const filteredOptions = React.useMemo(() => {
+		if (onSearchChange) return options;
+		return options.filter((o) => {
+			const q = searchQuery.toLowerCase();
+			const matchLabel = o?.label?.toLowerCase().includes(q);
+			const matchValue = o?.value?.toLowerCase().includes(q);
+			return matchLabel || matchValue;
+		});
+	}, [options, searchQuery, onSearchChange]);
 
 	const toggleValue = React.useCallback(
 		(value: string) => {
@@ -101,6 +101,7 @@ export function MultiSelectWithTags({
 	onPrevPage,
 	canNextPage,
 	canPrevPage,
+	isLoading,
 }: BaseProps) {
 	const effectiveOptions = React.useMemo(() => {
 		const missingSelected = selected.filter(
@@ -202,21 +203,33 @@ export function MultiSelectWithTags({
 					<div
 						className="max-h-[200px] overflow-y-auto p-2"
 						onScroll={handleScroll}>
-						{filteredOptions.length === 0 ? (
+						{isLoading ? (
+							<div className="py-6 text-center text-sm text-[#5A615D]">
+								Laster...
+							</div>
+						) : filteredOptions.length === 0 ? (
 							<div className="py-6 text-center text-sm text-[#5A615D]">
 								Ingen resultater funnet
 							</div>
 						) : (
 							filteredOptions.map((option) => {
 								const isSelected = selected.includes(option.value);
-
+								const displayLabel =
+									option.value && option.value !== option.label
+										? `${option.label} (${option.value})`
+										: option.label;
 								return (
 									<DropdownMenuCheckboxItem
 										key={option.value}
 										checked={isSelected}
 										onSelect={(e) => e.preventDefault()}
-										onCheckedChange={() => toggleValue(option.value)}>
-										{option.label}
+										onCheckedChange={() => toggleValue(option.value)}
+										className="flex items-start gap-2">
+										<span
+											className="min-w-0 flex-1 break-words whitespace-normal"
+											title={displayLabel}>
+											{displayLabel}
+										</span>
 									</DropdownMenuCheckboxItem>
 								);
 							})
@@ -228,14 +241,23 @@ export function MultiSelectWithTags({
 			{selected.length > 0 && (
 				<div className="flex flex-wrap gap-2">
 					{visibleValues.map((value) => {
-						const label =
-							effectiveOptions.find((o) => o.value === value)?.label ?? value;
+						const matchedOption = effectiveOptions.find(
+							(o) => o.value === value,
+						);
+						const displayLabel =
+							matchedOption && matchedOption.value !== matchedOption.label
+								? `${matchedOption.label} (${matchedOption.value})`
+								: (matchedOption?.label ?? value);
 						return (
 							<Badge
 								key={value}
 								variant="secondary"
-								className="h-[22px] gap-1 rounded-md bg-[#E8EAE9] px-2 py-0 text-xs font-normal text-[#0F1912] hover:bg-[#E8EAE9]">
-								{label}
+								className="min-h-[22px] max-w-full gap-1 rounded-md bg-[#E8EAE9] px-2 py-1 text-xs font-normal text-[#0F1912] hover:bg-[#E8EAE9]">
+								<span
+									className="min-w-0 flex-1 break-words whitespace-normal"
+									title={displayLabel}>
+									{displayLabel}
+								</span>
 								<button
 									onClick={(e) => {
 										e.preventDefault();
@@ -243,7 +265,7 @@ export function MultiSelectWithTags({
 										removeValue(value);
 									}}
 									className="ml-1 rounded-sm hover:bg-[#C1C4C2]"
-									aria-label={`Remove ${label}`}>
+									aria-label={`Remove ${displayLabel}`}>
 									<X className="h-3 w-3 cursor-pointer" />
 								</button>
 							</Badge>
