@@ -15,8 +15,9 @@ import { useGetHoseSystems } from "@/hooks/useGetHoseSystems";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
 import { cn } from "@/lib/utils";
-import { ShoppingCart, Folder, User, Settings, LogOut } from "lucide-react";
+import { ShoppingCart, Folder, User, Settings, LogOut, List } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 
 import { Dimensions } from "./(components)/dimensions";
 import HoseDetailsPage from "./(components)/hose-details-page";
@@ -32,13 +33,16 @@ import { OrdreHistorikk } from "./(components)/ordre-historikk";
 import { Rekvisisjoner } from "./(components)/rekvisisjoner";
 import { SidebarNav } from "./(components)/sidebar-nav";
 import UsersBrukere from "./(components)/users-brukere";
+import { AvvikendeOrdre } from "./(components)/avvikende-ordre";
+import { AvvikendeOrdreDetail } from "./(components)/avvikende-ordre-detail";
 
 export default function ProfilePage() {
 	const { setIsAuthOpen } = useAppContext();
 	const { data: profile, isLoading: isLoadingProfile } = useGetProfileData();
 	const t = useTranslations();
+	const searchParams = useSearchParams();
 
-	const [activeMode, setActiveMode] = useState<"hose" | "ehandel">("ehandel");
+	const [activeMode, setActiveMode] = useState<"hose" | "ehandel" | "tess-edi">("ehandel");
 	const [activeTab, setActiveTab] = useState("rekvisisjoner");
 
 	const shouldFetchHoseSystems = !!profile && activeMode === "hose";
@@ -59,12 +63,37 @@ export default function ProfilePage() {
 		}
 	}, [profile]);
 
-	const handleModeChange = (mode: "hose" | "ehandel") => {
+	// Read tab from URL query parameters
+	useEffect(() => {
+		const tabParam = searchParams.get("tab");
+		if (tabParam) {
+			setActiveTab(tabParam);
+			// If navigating to tess-edi, switch to tess-edi mode
+			if (tabParam === "tess-edi" && profile?.defaultCustomerNumber !== SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER) {
+				setActiveMode("tess-edi");
+				// Reset selected order when navigating to tess-edi tab
+				setSelectedAvvikendeOrdreId(null);
+			}
+		}
+	}, [searchParams, profile]);
+
+	// Reset selected order when activeTab changes away from tess-edi or when switching to tess-edi
+	useEffect(() => {
+		if (activeTab !== "tess-edi") {
+			setSelectedAvvikendeOrdreId(null);
+		}
+	}, [activeTab]);
+
+	const handleModeChange = (mode: "hose" | "ehandel" | "tess-edi") => {
 		setActiveMode(mode);
 		if (mode === "ehandel") {
 			setActiveTab("rekvisisjoner");
 		} else if (mode === "hose") {
 			setActiveTab("hose-orders");
+		} else if (mode === "tess-edi") {
+			setActiveTab("tess-edi");
+			// Reset selected order when switching to tess-edi mode
+			setSelectedAvvikendeOrdreId(null);
 		}
 	};
 	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
@@ -73,6 +102,9 @@ export default function ProfilePage() {
 	const [selectedHexagonId, setSelectedHexagonId] = useState<string | null>(
 		null,
 	);
+	const [selectedAvvikendeOrdreId, setSelectedAvvikendeOrdreId] = useState<
+		string | null
+	>(null);
 
 	if (isLoadingProfile) {
 		return (
@@ -119,6 +151,8 @@ export default function ProfilePage() {
 			users: t("ProfilePage.tabs.users"),
 			catalog: t("ProfilePage.tabs.catalog"),
 			settings: t("ProfilePage.tabs.settings"),
+			// TESS EDI tabs
+			"tess-edi": "TESS EDI",
 			// Hose tabs
 			"hose-oversikt": t("ProfilePage.tabs.overview"),
 			"hose-orders": t("ProfilePage.tabs.hosesEquipment"),
@@ -133,9 +167,15 @@ export default function ProfilePage() {
 		const modeLabel =
 			activeMode === "hose"
 				? t("BreadCrumbs.hoseManagement")
+				: activeMode === "tess-edi"
+				? "TESS EDI"
 				: t("BreadCrumbs.ehandel");
 		const defaultTab =
-			activeMode === "hose" ? "hose-orders" : "mine-bestillinger";
+			activeMode === "hose"
+				? "hose-orders"
+				: activeMode === "tess-edi"
+				? "tess-edi"
+				: "mine-bestillinger";
 
 		items.push({
 			href: "/profile",
@@ -200,6 +240,10 @@ export default function ProfilePage() {
 									return;
 								}
 								setActiveTab(tab);
+								// Reset selected order when switching tabs
+								if (tab === "tess-edi") {
+									setSelectedAvvikendeOrdreId(null);
+								}
 							}}
 							onCollapse={setIsSidebarCollapsed}
 							profile={profile}
@@ -260,6 +304,14 @@ export default function ProfilePage() {
 											// 	icon: LogOut,
 											// 	variant: "logout",
 											// },
+										]
+									: activeMode === "tess-edi"
+									? [
+											{
+												href: "tess-edi",
+												label: "Avvikende ordre",
+												icon: List,
+											},
 										]
 									: [
 											// {
@@ -356,6 +408,19 @@ export default function ProfilePage() {
 
 						<TabsContent value="users">
 							<UsersBrukere />
+						</TabsContent>
+
+						<TabsContent value="tess-edi" className="mt-0">
+							{selectedAvvikendeOrdreId ? (
+								<AvvikendeOrdreDetail
+									orderId={selectedAvvikendeOrdreId}
+									onBack={() => setSelectedAvvikendeOrdreId(null)}
+								/>
+							) : (
+								<AvvikendeOrdre
+									onOrderClick={setSelectedAvvikendeOrdreId}
+								/>
+							)}
 						</TabsContent>
 
 						<TabsContent value="addresses">

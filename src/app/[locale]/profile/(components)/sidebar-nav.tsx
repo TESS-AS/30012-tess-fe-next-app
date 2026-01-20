@@ -17,6 +17,7 @@ import { useTranslations } from "next-intl";
 
 import CartSvg from "../../../../../public/icons/profile/cart.svg";
 import ClipboardSvg from "../../../../../public/icons/profile/clipboard-check.svg";
+import TessEdiSvg from "../../../../../public/icons/profile/navbar/tess-edi.svg";
 
 export function SidebarNav({
 	items,
@@ -75,25 +76,46 @@ export function SidebarNav({
 					</button>
 					{profile?.defaultCustomerNumber !==
 						SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
-						<button
-							onClick={() => onModeChange("ehandel")}
-							className={cn(
-								"flex w-16 cursor-pointer flex-col items-center gap-1 rounded-md p-1 text-[10px] font-medium transition-colors",
-							)}>
-							<div
+						<>
+							<button
+								onClick={() => onModeChange("ehandel")}
 								className={cn(
-									"flex h-[40px] w-[40px] items-center justify-center rounded",
-									activeMode === "ehandel" && "bg-[#DCF7E0]",
+									"flex w-16 cursor-pointer flex-col items-center gap-1 rounded-md p-1 text-[10px] font-medium transition-colors",
 								)}>
-								<Image
-									src={CartSvg}
-									alt="E-handel"
-									width={24}
-									height={24}
-								/>
-							</div>
-							<span>{t("eCommerce")}</span>
-						</button>
+								<div
+									className={cn(
+										"flex h-[40px] w-[40px] items-center justify-center rounded",
+										activeMode === "ehandel" && "bg-[#DCF7E0]",
+									)}>
+									<Image
+										src={CartSvg}
+										alt="E-handel"
+										width={24}
+										height={24}
+									/>
+								</div>
+								<span>{t("eCommerce")}</span>
+							</button>
+							<button
+								onClick={() => onModeChange("tess-edi")}
+								className={cn(
+									"flex w-16 cursor-pointer flex-col items-center gap-1 rounded-md p-1 text-[10px] font-medium transition-colors",
+								)}>
+								<div
+									className={cn(
+										"flex h-[40px] w-[40px] items-center justify-center rounded",
+										activeMode === "tess-edi" && "bg-[#DCF7E0]",
+									)}>
+									<Image
+										src={TessEdiSvg}
+										alt="TESS EDI"
+										width={24}
+										height={24}
+									/>
+								</div>
+								<span>TESS EDI</span>
+							</button>
+						</>
 					)}
 				</div>
 				<div
@@ -103,13 +125,16 @@ export function SidebarNav({
 							<p className="mt-4 ml-6 text-[14px] font-medium uppercase">
 								{activeMode === "ehandel"
 									? t("eCommerce")
+									: activeMode === "tess-edi"
+									? "TESS EDI"
 									: t("hoseManagement")}
 							</p>
 							<div className="flex w-full flex-col py-2 pl-4">
 								{items.map((item, index) => {
 									const isActive =
 										pathname === item.href ||
-										item.subitems?.some((subitem) => pathname === subitem.href);
+										item.subitems?.some((subitem) => pathname === subitem.href) ||
+										(!item.subitems && item.href === activeTab);
 									const isLastTwoItems = index >= items.length - 2;
 
 									return (
@@ -131,6 +156,7 @@ export function SidebarNav({
 												}}
 												className={cn(
 													"mb-2 flex w-full cursor-pointer items-center justify-between rounded-md p-2 text-base font-medium transition-colors",
+													isActive && !item.subitems && "bg-[#DCF7E0] text-[#1C6D2C]",
 													item.variant === "logout" &&
 														"mt-4 text-red-600 hover:text-red-700",
 												)}>
@@ -156,6 +182,9 @@ export function SidebarNav({
 													)}
 													{!isCollapsed && <span>{item.label}</span>}
 												</div>
+												{!item.subitems && isActive && (
+													<ArrowRight className="h-4 w-4 shrink-0 text-[#1C6D2C]" />
+												)}
 												{item.subitems && (
 													<ChevronRight
 														className={cn(

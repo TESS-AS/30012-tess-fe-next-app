@@ -25,9 +25,9 @@ export interface SidebarNavItem {
 
 export interface SidebarNavProps {
 	items: SidebarNavItem[];
-	activeMode: "hose" | "ehandel";
+	activeMode: "hose" | "ehandel" | "tess-edi";
 	activeTab: string;
-	onModeChange: (mode: "hose" | "ehandel") => void;
+	onModeChange: (mode: "hose" | "ehandel" | "tess-edi") => void;
 	onTabChange: (tab: string) => void;
 	onCollapse: (isCollapsed: boolean) => void;
 	profile: ProfileUser;

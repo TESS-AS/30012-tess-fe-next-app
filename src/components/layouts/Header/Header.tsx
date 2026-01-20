@@ -52,6 +52,7 @@ import {
 	BookOpen,
 	ChevronDown,
 	ChevronUp,
+	FileText,
 	LogOut,
 	MessageSquareText,
 	Plus,
@@ -687,6 +688,12 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 										<DropdownMenuSeparator />
 										<CustomerNumberSwitcher profile={profile} />
 										<DropdownMenuSeparator />
+										<DropdownMenuItem
+											className="text-gray-700"
+											onClick={() => router.push("/profile?tab=tess-edi")}>
+											<FileText className="mr-2 h-4 w-4" />
+											TESS EDI
+										</DropdownMenuItem>
 										<DropdownMenuItem
 											onClick={handleLogout}
 											className="text-red-700">

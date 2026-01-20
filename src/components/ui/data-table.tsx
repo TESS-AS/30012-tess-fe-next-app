@@ -176,15 +176,21 @@ export function DataTable<
 									) : (
 										data.map((item, index) => (
 											<React.Fragment key={index}>
-												<tr
-													onClick={() => onHoseClick?.(item?.hexagonId ?? "")}
-													className={cn(
-														"group border-b border-[#C1C4C2] transition-colors duration-200",
-														isSelected(item.orderId)
-															? selectedRowBgClass
-															: "hover:bg-[#F8F9F8]",
-														onHoseClick && "cursor-pointer",
-													)}>
+											<tr
+												onClick={() => {
+													if (onHoseClick && item?.hexagonId) {
+														onHoseClick(item.hexagonId);
+													} else if (onOrderClick) {
+														onOrderClick(item.orderId);
+													}
+												}}
+												className={cn(
+													"group border-b border-[#C1C4C2] transition-colors duration-200",
+													isSelected(item.orderId)
+														? selectedRowBgClass
+														: "hover:bg-[#F8F9F8]",
+													(onHoseClick || onOrderClick) && "cursor-pointer",
+												)}>
 													{isExpandable && (
 														<td className="w-10 px-4 py-4">
 															<Button
