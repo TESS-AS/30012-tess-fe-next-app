@@ -178,23 +178,23 @@ const UsersBrukere = () => {
 		setIsConfirmChangesModalOpen(true);
 	};
 
-	const handleFinalConfirm = async () => {
-		if (!pendingBulkChanges) return;
+	const handleFinalConfirm = async (changes: BulkEditChanges | null) => {
+		if (!changes) return;
 
 		const usersToUpdate = users.filter((u) => selectedUsers.includes(u.email));
 
 		try {
 			await updateUserRelations({
 				userId: usersToUpdate.map((u) => u.userId),
-				assortments: pendingBulkChanges.catalogs ?? [],
-				customers: pendingBulkChanges.customerAccess ?? [],
+				assortments: changes.catalogs ?? [],
+				customers: changes.customerAccess ?? [],
 				warehouses:
-					pendingBulkChanges.warehouses?.map((warehouse) => ({
+					changes.warehouses?.map((warehouse) => ({
 						warehouseNumber: warehouse.warehouseNumber,
 						companyNumber: warehouse.companyNumber ?? "",
 						isDefault: false,
 					})) ?? [],
-				companyNumber: pendingBulkChanges.company ?? "",
+				companyNumber: changes.company ?? "",
 			});
 			setPendingBulkChanges(null);
 			setSelectedUsers([]);
@@ -411,6 +411,7 @@ const UsersBrukere = () => {
 				onOpenChange={setIsConfirmChangesModalOpen}
 				onConfirm={handleFinalConfirm}
 				userCount={selectedUsers.length}
+				bulkChanges={pendingBulkChanges}
 			/>
 		</div>
 	);
