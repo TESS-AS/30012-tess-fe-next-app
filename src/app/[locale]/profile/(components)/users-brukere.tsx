@@ -18,7 +18,7 @@ import {
 } from "@/hooks/useGetEditableUsers";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useUpdateUserRelations } from "@/hooks/useUpdateUserRelations";
-import { User, UpdateUserRelationsPayload } from "@/types/user.types";
+import { User, BulkEditChanges } from "@/types/user.types";
 import type { AxiosError } from "axios";
 import {
 	Plus,
@@ -33,10 +33,7 @@ import {
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
-import {
-	BulkEditConfirmationModal,
-	BulkEditChanges,
-} from "./bulk-edit-confirmation-modal";
+import { BulkEditConfirmationModal } from "./bulk-edit-confirmation-modal";
 import { ConfirmChangesModal } from "./confirm-changes-modal";
 import { ViewUserModal } from "./view-user-modal";
 
@@ -182,7 +179,7 @@ const UsersBrukere = () => {
 		if (!changes) return;
 
 		const usersToUpdate = users.filter((u) => selectedUsers.includes(u.email));
-
+		console.log(changes, "changes");
 		try {
 			await updateUserRelations({
 				userId: usersToUpdate.map((u) => u.userId),
@@ -194,7 +191,7 @@ const UsersBrukere = () => {
 						companyNumber: warehouse.companyNumber ?? "",
 						isDefault: false,
 					})) ?? [],
-				companyNumber: changes.company ?? "",
+				companies: changes.companies ?? [],
 			});
 			setPendingBulkChanges(null);
 			setSelectedUsers([]);
@@ -276,22 +273,38 @@ const UsersBrukere = () => {
 			{
 				key: "customerAccess",
 				header: t("columns.customerAccess"),
-				cell: (row) => row.user.customerAccess.join(", "),
+				cell: (row) =>
+					row.user.customerAccess
+						.map((x) => x?.name || x?.number)
+						.filter(Boolean)
+						.join(", "),
 			},
 			{
 				key: "catalog",
 				header: t("columns.catalog"),
-				cell: (row) => row.user.catalog.join(", "),
+				cell: (row) =>
+					row.user.catalog
+						.map((x) => x?.name || x?.number)
+						.filter(Boolean)
+						.join(", "),
 			},
 			{
 				key: "warehouse",
 				header: t("columns.warehouse"),
-				cell: (row) => row.user.warehouse.join(", "),
+				cell: (row) =>
+					row.user.warehouse
+						.map((x) => x?.name || x?.number)
+						.filter(Boolean)
+						.join(", "),
 			},
 			{
 				key: "company",
 				header: t("columns.company"),
-				cell: (row) => row.user.company?.join(", ") ?? "-",
+				cell: (row) =>
+					row.user.company
+						.map((x) => x?.name || x?.number)
+						.filter(Boolean)
+						.join(", ") || "-",
 			},
 			{
 				key: "action",

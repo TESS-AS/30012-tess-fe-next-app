@@ -68,10 +68,22 @@ export interface User {
 	email: string;
 	role: string;
 	accessLevel: string;
-	customerAccess: string[];
-	warehouse: string[];
-	catalog: string[];
-	company: string[];
+	customerAccess: {
+		name: string;
+		number: string;
+	}[];
+	warehouse: {
+		name: string;
+		number: string;
+	}[];
+	catalog: {
+		name: string;
+		number: string;
+	}[];
+	company: {
+		name: string;
+		number: string;
+	}[];
 	phone?: string;
 	firma?: string[];
 }
@@ -134,7 +146,7 @@ export interface UpdateUserRelationsPayload {
 		companyNumber: string;
 		isDefault: boolean;
 	}[];
-	companyNumber: string;
+	companies: string[];
 }
 
 export interface UpdateUserRelationsResponse {
@@ -166,6 +178,14 @@ export interface UpdateUserRelationsResponse {
 				defaultWarehouseId: number;
 			},
 		];
+		companies: [
+			{
+				companyId: number;
+				companyName: string;
+				companyNumber: string;
+				status: string;
+			},
+		];
 	};
 }
 
@@ -189,4 +209,19 @@ export interface FetchUserDataBrukereResponse {
 			nameNo?: string;
 		},
 	];
+}
+
+export interface BulkEditConfirmationModalProps {
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+	selectedUsers: User[];
+	onConfirm: (changes: BulkEditChanges) => void;
+	removeUser?: (user: User) => void;
+}
+
+export interface BulkEditChanges {
+	customerAccess?: string[];
+	catalogs?: string[];
+	warehouses?: { warehouseNumber: string; companyNumber: string }[];
+	companies?: string[];
 }
