@@ -7,9 +7,8 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { BulkEditChanges } from "@/types/user.types";
 import { useTranslations } from "next-intl";
-
-import type { BulkEditChanges } from "./bulk-edit-confirmation-modal";
 
 interface ConfirmChangesModalProps {
 	open: boolean;

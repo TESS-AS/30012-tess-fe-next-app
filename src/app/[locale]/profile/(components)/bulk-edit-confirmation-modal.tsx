@@ -19,9 +19,9 @@ import {
 	BulkEditConfirmationModalProps,
 	User,
 } from "@/types/user.types";
+import { buildSelectOptions, normalizeValuesWithMap } from "@/utils/bulkEdit";
 import { X, Info } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { buildSelectOptions, normalizeValuesWithMap } from "@/utils/bulkEdit";
 
 export function BulkEditConfirmationModal({
 	open,

@@ -138,21 +138,52 @@ export function MultiSelectWithTags({
 	const shouldCollapse = selected.length > 3;
 	const remainingCount = Math.max(selected.length - maxCollapsedTags, 0);
 	const [hasRequestedNextPage, setHasRequestedNextPage] = React.useState(false);
+	const scrollRafRef = React.useRef<number | null>(null);
 
-	const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-		const target = e.currentTarget;
-		const nearBottom =
-			target.scrollTop + target.clientHeight >= target.scrollHeight - 16;
+	const maybeRequestNextPage = React.useCallback(
+		(target: HTMLDivElement) => {
+			if (isLoading) return;
+			if (hasRequestedNextPage) return;
+			if (!canNextPage || !onNextPage) return;
+			if (target.scrollHeight <= target.clientHeight + 1) return;
 
-		if (nearBottom && !hasRequestedNextPage && canNextPage && onNextPage) {
-			setHasRequestedNextPage(true);
-			onNextPage();
-		}
-	};
+			const thresholdPx = 80;
+			const distanceToBottom =
+				target.scrollHeight - (target.scrollTop + target.clientHeight);
+			const nearBottom = distanceToBottom <= thresholdPx;
+
+			if (nearBottom) {
+				setHasRequestedNextPage(true);
+				onNextPage();
+			}
+		},
+		[isLoading, hasRequestedNextPage, canNextPage, onNextPage],
+	);
+
+	const handleScroll = React.useCallback(
+		(e: React.UIEvent<HTMLDivElement>) => {
+			const target = e.currentTarget;
+			if (scrollRafRef.current != null) return;
+			scrollRafRef.current = window.requestAnimationFrame(() => {
+				scrollRafRef.current = null;
+				maybeRequestNextPage(target);
+			});
+		},
+		[maybeRequestNextPage],
+	);
 
 	React.useEffect(() => {
 		setHasRequestedNextPage(false);
 	}, [page]);
+
+	React.useEffect(() => {
+		return () => {
+			if (scrollRafRef.current != null) {
+				window.cancelAnimationFrame(scrollRafRef.current);
+				scrollRafRef.current = null;
+			}
+		};
+	}, []);
 
 	const visibleValues =
 		expanded || !shouldCollapse
@@ -203,7 +234,7 @@ export function MultiSelectWithTags({
 					<div
 						className="max-h-[200px] overflow-y-auto p-2"
 						onScroll={handleScroll}>
-						{isLoading ? (
+						{filteredOptions.length === 0 && isLoading ? (
 							<div className="py-6 text-center text-sm text-[#5A615D]">
 								Laster...
 							</div>
@@ -234,6 +265,12 @@ export function MultiSelectWithTags({
 								);
 							})
 						)}
+						{filteredOptions.length > 0 && isLoading && (
+							<div className="py-3 text-center text-sm text-[#5A615D]">
+								Laster...
+							</div>
+						)}
+						{canNextPage && <div className="h-8" />}
 					</div>
 				</DropdownMenuContent>
 			</DropdownMenu>
