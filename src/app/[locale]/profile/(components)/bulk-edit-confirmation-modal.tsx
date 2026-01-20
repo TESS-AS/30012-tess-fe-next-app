@@ -303,18 +303,15 @@ export function BulkEditConfirmationModal({
 			}));
 
 		const changes: BulkEditChanges = {
-			customerAccess: selectedCustomers.filter(isNumericId),
-			catalogs: selectedCatalogs.filter(isNumericId),
+			customerAccess: selectedCustomers.filter(Boolean),
+			catalogs: selectedCatalogs.filter(Boolean),
 			warehouses: warehousesPayload,
 			company: selectedCompany,
 		};
-		console.log(changes, "changes");
 
 		onConfirm(changes);
 		onOpenChange(false);
 	};
-
-	console.log(warehouses, "warehouses");
 
 	return (
 		<Dialog
@@ -392,9 +389,14 @@ export function BulkEditConfirmationModal({
 								<Label htmlFor="kundetilgang">{t("customerAccess")}</Label>
 								<MultiSelectWithTags
 									options={customers.map((customer) => {
+										const name = customer.customerName ?? "";
+										const number = customer.customerNumber ?? "";
+										const label = number
+											? `${name} (${number})`
+											: name || number;
 										return {
 											value: customer.customerNumber ?? "",
-											label: customer.customerName ?? "",
+											label,
 										};
 									})}
 									selected={selectedCustomers}
@@ -434,7 +436,6 @@ export function BulkEditConfirmationModal({
 									})}
 									selected={selectedCatalogs}
 									onChange={(value) => {
-										console.log(value, "value");
 										setSelectedCatalogs(normalizeAssortmentNumbers(value));
 									}}
 									onSearchChange={(value) => {

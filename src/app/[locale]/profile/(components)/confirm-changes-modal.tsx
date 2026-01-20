@@ -9,11 +9,14 @@ import {
 } from "@/components/ui/dialog";
 import { useTranslations } from "next-intl";
 
+import type { BulkEditChanges } from "./bulk-edit-confirmation-modal";
+
 interface ConfirmChangesModalProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
-	onConfirm: () => void;
+	onConfirm: (changes: BulkEditChanges | null) => void;
 	userCount: number;
+	bulkChanges: BulkEditChanges | null;
 }
 
 export function ConfirmChangesModal({
@@ -21,6 +24,7 @@ export function ConfirmChangesModal({
 	onOpenChange,
 	onConfirm,
 	userCount,
+	bulkChanges,
 }: ConfirmChangesModalProps) {
 	const t = useTranslations("ConfirmChangesModal");
 
@@ -50,7 +54,7 @@ export function ConfirmChangesModal({
 					<Button
 						variant="greenSolid"
 						onClick={() => {
-							onConfirm();
+							onConfirm(bulkChanges);
 							onOpenChange(false);
 						}}>
 						{t("confirm")}

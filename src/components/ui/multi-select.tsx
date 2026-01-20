@@ -52,9 +52,12 @@ function useMultiSelectLogic({
 
 	const filteredOptions = React.useMemo(
 		() =>
-			options.filter((o) =>
-				o?.label?.toLowerCase().includes(searchQuery.toLowerCase()),
-			),
+			options.filter((o) => {
+				const q = searchQuery.toLowerCase();
+				const matchLabel = o?.label?.toLowerCase().includes(q);
+				const matchValue = o?.value?.toLowerCase().includes(q);
+				return matchLabel || matchValue;
+			}),
 		[options, searchQuery],
 	);
 
