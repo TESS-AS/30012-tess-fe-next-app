@@ -96,25 +96,27 @@ export function SidebarNav({
 								</div>
 								<span>{t("eCommerce")}</span>
 							</button>
-							<button
-								onClick={() => onModeChange("tess-edi")}
-								className={cn(
-									"flex w-16 cursor-pointer flex-col items-center gap-1 rounded-md p-1 text-[10px] font-medium transition-colors",
-								)}>
-								<div
+							{profile?.role === "admin" && (
+								<button
+									onClick={() => onModeChange("tess-edi")}
 									className={cn(
-										"flex h-[40px] w-[40px] items-center justify-center rounded",
-										activeMode === "tess-edi" && "bg-[#DCF7E0]",
+										"flex w-16 cursor-pointer flex-col items-center gap-1 rounded-md p-1 text-[10px] font-medium transition-colors",
 									)}>
-									<Image
-										src={TessEdiSvg}
-										alt="TESS EDI"
-										width={24}
-										height={24}
-									/>
-								</div>
-								<span>TESS EDI</span>
-							</button>
+									<div
+										className={cn(
+											"flex h-[40px] w-[40px] items-center justify-center rounded",
+											activeMode === "tess-edi" && "bg-[#DCF7E0]",
+										)}>
+										<Image
+											src={TessEdiSvg}
+											alt="TESS EDI"
+											width={24}
+											height={24}
+										/>
+									</div>
+									<span>TESS EDI</span>
+								</button>
+							)}
 						</>
 					)}
 				</div>

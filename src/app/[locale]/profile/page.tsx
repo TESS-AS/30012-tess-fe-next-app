@@ -68,11 +68,14 @@ export default function ProfilePage() {
 		const tabParam = searchParams.get("tab");
 		if (tabParam) {
 			setActiveTab(tabParam);
-			// If navigating to tess-edi, switch to tess-edi mode
-			if (tabParam === "tess-edi" && profile?.defaultCustomerNumber !== SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER) {
+			// If navigating to tess-edi, switch to tess-edi mode (only for admins)
+			if (tabParam === "tess-edi" && profile?.defaultCustomerNumber !== SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && profile?.role === "admin") {
 				setActiveMode("tess-edi");
 				// Reset selected order when navigating to tess-edi tab
 				setSelectedAvvikendeOrdreId(null);
+			} else if (tabParam === "tess-edi" && profile?.role !== "admin") {
+				// Redirect non-admins away from tess-edi
+				setActiveTab("rekvisisjoner");
 			}
 		}
 	}, [searchParams, profile]);
@@ -85,6 +88,10 @@ export default function ProfilePage() {
 	}, [activeTab]);
 
 	const handleModeChange = (mode: "hose" | "ehandel" | "tess-edi") => {
+		// Only allow tess-edi mode for admins
+		if (mode === "tess-edi" && profile?.role !== "admin") {
+			return;
+		}
 		setActiveMode(mode);
 		if (mode === "ehandel") {
 			setActiveTab("rekvisisjoner");
@@ -237,6 +244,10 @@ export default function ProfilePage() {
 							onTabChange={(tab) => {
 								if (tab === "support") {
 									setSupportOpen(true);
+									return;
+								}
+								// Only allow tess-edi tab for admins
+								if (tab === "tess-edi" && profile?.role !== "admin") {
 									return;
 								}
 								setActiveTab(tab);
@@ -410,18 +421,20 @@ export default function ProfilePage() {
 							<UsersBrukere />
 						</TabsContent>
 
-						<TabsContent value="tess-edi" className="mt-0">
-							{selectedAvvikendeOrdreId ? (
-								<AvvikendeOrdreDetail
-									orderId={selectedAvvikendeOrdreId}
-									onBack={() => setSelectedAvvikendeOrdreId(null)}
-								/>
-							) : (
-								<AvvikendeOrdre
-									onOrderClick={setSelectedAvvikendeOrdreId}
-								/>
-							)}
-						</TabsContent>
+						{profile.role === "admin" && (
+							<TabsContent value="tess-edi" className="mt-0">
+								{selectedAvvikendeOrdreId ? (
+									<AvvikendeOrdreDetail
+										orderId={selectedAvvikendeOrdreId}
+										onBack={() => setSelectedAvvikendeOrdreId(null)}
+									/>
+								) : (
+									<AvvikendeOrdre
+										onOrderClick={setSelectedAvvikendeOrdreId}
+									/>
+								)}
+							</TabsContent>
+						)}
 
 						<TabsContent value="addresses">
 							<UserAddressesTab />
