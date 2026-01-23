@@ -140,17 +140,18 @@ export function AvvikendeOrdreDetail({
 
 			{/* Order Summary */}
 			<div className="rounded-lg border border-[#C1C4C2] bg-[#F8F9F8] p-4">
-				<div className="flex items-center justify-between">
+				<div className="grid grid-cols-3 gap-4">
 					<div>
 						<p className="text-base font-normal text-gray-500">Leverandør</p>
 						<p className="text-base font-medium text-[#0F1912]">
 							{order.supplier}
 						</p>
 					</div>
-					<div>
+					<div className="mr-[-1px] text-left">
 						<p className="text-base font-normal text-gray-500">Dato</p>
 						<p className="text-base font-medium text-[#0F1912]">{order.date}</p>
 					</div>
+					<div></div>
 				</div>
 			</div>
 

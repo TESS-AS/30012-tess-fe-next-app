@@ -1,5 +1,9 @@
 import { OrderItems } from "@/types/orderHistory.types";
-import { Order, UserOrderResponse } from "@/types/orders.types";
+import {
+	Order,
+	OpenConfirmationsResponse,
+	UserOrderResponse,
+} from "@/types/orders.types";
 
 import axiosInstance from "./axiosClient";
 
@@ -136,6 +140,18 @@ export async function getUserOrders(
 		return response.data;
 	} catch (error) {
 		console.error("Error fetching user orders:", error);
+		throw error;
+	}
+}
+
+export async function getOpenConfirmations(): Promise<OpenConfirmationsResponse> {
+	try {
+		const response = await axiosInstance.get<OpenConfirmationsResponse>(
+			"/OrderConfirmation/openConfirmations",
+		);
+		return response.data;
+	} catch (error) {
+		console.error("Error fetching open confirmations:", error);
 		throw error;
 	}
 }

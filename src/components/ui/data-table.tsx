@@ -7,13 +7,13 @@ import {
 	ChevronDown,
 	ChevronLeft,
 	ChevronRight,
+	ChevronUp,
 	CircleX,
 	Eye,
 	MoreVertical,
 	ShoppingCart,
 	Truck,
 } from "lucide-react";
-import Image from "next/image";
 
 import { Button } from "./button";
 import {
@@ -28,7 +28,10 @@ export interface Column<T> {
 	header: string | (() => React.ReactElement) | React.ReactElement;
 	cell: (item: T) => React.ReactNode;
 	sortable?: boolean;
+	sortFn?: (a: T, b: T) => number;
 }
+
+type SortDirection = "asc" | "desc" | null;
 
 interface DataTableProps<T> {
 	onOrderClick?: (orderId: string) => void;
@@ -45,7 +48,9 @@ interface DataTableProps<T> {
 	isLoading?: boolean;
 	className?: string;
 	isDropdownColumn?: boolean;
-
+	sortColumn?: string | null;
+	sortDirection?: SortDirection;
+	onSort?: (columnKey: string) => void;
 	selectedIds?: string[];
 	selectedRowBgClass?: string;
 	onHoseClick?: (hoseId: string) => void;
@@ -71,6 +76,9 @@ export function DataTable<
 	isLoading,
 	className,
 	isDropdownColumn,
+	sortColumn = null,
+	sortDirection = null,
+	onSort,
 	selectedIds = [],
 	selectedRowBgClass = "bg-[#E6F7EA]",
 	onHoseClick,
@@ -138,24 +146,39 @@ export function DataTable<
 														"p-0": column.key === "handling",
 													},
 												)}>
-												{typeof column.header === "string"
-													? column.header
-													: typeof column.header === "function"
-														? column.header()
-														: column.header}
-												{column.sortable &&
-													typeof column.header === "string" && (
-														<button
-															className="ml-1 text-gray-400"
-															aria-label={`Sorter ${column.header}`}>
-															<Image
-																src="/icons/toggle-caret.svg"
-																alt="Toggle"
-																width={8}
-																height={8}
-															/>
-														</button>
-													)}
+												<div className="flex items-center gap-1">
+													{typeof column.header === "string"
+														? column.header
+														: typeof column.header === "function"
+															? column.header()
+															: column.header}
+													{column.sortable &&
+														typeof column.header === "string" &&
+														onSort && (
+															<button
+																onClick={() => onSort(column.key)}
+																className={cn(
+																	"ml-1 flex cursor-pointer flex-col items-center justify-center text-gray-400 transition-colors hover:text-gray-600",
+																	sortColumn === column.key && "text-[#1C6D2C]",
+																)}
+																aria-label={`Sorter ${column.header}`}>
+																{sortColumn === column.key ? (
+																	// Show single arrow when sorted
+																	sortDirection === "asc" ? (
+																		<ChevronUp className="h-3 w-3" />
+																	) : (
+																		<ChevronDown className="h-3 w-3" />
+																	)
+																) : (
+																	// Show both arrows when not sorted
+																	<div className="flex flex-col -space-y-1">
+																		<ChevronUp className="h-3 w-3" />
+																		<ChevronDown className="h-3 w-3" />
+																	</div>
+																)}
+															</button>
+														)}
+												</div>
 											</th>
 										))}
 										{isDropdownColumn && (

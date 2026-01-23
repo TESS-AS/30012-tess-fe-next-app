@@ -7,94 +7,11 @@ import { DataTable } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useGetOpenConfirmations } from "@/hooks/useGetOpenConfirmations";
 import { cn } from "@/lib/utils";
+import { OpenOrderConfirmation } from "@/types/orders.types";
 import { Check, X } from "lucide-react";
 import { Search } from "lucide-react";
-
-type AvvikendeOrdre = {
-	orderId: string;
-	supplier: string;
-	date: string;
-	deviation: number;
-	status: "Venter godkjenning" | "Godkjent" | "Avvist";
-	handled: string | null;
-};
-
-// Mock data
-const mockOrders: AvvikendeOrdre[] = [
-	{
-		orderId: "100296071",
-		supplier: "Leverandør 1",
-		date: "19.11.2025, 11:33",
-		deviation: 8,
-		status: "Venter godkjenning",
-		handled: null,
-	},
-	{
-		orderId: "100296072",
-		supplier: "Leverandør 2",
-		date: "19.11.2025, 12:15",
-		deviation: 1,
-		status: "Venter godkjenning",
-		handled: null,
-	},
-	{
-		orderId: "100296073",
-		supplier: "Leverandør 3",
-		date: "19.11.2025, 13:45",
-		deviation: 3,
-		status: "Venter godkjenning",
-		handled: null,
-	},
-	{
-		orderId: "100296074",
-		supplier: "Leverandør 1",
-		date: "18.11.2025, 10:20",
-		deviation: 2,
-		status: "Godkjent",
-		handled: "01.01.2026, 12:00",
-	},
-	{
-		orderId: "100296075",
-		supplier: "Leverandør 2",
-		date: "18.11.2025, 14:30",
-		deviation: 5,
-		status: "Godkjent",
-		handled: "01.01.2026, 12:00",
-	},
-	{
-		orderId: "100296076",
-		supplier: "Leverandør 4",
-		date: "17.11.2025, 09:15",
-		deviation: 1,
-		status: "Godkjent",
-		handled: "01.01.2026, 12:00",
-	},
-	{
-		orderId: "100296077",
-		supplier: "Leverandør 3",
-		date: "16.11.2025, 16:45",
-		deviation: 4,
-		status: "Avvist",
-		handled: "01.01.2026, 12:00",
-	},
-	{
-		orderId: "100296078",
-		supplier: "Leverandør 1",
-		date: "15.11.2025, 11:20",
-		deviation: 7,
-		status: "Avvist",
-		handled: "01.01.2026, 12:00",
-	},
-	{
-		orderId: "100296079",
-		supplier: "Leverandør 5",
-		date: "14.11.2025, 13:10",
-		deviation: 2,
-		status: "Avvist",
-		handled: "01.01.2026, 12:00",
-	},
-];
 
 export function AvvikendeOrdre({
 	onOrderClick,
@@ -104,7 +21,13 @@ export function AvvikendeOrdre({
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedStatus, setSelectedStatus] = useState<string>("Alle");
 	const [currentPage, setCurrentPage] = useState(1);
+	const [sortColumn, setSortColumn] = useState<string | null>(null);
+	const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(
+		null,
+	);
 	const ITEMS_PER_PAGE = 10;
+
+	const { data: orders, isLoading } = useGetOpenConfirmations();
 
 	const statuses = ["Alle", "Venter godkjenning", "Godkjent", "Avvist"];
 
@@ -132,8 +55,25 @@ export function AvvikendeOrdre({
 		}
 	};
 
+	// Handle sorting
+	const handleSort = (columnKey: string) => {
+		if (sortColumn === columnKey) {
+			// Toggle direction: asc -> desc -> null
+			if (sortDirection === "asc") {
+				setSortDirection("desc");
+			} else if (sortDirection === "desc") {
+				setSortColumn(null);
+				setSortDirection(null);
+			}
+		} else {
+			setSortColumn(columnKey);
+			setSortDirection("asc");
+		}
+		setCurrentPage(1); // Reset to first page when sorting
+	};
+
 	// Filter orders based on search and status
-	const filteredOrders = mockOrders.filter((order) => {
+	const filteredOrders = (orders || []).filter((order: OpenOrderConfirmation) => {
 		const matchesSearch =
 			!searchQuery ||
 			order.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -143,18 +83,82 @@ export function AvvikendeOrdre({
 		return matchesSearch && matchesStatus;
 	});
 
+	// Sort filtered orders
+	const sortedOrders = [...filteredOrders].sort((a, b) => {
+		if (!sortColumn || !sortDirection) return 0;
+
+		let aValue: string | number;
+		let bValue: string | number;
+
+		switch (sortColumn) {
+			case "orderId":
+				// Extract numeric part for proper numeric sorting
+				aValue = parseInt(a.orderId.replace(/\D/g, "")) || 0;
+				bValue = parseInt(b.orderId.replace(/\D/g, "")) || 0;
+				break;
+			case "supplier":
+				aValue = a.supplier.toLowerCase();
+				bValue = b.supplier.toLowerCase();
+				break;
+			case "date":
+				// Parse date string (DD.MM.YYYY, HH:mm format)
+				const parseDate = (dateStr: string) => {
+					const match = dateStr.match(/(\d{2})\.(\d{2})\.(\d{4}), (\d{2}):(\d{2})/);
+					if (match) {
+						const [, day, month, year, hour, minute] = match;
+						return new Date(
+							parseInt(year),
+							parseInt(month) - 1,
+							parseInt(day),
+							parseInt(hour),
+							parseInt(minute),
+						).getTime();
+					}
+					return 0;
+				};
+				aValue = parseDate(a.date);
+				bValue = parseDate(b.date);
+				break;
+			case "deviation":
+				aValue = a.deviation;
+				bValue = b.deviation;
+				break;
+			case "status":
+				// Sort by status priority: Venter godkjenning < Avvist < Godkjent
+				const statusPriority: Record<string, number> = {
+					"Venter godkjenning": 1,
+					Avvist: 2,
+					Godkjent: 3,
+				};
+				aValue = statusPriority[a.status] || 0;
+				bValue = statusPriority[b.status] || 0;
+				break;
+			case "handled":
+				aValue = a.handled || "";
+				bValue = b.handled || "";
+				break;
+			default:
+				return 0;
+		}
+
+		if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+		if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+		return 0;
+	});
+
 	// Calculate counts for each status (based on all orders, not filtered)
 	const statusCounts = {
-		Alle: mockOrders.length,
-		"Venter godkjenning": mockOrders.filter((o) => o.status === "Venter godkjenning").length,
-		Godkjent: mockOrders.filter((o) => o.status === "Godkjent").length,
-		Avvist: mockOrders.filter((o) => o.status === "Avvist").length,
+		Alle: orders?.length || 0,
+		"Venter godkjenning":
+			orders?.filter((o) => o.status === "Venter godkjenning").length || 0,
+		Godkjent: orders?.filter((o) => o.status === "Godkjent").length || 0,
+		Avvist: orders?.filter((o) => o.status === "Avvist").length || 0,
 	};
 
 	// Pagination
-	const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
+	const totalPages = Math.ceil(sortedOrders.length / ITEMS_PER_PAGE);
 	const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-	const paginatedOrders = filteredOrders.slice(
+	const paginatedOrders = sortedOrders.slice(
 		startIndex,
 		startIndex + ITEMS_PER_PAGE,
 	);
@@ -163,7 +167,7 @@ export function AvvikendeOrdre({
 		{
 			key: "orderId",
 			header: "ORDRE-ID",
-			cell: (order: AvvikendeOrdre) => (
+			cell: (order: OpenOrderConfirmation) => (
 				<span className="">#{order.orderId}</span>
 			),
 			sortable: true,
@@ -171,19 +175,19 @@ export function AvvikendeOrdre({
 		{
 			key: "supplier",
 			header: "LEVERANDØR",
-			cell: (order: AvvikendeOrdre) => <span>{order.supplier}</span>,
+			cell: (order: OpenOrderConfirmation) => <span>{order.supplier}</span>,
 			sortable: true,
 		},
 		{
 			key: "date",
 			header: "DATO",
-			cell: (order: AvvikendeOrdre) => <span>{order.date}</span>,
+			cell: (order: OpenOrderConfirmation) => <span>{order.date}</span>,
 			sortable: true,
 		},
 		{
 			key: "deviation",
 			header: "AVVIK",
-			cell: (order: AvvikendeOrdre) => (
+			cell: (order: OpenOrderConfirmation) => (
 				<span>{order.deviation} avvik</span>
 			),
 			sortable: true,
@@ -191,7 +195,7 @@ export function AvvikendeOrdre({
 		{
 			key: "status",
 			header: "STATUS",
-			cell: (order: AvvikendeOrdre) => (
+			cell: (order: OpenOrderConfirmation) => (
 				<span
 					className={cn(
 						"inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs",
@@ -206,7 +210,7 @@ export function AvvikendeOrdre({
 		{
 			key: "handled",
 			header: "BEHANDLET",
-			cell: (order: AvvikendeOrdre) => (
+			cell: (order: OpenOrderConfirmation) => (
 				<span>{order.handled || "-"}</span>
 			),
 			sortable: true,
@@ -255,7 +259,7 @@ export function AvvikendeOrdre({
 										value={status}
 										id={status}
 										className={cn(
-											"h-5 w-5",
+											"h-5 w-5 cursor-pointer",
 											selectedStatus === status
 												? "border-[#1C6D2C] text-[#1C6D2C]"
 												: "border-[#C1C4C2]",
@@ -263,7 +267,7 @@ export function AvvikendeOrdre({
 									/>
 									<Label
 										htmlFor={status}
-										className="text-sm font-medium text-[#0F1912]">
+										className="cursor-pointer text-sm font-medium text-[#0F1912]">
 										{status} ({statusCounts[status as keyof typeof statusCounts]})
 									</Label>
 								</div>
@@ -276,14 +280,17 @@ export function AvvikendeOrdre({
 					columns={columns}
 					currentPage={currentPage}
 					totalPages={totalPages}
-					totalItems={filteredOrders.length}
+					totalItems={sortedOrders.length}
 					itemsPerPage={ITEMS_PER_PAGE}
 					onPageChange={(page) => {
 						setCurrentPage(page);
 						window.scrollTo({ top: 0, behavior: "smooth" });
 					}}
-					isLoading={false}
+					isLoading={isLoading}
 					onOrderClick={onOrderClick}
+					sortColumn={sortColumn}
+					sortDirection={sortDirection}
+					onSort={handleSort}
 				/>
 			</div>
 		</div>
