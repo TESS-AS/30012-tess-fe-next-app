@@ -110,13 +110,19 @@ export function ViewUserModal({
 									{t("customerAccess")}
 								</p>
 								<p className="text-sm font-medium text-[#0F1912]">
-									{user.customerAccess.join(", ") || "-"}
+									{user.customerAccess
+										.map((x) => x?.name || x?.number)
+										.filter(Boolean)
+										.join(", ") || "-"}
 								</p>
 							</div>
 							<div>
 								<p className="mb-1 text-sm text-[#5A615D]">{t("catalog")}</p>
 								<p className="text-sm font-medium text-[#0F1912]">
-									{user.catalog.join(", ") || "-"}
+									{user.catalog
+										.map((x) => x?.name || x?.number)
+										.filter(Boolean)
+										.join(", ") || "-"}
 								</p>
 							</div>
 							<div>
@@ -124,7 +130,10 @@ export function ViewUserModal({
 									{t("standardWarehouse")}
 								</p>
 								<p className="text-sm font-medium text-[#0F1912]">
-									{user.warehouse.join(", ") || "-"}
+									{user.warehouse
+										.map((x) => x?.name || x?.number)
+										.filter(Boolean)
+										.join(", ") || "-"}
 								</p>
 							</div>
 							<div>
@@ -132,7 +141,10 @@ export function ViewUserModal({
 									{t("tessCompany")}
 								</p>
 								<p className="text-sm font-medium text-[#0F1912]">
-									{user.company.join(", ") || "-"}
+									{user.company
+										.map((x) => x?.name || x?.number)
+										.filter(Boolean)
+										.join(", ") || "-"}
 								</p>
 							</div>
 						</div>

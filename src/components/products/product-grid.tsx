@@ -419,10 +419,12 @@ export function ProductGrid({
 							const isPriceLoading =
 								isFetchingPrices && productPrice === undefined;
 
-							// Preserve current search params in product link for back navigation
-							const currentParams = searchParams.toString();
-							const productHref = currentParams
-								? `${pathname}/${product.productNumber}?${currentParams}`
+							// Only preserve search params when on category pages (not search pages)
+							// This prevents 431 errors from overly long URLs when coming from search
+							const productHref = query
+								? `${pathname}/${product.productNumber}`
+								: searchParams.toString()
+								? `${pathname}/${product.productNumber}?${searchParams.toString()}`
 								: `${pathname}/${product.productNumber}`;
 
 							return (

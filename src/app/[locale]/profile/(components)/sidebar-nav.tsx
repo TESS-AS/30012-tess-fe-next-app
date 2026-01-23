@@ -31,7 +31,9 @@ export function SidebarNav({
 	const t = useTranslations("SidebarNav");
 	const pathname = usePathname();
 	const [expandedItems, setExpandedItems] = useState<string[]>([]);
-	const [isCollapsed, setIsCollapsed] = useState(true);
+	const [isCollapsed, setIsCollapsed] = useState(
+		profile?.defaultCustomerNumber === "184200" ? true : false,
+	);
 
 	const toggleCollapse = () => {
 		const newCollapsed = !isCollapsed;
