@@ -15,10 +15,19 @@ import { useGetHoseSystems } from "@/hooks/useGetHoseSystems";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
 import { cn } from "@/lib/utils";
-import { ShoppingCart, Folder, User, Settings, LogOut, List } from "lucide-react";
-import { useTranslations } from "next-intl";
+import {
+	ShoppingCart,
+	Folder,
+	User,
+	Settings,
+	LogOut,
+	List,
+} from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
+import { AvvikendeOrdre } from "./(components)/avvikende-ordre";
+import { AvvikendeOrdreDetail } from "./(components)/avvikende-ordre-detail";
 import { Dimensions } from "./(components)/dimensions";
 import HoseDetailsPage from "./(components)/hose-details-page";
 import HoseInspections from "./(components)/hose-inspections";
@@ -33,8 +42,6 @@ import { OrdreHistorikk } from "./(components)/ordre-historikk";
 import { Rekvisisjoner } from "./(components)/rekvisisjoner";
 import { SidebarNav } from "./(components)/sidebar-nav";
 import UsersBrukere from "./(components)/users-brukere";
-import { AvvikendeOrdre } from "./(components)/avvikende-ordre";
-import { AvvikendeOrdreDetail } from "./(components)/avvikende-ordre-detail";
 
 export default function ProfilePage() {
 	const { setIsAuthOpen } = useAppContext();
@@ -42,7 +49,9 @@ export default function ProfilePage() {
 	const t = useTranslations();
 	const searchParams = useSearchParams();
 
-	const [activeMode, setActiveMode] = useState<"hose" | "ehandel" | "tess-edi">("ehandel");
+	const [activeMode, setActiveMode] = useState<"hose" | "ehandel" | "tess-edi">(
+		"ehandel",
+	);
 	const [activeTab, setActiveTab] = useState("rekvisisjoner");
 
 	const shouldFetchHoseSystems = !!profile && activeMode === "hose";
@@ -69,7 +78,12 @@ export default function ProfilePage() {
 		if (tabParam) {
 			setActiveTab(tabParam);
 			// If navigating to tess-edi, switch to tess-edi mode (only for admins)
-			if (tabParam === "tess-edi" && profile?.defaultCustomerNumber !== SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && profile?.role === "admin") {
+			if (
+				tabParam === "tess-edi" &&
+				profile?.defaultCustomerNumber !==
+					SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER &&
+				profile?.role === "admin"
+			) {
 				setActiveMode("tess-edi");
 				// Reset selected order when navigating to tess-edi tab
 				setSelectedAvvikendeOrdreId(null);
@@ -175,14 +189,14 @@ export default function ProfilePage() {
 			activeMode === "hose"
 				? t("BreadCrumbs.hoseManagement")
 				: activeMode === "tess-edi"
-				? "TESS EDI"
-				: t("BreadCrumbs.ehandel");
+					? "TESS EDI"
+					: t("BreadCrumbs.ehandel");
 		const defaultTab =
 			activeMode === "hose"
 				? "hose-orders"
 				: activeMode === "tess-edi"
-				? "tess-edi"
-				: "mine-bestillinger";
+					? "tess-edi"
+					: "mine-bestillinger";
 
 		items.push({
 			href: "/profile",
@@ -317,66 +331,66 @@ export default function ProfilePage() {
 											// },
 										]
 									: activeMode === "tess-edi"
-									? [
-											{
-												href: "tess-edi",
-												label: "Avvikende ordre",
-												icon: List,
-											},
-										]
-									: [
-											// {
-											// 	href: "hose-oversikt",
-											// 	label: t("ProfilePage.sidebar.overview"),
-											// 	icon: "/icons/profile/navbar/overview.svg",
-											// },
-											{
-												href: "hose-orders",
-												label: t("ProfilePage.sidebar.hosesEquipment"),
-												icon: "/icons/profile/navbar/list.svg",
-											},
-											// {
-											// 	href: "hose-inspections",
-											// 	label: t("ProfilePage.sidebar.inspections"),
-											// 	icon: "/icons/profile/navbar/inspectioner.svg",
-											// },
-											// {
-											// 	href: "hose-replacement",
-											// 	label: t("ProfilePage.sidebar.hoseReplacement"),
-											// 	icon: "/icons/profile/navbar/hose-changer.svg",
-											// },
-											// {
-											// 	href: "hose-risk-class",
-											// 	label: t("ProfilePage.sidebar.riskClass"),
-											// 	icon: "/icons/profile/navbar/risk-classes.svg",
-											// },
-											// {
-											// 	href: "hose-requests",
-											// 	label: t("ProfilePage.sidebar.requests"),
-											// 	icon: "/icons/profile/navbar/requirments.svg",
-											// },
-											// {
-											// 	href: "hose-activities",
-											// 	label: t("ProfilePage.sidebar.recentActivities"),
-											// 	icon: "/icons/profile/navbar/activities.svg",
-											// },
-											// {
-											// 	href: "hose-settings",
-											// 	label: t("ProfilePage.sidebar.settings"),
-											// 	icon: "/icons/profile/navbar/settings.svg",
-											// },
-											// {
-											// 	href: "support",
-											// 	label: t("ProfilePage.sidebar.support"),
-											// 	icon: "/icons/profile/navbar/support.svg",
-											// },
-											// {
-											// 	href: "logout",
-											// 	label: t("ProfilePage.sidebar.logout"),
-											// 	icon: LogOut,
-											// 	variant: "logout",
-											// },
-										]
+										? [
+												{
+													href: "tess-edi",
+													label: "Avvikende ordre",
+													icon: List,
+												},
+											]
+										: [
+												// {
+												// 	href: "hose-oversikt",
+												// 	label: t("ProfilePage.sidebar.overview"),
+												// 	icon: "/icons/profile/navbar/overview.svg",
+												// },
+												{
+													href: "hose-orders",
+													label: t("ProfilePage.sidebar.hosesEquipment"),
+													icon: "/icons/profile/navbar/list.svg",
+												},
+												// {
+												// 	href: "hose-inspections",
+												// 	label: t("ProfilePage.sidebar.inspections"),
+												// 	icon: "/icons/profile/navbar/inspectioner.svg",
+												// },
+												// {
+												// 	href: "hose-replacement",
+												// 	label: t("ProfilePage.sidebar.hoseReplacement"),
+												// 	icon: "/icons/profile/navbar/hose-changer.svg",
+												// },
+												// {
+												// 	href: "hose-risk-class",
+												// 	label: t("ProfilePage.sidebar.riskClass"),
+												// 	icon: "/icons/profile/navbar/risk-classes.svg",
+												// },
+												// {
+												// 	href: "hose-requests",
+												// 	label: t("ProfilePage.sidebar.requests"),
+												// 	icon: "/icons/profile/navbar/requirments.svg",
+												// },
+												// {
+												// 	href: "hose-activities",
+												// 	label: t("ProfilePage.sidebar.recentActivities"),
+												// 	icon: "/icons/profile/navbar/activities.svg",
+												// },
+												// {
+												// 	href: "hose-settings",
+												// 	label: t("ProfilePage.sidebar.settings"),
+												// 	icon: "/icons/profile/navbar/settings.svg",
+												// },
+												// {
+												// 	href: "support",
+												// 	label: t("ProfilePage.sidebar.support"),
+												// 	icon: "/icons/profile/navbar/support.svg",
+												// },
+												// {
+												// 	href: "logout",
+												// 	label: t("ProfilePage.sidebar.logout"),
+												// 	icon: LogOut,
+												// 	variant: "logout",
+												// },
+											]
 							}
 						/>
 					</div>
@@ -422,16 +436,16 @@ export default function ProfilePage() {
 						</TabsContent>
 
 						{profile.role === "admin" && (
-							<TabsContent value="tess-edi" className="mt-0">
+							<TabsContent
+								value="tess-edi"
+								className="mt-0">
 								{selectedAvvikendeOrdreId ? (
 									<AvvikendeOrdreDetail
 										orderId={selectedAvvikendeOrdreId}
 										onBack={() => setSelectedAvvikendeOrdreId(null)}
 									/>
 								) : (
-									<AvvikendeOrdre
-										onOrderClick={setSelectedAvvikendeOrdreId}
-									/>
+									<AvvikendeOrdre onOrderClick={setSelectedAvvikendeOrdreId} />
 								)}
 							</TabsContent>
 						)}

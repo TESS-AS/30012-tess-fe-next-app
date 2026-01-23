@@ -1,10 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
-
 import { getOpenConfirmations } from "@/services/orders.service";
 import {
 	OpenOrderConfirmation,
 	OpenOrderConfirmationRaw,
 } from "@/types/orders.types";
+import { useQuery } from "@tanstack/react-query";
 
 export const openConfirmationsKeys = {
 	all: ["openConfirmations"] as const,
@@ -46,11 +45,9 @@ function transformOrderData(
 	};
 
 	// Get the most recent difference timestamp for the date, or use createDateTime
-	const latestDifference = rawOrder.differences
-		.sort(
-			(a, b) =>
-				new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-		)[0];
+	const latestDifference = rawOrder.differences.sort(
+		(a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+	)[0];
 
 	const date = latestDifference
 		? formatDate(latestDifference.timestamp)
