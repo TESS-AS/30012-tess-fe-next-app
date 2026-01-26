@@ -11,6 +11,11 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+	HoverCard,
+	HoverCardContent,
+	HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { Input } from "@/components/ui/input";
 import {
 	useGetEditableUsers,
@@ -231,6 +236,61 @@ const UsersBrukere = () => {
 		}
 	};
 
+	const renderTruncatedList = (
+		items: { name?: string; number?: string }[],
+		countTranslationKey: string,
+		user: User,
+	) => {
+		const validItems = items
+			.map((x) => x?.name || x?.number)
+			.filter(Boolean) as string[];
+
+		if (validItems.length === 0) {
+			return "-";
+		}
+
+		const maxDisplay = 5;
+		const displayItems = validItems.slice(0, maxDisplay);
+		const hasMore = validItems.length > maxDisplay;
+
+		if (hasMore) {
+			const countText = t(`counts.${countTranslationKey}`, {
+				count: validItems.length,
+			});
+
+			return (
+				<HoverCard>
+					<HoverCardTrigger asChild>
+						<span
+							className="cursor-pointer hover:underline"
+							onClick={(e) => {
+								e.stopPropagation();
+								handleViewClick(user);
+							}}>
+							{countText}
+						</span>
+					</HoverCardTrigger>
+					<HoverCardContent className="w-auto max-w-sm">
+						<div className="space-y-1">
+							<div className="text-sm">
+								{displayItems.map((item, idx) => (
+									<div
+										key={idx}
+										className="py-0.5">
+										{item}
+									</div>
+								))}
+							</div>
+							<div className="pt-1 text-sm text-gray-500">...</div>
+						</div>
+					</HoverCardContent>
+				</HoverCard>
+			);
+		}
+
+		return displayItems.join(", ");
+	};
+
 	const columns: Column<UserRow>[] = useMemo(
 		() => [
 			{
@@ -274,37 +334,25 @@ const UsersBrukere = () => {
 				key: "customerAccess",
 				header: t("columns.customerAccess"),
 				cell: (row) =>
-					row.user.customerAccess
-						.map((x) => x?.name || x?.number)
-						.filter(Boolean)
-						.join(", "),
+					renderTruncatedList(row.user.customerAccess, "customers", row.user),
 			},
 			{
 				key: "catalog",
 				header: t("columns.catalog"),
 				cell: (row) =>
-					row.user.catalog
-						.map((x) => x?.name || x?.number)
-						.filter(Boolean)
-						.join(", "),
+					renderTruncatedList(row.user.catalog, "catalogs", row.user),
 			},
 			{
 				key: "warehouse",
 				header: t("columns.warehouse"),
 				cell: (row) =>
-					row.user.warehouse
-						.map((x) => x?.name || x?.number)
-						.filter(Boolean)
-						.join(", "),
+					renderTruncatedList(row.user.warehouse, "warehouses", row.user),
 			},
 			{
 				key: "company",
 				header: t("columns.company"),
 				cell: (row) =>
-					row.user.company
-						.map((x) => x?.name || x?.number)
-						.filter(Boolean)
-						.join(", ") || "-",
+					renderTruncatedList(row.user.company, "companies", row.user),
 			},
 			{
 				key: "action",
