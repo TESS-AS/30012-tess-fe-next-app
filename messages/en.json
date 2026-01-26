@@ -888,7 +888,14 @@
 			"viewDetails": "View details",
 			"editUser": "Edit user",
 			"deleteUser": "Delete user"
-		}
+		},
+		"counts": {
+			"customers": "{count} customers",
+			"catalogs": "{count} catalogs",
+			"warehouses": "{count} warehouses",
+			"companies": "{count} companies"
+		},
+		"andMore": "and {count} more"
 	},
 	"HoseColumnsDropdown": {
 		"addColumn": "Add column"

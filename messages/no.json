@@ -892,7 +892,14 @@
 			"viewDetails": "Vis detaljer",
 			"editUser": "Rediger bruker",
 			"deleteUser": "Slett bruker"
-		}
+		},
+		"counts": {
+			"customers": "{count} kunder",
+			"catalogs": "{count} kataloger",
+			"warehouses": "{count} lager",
+			"companies": "{count} firmaer"
+		},
+		"andMore": "og {count} flere"
 	},
 	"HoseColumnsDropdown": {
 		"addColumn": "Legg til kolonne"
