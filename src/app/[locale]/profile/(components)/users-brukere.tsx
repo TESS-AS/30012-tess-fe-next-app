@@ -270,18 +270,16 @@ const UsersBrukere = () => {
 							{countText}
 						</span>
 					</HoverCardTrigger>
-					<HoverCardContent className="w-auto max-w-sm">
-						<div className="space-y-1">
-							<div className="text-sm">
-								{displayItems.map((item, idx) => (
-									<div
-										key={idx}
-										className="py-0.5">
-										{item}
-									</div>
-								))}
-							</div>
-							<div className="pt-1 text-sm text-gray-500">...</div>
+					<HoverCardContent className="w-auto min-w-[200px] max-w-sm">
+						<div className="flex flex-col gap-1.5">
+							{displayItems.map((item, idx) => (
+								<div
+									key={idx}
+									className="text-sm leading-relaxed">
+									{item}
+								</div>
+							))}
+							<div className="text-sm text-gray-500">...</div>
 						</div>
 					</HoverCardContent>
 				</HoverCard>
