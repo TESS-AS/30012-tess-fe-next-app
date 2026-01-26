@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { MultiSelectWithTags } from "@/components/ui/multi-select";
 import { useFetchUserDataBrukere } from "@/hooks/useFetchUserDataBrukere";
 import { useMergedPagedItems } from "@/hooks/useMergedPagedItems";
+import { fetchUserDataBrukere } from "@/services/user.service";
 import {
 	BulkEditChanges,
 	BulkEditConfirmationModalProps,
@@ -47,6 +48,9 @@ export function BulkEditConfirmationModal({
 	const [selectedCatalogs, setSelectedCatalogs] = useState<string[]>([]);
 	const [selectedWarehouses, setSelectedWarehouses] = useState<string[]>([]);
 	const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
+	const [extraWarehouseCompanyMap, setExtraWarehouseCompanyMap] = useState(
+		() => new Map<string, string>(),
+	);
 	const pageSize = 10;
 
 	const { data: customersData, isLoading: isLoadingCustomers } =
@@ -164,6 +168,59 @@ export function BulkEditConfirmationModal({
 		return map;
 	}, [warehouses]);
 
+	const missingWarehouseNumbers = useMemo(() => {
+		if (!open) return [];
+		return selectedWarehouses
+			.map((w) => w.trim())
+			.filter(
+				(warehouseNumber) =>
+					warehouseNumber.length > 0 &&
+					!warehouseNumberToCompanyNumber.has(warehouseNumber) &&
+					!extraWarehouseCompanyMap.has(warehouseNumber),
+			);
+	}, [
+		open,
+		selectedWarehouses,
+		warehouseNumberToCompanyNumber,
+		extraWarehouseCompanyMap,
+	]);
+
+	useEffect(() => {
+		if (!open) return;
+		if (missingWarehouseNumbers.length === 0) return;
+
+		let cancelled = false;
+		(async () => {
+			try {
+				const results = await Promise.all(
+					missingWarehouseNumbers.map((warehouseNumber) =>
+						fetchUserDataBrukere("warehouse", 1, pageSize, warehouseNumber),
+					),
+				);
+
+				if (cancelled) return;
+
+				setExtraWarehouseCompanyMap((prev) => {
+					const next = new Map(prev);
+					results.forEach((res) => {
+						(res?.result ?? []).forEach((w) => {
+							if (w.warehouseNumber && w.companyNumber != null) {
+								next.set(String(w.warehouseNumber), String(w.companyNumber));
+							}
+						});
+					});
+					return next;
+				});
+			} catch {
+				// no-op
+			}
+		})();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [open, missingWarehouseNumbers, pageSize]);
+
 	const assortmentNameToNumber = useMemo(() => {
 		const map = new Map<string, string>();
 		assortments.forEach((a) => {
@@ -182,7 +239,7 @@ export function BulkEditConfirmationModal({
 			}
 		});
 		return map;
-	}, [assortments]);
+	}, [companies]);
 
 	const assortmentOptions = useMemo(() => {
 		const base = assortments.map((assortment) => ({
@@ -287,7 +344,9 @@ export function BulkEditConfirmationModal({
 			.map((warehouseNumber) => ({
 				warehouseNumber,
 				companyNumber:
-					warehouseNumberToCompanyNumber.get(warehouseNumber) ?? "",
+					extraWarehouseCompanyMap.get(warehouseNumber) ??
+					warehouseNumberToCompanyNumber.get(warehouseNumber) ??
+					"",
 			}));
 
 		const changes: BulkEditChanges = {
