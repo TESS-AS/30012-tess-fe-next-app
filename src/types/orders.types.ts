@@ -94,3 +94,74 @@ export interface UserOrderResponse {
 		totalLinePrice: number;
 	}>;
 }
+
+export type OrderConfirmationStatus = "Venter godkjenning" | "Godkjent" | "Avvist";
+
+export interface OrderDifference {
+	openConfirmationId: number;
+	timestamp: string;
+	message: string;
+	status: number;
+	differences: Array<{
+		mismatches: Record<string, any>;
+		orderLineNumber: number;
+	}>;
+}
+
+export interface OrderLine {
+	orderLineId: number;
+	orderLineNumber: number;
+	itemNumber: string;
+	itemName: string;
+	quantity: number;
+	unit: string;
+	netPrice: number;
+	lineStatus: number | null;
+	lineSum: number;
+	supplierItemNumber: string;
+	globalTradeItemNumber: string | null;
+	shipmentDate: string;
+	arrivalDate: string;
+}
+
+export interface OpenOrderConfirmationRaw {
+	orderId: number;
+	orderNumber: number;
+	createDateTime: string;
+	customerOrderRef: string | null;
+	customerRef: string;
+	companyNumber: number;
+	warehouseNumber: string;
+	sum: number;
+	shipperName: string | null;
+	shipperDescription: string;
+	paymentTermId: number;
+	paymentTermDescription: string;
+	deliveryTermId: number;
+	deliveryTermDescription: string;
+	currency: string;
+	buyerName: string;
+	buyerNumber: string;
+	surcharge: number | null;
+	supplierNumber: string;
+	handler: string | null;
+	differences: OrderDifference[];
+	lines: OrderLine[];
+}
+
+export interface OpenOrderConfirmation {
+	orderId: string;
+	supplier: string;
+	date: string;
+	deviation: number;
+	status: OrderConfirmationStatus;
+	handled: string | null;
+}
+
+export interface OpenConfirmationsResponse {
+	page: number;
+	pageSize: number;
+	totalOrders: number;
+	totalPages: number;
+	orders: OpenOrderConfirmationRaw[];
+}

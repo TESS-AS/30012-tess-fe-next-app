@@ -26,6 +26,8 @@ const buttonVariants = cva(
 				link: "text-primary underline-offset-4 hover:underline",
 				green: "bg-[#02a554] text-white hover:bg-[#028f48]",
 				greenSolid: "bg-green-700 text-white shadow-xs hover:bg-green-800",
+				approve: "bg-green-700 text-white shadow-xs hover:bg-green-800 text-xs",
+				reject: "bg-red-700 text-white shadow-xs hover:bg-red-800 text-xs",
 			},
 			size: {
 				default: "h-9 px-4 py-2",
