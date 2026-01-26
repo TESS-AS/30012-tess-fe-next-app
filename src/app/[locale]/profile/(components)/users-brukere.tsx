@@ -239,6 +239,7 @@ const UsersBrukere = () => {
 	const renderTruncatedList = (
 		items: { name?: string; number?: string }[],
 		countTranslationKey: string,
+		user: User,
 	) => {
 		const validItems = items
 			.map((x) => x?.name || x?.number)
@@ -260,7 +261,14 @@ const UsersBrukere = () => {
 			return (
 				<HoverCard>
 					<HoverCardTrigger asChild>
-						<span className="cursor-pointer hover:underline">{countText}</span>
+						<span
+							className="cursor-pointer hover:underline"
+							onClick={(e) => {
+								e.stopPropagation();
+								handleViewClick(user);
+							}}>
+							{countText}
+						</span>
 					</HoverCardTrigger>
 					<HoverCardContent className="w-auto max-w-sm">
 						<div className="space-y-1">
@@ -273,11 +281,7 @@ const UsersBrukere = () => {
 									</div>
 								))}
 							</div>
-							{validItems.length > maxDisplay && (
-								<div className="pt-1 text-sm text-gray-500">
-									... {t("andMore", { count: validItems.length - maxDisplay })}
-								</div>
-							)}
+							<div className="pt-1 text-sm text-gray-500">...</div>
 						</div>
 					</HoverCardContent>
 				</HoverCard>
@@ -330,22 +334,25 @@ const UsersBrukere = () => {
 				key: "customerAccess",
 				header: t("columns.customerAccess"),
 				cell: (row) =>
-					renderTruncatedList(row.user.customerAccess, "customers"),
+					renderTruncatedList(row.user.customerAccess, "customers", row.user),
 			},
 			{
 				key: "catalog",
 				header: t("columns.catalog"),
-				cell: (row) => renderTruncatedList(row.user.catalog, "catalogs"),
+				cell: (row) =>
+					renderTruncatedList(row.user.catalog, "catalogs", row.user),
 			},
 			{
 				key: "warehouse",
 				header: t("columns.warehouse"),
-				cell: (row) => renderTruncatedList(row.user.warehouse, "warehouses"),
+				cell: (row) =>
+					renderTruncatedList(row.user.warehouse, "warehouses", row.user),
 			},
 			{
 				key: "company",
 				header: t("columns.company"),
-				cell: (row) => renderTruncatedList(row.user.company, "companies"),
+				cell: (row) =>
+					renderTruncatedList(row.user.company, "companies", row.user),
 			},
 			{
 				key: "action",
