@@ -145,9 +145,25 @@ export default function ProductVariantTable({
 	const allAttributeNames = useMemo(() => {
 		// Get default attributes from productData (prioritized first)
 		const defaultAttributes = columnAttributes?.productData?.defaultAttributes || [];
+		
+		// Check if mediaId is in defaultAttributes (by name or attributeIdentifier)
+		const hasMediaIdInDefaults = defaultAttributes.some(
+			(attr: any) =>
+				attr.name?.toLowerCase() === "mediaid" ||
+				attr.name?.toLowerCase() === "media id" ||
+				attr.attributeIdentifier?.toLowerCase() === "mediaid" ||
+				attr.attributeIdentifier?.toLowerCase() === "media id",
+		);
+
 		const defaultAttributeNames = defaultAttributes
 			.map((attr: any) => attr.name)
-			.filter((name: any): name is string => typeof name === "string" && name.trim() !== "");
+			.filter((name: any): name is string => typeof name === "string" && name.trim() !== "")
+			// Filter out mediaId from default attribute names
+			.filter(
+				(name: string) =>
+					name?.toLowerCase() !== "mediaid" &&
+					name?.toLowerCase() !== "media id",
+			);
 
 		// Get all attribute names from variants
 		const allVariantNames = Array.from(
@@ -159,7 +175,14 @@ export default function ProductVariantTable({
 						) ?? [],
 				),
 			),
-		).filter((name): name is string => typeof name === "string" && name.trim() !== "");
+		)
+			.filter((name): name is string => typeof name === "string" && name.trim() !== "")
+			// Filter out mediaId from variant attribute names
+			.filter(
+				(name: string) =>
+					name?.toLowerCase() !== "mediaid" &&
+					name?.toLowerCase() !== "media id",
+			);
 
 		// Create a Set of default attribute names for quick lookup
 		const defaultNamesSet = new Set(defaultAttributeNames);
@@ -170,6 +193,11 @@ export default function ProductVariantTable({
 		);
 
 		const orderedNames = [...defaultAttributeNames, ...otherAttributes];
+
+		// If mediaId is in defaultAttributes, add "bilde" to attribute names (replace mediaId)
+		if (hasMediaIdInDefaults && !orderedNames.includes("bilde")) {
+			orderedNames.unshift("bilde");
+		}
 
 		// Filter out SAP NR for non-SAP customers
 		if (!isSapCustomer) {
@@ -228,10 +256,25 @@ export default function ProductVariantTable({
 			const next: Record<string, boolean> = {};
 
 			if (hasDefaultAttributes) {
-				// If defaultAttributes exist, show ONLY those attributes
+				// Check if mediaId is in defaultAttributes (by name or attributeIdentifier)
+				const hasMediaIdInDefaults = defaultAttributes.some(
+					(attr: any) =>
+						attr.name?.toLowerCase() === "mediaid" ||
+						attr.name?.toLowerCase() === "media id" ||
+						attr.attributeIdentifier?.toLowerCase() === "mediaid" ||
+						attr.attributeIdentifier?.toLowerCase() === "media id",
+				);
+
+				// If defaultAttributes exist, show ONLY those attributes (excluding mediaId)
 				const defaultAttributeNames = defaultAttributes
 					.map((attr: any) => attr.name)
-					.filter((name: any): name is string => typeof name === "string" && name.trim() !== "");
+					.filter((name: any): name is string => typeof name === "string" && name.trim() !== "")
+					// Filter out mediaId from default attribute names
+					.filter(
+						(name: string) =>
+							name?.toLowerCase() !== "mediaid" &&
+							name?.toLowerCase() !== "media id",
+					);
 
 				for (const name of allAttributeNames) {
 					// Filter out SAP NR for non-SAP customers
@@ -243,8 +286,18 @@ export default function ProductVariantTable({
 						next[name] = false;
 						continue;
 					}
-					// Show only if it's in defaultAttributes
-					next[name] = defaultAttributeNames.includes(name);
+					// Filter out mediaId (should already be filtered, but double-check)
+					if (
+						name?.toLowerCase() === "mediaid" ||
+						name?.toLowerCase() === "media id"
+					) {
+						next[name] = false;
+						continue;
+					}
+					// Show if it's in defaultAttributes, or if it's "bilde" and mediaId is in defaults
+					const isInDefaults = defaultAttributeNames.includes(name);
+					const isBildeMapping = name?.toLowerCase() === "bilde" && hasMediaIdInDefaults;
+					next[name] = isInDefaults || isBildeMapping;
 				}
 			} else {
 				// Original behavior: show up to maxAttributeSlots
@@ -271,6 +324,14 @@ export default function ProductVariantTable({
 						!isSapCustomer &&
 						(name?.toLowerCase() === "sap nr" ||
 							name?.toLowerCase() === "sap number")
+					) {
+						next[name] = false;
+						continue;
+					}
+					// Filter out mediaId (should already be filtered, but double-check)
+					if (
+						name?.toLowerCase() === "mediaid" ||
+						name?.toLowerCase() === "media id"
 					) {
 						next[name] = false;
 						continue;
@@ -491,7 +552,7 @@ export default function ProductVariantTable({
 		const orderedStaticFirst: ColumnKey[] = [];
 		dropdownOrder
 			.filter(
-				(key) => key !== "quantity" && key !== "warehouse" && key !== "cart" && key !== "price",
+				(key) => key !== "quantity" && key !== "warehouse" && key !== "cart" && key !== "price" && key !== "image",
 			)
 			.forEach((key) => {
 				if (visibleCols[key]) orderedStaticFirst.push(key);
@@ -575,7 +636,7 @@ export default function ProductVariantTable({
 							align="end"
 							className="w-64 rounded-2xl p-2 shadow-lg">
 							{dropdownOrder
-								.filter((key) => key !== "quantity" && key !== "warehouse") // ❌ exclude fixed ones
+								.filter((key) => key !== "quantity" && key !== "warehouse" && key !== "image") // ❌ exclude fixed ones and image
 								.map((key) => {
 									const locked = lockedCols.includes(key);
 									return (
@@ -624,24 +685,22 @@ export default function ProductVariantTable({
 						<TableRow>
 							{renderColumns()
 								.filter(
-									(col) => !["quantity", "warehouse", "cart", "price"].includes(col),
+									(col) => !["quantity", "warehouse", "cart", "price", "image"].includes(col),
 								)
 								.map((col) => {
 									return (
 										<TableHead
 											key={col}
 											className={`py-2 ${
-												col === "image"
-													? "min-w-[80px]"
-													: col === "itemNumber"
-														? "min-w-[120px]"
-														: col === "unspsc"
-															? "min-w-[100px]"
-															: col === "contentUnit"
-																? "min-w-[80px]"
-																: col === "price"
-																	? "min-w-[100px]"
-																	: "min-w-[120px]"
+												col === "itemNumber"
+													? "min-w-[120px]"
+													: col === "unspsc"
+														? "min-w-[100px]"
+														: col === "contentUnit"
+															? "min-w-[80px]"
+															: col === "price"
+																? "min-w-[100px]"
+																: "min-w-[120px]"
 											}`}>
 											{columnLabels[col]}
 										</TableHead>
@@ -702,31 +761,10 @@ export default function ProductVariantTable({
 									}}>
 									{renderColumns()
 										.filter(
-											(col) => !["quantity", "warehouse", "cart", "price"].includes(col),
+											(col) => !["quantity", "warehouse", "cart", "price", "image"].includes(col),
 										)
 										.map((col) => {
 											switch (col) {
-												case "image":
-													const imageUrl =
-														columnAttributes?.[variant.itemNumber]?.mediaId?.[0]
-															?.url || variant.mediaId?.[0]?.url;
-													return (
-														<TableCell
-															key="image"
-															className="min-w-[80px] py-2">
-															{imageUrl ? (
-																<Image
-																	src={imageUrl}
-																	alt={variant.itemNumber.toString()}
-																	width={40}
-																	height={40}
-																	className="object-contain"
-																/>
-															) : (
-																<div className="bg-muted h-[40px] w-[40px]" />
-															)}
-														</TableCell>
-													);
 												case "itemNumber":
 													return (
 														<TableCell
@@ -791,6 +829,30 @@ export default function ProductVariantTable({
 									{allAttributeNames
 										.filter((name) => visibleAttributes[name])
 										.map((name) => {
+											// Map "bilde" to mediaId
+											if (name?.toLowerCase() === "bilde") {
+												const imageUrl =
+													columnAttributes?.[variant.itemNumber]?.mediaId?.[0]
+														?.url || variant.mediaId?.[0]?.url;
+												return (
+													<TableCell
+														key={`${variant.itemNumber}-${name}`}
+														className="min-w-[120px] py-2">
+														{imageUrl ? (
+															<Image
+																src={imageUrl}
+																alt={variant.itemNumber.toString()}
+																width={40}
+																height={40}
+																className="object-contain"
+															/>
+														) : (
+															"-"
+														)}
+													</TableCell>
+												);
+											}
+
 											const attrs =
 												columnAttributes?.[variant.itemNumber]?.attributes ??
 												[];
