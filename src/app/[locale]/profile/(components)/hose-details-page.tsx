@@ -165,14 +165,14 @@ export default function HoseDetailsPage({
 							SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
 						}
 						onClick={() => setIsEditMode(!isEditMode)}
-						className="border-[#C1C4C2] text-[#0F1912]"
+						className="border-[#C1C4C2] bg-white text-[#0F1912]"
 						variant="outline">
 						<SquarePen /> {isEditMode ? "Avbryt" : "Rediger slangedetaljer"}
 					</Button>
 					<Button
 						onClick={handleAddToCart}
 						disabled={isAddingToCart || !hoseDetails}
-						className="border-[#C1C4C2] text-[#0F1912]"
+						className="border-[#C1C4C2] bg-white text-[#0F1912]"
 						variant="outline">
 						<ShoppingCart /> {isAddingToCart ? t("adding") : t("addToCart")}
 					</Button>
@@ -189,7 +189,7 @@ export default function HoseDetailsPage({
 						onExport={() => console.log("Export")}
 						triggerButton={
 							<Button
-								className="border-[#C1C4C2] text-[#0F1912]"
+								className="border-[#C1C4C2] bg-white text-[#0F1912]"
 								variant="outline">
 								<Ellipsis /> Handlinger
 							</Button>
