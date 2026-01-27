@@ -356,6 +356,7 @@ export function HosesAndEquipments({
 			page,
 			pageSize: ITEMS_PER_PAGE,
 			...getActiveFilters(),
+			...(searchQuery ? { search: searchQuery } : {}),
 		};
 		fetchAssets(filters);
 		if (typeof window !== "undefined") {
@@ -376,6 +377,7 @@ export function HosesAndEquipments({
 			page,
 			pageSize: ITEMS_PER_PAGE,
 			...getActiveFilters(),
+			...(searchQuery ? { search: searchQuery } : {}),
 		};
 		fetchAssets(filters);
 	}, []);

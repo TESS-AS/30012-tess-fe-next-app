@@ -148,8 +148,57 @@ export default function HoseDetailsPage({
 	};
 
 	return (
-		<div className="mx-auto max-w-[1200px] space-y-4">
-			<div className="rounded-lg bg-white shadow">
+		<div className="mx-auto space-y-4">
+			<div className="flex items-center justify-between rounded-md">
+				<Button
+					variant="ghost"
+					onClick={onBack}
+					className="gap-2 px-0 text-[#0F1912] hover:bg-transparent hover:text-[#003D1A]">
+					<ChevronLeft className="h-5 w-5" />
+					Gå tilbake til listen
+				</Button>
+
+				<div className="flex items-center gap-3">
+					<Button
+						disabled={
+							profile?.defaultCustomerNumber ===
+							SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+						}
+						onClick={() => setIsEditMode(!isEditMode)}
+						className="border-[#C1C4C2] text-[#0F1912]"
+						variant="outline">
+						<SquarePen /> {isEditMode ? "Avbryt" : "Rediger slangedetaljer"}
+					</Button>
+					<Button
+						onClick={handleAddToCart}
+						disabled={isAddingToCart || !hoseDetails}
+						className="border-[#C1C4C2] text-[#0F1912]"
+						variant="outline">
+						<ShoppingCart /> {isAddingToCart ? t("adding") : t("addToCart")}
+					</Button>
+					<HoseActionsDropdown
+						selectedCount={1}
+						isAddingToCart={isAddingToCart}
+						onAddToCart={handleAddToCart}
+						onContactSupport={() => console.log("Contact support")}
+						onReportReplacement={() => console.log("Report replacement")}
+						onDiscardEquipment={() => console.log("Discard equipment")}
+						onPrintCertificate={() => console.log("Print certificate")}
+						onPrintTags={() => console.log("Print tags")}
+						onPrintTestCertificates={() => {}}
+						onExport={() => console.log("Export")}
+						triggerButton={
+							<Button
+								className="border-[#C1C4C2] text-[#0F1912]"
+								variant="outline">
+								<Ellipsis /> Handlinger
+							</Button>
+						}
+						align="end"
+					/>
+				</div>
+			</div>
+			{/* <div className="rounded-lg bg-white shadow">
 				<div className="border-b border-[#E8EAE9] px-6 py-3">
 					<Button
 						variant="ghost"
@@ -298,11 +347,12 @@ export default function HoseDetailsPage({
 						align="end"
 					/>
 				</div>
-			</div>
+			</div> */}
 
 			<div className="rounded-md bg-white px-6 py-4">
 				<Accordion
 					type="multiple"
+					defaultValue={["s2-utstyr"]}
 					className="space-y-3">
 					<S2EquipmentsAccordion
 						isEditMode={isEditMode}
