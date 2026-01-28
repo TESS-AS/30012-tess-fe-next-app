@@ -12,7 +12,6 @@ import { useCategories } from "@/lib/CategoriesProvider";
 import axiosClient from "@/services/axiosClient";
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
 
 export default function PunchoutSessionPage() {
 	const params = useParams();
@@ -41,8 +40,6 @@ export default function PunchoutSessionPage() {
 						withCredentials: true,
 					},
 				);
-
-				await signOut({ redirect: false });
 
 				clearPunchoutProfile();
 				queryClient.invalidateQueries({
