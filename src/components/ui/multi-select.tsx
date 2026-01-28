@@ -133,6 +133,33 @@ export function MultiSelectWithTags({
 		onSearchChange,
 	});
 
+	React.useEffect(() => {
+		if (process.env.NODE_ENV === "production") return;
+		if (!open) return;
+		const missingSelected = selected.filter(
+			(value) => !options.some((o) => o.value === value),
+		);
+		console.debug("[MultiSelect] open", {
+			selectedCount: selected.length,
+			optionsCount: options.length,
+			effectiveOptionsCount: effectiveOptions.length,
+			missingSelected,
+		});
+		console.debug(
+			"[MultiSelect] option values sample",
+			effectiveOptions.slice(0, 15).map((o) => o.value),
+		);
+	}, [open, options, effectiveOptions, selected]);
+
+	React.useEffect(() => {
+		if (process.env.NODE_ENV === "production") return;
+		if (!open) return;
+		console.debug("[MultiSelect] search", {
+			searchQuery,
+			filteredOptionsCount: filteredOptions.length,
+		});
+	}, [open, searchQuery, filteredOptions.length]);
+
 	const [expanded, setExpanded] = React.useState(false);
 	const maxCollapsedTags = 2;
 	const shouldCollapse = selected.length > 3;
