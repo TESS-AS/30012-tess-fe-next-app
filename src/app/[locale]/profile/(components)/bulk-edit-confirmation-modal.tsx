@@ -170,14 +170,18 @@ export function BulkEditConfirmationModal({
 
 	const missingWarehouseNumbers = useMemo(() => {
 		if (!open) return [];
-		return selectedWarehouses
+		const normalized = selectedWarehouses
 			.map((w) => w.trim())
-			.filter(
-				(warehouseNumber) =>
-					warehouseNumber.length > 0 &&
-					!warehouseNumberToCompanyNumber.has(warehouseNumber) &&
-					!extraWarehouseCompanyMap.has(warehouseNumber),
-			);
+			.filter(Boolean)
+			.map((value) => value.split("|")[0])
+			.filter(Boolean);
+
+		return Array.from(new Set(normalized)).filter(
+			(warehouseNumber) =>
+				warehouseNumber.length > 0 &&
+				!warehouseNumberToCompanyNumber.has(warehouseNumber) &&
+				!extraWarehouseCompanyMap.has(warehouseNumber),
+		);
 	}, [
 		open,
 		selectedWarehouses,
@@ -256,16 +260,86 @@ export function BulkEditConfirmationModal({
 
 	const warehouseOptions = useMemo(() => {
 		const base = warehouses.map((warehouse) => ({
-			value: warehouse.warehouseNumber ?? String(warehouse.warehouseId),
+			value:
+				warehouse.warehouseNumber && warehouse.companyNumber
+					? `${warehouse.warehouseNumber}|${warehouse.companyNumber}`
+					: (warehouse.warehouseNumber ?? String(warehouse.warehouseId)),
 			label: warehouse.warehouseName ?? "",
 		}));
+
+		const baseWarehouseNumbers = new Set(
+			warehouses
+				.map((w) => w.warehouseNumber)
+				.filter((w): w is string => Boolean(w)),
+		);
+		const baseValues = new Set(base.map((o) => o.value));
+
 		const extra = selectedUsers.flatMap((user) =>
 			(user.warehouse ?? [])
 				.filter((w) => w?.number && w?.name)
-				.map((w) => ({ value: w.number, label: w.name })),
+				.flatMap((w) => {
+					const resolvedCompany =
+						(w.companyNumber ? String(w.companyNumber) : undefined) ??
+						extraWarehouseCompanyMap.get(w.number) ??
+						warehouseNumberToCompanyNumber.get(w.number);
+					const value = resolvedCompany
+						? `${w.number}|${resolvedCompany}`
+						: w.number;
+					if (resolvedCompany && baseValues.has(value)) {
+						return [];
+					}
+					if (!resolvedCompany && baseWarehouseNumbers.has(w.number)) {
+						return [];
+					}
+					return [{ value, label: w.name }];
+				}),
 		);
 		return buildSelectOptions(base, extra);
-	}, [selectedUsers, warehouses]);
+	}, [
+		selectedUsers,
+		warehouses,
+		extraWarehouseCompanyMap,
+		warehouseNumberToCompanyNumber,
+	]);
+
+	useEffect(() => {
+		if (!open) return;
+		if (selectedWarehouses.length === 0) return;
+
+		setSelectedWarehouses((prev) => {
+			let changed = false;
+			const next = prev
+				.map((raw) => raw.trim())
+				.filter(Boolean)
+				.map((value) => {
+					if (value.includes("|")) return value;
+					const company =
+						extraWarehouseCompanyMap.get(value) ??
+						warehouseNumberToCompanyNumber.get(value);
+					if (!company) return value;
+					changed = true;
+					return `${value}|${company}`;
+				});
+
+			const deduped = Array.from(new Set(next));
+			return changed || deduped.length !== prev.length ? deduped : prev;
+		});
+	}, [
+		open,
+		selectedWarehouses,
+		extraWarehouseCompanyMap,
+		warehouseNumberToCompanyNumber,
+	]);
+
+	useEffect(() => {
+		if (process.env.NODE_ENV === "production") return;
+		if (!open) return;
+		console.debug(
+			"[BulkEdit] warehouseOptions sample",
+			warehouseOptions.slice(0, 10),
+		);
+		console.debug("[BulkEdit] selectedWarehouses", selectedWarehouses);
+	}, [open, warehouseOptions, selectedWarehouses]);
 
 	const companyOptions = useMemo(() => {
 		const base = companies.map((item) => ({
@@ -296,7 +370,14 @@ export function BulkEditConfirmationModal({
 				if (catalog?.number) catalogSet.add(catalog.number);
 			});
 			user.warehouse?.forEach((warehouse) => {
-				if (warehouse?.number) warehouseSet.add(warehouse.number);
+				if (!warehouse?.number) return;
+				if (warehouse.companyNumber) {
+					warehouseSet.add(
+						`${warehouse.number}|${String(warehouse.companyNumber)}`,
+					);
+					return;
+				}
+				warehouseSet.add(warehouse.number);
 			});
 			user.company?.forEach((company) => {
 				if (company?.number) companySet.add(company.number);
@@ -341,13 +422,19 @@ export function BulkEditConfirmationModal({
 	const handleConfirm = () => {
 		const warehousesPayload = selectedWarehouses
 			.filter((warehouseNumber) => warehouseNumber.trim())
-			.map((warehouseNumber) => ({
-				warehouseNumber,
-				companyNumber:
+			.map((warehouseValue) => {
+				const trimmed = warehouseValue.trim();
+				const [warehouseNumber, companyNumberFromValue] = trimmed.split("|");
+				const companyNumber =
+					companyNumberFromValue ??
 					extraWarehouseCompanyMap.get(warehouseNumber) ??
 					warehouseNumberToCompanyNumber.get(warehouseNumber) ??
-					"",
-			}));
+					"";
+				return {
+					warehouseNumber,
+					companyNumber,
+				};
+			});
 
 		const changes: BulkEditChanges = {
 			customerAccess: selectedCustomers.filter(Boolean),
