@@ -62,7 +62,7 @@ export const AddressSelector = ({
 						</SelectItem>
 					))}
 
-				<div className="mt-2 flex items-center justify-between border-t px-1 py-2 text-sm font-medium text-[#009640]">
+				{/* <div className="mt-2 flex items-center justify-between border-t px-1 py-2 text-sm font-medium text-[#009640]">
 					<span>{t("customer")}</span>
 				</div>
 				{savedAddresses
@@ -102,7 +102,7 @@ export const AddressSelector = ({
 								</span>
 							)}
 						</SelectItem>
-					))}
+					))} */}
 			</SelectContent>
 		</Select>
 	);

@@ -51,6 +51,12 @@ function useMultiSelectLogic({
 		[onSearchChange],
 	);
 
+	React.useEffect(() => {
+		if (open) return;
+		if (searchQuery) setSearchQueryState("");
+		onSearchChange?.("");
+	}, [open, searchQuery, onSearchChange]);
+
 	const filteredOptions = React.useMemo(() => {
 		if (onSearchChange) return options;
 		return options.filter((o) => {
@@ -103,6 +109,8 @@ export function MultiSelectWithTags({
 	canPrevPage,
 	isLoading,
 }: BaseProps) {
+	const labelCacheRef = React.useRef<Map<string, string>>(new Map());
+
 	const effectiveOptions = React.useMemo(() => {
 		const missingSelected = selected.filter(
 			(value) => !options.some((o) => o.value === value),
@@ -112,11 +120,19 @@ export function MultiSelectWithTags({
 
 		const syntheticOptions = missingSelected.map((value) => ({
 			value,
-			label: value,
+			label: labelCacheRef.current.get(value) ?? value,
 		}));
 
 		return [...options, ...syntheticOptions];
 	}, [options, selected]);
+
+	React.useEffect(() => {
+		effectiveOptions.forEach((o) => {
+			if (o?.value && o?.label) {
+				labelCacheRef.current.set(o.value, o.label);
+			}
+		});
+	}, [effectiveOptions]);
 
 	const {
 		open,
@@ -132,33 +148,6 @@ export function MultiSelectWithTags({
 		onChange,
 		onSearchChange,
 	});
-
-	React.useEffect(() => {
-		if (process.env.NODE_ENV === "production") return;
-		if (!open) return;
-		const missingSelected = selected.filter(
-			(value) => !options.some((o) => o.value === value),
-		);
-		console.debug("[MultiSelect] open", {
-			selectedCount: selected.length,
-			optionsCount: options.length,
-			effectiveOptionsCount: effectiveOptions.length,
-			missingSelected,
-		});
-		console.debug(
-			"[MultiSelect] option values sample",
-			effectiveOptions.slice(0, 15).map((o) => o.value),
-		);
-	}, [open, options, effectiveOptions, selected]);
-
-	React.useEffect(() => {
-		if (process.env.NODE_ENV === "production") return;
-		if (!open) return;
-		console.debug("[MultiSelect] search", {
-			searchQuery,
-			filteredOptionsCount: filteredOptions.length,
-		});
-	}, [open, searchQuery, filteredOptions.length]);
 
 	const [expanded, setExpanded] = React.useState(false);
 	const maxCollapsedTags = 2;
@@ -308,10 +297,11 @@ export function MultiSelectWithTags({
 						const matchedOption = effectiveOptions.find(
 							(o) => o.value === value,
 						);
+						const cachedLabel = labelCacheRef.current.get(value);
 						const displayLabel =
 							matchedOption && matchedOption.value !== matchedOption.label
 								? `${matchedOption.label} (${matchedOption.value})`
-								: (matchedOption?.label ?? value);
+								: (matchedOption?.label ?? cachedLabel ?? value);
 						return (
 							<Badge
 								key={value}

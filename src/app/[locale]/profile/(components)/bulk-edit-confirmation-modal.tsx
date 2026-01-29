@@ -99,6 +99,10 @@ export function BulkEditConfirmationModal({
 				warehouseName: w.warehouseName,
 				companyNumber:
 					w.companyNumber != null ? String(w.companyNumber) : undefined,
+				warehouseKey:
+					w.warehouseNumber && w.companyNumber != null
+						? `${w.warehouseNumber}|${String(w.companyNumber)}`
+						: String(w.warehouseId ?? w.warehouseNumber ?? ""),
 			})),
 		[warehousesPageItems],
 	);
@@ -126,7 +130,7 @@ export function BulkEditConfirmationModal({
 	);
 	const warehouses = useMergedPagedItems(
 		warehousesPageItemsNormalized,
-		"warehouseId",
+		"warehouseKey",
 		warehousePage === 1,
 	);
 	const companies = useMergedPagedItems(
@@ -285,6 +289,7 @@ export function BulkEditConfirmationModal({
 					const value = resolvedCompany
 						? `${w.number}|${resolvedCompany}`
 						: w.number;
+
 					if (resolvedCompany && baseValues.has(value)) {
 						return [];
 					}
@@ -301,45 +306,6 @@ export function BulkEditConfirmationModal({
 		extraWarehouseCompanyMap,
 		warehouseNumberToCompanyNumber,
 	]);
-
-	useEffect(() => {
-		if (!open) return;
-		if (selectedWarehouses.length === 0) return;
-
-		setSelectedWarehouses((prev) => {
-			let changed = false;
-			const next = prev
-				.map((raw) => raw.trim())
-				.filter(Boolean)
-				.map((value) => {
-					if (value.includes("|")) return value;
-					const company =
-						extraWarehouseCompanyMap.get(value) ??
-						warehouseNumberToCompanyNumber.get(value);
-					if (!company) return value;
-					changed = true;
-					return `${value}|${company}`;
-				});
-
-			const deduped = Array.from(new Set(next));
-			return changed || deduped.length !== prev.length ? deduped : prev;
-		});
-	}, [
-		open,
-		selectedWarehouses,
-		extraWarehouseCompanyMap,
-		warehouseNumberToCompanyNumber,
-	]);
-
-	useEffect(() => {
-		if (process.env.NODE_ENV === "production") return;
-		if (!open) return;
-		console.debug(
-			"[BulkEdit] warehouseOptions sample",
-			warehouseOptions.slice(0, 10),
-		);
-		console.debug("[BulkEdit] selectedWarehouses", selectedWarehouses);
-	}, [open, warehouseOptions, selectedWarehouses]);
 
 	const companyOptions = useMemo(() => {
 		const base = companies.map((item) => ({
@@ -421,7 +387,7 @@ export function BulkEditConfirmationModal({
 
 	const handleConfirm = () => {
 		const warehousesPayload = selectedWarehouses
-			.filter((warehouseNumber) => warehouseNumber.trim())
+			.filter((warehouseValue) => warehouseValue.trim())
 			.map((warehouseValue) => {
 				const trimmed = warehouseValue.trim();
 				const [warehouseNumber, companyNumberFromValue] = trimmed.split("|");

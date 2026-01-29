@@ -51,6 +51,7 @@ export default function CheckoutPage() {
 	const { submitFeedback, loading } = useFeedback();
 
 	const selectedAddress = defaultAddress?.[0];
+	console.log(selectedAddress, "selectedAddress");
 
 	const { contactPerson, handleSave: handleContactPersonSave } =
 		useContactPerson();

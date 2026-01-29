@@ -237,11 +237,11 @@ const UsersBrukere = () => {
 	};
 
 	const renderTruncatedList = (
-		items: { name?: string; number?: string }[],
+		items: { name?: string; number?: string }[] | null | undefined,
 		countTranslationKey: string,
 		user: User,
 	) => {
-		const validItems = items
+		const validItems = (items ?? [])
 			.map((x) => x?.name || x?.number)
 			.filter(Boolean) as string[];
 
@@ -270,7 +270,7 @@ const UsersBrukere = () => {
 							{countText}
 						</span>
 					</HoverCardTrigger>
-					<HoverCardContent className="w-auto min-w-[200px] max-w-sm">
+					<HoverCardContent className="w-auto max-w-sm min-w-[200px]">
 						<div className="flex flex-col gap-1.5">
 							{displayItems.map((item, idx) => (
 								<div
