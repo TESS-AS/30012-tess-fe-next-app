@@ -51,6 +51,12 @@ function useMultiSelectLogic({
 		[onSearchChange],
 	);
 
+	React.useEffect(() => {
+		if (open) return;
+		if (searchQuery) setSearchQueryState("");
+		onSearchChange?.("");
+	}, [open, searchQuery, onSearchChange]);
+
 	const filteredOptions = React.useMemo(() => {
 		if (onSearchChange) return options;
 		return options.filter((o) => {

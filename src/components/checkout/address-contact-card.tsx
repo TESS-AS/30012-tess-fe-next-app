@@ -181,6 +181,8 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 		}
 	};
 
+	console.log(houseNumber, postalCode, city, "checkout");
+
 	return (
 		<Card className="rounded-lg shadow-none">
 			<CardContent className="p-6">
@@ -191,6 +193,12 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 							{t("title")}
 						</h2>
 					</div>
+					{editMode && (
+						<div className="flex items-center gap-2 text-sm font-medium text-[#003D1A]">
+							<SquarePen className="h-4 w-4" />
+							<span>{t("edit")}</span>
+						</div>
+					)}
 				</div>
 
 				{!editMode ? (
@@ -207,7 +215,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 				) : (
 					<div className="space-y-4">
 						<div>
-							<Label>{t("savedAddresses")}</Label>
+							<Label>Adresse</Label>
 							<AddressSelector
 								savedAddresses={savedAddresses}
 								onAddressSelect={(selectedAddress) => {
@@ -239,7 +247,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 						</div>
 
 						<div>
-							<Label>{t("addressName")}</Label>
+							<Label>Navn på adresse</Label>
 							<Input
 								name="addressName"
 								value={formData.addressName}

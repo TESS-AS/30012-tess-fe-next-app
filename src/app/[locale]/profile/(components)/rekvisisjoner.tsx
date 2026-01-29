@@ -117,11 +117,23 @@ export function Rekvisisjoner() {
 		return matchesSearch;
 	});
 
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [searchQuery, selectedStatus]);
+
+	const itemsPerPage = 10;
+	const totalItems = filteredRekvisisjoner.length;
+	const totalPages = Math.ceil(totalItems / itemsPerPage);
+	const pagedRekvisisjoner = filteredRekvisisjoner.slice(
+		(currentPage - 1) * itemsPerPage,
+		currentPage * itemsPerPage,
+	);
+
 	const columns = [
 		{
 			key: "orderId",
 			header: t("orderId").toUpperCase(),
-			cell: (rekvisisjon: Rekvisisjon) => rekvisisjon.requisitionId,
+			cell: (rekvisisjon: Rekvisisjon) => rekvisisjon.orderId,
 		},
 		{
 			key: "bestiller",
@@ -226,10 +238,10 @@ export function Rekvisisjoner() {
 						<Button
 							variant="outline"
 							size="sm"
-							disabled={!isCustomerRole}
+							disabled={isCustomerRole}
 							className="border-[#C1C4C2] text-[#0F1912] hover:bg-[#E8EAE9] hover:text-[#009640]"
 							onClick={async () => {
-								if (!isCustomerRole) return;
+								if (isCustomerRole) return;
 								try {
 									await updateRequisition({
 										customerNumber:
@@ -328,11 +340,11 @@ export function Rekvisisjoner() {
 				</div>
 
 				<DataTable
-					data={filteredRekvisisjoner}
+					data={pagedRekvisisjoner}
 					columns={columns}
 					currentPage={currentPage}
-					itemsPerPage={10}
-					totalItems={filteredRekvisisjoner.length}
+					itemsPerPage={itemsPerPage}
+					totalItems={totalItems}
 					onPageChange={setCurrentPage}
 					isLoading={loading}
 					isExpandable
@@ -375,7 +387,7 @@ export function Rekvisisjoner() {
 							</div>
 						);
 					}}
-					totalPages={0}
+					totalPages={totalPages}
 					isDropdownColumn
 				/>
 			</div>

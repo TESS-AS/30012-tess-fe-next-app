@@ -494,7 +494,7 @@
 		},
 		"contactPerson": {
 			"title": "Kontaktperson",
-			"edit": "Endre kontaktperson",
+			"edit": "Du endrer nå en kontaktperson",
 			"firstName": "Fornavn",
 			"lastName": "Etternavn",
 			"email": "E-post",
@@ -507,7 +507,7 @@
 		},
 		"address": {
 			"title": "Din adresse",
-			"edit": "Endre adresse",
+			"edit": "Du endrer nå en adresse",
 			"savedAddresses": "Lagrede adresser",
 			"addressName": "Adressenavn",
 			"addressNameExample": "Eksempel: Hjem, Jobb, Kontor",

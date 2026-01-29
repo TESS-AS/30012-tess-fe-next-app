@@ -75,6 +75,7 @@ export interface User {
 	warehouse: {
 		name: string;
 		number: string;
+		companyNumber: string;
 	}[];
 	catalog: {
 		name: string;

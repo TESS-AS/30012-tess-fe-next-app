@@ -76,7 +76,7 @@ export const useRequisitions = (customerNumber: string, status?: string) => {
 			const response = await getRequisition(customerNumber, apiStatus);
 			const transformedRequisitions = response.requisitions.map(
 				(req: RequisitionResponse) => ({
-					orderId: req.requisitionId.toString(),
+					orderId: req.description,
 					bestiller: req.fullName,
 					fullName: req.fullName,
 					opprettet: req.requestDate,
