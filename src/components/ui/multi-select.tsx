@@ -109,6 +109,8 @@ export function MultiSelectWithTags({
 	canPrevPage,
 	isLoading,
 }: BaseProps) {
+	const labelCacheRef = React.useRef<Map<string, string>>(new Map());
+
 	const effectiveOptions = React.useMemo(() => {
 		const missingSelected = selected.filter(
 			(value) => !options.some((o) => o.value === value),
@@ -118,11 +120,19 @@ export function MultiSelectWithTags({
 
 		const syntheticOptions = missingSelected.map((value) => ({
 			value,
-			label: value,
+			label: labelCacheRef.current.get(value) ?? value,
 		}));
 
 		return [...options, ...syntheticOptions];
 	}, [options, selected]);
+
+	React.useEffect(() => {
+		effectiveOptions.forEach((o) => {
+			if (o?.value && o?.label) {
+				labelCacheRef.current.set(o.value, o.label);
+			}
+		});
+	}, [effectiveOptions]);
 
 	const {
 		open,
@@ -287,10 +297,11 @@ export function MultiSelectWithTags({
 						const matchedOption = effectiveOptions.find(
 							(o) => o.value === value,
 						);
+						const cachedLabel = labelCacheRef.current.get(value);
 						const displayLabel =
 							matchedOption && matchedOption.value !== matchedOption.label
 								? `${matchedOption.label} (${matchedOption.value})`
-								: (matchedOption?.label ?? value);
+								: (matchedOption?.label ?? cachedLabel ?? value);
 						return (
 							<Badge
 								key={value}
