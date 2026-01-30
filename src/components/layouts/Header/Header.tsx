@@ -37,10 +37,7 @@ import { useOrderSummary } from "@/hooks/useOrderSummary";
 import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import { useCategories } from "@/lib/CategoriesProvider";
-import {
-	buildCategoryPath,
-	findCategoryByGroupId,
-} from "@/lib/category-utils";
+import { buildCategoryPath, findCategoryByGroupId } from "@/lib/category-utils";
 import { useSearchStore } from "@/lib/searchStore";
 import axiosClient from "@/services/axiosClient";
 import { getProductVariations } from "@/services/product.service";
@@ -117,6 +114,16 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 	const [variations, setVariations] = useState<Record<string, any>>({});
 	const { sumAfterDiscount } = useOrderSummary();
 	const { cartItems, isAuthOpen, setIsAuthOpen } = useAppContext();
+
+	const missingDefaultVariables = useMemo(() => {
+		if (!profile) return false;
+		return (
+			!profile.defaultWarehouseNumber ||
+			!profile.defaultCompanyNumber ||
+			!profile.defaultCustomerNumber ||
+			!profile.defaultAssortmentNumber
+		);
+	}, [profile]);
 
 	const {
 		query: searchQuery,
@@ -408,6 +415,14 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								onClick={() => router.push("/")}>
 								E-handel
 							</Button>
+						)}
+						{profile && missingDefaultVariables && (
+							<CustomerNumberSwitcher
+								profile={profile}
+								forceOpen
+								blockUntilComplete
+								hideTrigger
+							/>
 						)}
 						<Button
 							variant="ghost"
