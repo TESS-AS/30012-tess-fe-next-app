@@ -29,10 +29,16 @@ import { useTranslations } from "next-intl";
 
 interface CustomerNumberSwitcherProps {
 	profile: ProfileUser;
+	forceOpen?: boolean;
+	blockUntilComplete?: boolean;
+	hideTrigger?: boolean;
 }
 
 export default function CustomerNumberSwitcher({
 	profile,
+	forceOpen,
+	blockUntilComplete,
+	hideTrigger,
 }: CustomerNumberSwitcherProps) {
 	const t = useTranslations();
 	const { refetch: refetchCategories } = useCategories();
@@ -48,12 +54,29 @@ export default function CustomerNumberSwitcher({
 	const [isSaving, setIsSaving] = useState(false);
 	const previousCompanyRef = useRef<string>("");
 
-	// Use selectedCompanyNumber or profile default for fetching filtered data
-	const effectiveCompanyNumber = selectedCompanyNumber || profile?.defaultCompanyNumber;
+	const missingRequiredDefaults =
+		!profile?.defaultCompanyNumber ||
+		!profile?.defaultCustomerNumber ||
+		!profile?.defaultWarehouseNumber ||
+		!profile?.defaultAssortmentNumber;
+	const shouldBlock = Boolean(blockUntilComplete && missingRequiredDefaults);
 
-	const { customers, refetch: refetchCustomers } = useGetCustomers(true, effectiveCompanyNumber);
-	const { warehouses, refetch: refetchWarehouses } = useGetWarehouses(true, effectiveCompanyNumber);
-	const { assortments, refetch: refetchAssortments } = useGetAssortments(true, effectiveCompanyNumber);
+	// Use selectedCompanyNumber or profile default for fetching filtered data
+	const effectiveCompanyNumber =
+		selectedCompanyNumber || profile?.defaultCompanyNumber;
+
+	const { customers, refetch: refetchCustomers } = useGetCustomers(
+		true,
+		effectiveCompanyNumber,
+	);
+	const { warehouses, refetch: refetchWarehouses } = useGetWarehouses(
+		true,
+		effectiveCompanyNumber,
+	);
+	const { assortments, refetch: refetchAssortments } = useGetAssortments(
+		true,
+		effectiveCompanyNumber,
+	);
 	const { companies } = useGetCompanies(true);
 
 	useEffect(() => {
@@ -111,10 +134,10 @@ export default function CustomerNumberSwitcher({
 	// Set initial warehouse when warehouses first load (only if company matches profile default)
 	useEffect(() => {
 		if (!warehouses.length || selectedWarehouse) return;
-		
+
 		// Only auto-select if company matches profile default (initial load)
-		const currentCompanyMatchesDefault = 
-			selectedCompanyNumber && 
+		const currentCompanyMatchesDefault =
+			selectedCompanyNumber &&
 			String(selectedCompanyNumber) === String(profile?.defaultCompanyNumber);
 
 		if (currentCompanyMatchesDefault && profile?.defaultWarehouseNumber) {
@@ -126,7 +149,13 @@ export default function CustomerNumberSwitcher({
 				return;
 			}
 		}
-	}, [warehouses, profile?.defaultWarehouseNumber, profile?.defaultCompanyNumber, selectedWarehouse, selectedCompanyNumber]);
+	}, [
+		warehouses,
+		profile?.defaultWarehouseNumber,
+		profile?.defaultCompanyNumber,
+		selectedWarehouse,
+		selectedCompanyNumber,
+	]);
 
 	// Reset warehouse when company changes - warehouses automatically refetch
 	useEffect(() => {
@@ -138,7 +167,10 @@ export default function CustomerNumberSwitcher({
 		// If company hasn't changed, don't reset warehouse (unless it's invalid)
 		if (previousCompanyStr && previousCompanyStr === currentCompanyStr) {
 			// Only reset if current warehouse selection is invalid
-			if (selectedWarehouse && warehouses.find((w) => w.id === selectedWarehouse)) {
+			if (
+				selectedWarehouse &&
+				warehouses.find((w) => w.id === selectedWarehouse)
+			) {
 				return; // Valid warehouse, no need to reset
 			}
 		}
@@ -161,8 +193,17 @@ export default function CustomerNumberSwitcher({
 
 		// Update ref to track the current company
 		previousCompanyRef.current = currentCompanyStr;
-	}, [selectedCompanyNumber, warehouses, profile?.defaultWarehouseNumber, selectedWarehouse]);
+	}, [
+		selectedCompanyNumber,
+		warehouses,
+		profile?.defaultWarehouseNumber,
+		selectedWarehouse,
+	]);
 
+	useEffect(() => {
+		if (!forceOpen && !shouldBlock) return;
+		setIsCustomerModalOpen(true);
+	}, [forceOpen, shouldBlock]);
 
 	const handleSave = async () => {
 		// Validate required fields
@@ -216,20 +257,32 @@ export default function CustomerNumberSwitcher({
 	console.log(assortments, "assortments");
 	return (
 		<>
-			<button
-				onClick={() => setIsCustomerModalOpen(true)}
-				className="hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-gray-700 transition-colors outline-none">
-				<UserRoundCog className="h-4 w-4" />
-				<span>Velg kunde/lager/sortiment</span>
-			</button>
+			{!hideTrigger && (
+				<button
+					onClick={() => setIsCustomerModalOpen(true)}
+					className="hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-gray-700 transition-colors outline-none">
+					<UserRoundCog className="h-4 w-4" />
+					<span>Velg kunde/lager/sortiment</span>
+				</button>
+			)}
 
 			<Modal
 				open={isCustomerModalOpen}
-				onOpenChange={setIsCustomerModalOpen}>
+				// hideCloseButton={shouldBlock}
+				onOpenChange={(nextOpen) => {
+					if (shouldBlock && !nextOpen) return;
+					setIsCustomerModalOpen(nextOpen);
+				}}>
 				<ModalHeader>
 					<ModalTitle>{t("CustomerSwitcher.title")}</ModalTitle>
 				</ModalHeader>
 				<div className="space-y-4 py-4">
+					{/* {shouldBlock && (
+						<div className="rounded-md border border-[#FDE8E8] bg-[#FDE8E8] px-3 py-2 text-sm text-[#9B1C1C]">
+							Du må velge standard firma, kunde, lager og sortiment før du kan
+							bruke appen.
+						</div>
+					)} */}
 					<div className="space-y-2">
 						<Label htmlFor="customerSelect">
 							{t("CustomerSwitcher.selectCustomerLabel")}
@@ -300,11 +353,13 @@ export default function CustomerNumberSwitcher({
 								</SelectGroup>
 							</SelectContent>
 						</Select>
-						{selectedCompanyNumber && !selectedWarehouse && warehouses.length > 0 && (
-							<p className="text-sm text-red-600">
-								Lager er påkrevd. Vennligst velg et lager.
-							</p>
-						)}
+						{selectedCompanyNumber &&
+							!selectedWarehouse &&
+							warehouses.length > 0 && (
+								<p className="text-sm text-red-600">
+									Lager er påkrevd. Vennligst velg et lager.
+								</p>
+							)}
 					</div>
 
 					<div className="space-y-2">
