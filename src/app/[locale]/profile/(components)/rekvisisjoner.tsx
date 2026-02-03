@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { getStatusIcons } from "./mine-bestillinger";
+import { useAppContext } from "@/lib/appContext";
 
 type Status = "Alle" | "Venter godkjenning" | "Godkjent" | "Avvist";
 
@@ -70,6 +71,7 @@ export function Rekvisisjoner() {
 	const t = useTranslations("Rekvisisjoner");
 	const router = useRouter();
 	const { data: profile } = usePunchoutProfile();
+	const { isCartChanging, setIsCartChanging } = useAppContext();
 	const isCustomerRole = (profile?.role ?? "").toLowerCase() === "customer";
 
 	const [searchQuery, setSearchQuery] = useState("");
@@ -175,6 +177,7 @@ export function Rekvisisjoner() {
 								disabled={isCustomerRole}
 								className="border-[#009640] text-[#009640] hover:border-[#005522] hover:bg-[#005522] hover:text-white"
 								onClick={async () => {
+									setIsCartChanging(true);
 									setSelectedOrder(rekvisisjon);
 									setShowAllItems(false);
 									setApprovalModalOpen(true);
@@ -203,6 +206,8 @@ export function Rekvisisjoner() {
 											"Error approving requisition and adding items to cart",
 											error,
 										);
+									} finally {
+										setIsCartChanging(false);
 									}
 								}}>
 								{t("approve")}
