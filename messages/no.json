@@ -327,6 +327,8 @@
 		"forPrivateAndBusiness": "For privatpersoner og bedriftskunder",
 		"loginAs": "Logg inn med ansattkonto",
 		"employee": "ansatt",
+		"loginWithBESso": "Logg inn med BE SSO",
+		"loginWithTenantBe": "Tenant login BE",
 		"or": "eller",
 		"needHelp": "Trenger du hjelp til å logge inn?",
 		"contactUs": "Kontakt oss",

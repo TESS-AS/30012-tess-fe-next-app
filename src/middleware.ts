@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { auth } from "../auth";
-
-const protectedRoutes = ["profile"];
-const apiAuthPrefix = "/api/auth";
 const supportedLocales = ["en", "no"];
 
 function redirectToLocale(request: NextRequest): NextResponse | null {
@@ -68,28 +64,15 @@ function rewriteProductUrls(request: NextRequest): NextResponse | null {
 	return null;
 }
 
-export default auth((request) => {
-	const { nextUrl } = request;
-	const isLoggedIn = !!request.auth;
-
-	const path = nextUrl.pathname;
-
-	if (path.startsWith(apiAuthPrefix)) {
-		return NextResponse.next();
-	}
-
+export default function middleware(request: NextRequest) {
 	const localeRedirect = redirectToLocale(request);
 	if (localeRedirect) return localeRedirect;
-
-	const isProtected = protectedRoutes.some((route) =>
-		path.split("/").includes(route),
-	);
 
 	const rewritten = rewriteProductUrls(request);
 	if (rewritten) return rewritten;
 
 	return NextResponse.next();
-});
+}
 
 // Only apply to non-static, non-api, non-next routes
 export const config = {
