@@ -44,3 +44,24 @@ export interface UpdateRequisitionResponse {
 		},
 	];
 }
+
+export interface CreateRequisitionPayload {
+	customerNumber: string;
+	description: string;
+	items: Array<{
+		itemNumber: string;
+		quantity: number;
+	}>;
+}
+
+export interface CreateRequisitionResponse {
+	customerNumber: string;
+	userId: number;
+	requisitionId: number;
+	description: string;
+	requisitionLines: Array<{
+		lineNumber: number;
+		itemNumber: string;
+		quantity: number;
+	}>;
+}
