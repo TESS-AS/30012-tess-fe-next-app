@@ -7,6 +7,7 @@ import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useRequisitions } from "@/hooks/useRequisitions";
+import { useAppContext } from "@/lib/appContext";
 import { cn, formatDate } from "@/lib/utils";
 import { addToCart } from "@/services/carts.service";
 import { updateRequisition } from "@/services/requisitions.service";
@@ -22,7 +23,6 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { getStatusIcons } from "./mine-bestillinger";
-import { useAppContext } from "@/lib/appContext";
 
 type Status = "Alle" | "Venter godkjenning" | "Godkjent" | "Avvist";
 
