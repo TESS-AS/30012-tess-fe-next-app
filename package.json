@@ -54,7 +54,6 @@
 		"lodash": "^4.17.21",
 		"lucide-react": "^0.487.0",
 		"next": "15.2.4",
-		"next-auth": "^5.0.0-beta.27",
 		"next-intl": "^4.0.2",
 		"pdfjs-dist": "5.4.149",
 		"postcss": "^8.5.3",

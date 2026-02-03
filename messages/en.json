@@ -323,6 +323,8 @@
 		"forPrivateAndBusiness": "For private individuals and business customers",
 		"loginAs": "Log in as",
 		"employee": "employee",
+		"loginWithBESso": "Login with BE SSO",
+		"loginWithTenantBe": "Tenant login BE",
 		"or": "or",
 		"needHelp": "Need help logging in?",
 		"contactUs": "Contact us",

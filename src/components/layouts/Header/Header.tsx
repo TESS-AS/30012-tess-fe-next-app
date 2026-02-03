@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/tooltip";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useProfile } from "@/contexts/ProfileContext";
+import { profileKeys } from "@/hooks/useGetProfileData";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useGetAssortments } from "@/hooks/useGetAssortments";
 import { useInstantSearch } from "@/hooks/useInstantSearch";
@@ -61,7 +62,6 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 
 export default function Header({ profile }: { profile: ProfileUser | null }) {
@@ -308,7 +308,8 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		} catch (error) {
 			console.error("Logout API failed", error);
 		}
-		await signOut();
+		queryClient.removeQueries({ queryKey: profileKeys.all });
+		router.push("/");
 	};
 
 	const handleAssortmentChange = async (assortmentNumber: string) => {

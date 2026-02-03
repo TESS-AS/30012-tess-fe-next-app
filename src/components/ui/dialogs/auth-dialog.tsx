@@ -9,10 +9,10 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { useProfile } from "@/contexts/ProfileContext";
 import { User, Info } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { signIn, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
 export default function AuthDialog({
@@ -24,7 +24,7 @@ export default function AuthDialog({
 }) {
 	const router = useRouter();
 	const t = useTranslations();
-	const { data: session, status } = useSession();
+	const { profile } = useProfile();
 	const [authenticatingProvider, setAuthenticatingProvider] = useState<
 		string | null
 	>(null);
@@ -36,26 +36,28 @@ export default function AuthDialog({
 		onOpenChange(false);
 	};
 
+	// Close dialog when user is logged in (profile from backend /user)
 	useEffect(() => {
-		if (isOpen && status === "authenticated" && session) {
+		if (isOpen && profile) {
 			closeDialog();
 			setTimeout(() => {
 				router.push("/");
 			}, 100);
 		}
-	}, [isOpen, status, session]);
+	}, [isOpen, profile]);
 
-	const handleSignIn = async (provider: string) => {
-		setAuthenticatingProvider(provider);
-		try {
-			await signIn(provider, {
-				callbackUrl: "/",
-				redirect: true,
-			});
-		} catch (error) {
-			console.error("Authentication failed:", error);
-			setAuthenticatingProvider(null);
-		}
+	const handleLoginWithBESso = () => {
+		setAuthenticatingProvider("be-sso");
+		const baseUrl =
+			process.env.NEXT_PUBLIC_API_BASE_URL || window.location.origin;
+		window.location.href = `${baseUrl}/auth/sso`;
+	};
+
+	const handleLoginWithTenantBe = () => {
+		setAuthenticatingProvider("tenant-be");
+		const baseUrl =
+			process.env.NEXT_PUBLIC_API_BASE_URL || window.location.origin;
+		window.location.href = `${baseUrl}/auth/tenant`;
 	};
 
 	return (
@@ -100,16 +102,14 @@ export default function AuthDialog({
 							<Button
 								variant="outlineGrey"
 								className="text-md mb-2 h-[52px] w-full"
-								onClick={() => handleSignIn("microsoft-entra-id-tenant")}
-								disabled={
-									authenticatingProvider === "microsoft-entra-id-tenant"
-								}>
+								onClick={handleLoginWithTenantBe}
+								disabled={authenticatingProvider === "tenant-be"}>
 								<User
 									className="mr-2 h-4 w-4"
 									fill="currentColor"
 									stroke="none"
 								/>
-								{authenticatingProvider === "microsoft-entra-id-tenant"
+								{authenticatingProvider === "tenant-be"
 									? "Logging in..."
 									: t("AuthDialog.loginOrCreateUser")}
 							</Button>
@@ -130,9 +130,9 @@ export default function AuthDialog({
 							<Button
 								variant="outlineGrey"
 								className="text-md h-[52px] w-full"
-								onClick={() => handleSignIn("microsoft-entra-id")}
-								disabled={authenticatingProvider === "microsoft-entra-id"}>
-								{authenticatingProvider === "microsoft-entra-id"
+								onClick={handleLoginWithBESso}
+								disabled={authenticatingProvider === "be-sso"}>
+								{authenticatingProvider === "be-sso"
 									? "Logging in..."
 									: t("AuthDialog.loginAs")}
 							</Button>
