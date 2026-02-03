@@ -14,6 +14,7 @@ import { User, Info } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import axiosClient from "@/services/axiosClient";
 
 export default function AuthDialog({
 	isOpen,
@@ -46,18 +47,35 @@ export default function AuthDialog({
 		}
 	}, [isOpen, profile]);
 
+	const fetchAuthAndRedirect = async (
+		endpoint: "/auth/sso" | "/auth/tenant",
+	) => {
+		try {
+			const response = await axiosClient.get<{
+				redirectUrl?: string;
+				url?: string;
+			}>(endpoint);
+			const redirectUrl = response.data?.redirectUrl ?? response.data?.url;
+			if (redirectUrl && typeof redirectUrl === "string") {
+				window.location.href = redirectUrl;
+			} else {
+				router.push("/");
+				closeDialog();
+			}
+		} catch (err) {
+			console.error("Auth request failed", err);
+			setAuthenticatingProvider(null);
+		}
+	};
+
 	const handleLoginWithBESso = () => {
 		setAuthenticatingProvider("be-sso");
-		const baseUrl =
-			process.env.NEXT_PUBLIC_API_BASE_URL || window.location.origin;
-		window.location.href = `${baseUrl}/auth/sso`;
+		fetchAuthAndRedirect("/auth/sso");
 	};
 
 	const handleLoginWithTenantBe = () => {
 		setAuthenticatingProvider("tenant-be");
-		const baseUrl =
-			process.env.NEXT_PUBLIC_API_BASE_URL || window.location.origin;
-		window.location.href = `${baseUrl}/auth/tenant`;
+		fetchAuthAndRedirect("/auth/tenant");
 	};
 
 	return (

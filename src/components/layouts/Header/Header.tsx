@@ -30,9 +30,9 @@ import {
 } from "@/components/ui/tooltip";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useProfile } from "@/contexts/ProfileContext";
-import { profileKeys } from "@/hooks/useGetProfileData";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useGetAssortments } from "@/hooks/useGetAssortments";
+import { profileKeys } from "@/hooks/useGetProfileData";
 import { useInstantSearch } from "@/hooks/useInstantSearch";
 import { useOrderSummary } from "@/hooks/useOrderSummary";
 import { useRouter } from "@/i18n/navigation";
@@ -165,7 +165,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 
 		return searchData.categories.map((searchCategory) => {
 			// Find the category in the category tree using categoryNumber (which matches groupId)
-			const categoryNumber = searchCategory.categoryNumber;
+			const { categoryNumber } = searchCategory;
 			const foundCategory = categoryNumber
 				? findCategoryByGroupId(categories, categoryNumber)
 				: null;
