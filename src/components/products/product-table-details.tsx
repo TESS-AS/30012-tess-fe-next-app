@@ -1,11 +1,11 @@
 "use client";
 
 import ProductVariantTable from "@/components/checkout/product-variant-table";
-import { useGetColumnAttributes } from "@/hooks/useGetColumnAttributes";
 import { useTranslations } from "next-intl";
 
 interface ProductDetailsTableProps {
-	variantData: any;
+	variants: Array<{ itemNumber?: string }>;
+	columnAttributes?: Record<string, unknown> | null;
 	productNumber?: string;
 	locale: string;
 	selectedItemNumber?: string;
@@ -14,7 +14,8 @@ interface ProductDetailsTableProps {
 }
 
 export function ProductDetailsTable({
-	variantData,
+	variants,
+	columnAttributes,
 	productNumber,
 	locale,
 	selectedItemNumber,
@@ -22,13 +23,7 @@ export function ProductDetailsTable({
 	onWarehouseChange,
 }: ProductDetailsTableProps) {
 	const t = useTranslations("Product");
-
-	const firstVariant = variantData?.itemVariants?.[0]?.itemNumber;
-
-	const { data: columnAttributes, isLoading: loadingAttributes } =
-		useGetColumnAttributes(firstVariant);
-
-	const variantCount = variantData.itemVariants?.length || 0;
+	const variantCount = variants?.length ?? 0;
 
 	return (
 		<div
@@ -40,15 +35,15 @@ export function ProductDetailsTable({
 					{variantCount})
 				</h2>
 			)}
-			{variantData.itemVariants?.length ? (
+			{variantCount > 0 ? (
 				<ProductVariantTable
-					variants={variantData.itemVariants}
+					variants={variants as any}
 					productNumber={productNumber || ""}
 					hasSearch
 					selectedItemNumber={selectedItemNumber}
 					onSelectVariant={onSelectVariant}
 					columnAttributes={columnAttributes ?? undefined}
-					loadingAttributes={loadingAttributes}
+					loadingAttributes={false}
 					onWarehouseChange={onWarehouseChange}
 				/>
 			) : (

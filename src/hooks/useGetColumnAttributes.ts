@@ -91,6 +91,7 @@ type ColumnAttributeResponse = {
 				itemName?: string;
 				itemCount?: number | string;
 				SDS?: string;
+				GTIN?: string | null;
 				inventory?: {
 					warehouseId: number;
 					warehouseNumber?: string;
@@ -118,7 +119,7 @@ export function useGetColumnAttributes(variantNumber?: string) {
 			try {
 				setIsLoading(true);
 				const response = await axiosClient.get<ColumnAttributeApiResponse>(
-					`/columnAttributesNew/${variantNumber}`,
+					`/columnAttributes/${variantNumber}`,
 				);
 
 				// Transform new response structure to expected format
@@ -130,6 +131,14 @@ export function useGetColumnAttributes(variantNumber?: string) {
 					transformedData.productAttributes =
 						response.data.productData.attributes || [];
 				}
+
+				// Normalize mediaId: API may return array or single object (product-level is object, variant can be either)
+				const toMediaArray = (raw: unknown): MediaItem[] => {
+					if (Array.isArray(raw)) return raw as MediaItem[];
+					if (raw && typeof raw === "object" && "url" in (raw as object))
+						return [raw as MediaItem];
+					return [];
+				};
 
 				// Transform variant data array to object format keyed by itemNumber
 				if (
@@ -145,6 +154,7 @@ export function useGetColumnAttributes(variantNumber?: string) {
 							itemName: itemData.itemName,
 							itemCount: itemData.itemCount,
 							SDS: itemData.SDS,
+							GTIN: itemData.GTIN ?? null,
 							inventory: itemData.inventory?.map((inv) => ({
 								warehouseId: inv.wareHouseId,
 								warehouseNumber: inv.wareHouseNumber,
@@ -154,7 +164,7 @@ export function useGetColumnAttributes(variantNumber?: string) {
 								balance: inv.balance,
 							})),
 							attributes: itemData.attributes || [],
-							mediaId: itemData.mediaId || [],
+							mediaId: toMediaArray(itemData.mediaId),
 						};
 					});
 				}

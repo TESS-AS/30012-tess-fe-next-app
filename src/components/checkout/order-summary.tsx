@@ -188,9 +188,6 @@ export default function OrderSummary({
 									</button>
 								)}
 							</div>
-							<p className="text-sm text-[#5A615D]">
-								F.eks. Mekkerverksted eller leveringsadresse
-							</p>
 						</div>
 
 						<Button

@@ -47,16 +47,6 @@ export async function productFetch(productName: string) {
 	}
 }
 
-export async function getItemCard(variantNumber: string) {
-	try {
-		const response = await axiosInstance.get(`/item/card/${variantNumber}`);
-		return response.data;
-	} catch (error) {
-		console.error(`Error fetching item card for ${variantNumber}:`, error);
-		throw error;
-	}
-}
-
 export async function loadCategories(query: string) {
 	try {
 		const url = `/searchCategory/${query}`;
