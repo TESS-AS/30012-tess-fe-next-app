@@ -831,9 +831,12 @@ export default function ProductVariantTable({
 										.map((name) => {
 											// Map "bilde" to mediaId
 											if (name?.toLowerCase() === "bilde") {
-												const imageUrl =
-													columnAttributes?.[variant.itemNumber]?.mediaId?.[0]
-														?.url || variant.mediaId?.[0]?.url;
+												const variantAttrs = columnAttributes?.[variant.itemNumber];
+												const mediaId =
+													variantAttrs && !Array.isArray(variantAttrs)
+														? variantAttrs.mediaId?.[0]?.url
+														: undefined;
+												const imageUrl = mediaId || variant.mediaId?.[0]?.url;
 												return (
 													<TableCell
 														key={`${variant.itemNumber}-${name}`}

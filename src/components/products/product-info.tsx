@@ -40,11 +40,11 @@ interface ProductInfoProps {
 	gtin?: string | null;
 	imageUrl?: string;
 	application?: string;
-	variantData?: any;
 	locale: string;
 	selectedItemNumber?: string;
 	shortDescription?: string;
 	columnAttributes?: Record<string, any> | null;
+	variants?: Array<{ itemNumber?: string }>;
 	selectedWarehouse?: string;
 	onWarehouseChange?: (itemNumber: string, warehouseNumber: string) => void;
 }
@@ -57,14 +57,15 @@ export function ProductInfo({
 	gtin,
 	imageUrl,
 	application,
-	variantData,
 	locale,
 	selectedItemNumber,
 	shortDescription,
 	columnAttributes,
+	variants = [],
 	selectedWarehouse,
 	onWarehouseChange,
 }: ProductInfoProps) {
+	const firstItemNumber = variants?.[0]?.itemNumber;
 	const t = useTranslations("Product");
 	const { data: profile } = useGetProfileData();
 	const { isCartChanging, setIsCartChanging } = useAppContext();
@@ -126,9 +127,7 @@ export function ProductInfo({
 	const longDescription =
 		longDescFromAttributes !== undefined
 			? longDescFromAttributes || null
-			: variantData?.description?.itemRemarks ||
-				variantData?.itemHeader?.extLongText?.[1]?.value_def ||
-				null;
+			: null;
 
 	// If no short description, use long description directly
 	// Otherwise, use show more/show less logic
@@ -186,9 +185,7 @@ export function ProductInfo({
 	};
 
 	const currentItemNumber =
-		selectedItemNumber?.toString() ||
-		variantData?.itemVariants?.[0]?.itemNumber?.toString() ||
-		"";
+		selectedItemNumber?.toString() || firstItemNumber?.toString() || "";
 
 	const ecoonlineUrl = currentItemNumber
 		? `https://app.ecoonline.com/ecosuite/applic/shoplink/shoplink.php?msdsCid=1000435&applicationID=9&msdsLang=1&viewForm=pdf&msdsEr=${currentItemNumber}`
@@ -250,11 +247,7 @@ export function ProductInfo({
 	const warehouseInfo = getWarehouseInfo();
 	const selectedWarehouseBalance = warehouseInfo
 		? warehouseInfo.balance
-		: warehouseNumber
-			? (variantData?.stockByWarehouse?.find(
-					(w: any) => w.warehouse_number === warehouseNumber,
-				)?.balance ?? 0)
-			: 0;
+		: 0;
 
 	const selectedWarehouseName = warehouseInfo
 		? warehouseInfo.warehouseName
@@ -354,9 +347,10 @@ export function ProductInfo({
 
 		const warehouseNumber = profile?.defaultWarehouseNumber || "";
 
+		const inventory = columnAttributes?.[selectedItemNumber]?.inventory ?? [];
 		const balance =
-			variantData?.stockByWarehouse?.find(
-				(w: any) => w.warehouse_number === warehouseNumber,
+			inventory.find(
+				(inv: any) => inv.warehouseNumber === warehouseNumber || inv.warehouseId?.toString() === warehouseNumber,
 			)?.balance ?? null;
 
 		if (balance === null || balance === undefined) {
@@ -433,7 +427,7 @@ export function ProductInfo({
 
 	// Handle PDF download
 	const handleDownloadPdf = async () => {
-		if (!variantData) {
+		if (!columnAttributes || !selectedItemNumber) {
 			toast(t("noDataAvailable"), {
 				type: "warning",
 				position: "bottom-right",
@@ -445,26 +439,23 @@ export function ProductInfo({
 		setIsGeneratingPdf(true);
 
 		try {
-			const filteredAttributes =
-				variantData?.itemTechnicalSpec?.itemAttributes?.filter((attr: any) =>
-					locale === "no"
-						? attr.language === "Norwegian"
-						: attr.language === "English",
-				) ?? [];
-
+			const productAttrs = columnAttributes?.productData?.attributes ?? [];
+			const filteredAttributes = productAttrs.filter((attr: any) =>
+				locale === "no"
+					? attr.language === "Norwegian"
+					: attr.language === "English",
+			);
 			const specifications = filteredAttributes.map((attr: any) => ({
 				name: attr.name || attr.name_key_language || "",
 				value: attr.value_def || attr.valueDef || "-",
 			}));
 
 			const itemNumberForPdf =
-				selectedItemNumber?.toString() ||
-				variantData?.itemVariants?.[0]?.itemNumber?.toString() ||
-				"-";
+				selectedItemNumber?.toString() || firstItemNumber?.toString() || "-";
 
-			// Extract variants and prepare variant data for PDF
-			const itemVariants = variantData?.itemVariants || [];
-			let variants: Array<{
+			// Use variants prop (product items) for PDF
+			const itemVariants = variants ?? [];
+			let pdfVariants: Array<{
 				itemNumber: string;
 				attributes?: Record<string, string>;
 				price?: number;
@@ -527,10 +518,10 @@ export function ProductInfo({
 				}
 
 				// Map variants to PDF format
-				variants = itemVariants.map((variant: any) => {
-					const variantItemNumber = variant.itemNumber?.toString() || "";
+				pdfVariants = itemVariants.map((v: any) => {
+					const variantItemNumber = v.itemNumber?.toString() || "";
 					const attrs =
-						columnAttributes?.[variant.itemNumber]?.attributes || [];
+						columnAttributes?.[v.itemNumber]?.attributes || [];
 
 					// Create attributes object from columnAttributes
 					const attributes: Record<string, string> = {};
@@ -554,9 +545,9 @@ export function ProductInfo({
 				gtin: gtin || null,
 				imageUrl,
 				application: application || "",
-				notes: variantData?.description?.itemRemarks || "",
+				notes: columnAttributes?.productData?.remarksNo ?? columnAttributes?.productData?.remarksEn ?? "",
 				specifications,
-				variants,
+				variants: pdfVariants,
 				visibleAttributeNames,
 				locale,
 			});
@@ -652,7 +643,7 @@ export function ProductInfo({
 			)}
 
 			{/* Product action section */}
-			{selectedItemNumber && variantData && (
+			{selectedItemNumber && columnAttributes && (
 				<div className="mt-4 flex items-center justify-between gap-4">
 					{/* Item number */}
 					<div className="w-1/2 flex-col gap-1">
@@ -660,7 +651,7 @@ export function ProductInfo({
 							<span className="font-semibold text-black">
 								{locale === "no" ? "Varenummer:" : "Item number:"}
 							</span>{" "}
-							{variantData?.itemTechnicalSpec?.itemNumber}
+							{selectedItemNumber}
 						</p>
 
 						{/* Warehouse selection */}
@@ -967,7 +958,7 @@ export function ProductInfo({
 									<button
 										type="button"
 										onClick={handleDownloadPdf}
-										disabled={isGeneratingPdf || !variantData}
+										disabled={isGeneratingPdf || !columnAttributes}
 										className="flex cursor-pointer items-center gap-3 text-left disabled:cursor-not-allowed disabled:opacity-50">
 										{isGeneratingPdf ? (
 											<Loader2 className="h-5 w-5 animate-spin text-black" />

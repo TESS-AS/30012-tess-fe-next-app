@@ -6,11 +6,9 @@ import { ProductBreadcrumbs } from "@/components/products/product-breadcrumbs";
 import { ProductGallery } from "@/components/products/product-gallery";
 import { ProductInfo } from "@/components/products/product-info";
 import { ProductDetailsTable } from "@/components/products/product-table-details";
-import { ProductVariantInfo } from "@/components/products/product-variant-info";
 import { RelatedProducts } from "@/components/products/related-products";
 import { Separator } from "@/components/ui/separator";
 import { useGetColumnAttributes } from "@/hooks/useGetColumnAttributes";
-import { useGetVariantInfo } from "@/hooks/useGetVariantInfo";
 import { useProductFetch } from "@/hooks/useProductFetch";
 import { Loader2 } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -87,12 +85,7 @@ export function ProductPageClient({
 		selectedItemNumber,
 	]);
 
-	const { data: variantData, isLoading: isLoadingVariant } = useGetVariantInfo(
-		productData?.items || [],
-		selectedItemNumber,
-	);
-
-	const firstVariant = variantData?.itemVariants?.[0]?.itemNumber;
+	const firstVariant = productData?.items?.[0]?.itemNumber;
 	const { data: columnAttributes } = useGetColumnAttributes(firstVariant);
 
 	const handleWarehouseChange = (
@@ -106,9 +99,9 @@ export function ProductPageClient({
 	};
 
 	const selectedVariant =
-		variantData?.itemVariants?.find(
-			(v: any) => v.itemNumber === selectedItemNumber,
-		) || null;
+		productData?.items?.find(
+			(item: { itemNumber?: string }) => item.itemNumber === selectedItemNumber,
+		) ?? null;
 
 	// Handle loading state
 	if (isLoading) {
@@ -125,29 +118,30 @@ export function ProductPageClient({
 	}
 
 	const getProductImages = () => {
-		if (variantData?.itemHeader?.itemImage) {
-			const {itemImage} = variantData.itemHeader;
-
-			if (Array.isArray(itemImage)) {
-				return itemImage.length > 0 ? itemImage : [];
-			}
-
-			if (itemImage && typeof itemImage === "object" && itemImage.url) {
-				return [itemImage];
-			}
-
-			if (typeof itemImage === "string" && itemImage.trim() !== "") {
-				return [
-					{
-						url: itemImage,
-						filename: "",
-						picture_type: "MainImage",
-						thumbnail_url: itemImage,
-					},
-				];
-			}
+		// Variant-level mediaId from columnAttributes (per itemNumber) – API returns array per variant
+		const selectedItem =
+			selectedItemNumber && columnAttributes?.[selectedItemNumber];
+		const selectedMedia =
+			selectedItem && !Array.isArray(selectedItem)
+				? selectedItem.mediaId
+				: undefined;
+		if (selectedMedia && Array.isArray(selectedMedia) && selectedMedia.length > 0) {
+			return selectedMedia;
 		}
-
+		const firstItem = firstVariant && columnAttributes?.[firstVariant];
+		const firstMedia =
+			firstItem && !Array.isArray(firstItem) ? firstItem.mediaId : undefined;
+		if (firstMedia && Array.isArray(firstMedia) && firstMedia.length > 0) {
+			return firstMedia;
+		}
+		// Product-level mediaId from columnAttributes – API returns single object
+		const productMedia = columnAttributes?.productData?.mediaId;
+		if (productMedia) {
+			return Array.isArray(productMedia)
+				? productMedia
+				: [productMedia as { url: string; thumbnail_url?: string }];
+		}
+		// Fallback to product fetch mediaId
 		return Array.isArray(productData.mediaId)
 			? productData.mediaId
 			: productData.mediaId
@@ -183,11 +177,19 @@ export function ProductPageClient({
 						productNumber={productData.productNumber}
 						pdfUrl={productData.pdfUrl}
 						gtin={
-							selectedVariant?.gtin ?? variantData?.itemHeader?.GTIN ?? null
+							(() => {
+								const item =
+									selectedItemNumber &&
+									columnAttributes?.[selectedItemNumber];
+								if (item && !Array.isArray(item) && "GTIN" in item)
+									return item.GTIN ?? null;
+								return selectedVariant?.gtin ?? null;
+							})()
 						}
 						imageUrl={
 							productImages?.[0]?.url ||
-							productImages?.[0]?.thumbnail_url ||
+							(productImages?.[0] as { thumbnail_url?: string } | undefined)
+								?.thumbnail_url ||
 							undefined
 						}
 						application={
@@ -195,13 +197,10 @@ export function ProductPageClient({
 								? productData.applicationEn
 								: productData.applicationNo
 						}
-						variantData={variantData}
 						locale={locale}
 						selectedItemNumber={selectedItemNumber}
-						shortDescription={
-							variantData?.itemHeader?.extShortText?.[1]?.value_def
-						}
 						columnAttributes={columnAttributes ?? undefined}
+						variants={productData.items ?? []}
 						selectedWarehouse={selectedWarehouse[selectedItemNumber || ""]}
 						onWarehouseChange={handleWarehouseChange}
 					/>
@@ -222,9 +221,11 @@ export function ProductPageClient({
 			</div>
 
 			<div className="mb-1">
-				{variantData && (
+				{productData.items && productData.items.length > 0 && (
 					<ProductDetailsTable
-						variantData={variantData}
+						variants={productData.items}
+						columnAttributes={columnAttributes ?? undefined}
+						productNumber={productData.productNumber}
 						locale={locale}
 						selectedItemNumber={selectedItemNumber}
 						onSelectVariant={setSelectedItemNumber}
@@ -234,7 +235,7 @@ export function ProductPageClient({
 			</div>
 
 			<RelatedProducts
-				products={variantData?.itemRelatedProducts ?? []}
+				products={[]}
 				category={category}
 			/>
 		</div>
