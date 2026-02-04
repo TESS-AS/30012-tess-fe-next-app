@@ -10,11 +10,11 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { useProfile } from "@/contexts/ProfileContext";
+import { baseURL } from "@/lib/axiosConfig";
 import { User, Info } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import axiosClient from "@/services/axiosClient";
 
 export default function AuthDialog({
 	isOpen,
@@ -34,6 +34,7 @@ export default function AuthDialog({
 		const params = new URLSearchParams(window.location.search);
 		params.delete("auth");
 		router.replace("?" + params.toString(), { scroll: false });
+		setAuthenticatingProvider(null); // Reset loading state when closing
 		onOpenChange(false);
 	};
 
@@ -47,35 +48,14 @@ export default function AuthDialog({
 		}
 	}, [isOpen, profile]);
 
-	const fetchAuthAndRedirect = async (
-		endpoint: "/auth/sso" | "/auth/tenant",
-	) => {
-		try {
-			const response = await axiosClient.get<{
-				redirectUrl?: string;
-				url?: string;
-			}>(endpoint);
-			const redirectUrl = response.data?.redirectUrl ?? response.data?.url;
-			if (redirectUrl && typeof redirectUrl === "string") {
-				window.location.href = redirectUrl;
-			} else {
-				router.push("/");
-				closeDialog();
-			}
-		} catch (err) {
-			console.error("Auth request failed", err);
-			setAuthenticatingProvider(null);
-		}
-	};
-
 	const handleLoginWithBESso = () => {
 		setAuthenticatingProvider("be-sso");
-		fetchAuthAndRedirect("/auth/sso");
+		window.location.href = `${baseURL}/auth/sso`;
 	};
 
 	const handleLoginWithTenantBe = () => {
 		setAuthenticatingProvider("tenant-be");
-		fetchAuthAndRedirect("/auth/tenant");
+		window.location.href = `${baseURL}/auth/tenant`;
 	};
 
 	return (

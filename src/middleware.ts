@@ -76,5 +76,5 @@ export default function middleware(request: NextRequest) {
 
 // Only apply to non-static, non-api, non-next routes
 export const config = {
-	matcher: ["/((?!_next|favicon.ico|api|.*\\..*).*)"],
+	matcher: ["/((?!_next|favicon.ico|api|auth|.*\\..*).*)"],
 };

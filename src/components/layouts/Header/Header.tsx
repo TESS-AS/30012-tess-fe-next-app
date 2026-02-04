@@ -308,7 +308,10 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		} catch (error) {
 			console.error("Logout API failed", error);
 		}
+		queryClient.setQueryData(profileKeys.detail(), null);
+		queryClient.invalidateQueries({ queryKey: profileKeys.all });
 		queryClient.removeQueries({ queryKey: profileKeys.all });
+		setIsAuthOpen(false);
 		router.push("/");
 	};
 
