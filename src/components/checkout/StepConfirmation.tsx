@@ -298,6 +298,7 @@ export default function StepConfirmation({
 												src={item.mediaId[0].url}
 												alt={item.mediaId[0].filename || ""}
 												fill
+												sizes="64px"
 												className="object-contain p-1"
 											/>
 										) : (

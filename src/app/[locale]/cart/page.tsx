@@ -302,6 +302,7 @@ const CartPage = () => {
 									src={item.mediaId[0].url}
 									alt={item.mediaId[0].filename || ""}
 									fill
+									sizes="80px"
 									className="object-contain"
 								/>
 							) : (

@@ -56,6 +56,8 @@ export function ProductGallery({ images, className }: ProductGalleryProps) {
 						width={550}
 						height={350}
 						className="aspect-square rounded-lg"
+						priority
+						sizes="(min-width: 1024px) 550px, (min-width: 768px) 50vw, 100vw"
 					/>
 				</div>
 			</div>

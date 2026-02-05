@@ -15,6 +15,10 @@ interface ZoomImageProps {
 	width: number;
 	height: number;
 	className?: string;
+	/** Load immediately (for above-the-fold hero images); avoids lazy-load delay in prod */
+	priority?: boolean;
+	/** Hint for responsive image size; reduces payload and speeds up first paint */
+	sizes?: string;
 }
 
 export function ZoomImage({
@@ -23,6 +27,8 @@ export function ZoomImage({
 	width,
 	height,
 	className,
+	priority = false,
+	sizes = "(min-width: 1024px) 550px, (min-width: 768px) 50vw, 100vw",
 }: ZoomImageProps) {
 	const [isLoading, setIsLoading] = useState(true);
 	const [isZoomed, setIsZoomed] = useState(false);
@@ -69,9 +75,10 @@ export function ZoomImage({
 					alt={alt}
 					width={width}
 					height={height}
-					quality={90}
-					priority={false}
-					loading="lazy"
+					quality={80}
+					priority={priority}
+					loading={priority ? "eager" : "lazy"}
+					sizes={sizes}
 					className={cn(
 						"h-full w-full object-contain transition-all duration-300",
 						isLoading ? "scale-110 blur-sm" : "blur-0 scale-100",

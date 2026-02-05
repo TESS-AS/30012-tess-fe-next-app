@@ -184,6 +184,7 @@ const CartHistoryPage = () => {
 																							cartItem.mediaId[0].filename || ""
 																						}
 																						fill
+																						sizes="64px"
 																						className="object-contain"
 																					/>
 																				) : (
