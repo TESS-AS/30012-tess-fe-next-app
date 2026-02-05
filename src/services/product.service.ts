@@ -60,8 +60,9 @@ export async function loadCategories(query: string) {
 
 export async function loadItem(query?: string) {
 	try {
-		const parsedQuery = query?.split(" ").join("%20");
-		const url = `/search/${parsedQuery}`;
+		const params = new URLSearchParams();
+		if (query) params.append("query", query);
+		const url = `/search${params.toString() ? `?${params.toString()}` : ""}`;
 
 		const response: AxiosResponse = await axiosInstance.get(url);
 		return response.data;
