@@ -505,7 +505,7 @@ export default function ProductVariantTable({
 						.slice(0, 50)
 						.sort((a: any, b: any) => b.balance - a.balance);
 
-					const warehouses = warehouseOptions.map((w) => ({
+					const warehouses = warehouseOptions.map((w: { warehouseId: { toString: () => any; }; warehouseName: any; balance: any; }) => ({
 						warehouseNumber: w.warehouseId.toString(),
 						warehouseName: w.warehouseName,
 						balance: w.balance,
