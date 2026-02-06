@@ -221,28 +221,40 @@ export function ProductInfo({
 	}, [selectedItemNumber, columnAttributes, t]);
 
 	// Get warehouse info for selected warehouse
-	const warehouseNumber = selectedWarehouse || profile?.defaultWarehouseNumber;
-
 	const getWarehouseInfo = () => {
-		if (!selectedItemNumber || !columnAttributes || !warehouseNumber)
-			return null;
+		if (!selectedItemNumber || !columnAttributes) return null;
+		if (!selectedWarehouse && !profile?.defaultWarehouseNumber) return null;
 
 		const inventory = columnAttributes[selectedItemNumber]?.inventory || [];
-		const warehouseId = parseInt(warehouseNumber);
-		const warehouseInfo = inventory.find(
-			(inv: any) => inv.warehouseId === warehouseId,
-		);
+		
+		let warehouseInfo;
+		
+		if (selectedWarehouse) {
+			// selectedWarehouse from table is warehouseId (unique)
+			const warehouseId = parseInt(selectedWarehouse);
+			warehouseInfo = inventory.find((inv: any) => inv.warehouseId === warehouseId);
+		} else {
+			// profile default uses warehouseNumber + companyNumber (combination is unique)
+			const defaultWarehouseNumber = profile?.defaultWarehouseNumber;
+			const defaultCompanyNumber = profile?.defaultCompanyNumber;
+			warehouseInfo = inventory.find(
+				(inv: any) => 
+					inv.warehouseNumber === defaultWarehouseNumber &&
+					inv.companyNumber === defaultCompanyNumber,
+			);
+		}
 
 		if (warehouseInfo) {
 			return {
 				balance: warehouseInfo.balance || 0,
-				warehouseName: warehouseInfo.warehouseName || `Lager ${warehouseId}`,
+				warehouseName: warehouseInfo.warehouseName || `Lager ${warehouseInfo.warehouseId}`,
 			};
 		}
 
 		return null;
 	};
 
+	// Get warehouse info for selected warehouse (unique by warehouseId or warehouseNumber+companyNumber)
 	const warehouseInfo = getWarehouseInfo();
 	const selectedWarehouseBalance = warehouseInfo
 		? warehouseInfo.balance
@@ -250,9 +262,10 @@ export function ProductInfo({
 
 	const selectedWarehouseName = warehouseInfo
 		? warehouseInfo.warehouseName
-		: warehouseNumber
-			? `Lager ${warehouseNumber}`
-			: "hovedlager";
+		: "hovedlager";
+
+	// For warehouse selection dropdown display
+	const warehouseNumber = selectedWarehouse || profile?.defaultWarehouseNumber;
 
 	// Get unit (enhet) for the selected item
 	const getUnit = () => {

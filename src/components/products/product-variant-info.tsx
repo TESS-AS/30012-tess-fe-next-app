@@ -74,46 +74,43 @@ export function ProductVariantInfo({
 
 	const sapNumber = getSapNumber();
 
-	// Get stock balance and warehouse name for selected warehouse (from table selection or default warehouse)
-	const warehouseNumber = selectedWarehouse || profile?.defaultWarehouseNumber;
-
 	// Get warehouse info from columnAttributes (inventory data) if available
 	const getWarehouseInfo = () => {
 		if (!selectedItemNumber || !columnAttributes) return null;
 
 		const inventory = columnAttributes[selectedItemNumber]?.inventory || [];
-		if (!warehouseNumber) return null;
+		if (!selectedWarehouse && !profile?.defaultWarehouseNumber) return null;
 
-		const warehouseId = parseInt(warehouseNumber);
-		const warehouseInfo = inventory.find(
-			(inv: any) => inv.warehouseId === warehouseId,
-		);
+		let warehouseInfo;
+		
+		if (selectedWarehouse) {
+			// selectedWarehouse from table is warehouseId (unique)
+			const warehouseId = parseInt(selectedWarehouse);
+			warehouseInfo = inventory.find((inv: any) => inv.warehouseId === warehouseId);
+		} else {
+			// profile default uses warehouseNumber + companyNumber (combination is unique)
+			const defaultWarehouseNumber = profile?.defaultWarehouseNumber;
+			const defaultCompanyNumber = profile?.defaultCompanyNumber;
+			warehouseInfo = inventory.find(
+				(inv: any) => 
+					inv.warehouseNumber === defaultWarehouseNumber &&
+					inv.companyNumber === defaultCompanyNumber,
+			);
+		}
 
 		if (warehouseInfo) {
 			return {
 				balance: warehouseInfo.balance || 0,
-				warehouseName: warehouseInfo.warehouseName || `Lager ${warehouseId}`,
+				warehouseName: warehouseInfo.warehouseName || `Lager ${warehouseInfo.warehouseId}`,
 			};
 		}
 
 		return null;
 	};
 
-	// Fallback to stockByWarehouse if columnAttributes not available
 	const warehouseInfo = getWarehouseInfo();
-	const selectedWarehouseBalance = warehouseInfo
-		? warehouseInfo.balance
-		: warehouseNumber
-			? (variantData?.stockByWarehouse?.find(
-					(w: any) => w.warehouse_number === warehouseNumber,
-				)?.balance ?? 0)
-			: 0;
-
-	const selectedWarehouseName = warehouseInfo
-		? warehouseInfo.warehouseName
-		: warehouseNumber
-			? `Lager ${warehouseNumber}`
-			: "hovedlager";
+	const selectedWarehouseBalance = warehouseInfo ? warehouseInfo.balance : 0;
+	const selectedWarehouseName = warehouseInfo ? warehouseInfo.warehouseName : "hovedlager";
 
 	// Get unit (enhet) for the selected item
 	const getUnit = () => {
