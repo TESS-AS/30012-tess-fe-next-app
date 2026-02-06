@@ -12,6 +12,7 @@ export default function NotFound() {
 						src="/images/404.png"
 						alt="Homepage Banner"
 						fill
+						sizes="100vw"
 						className="object-cover"
 						priority
 					/>

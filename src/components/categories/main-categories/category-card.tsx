@@ -29,6 +29,7 @@ export function CategoryCard({ name, description, image }: CategoryCardProps) {
 							src={image}
 							alt={name}
 							fill
+							sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 640px"
 							className="object-cover transition-transform duration-300 group-hover:scale-105"
 						/>
 					</motion.div>

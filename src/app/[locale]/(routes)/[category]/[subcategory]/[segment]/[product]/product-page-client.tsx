@@ -5,14 +5,29 @@ import { useState, useEffect } from "react";
 import { ProductBreadcrumbs } from "@/components/products/product-breadcrumbs";
 import { ProductGallery } from "@/components/products/product-gallery";
 import { ProductInfo } from "@/components/products/product-info";
-import { ProductDetailsTable } from "@/components/products/product-table-details";
-import { RelatedProducts } from "@/components/products/related-products";
-import { Separator } from "@/components/ui/separator";
 import { useGetColumnAttributes } from "@/hooks/useGetColumnAttributes";
 import { useProductFetch } from "@/hooks/useProductFetch";
 import { Loader2 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 import { useTranslations } from "next-intl";
+
+// Lazy load heavy components (variant table, related products) to reduce product page bundle
+const ProductDetailsTable = dynamic(
+	() =>
+		import("@/components/products/product-table-details").then((m) => ({
+			default: m.ProductDetailsTable,
+		})),
+	{ ssr: true, loading: () => <div className="min-h-[200px] animate-pulse rounded-lg bg-gray-100" /> },
+);
+
+const RelatedProducts = dynamic(
+	() =>
+		import("@/components/products/related-products").then((m) => ({
+			default: m.RelatedProducts,
+		})),
+	{ ssr: false, loading: () => <div className="min-h-[280px]" /> },
+);
 
 interface Props {
 	locale: string;

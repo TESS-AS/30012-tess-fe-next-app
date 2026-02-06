@@ -19,7 +19,6 @@ import { addToCart, getCart } from "@/services/carts.service";
 import { calculateItemPrice } from "@/services/product.service";
 import { useProductTabs } from "@/stores/useProductTabs";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
-import { generateProductPdf } from "@/utils/generateProductPdf";
 import {
 	ExternalLink,
 	Files,
@@ -539,6 +538,7 @@ export function ProductInfo({
 				});
 			}
 
+			const { generateProductPdf } = await import("@/utils/generateProductPdf");
 			await generateProductPdf({
 				name,
 				itemNumber: itemNumberForPdf,

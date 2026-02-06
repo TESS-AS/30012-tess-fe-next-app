@@ -71,7 +71,7 @@ export function ProductCard({
 						"object-contain transition-transform duration-300 group-hover:scale-105",
 						!isLoaded && "opacity-0",
 					)}
-					onLoadingComplete={() => setIsLoaded(true)}
+					onLoad={() => setIsLoaded(true)}
 				/>
 			</div>
 
