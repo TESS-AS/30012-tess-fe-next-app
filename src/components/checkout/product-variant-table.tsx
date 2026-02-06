@@ -121,10 +121,12 @@ export default function ProductVariantTable({
 	const [prices, setPrices] = useState<Record<number, number>>({});
 	const [loading, setLoading] = useState<Record<number, boolean>>({});
 	const initializedWarehousesRef = useRef<Set<number>>(new Set());
+	const pendingWarehouseChangesRef = useRef<Array<[string, string]>>([]);
 
 	// Reset initialized warehouses when variants change
 	useEffect(() => {
 		initializedWarehousesRef.current.clear();
+		pendingWarehouseChangesRef.current = [];
 	}, [variants]);
 
 	const [visibleCols, setVisibleCols] = useState<Record<ColumnKey, boolean>>({
@@ -219,31 +221,27 @@ export default function ProductVariantTable({
 		variantsWithWarehouses.forEach((variant) => {
 			const inventory = columnAttributes?.[variant.itemNumber]?.inventory || [];
 
-			const warehouseMap = new Map();
-			inventory
-				.filter((inv: any) => inv.balance > 0)
-				.forEach((inv: any) => {
-					const key = inv.warehouseId;
-					if (warehouseMap.has(key)) {
-						warehouseMap.get(key).balance += inv.balance;
-					} else {
-						warehouseMap.set(key, {
-							warehouseId: inv.warehouseId,
-							warehouseName:
-								inv.warehouseName ||
-								`${t("Product.warehouses")} ${inv.warehouseId}`,
-							balance: inv.balance,
-						});
-					}
-				});
-
-			optionsMap[variant.itemNumber] = Array.from(warehouseMap.values())
+			// Filter by company number and positive balance only
+			const warehouseOptions = inventory
+				.filter((inv: any) => 
+					inv.balance > 0 && 
+					inv.companyNumber === profile?.defaultCompanyNumber
+				)
+				.map((inv: any) => ({
+					warehouseId: inv.warehouseId,
+					warehouseName:
+						inv.warehouseName ||
+						`${t("Product.warehouses")} ${inv.warehouseId}`,
+					balance: inv.balance,
+				}))
 				.slice(0, 50)
 				.sort((a: any, b: any) => b.balance - a.balance);
+
+			optionsMap[variant.itemNumber] = warehouseOptions;
 		});
 
 		return optionsMap;
-	}, [variantsWithWarehouses, columnAttributes]);
+	}, [variantsWithWarehouses, columnAttributes, profile?.defaultCompanyNumber]);
 
 	useEffect(() => {
 		if (!allAttributeNames?.length) return;
@@ -346,6 +344,16 @@ export default function ProductVariantTable({
 			return next;
 		});
 	}, [allAttributeNames, visibleCols, isSapCustomer, columnAttributes]);
+
+	// Process pending warehouse changes after state updates to avoid updating parent during render
+	useEffect(() => {
+		if (pendingWarehouseChangesRef.current.length > 0 && onWarehouseChange) {
+			pendingWarehouseChangesRef.current.forEach(([itemNumber, warehouseNumber]) => {
+				onWarehouseChange(itemNumber, warehouseNumber);
+			});
+			pendingWarehouseChangesRef.current = [];
+		}
+	}, [warehouse, onWarehouseChange]);
 
 	const getTotalVisibleColumns = () => {
 		const visibleStaticCount = Object.entries(visibleCols).filter(
@@ -480,29 +488,24 @@ export default function ProductVariantTable({
 					// Compute warehouse options directly from variants and columnAttributes
 					const inventory =
 						columnAttributes?.[variant.itemNumber]?.inventory || [];
-					const warehouseMap = new Map();
-					inventory
-						.filter((inv: any) => inv.balance > 0)
-						.forEach((inv: any) => {
-							const key = inv.warehouseId;
-							if (warehouseMap.has(key)) {
-								warehouseMap.get(key).balance += inv.balance;
-							} else {
-								warehouseMap.set(key, {
-									warehouseId: inv.warehouseId,
-									warehouseName:
-										inv.warehouseName ||
-										`${t("Product.warehouses")} ${inv.warehouseId}`,
-									balance: inv.balance,
-								});
-							}
-						});
-
-					const warehouseOptions = Array.from(warehouseMap.values())
+					
+					// Filter for positive balance and matching company number, then sort
+					const warehouseOptions = inventory
+						.filter((inv: any) => 
+							inv.balance > 0 && 
+							inv.companyNumber === profile?.defaultCompanyNumber
+						)
+						.map((inv: any) => ({
+							warehouseId: inv.warehouseId,
+							warehouseName:
+								inv.warehouseName ||
+								`${t("Product.warehouses")} ${inv.warehouseId}`,
+							balance: inv.balance,
+						}))
 						.slice(0, 50)
 						.sort((a: any, b: any) => b.balance - a.balance);
 
-					const warehouses = warehouseOptions.map((w) => ({
+					const warehouses = warehouseOptions.map((w: { warehouseId: { toString: () => any; }; warehouseName: any; balance: any; }) => ({
 						warehouseNumber: w.warehouseId.toString(),
 						warehouseName: w.warehouseName,
 						balance: w.balance,
@@ -520,8 +523,8 @@ export default function ProductVariantTable({
 									initializedWarehousesRef.current.add(variantKey);
 									return prev; // Keep existing selection
 								}
-								// Preselect first available warehouse and notify parent
-								onWarehouseChange?.(variantKey.toString(), firstWarehouse);
+								// Queue the parent notification for later (after state update)
+								pendingWarehouseChangesRef.current.push([variantKey.toString(), firstWarehouse]);
 								initializedWarehousesRef.current.add(variantKey);
 								return {
 									...prev,
