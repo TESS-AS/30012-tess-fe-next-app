@@ -60,6 +60,7 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
 						src="/images/feedback.png"
 						alt="Feedback banner"
 						fill
+						sizes="(max-width: 448px) 100vw, 448px"
 						className="object-cover grayscale"
 					/>
 				</div>

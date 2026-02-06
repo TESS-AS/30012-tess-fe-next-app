@@ -391,7 +391,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 
 	return (
 		<header
-			className={`bg-background relative z-50 w-full border-t ${isHoseManagementCustomer ? "h-[132px]" : "h-[182px]"}`}>
+			className={`bg-background relative z-50 h-[182px] w-full border-t ${isHoseManagementCustomer ? "flex flex-col justify-end pb-[50px]" : ""}`}>
 			<div className="container m-auto flex h-16 items-center justify-between">
 				<div className="flex items-center gap-4">
 					<Link

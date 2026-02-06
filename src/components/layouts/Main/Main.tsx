@@ -1,9 +1,8 @@
 "use client";
 
-import { ReactNode, useEffect, useMemo } from "react";
+import { ReactNode, useEffect } from "react";
 
 import Header from "@/components/layouts/Header/Header";
-import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { cn } from "@/lib/utils";
 import { useNavMenuStore } from "@/stores/useNavMenuStore";
@@ -18,13 +17,8 @@ export default function Main({ children }: { children?: ReactNode }) {
 		setIsOpen(false);
 	}, [pathname, setIsOpen]);
 
-	const headerHeight = useMemo(() => {
-		if (!profile) return 182;
-		return profile.defaultCustomerNumber ===
-			SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
-			? 132
-			: 182;
-	}, [profile]);
+	// Fixed 182px to prevent CLS when profile loads (header always reserves 182px)
+	const headerHeight = 182;
 
 	return (
 		<div className="relative flex flex-1 flex-col min-md:overflow-hidden">

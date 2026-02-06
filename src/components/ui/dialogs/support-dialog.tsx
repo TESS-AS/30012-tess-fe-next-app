@@ -82,6 +82,7 @@ export function SupportDialog({
 						src="/images/96701_kvadrat.png"
 						alt="Banner"
 						fill
+						sizes="(max-width: 650px) 100vw, 650px"
 						className="object-cover grayscale"
 					/>
 				</div>
