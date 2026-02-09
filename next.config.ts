@@ -10,11 +10,34 @@ const nextConfig: NextConfig = {
 				pathname: "/**",
 			},
 		],
-		// Avoid generating unnecessarily large images; improves cache hit and reduces work
 		deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
 		imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-		// Cache optimized images longer so repeat views and other users get fast responses
 		minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
+		// Set to false unless you truly need SVG via next/image
+		dangerouslyAllowSVG: false,
+	},
+
+	async headers() {
+		return [
+			{
+				source: "/_next/static/:path*",
+				headers: [
+					{
+						key: "Cache-Control",
+						value: "public, max-age=31536000, immutable",
+					},
+				],
+			},
+			{
+				source: "/images/:path*",
+				headers: [
+					{
+						key: "Cache-Control",
+						value: "public, max-age=31536000, immutable",
+					},
+				],
+			},
+		];
 	},
 };
 

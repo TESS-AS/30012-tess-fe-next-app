@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import { searchProducts } from "@/services/product.service";
 import { FilterValues } from "@/types/filter.types";
 import { IProduct } from "@/types/product.types";
@@ -51,19 +53,26 @@ export function useProductInfiniteQuery({
 		initialPageParam: 1,
 		enabled: enabled && (!!categoryNumber || !!query),
 		staleTime: 1 * 60 * 1000, // 1 minute
-		gcTime: 5 * 60 * 1000, // 5 minutes
+		gcTime: 2 * 60 * 1000, // Reduced from 5 to 2 minutes to prevent cache accumulation
 	});
 
-	// Flatten all pages into a single array of products
-	const products: IProduct[] =
-		infiniteQuery.data?.pages.flatMap((page) => page.products) || [];
+	// Memoize deduplication to prevent unnecessary re-computations
+	const uniqueProducts = useMemo(() => {
+		if (!infiniteQuery.data?.pages) return [];
 
-	// Deduplicate by productNumber
-	const uniqueProducts = products.filter(
-		(product, index, self) =>
-			index ===
-			self.findIndex((p) => p.productNumber === product.productNumber),
-	);
+		// Flatten all pages into a single array of products
+		const products = infiniteQuery.data.pages.flatMap((page) => page.products);
+
+		// Use Map for O(n) deduplication instead of O(n²) filter
+		const seen = new Map<string, IProduct>();
+		for (const product of products) {
+			if (!seen.has(product.productNumber)) {
+				seen.set(product.productNumber, product);
+			}
+		}
+
+		return Array.from(seen.values());
+	}, [infiniteQuery.data?.pages]);
 
 	return {
 		products: uniqueProducts,

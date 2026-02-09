@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, use } from "react";
 
 import CategoryContent from "@/components/category/category-content";
 import type { FilterCategory } from "@/components/ui/filter";
@@ -11,9 +11,14 @@ import type { Category } from "@/types/categories.types";
 import { notFound } from "next/navigation";
 import { useLocale } from "next-intl";
 
-export default function CategoryPage({ params, searchParams }: any) {
-	const { category } = params;
-	const { query } = searchParams;
+interface CategoryPageProps {
+	params: Promise<{ category: string }>;
+	searchParams: Promise<{ query?: string }>;
+}
+
+export default function CategoryPage({ params, searchParams }: CategoryPageProps) {
+	const { category } = use(params);
+	const { query } = use(searchParams);
 	const locale = useLocale();
 
 	const { categories } = useCategories();

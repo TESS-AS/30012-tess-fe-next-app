@@ -17,6 +17,18 @@ function redirectToLocale(request: NextRequest): NextResponse | null {
 	return null;
 }
 
+// Pre-compile regex patterns for better performance
+const PRODUCT_ID_PATTERNS = [
+	/^P_[A-Za-z0-9_-]+$/, // P_ prefixed IDs
+	/^\d+$/, // Pure numeric IDs
+	/^(AT|TR|VH|VS|US|GW|KN|KF|CW|GK|AV|JB|AU|AS|AK|VM|ZS)\d+(?:-[A-Za-z0-9]+)?$/i, // Prefixed IDs
+	/^p_rw\d+$/i, // Special p_rw format
+];
+
+function isValidProductId(id: string): boolean {
+	return PRODUCT_ID_PATTERNS.some((pattern) => pattern.test(id));
+}
+
 function rewriteProductUrls(request: NextRequest): NextResponse | null {
 	const url = request.nextUrl.clone();
 	const segments = url.pathname.split("/").filter(Boolean);
@@ -38,20 +50,7 @@ function rewriteProductUrls(request: NextRequest): NextResponse | null {
 	// CASE 2: /locale/category[/subcategory]/productId (only if ID looks valid)
 	if (rest.length === 2 || rest.length === 3) {
 		const maybeProductId = rest.at(-1);
-		const isProductId = maybeProductId
-			? // P_ prefixed IDs with alphanumeric and special chars
-				/^P_[A-Za-z0-9_-]+$/.test(maybeProductId) ||
-				// Pure numeric IDs
-				/^\d+$/.test(maybeProductId) ||
-				// Prefixed IDs with optional hyphenated suffixes
-				/^(AT|TR|VH|VS|US|GW|KN|KF|CW|GK|AV|JB|AU|AS|AK|VM|ZS)\d+(?:-[A-Za-z0-9]+)?$/i.test(
-					maybeProductId,
-				) ||
-				// Special p_rw format
-				/^p_rw\d+$/i.test(maybeProductId)
-			: false;
-
-		if (isProductId) {
+		if (maybeProductId && isValidProductId(maybeProductId)) {
 			const filled = [...rest];
 			while (filled.length < 4) {
 				filled.splice(filled.length - 1, 0, "__default");
