@@ -119,8 +119,9 @@ export function useGetColumnAttributes(variantNumber?: string) {
 			try {
 				setIsLoading(true);
 				const params = new URLSearchParams();
+				params.append("itemNumber", variantNumber);
 				const response = await axiosClient.get<ColumnAttributeApiResponse>(
-					`/columnAttributes/${variantNumber}`,
+					`/columnAttributes?${params.toString()}`,
 				);
 
 				// Transform new response structure to expected format
