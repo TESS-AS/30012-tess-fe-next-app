@@ -371,14 +371,13 @@ export default function HoseDetailsPage({
 						hoseDetails={hoseDetails}
 					/>
 
-					<OtherDetailsAccordion
-						isEditMode={isEditMode}
-						hoseDetails={hoseDetails}
-					/>
-
 					{profile?.defaultCustomerNumber !==
 						SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
 						<>
+							<OtherDetailsAccordion
+								isEditMode={isEditMode}
+								hoseDetails={hoseDetails}
+							/>
 							<InspectionsAccordion
 								isEditMode={isEditMode}
 								hoseDetails={hoseDetails}

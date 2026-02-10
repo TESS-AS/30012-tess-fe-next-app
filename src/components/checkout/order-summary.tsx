@@ -9,6 +9,7 @@ import { PriceDisplay } from "@/components/ui/price-display";
 import {
 	HIDE_CHECKOUT_FOR_SPECIFIC_CUSTOMER_NUMBER,
 	SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER,
+	SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER,
 } from "@/constants/checkout";
 import { useOrderSummary } from "@/hooks/useOrderSummary";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
@@ -237,10 +238,15 @@ export default function OrderSummary({
 									isPositive
 								/>
 							</div>
-							<div className="flex justify-between">
-								<span className="text-[#5A615D]">{t("OrderSummary.vat")}</span>
-								<PriceDisplay amount={vat} />
-							</div>
+							{profile?.defaultCustomerNumber !==
+								SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
+								<div className="flex justify-between">
+									<span className="text-[#5A615D]">
+										{t("OrderSummary.vat")}
+									</span>
+									<PriceDisplay amount={vat} />
+								</div>
+							)}
 							<Separator className="h-[1px] flex-1 bg-[#5A615D]" />
 							<div className="flex justify-between">
 								<span className="text-base font-bold text-[#0F1912]">
