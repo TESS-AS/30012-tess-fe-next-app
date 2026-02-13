@@ -30,21 +30,97 @@ import { useTranslations } from "next-intl";
 import { SidebarNav } from "./(components)/sidebar-nav";
 
 // Lazy load tab content to reduce profile page First Load JS (each tab in its own chunk)
-const AvvikendeOrdre = dynamic(() => import("./(components)/avvikende-ordre").then((m) => ({ default: m.AvvikendeOrdre })), { ssr: false });
-const AvvikendeOrdreDetail = dynamic(() => import("./(components)/avvikende-ordre-detail").then((m) => ({ default: m.AvvikendeOrdreDetail })), { ssr: false });
-const Dimensions = dynamic(() => import("./(components)/dimensions"), { ssr: false });
-const HoseDetailsPage = dynamic(() => import("./(components)/hose-details-page"), { ssr: false });
-const HoseInspections = dynamic(() => import("./(components)/hose-inspections"), { ssr: false });
-const HoseOverview = dynamic(() => import("./(components)/hose-overview").then((m) => ({ default: m.default })), { ssr: false });
-const HoseReplacement = dynamic(() => import("./(components)/hose-replacement").then((m) => ({ default: m.default })), { ssr: false });
-const HoseRequests = dynamic(() => import("./(components)/hose-requests").then((m) => ({ default: m.default })), { ssr: false });
-const HoseRiskClass = dynamic(() => import("./(components)/hose-risk-class").then((m) => ({ default: m.default })), { ssr: false });
-const HosesAndEquipments = dynamic(() => import("./(components)/hoses-and-equipments").then((m) => ({ default: m.HosesAndEquipments })), { ssr: false });
-const MineBestillinger = dynamic(() => import("./(components)/mine-bestillinger").then((m) => ({ default: m.MineBestillinger })), { ssr: false });
-const OrdreDetaljer = dynamic(() => import("./(components)/ordre-detaljer").then((m) => ({ default: m.OrdreDetaljer })), { ssr: false });
-const OrdreHistorikk = dynamic(() => import("./(components)/ordre-historikk").then((m) => ({ default: m.OrdreHistorikk })), { ssr: false });
-const Rekvisisjoner = dynamic(() => import("./(components)/rekvisisjoner").then((m) => ({ default: m.Rekvisisjoner })), { ssr: false });
-const UsersBrukere = dynamic(() => import("./(components)/users-brukere"), { ssr: false });
+const AvvikendeOrdre = dynamic(
+	() =>
+		import("./(components)/avvikende-ordre").then((m) => ({
+			default: m.AvvikendeOrdre,
+		})),
+	{ ssr: false },
+);
+const AvvikendeOrdreDetail = dynamic(
+	() =>
+		import("./(components)/avvikende-ordre-detail").then((m) => ({
+			default: m.AvvikendeOrdreDetail,
+		})),
+	{ ssr: false },
+);
+const Dimensions = dynamic(() => import("./(components)/dimensions"), {
+	ssr: false,
+});
+const HoseDetailsPage = dynamic(
+	() => import("./(components)/hose-details-page"),
+	{ ssr: false },
+);
+const HoseInspections = dynamic(
+	() => import("./(components)/hose-inspections"),
+	{ ssr: false },
+);
+const HoseOverview = dynamic(
+	() =>
+		import("./(components)/hose-overview").then((m) => ({
+			default: m.default,
+		})),
+	{ ssr: false },
+);
+const HoseReplacement = dynamic(
+	() =>
+		import("./(components)/hose-replacement").then((m) => ({
+			default: m.default,
+		})),
+	{ ssr: false },
+);
+const HoseRequests = dynamic(
+	() =>
+		import("./(components)/hose-requests").then((m) => ({
+			default: m.default,
+		})),
+	{ ssr: false },
+);
+const HoseRiskClass = dynamic(
+	() =>
+		import("./(components)/hose-risk-class").then((m) => ({
+			default: m.default,
+		})),
+	{ ssr: false },
+);
+const HosesAndEquipments = dynamic(
+	() =>
+		import("./(components)/hoses-and-equipments").then((m) => ({
+			default: m.HosesAndEquipments,
+		})),
+	{ ssr: false },
+);
+const MineBestillinger = dynamic(
+	() =>
+		import("./(components)/mine-bestillinger").then((m) => ({
+			default: m.MineBestillinger,
+		})),
+	{ ssr: false },
+);
+const OrdreDetaljer = dynamic(
+	() =>
+		import("./(components)/ordre-detaljer").then((m) => ({
+			default: m.OrdreDetaljer,
+		})),
+	{ ssr: false },
+);
+const OrdreHistorikk = dynamic(
+	() =>
+		import("./(components)/ordre-historikk").then((m) => ({
+			default: m.OrdreHistorikk,
+		})),
+	{ ssr: false },
+);
+const Rekvisisjoner = dynamic(
+	() =>
+		import("./(components)/rekvisisjoner").then((m) => ({
+			default: m.Rekvisisjoner,
+		})),
+	{ ssr: false },
+);
+const UsersBrukere = dynamic(() => import("./(components)/users-brukere"), {
+	ssr: false,
+});
 
 export default function ProfilePage() {
 	const { setIsAuthOpen } = useAppContext();
@@ -291,10 +367,10 @@ export default function ProfilePage() {
 														href: "rekvisisjoner",
 														label: t("ProfilePage.sidebar.requisitions"),
 													},
-													{
-														href: "ordrehistorikk",
-														label: t("ProfilePage.sidebar.orderHistory"),
-													},
+													// {
+													// 	href: "ordrehistorikk",
+													// 	label: t("ProfilePage.sidebar.orderHistory"),
+													// },
 												],
 											},
 											// {
