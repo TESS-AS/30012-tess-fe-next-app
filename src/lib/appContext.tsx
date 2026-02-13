@@ -170,33 +170,44 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				})) ?? [];
 
 			const cartKitPriceRequests =
-				cart.cartKit?.flatMap((item) => [
-					{
-						itemNumber: item.hose.itemNumber,
-						quantity: item.hose.quantity || 1,
-						warehouseNumber: profile?.defaultWarehouseNumber || "",
-					},
-					{
-						itemNumber: item.ferrule1.itemNumber,
-						quantity: item.ferrule1.quantity || 1,
-						warehouseNumber: profile?.defaultWarehouseNumber || "",
-					},
-					{
-						itemNumber: item.ferrule2.itemNumber,
-						quantity: item.ferrule2.quantity || 1,
-						warehouseNumber: profile?.defaultWarehouseNumber || "",
-					},
-					{
-						itemNumber: item.insert1.itemNumber,
-						quantity: item.insert1.quantity || 1,
-						warehouseNumber: profile?.defaultWarehouseNumber || "",
-					},
-					{
-						itemNumber: item.insert2.itemNumber,
-						quantity: item.insert2.quantity || 1,
-						warehouseNumber: profile?.defaultWarehouseNumber || "",
-					},
-				]) ?? [];
+				cart.cartKit?.flatMap((item) => {
+					const serviceItemNumbers = Object.values(item.services ?? {}).filter(
+						(v): v is string => typeof v === "string" && v.trim().length > 0,
+					);
+
+					return [
+						{
+							itemNumber: item.hose.itemNumber,
+							quantity: item.hose.quantity || 1,
+							warehouseNumber: profile?.defaultWarehouseNumber || "",
+						},
+						{
+							itemNumber: item.ferrule1.itemNumber,
+							quantity: item.ferrule1.quantity || 1,
+							warehouseNumber: profile?.defaultWarehouseNumber || "",
+						},
+						{
+							itemNumber: item.ferrule2.itemNumber,
+							quantity: item.ferrule2.quantity || 1,
+							warehouseNumber: profile?.defaultWarehouseNumber || "",
+						},
+						{
+							itemNumber: item.insert1.itemNumber,
+							quantity: item.insert1.quantity || 1,
+							warehouseNumber: profile?.defaultWarehouseNumber || "",
+						},
+						{
+							itemNumber: item.insert2.itemNumber,
+							quantity: item.insert2.quantity || 1,
+							warehouseNumber: profile?.defaultWarehouseNumber || "",
+						},
+						...serviceItemNumbers.map((itemNumber) => ({
+							itemNumber,
+							quantity: 1,
+							warehouseNumber: profile?.defaultWarehouseNumber || "",
+						})),
+					];
+				}) ?? [];
 
 			const allPriceRequests = [...priceRequests, ...cartKitPriceRequests];
 
@@ -275,6 +286,16 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 							quantity: k.insert2.quantity || 1,
 							warehouseNumber: profile?.defaultWarehouseNumber || "",
 						},
+						...Object.values(k.services ?? {})
+							.filter(
+								(v): v is string =>
+									typeof v === "string" && v.trim().length > 0,
+							)
+							.map((itemNumber) => ({
+								itemNumber,
+								quantity: 1,
+								warehouseNumber: profile?.defaultWarehouseNumber || "",
+							})),
 					]),
 				];
 
@@ -370,7 +391,17 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			const ferrule2 = calculatedPrices[kit.ferrule2.itemNumber] ?? 0;
 			const insert1 = calculatedPrices[kit.insert1.itemNumber] ?? 0;
 			const insert2 = calculatedPrices[kit.insert2.itemNumber] ?? 0;
-			return sum + hose + ferrule1 + ferrule2 + insert1 + insert2;
+			const servicesTotal = Object.values(kit.services ?? {})
+				.filter(
+					(v): v is string => typeof v === "string" && v.trim().length > 0,
+				)
+				.reduce(
+					(acc, itemNumber) => acc + (calculatedPrices[itemNumber] ?? 0),
+					0,
+				);
+			return (
+				sum + hose + ferrule1 + ferrule2 + insert1 + insert2 + servicesTotal
+			);
 		}, 0);
 
 		return regularTotal + kitsTotal;
@@ -407,9 +438,22 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			const ferrule2Price = calculatedPrices[kit.ferrule2?.itemNumber] ?? 0;
 			const insert1Price = calculatedPrices[kit.insert1?.itemNumber] ?? 0;
 			const insert2Price = calculatedPrices[kit.insert2?.itemNumber] ?? 0;
+			const servicesTotal = Object.values(kit.services ?? {})
+				.filter(
+					(v): v is string => typeof v === "string" && v.trim().length > 0,
+				)
+				.reduce(
+					(acc, itemNumber) => acc + (calculatedPrices[itemNumber] ?? 0),
+					0,
+				);
 
 			totals[kit.hexagonId] =
-				hosePrice + ferrule1Price + ferrule2Price + insert1Price + insert2Price;
+				hosePrice +
+				ferrule1Price +
+				ferrule2Price +
+				insert1Price +
+				insert2Price +
+				servicesTotal;
 		}
 
 		return totals;
@@ -475,6 +519,9 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				kitBackup.ferrule2.itemNumber,
 				kitBackup.insert1.itemNumber,
 				kitBackup.insert2.itemNumber,
+				...Object.values(kitBackup.services ?? {}).filter(
+					(v): v is string => typeof v === "string" && v.trim().length > 0,
+				),
 			];
 
 			setCartItems((prev) => {

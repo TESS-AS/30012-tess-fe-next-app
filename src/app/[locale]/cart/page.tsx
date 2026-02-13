@@ -771,6 +771,46 @@ const CartPage = () => {
 																		)}
 																	</p>
 																</div>
+																{Object.values(item.services ?? {}).some(
+																	(v) =>
+																		typeof v === "string" &&
+																		v.trim().length > 0,
+																) && (
+																	<div className="space-y-4">
+																		{Object.entries(item.services ?? {})
+																			.filter(
+																				([, v]) =>
+																					typeof v === "string" &&
+																					v.trim().length > 0,
+																			)
+																			.map(([key, itemNumber]) => (
+																				<div
+																					key={`${key}-${itemNumber}`}
+																					className="flex items-start justify-between gap-2">
+																					<div className="flex flex-col">
+																						<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
+																							{key
+																								.replace(
+																									/([a-z])([A-Z])/g,
+																									"$1 $2",
+																								)
+																								.replace(/_/g, " ")
+																								.replace(/\s+/g, " ")
+																								.trim()}
+																						</p>
+																						<p className="text-xs text-[#5A615D]">
+																							{itemNumber}
+																						</p>
+																					</div>
+																					<p className="font-bold">
+																						{formatNorwegianCurrency(
+																							calculatedPrices[itemNumber] ?? 0,
+																						)}
+																					</p>
+																				</div>
+																			))}
+																	</div>
+																)}
 															</div>
 														</div>
 													</div>
