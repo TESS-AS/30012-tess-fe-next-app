@@ -178,6 +178,20 @@ export default function StepConfirmation({
 												<div className="flex items-center gap-6">
 													<span className="font-semibold">
 														{(() => {
+															const servicesTotal = Object.values(
+																item.services ?? {},
+															)
+																.filter(
+																	(v): v is string =>
+																		typeof v === "string" &&
+																		v.trim().length > 0,
+																)
+																.reduce(
+																	(sum, itemNumber) =>
+																		sum + (calculatedPrices[itemNumber] ?? 0),
+																	0,
+																);
+
 															const total = [
 																calculatedPrices[item.hose.itemNumber] ?? 0,
 																calculatedPrices[item.ferrule1.itemNumber] ?? 0,
@@ -185,7 +199,9 @@ export default function StepConfirmation({
 																calculatedPrices[item.insert1.itemNumber] ?? 0,
 																calculatedPrices[item.insert2.itemNumber] ?? 0,
 															].reduce((sum, price) => sum + price, 0);
-															return formatNorwegianCurrency(total);
+															return formatNorwegianCurrency(
+																total + servicesTotal,
+															);
 														})()}
 													</span>
 												</div>
@@ -278,6 +294,48 @@ export default function StepConfirmation({
 															</p>
 														</div>
 													</div>
+													{Object.values(item.services ?? {}).some(
+														(v) => typeof v === "string" && v.trim().length > 0,
+													) && (
+														<div className="space-y-4 pl-8">
+															{Object.entries(item.services ?? {})
+																.filter(
+																	([, v]) =>
+																		typeof v === "string" &&
+																		v.trim().length > 0,
+																)
+																.map(([key, itemNumber]) => {
+																	const label = key
+																		.replace(/([a-z])([A-Z])/g, "$1 $2")
+																		.replace(/_/g, " ")
+																		.replace(/\s+/g, " ")
+																		.trim();
+
+																	const price =
+																		(prices[itemNumber] ??
+																			calculatedPrices[itemNumber] ??
+																			0) * (item.hose.quantity || 1);
+
+																	return (
+																		<div
+																			key={`${key}-${itemNumber}`}
+																			className="flex items-start justify-between gap-2">
+																			<div className="flex flex-col">
+																				<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
+																					{label}
+																				</p>
+																				<p className="text-xs text-[#5A615D]">
+																					{itemNumber}
+																				</p>
+																			</div>
+																			<p className="font-bold">
+																				{formatNorwegianCurrency(price)}
+																			</p>
+																		</div>
+																	);
+																})}
+														</div>
+													)}
 												</div>
 											</div>
 										)}

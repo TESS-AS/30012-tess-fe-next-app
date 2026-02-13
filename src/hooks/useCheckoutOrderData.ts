@@ -92,6 +92,10 @@ export function useCheckoutOrderData(
 					},
 				];
 
+				const serviceItemNumbers = Object.values(kitItem.services ?? {}).filter(
+					(v): v is string => typeof v === "string" && v.trim().length > 0,
+				);
+
 				const kitLines = kitComponents.map((component) => ({
 					customerOrderLine: lineCounter++,
 					warehouseNumber: warehouseNumber,
@@ -106,7 +110,21 @@ export function useCheckoutOrderData(
 					text: `${kitItem.hexagonId};${kitItem.hose.itemDescription}`,
 				}));
 
-				salesOrderLines = [...salesOrderLines, ...kitLines];
+				const serviceLines = serviceItemNumbers.map((itemNumber) => ({
+					customerOrderLine: lineCounter++,
+					warehouseNumber: warehouseNumber,
+					orderType: "S2",
+					itemCode: itemNumber,
+					orderedQuantity: 1,
+					salesPrice: unitPrices[itemNumber] || 0,
+					requestedDeliveryDate: new Date().toISOString().split("T")[0],
+					accountPart3: "",
+					accountPart4: String(userId || ""),
+					accountPart5: "",
+					text: `${kitItem.hexagonId};${kitItem.hose.itemDescription}`,
+				}));
+
+				salesOrderLines = [...salesOrderLines, ...kitLines, ...serviceLines];
 			});
 		}
 

@@ -23,6 +23,7 @@ export interface CartKitItem {
 	hexagonId: string;
 	assetId: number;
 	cartLine: number;
+	services?: Record<string, string>;
 	hose: {
 		itemName: string;
 		itemNumber: string;
