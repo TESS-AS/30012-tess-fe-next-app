@@ -79,7 +79,9 @@ export const getAssets = async (
 	try {
 		const params = new URLSearchParams();
 		if (customerNumber) params.append("customerNumber", customerNumber);
-		if (s1Code) params.append("s1Code", s1Code);
+		// if (s1Code) params.append("s1Code", s1Code);
+		params.append("s1Code", "1391731"); // TODO: Remove this
+
 		params.append("page", page.toString());
 		params.append("pageSize", pageSize.toString());
 		params.append("ageRange", ageRange || "");
