@@ -19,11 +19,12 @@ export interface ProfileUser {
 	punchout: boolean;
 	role: string;
 	/**
-	 * From user endpoint. Drives banner under header:
-	 * - false = red banner (Vi kobler nå kontoen din...)
-	 * - true = green banner (Kontoen din er nå koblet...)
+	 * From user endpoint. Drives banner under header and onboarding modal:
+	 * - "new" = show onboarding modal
+	 * - "connected" = green banner (Kontoen din er nå koblet...)
+	 * - "onboarding" = onboarding notification banner
 	 */
-	userstate?: boolean;
+	userstate?: "new" | "connected" | "onboarding";
 }
 
 export interface UserAddress {

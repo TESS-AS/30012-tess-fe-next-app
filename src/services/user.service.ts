@@ -7,30 +7,42 @@ import {
 	UserDomainConfig,
 } from "@/types/user.types";
 
+import axios from "axios";
 import axiosInstance from "./axiosClient";
 
-/** Address record returned by GET /address/organization/{orgNumber} */
-export interface OrganizationAddressRecord {
-	name?: string;
-	addressName?: string;
-	[key: string]: unknown;
+/** Organization record returned by GET api.tessix.no/org/{orgNumber} */
+export interface OrganizationRecord {
+	org_id: number;
+	org_number: string;
+	org_name: string;
+	org_amended_date: string;
+	org_sales_person_id: number | null;
+	org_status: string;
+	org_response_tb: unknown | null;
+	// Address fields (if available in response)
+	address?: string;
+	postal_code?: string;
+	city?: string;
+	country?: string;
 }
 
 export async function getOrganizationAddresses(
 	orgNumber: string,
-): Promise<OrganizationAddressRecord[]> {
+): Promise<OrganizationRecord | null> {
 	try {
-		const response = await axiosInstance.get<OrganizationAddressRecord[]>(
-			`/address/organization/${encodeURIComponent(orgNumber)}`,
+		const response = await axios.get<OrganizationRecord>(
+			`https://api.tessix.no/org/${encodeURIComponent(orgNumber)}`,
 		);
-		return Array.isArray(response.data) ? response.data : [];
+		return response.data;
 	} catch (error) {
-		console.error("Error fetching organization addresses:", error);
+		console.error("Error fetching organization:", error);
 		throw error;
 	}
 }
 
-export async function patchUserState(userstate: boolean): Promise<unknown> {
+export async function patchUserState(
+	userstate: "new" | "connected" | "onboarding",
+): Promise<unknown> {
 	try {
 		const response = await axiosInstance.patch("/user", { userstate });
 		return response.data;

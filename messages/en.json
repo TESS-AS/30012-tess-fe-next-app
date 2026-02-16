@@ -67,9 +67,13 @@
 			"greeting": "Hello, {name}!",
 			"message": "We are now connecting your account to the company agreement. This gives you the correct prices automatically. You don't need to do anything. We will notify you here when everything is ready. Browse our product range while you wait."
 		},
-		"updated": {
+		"connected": {
 			"title": "Account is updated",
 			"message": "Your account is now linked to your company agreement. You have access to your prices and can order goods."
+		},
+		"onboarding": {
+			"title": "Welcome to TESSIX online store",
+			"message": "Your account has been created and is ready to use. You can start shopping right away."
 		}
 	},
 	"Products": {
