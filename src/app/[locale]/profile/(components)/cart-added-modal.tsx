@@ -40,7 +40,12 @@ export function CartAddedModal({
 				<ModalHeader>
 					<ModalTitle className="flex items-center gap-2">
 						{allUnavailable ? (
-							<AlertTriangle className="h-5 w-5 text-[#8A6A00]" />
+							<Image
+								src="/icons/alert-filled.svg"
+								alt="Alert"
+								width={20}
+								height={20}
+							/>
 						) : (
 							<Image
 								src="/icons/check-filled.svg"
@@ -106,7 +111,12 @@ export function CartAddedModal({
 						)}
 						{!allUnavailable && unavailableCount > 0 && (
 							<div className="mt-4 flex items-center gap-3 rounded-md bg-[#FFF7D6] px-3 py-3 text-sm text-[#0F1912]">
-								<AlertTriangle className="h-5 w-5 text-[#8A6A00]" />
+								<Image
+									src="/icons/alert-filled.svg"
+									alt="Alert"
+									width={20}
+									height={20}
+								/>
 								<span>
 									{unavailableCount} vare
 									{unavailableCount === 1 ? "" : "r"} ikke tilgjengelig for salg
