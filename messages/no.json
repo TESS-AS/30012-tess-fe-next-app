@@ -17,7 +17,60 @@
 		"browseOurTopCategories": "Bla gjennom v\u00e5re toppkategorier",
 		"ourCategories": "Our categories",
 		"seeCategories": "Se kategorier",
-		"learnMore": "L\u00e6r mer"
+		"learnMore": "L\u00e6r mer",
+		"welcome": {
+			"titlePart1": "Velkommen til",
+			"titlePart2": "TESSIX netthandel",
+			"intro": "Du m\u00e5 v\u00e6re innlogget for \u00e5 se priser, lagerstatus og handle.",
+			"haveUser": "Har du allerede bruker?",
+			"logIn": "Logg inn",
+			"missingAccess": "Mangler du tilgang?",
+			"createAccount": "Opprett ny brukerkonto",
+			"needHelp": "Trenger du hjelp?",
+			"see": "Se",
+			"faq": "ofte stilte sp\u00f8rsm\u00e5l",
+			"orContactUs": "eller kontakt oss p\u00e5"
+		}
+	},
+	"Onboarding": {
+		"title": "Velkommen!",
+		"intro": "For at du skal f\u00e5 dine avtalepriser, m\u00e5 vi vite hvem du handler for.",
+		"companySectionTitle": "Hvilken bedrift tilh\u00f8rer du?",
+		"companyLabel": "Bedrift",
+		"companyPlaceholder": "Skriv din bedrift",
+		"departmentLabel": "Din avdeling (ikke obligatorisk)",
+		"departmentPlaceholder": "Skriv din avdeling",
+		"orgSearchTitle": "Bedriftss\u00f8k",
+		"notMandatory": "ikke obligatorisk",
+		"orgSearchHelper": "Org.nr. hjelper oss med \u00e5 koble kontoen din raskere",
+		"orgNumberLabel": "Organisasjonsnummer",
+		"orgNumberPlaceholder": "Skriv organisasjonsnummer",
+		"orgNumberHint": "9 siffer - henter navn og adresse automatisk",
+		"orgNumberError": "Organisasjonsnummer m\u00e5 v\u00e6re 9 siffer",
+		"orgSearchError": "Kunne ikke finne bedrift med dette organisasjonsnummeret",
+		"search": "S\u00f8k",
+		"serviceCenterTitle": "Hvilket TESS servicesenter har du relasjon til?",
+		"serviceCenterLabel": "Velg TESS service senter",
+		"serviceCenterPlaceholder": "Velg servicesenter",
+		"helpText": "Usikker? F\u00e5 hjelp p\u00e5",
+		"helpTextOr": "eller send e-post til",
+		"submit": "Send",
+		"submitting": "Sender...",
+		"submitted": "Sendt",
+		"submitSuccess": "Informasjon sendt!",
+		"submitSuccessMessage": "Din informasjon er sendt til support. Vi vil kontakte deg snart.",
+		"submitError": "Kunne ikke sende inn informasjon",
+		"submitErrorTitle": "Feil ved sending"
+	},
+	"UserStateBanner": {
+		"connecting": {
+			"greeting": "Hei, {name}!",
+			"message": "Vi kobler n\u00e5 kontoen din til firmaavtalen. Dette gir deg riktige priser automatisk. Du trenger ikke \u00e5 gj\u00f8re noe. Vi varsler deg her n\u00e5r alt er klart. Se vareutvalget v\u00e5rt mens du venter."
+		},
+		"updated": {
+			"title": "Kontoen er oppdatert",
+			"message": "Kontoen din er n\u00e5 koblet til din firmaavtale. Du har tilgang til dine priser og kan bestille varer."
+		}
 	},
 	"Products": {
 		"noProducts": "Ingen produkter funnet"

@@ -9,6 +9,37 @@ import {
 
 import axiosInstance from "./axiosClient";
 
+/** Address record returned by GET /address/organization/{orgNumber} */
+export interface OrganizationAddressRecord {
+	name?: string;
+	addressName?: string;
+	[key: string]: unknown;
+}
+
+export async function getOrganizationAddresses(
+	orgNumber: string,
+): Promise<OrganizationAddressRecord[]> {
+	try {
+		const response = await axiosInstance.get<OrganizationAddressRecord[]>(
+			`/address/organization/${encodeURIComponent(orgNumber)}`,
+		);
+		return Array.isArray(response.data) ? response.data : [];
+	} catch (error) {
+		console.error("Error fetching organization addresses:", error);
+		throw error;
+	}
+}
+
+export async function patchUserState(userstate: boolean): Promise<unknown> {
+	try {
+		const response = await axiosInstance.patch("/user", { userstate });
+		return response.data;
+	} catch (error) {
+		console.error("Error patching user state:", error);
+		throw error;
+	}
+}
+
 export async function updateUserProfile(
 	firstName: string,
 	lastName: string,
