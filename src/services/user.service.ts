@@ -6,8 +6,8 @@ import {
 	UpdateUserRelationsResponse,
 	UserDomainConfig,
 } from "@/types/user.types";
-
 import axios from "axios";
+
 import axiosInstance from "./axiosClient";
 
 /** Organization record returned by GET api.tessix.no/org/{orgNumber} */
