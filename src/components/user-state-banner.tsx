@@ -11,20 +11,25 @@ export function UserStateBanner() {
 	const { data: profile } = useGetProfileData();
 	const [dismissed, setDismissed] = useState(false);
 
-	// userstate false = red banner (connecting); userstate true = green banner (updated)
 	const userstate = profile?.userstate;
-	const showConnecting = userstate === false && !dismissed;
-	const showUpdated = userstate === true && !dismissed;
+	const showConnected = userstate === "connected" && !dismissed;
+	const showOnboarding = userstate === "onboarding" && !dismissed;
 
 	const handleDismiss = () => {
 		setDismissed(true);
 	};
 
-	if (showConnecting) {
+	// Debug: log the userstate to help troubleshoot
+	if (typeof window !== "undefined" && userstate) {
+		console.log("UserStateBanner - userstate:", userstate);
+	}
+
+	// Check onboarding first - shows yellow banner with connecting message
+	if (showOnboarding) {
 		const firstName = profile?.firstName ?? "";
 		return (
 			<div className="flex w-full items-center justify-between gap-4 bg-yellow-100 px-4 py-3">
-				<div className="container mx-auto flex-1 pr-8">
+				<div className="container mx-auto flex-1 px-5 pr-8">
 					<p className="font-bold text-gray-900">
 						{t("connecting.greeting", { name: firstName })}
 					</p>
@@ -43,12 +48,12 @@ export function UserStateBanner() {
 		);
 	}
 
-	if (showUpdated) {
+	if (showConnected) {
 		return (
 			<div className="flex w-full items-center justify-between gap-4 bg-[#DCF7E0] px-4 py-3">
-				<div className="container mx-auto flex-1 pr-8">
-					<p className="font-semibold text-gray-900">{t("updated.title")}</p>
-					<p className="mt-1 text-sm text-gray-800">{t("updated.message")}</p>
+				<div className="container mx-auto flex-1 px-5 pr-8">
+					<p className="font-semibold text-gray-900">{t("connected.title")}</p>
+					<p className="mt-1 text-sm text-gray-800">{t("connected.message")}</p>
 				</div>
 				<button
 					type="button"

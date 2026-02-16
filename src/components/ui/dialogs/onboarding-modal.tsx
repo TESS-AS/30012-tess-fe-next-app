@@ -24,13 +24,13 @@ import { useGetCompanies } from "@/hooks/useGetCompanies";
 import { useGetProfileData, profileKeys } from "@/hooks/useGetProfileData";
 import { useGetWarehouses } from "@/hooks/useGetWarehouse";
 import { triggerProfileRefetch } from "@/hooks/usePunchoutProfile";
-import axiosClient from "@/services/axiosClient";
 import {
 	getOrganizationAddresses,
 	patchUserState,
+	type OrganizationRecord,
 } from "@/services/user.service";
 import { useQueryClient } from "@tanstack/react-query";
-import { Building2, Search, Loader2, ChevronRight } from "lucide-react";
+import { Building2, Search, Loader2, ChevronRight, CheckCircle2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 interface OnboardingModalProps {
@@ -61,6 +61,8 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 	const [orgSearchError, setOrgSearchError] = useState<string | null>(null);
 	const [submitSuccess, setSubmitSuccess] = useState(false);
 	const [submitError, setSubmitError] = useState<string | null>(null);
+	const [foundOrganization, setFoundOrganization] =
+		useState<OrganizationRecord | null>(null);
 
 	// Initialize form with profile data if available
 	useEffect(() => {
@@ -94,22 +96,19 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 		setOrgSearchError(null);
 
 		try {
-			const addresses = await getOrganizationAddresses(orgNumber.trim());
+			const organization = await getOrganizationAddresses(orgNumber.trim());
 
-			if (addresses.length > 0) {
-				// Pre-fill company name from first address if available
-				const first = addresses[0];
-				const name =
-					first?.addressName ??
-					first?.name ??
-					(first as { companyName?: string })?.companyName;
-				if (name && typeof name === "string") {
-					setCompanyName(name);
-				}
+			if (organization && organization.org_name) {
+				// Store organization data and pre-fill company name
+				setFoundOrganization(organization);
+				setCompanyName(organization.org_name);
+				setOrgSearchError(null);
 			} else {
+				setFoundOrganization(null);
 				setOrgSearchError(t("orgSearchError"));
 			}
 		} catch (error) {
+			setFoundOrganization(null);
 			setOrgSearchError(t("orgSearchError"));
 		} finally {
 			setIsSearchingOrg(false);
@@ -130,38 +129,8 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 			);
 			const warehouseName = selectedWarehouse?.name || selectedWarehouseNumber;
 
-			// Format the message with all onboarding information
-			const onboardingMessage = `
-NY BRUKER ONBOARDING - ${companyName}
-
-Brukerinformasjon:
-- Navn: ${profile?.firstName || ""} ${profile?.lastName || ""}
-- E-post: ${profile?.email || "Ikke tilgjengelig"}
-- Telefon: ${profile?.phoneNumber || "Ikke oppgitt"}
-- Bruker ID: ${profile?.userId || "Ikke tilgjengelig"}
-
-Bedriftsinformasjon:
-- Bedrift: ${companyName}
-${department ? `- Avdeling: ${department}` : ""}
-${orgNumber ? `- Organisasjonsnummer: ${orgNumber}` : ""}
-${selectedCompanyNumber ? `- Selskap nummer: ${selectedCompanyNumber}` : ""}
-
-TESS Servicesenter:
-- Servicesenter: ${warehouseName}
-- Servicesenter nummer: ${selectedWarehouseNumber}
-
----
-Dette er en automatisk melding fra TESSIX netthandel onboarding system.
-Vennligst sett opp brukeren med riktig tilgang basert på informasjonen over.
-			`.trim();
-
-			// Send email to support with all onboarding information
-			await axiosClient.post("/feedback/Onboarding", {
-				message: onboardingMessage,
-			});
-
-			// Set userstate false so red "connecting" banner shows under header
-			await patchUserState(false);
+			// Set userstate to "onboarding" so onboarding notification shows under header
+			await patchUserState("onboarding");
 
 			// Refetch profile so banner appears
 			await queryClient.invalidateQueries({
@@ -251,9 +220,14 @@ Vennligst sett opp brukeren med riktig tilgang basert på informasjonen over.
 					</div>
 
 					{/* Organization Number Search Section */}
-					<div className="space-y-4 rounded-lg bg-gray-50 p-4">
+					<div
+						className={`mb-0 space-y-4 rounded-lg p-4 ${foundOrganization ? "bg-green-50" : "bg-gray-50"}`}>
 						<div className="mb-1 flex items-center gap-2">
-							<Building2 className="h-5 w-5 text-gray-900" />
+							{foundOrganization ? (
+								<CheckCircle2 className="h-5 w-5 text-green-600" />
+							) : (
+								<Building2 className="h-5 w-5 text-gray-900" />
+							)}
 							<h3 className="text-base font-semibold">
 								{t("orgSearchTitle")}
 								<span className="font-normal text-gray-500">
@@ -274,6 +248,7 @@ Vennligst sett opp brukeren med riktig tilgang basert på informasjonen over.
 									onChange={(e) => {
 										setOrgNumber(e.target.value);
 										setOrgSearchError(null);
+										setFoundOrganization(null);
 									}}
 									maxLength={9}
 									className="mt-1 h-[58px] pr-[70px]"
@@ -299,6 +274,70 @@ Vennligst sett opp brukeren med riktig tilgang basert på informasjonen over.
 							<p className="text-xs text-gray-500">{t("orgNumberHint")}</p>
 						</div>
 					</div>
+
+					{/* Organization Details Display */}
+					{foundOrganization && (
+						<div className="rounded-lg">
+							<div className="space-y-0">
+								<div className="flex items-center justify-between bg-white px-4 py-3">
+									<span className="text-base font-medium text-gray-900">
+										Organisasjonsnummer:
+									</span>
+									<span className="text-base font-light text-gray-900">
+										{foundOrganization.org_number}
+									</span>
+								</div>
+								<div className="flex items-center justify-between bg-gray-50 px-4 py-3">
+									<span className="text-base font-medium text-gray-900">
+										Firmanavn:
+									</span>
+									<span className="text-base font-light text-gray-900">
+										{foundOrganization.org_name}
+									</span>
+								</div>
+								{foundOrganization.address && (
+									<div className="flex items-center justify-between bg-white px-4 py-3">
+										<span className="text-base font-medium text-gray-900">
+											Adresse:
+										</span>
+										<span className="text-base font-light text-gray-900">
+											{foundOrganization.address}
+										</span>
+									</div>
+								)}
+								{foundOrganization.postal_code && (
+									<div className="flex items-center justify-between bg-gray-50 px-4 py-3">
+										<span className="text-base font-medium text-gray-900">
+											Postnummer:
+										</span>
+										<span className="text-base font-light text-gray-900">
+											{foundOrganization.postal_code}
+										</span>
+									</div>
+								)}
+								{foundOrganization.city && (
+									<div className="flex items-center justify-between bg-white px-4 py-3">
+										<span className="text-base font-medium text-gray-900">
+											Poststed:
+										</span>
+										<span className="text-base font-light text-gray-900">
+											{foundOrganization.city}
+										</span>
+									</div>
+								)}
+								{foundOrganization.country && (
+									<div className="flex items-center justify-between bg-gray-50 px-4 py-3">
+										<span className="text-base font-medium text-gray-900">
+											Land:
+										</span>
+										<span className="text-base font-light text-gray-900">
+											{foundOrganization.country}
+										</span>
+									</div>
+								)}
+							</div>
+						</div>
+					)}
 
 					{/* Service Center Section */}
 					<div className="space-y-4">

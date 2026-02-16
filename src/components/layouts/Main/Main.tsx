@@ -20,20 +20,11 @@ export default function Main({ children }: { children?: ReactNode }) {
 		setIsOpen(false);
 	}, [pathname, setIsOpen]);
 
-	// Check if user is new and needs onboarding
-	// A new user is someone whose orgNumbers only contains "default" or is empty
-	// Backend will eventually provide a flag to determine if onboarding is needed
+	// Check if user needs onboarding based on userstate
 	const isNewUser = useMemo(() => {
 		if (!profile || isLoading) return false;
 		if (onboardingCompleted) return false;
-
-		const orgNumbers = profile.orgNumbers || [];
-		// Check if orgNumbers is empty or only contains "default"
-		const hasOnlyDefault =
-			orgNumbers.length === 0 ||
-			(orgNumbers.length === 1 && orgNumbers[0] === "default");
-
-		return hasOnlyDefault;
+		return profile.userstate === "new";
 	}, [profile, isLoading, onboardingCompleted]);
 
 	// Fixed 182px to prevent CLS when profile loads (header always reserves 182px)

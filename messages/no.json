@@ -67,9 +67,13 @@
 			"greeting": "Hei, {name}!",
 			"message": "Vi kobler n\u00e5 kontoen din til firmaavtalen. Dette gir deg riktige priser automatisk. Du trenger ikke \u00e5 gj\u00f8re noe. Vi varsler deg her n\u00e5r alt er klart. Se vareutvalget v\u00e5rt mens du venter."
 		},
-		"updated": {
+		"connected": {
 			"title": "Kontoen er oppdatert",
 			"message": "Kontoen din er n\u00e5 koblet til din firmaavtale. Du har tilgang til dine priser og kan bestille varer."
+		},
+		"onboarding": {
+			"title": "Velkommen til TESSIX netthandel",
+			"message": "Din konto er n\u00e5 opprettet og klar til bruk. Du kan begynne \u00e5 handle med en gang."
 		}
 	},
 	"Products": {
