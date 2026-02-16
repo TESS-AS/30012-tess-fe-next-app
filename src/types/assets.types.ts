@@ -68,6 +68,7 @@ export interface GetAssetsResponse {
 		whipcheck: string;
 		breakaway: string;
 		currentStatus: "Processed" | "Pending" | "Failed";
+		ecom: number | boolean;
 	};
 	hoseData: {
 		hoseLineId: number;

@@ -23,6 +23,7 @@ interface HoseActionsDropdownProps {
 	selectedCount: number;
 	isAddingToCart?: boolean;
 	isLoading?: boolean;
+	disableAddToCart?: boolean;
 	onAddToCart: () => void;
 	onContactSupport: () => void;
 	onReportReplacement: () => void;
@@ -43,6 +44,7 @@ export function HoseActionsDropdown({
 	selectedCount,
 	isAddingToCart = false,
 	isLoading = false,
+	disableAddToCart = false,
 	onAddToCart,
 	onContactSupport,
 	onReportReplacement,
@@ -94,10 +96,10 @@ export function HoseActionsDropdown({
 
 				<DropdownMenuItem
 					onClick={onAddToCart}
-					disabled={selectedCount === 0 || isAddingToCart}
+					disabled={selectedCount === 0 || isAddingToCart || disableAddToCart}
 					className={cn({
 						"cursor-not-allowed opacity-50":
-							selectedCount === 0 || isAddingToCart,
+							selectedCount === 0 || isAddingToCart || disableAddToCart,
 					})}>
 					<ShoppingCart className="mr-3 h-4 w-4 text-[#005522]" />
 					<span>{isAddingToCart ? t("adding") : t("addToCart")}</span>

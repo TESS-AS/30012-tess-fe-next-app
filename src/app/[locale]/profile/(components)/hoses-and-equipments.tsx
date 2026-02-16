@@ -43,6 +43,7 @@ export interface HoseOrder {
 	kunde_id: string;
 	beskrivelse: string;
 	status: "Processed" | "Pending" | "Failed" | string;
+	ecom?: number | boolean;
 	dato: string;
 	warehouse: string;
 	assetId: string;
@@ -76,6 +77,9 @@ export function HosesAndEquipments({
 	const [printOpen, setPrintOpen] = useState(false);
 	const [printTagsOpen, setPrintTagsOpen] = useState(false);
 	const [showAllItems, setShowAllItems] = useState(false);
+	const [addedToCartItems, setAddedToCartItems] = useState<string[]>([]);
+	const [unavailableForPurchaseItems, setUnavailableForPurchaseItems] =
+		useState<string[]>([]);
 	const [customerNumber, setCustomerNumber] = useState<string>("");
 	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
 		() => {
@@ -141,6 +145,7 @@ export function HosesAndEquipments({
 		kunde_id: asset?.hoseHeader?.customerNumber ?? "",
 		beskrivelse: asset?.hoseLine?.itemDescription ?? "",
 		status: asset?.hoseLine?.currentStatus ?? "",
+		ecom: asset?.hoseLine?.ecom,
 		dato: asset?.hoseHeader?.requestDate ?? "",
 		warehouse: asset?.hoseHeader?.department ?? "",
 		assetId: asset?.hoseHeader?.assetId?.toString?.() || "",
@@ -305,23 +310,35 @@ export function HosesAndEquipments({
 			const handleAddToCart = async () => {
 				setIsAddingToCart(true);
 				try {
-					const hexagonIds = allAcrossPages
-						? transformedAssets
-								.filter((a) => !deselectedIds.has(a.hexagonId))
-								.map((a) => a.hexagonId)
-						: selectedRows;
+					const currentAssets = transformedAssetsRef.current;
+					const selectedAssetRows = allAcrossPages
+						? currentAssets.filter((a) => !deselectedIds.has(a.hexagonId))
+						: currentAssets.filter((a) => selectedRows.includes(a.hexagonId));
 
-					const cartItems = hexagonIds.map((hexagonId) => ({
-						hexagonId: Number(hexagonId),
-						quantity: 1,
-						warehouseNumber: profile?.defaultWarehouseNumber,
-						companyNumber: profile?.defaultCompanyNumber,
-					}));
+					const unavailable = selectedAssetRows
+						.filter((a) => Number(a.ecom) === 3)
+						.map((a) => a.hexagonId);
+					const available = selectedAssetRows
+						.filter((a) => Number(a.ecom) !== 3)
+						.map((a) => a.hexagonId);
 
-					await postCartKit(cartItems);
-					toast.success("Elementer lagt til i handlekurven");
+					setAddedToCartItems(available);
+					setUnavailableForPurchaseItems(unavailable);
+
+					if (available.length > 0) {
+						const cartItems = available.map((hexagonId) => ({
+							hexagonId: Number(hexagonId),
+							quantity: 1,
+							warehouseNumber: profile?.defaultWarehouseNumber,
+							companyNumber: profile?.defaultCompanyNumber,
+						}));
+
+						await postCartKit(cartItems);
+						toast.success("Elementer lagt til i handlekurven");
+						setIsCartChanging(!isCartChanging);
+					}
+
 					setCartModalOpen(true);
-					setIsCartChanging(!isCartChanging);
 				} catch (error) {
 					toast.error("Kunne ikke legge til elementer i handlekurven");
 				} finally {
@@ -564,16 +581,25 @@ export function HosesAndEquipments({
 				open={cartModalOpen}
 				onOpenChange={(open) => {
 					setCartModalOpen(open);
+					setAddedToCartItems([]);
+					setUnavailableForPurchaseItems([]);
 					setSelectedRows([]);
 					setAllAcrossPages(false);
 					setDeselectedIds(new Set());
 				}}
-				selectedItems={selectedRows}
+				selectedItems={addedToCartItems}
+				unavailableItems={unavailableForPurchaseItems}
 				showAllItems={showAllItems}
 				setShowAllItems={setShowAllItems}
 				onConfirm={async () => {
 					setCartModalOpen(false);
-					router.push("/cart");
+					if (addedToCartItems.length > 0) {
+						router.push("/cart");
+					} else {
+						setRfqOpen(true);
+					}
+					setAddedToCartItems([]);
+					setUnavailableForPurchaseItems([]);
 					setSelectedRows([]);
 					setAllAcrossPages(false);
 					setDeselectedIds(new Set());

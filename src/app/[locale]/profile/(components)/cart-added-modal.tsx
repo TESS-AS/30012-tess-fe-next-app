@@ -4,7 +4,7 @@ import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
-import { Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
@@ -12,6 +12,7 @@ export interface CartAddedModalProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	selectedItems: string[];
+	unavailableItems?: string[];
 	showAllItems: boolean;
 	setShowAllItems: (val: boolean) => void;
 	onConfirm: () => Promise<void> | void;
@@ -21,36 +22,61 @@ export function CartAddedModal({
 	open,
 	onOpenChange,
 	selectedItems,
+	unavailableItems = [],
 	showAllItems,
 	setShowAllItems,
 	onConfirm,
 }: CartAddedModalProps) {
 	const t = useTranslations("CartAddedModal");
+	const unavailableCount = unavailableItems.length;
+	const addedCount = selectedItems.length;
+	const allUnavailable = addedCount === 0 && unavailableCount > 0;
 	return (
 		<Modal
-			className="max-w-[400px]"
+			className="max-w-[440px]"
 			open={open}
 			onOpenChange={onOpenChange}>
 			<div>
 				<ModalHeader>
 					<ModalTitle className="flex items-center gap-2">
-						<Image
-							src="/icons/check-filled.svg"
-							alt="Check"
-							width={20}
-							height={20}
-						/>
+						{allUnavailable ? (
+							<Image
+								src="/icons/alert-filled.svg"
+								alt="Alert"
+								width={20}
+								height={20}
+							/>
+						) : (
+							<Image
+								src="/icons/check-filled.svg"
+								alt="Check"
+								width={20}
+								height={20}
+							/>
+						)}
 						<span>
-							{selectedItems.length}{" "}
-							{selectedItems.length === 1 ? t("item") : t("items")}{" "}
-							{t("addedToCart")}
+							{allUnavailable ? (
+								"Ingen av de valgte varene er tilgjengelig for direktekjøp."
+							) : (
+								<>
+									{addedCount} {addedCount === 1 ? t("item") : t("items")}{" "}
+									{t("addedToCart")}
+								</>
+							)}
 						</span>
 					</ModalTitle>
 				</ModalHeader>
 
 				<div className="space-y-4 py-4">
 					<div className="space-y-2">
-						{selectedItems.length === 0 ? (
+						{allUnavailable ? (
+							<div className="space-y-3 text-sm text-gray-600">
+								<p>
+									Du kan be om å bli kontaktet eller sende en forespørsel om
+									tilbud.
+								</p>
+							</div>
+						) : addedCount === 0 ? (
 							<div className="text-sm text-gray-600">
 								{t("noItemsSelected")}
 							</div>
@@ -83,6 +109,20 @@ export function CartAddedModal({
 								)}
 							</>
 						)}
+						{!allUnavailable && unavailableCount > 0 && (
+							<div className="mt-4 flex items-center gap-3 rounded-md bg-[#FFF7D6] px-3 py-3 text-sm text-[#0F1912]">
+								<Image
+									src="/icons/alert-filled.svg"
+									alt="Alert"
+									width={20}
+									height={20}
+								/>
+								<span>
+									{unavailableCount} vare
+									{unavailableCount === 1 ? "" : "r"} ikke tilgjengelig for salg
+								</span>
+							</div>
+						)}
 					</div>
 				</div>
 
@@ -91,7 +131,7 @@ export function CartAddedModal({
 						variant="default"
 						className="w-full bg-[#1C6D2C] text-white hover:bg-[#164B1F]"
 						onClick={onConfirm}>
-						{t("goToCart")}
+						{allUnavailable ? "Send forespørsel" : t("goToCart")}
 					</Button>
 				</div>
 			</div>

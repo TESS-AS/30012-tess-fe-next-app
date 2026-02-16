@@ -4,6 +4,13 @@ import { useState } from "react";
 
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useGetHoseDetails } from "@/hooks/useGetHoseDetails";
 import { useGetHoseHistory } from "@/hooks/useGetHoseHistory";
@@ -68,6 +75,10 @@ export default function HoseDetailsPage({
 		hoseDetails?.hoseLine?.assetId?.toString() || "",
 	);
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
+
+	const isDirectPurchaseBlocked = Number(hoseDetails?.hoseLine?.ecom) === 3;
+	const directPurchaseTooltipText =
+		"Slangen er ikke tilgjengelig for direktekjøp. Send forespørsel for pris og levering.";
 
 	// Update selectedAssetId when hoseDetails loads
 	const title = hoseDetails?.hoseLine?.itemDescription
@@ -147,6 +158,45 @@ export default function HoseDetailsPage({
 		});
 	};
 
+	if (isLoadingDetails) {
+		return (
+			<div className="mx-auto space-y-4">
+				<div className="flex items-center justify-between rounded-md">
+					<Button
+						variant="ghost"
+						onClick={onBack}
+						className="gap-2 px-0 text-[#0F1912] hover:bg-transparent hover:text-[#003D1A]">
+						<ChevronLeft className="h-5 w-5" />
+						Gå tilbake til listen
+					</Button>
+
+					<div className="flex items-center gap-3">
+						<Skeleton className="h-[40px] w-[190px] rounded-md" />
+						<Skeleton className="h-[40px] w-[140px] rounded-md" />
+						<Skeleton className="h-[40px] w-[125px] rounded-md" />
+					</div>
+				</div>
+
+				<div className="rounded-md bg-white px-6 py-4">
+					<div className="space-y-4">
+						<Skeleton className="h-7 w-[260px]" />
+						<Skeleton className="h-5 w-[420px]" />
+						<div className="space-y-3">
+							{[1, 2, 3, 4, 5, 6].map((i) => (
+								<div
+									key={i}
+									className="flex items-center justify-between border-b border-[#E8EAE9] py-3">
+									<Skeleton className="h-4 w-[220px]" />
+									<Skeleton className="h-4 w-[90px]" />
+								</div>
+							))}
+						</div>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div className="mx-auto space-y-4">
 			<div className="flex items-center justify-between rounded-md">
@@ -167,18 +217,43 @@ export default function HoseDetailsPage({
 						onClick={() => setIsEditMode(!isEditMode)}
 						className="border-[#C1C4C2] bg-white text-[#0F1912]"
 						variant="outline">
-						<SquarePen /> {isEditMode ? "Avbryt" : "Rediger slangedetaljer"}
+						<SquarePen />
+						{isEditMode ? "Avbryt" : "Rediger slangedetaljer"}
 					</Button>
-					<Button
-						onClick={handleAddToCart}
-						disabled={isAddingToCart || !hoseDetails}
-						className="border-[#C1C4C2] bg-white text-[#0F1912]"
-						variant="outline">
-						<ShoppingCart /> {isAddingToCart ? t("adding") : t("addToCart")}
-					</Button>
+					{isDirectPurchaseBlocked ? (
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<span tabIndex={0}>
+										<Button
+											onClick={handleAddToCart}
+											disabled
+											className="border-[#C1C4C2] bg-white text-[#0F1912]"
+											variant="outline">
+											<ShoppingCart />
+											{isAddingToCart ? t("adding") : t("addToCart")}
+										</Button>
+									</span>
+								</TooltipTrigger>
+								<TooltipContent>
+									<p>{directPurchaseTooltipText}</p>
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
+					) : (
+						<Button
+							onClick={handleAddToCart}
+							disabled={isAddingToCart || !hoseDetails}
+							className="border-[#C1C4C2] bg-white text-[#0F1912]"
+							variant="outline">
+							<ShoppingCart />
+							{isAddingToCart ? t("adding") : t("addToCart")}
+						</Button>
+					)}
 					<HoseActionsDropdown
 						selectedCount={1}
 						isAddingToCart={isAddingToCart}
+						disableAddToCart={isDirectPurchaseBlocked}
 						onAddToCart={handleAddToCart}
 						onContactSupport={() => console.log("Contact support")}
 						onReportReplacement={() => console.log("Report replacement")}
@@ -313,13 +388,35 @@ export default function HoseDetailsPage({
 						variant="outline">
 						<SquarePen /> {isEditMode ? t("cancel") : t("edit")}
 					</Button>
-					<Button
-						onClick={handleAddToCart}
-						disabled={isAddingToCart || !hoseDetails}
-						className="border-[#C1C4C2] text-[#0F1912]"
-						variant="outline">
-						<ShoppingCart /> {isAddingToCart ? t("adding") : t("addToCart")}
-					</Button>
+					{isDirectPurchaseBlocked ? (
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<span tabIndex={0}>
+										<Button
+											onClick={handleAddToCart}
+											disabled
+											className="border-[#C1C4C2] text-[#0F1912]"
+											variant="outline">
+											<ShoppingCart />
+											{isAddingToCart ? t("adding") : t("addToCart")}
+										</Button>
+									</span>
+								</TooltipTrigger>
+								<TooltipContent>
+									<p>{directPurchaseTooltipText}</p>
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
+					) : (
+						<Button
+							onClick={handleAddToCart}
+							disabled={isAddingToCart || !hoseDetails}
+							className="border-[#C1C4C2] text-[#0F1912]"
+							variant="outline">
+							<ShoppingCart /> {isAddingToCart ? t("adding") : t("addToCart")}
+						</Button>
+					)}
 					<Button
 						disabled
 						className="border-[#C1C4C2] text-[#0F1912]"
@@ -329,6 +426,7 @@ export default function HoseDetailsPage({
 					<HoseActionsDropdown
 						selectedCount={1}
 						isAddingToCart={isAddingToCart}
+						disableAddToCart={isDirectPurchaseBlocked}
 						onAddToCart={handleAddToCart}
 						onContactSupport={() => console.log("Contact support")}
 						onReportReplacement={() => console.log("Report replacement")}
