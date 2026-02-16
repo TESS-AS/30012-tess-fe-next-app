@@ -18,6 +18,12 @@ export interface ProfileUser {
 	defaultWarehouseNumber: string;
 	punchout: boolean;
 	role: string;
+	/**
+	 * From user endpoint. Drives banner under header:
+	 * - false = red banner (Vi kobler nå kontoen din...)
+	 * - true = green banner (Kontoen din er nå koblet...)
+	 */
+	userstate?: boolean;
 }
 
 export interface UserAddress {

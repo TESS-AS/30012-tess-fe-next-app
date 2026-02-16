@@ -17,7 +17,60 @@
 		"browseOurTopCategories": "Bla gjennom våre toppkategorier",
 		"ourCategories": "Our categories",
 		"seeCategories": "See Categories",
-		"learnMore": "Learn More"
+		"learnMore": "Learn More",
+		"welcome": {
+			"titlePart1": "Welcome to",
+			"titlePart2": "TESSIX online store",
+			"intro": "You must be logged in to see prices, stock status and shop.",
+			"haveUser": "Do you already have a user?",
+			"logIn": "Log in",
+			"missingAccess": "Missing access?",
+			"createAccount": "Create new user account",
+			"needHelp": "Need help?",
+			"see": "See",
+			"faq": "frequently asked questions",
+			"orContactUs": "or contact us at"
+		}
+	},
+	"Onboarding": {
+		"title": "Welcome!",
+		"intro": "To get your contract prices, we need to know who you are trading with.",
+		"companySectionTitle": "Which company do you belong to?",
+		"companyLabel": "Company",
+		"companyPlaceholder": "Write your company",
+		"departmentLabel": "Your department (not mandatory)",
+		"departmentPlaceholder": "Write your department",
+		"orgSearchTitle": "Company search",
+		"notMandatory": "not mandatory",
+		"orgSearchHelper": "Org. no. helps us connect your account faster",
+		"orgNumberLabel": "Organization number",
+		"orgNumberPlaceholder": "Write organization number",
+		"orgNumberHint": "9 digits - fetches name and address automatically",
+		"orgNumberError": "Organization number must be 9 digits",
+		"orgSearchError": "Could not find company with this organization number",
+		"search": "Search",
+		"serviceCenterTitle": "Which TESS service center do you have a relationship with?",
+		"serviceCenterLabel": "Select TESS service center",
+		"serviceCenterPlaceholder": "Select service center",
+		"helpText": "Unsure? Get help on",
+		"helpTextOr": "or send e-mail to",
+		"submit": "Send",
+		"submitting": "Sending...",
+		"submitted": "Sent",
+		"submitSuccess": "Information sent!",
+		"submitSuccessMessage": "Your information has been sent to support. We will contact you soon.",
+		"submitError": "Could not submit information",
+		"submitErrorTitle": "Submission error"
+	},
+	"UserStateBanner": {
+		"connecting": {
+			"greeting": "Hello, {name}!",
+			"message": "We are now connecting your account to the company agreement. This gives you the correct prices automatically. You don't need to do anything. We will notify you here when everything is ready. Browse our product range while you wait."
+		},
+		"updated": {
+			"title": "Account is updated",
+			"message": "Your account is now linked to your company agreement. You have access to your prices and can order goods."
+		}
 	},
 	"Products": {
 		"noProducts": "Ingen produkter funnet"

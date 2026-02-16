@@ -1,8 +1,10 @@
 "use client";
 
-import { ReactNode, useEffect } from "react";
+import React, { ReactNode, useEffect, useMemo } from "react";
 
 import Header from "@/components/layouts/Header/Header";
+import { OnboardingModal } from "@/components/ui/dialogs/onboarding-modal";
+import { UserStateBanner } from "@/components/user-state-banner";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { cn } from "@/lib/utils";
 import { useNavMenuStore } from "@/stores/useNavMenuStore";
@@ -11,11 +13,28 @@ import { usePathname } from "next/navigation";
 export default function Main({ children }: { children?: ReactNode }) {
 	const pathname = usePathname();
 	const { isOpen, setIsOpen } = useNavMenuStore();
-	const { data: profile } = useGetProfileData();
+	const { data: profile, isLoading } = useGetProfileData();
+	const [onboardingCompleted, setOnboardingCompleted] = React.useState(false);
 
 	useEffect(() => {
 		setIsOpen(false);
 	}, [pathname, setIsOpen]);
+
+	// Check if user is new and needs onboarding
+	// A new user is someone whose orgNumbers only contains "default" or is empty
+	// Backend will eventually provide a flag to determine if onboarding is needed
+	const isNewUser = useMemo(() => {
+		if (!profile || isLoading) return false;
+		if (onboardingCompleted) return false;
+
+		const orgNumbers = profile.orgNumbers || [];
+		// Check if orgNumbers is empty or only contains "default"
+		const hasOnlyDefault =
+			orgNumbers.length === 0 ||
+			(orgNumbers.length === 1 && orgNumbers[0] === "default");
+
+		return hasOnlyDefault;
+	}, [profile, isLoading, onboardingCompleted]);
 
 	// Fixed 182px to prevent CLS when profile loads (header always reserves 182px)
 	const headerHeight = 182;
@@ -24,6 +43,7 @@ export default function Main({ children }: { children?: ReactNode }) {
 		<div className="relative flex flex-1 flex-col min-md:overflow-hidden">
 			<div className="relative z-50">
 				<Header profile={profile} />
+				<UserStateBanner />
 			</div>
 			<div
 				className={cn(
@@ -34,6 +54,13 @@ export default function Main({ children }: { children?: ReactNode }) {
 				style={{ height: `calc(100vh - ${headerHeight}px)` }}>
 				<div className="container mx-auto">{children}</div>
 			</div>
+			{/* Onboarding modal for new users - blocks UI until submitted */}
+			<OnboardingModal
+				isOpen={isNewUser}
+				onClose={() => {
+					setOnboardingCompleted(true);
+				}}
+			/>
 		</div>
 	);
 }
