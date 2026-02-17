@@ -53,6 +53,7 @@ export default function CustomerNumberSwitcher({
 	const [defaultCustomerNumber, setDefaultCustomerNumber] = useState("");
 	const [isSaving, setIsSaving] = useState(false);
 	const previousCompanyRef = useRef<string>("");
+	const companyInitializedRef = useRef<boolean>(false);
 
 	const missingRequiredDefaults =
 		!profile?.defaultCompanyNumber ||
@@ -102,16 +103,21 @@ export default function CustomerNumberSwitcher({
 			}
 		}
 
+		// Initialize company selection - only on first load
 		if (
 			companies.length &&
-			!selectedCompanyNumber &&
-			profile?.defaultCompanyNumber
+			profile?.defaultCompanyNumber &&
+			!companyInitializedRef.current &&
+			!selectedCompanyNumber
 		) {
+			// Compare both as numbers to handle leading zeros (e.g., "03" vs 3)
+			const defaultCompanyNum = Number(profile.defaultCompanyNumber);
 			const match = companies.find(
-				(c) => String(c.companyNumber) === String(profile.defaultCompanyNumber),
+				(c) => Number(c.companyNumber) === defaultCompanyNum,
 			);
 			if (match) {
 				setSelectedCompanyNumber(String(match.companyNumber));
+				companyInitializedRef.current = true;
 			}
 		}
 	}, [
@@ -131,13 +137,31 @@ export default function CustomerNumberSwitcher({
 		}
 	}, [profile?.defaultCompanyNumber]);
 
+	// Initialize company selection when companies load (separate effect for reliability)
+	useEffect(() => {
+		if (!companies.length || !profile?.defaultCompanyNumber || companyInitializedRef.current) return;
+		
+		// Only set on initial load if not already set
+		if (!selectedCompanyNumber) {
+			// Compare both as numbers to handle leading zeros (e.g., "03" vs 3)
+			const defaultCompanyNum = Number(profile.defaultCompanyNumber);
+			const match = companies.find(
+				(c) => Number(c.companyNumber) === defaultCompanyNum,
+			);
+			if (match) {
+				setSelectedCompanyNumber(String(match.companyNumber));
+				companyInitializedRef.current = true;
+			}
+		}
+	}, [companies, profile?.defaultCompanyNumber, selectedCompanyNumber]);
+
 	// Set initial warehouse when warehouses first load (only if company matches profile default)
 	useEffect(() => {
 		if (!warehouses.length || selectedWarehouse) return;
 
-		// Only auto-select if company matches profile default (initial load)
+		// Check if we're using the default company (either selectedCompanyNumber matches default, or it's empty and we use profile default)
 		const currentCompanyMatchesDefault =
-			selectedCompanyNumber &&
+			!selectedCompanyNumber ||
 			String(selectedCompanyNumber) === String(profile?.defaultCompanyNumber);
 
 		if (currentCompanyMatchesDefault && profile?.defaultWarehouseNumber) {
