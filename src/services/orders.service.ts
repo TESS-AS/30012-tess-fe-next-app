@@ -147,7 +147,7 @@ export async function getUserOrders(
 export async function getOpenConfirmations(): Promise<OpenConfirmationsResponse> {
 	try {
 		const response = await axiosInstance.get<OpenConfirmationsResponse>(
-			"/OrderConfirmation/openConfirmations",
+			"/edi/order/openOrders",
 		);
 		return response.data;
 	} catch (error) {
