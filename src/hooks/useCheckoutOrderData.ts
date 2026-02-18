@@ -36,11 +36,7 @@ export function useCheckoutOrderData(
 	useEffect(() => {
 		if (!companyNumber || !warehouseNumber || !userId) return;
 
-		const companyCode = companyNumber
-			? Number(companyNumber) < 10
-				? `0${companyNumber}`
-				: companyNumber.toString()
-			: "";
+		const companyCode = companyNumber ? String(companyNumber).trim() : "";
 
 		let salesOrderLines: OrderLines[] = [];
 		let lineCounter = 1;
