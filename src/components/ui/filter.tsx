@@ -96,6 +96,7 @@ export const Filter = React.forwardRef<
 			onFilterChange,
 			selectedFilters: externalSelectedFilters = {},
 			categoryNumber,
+			categoryName,
 			language,
 			categoryFilters,
 			handleCategoryChange,

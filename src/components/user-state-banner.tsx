@@ -1,23 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+const DISMISSED_STORAGE_KEY = "userStateBannerDismissed";
+
 export function UserStateBanner() {
 	const t = useTranslations("UserStateBanner");
 	const { data: profile } = useGetProfileData();
-	const [dismissed, setDismissed] = useState(false);
+	const [dismissed, setDismissed] = useState<string | null>(null);
 
 	const userstate = profile?.userstate;
-	const showConnected = userstate === "connected" && !dismissed;
-	const showOnboarding = userstate === "onboarding" && !dismissed;
+
+	// Load dismissed state from localStorage on mount
+	useEffect(() => {
+		if (typeof window !== "undefined" && userstate) {
+			const dismissedState = localStorage.getItem(`${DISMISSED_STORAGE_KEY}_${userstate}`);
+			if (dismissedState === "true") {
+				setDismissed(userstate);
+			}
+		}
+	}, [userstate]);
 
 	const handleDismiss = () => {
-		setDismissed(true);
+		if (userstate && typeof window !== "undefined") {
+			localStorage.setItem(`${DISMISSED_STORAGE_KEY}_${userstate}`, "true");
+			setDismissed(userstate);
+		}
 	};
+
+	const showConnected = userstate === "connected" && dismissed !== "connected";
+	const showOnboarding = userstate === "onboarding" && dismissed !== "onboarding";
 
 	// Debug: log the userstate to help troubleshoot
 	if (typeof window !== "undefined" && userstate) {
