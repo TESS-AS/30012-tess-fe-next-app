@@ -354,9 +354,7 @@ export default function OrderSummary({
 							variant="link"
 							className="mt-2 w-full hover:no-underline"
 							disabled={
-								isCartEmpty ||
-								isCheckoutLoading ||
-								(!acceptedTerms && currentStep === 2)
+								isCheckoutLoading || (!acceptedTerms && currentStep === 2)
 							}
 							onClick={async () => {
 								if (isTessEmployee && requisitionSaved) {

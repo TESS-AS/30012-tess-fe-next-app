@@ -170,8 +170,15 @@ export function HosesAndEquipments({
 
 	// Keep a ref to always have the latest transformed assets
 	const transformedAssetsRef = useRef(transformedAssets);
+	const assetsByHexagonIdRef = useRef(
+		new Map<string, Pick<HoseOrder, "ecom">>(),
+	);
 	useEffect(() => {
 		transformedAssetsRef.current = transformedAssets;
+		for (const asset of transformedAssets) {
+			if (!asset?.hexagonId) continue;
+			assetsByHexagonIdRef.current.set(asset.hexagonId, { ecom: asset.ecom });
+		}
 	}, [transformedAssets]);
 
 	const isRowSelected = (hexagonId: string) => {
@@ -179,24 +186,23 @@ export function HosesAndEquipments({
 		return selectedRows.includes(hexagonId);
 	};
 
+	const isEcomBlocked = (row: HoseOrder) => Number(row.ecom) === 3;
+
 	const selectedCount = allAcrossPages
 		? Math.max(0, (pagination?.totalItems ?? 0) - deselectedIds.size)
 		: selectedRows.length;
 
-	const selectedItems = useMemo(() => {
-		const set = new Set(selectedRows);
-		return transformedAssets.filter((a) =>
-			allAcrossPages ? !deselectedIds.has(a.hexagonId) : set.has(a.hexagonId),
-		);
-	}, [selectedRows, transformedAssets, allAcrossPages, deselectedIds]);
-
 	const allSelectedOnPage = useMemo(() => {
 		if (!transformedAssets.length) return false;
+		const purchasableAssets = transformedAssets.filter(
+			(a) => !isEcomBlocked(a),
+		);
+		if (purchasableAssets.length === 0) return false;
 		if (allAcrossPages) {
-			return transformedAssets.every((a) => !deselectedIds.has(a.hexagonId));
+			return purchasableAssets.every((a) => !deselectedIds.has(a.hexagonId));
 		}
 		const set = new Set(selectedRows);
-		return transformedAssets.every((a) => set.has(a.hexagonId));
+		return purchasableAssets.every((a) => set.has(a.hexagonId));
 	}, [transformedAssets, selectedRows, allAcrossPages, deselectedIds]);
 
 	const allSelectedGlobally = allAcrossPages && selectedCount > 0;
@@ -251,7 +257,9 @@ export function HosesAndEquipments({
 
 	const handleSelectAllOnPage = () => {
 		const currentAssets = transformedAssetsRef.current;
-		const ids = currentAssets.map((a) => a.hexagonId);
+		const ids = currentAssets
+			.filter((a) => !isEcomBlocked(a))
+			.map((a) => a.hexagonId);
 
 		if (ids.length === 0) {
 			return;
@@ -311,14 +319,18 @@ export function HosesAndEquipments({
 				setIsAddingToCart(true);
 				try {
 					const currentAssets = transformedAssetsRef.current;
-					const selectedAssetRows = allAcrossPages
-						? currentAssets.filter((a) => !deselectedIds.has(a.hexagonId))
-						: currentAssets.filter((a) => selectedRows.includes(a.hexagonId));
+					const selectedAssets: Array<Pick<HoseOrder, "hexagonId" | "ecom">> =
+						allAcrossPages
+							? currentAssets.filter((a) => !deselectedIds.has(a.hexagonId))
+							: selectedRows.map((hexagonId) => {
+									const meta = assetsByHexagonIdRef.current.get(hexagonId);
+									return { hexagonId, ecom: meta?.ecom };
+								});
 
-					const unavailable = selectedAssetRows
+					const unavailable = selectedAssets
 						.filter((a) => Number(a.ecom) === 3)
 						.map((a) => a.hexagonId);
-					const available = selectedAssetRows
+					const available = selectedAssets
 						.filter((a) => Number(a.ecom) !== 3)
 						.map((a) => a.hexagonId);
 
@@ -519,8 +531,10 @@ export function HosesAndEquipments({
 			cell: (order: HoseOrder) => (
 				<Checkbox
 					onClick={(e) => e.stopPropagation()}
+					disabled={isEcomBlocked(order)}
 					checked={isRowSelected(order.hexagonId)}
 					onCheckedChange={(val) => {
+						if (isEcomBlocked(order)) return;
 						handleSelectRow(order.hexagonId, val);
 					}}
 				/>
@@ -834,6 +848,7 @@ export function HosesAndEquipments({
 						isLoading={loading}
 						selectedIds={selectedRows}
 						selectedRowBgClass="bg-[#DCF7E0]"
+						isRowDisabled={(row) => Number(row.ecom) === 3}
 						onHoseClick={(hoseId) => {
 							if (typeof window !== "undefined") {
 								window.localStorage.setItem(
