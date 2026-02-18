@@ -54,12 +54,14 @@ interface DataTableProps<T> {
 	selectedIds?: string[];
 	selectedRowBgClass?: string;
 	onHoseClick?: (hoseId: string) => void;
+	isRowDisabled?: (item: T) => boolean;
 }
 
 export function DataTable<
 	T extends {
 		hexagonId?: string;
 		orderId: string;
+		ecom?: number | boolean;
 	},
 >({
 	onOrderClick,
@@ -82,6 +84,7 @@ export function DataTable<
 	selectedIds = [],
 	selectedRowBgClass = "bg-[#E6F7EA]",
 	onHoseClick,
+	isRowDisabled,
 }: DataTableProps<T>) {
 	const [expandedRows, setExpandedRows] = useState<number[]>([]);
 	const safeColumns = useMemo(
@@ -197,112 +200,123 @@ export function DataTable<
 											</td>
 										</tr>
 									) : (
-										data.map((item, index) => (
-											<React.Fragment key={index}>
-											<tr
-												onClick={() => {
-													if (onHoseClick && item?.hexagonId) {
-														onHoseClick(item.hexagonId);
-													} else if (onOrderClick) {
-														onOrderClick(item.orderId);
-													}
-												}}
-												className={cn(
-													"group border-b border-[#C1C4C2] transition-colors duration-200",
-													isSelected(item.orderId)
-														? selectedRowBgClass
-														: "hover:bg-[#F8F9F8]",
-													(onHoseClick || onOrderClick) && "cursor-pointer",
-												)}>
-													{isExpandable && (
-														<td className="w-10 px-4 py-4">
-															<Button
-																variant="ghost"
-																size="sm"
-																className="h-6 w-6 p-0 transition-all duration-200"
-																onClick={() => {
-																	setExpandedRows((prev) =>
-																		prev.includes(index)
-																			? prev.filter((i) => i !== index)
-																			: [...prev, index],
-																	);
-																}}>
-																<ChevronDown
-																	className={cn(
-																		"h-4 w-4 transition-transform duration-200",
-																		expandedRows.includes(index)
-																			? "rotate-180 text-[#1C6D2C]"
-																			: "",
-																	)}
-																/>
-															</Button>
-														</td>
-													)}
-
-													{safeColumns.map((column) => (
-														<td
-															key={column.key}
-															className={cn(
-																"px-4 py-4 font-medium text-[#0F1912]",
-																column.key === "action" &&
-																	"sticky right-0 bg-inherit",
-															)}>
-															{column.cell(item)}
-														</td>
-													))}
-
-													{isDropdownColumn && (
-														<td className="sticky right-0 bg-white px-4 py-4 text-right group-hover:bg-[#F8F9F8]">
-															<DropdownMenu>
-																<DropdownMenuTrigger asChild>
-																	<Button
-																		variant="ghost"
-																		className="h-8 w-8 p-0 text-[#5A615D] hover:text-[#0F1912]">
-																		<MoreVertical className="h-4 w-4" />
-																	</Button>
-																</DropdownMenuTrigger>
-																<DropdownMenuContent
-																	align="end"
-																	className="w-[200px]">
-																	<DropdownMenuItem
-																		className="flex items-center gap-3 text-xs"
-																		onClick={() =>
-																			onOrderClick?.(item.orderId)
-																		}>
-																		<Eye className="h-4 w-4" />
-																		<span>Vis ordre</span>
-																	</DropdownMenuItem>
-																	<DropdownMenuItem className="flex items-center gap-3 text-xs">
-																		<ShoppingCart className="h-4 w-4" />
-																		<span>Legg til varer i ny handlekurv</span>
-																	</DropdownMenuItem>
-																	<DropdownMenuItem className="flex items-center gap-3 text-xs">
-																		<Truck className="h-4 w-4" />
-																		<span>Spor bestillingen</span>
-																	</DropdownMenuItem>
-																	<DropdownMenuItem className="flex items-center gap-3 text-xs">
-																		<CircleX className="h-4 w-4" />
-																		<span>Kanseller bestilling</span>
-																	</DropdownMenuItem>
-																</DropdownMenuContent>
-															</DropdownMenu>
-														</td>
-													)}
-												</tr>
-
-												{isExpandable &&
-													expandedRows.includes(index) &&
-													expandableContent && (
-														<tr className="animate-in fade-in-0 zoom-in-95 border-b border-[#C1C4C2] bg-[#F3FAF7] duration-200">
-															<td
-																colSpan={safeColumns.length + 2}
-																className="border-t border-[#E5E7E6] py-6 pl-16">
-																{expandableContent(item)}
+										data.map((item, index) => {
+											const disabled = isRowDisabled?.(item) ?? false;
+											return (
+												<React.Fragment key={index}>
+													<tr
+														onClick={() => {
+															if (disabled) return;
+															if (onHoseClick && item?.hexagonId) {
+																onHoseClick(item.hexagonId);
+															} else if (onOrderClick) {
+																onOrderClick(item.orderId);
+															}
+														}}
+														className={cn(
+															"group border-b border-[#C1C4C2] transition-colors duration-200",
+															disabled
+																? "bg-[#F8F9F8] opacity-60"
+																: isSelected(item.orderId)
+																	? selectedRowBgClass
+																	: "hover:bg-[#F8F9F8]",
+															!disabled &&
+																(onHoseClick || onOrderClick) &&
+																"cursor-pointer",
+															disabled && "cursor-not-allowed",
+														)}>
+														{isExpandable && (
+															<td className="w-10 px-4 py-4">
+																<Button
+																	variant="ghost"
+																	size="sm"
+																	className="h-6 w-6 p-0 transition-all duration-200"
+																	onClick={() => {
+																		setExpandedRows((prev) =>
+																			prev.includes(index)
+																				? prev.filter((i) => i !== index)
+																				: [...prev, index],
+																		);
+																	}}>
+																	<ChevronDown
+																		className={cn(
+																			"h-4 w-4 transition-transform duration-200",
+																			expandedRows.includes(index)
+																				? "rotate-180 text-[#1C6D2C]"
+																				: "",
+																		)}
+																	/>
+																</Button>
 															</td>
-														</tr>
-													)}
-											</React.Fragment>
-										))
+														)}
+
+														{safeColumns.map((column) => (
+															<td
+																key={column.key}
+																className={cn(
+																	"px-4 py-4 font-medium text-[#0F1912]",
+																	column.key === "action" &&
+																		"sticky right-0 bg-inherit",
+																)}>
+																{column.cell(item)}
+															</td>
+														))}
+
+														{isDropdownColumn && (
+															<td className="sticky right-0 bg-white px-4 py-4 text-right group-hover:bg-[#F8F9F8]">
+																<DropdownMenu>
+																	<DropdownMenuTrigger asChild>
+																		<Button
+																			variant="ghost"
+																			className="h-8 w-8 p-0 text-[#5A615D] hover:text-[#0F1912]">
+																			<MoreVertical className="h-4 w-4" />
+																		</Button>
+																	</DropdownMenuTrigger>
+																	<DropdownMenuContent
+																		align="end"
+																		className="w-[200px]">
+																		<DropdownMenuItem
+																			className="flex items-center gap-3 text-xs"
+																			onClick={() =>
+																				onOrderClick?.(item.orderId)
+																			}>
+																			<Eye className="h-4 w-4" />
+																			<span>Vis ordre</span>
+																		</DropdownMenuItem>
+																		<DropdownMenuItem className="flex items-center gap-3 text-xs">
+																			<ShoppingCart className="h-4 w-4" />
+																			<span>
+																				Legg til varer i ny handlekurv
+																			</span>
+																		</DropdownMenuItem>
+																		<DropdownMenuItem className="flex items-center gap-3 text-xs">
+																			<Truck className="h-4 w-4" />
+																			<span>Spor bestillingen</span>
+																		</DropdownMenuItem>
+																		<DropdownMenuItem className="flex items-center gap-3 text-xs">
+																			<CircleX className="h-4 w-4" />
+																			<span>Kanseller bestilling</span>
+																		</DropdownMenuItem>
+																	</DropdownMenuContent>
+																</DropdownMenu>
+															</td>
+														)}
+													</tr>
+
+													{isExpandable &&
+														expandedRows.includes(index) &&
+														expandableContent && (
+															<tr className="animate-in fade-in-0 zoom-in-95 border-b border-[#C1C4C2] bg-[#F3FAF7] duration-200">
+																<td
+																	colSpan={safeColumns.length + 2}
+																	className="border-t border-[#E5E7E6] py-6 pl-16">
+																	{expandableContent(item)}
+																</td>
+															</tr>
+														)}
+												</React.Fragment>
+											);
+										})
 									)}
 								</tbody>
 							</>
