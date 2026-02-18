@@ -198,7 +198,10 @@ export function ProductInfo({
 		const warehouseMap = new Map();
 
 		inventory
-			.filter((inv: any) => inv.balance > 0)
+			.filter((inv: any) => 
+				inv.balance > 0 && 
+				Number(inv.companyNumber) === Number(profile?.defaultCompanyNumber)
+			)
 			.forEach((inv: any) => {
 				const key = inv.warehouseId;
 				if (warehouseMap.has(key)) {
@@ -218,7 +221,7 @@ export function ProductInfo({
 		return Array.from(warehouseMap.values())
 			.slice(0, 50)
 			.sort((a: any, b: any) => b.balance - a.balance);
-	}, [selectedItemNumber, columnAttributes, t]);
+	}, [selectedItemNumber, columnAttributes, profile?.defaultCompanyNumber, locale]);
 
 	// Get warehouse info for selected warehouse
 	const getWarehouseInfo = () => {

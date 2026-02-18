@@ -94,7 +94,7 @@ export function ProductVariantInfo({
 			warehouseInfo = inventory.find(
 				(inv: any) => 
 					inv.warehouseNumber === defaultWarehouseNumber &&
-					inv.companyNumber === defaultCompanyNumber,
+					Number(inv.companyNumber) === Number(defaultCompanyNumber),
 			);
 		}
 
