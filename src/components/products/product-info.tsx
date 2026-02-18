@@ -190,37 +190,50 @@ export function ProductInfo({
 		? `https://app.ecoonline.com/ecosuite/applic/shoplink/shoplink.php?msdsCid=1000435&applicationID=9&msdsLang=1&viewForm=pdf&msdsEr=${currentItemNumber}`
 		: "";
 
-	// Get warehouse options similar to product variant table
+	// Get warehouse options: same as product-variant-table (company fallback, allow 0 balance, dedupe by warehouseId)
 	const warehouseOptions = useMemo(() => {
 		if (!selectedItemNumber || !columnAttributes) return [];
+		const variantData = columnAttributes[selectedItemNumber] ?? columnAttributes[String(selectedItemNumber)];
+		const inventory = variantData?.inventory || [];
 
-		const inventory = columnAttributes[selectedItemNumber]?.inventory || [];
-		const warehouseMap = new Map();
+		let filtered = inventory;
+		if (profile?.defaultCompanyNumber) {
+			const byCompany = inventory.filter(
+				(inv: any) => Number(inv.companyNumber) === Number(profile.defaultCompanyNumber)
+			);
+			if (byCompany.length > 0) filtered = byCompany;
+		}
 
-		inventory
-			.filter((inv: any) => 
-				inv.balance > 0 && 
-				Number(inv.companyNumber) === Number(profile?.defaultCompanyNumber)
-			)
-			.forEach((inv: any) => {
-				const key = inv.warehouseId;
-				if (warehouseMap.has(key)) {
-					const existing = warehouseMap.get(key);
-					existing.balance += inv.balance;
-				} else {
-					warehouseMap.set(key, {
-						warehouseId: inv.warehouseId,
-						warehouseName:
-							inv.warehouseName ||
-							`${locale === "no" ? "Lager" : "Warehouse"} ${inv.warehouseId}`,
-						balance: inv.balance,
-					});
-				}
-			});
-
-		return Array.from(warehouseMap.values())
-			.slice(0, 50)
+		const withBalance = filtered
+			.filter((inv: any) => inv.balance > 0)
+			.map((inv: any) => ({
+				warehouseId: inv.warehouseId,
+				warehouseName:
+					inv.warehouseName ||
+					`${locale === "no" ? "Lager" : "Warehouse"} ${inv.warehouseId}`,
+				balance: inv.balance,
+			}))
 			.sort((a: any, b: any) => b.balance - a.balance);
+		const withZero = filtered
+			.filter((inv: any) => inv.balance === 0)
+			.map((inv: any) => ({
+				warehouseId: inv.warehouseId,
+				warehouseName:
+					inv.warehouseName ||
+					`${locale === "no" ? "Lager" : "Warehouse"} ${inv.warehouseId}`,
+				balance: inv.balance,
+			}))
+			.sort((a: any, b: any) => a.warehouseId - b.warehouseId);
+
+		const combined = [...withBalance, ...withZero];
+		const seen = new Set<number>();
+		return combined
+			.filter((w: { warehouseId: number }) => {
+				if (seen.has(w.warehouseId)) return false;
+				seen.add(w.warehouseId);
+				return true;
+			})
+			.slice(0, 50);
 	}, [selectedItemNumber, columnAttributes, profile?.defaultCompanyNumber, locale]);
 
 	// Get warehouse info for selected warehouse
@@ -228,7 +241,8 @@ export function ProductInfo({
 		if (!selectedItemNumber || !columnAttributes) return null;
 		if (!selectedWarehouse && !profile?.defaultWarehouseNumber) return null;
 
-		const inventory = columnAttributes[selectedItemNumber]?.inventory || [];
+		const variantData = columnAttributes[selectedItemNumber] ?? columnAttributes[String(selectedItemNumber)];
+		const inventory = variantData?.inventory || [];
 		
 		let warehouseInfo;
 		
@@ -270,6 +284,23 @@ export function ProductInfo({
 	// For warehouse selection dropdown display
 	const warehouseNumber = selectedWarehouse || profile?.defaultWarehouseNumber;
 
+	// Normalize Select value to match an option (options use warehouseId.toString())
+	const selectValue = useMemo(() => {
+		if (!warehouseNumber || warehouseOptions.length === 0) return "";
+		const optionValues = warehouseOptions.map((w: { warehouseId: number }) => w.warehouseId.toString());
+		if (optionValues.includes(warehouseNumber)) return warehouseNumber;
+		const variantData = selectedItemNumber && columnAttributes
+			? (columnAttributes[selectedItemNumber] ?? columnAttributes[String(selectedItemNumber)])
+			: null;
+		const inventory = variantData?.inventory || [];
+		const inv = inventory.find(
+			(inv: any) =>
+				inv.warehouseId?.toString() === warehouseNumber ||
+				inv.warehouseNumber === warehouseNumber
+		);
+		return inv ? inv.warehouseId.toString() : warehouseOptions[0].warehouseId.toString();
+	}, [warehouseNumber, warehouseOptions, selectedItemNumber, columnAttributes]);
+
 	// Get unit (enhet) for the selected item
 	const getUnit = () => {
 		if (!selectedItemNumber || !columnAttributes) return "STK";
@@ -299,6 +330,17 @@ export function ProductInfo({
 	};
 
 	const unit = getUnit();
+
+	// Label for trigger: when we have a valid selection, show that option's label (never "Ingen lager")
+	const selectedOption = selectValue
+		? warehouseOptions.find((w: { warehouseId: number }) => w.warehouseId.toString() === selectValue)
+		: null;
+	const warehouseTriggerLabel =
+		selectedOption
+			? `${selectedOption.balance} ${unit} på ${selectedOption.warehouseName}`
+			: warehouseOptions.length === 0
+				? "Ingen lager"
+				: "Velg lager";
 
 	// Always reset active tab to "attributes" when component mounts
 	useEffect(() => {
@@ -672,7 +714,7 @@ export function ProductInfo({
 
 						{/* Warehouse selection */}
 						<Select
-							value={warehouseNumber || ""}
+							value={selectValue}
 							onValueChange={async (value) => {
 								if (selectedItemNumber) {
 									onWarehouseChange?.(selectedItemNumber, value);
@@ -705,16 +747,10 @@ export function ProductInfo({
 							}}>
 							<SelectTrigger className="w-auto border-0 bg-transparent p-0 shadow-none outline-none">
 								<div className="flex items-center gap-1">
-									{selectedWarehouseBalance > 0 && warehouseNumber && (
+									{selectedOption && selectedOption.balance > 0 && (
 										<CheckCircle className="h-4 w-4 text-green-800" />
 									)}
-									<SelectValue>
-										{warehouseOptions.length === 0
-											? "Ingen lager"
-											: selectedWarehouseBalance > 0 && warehouseNumber
-												? `${selectedWarehouseBalance} ${unit} på ${selectedWarehouseName}`
-												: "Velg lager"}
-									</SelectValue>
+									<SelectValue>{warehouseTriggerLabel}</SelectValue>
 								</div>
 							</SelectTrigger>
 							<SelectContent className="max-h-[300px] overflow-y-auto">

@@ -212,7 +212,7 @@ export default function ProductVariantTable({
 		return orderedNames;
 	}, [variantsWithWarehouses, columnAttributes, isSapCustomer]);
 
-	const getWarehouseOptions = useMemo(() => {
+		const getWarehouseOptions = useMemo(() => {
 		const optionsMap: Record<
 			number,
 			Array<{ warehouseId: number; warehouseName: string; balance: number }>
@@ -221,13 +221,25 @@ export default function ProductVariantTable({
 		variantsWithWarehouses.forEach((variant) => {
 			const inventory = columnAttributes?.[variant.itemNumber]?.inventory || [];
 
-			// Filter by company number and positive balance only
+			// First try to filter by company number if available (allow warehouses with 0 balance)
 			// Compare as numbers to handle string/number type differences (e.g., "03" vs 3)
-			const warehouseOptions = inventory
-				.filter((inv: any) => 
-					inv.balance > 0 && 
-					Number(inv.companyNumber) === Number(profile?.defaultCompanyNumber)
-				)
+			let filteredInventory = inventory;
+			if (profile?.defaultCompanyNumber) {
+				const companyFiltered = inventory.filter((inv: any) => 
+					Number(inv.companyNumber) === Number(profile.defaultCompanyNumber)
+				);
+				// If we have matches for the company, use them; otherwise show all warehouses
+				if (companyFiltered.length > 0) {
+					filteredInventory = companyFiltered;
+				}
+			}
+
+			// Separate warehouses with balance > 0 and balance = 0
+			const warehousesWithBalance = filteredInventory.filter((inv: any) => inv.balance > 0);
+			const warehousesWithZeroBalance = filteredInventory.filter((inv: any) => inv.balance === 0);
+
+			// Map and sort warehouses with balance (descending)
+			const warehousesWithBalanceOptions = warehousesWithBalance
 				.map((inv: any) => ({
 					warehouseId: inv.warehouseId,
 					warehouseName:
@@ -235,14 +247,39 @@ export default function ProductVariantTable({
 						`${t("Product.warehouses")} ${inv.warehouseId}`,
 					balance: inv.balance,
 				}))
-				.slice(0, 50)
 				.sort((a: any, b: any) => b.balance - a.balance);
+
+			// Map warehouses with 0 balance (always show all options)
+			const warehousesWithZeroBalanceOptions = warehousesWithZeroBalance
+				.map((inv: any) => ({
+					warehouseId: inv.warehouseId,
+					warehouseName:
+						inv.warehouseName ||
+						`${t("Product.warehouses")} ${inv.warehouseId}`,
+					balance: inv.balance,
+				}))
+				.sort((a: any, b: any) => a.warehouseId - b.warehouseId); // Sort by warehouseId for consistency
+
+			// Combine: warehouses with balance first, then 0 balance. Dedupe by warehouseId
+			// so the same warehouse doesn't appear twice (would make both show as selected).
+			const combined = [
+				...warehousesWithBalanceOptions,
+				...warehousesWithZeroBalanceOptions
+			];
+			const seenIds = new Set<number>();
+			const warehouseOptions = combined
+				.filter((w: { warehouseId: number }) => {
+					if (seenIds.has(w.warehouseId)) return false;
+					seenIds.add(w.warehouseId);
+					return true;
+				})
+				.slice(0, 50);
 
 			optionsMap[variant.itemNumber] = warehouseOptions;
 		});
 
 		return optionsMap;
-	}, [variantsWithWarehouses, columnAttributes, profile?.defaultCompanyNumber]);
+	}, [variantsWithWarehouses, columnAttributes, profile?.defaultCompanyNumber, t]);
 
 	useEffect(() => {
 		if (!allAttributeNames?.length) return;
@@ -490,13 +527,25 @@ export default function ProductVariantTable({
 					const inventory =
 						columnAttributes?.[variant.itemNumber]?.inventory || [];
 					
-					// Filter for positive balance and matching company number, then sort
+					// First try to filter by company number if available (allow warehouses with 0 balance)
 					// Compare as numbers to handle string/number type differences (e.g., "03" vs 3)
-					const warehouseOptions = inventory
-						.filter((inv: any) => 
-							inv.balance > 0 && 
-							Number(inv.companyNumber) === Number(profile?.defaultCompanyNumber)
-						)
+					let filteredInventory = inventory;
+					if (profile?.defaultCompanyNumber) {
+						const companyFiltered = inventory.filter((inv: any) => 
+							Number(inv.companyNumber) === Number(profile.defaultCompanyNumber)
+						);
+						// If we have matches for the company, use them; otherwise show all warehouses
+						if (companyFiltered.length > 0) {
+							filteredInventory = companyFiltered;
+						}
+					}
+
+					// Separate warehouses with balance > 0 and balance = 0
+					const warehousesWithBalance = filteredInventory.filter((inv: any) => inv.balance > 0);
+					const warehousesWithZeroBalance = filteredInventory.filter((inv: any) => inv.balance === 0);
+
+					// Map and sort warehouses with balance (descending)
+					const warehousesWithBalanceOptions = warehousesWithBalance
 						.map((inv: any) => ({
 							warehouseId: inv.warehouseId,
 							warehouseName:
@@ -504,8 +553,33 @@ export default function ProductVariantTable({
 								`${t("Product.warehouses")} ${inv.warehouseId}`,
 							balance: inv.balance,
 						}))
-						.slice(0, 50)
 						.sort((a: any, b: any) => b.balance - a.balance);
+
+					// Map warehouses with 0 balance (always show all options)
+					const warehousesWithZeroBalanceOptions = warehousesWithZeroBalance
+						.map((inv: any) => ({
+							warehouseId: inv.warehouseId,
+							warehouseName:
+								inv.warehouseName ||
+								`${t("Product.warehouses")} ${inv.warehouseId}`,
+							balance: inv.balance,
+						}))
+						.sort((a: any, b: any) => a.warehouseId - b.warehouseId); // Sort by warehouseId for consistency
+
+					// Combine: warehouses with balance first, then 0 balance. Dedupe by warehouseId
+					// so the same warehouse doesn't appear twice (would make both show as selected).
+					const combined = [
+						...warehousesWithBalanceOptions,
+						...warehousesWithZeroBalanceOptions
+					];
+					const seenIds = new Set<number>();
+					const warehouseOptions = combined
+						.filter((w: { warehouseId: number }) => {
+							if (seenIds.has(w.warehouseId)) return false;
+							seenIds.add(w.warehouseId);
+							return true;
+						})
+						.slice(0, 50);
 
 					const warehouses = warehouseOptions.map((w: { warehouseId: { toString: () => any; }; warehouseName: any; balance: any; }) => ({
 						warehouseNumber: w.warehouseId.toString(),
@@ -513,25 +587,16 @@ export default function ProductVariantTable({
 						balance: w.balance,
 					}));
 
-					if (warehouses.length > 0) {
-						const firstWarehouse = warehouses[0].warehouseNumber;
+					if (warehouseOptions.length > 0) {
 						const variantKey = variant.itemNumber;
 
-						// Only initialize warehouse if not already initialized for this variant
 						if (!initializedWarehousesRef.current.has(variantKey)) {
+							const warehouseToPreselect = warehouseOptions[0].warehouseId.toString();
+							initializedWarehousesRef.current.add(variantKey);
 							setWarehouse((prev) => {
-								// Only set warehouse if not already set (to preserve user selection)
-								if (prev[variantKey]) {
-									initializedWarehousesRef.current.add(variantKey);
-									return prev; // Keep existing selection
-								}
-								// Queue the parent notification for later (after state update)
-								pendingWarehouseChangesRef.current.push([variantKey.toString(), firstWarehouse]);
-								initializedWarehousesRef.current.add(variantKey);
-								return {
-									...prev,
-									[variantKey]: firstWarehouse,
-								};
+								if (prev[variantKey]) return prev;
+								pendingWarehouseChangesRef.current.push([variantKey.toString(), warehouseToPreselect]);
+								return { ...prev, [variantKey]: warehouseToPreselect };
 							});
 						}
 					}
@@ -1067,20 +1132,7 @@ export default function ProductVariantTable({
 																					w.warehouseNumber ===
 																					selectedWarehouse,
 																			);
-																		if (
-																			!selectedWarehouseData?.balance &&
-																			selectedWarehouseData?.balance !== 0
-																		) {
-																			toast(
-																				t("Product.noBalanceForWarehouse"),
-																				{
-																					type: "warning",
-																					position: "bottom-right",
-																					autoClose: 2000,
-																				},
-																			);
-																			return;
-																		}
+																		// Allow adding to cart even if balance is 0
 
 																		setLoading((prev) => ({
 																			...prev,
