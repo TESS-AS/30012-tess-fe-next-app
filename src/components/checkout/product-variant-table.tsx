@@ -222,10 +222,11 @@ export default function ProductVariantTable({
 			const inventory = columnAttributes?.[variant.itemNumber]?.inventory || [];
 
 			// Filter by company number and positive balance only
+			// Compare as numbers to handle string/number type differences (e.g., "03" vs 3)
 			const warehouseOptions = inventory
 				.filter((inv: any) => 
 					inv.balance > 0 && 
-					inv.companyNumber === profile?.defaultCompanyNumber
+					Number(inv.companyNumber) === Number(profile?.defaultCompanyNumber)
 				)
 				.map((inv: any) => ({
 					warehouseId: inv.warehouseId,
@@ -490,10 +491,11 @@ export default function ProductVariantTable({
 						columnAttributes?.[variant.itemNumber]?.inventory || [];
 					
 					// Filter for positive balance and matching company number, then sort
+					// Compare as numbers to handle string/number type differences (e.g., "03" vs 3)
 					const warehouseOptions = inventory
 						.filter((inv: any) => 
 							inv.balance > 0 && 
-							inv.companyNumber === profile?.defaultCompanyNumber
+							Number(inv.companyNumber) === Number(profile?.defaultCompanyNumber)
 						)
 						.map((inv: any) => ({
 							warehouseId: inv.warehouseId,

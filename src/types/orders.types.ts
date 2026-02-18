@@ -98,14 +98,8 @@ export interface UserOrderResponse {
 export type OrderConfirmationStatus = "Venter godkjenning" | "Godkjent" | "Avvist";
 
 export interface OrderDifference {
-	openConfirmationId: number;
-	timestamp: string;
-	message: string;
-	status: number;
-	differences: Array<{
-		mismatches: Record<string, any>;
-		orderLineNumber: number;
-	}>;
+	mismatches: Record<string, any>;
+	orderLineNumber: number;
 }
 
 export interface OrderLine {
@@ -124,20 +118,56 @@ export interface OrderLine {
 	arrivalDate: string;
 }
 
+export interface OrderInputLine {
+	unit: string;
+	itemid: number;
+	lineSum: number;
+	netPrice: number;
+	quantity: number;
+	itemNumber: string;
+	lineStatus: number;
+	arrivalDate: string;
+	globalitemid: number | null;
+	shipmentDate: string;
+	supplieritemid: number;
+	orderLineNumber: number;
+	globalItemNumber: string | null;
+	supplierItemNumber: string;
+}
+
+export interface OrderInput {
+	lines: OrderInputLine[];
+	order: {
+		sum: number;
+		currency: string;
+		buyerName: string;
+		surcharge: number;
+		buyerNumber: string;
+		customerRef: string;
+		orderNumber: number;
+		supplierName: string;
+		createDateTime: string;
+		supplierNumber: string;
+		customerOrderRef: string;
+	};
+}
+
 export interface OpenOrderConfirmationRaw {
 	orderId: number;
+	timestamp: string;
+	message: string;
+	status: number;
 	orderNumber: number;
 	createDateTime: string;
 	customerOrderRef: string | null;
 	customerRef: string;
 	companyNumber: number;
 	warehouseNumber: string;
+	warehouseName: string;
 	sum: number;
 	shipperName: string | null;
 	shipperDescription: string;
-	paymentTermId: number;
 	paymentTermDescription: string;
-	deliveryTermId: number;
 	deliveryTermDescription: string;
 	currency: string;
 	buyerName: string;
@@ -146,7 +176,7 @@ export interface OpenOrderConfirmationRaw {
 	supplierNumber: string;
 	handler: string | null;
 	differences: OrderDifference[];
-	lines: OrderLine[];
+	input: OrderInput;
 }
 
 export interface OpenOrderConfirmation {
@@ -160,8 +190,6 @@ export interface OpenOrderConfirmation {
 
 export interface OpenConfirmationsResponse {
 	page: number;
-	pageSize: number;
-	totalOrders: number;
-	totalPages: number;
-	orders: OpenOrderConfirmationRaw[];
+	limit: number;
+	data: OpenOrderConfirmationRaw[];
 }

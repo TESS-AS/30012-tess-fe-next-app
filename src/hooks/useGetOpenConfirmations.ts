@@ -17,19 +17,14 @@ export const openConfirmationsKeys = {
 function transformOrderData(
 	rawOrder: OpenOrderConfirmationRaw,
 ): OpenOrderConfirmation {
-	// Count total differences across all difference entries
-	const totalDifferences = rawOrder.differences.reduce(
-		(acc, diff) => acc + (diff.differences?.length || 0),
-		0,
-	);
+	// Count total differences - now differences is a direct array
+	const totalDifferences = rawOrder.differences?.length || 0;
 
-	// Determine status based on differences
-	// If there are differences with status 400, it's "Venter godkjenning"
-	// For now, we'll use "Venter godkjenning" if there are any differences
-	// Note: The API doesn't provide explicit status, so we assume pending if differences exist
+	// Determine status based on differences and status field
+	// status 400 means "Differences found during comparison" = "Venter godkjenning"
 	let status: "Venter godkjenning" | "Godkjent" | "Avvist" =
 		"Venter godkjenning";
-	if (totalDifferences === 0) {
+	if (totalDifferences === 0 || rawOrder.status !== 400) {
 		status = "Godkjent";
 	}
 
@@ -44,13 +39,9 @@ function transformOrderData(
 		return `${day}.${month}.${year}, ${hours}:${minutes}`;
 	};
 
-	// Get the most recent difference timestamp for the date, or use createDateTime
-	const latestDifference = rawOrder.differences.sort(
-		(a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-	)[0];
-
-	const date = latestDifference
-		? formatDate(latestDifference.timestamp)
+	// Use timestamp field for the date, or fallback to createDateTime
+	const date = rawOrder.timestamp
+		? formatDate(rawOrder.timestamp)
 		: formatDate(rawOrder.createDateTime);
 
 	// Use supplierNumber as supplier identifier
@@ -63,7 +54,7 @@ function transformOrderData(
 		date,
 		deviation: totalDifferences,
 		status,
-		handled: null, // API doesn't provide this field
+		handled: rawOrder.handler || null,
 	};
 }
 
@@ -73,7 +64,8 @@ export function useGetOpenConfirmations(enabled: boolean = true) {
 		queryFn: async () => {
 			const response = await getOpenConfirmations();
 			// Transform the raw orders array to match component expectations
-			return (response.orders || []).map(transformOrderData);
+			// New API structure uses `data` instead of `orders`
+			return (response.data || []).map(transformOrderData);
 		},
 		enabled,
 		staleTime: 1000 * 60 * 5, // 5 minutes
