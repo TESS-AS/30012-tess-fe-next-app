@@ -209,13 +209,6 @@ export function ProductVariantInfo({
 
 		if (balance === null || balance === undefined) {
 			/* empty */
-		} else if (balance <= 0) {
-			toast(t("noBalanceForWarehouse"), {
-				type: "warning",
-				position: "bottom-right",
-				autoClose: 2000,
-			});
-			return;
 		}
 
 		setAdding(true);

@@ -193,13 +193,16 @@ export function ProductInfo({
 	// Get warehouse options: same as product-variant-table (company fallback, allow 0 balance, dedupe by warehouseId)
 	const warehouseOptions = useMemo(() => {
 		if (!selectedItemNumber || !columnAttributes) return [];
-		const variantData = columnAttributes[selectedItemNumber] ?? columnAttributes[String(selectedItemNumber)];
+		const variantData =
+			columnAttributes[selectedItemNumber] ??
+			columnAttributes[String(selectedItemNumber)];
 		const inventory = variantData?.inventory || [];
 
 		let filtered = inventory;
 		if (profile?.defaultCompanyNumber) {
 			const byCompany = inventory.filter(
-				(inv: any) => Number(inv.companyNumber) === Number(profile.defaultCompanyNumber)
+				(inv: any) =>
+					Number(inv.companyNumber) === Number(profile.defaultCompanyNumber),
 			);
 			if (byCompany.length > 0) filtered = byCompany;
 		}
@@ -234,28 +237,37 @@ export function ProductInfo({
 				return true;
 			})
 			.slice(0, 50);
-	}, [selectedItemNumber, columnAttributes, profile?.defaultCompanyNumber, locale]);
+	}, [
+		selectedItemNumber,
+		columnAttributes,
+		profile?.defaultCompanyNumber,
+		locale,
+	]);
 
 	// Get warehouse info for selected warehouse
 	const getWarehouseInfo = () => {
 		if (!selectedItemNumber || !columnAttributes) return null;
 		if (!selectedWarehouse && !profile?.defaultWarehouseNumber) return null;
 
-		const variantData = columnAttributes[selectedItemNumber] ?? columnAttributes[String(selectedItemNumber)];
+		const variantData =
+			columnAttributes[selectedItemNumber] ??
+			columnAttributes[String(selectedItemNumber)];
 		const inventory = variantData?.inventory || [];
-		
+
 		let warehouseInfo;
-		
+
 		if (selectedWarehouse) {
 			// selectedWarehouse from table is warehouseId (unique)
 			const warehouseId = parseInt(selectedWarehouse);
-			warehouseInfo = inventory.find((inv: any) => inv.warehouseId === warehouseId);
+			warehouseInfo = inventory.find(
+				(inv: any) => inv.warehouseId === warehouseId,
+			);
 		} else {
 			// profile default uses warehouseNumber + companyNumber (combination is unique)
 			const defaultWarehouseNumber = profile?.defaultWarehouseNumber;
 			const defaultCompanyNumber = profile?.defaultCompanyNumber;
 			warehouseInfo = inventory.find(
-				(inv: any) => 
+				(inv: any) =>
 					inv.warehouseNumber === defaultWarehouseNumber &&
 					inv.companyNumber === defaultCompanyNumber,
 			);
@@ -264,7 +276,8 @@ export function ProductInfo({
 		if (warehouseInfo) {
 			return {
 				balance: warehouseInfo.balance || 0,
-				warehouseName: warehouseInfo.warehouseName || `Lager ${warehouseInfo.warehouseId}`,
+				warehouseName:
+					warehouseInfo.warehouseName || `Lager ${warehouseInfo.warehouseId}`,
 			};
 		}
 
@@ -273,9 +286,7 @@ export function ProductInfo({
 
 	// Get warehouse info for selected warehouse (unique by warehouseId or warehouseNumber+companyNumber)
 	const warehouseInfo = getWarehouseInfo();
-	const selectedWarehouseBalance = warehouseInfo
-		? warehouseInfo.balance
-		: 0;
+	const selectedWarehouseBalance = warehouseInfo ? warehouseInfo.balance : 0;
 
 	const selectedWarehouseName = warehouseInfo
 		? warehouseInfo.warehouseName
@@ -287,18 +298,24 @@ export function ProductInfo({
 	// Normalize Select value to match an option (options use warehouseId.toString())
 	const selectValue = useMemo(() => {
 		if (!warehouseNumber || warehouseOptions.length === 0) return "";
-		const optionValues = warehouseOptions.map((w: { warehouseId: number }) => w.warehouseId.toString());
+		const optionValues = warehouseOptions.map((w: { warehouseId: number }) =>
+			w.warehouseId.toString(),
+		);
 		if (optionValues.includes(warehouseNumber)) return warehouseNumber;
-		const variantData = selectedItemNumber && columnAttributes
-			? (columnAttributes[selectedItemNumber] ?? columnAttributes[String(selectedItemNumber)])
-			: null;
+		const variantData =
+			selectedItemNumber && columnAttributes
+				? (columnAttributes[selectedItemNumber] ??
+					columnAttributes[String(selectedItemNumber)])
+				: null;
 		const inventory = variantData?.inventory || [];
 		const inv = inventory.find(
 			(inv: any) =>
 				inv.warehouseId?.toString() === warehouseNumber ||
-				inv.warehouseNumber === warehouseNumber
+				inv.warehouseNumber === warehouseNumber,
 		);
-		return inv ? inv.warehouseId.toString() : warehouseOptions[0].warehouseId.toString();
+		return inv
+			? inv.warehouseId.toString()
+			: warehouseOptions[0].warehouseId.toString();
 	}, [warehouseNumber, warehouseOptions, selectedItemNumber, columnAttributes]);
 
 	// Get unit (enhet) for the selected item
@@ -333,14 +350,16 @@ export function ProductInfo({
 
 	// Label for trigger: when we have a valid selection, show that option's label (never "Ingen lager")
 	const selectedOption = selectValue
-		? warehouseOptions.find((w: { warehouseId: number }) => w.warehouseId.toString() === selectValue)
+		? warehouseOptions.find(
+				(w: { warehouseId: number }) =>
+					w.warehouseId.toString() === selectValue,
+			)
 		: null;
-	const warehouseTriggerLabel =
-		selectedOption
-			? `${selectedOption.balance} ${unit} på ${selectedOption.warehouseName}`
-			: warehouseOptions.length === 0
-				? "Ingen lager"
-				: "Velg lager";
+	const warehouseTriggerLabel = selectedOption
+		? `${selectedOption.balance} ${unit} på ${selectedOption.warehouseName}`
+		: warehouseOptions.length === 0
+			? "Ingen lager"
+			: "Velg lager";
 
 	// Always reset active tab to "attributes" when component mounts
 	useEffect(() => {
@@ -407,18 +426,13 @@ export function ProductInfo({
 		const inventory = columnAttributes?.[selectedItemNumber]?.inventory ?? [];
 		const balance =
 			inventory.find(
-				(inv: any) => inv.warehouseNumber === warehouseNumber || inv.warehouseId?.toString() === warehouseNumber,
+				(inv: any) =>
+					inv.warehouseNumber === warehouseNumber ||
+					inv.warehouseId?.toString() === warehouseNumber,
 			)?.balance ?? null;
 
 		if (balance === null || balance === undefined) {
 			/* empty */
-		} else if (balance <= 0) {
-			toast(t("noBalanceForWarehouse"), {
-				type: "warning",
-				position: "bottom-right",
-				autoClose: 2000,
-			});
-			return;
 		}
 
 		setAdding(true);
@@ -577,8 +591,7 @@ export function ProductInfo({
 				// Map variants to PDF format
 				pdfVariants = itemVariants.map((v: any) => {
 					const variantItemNumber = v.itemNumber?.toString() || "";
-					const attrs =
-						columnAttributes?.[v.itemNumber]?.attributes || [];
+					const attrs = columnAttributes?.[v.itemNumber]?.attributes || [];
 
 					// Create attributes object from columnAttributes
 					const attributes: Record<string, string> = {};
@@ -603,7 +616,10 @@ export function ProductInfo({
 				gtin: gtin || null,
 				imageUrl,
 				application: application || "",
-				notes: columnAttributes?.productData?.remarksNo ?? columnAttributes?.productData?.remarksEn ?? "",
+				notes:
+					columnAttributes?.productData?.remarksNo ??
+					columnAttributes?.productData?.remarksEn ??
+					"",
 				specifications,
 				variants: pdfVariants,
 				visibleAttributeNames,
