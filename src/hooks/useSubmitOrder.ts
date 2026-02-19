@@ -32,7 +32,7 @@ export const useSubmitOrder = (
 
 			if (isExcelCustomer) {
 				const { blob, filename } = await excelOrderConfirmation(payload);
-				
+
 				// Create download link and trigger download
 				const url = window.URL.createObjectURL(blob);
 				const link = document.createElement("a");
@@ -48,7 +48,17 @@ export const useSubmitOrder = (
 				// await handleArchiveCart();
 				return null;
 			} else {
-				const response = await salesOrder(payload);
+				const updatedPayload = payload.salesOrderHeader.customerReference
+					? payload
+					: {
+							...payload,
+							salesOrderHeader: {
+								...payload.salesOrderHeader,
+								customerReference: `${profile?.firstName} ${profile?.lastName}`,
+							},
+						};
+
+				const response = await salesOrder(updatedPayload);
 
 				localStorage.removeItem("selectedHoseRows");
 

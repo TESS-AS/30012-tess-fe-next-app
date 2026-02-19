@@ -80,9 +80,11 @@ export default function CheckoutPage() {
 		profile?.punchout || false,
 		profile,
 		{
-			name: "999",
+			name: updatedAddress?.addressName || selectedAddress?.addressName || "",
 			addressLine1:
-				updatedAddress?.street || selectedAddress?.addressLine1 || "",
+				`${updatedAddress?.street} ${updatedAddress?.houseNumber}` ||
+				`${selectedAddress?.addressLine1} ${selectedAddress?.addressLine2}` ||
+				"",
 			addressLine2:
 				updatedAddress?.houseNumber || selectedAddress?.addressLine2 || "",
 			addressLine3:
