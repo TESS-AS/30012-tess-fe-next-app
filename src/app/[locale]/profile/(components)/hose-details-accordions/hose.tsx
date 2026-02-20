@@ -12,14 +12,13 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { GetAssetsResponse } from "@/types/assets.types";
-import { Info } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Cell } from "./cell";
 
 interface Props {
 	isEditMode: boolean;
-	setIsProductModalOpen: (isOpen: boolean) => void;
+	setIsProductModalOpen: (isOpen: boolean, itemNumber?: string) => void;
 	hoseDetails: GetAssetsResponse | null;
 	isLoading: boolean;
 }
@@ -35,6 +34,8 @@ export const HoseAccordion = ({
 	const hoseData = hoseDetails?.hoseData;
 	const customerData = hoseDetails?.customerData;
 	const hoseLine = hoseDetails?.hoseLine;
+
+	console.log(hoseData, "dataa e hossiiit");
 	return (
 		<AccordionItem
 			value="slange"
@@ -82,7 +83,9 @@ export const HoseAccordion = ({
 							</tr>
 
 							<tr className="bg-white">
-								<td className="px-4 py-3 text-[#5A615D]">{t("workingPressureBar")}</td>
+								<td className="px-4 py-3 text-[#5A615D]">
+									{t("workingPressureBar")}
+								</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
 										value={hoseData?.wpBar ? String(hoseData.wpBar) : "—"}
@@ -92,7 +95,9 @@ export const HoseAccordion = ({
 							</tr>
 
 							<tr className="bg-[#F8F9F8]">
-								<td className="px-4 py-3 text-[#5A615D]">{t("workingPressurePsi")}</td>
+								<td className="px-4 py-3 text-[#5A615D]">
+									{t("workingPressurePsi")}
+								</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
 										value={hoseData?.wpPsi ? String(hoseData.wpPsi) : "—"}
@@ -111,41 +116,17 @@ export const HoseAccordion = ({
 											searchable
 											isEditMode={isEditMode}
 										/>
+									) : hoseData?.hoseType?.hoseTypeName ? (
+										<button
+											type="button"
+											onClick={() =>
+												setIsProductModalOpen(true, hoseData.hoseType.hoseTypeName)
+											}
+											className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-[#0F1912] transition-colors hover:border-gray-400 hover:bg-gray-100 hover:text-green-600 active:border-2 active:border-green-600 active:bg-white active:shadow-sm">
+											{hoseData.hoseType.hoseTypeName}
+										</button>
 									) : (
-										<div className="flex items-center justify-between">
-											<TooltipProvider>
-												<Tooltip>
-													<TooltipTrigger asChild>
-														<span className="cursor-default">
-															{hoseData?.hoseType?.hoseTypeName || "—"}
-														</span>
-													</TooltipTrigger>
-													<TooltipContent
-														side="top"
-														className="bg-[#1F2421] p-3 text-white">
-														<div className="space-y-1">
-															<p className="font-semibold">
-																{hoseData?.hoseType?.hoseTypeName || "—"}
-															</p>
-															<p className="text-sm">
-																{hoseData?.hoseDimension?.hoseDimension || "—"}
-															</p>
-															<p className="text-sm">
-																{hoseData?.type?.typeName || "—"}
-															</p>
-														</div>
-													</TooltipContent>
-												</Tooltip>
-											</TooltipProvider>
-											<Button
-												variant="outline"
-												size="sm"
-												onClick={() => setIsProductModalOpen(true)}
-												className="flex items-center gap-1 text-xs">
-												<Info className="h-4 w-4" />
-												{t("seeDetails")}
-											</Button>
-										</div>
+										<span>—</span>
 									)}
 								</td>
 							</tr>
@@ -163,40 +144,92 @@ export const HoseAccordion = ({
 							<tr className="bg-white">
 								<td className="px-4 py-3 text-[#5A615D]">{t("ferrule1")}</td>
 								<td className="px-4 py-3 text-[#0F1912]">
-									<Cell
-										value={hoseData?.ferrule1 || "—"}
-										isEditMode={isEditMode}
-									/>
+									{isEditMode ? (
+										<Cell
+											value={hoseData?.ferrule1 || "—"}
+											isEditMode={isEditMode}
+										/>
+									) : hoseData?.ferrule1 ? (
+										<button
+											type="button"
+											onClick={() =>
+												setIsProductModalOpen(true, hoseData.ferrule1)
+											}
+											className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-[#0F1912] transition-colors hover:border-gray-400 hover:bg-gray-100 hover:text-green-600 active:border-2 active:border-green-600 active:bg-white active:shadow-sm">
+											{hoseData.ferrule1}
+										</button>
+									) : (
+										<span>—</span>
+									)}
 								</td>
 							</tr>
 
 							<tr className="bg-[#F8F9F8]">
 								<td className="px-4 py-3 text-[#5A615D]">{t("ferrule2")}</td>
 								<td className="px-4 py-3 text-[#0F1912]">
-									<Cell
-										value={hoseData?.ferrule2 || "—"}
-										isEditMode={isEditMode}
-									/>
+									{isEditMode ? (
+										<Cell
+											value={hoseData?.ferrule2 || "—"}
+											isEditMode={isEditMode}
+										/>
+									) : hoseData?.ferrule2 ? (
+										<button
+											type="button"
+											onClick={() =>
+												setIsProductModalOpen(true, hoseData.ferrule2)
+											}
+											className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-[#0F1912] transition-colors hover:border-gray-400 hover:bg-gray-100 hover:text-green-600 active:border-2 active:border-green-600 active:bg-white active:shadow-sm">
+											{hoseData.ferrule2}
+										</button>
+									) : (
+										<span>—</span>
+									)}
 								</td>
 							</tr>
 
 							<tr className="bg-white">
 								<td className="px-4 py-3 text-[#5A615D]">{t("insert1")}</td>
 								<td className="px-4 py-3 text-[#0F1912]">
-									<Cell
-										value={hoseData?.insert1 || "—"}
-										isEditMode={isEditMode}
-									/>
+									{isEditMode ? (
+										<Cell
+											value={hoseData?.insert1 || "—"}
+											isEditMode={isEditMode}
+										/>
+									) : hoseData?.insert1 ? (
+										<button
+											type="button"
+											onClick={() =>
+												setIsProductModalOpen(true, hoseData.insert1)
+											}
+											className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-[#0F1912] transition-colors hover:border-gray-400 hover:bg-gray-100 hover:text-green-600 active:border-2 active:border-green-600 active:bg-white active:shadow-sm">
+											{hoseData.insert1}
+										</button>
+									) : (
+										<span>—</span>
+									)}
 								</td>
 							</tr>
 
 							<tr className="bg-[#F8F9F8]">
 								<td className="px-4 py-3 text-[#5A615D]">{t("insert2")}</td>
 								<td className="px-4 py-3 text-[#0F1912]">
-									<Cell
-										value={hoseData?.insert2 || "—"}
-										isEditMode={isEditMode}
-									/>
+									{isEditMode ? (
+										<Cell
+											value={hoseData?.insert2 || "—"}
+											isEditMode={isEditMode}
+										/>
+									) : hoseData?.insert2 ? (
+										<button
+											type="button"
+											onClick={() =>
+												setIsProductModalOpen(true, hoseData.insert2)
+											}
+											className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-[#0F1912] transition-colors hover:border-gray-400 hover:bg-gray-100 hover:text-green-600 active:border-2 active:border-green-600 active:bg-white active:shadow-sm">
+											{hoseData.insert2}
+										</button>
+									) : (
+										<span>—</span>
+									)}
 								</td>
 							</tr>
 
@@ -251,7 +284,9 @@ export const HoseAccordion = ({
 							</tr>
 
 							<tr className="bg-white">
-								<td className="px-4 py-3 text-[#5A615D]">{t("hoseWarranty")}</td>
+								<td className="px-4 py-3 text-[#5A615D]">
+									{t("hoseWarranty")}
+								</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
 										value={hoseData?.hoseWarranty === "YES" ? "Ja" : "Nei"}
@@ -454,7 +489,9 @@ export const HoseAccordion = ({
 							</tr>
 
 							<tr className="bg-white">
-								<td className="px-4 py-3 text-[#5A615D]">{t("additionalComment")}</td>
+								<td className="px-4 py-3 text-[#5A615D]">
+									{t("additionalComment")}
+								</td>
 								<td className="px-4 py-3 text-[#0F1912]">
 									<Cell
 										value={hoseLine?.additionalComment || ""}

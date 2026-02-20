@@ -70,6 +70,7 @@ export default function HoseDetailsPage({
 
 	const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 	const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+	const [selectedItemNumber, setSelectedItemNumber] = useState<string | undefined>(undefined);
 	const [isEditMode, setIsEditMode] = useState(false);
 	const [selectedAssetId, setSelectedAssetId] = useState(
 		hoseDetails?.hoseLine?.assetId?.toString() || "",
@@ -459,7 +460,10 @@ export default function HoseDetailsPage({
 
 					<HoseAccordion
 						isEditMode={isEditMode}
-						setIsProductModalOpen={setIsProductModalOpen}
+						setIsProductModalOpen={(isOpen, itemNumber) => {
+							setIsProductModalOpen(isOpen);
+							setSelectedItemNumber(itemNumber);
+						}}
 						hoseDetails={hoseDetails}
 						isLoading={isLoadingDetails}
 					/>
@@ -504,7 +508,12 @@ export default function HoseDetailsPage({
 
 			<ProductDetailsModal
 				isOpen={isProductModalOpen}
-				onClose={() => setIsProductModalOpen(false)}
+				onClose={() => {
+					setIsProductModalOpen(false);
+					setSelectedItemNumber(undefined);
+				}}
+				hoseDetails={hoseDetails ?? null}
+				itemNumber={selectedItemNumber}
 			/>
 		</div>
 	);
