@@ -1,4 +1,4 @@
-import { searchAssets } from "@/services/assets.service";
+import { getAssets } from "@/services/assets.service";
 import type { GetAssetsResponse } from "@/types/assets.types";
 import { useQuery } from "@tanstack/react-query";
 
@@ -17,12 +17,18 @@ export const useGetHoseDetails = (
 		queryFn: async () => {
 			try {
 				// Search for the specific hose by hexagonId
-				const response = await searchAssets(
-					hexagonId,
+				const response = await getAssets(
 					customerNumber,
 					undefined, // s1Code
 					1, // page
 					1, // pageSize - we only need one result
+					undefined, // ageRange
+					undefined, // approved
+					undefined, // overdue
+					undefined, // replacementDue
+					undefined, // spareSet
+					undefined, // rejected
+					hexagonId, // searchTerm
 				);
 
 				if (response?.data && response.data.length > 0) {

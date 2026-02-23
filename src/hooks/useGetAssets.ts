@@ -1,6 +1,6 @@
 import React from "react";
 
-import { getAssets, getS1Codes, searchAssets } from "@/services/assets.service";
+import { getAssets, getS1Codes } from "@/services/assets.service";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export interface FilterOptions {
@@ -67,32 +67,19 @@ export const useGetAssets = (
 				search,
 			} = currentFilters;
 
-			return search
-				? await searchAssets(
-						search,
-						customerNumber,
-						s1Code,
-						page,
-						pageSize,
-						ageSize,
-						approved,
-						overdue,
-						replacementDue,
-						spareSet,
-						rejected,
-					)
-				: await getAssets(
-						customerNumber,
-						s1Code,
-						page,
-						pageSize,
-						ageSize,
-						approved,
-						overdue,
-						replacementDue,
-						spareSet,
-						rejected,
-					);
+			return await getAssets(
+				customerNumber,
+				s1Code,
+				page,
+				pageSize,
+				ageSize,
+				approved,
+				overdue,
+				replacementDue,
+				spareSet,
+				rejected,
+				search,
+			);
 		},
 		enabled: options.initAssets !== false && !!customerNumber,
 		staleTime: 5 * 60 * 1000,
