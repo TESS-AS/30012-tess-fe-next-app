@@ -8,11 +8,20 @@ export function useCheckoutOrderData(
 	profile: any,
 	unitPrices: Record<string, number>,
 ): [Order, React.Dispatch<React.SetStateAction<Order>>] {
+	const formatDate = (d: Date) => d.toISOString().split("T")[0];
 	const cart = cartItems?.cart;
 	const cartKit = cartItems?.cartKit;
 	const companyNumber = profile?.defaultCompanyNumber;
 	const warehouseNumber = profile?.defaultWarehouseNumber;
 	const userId = profile?.userId;
+	const customerNumber = profile?.defaultCustomerNumber;
+	const requestedDeliveryDate = (() => {
+		const base = new Date();
+		if (String(customerNumber ?? "") === "184200") {
+			base.setDate(base.getDate() + 14);
+		}
+		return formatDate(base);
+	})();
 	const [orderData, setOrderData] = useState<Order>({
 		documentControl: { companyCode: "" },
 		salesOrderHeader: {
@@ -52,7 +61,7 @@ export function useCheckoutOrderData(
 					itemCode: item.itemNumber,
 					orderedQuantity: item.quantity,
 					salesPrice: unitPrice,
-					requestedDeliveryDate: new Date().toISOString().split("T")[0],
+					requestedDeliveryDate,
 					accountPart3: "",
 					accountPart4: String(profile.userId || ""),
 					accountPart5: "",
@@ -99,7 +108,7 @@ export function useCheckoutOrderData(
 					itemCode: component.itemNumber,
 					orderedQuantity: component.quantity,
 					salesPrice: unitPrices[component.itemNumber] || 0,
-					requestedDeliveryDate: new Date().toISOString().split("T")[0],
+					requestedDeliveryDate,
 					accountPart3: "",
 					accountPart4: String(userId || ""),
 					accountPart5: "",
@@ -113,7 +122,7 @@ export function useCheckoutOrderData(
 					itemCode: itemNumber,
 					orderedQuantity: 1,
 					salesPrice: unitPrices[itemNumber] || 0,
-					requestedDeliveryDate: new Date().toISOString().split("T")[0],
+					requestedDeliveryDate,
 					accountPart3: "",
 					accountPart4: String(userId || ""),
 					accountPart5: "",

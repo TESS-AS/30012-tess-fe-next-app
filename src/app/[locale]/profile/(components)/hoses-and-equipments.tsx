@@ -69,6 +69,9 @@ export function HosesAndEquipments({
 	const router = useRouter();
 	const { setIsCartChanging, isCartChanging } = useAppContext();
 
+	const S1_CODE_TROLL_A = "1391731";
+	const S1_CODE_GUDRUN = "1291619";
+
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
 	const [cartModalOpen, setCartModalOpen] = useState(false);
 	const [supportOpen, setSupportOpen] = useState(false);
@@ -84,11 +87,19 @@ export function HosesAndEquipments({
 	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
 		() => {
 			if (typeof window !== "undefined") {
-				return localStorage.getItem("selectedS1Code") || undefined;
+				return localStorage.getItem("selectedS1Code") || S1_CODE_TROLL_A;
 			}
 			return undefined;
 		},
 	);
+
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		const stored = localStorage.getItem("selectedS1Code");
+		if (!stored) {
+			localStorage.setItem("selectedS1Code", S1_CODE_TROLL_A);
+		}
+	}, []);
 
 	const effectiveCustomerNumber =
 		profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
@@ -747,6 +758,11 @@ export function HosesAndEquipments({
 									}}>
 									{(s1Codes || [])
 										.filter((s1) => s1.S1Code && s1.S1Name)
+										.filter(
+											(s1) =>
+												s1.S1Code === S1_CODE_TROLL_A ||
+												s1.S1Code === S1_CODE_GUDRUN,
+										)
 										.map((s1) => (
 											<SelectItem
 												key={s1.S1Code}

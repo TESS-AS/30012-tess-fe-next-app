@@ -9,18 +9,25 @@ export const useSubmitOrder = (
 	selectedAddress: SalesOrderAddress,
 	handleArchiveCart: () => Promise<void>,
 ) => {
+	const formatDate = (d: Date) => d.toISOString().split("T")[0];
 	const submitOrder = async (orderData: Order): Promise<Order | null> => {
+		const baseDispatchDate = new Date();
+		if (String(profile?.defaultCustomerNumber ?? "") === "184200") {
+			baseDispatchDate.setDate(baseDispatchDate.getDate() + 14);
+		}
+		const dispatchDate = formatDate(baseDispatchDate);
+
 		const payload: Order = {
 			...orderData,
 			salesOrderHeader: {
 				...orderData.salesOrderHeader,
 				customersOrderNumberEdifact: "EDIFACT123",
-				orderType: "KM",
+				orderType: profile?.defaultWarehosueName === "L01" ? "ED" : "KM",
 				customerNumber: profile?.defaultCustomerNumber ?? "",
 				warehouseNumber: String(profile?.defaultWarehouseNumber ?? ""),
 				termsOfDelivery: "DAP",
 				// termsOfPayment: "NET",
-				dispatchDate: new Date().toISOString().split("T")[0],
+				dispatchDate,
 			},
 			salesOrderAddresses: [selectedAddress],
 		};
@@ -57,7 +64,6 @@ export const useSubmitOrder = (
 								customerReference: `${profile?.firstName} ${profile?.lastName}`,
 							},
 						};
-
 				const response = await salesOrder(updatedPayload);
 
 				localStorage.removeItem("selectedHoseRows");
