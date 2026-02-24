@@ -13,7 +13,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { useGetAssortments } from "@/hooks/useGetAssortments";
 import { useGetCompanies } from "@/hooks/useGetCompanies";
 import { useGetCustomers } from "@/hooks/useGetCustomers";
 import { profileKeys } from "@/hooks/useGetProfileData";
@@ -48,7 +47,6 @@ export default function CustomerNumberSwitcher({
 	const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
 	const [newCustomerNumber, setNewCustomerNumber] = useState("");
 	const [selectedWarehouse, setSelectedWarehouse] = useState("");
-	const [selectedAssortment, setSelectedAssortment] = useState("");
 	const [selectedCompanyNumber, setSelectedCompanyNumber] = useState("");
 	const [defaultCustomerNumber, setDefaultCustomerNumber] = useState("");
 	const [isSaving, setIsSaving] = useState(false);
@@ -58,8 +56,7 @@ export default function CustomerNumberSwitcher({
 	const missingRequiredDefaults =
 		!profile?.defaultCompanyNumber ||
 		!profile?.defaultCustomerNumber ||
-		!profile?.defaultWarehouseNumber ||
-		!profile?.defaultAssortmentNumber;
+		!profile?.defaultWarehouseNumber;
 	const shouldBlock = Boolean(blockUntilComplete && missingRequiredDefaults);
 
 	// Use selectedCompanyNumber or profile default for fetching filtered data
@@ -71,10 +68,6 @@ export default function CustomerNumberSwitcher({
 		effectiveCompanyNumber,
 	);
 	const { warehouses, refetch: refetchWarehouses } = useGetWarehouses(
-		true,
-		effectiveCompanyNumber,
-	);
-	const { assortments, refetch: refetchAssortments } = useGetAssortments(
 		true,
 		effectiveCompanyNumber,
 	);
@@ -104,19 +97,6 @@ export default function CustomerNumberSwitcher({
 			setDefaultCustomerNumber(profile.defaultCustomerNumber);
 		}
 
-		if (
-			assortments.length &&
-			!selectedAssortment &&
-			profile?.defaultAssortmentNumber
-		) {
-			const match = assortments.find(
-				(a) => a.assortmentnumber === profile.defaultAssortmentNumber,
-			);
-			if (match) {
-				setSelectedAssortment(match.assortmentnumber);
-			}
-		}
-
 		// Initialize company selection - only on first load
 		if (
 			companies.length &&
@@ -134,15 +114,7 @@ export default function CustomerNumberSwitcher({
 				companyInitializedRef.current = true;
 			}
 		}
-	}, [
-		customers,
-		assortments,
-		companies,
-		profile,
-		newCustomerNumber,
-		selectedAssortment,
-		selectedCompanyNumber,
-	]);
+	}, [customers, companies, profile, newCustomerNumber, selectedCompanyNumber]);
 
 	// Initialize previousCompanyRef with profile default
 	useEffect(() => {
@@ -260,7 +232,7 @@ export default function CustomerNumberSwitcher({
 				companyNumber: selectedCompanyNumber || profile.defaultCompanyNumber,
 				customerNumber: newCustomerNumber,
 				warehouseNumber: selectedWarehouse,
-				assortmentNumber: selectedAssortment,
+				assortmentNumber: profile.defaultAssortmentNumber,
 			});
 			setDefaultCustomerNumber(newCustomerNumber);
 
@@ -345,41 +317,6 @@ export default function CustomerNumberSwitcher({
 												key={customer.customerNumber}
 												value={customer.customerNumber}>
 												{customer.customerName} ({customer.customerNumber})
-											</SelectItem>
-										))}
-									</>
-								</SelectGroup>
-							</SelectContent>
-						</Select>
-					</div>
-
-					<div className="space-y-2">
-						<Label htmlFor="assortmentSelect">
-							{t("CustomerSwitcher.selectAssortmentLabel")}
-						</Label>
-						<Select
-							value={selectedAssortment}
-							disabled={assortments.length === 0}
-							onValueChange={setSelectedAssortment}>
-							<SelectTrigger
-								id="assortmentSelect"
-								className="w-full">
-								<SelectValue
-									placeholder={
-										assortments.length === 0
-											? t("CustomerSwitcher.noAssortmentsAvailable")
-											: t("CustomerSwitcher.selectAssortmentPlaceholder")
-									}
-								/>
-							</SelectTrigger>
-							<SelectContent className="z-[9999]">
-								<SelectGroup>
-									<>
-										{assortments.map((a) => (
-											<SelectItem
-												key={a.assortmentnumber}
-												value={a.assortmentnumber}>
-												{a.nameNo} ({a.assortmentnumber})
 											</SelectItem>
 										))}
 									</>
