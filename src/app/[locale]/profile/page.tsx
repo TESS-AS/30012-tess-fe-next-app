@@ -154,22 +154,39 @@ export default function ProfilePage() {
 	// Read tab from URL query parameters
 	useEffect(() => {
 		const tabParam = searchParams.get("tab");
-		if (tabParam) {
-			setActiveTab(tabParam);
-			// If navigating to tess-edi, switch to tess-edi mode (only for admins)
-			if (
-				tabParam === "tess-edi" &&
-				profile?.defaultCustomerNumber !==
-					SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER &&
-				profile?.role === "admin"
-			) {
-				setActiveMode("tess-edi");
-				// Reset selected order when navigating to tess-edi tab
-				setSelectedAvvikendeOrdreId(null);
-			} else if (tabParam === "tess-edi" && profile?.role !== "admin") {
-				// Redirect non-admins away from tess-edi
-				setActiveTab("rekvisisjoner");
-			}
+		if (!tabParam) return;
+
+		// Hose management tab group -> switch to hose mode
+		const hoseTabs = new Set([
+			"hose-oversikt",
+			"hose-orders",
+			"hose-inspections",
+			"hose-replacement",
+			"hose-risk-class",
+			"hose-requests",
+			"hose-activities",
+			"hose-settings",
+		]);
+
+		if (hoseTabs.has(tabParam)) {
+			setActiveMode("hose");
+		}
+
+		setActiveTab(tabParam);
+
+		// If navigating to tess-edi, switch to tess-edi mode (only for admins)
+		if (
+			tabParam === "tess-edi" &&
+			profile?.defaultCustomerNumber !==
+				SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER &&
+			profile?.role === "admin"
+		) {
+			setActiveMode("tess-edi");
+			// Reset selected order when navigating to tess-edi tab
+			setSelectedAvvikendeOrdreId(null);
+		} else if (tabParam === "tess-edi" && profile?.role !== "admin") {
+			// Redirect non-admins away from tess-edi
+			setActiveTab("rekvisisjoner");
 		}
 	}, [searchParams, profile]);
 

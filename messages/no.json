@@ -189,7 +189,7 @@
 		"showLess": "Vis mindre"
 	},
 	"CustomerSwitcher": {
-		"title": "Kundeinformasjon",
+		"title": "Bytt handlekonto",
 		"selectCustomerLabel": "Kunder",
 		"selectCustomerPlaceholder": "Velg kundenummer",
 		"selectWarehouseLabel": "Lager",
@@ -202,8 +202,8 @@
 		"selectCompanyPlaceholder": "Velg selskap",
 		"noCompaniesAvailable": "Ingen selskaper tilgjengelig",
 		"defaultCompanyFallback": "Standardselskap ({companyNumber})",
-		"save": "Lagre",
-		"saving": "Lagrer..."
+		"save": "Bekreft",
+		"saving": "Bekrefter..."
 	},
 	"CustomerWebPromo": {
 		"switcher": {
