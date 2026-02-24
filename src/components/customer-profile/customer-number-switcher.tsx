@@ -80,6 +80,20 @@ export default function CustomerNumberSwitcher({
 	);
 	const { companies } = useGetCompanies(true);
 
+	const isAdmin = profile.role === "admin";
+	const warehouseDisplay =
+		warehouses.find((w) => String(w.id) === String(selectedWarehouse)) ||
+		warehouses.find(
+			(w) => String(w.id) === String(profile?.defaultWarehouseNumber),
+		);
+	const companyDisplay =
+		companies.find(
+			(c) => String(c.companyNumber) === String(selectedCompanyNumber),
+		) ||
+		companies.find(
+			(c) => String(c.companyNumber) === String(profile?.defaultCompanyNumber),
+		);
+
 	useEffect(() => {
 		if (
 			customers.length &&
@@ -139,8 +153,13 @@ export default function CustomerNumberSwitcher({
 
 	// Initialize company selection when companies load (separate effect for reliability)
 	useEffect(() => {
-		if (!companies.length || !profile?.defaultCompanyNumber || companyInitializedRef.current) return;
-		
+		if (
+			!companies.length ||
+			!profile?.defaultCompanyNumber ||
+			companyInitializedRef.current
+		)
+			return;
+
 		// Only set on initial load if not already set
 		if (!selectedCompanyNumber) {
 			// Compare both as numbers to handle leading zeros (e.g., "03" vs 3)
@@ -278,15 +297,13 @@ export default function CustomerNumberSwitcher({
 			setIsSaving(false);
 		}
 	};
-	console.log(assortments, "assortments");
 	return (
 		<>
 			{!hideTrigger && (
 				<button
 					onClick={() => setIsCustomerModalOpen(true)}
 					className="hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-gray-700 transition-colors outline-none">
-					<UserRoundCog className="h-4 w-4" />
-					<span>Velg kunde/lager/sortiment</span>
+					<span>Bytt handlekonto</span>
 				</button>
 			)}
 
@@ -301,12 +318,9 @@ export default function CustomerNumberSwitcher({
 					<ModalTitle>{t("CustomerSwitcher.title")}</ModalTitle>
 				</ModalHeader>
 				<div className="space-y-4 py-4">
-					{/* {shouldBlock && (
-						<div className="rounded-md border border-[#FDE8E8] bg-[#FDE8E8] px-3 py-2 text-sm text-[#9B1C1C]">
-							Du må velge standard firma, kunde, lager og sortiment før du kan
-							bruke appen.
-						</div>
-					)} */}
+					<p className="font-gray-500 text-sm font-normal">
+						Priser, lager og utvalg oppdateres basert på dine valg.
+					</p>
 					<div className="space-y-2">
 						<Label htmlFor="customerSelect">
 							{t("CustomerSwitcher.selectCustomerLabel")}
@@ -337,53 +351,6 @@ export default function CustomerNumberSwitcher({
 								</SelectGroup>
 							</SelectContent>
 						</Select>
-					</div>
-
-					<div className="space-y-2">
-						<Label htmlFor="warehouseSelect">
-							{t("CustomerSwitcher.selectWarehouseLabel")}
-						</Label>
-						<Select
-							value={selectedWarehouse}
-							onValueChange={setSelectedWarehouse}
-							disabled={warehouses.length === 0}
-							required>
-							<SelectTrigger
-								id="warehouseSelect"
-								className={`w-full ${
-									!selectedWarehouse && selectedCompanyNumber
-										? "border-red-500 focus:border-red-500"
-										: ""
-								}`}>
-								<SelectValue
-									placeholder={
-										warehouses.length === 0
-											? t("CustomerSwitcher.noWarehousesAvailable")
-											: t("CustomerSwitcher.selectWarehousePlaceholder")
-									}
-								/>
-							</SelectTrigger>
-							<SelectContent className="z-[9999]">
-								<SelectGroup>
-									<>
-										{warehouses.map((warehouse) => (
-											<SelectItem
-												key={warehouse.id}
-												value={warehouse.id}>
-												{warehouse.name} ({warehouse.id})
-											</SelectItem>
-										))}
-									</>
-								</SelectGroup>
-							</SelectContent>
-						</Select>
-						{selectedCompanyNumber &&
-							!selectedWarehouse &&
-							warehouses.length > 0 && (
-								<p className="text-sm text-red-600">
-									Lager er påkrevd. Vennligst velg et lager.
-								</p>
-							)}
 					</div>
 
 					<div className="space-y-2">
@@ -422,41 +389,119 @@ export default function CustomerNumberSwitcher({
 					</div>
 
 					<div className="space-y-2">
-						<Label htmlFor="companySelect">
+						<Label
+							htmlFor="warehouseSelect"
+							className={
+								!isAdmin ? "text-base font-normal text-gray-500" : undefined
+							}>
+							{t("CustomerSwitcher.selectWarehouseLabel")}
+						</Label>
+						{!isAdmin ? (
+							<p
+								id="warehouseSelect"
+								className="text-base font-medium text-gray-700">
+								{warehouseDisplay
+									? `${warehouseDisplay.name} (${warehouseDisplay.id})`
+									: (profile?.defaultWarehouseNumber ?? "—")}
+							</p>
+						) : (
+							<>
+								<Select
+									value={selectedWarehouse}
+									onValueChange={setSelectedWarehouse}
+									disabled={warehouses.length === 0}
+									required>
+									<SelectTrigger
+										id="warehouseSelect"
+										className={`w-full ${
+											!selectedWarehouse && selectedCompanyNumber
+												? "border-red-500 focus:border-red-500"
+												: ""
+										}`}>
+										<SelectValue
+											placeholder={
+												warehouses.length === 0
+													? t("CustomerSwitcher.noWarehousesAvailable")
+													: t("CustomerSwitcher.selectWarehousePlaceholder")
+											}
+										/>
+									</SelectTrigger>
+									<SelectContent className="z-[9999]">
+										<SelectGroup>
+											<>
+												{warehouses.map((warehouse) => (
+													<SelectItem
+														key={warehouse.id}
+														value={warehouse.id}>
+														{warehouse.name} ({warehouse.id})
+													</SelectItem>
+												))}
+											</>
+										</SelectGroup>
+									</SelectContent>
+								</Select>
+								{selectedCompanyNumber &&
+									!selectedWarehouse &&
+									warehouses.length > 0 && (
+										<p className="text-sm text-red-600">
+											Lager er påkrevd. Vennligst velg et lager.
+										</p>
+									)}
+							</>
+						)}
+					</div>
+
+					<div className="space-y-2">
+						<Label
+							htmlFor="companySelect"
+							className={
+								!isAdmin ? "text-base font-normal text-gray-500" : undefined
+							}>
 							{t("CustomerSwitcher.selectCompanyLabel")}
 						</Label>
-						<Select
-							value={selectedCompanyNumber}
-							onValueChange={setSelectedCompanyNumber}
-							disabled={companies.length === 0}>
-							<SelectTrigger
+						{!isAdmin ? (
+							<p
 								id="companySelect"
-								className="w-full">
-								<SelectValue
-									placeholder={
-										companies.length === 0
-											? t("CustomerSwitcher.noCompaniesAvailable")
-											: t("CustomerSwitcher.selectCompanyPlaceholder")
-									}
-								/>
-							</SelectTrigger>
-							<SelectContent className="z-[9999]">
-								<SelectGroup>
-									<>
-										{companies.map((company) => (
-											<SelectItem
-												key={company.companyNumber}
-												value={String(company.companyNumber)}>
-												{company.companyName} ({company.companyNumber})
-											</SelectItem>
-										))}
-									</>
-								</SelectGroup>
-							</SelectContent>
-						</Select>
+								className="text-base font-medium text-gray-700">
+								{companyDisplay
+									? `${companyDisplay.companyName} (${companyDisplay.companyNumber})`
+									: (profile?.defaultCompanyNumber ?? "—")}
+							</p>
+						) : (
+							<Select
+								value={selectedCompanyNumber}
+								onValueChange={setSelectedCompanyNumber}
+								disabled={companies.length === 0}>
+								<SelectTrigger
+									id="companySelect"
+									className="w-full">
+									<SelectValue
+										placeholder={
+											companies.length === 0
+												? t("CustomerSwitcher.noCompaniesAvailable")
+												: t("CustomerSwitcher.selectCompanyPlaceholder")
+										}
+									/>
+								</SelectTrigger>
+								<SelectContent className="z-[9999]">
+									<SelectGroup>
+										<>
+											{companies.map((company) => (
+												<SelectItem
+													key={company.companyNumber}
+													value={String(company.companyNumber)}>
+													{company.companyName} ({company.companyNumber})
+												</SelectItem>
+											))}
+										</>
+									</SelectGroup>
+								</SelectContent>
+							</Select>
+						)}
 					</div>
 
 					<Button
+						variant="greenSolid"
 						className="w-full"
 						disabled={isSaving || !selectedWarehouse}
 						onClick={handleSave}>

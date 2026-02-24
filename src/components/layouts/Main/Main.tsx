@@ -45,7 +45,6 @@ export default function Main({ children }: { children?: ReactNode }) {
 				style={{ height: `calc(100vh - ${headerHeight}px)` }}>
 				<div className="container mx-auto">{children}</div>
 			</div>
-			{/* Onboarding modal for new users - blocks UI until submitted */}
 			<OnboardingModal
 				isOpen={isNewUser}
 				onClose={() => {

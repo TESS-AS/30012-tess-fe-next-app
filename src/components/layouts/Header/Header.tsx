@@ -16,6 +16,7 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
+	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -389,6 +390,13 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		profile?.defaultCustomerNumber ===
 		SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
 
+	// Access flags for services shown under "Tjenester" in the profile dropdown
+	const hasHoseManagementAccess = !!profile;
+	const hasTessEdiAccess =
+		!!profile &&
+		profile.role === "admin" &&
+		profile.defaultCustomerNumber !== SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
+
 	return (
 		<header
 			className={`bg-background relative z-50 h-[182px] w-full border-t ${isHoseManagementCustomer ? "flex flex-col justify-end pb-[50px]" : ""}`}>
@@ -687,7 +695,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 							<DropdownMenuContent
 								align="end"
 								className="rounded-b-lg">
-								<div className="px-3 py-3">
+								<div className="px-2 py-3">
 									<div className="text-[14px] font-medium">
 										{profile.firstName}
 									</div>
@@ -704,16 +712,33 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 										<DropdownMenuItem className="text-gray-700">
 											Endre innstillinger
 										</DropdownMenuItem>
-										<DropdownMenuSeparator />
 										<CustomerNumberSwitcher profile={profile} />
-										<DropdownMenuSeparator />
-										{profile.role === "admin" && (
-											<DropdownMenuItem
-												className="text-gray-700"
-												onClick={() => router.push("/profile?tab=tess-edi")}>
-												<FileText className="mr-2 h-4 w-4" />
-												TESS EDI
-											</DropdownMenuItem>
+										{(hasHoseManagementAccess || hasTessEdiAccess) && (
+											<>
+												<DropdownMenuSeparator />
+												<DropdownMenuLabel className="text-sm font-semibold text-gray-700">
+													Tjenester
+												</DropdownMenuLabel>
+												{hasHoseManagementAccess && (
+													<DropdownMenuItem
+														className="text-gray-700"
+														onClick={() =>
+															router.push("/profile?tab=hose-orders")
+														}>
+														Hose management
+													</DropdownMenuItem>
+												)}
+												{hasTessEdiAccess && (
+													<DropdownMenuItem
+														className="text-gray-700"
+														onClick={() =>
+															router.push("/profile?tab=tess-edi")
+														}>
+														TESS EDI
+													</DropdownMenuItem>
+												)}
+												<DropdownMenuSeparator />
+											</>
 										)}
 										<DropdownMenuItem
 											onClick={handleLogout}
