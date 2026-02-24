@@ -287,6 +287,7 @@ export default function OrderSummary({
 						{profile?.defaultCustomerNumber !==
 							HIDE_CHECKOUT_FOR_SPECIFIC_CUSTOMER_NUMBER &&
 							(!profile?.punchout ? (
+								// isTessEmployee
 								isTessEmployee ? (
 									<Button
 										variant="greenSolid"
