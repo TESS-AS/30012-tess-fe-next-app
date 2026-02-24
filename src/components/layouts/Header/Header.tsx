@@ -32,6 +32,7 @@ import {
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useProfile } from "@/contexts/ProfileContext";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { useGetAssortments } from "@/hooks/useGetAssortments";
 import { profileKeys } from "@/hooks/useGetProfileData";
 import { useInstantSearch } from "@/hooks/useInstantSearch";
 import { useOrderSummary } from "@/hooks/useOrderSummary";
@@ -120,7 +121,8 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		return (
 			!profile.defaultWarehouseNumber ||
 			!profile.defaultCompanyNumber ||
-			!profile.defaultCustomerNumber
+			!profile.defaultCustomerNumber ||
+			!profile.defaultAssortmentNumber
 		);
 	}, [profile]);
 
@@ -154,6 +156,27 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 	const inputRef = useRef<HTMLInputElement>(null);
 	const justNavigatedRef = useRef(false);
 	const { shouldFocus, resetFocus } = useSearchStore();
+	const [selectedAssortment, setSelectedAssortment] = useState("");
+	const [isSaving, setIsSaving] = useState(false);
+	const [isAssortmentDropdownOpen, setIsAssortmentDropdownOpen] =
+		useState(false);
+
+	const { assortments } = useGetAssortments(!!profile);
+
+	useEffect(() => {
+		if (
+			assortments.length &&
+			!selectedAssortment &&
+			profile?.defaultAssortmentNumber
+		) {
+			const match = assortments.find(
+				(a: any) => a.assortmentnumber === profile.defaultAssortmentNumber,
+			);
+			if (match) {
+				setSelectedAssortment(match.assortmentnumber);
+			}
+		}
+	}, [assortments, selectedAssortment, profile]);
 
 	const searchCategories = useMemo(() => {
 		if (!searchData?.categories || !categories) return [];
@@ -182,8 +205,6 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 			};
 		});
 	}, [searchData?.categories, categories]);
-
-
 
 	useEffect(() => {
 		if (shouldFocus) {
@@ -295,6 +316,72 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		router.push("/");
 	};
 
+	const handleAssortmentChange = async (assortmentNumber: string) => {
+		if (!profile || isSaving) return;
+
+		setIsSaving(true);
+		try {
+			await axiosClient.post("/user/defaultVariables", {
+				companyNumber: profile.defaultCompanyNumber,
+				customerNumber: profile.defaultCustomerNumber,
+				warehouseNumber: profile.defaultWarehouseNumber,
+				assortmentNumber: assortmentNumber,
+			});
+			setSelectedAssortment(assortmentNumber);
+
+			await Promise.all([
+				queryClient.invalidateQueries({
+					queryKey: ["productPrice"],
+					refetchType: "active",
+				}),
+				queryClient.invalidateQueries({
+					queryKey: ["product"],
+					refetchType: "active",
+				}),
+				queryClient.invalidateQueries({
+					queryKey: ["products"],
+					refetchType: "active",
+				}),
+				refetchCategories(),
+			]);
+
+			setIsAssortmentDropdownOpen(false);
+		} catch (err) {
+			console.error("Failed to update default assortment", err);
+		} finally {
+			setIsSaving(false);
+		}
+	};
+
+	const getSelectedAssortmentName = () => {
+		if (!selectedAssortment || !assortments.length) return "";
+		const match = assortments.find(
+			(a: any) => a.assortmentnumber === selectedAssortment,
+		);
+		return match?.nameNo || "";
+	};
+
+	const assortmentDropdownRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (
+				assortmentDropdownRef.current &&
+				!assortmentDropdownRef.current.contains(event.target as Node)
+			) {
+				setIsAssortmentDropdownOpen(false);
+			}
+		};
+
+		if (isAssortmentDropdownOpen) {
+			document.addEventListener("mousedown", handleClickOutside);
+		}
+
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, [isAssortmentDropdownOpen]);
+
 	const isHoseManagementCustomer =
 		profile?.defaultCustomerNumber ===
 		SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
@@ -377,7 +464,9 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 			<div className="container m-auto mb-1 flex h-16 items-center justify-between">
 				<div className="flex items-center gap-2">
 					{!isHoseManagementCustomer && (
-						<div className="relative hidden md:flex">
+						<div
+							className="relative hidden md:flex"
+							ref={assortmentDropdownRef}>
 							<div className="h-[50px] w-[max-content] overflow-hidden rounded-r-lg border border-gray-300 bg-white">
 								<form
 									onSubmit={handleSearch}
@@ -474,14 +563,46 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 											</div>
 										)}
 									</div>
-									<div className="max-w-[175px] border-l border-gray-300">
-										<div className="flex h-[50px] w-full max-w-[175px] min-w-[175px] items-center gap-2 bg-gray-100 px-4">
-											<BookOpen className="h-5 w-5 flex-shrink-0 text-[#003D1A]" />
-											<span className="truncate text-sm font-medium text-[#0F1912]">
-												TESS katalog
-											</span>
+									{profile && assortments.length > 0 && (
+										<div className="max-w-[175px] border-l border-gray-300">
+											<Button
+												type="button"
+												variant="ghost"
+												className="flex h-[50px] w-full max-w-[175px] min-w-[175px] items-center gap-2 rounded-none bg-gray-100 px-4 text-[#0F1912]"
+												onClick={(e) => {
+													e.preventDefault();
+													e.stopPropagation();
+													setIsAssortmentDropdownOpen(
+														!isAssortmentDropdownOpen,
+													);
+												}}
+												disabled={isSaving}>
+												<BookOpen className="h-5 w-5 flex-shrink-0 text-[#003D1A]" />
+												<span className="truncate text-sm font-medium">
+													{getSelectedAssortmentName() ||
+														t("CustomerSwitcher.selectAssortmentPlaceholder")}
+												</span>
+												{isAssortmentDropdownOpen ? (
+													<ChevronUp className="h-4 w-4 flex-shrink-0" />
+												) : (
+													<ChevronDown className="h-4 w-4 flex-shrink-0" />
+												)}
+											</Button>
 										</div>
-									</div>
+									)}
+									{!profile && (
+										<div className="max-w-[175px] border-l border-gray-300">
+											<Button
+												type="button"
+												variant="ghost"
+												className="flex h-[50px] w-full max-w-[175px] min-w-[175px] items-center gap-2 rounded-none bg-gray-100 px-4 text-[#0F1912]">
+												<BookOpen className="h-5 w-5 flex-shrink-0 text-[#003D1A]" />
+												<span className="truncate text-sm font-medium">
+													TESS katalog
+												</span>
+											</Button>
+										</div>
+									)}
 									<Button
 										type="submit"
 										variant="greenSolid"
@@ -490,6 +611,46 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 									</Button>
 								</form>
 							</div>
+							{profile &&
+								assortments.length > 0 &&
+								isAssortmentDropdownOpen && (
+									<div className="absolute top-[50px] right-0 z-[9999] w-[300px] max-w-[400px] rounded-b-lg bg-white py-2 shadow-lg">
+										<TooltipProvider>
+											{assortments.map((a: any) => (
+												<Tooltip key={a.assortmentnumber}>
+													<TooltipTrigger asChild>
+														<button
+															type="button"
+															onClick={(e) => {
+																e.preventDefault();
+																e.stopPropagation();
+																handleAssortmentChange(a.assortmentnumber);
+															}}
+															className="flex w-full items-center gap-2 px-4 py-2 text-left transition-colors hover:bg-gray-50">
+															<div className="flex h-5 w-5 min-w-[20px] shrink-0 items-center justify-center">
+																{selectedAssortment === a.assortmentnumber ? (
+																	<div className="h-4 w-4 rounded-full border-2 border-[#009640] bg-white" />
+																) : (
+																	<div className="h-4 w-4 rounded-full border-2 border-gray-300" />
+																)}
+															</div>
+															<span className="text-sm font-medium break-words text-[#0F1912]">
+																{a.nameNo} ({a.assortmentnumber})
+															</span>
+														</button>
+													</TooltipTrigger>
+													{a.assortmentname.length > 30 && (
+														<TooltipContent
+															side="right"
+															className="max-w-[300px]">
+															<p className="break-words">{a.assortmentname}</p>
+														</TooltipContent>
+													)}
+												</Tooltip>
+											))}
+										</TooltipProvider>
+									</div>
+								)}
 						</div>
 					)}
 				</div>
@@ -666,7 +827,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 						<CategoryNavigationMenu
 							categories={categories ?? []}
 							loading={loading}
-							selectedAssortment={profile?.defaultAssortmentNumber ?? ""}
+							selectedAssortment={selectedAssortment}
 						/>
 					</div>
 				</div>
