@@ -329,11 +329,13 @@ export default function CustomerNumberSwitcher({
 						<Label
 							htmlFor="warehouseSelect"
 							className={
-								!isAdmin ? "text-base font-normal text-gray-500" : undefined
+								!isAdmin && warehouses.length <= 1
+									? "text-base font-normal text-gray-500"
+									: undefined
 							}>
 							{t("CustomerSwitcher.selectWarehouseLabel")}
 						</Label>
-						{!isAdmin ? (
+						{!isAdmin && warehouses.length <= 1 ? (
 							<p
 								id="warehouseSelect"
 								className="text-base font-medium text-gray-700">
@@ -392,11 +394,13 @@ export default function CustomerNumberSwitcher({
 						<Label
 							htmlFor="companySelect"
 							className={
-								!isAdmin ? "text-base font-normal text-gray-500" : undefined
+								!isAdmin && companies.length <= 1
+									? "text-base font-normal text-gray-500"
+									: undefined
 							}>
 							{t("CustomerSwitcher.selectCompanyLabel")}
 						</Label>
-						{!isAdmin ? (
+						{!isAdmin && companies.length <= 1 ? (
 							<p
 								id="companySelect"
 								className="text-base font-medium text-gray-700">
