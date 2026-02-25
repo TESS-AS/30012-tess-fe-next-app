@@ -70,7 +70,9 @@ export default function HoseDetailsPage({
 
 	const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 	const [isProductModalOpen, setIsProductModalOpen] = useState(false);
-	const [selectedItemNumber, setSelectedItemNumber] = useState<string | undefined>(undefined);
+	const [selectedItemNumber, setSelectedItemNumber] = useState<
+		string | undefined
+	>(undefined);
 	const [isEditMode, setIsEditMode] = useState(false);
 	const [selectedAssetId, setSelectedAssetId] = useState(
 		hoseDetails?.hoseLine?.assetId?.toString() || "",
@@ -138,8 +140,9 @@ export default function HoseDetailsPage({
 
 			setIsCartChanging(true);
 			setTimeout(() => setIsCartChanging(false), 100);
-
-			toast.success("Item added to cart successfully");
+			if (profile.defaultCustomerNumber !== "184200") {
+				toast.success("Item added to cart successfully");
+			}
 		} catch (error) {
 			toast.error("Failed to add item to cart");
 		} finally {
@@ -451,7 +454,7 @@ export default function HoseDetailsPage({
 			<div className="rounded-md bg-white px-6 py-4">
 				<Accordion
 					type="multiple"
-					defaultValue={["s2-utstyr"]}
+					defaultValue={["s2-utstyr", "slange"]}
 					className="space-y-3">
 					<S2EquipmentsAccordion
 						isEditMode={isEditMode}
