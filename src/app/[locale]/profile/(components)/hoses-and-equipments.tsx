@@ -9,17 +9,17 @@ import React, {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, type Column } from "@/components/ui/data-table";
+import { DiscardEquipmentDialog } from "@/components/ui/dialogs/discard-equipment-dialog";
+import { PrintCertificatesDialog } from "@/components/ui/dialogs/print-certificates-dialog";
+import { PrintTagsDialog } from "@/components/ui/dialogs/print-tags-dialog";
+import { RFQRequestDialog } from "@/components/ui/dialogs/rfq-request-dialog";
+import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DiscardEquipmentDialog } from "@/components/ui/dialogs/discard-equipment-dialog";
-import { PrintCertificatesDialog } from "@/components/ui/dialogs/print-certificates-dialog";
-import { PrintTagsDialog } from "@/components/ui/dialogs/print-tags-dialog";
-import { RFQRequestDialog } from "@/components/ui/dialogs/rfq-request-dialog";
-import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 import {
 	Select,
 	SelectContent,
