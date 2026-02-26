@@ -6,8 +6,15 @@ import React, {
 	useState,
 } from "react";
 
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, type Column } from "@/components/ui/data-table";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { DiscardEquipmentDialog } from "@/components/ui/dialogs/discard-equipment-dialog";
 import { PrintCertificatesDialog } from "@/components/ui/dialogs/print-certificates-dialog";
 import { PrintTagsDialog } from "@/components/ui/dialogs/print-tags-dialog";
@@ -25,7 +32,7 @@ import { FilterOptions, useGetAssets } from "@/hooks/useGetAssets";
 import { useAppContext } from "@/lib/appContext";
 import { postCartKit } from "@/services/carts.service";
 import { ProfileUser } from "@/types/user.types";
-import { MapPin, X } from "lucide-react";
+import { Mail, MapPin, MoreHorizontal, ShoppingCart, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
@@ -319,6 +326,39 @@ export function HosesAndEquipments({
 		});
 	};
 
+	const selectSingleRow = (hexagonId: string) => {
+		setAllAcrossPages(false);
+		setDeselectedIds(new Set());
+		setSelectedRows([hexagonId]);
+		localStorage.setItem("selectedHoseRows", JSON.stringify([hexagonId]));
+	};
+
+	const handleAddSingleToCart = async (order: HoseOrder) => {
+		if (isEcomBlocked(order)) return;
+		setIsAddingToCart(true);
+		try {
+			const cartItems = [
+				{
+					hexagonId: Number(order.hexagonId),
+					quantity: 1,
+					warehouseNumber: profile?.defaultWarehouseNumber,
+					companyNumber: profile?.defaultCompanyNumber,
+				},
+			];
+
+			await postCartKit(cartItems);
+			setAddedToCartItems([order.hexagonId]);
+			setUnavailableForPurchaseItems([]);
+			toast.success("Element lagt til i handlekurven");
+			setIsCartChanging(!isCartChanging);
+			setCartModalOpen(true);
+		} catch (error) {
+			toast.error("Kunne ikke legge til element i handlekurven");
+		} finally {
+			setIsAddingToCart(false);
+		}
+	};
+
 	const handleBulkAction = async (action: string): Promise<void> => {
 		if (action === "cart") {
 			if (selectedCount === 0) {
@@ -551,6 +591,70 @@ export function HosesAndEquipments({
 				/>
 			),
 		},
+		rowActions: {
+			key: "action",
+			header: "",
+			cell: (order: HoseOrder) => (
+				<div
+					className="flex items-center justify-end gap-2"
+					onClick={(e) => e.stopPropagation()}>
+					<Button
+						variant="ghost"
+						size="icon"
+						disabled={isEcomBlocked(order) || isAddingToCart}
+						className="h-10 w-10 rounded-full text-[#0F1912] hover:bg-[#E5E7E6] focus-visible:ring-4 focus-visible:ring-[#C1C4C2] focus-visible:outline-hidden"
+						onClick={() => void handleAddSingleToCart(order)}>
+						<ShoppingCart
+							className={
+								isEcomBlocked(order)
+									? "h-5 w-5 text-[#5A615D]"
+									: "h-5 w-5 text-[#0F1912]"
+							}
+						/>
+					</Button>
+
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant="ghost"
+								size="icon"
+								className="h-10 w-10 rounded-full text-[#0F1912] hover:bg-[#E5E7E6] focus-visible:ring-4 focus-visible:ring-[#C1C4C2] focus-visible:outline-hidden">
+								<MoreHorizontal className="h-5 w-5" />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent
+							align="end"
+							className="w-[300px]">
+							<DropdownMenuItem
+								disabled={isEcomBlocked(order) || isAddingToCart}
+								className="flex items-center gap-3"
+								onClick={() => void handleAddSingleToCart(order)}>
+								<ShoppingCart className="h-4 w-4 text-[#005522]" />
+								<span>Legg til handlekurv</span>
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								className="flex items-center gap-3"
+								onClick={() => {
+									selectSingleRow(order.hexagonId);
+									setSupportOpen(true);
+								}}>
+								<Mail className="h-4 w-4 text-[#005522]" />
+								<span>Kontakt TESS support</span>
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								className="flex items-center gap-3"
+								onClick={() => {
+									selectSingleRow(order.hexagonId);
+									setRfqOpen(true);
+								}}>
+								<Mail className="h-4 w-4 text-[#005522]" />
+								<span>Send forespørsel om tilbud (RFQ)</span>
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				</div>
+			),
+		},
 	};
 
 	const activeColumns = useMemo(() => {
@@ -558,7 +662,9 @@ export function HosesAndEquipments({
 		const cols: Column<HoseOrder>[] = nonActions
 			.map((n) => allColumns[n])
 			.filter(Boolean) as Column<HoseOrder>[];
-		if (selectedColumns.includes("actions")) cols.push(allColumns["actions"]);
+		if (selectedColumns.includes("actions"))
+			cols.unshift(allColumns["actions"]);
+		cols.push(allColumns["rowActions"]);
 		return cols;
 	}, [
 		selectedColumns,
