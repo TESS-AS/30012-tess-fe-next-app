@@ -1136,6 +1136,13 @@
 			"requests": "Requests",
 			"recentActivities": "Recent Activities"
 		},
+		"unsavedChanges": {
+			"title": "Unsaved changes",
+			"descriptionLine1": "You have unsaved changes.",
+			"descriptionLine2": "Do you want to discard these changes?",
+			"cancel": "No, go back",
+			"discard": "Discard changes"
+		},
 		"sidebar": {
 			"orders": "Orders",
 			"myOrders": "My Orders",
@@ -1209,5 +1216,36 @@
 		"description": "You are about to update {count} users. All filled fields will be changed for these users.",
 		"cancel": "Cancel",
 		"confirm": "Confirm Changes"
+	},
+	"InnstillingerTab": {
+		"loadingProfile": "Loading profile...",
+		"loadingAccess": "Loading access...",
+		"saveChanges": "Save changes",
+		"userRights": "User Rights",
+		"yourRole": "Your role:",
+		"roleLabel": {
+			"admin": "Admin",
+			"superuser": "Superuser",
+			"employee": "Employee",
+			"customer": "Customer"
+		},
+		"roleDescription": {
+			"admin": "You have all administrator rights. You can create users and change settings.",
+			"superuser": "You can create users with custom settings, approve requisitions, set budgets for employees, and create dimensions.",
+			"employee": "You can only shop on behalf of yourself.",
+			"customer": "You can only shop on behalf of yourself."
+		},
+		"superuserBanner": {
+			"title": "Changing standard warehouse is possible",
+			"line1": "Some choices are pre-set for you, but can be changed.",
+			"line2": "Other settings are fixed by administrator and cannot be changed."
+		},
+		"employeeBanner": {
+			"title": "Your accesses are fixed",
+			"line": "Your settings are set by the user who added you."
+		},
+		"customerAccessLabel": "Customer access:",
+		"tessCompanyLabel": "TESS company:",
+		"catalogLabel": "Customer catalog:"
 	}
 }

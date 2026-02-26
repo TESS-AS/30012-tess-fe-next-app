@@ -705,8 +705,12 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 											onClick={() => router.push("/profile")}>
 											Gå til din side
 										</DropdownMenuItem>
-										<DropdownMenuItem className="text-gray-700">
-											Endre innstillinger
+										<DropdownMenuItem
+											className="text-gray-700"
+											onClick={() =>
+												router.push("/profile?tab=settings")
+											}>
+											Innstillinger
 										</DropdownMenuItem>
 										<CustomerNumberSwitcher profile={profile} />
 										{(hasHoseManagementAccess || hasTessEdiAccess) && (
