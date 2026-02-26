@@ -7,14 +7,19 @@ import PersonalInfoTab from "@/app/[locale]/profile/(components)/tabs/PersonalIn
 import UserAddressesTab from "@/app/[locale]/profile/(components)/tabs/UserAdresses/UserAddressesTab";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useGetHoseSystems } from "@/hooks/useGetHoseSystems";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { profileKeys } from "@/hooks/useGetProfileData";
+import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import { cn } from "@/lib/utils";
+import axiosClient from "@/services/axiosClient";
+import { useQueryClient } from "@tanstack/react-query";
 import {
 	ShoppingCart,
 	Folder,
@@ -27,6 +32,7 @@ import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import { InnstillingerTab } from "./(components)/innstillinger-tab";
 import { SidebarNav } from "./(components)/sidebar-nav";
 
 // Lazy load tab content to reduce profile page First Load JS (each tab in its own chunk)
@@ -127,11 +133,26 @@ export default function ProfilePage() {
 	const { data: profile, isLoading: isLoadingProfile } = useGetProfileData();
 	const t = useTranslations();
 	const searchParams = useSearchParams();
+	const router = useRouter();
+	const queryClient = useQueryClient();
 
 	const [activeMode, setActiveMode] = useState<"hose" | "ehandel" | "tess-edi">(
 		"ehandel",
 	);
 	const [activeTab, setActiveTab] = useState("rekvisisjoner");
+	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+	const [supportOpen, setSupportOpen] = useState(false);
+	const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+	const [selectedHexagonId, setSelectedHexagonId] = useState<string | null>(
+		null,
+	);
+	const [selectedAvvikendeOrdreId, setSelectedAvvikendeOrdreId] = useState<
+		string | null
+	>(null);
+	const [hasUnsavedSettingsChanges, setHasUnsavedSettingsChanges] =
+		useState(false);
+	const [isUnsavedDialogOpen, setIsUnsavedDialogOpen] = useState(false);
+	const [pendingTab, setPendingTab] = useState<string | null>(null);
 
 	const shouldFetchHoseSystems = !!profile && activeMode === "hose";
 	const hoseSystems = useGetHoseSystems(shouldFetchHoseSystems);
@@ -151,10 +172,18 @@ export default function ProfilePage() {
 		}
 	}, [profile]);
 
-	// Read tab from URL query parameters
+	// Read tab from URL query parameters (and guard when leaving settings with unsaved changes)
 	useEffect(() => {
 		const tabParam = searchParams.get("tab");
 		if (!tabParam) return;
+
+		// If we're on settings with unsaved changes and URL says another tab, show modal and keep URL on settings
+		if (hasUnsavedSettingsChanges && tabParam !== "settings") {
+			setPendingTab(tabParam);
+			setIsUnsavedDialogOpen(true);
+			router.replace(`/profile?tab=settings`, { scroll: false });
+			return;
+		}
 
 		// Hose management tab group -> switch to hose mode
 		const hoseTabs = new Set([
@@ -170,6 +199,9 @@ export default function ProfilePage() {
 
 		if (hoseTabs.has(tabParam)) {
 			setActiveMode("hose");
+		}
+		if (tabParam === "settings") {
+			setActiveMode("ehandel");
 		}
 
 		setActiveTab(tabParam);
@@ -188,7 +220,7 @@ export default function ProfilePage() {
 			// Redirect non-admins away from tess-edi
 			setActiveTab("rekvisisjoner");
 		}
-	}, [searchParams, profile]);
+	}, [searchParams, profile, hasUnsavedSettingsChanges, router]);
 
 	// Reset selected order when activeTab changes away from tess-edi or when switching to tess-edi
 	useEffect(() => {
@@ -196,6 +228,18 @@ export default function ProfilePage() {
 			setSelectedAvvikendeOrdreId(null);
 		}
 	}, [activeTab]);
+
+	const handleLogout = async () => {
+		try {
+			await axiosClient.post("/logout");
+		} catch (error) {
+			console.error("Logout API failed", error);
+		}
+		queryClient.setQueryData(profileKeys.detail(), null);
+		queryClient.invalidateQueries({ queryKey: profileKeys.all });
+		queryClient.removeQueries({ queryKey: profileKeys.all });
+		router.push("/");
+	};
 
 	const handleModeChange = (mode: "hose" | "ehandel" | "tess-edi") => {
 		// Only allow tess-edi mode for admins
@@ -205,23 +249,50 @@ export default function ProfilePage() {
 		setActiveMode(mode);
 		if (mode === "ehandel") {
 			setActiveTab("rekvisisjoner");
+			router.replace("/profile?tab=rekvisisjoner", { scroll: false });
 		} else if (mode === "hose") {
 			setActiveTab("hose-orders");
+			router.replace("/profile?tab=hose-orders", { scroll: false });
 		} else if (mode === "tess-edi") {
 			setActiveTab("tess-edi");
+			router.replace("/profile?tab=tess-edi", { scroll: false });
 			// Reset selected order when switching to tess-edi mode
 			setSelectedAvvikendeOrdreId(null);
 		}
 	};
-	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
-	const [supportOpen, setSupportOpen] = useState(false);
-	const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
-	const [selectedHexagonId, setSelectedHexagonId] = useState<string | null>(
-		null,
-	);
-	const [selectedAvvikendeOrdreId, setSelectedAvvikendeOrdreId] = useState<
-		string | null
-	>(null);
+
+	const handleConfirmDiscardChanges = () => {
+		setIsUnsavedDialogOpen(false);
+		setHasUnsavedSettingsChanges(false);
+		if (!pendingTab) return;
+		const tab = pendingTab;
+		setPendingTab(null);
+
+		if (tab === "support") {
+			setSupportOpen(true);
+			return;
+		}
+
+		if (tab === "logout") {
+			handleLogout();
+			return;
+		}
+
+		if (tab === "tess-edi" && profile?.role !== "admin") {
+			return;
+		}
+
+		setActiveTab(tab);
+		router.replace(`/profile?tab=${tab}`, { scroll: false });
+		if (tab === "tess-edi") {
+			setSelectedAvvikendeOrdreId(null);
+		}
+	};
+
+	const handleCancelDiscardChanges = () => {
+		setIsUnsavedDialogOpen(false);
+		setPendingTab(null);
+	};
 
 	if (isLoadingProfile) {
 		return (
@@ -352,8 +423,22 @@ export default function ProfilePage() {
 							activeTab={activeTab}
 							onModeChange={handleModeChange}
 							onTabChange={(tab) => {
+								if (
+									activeTab === "settings" &&
+									tab !== "settings" &&
+									hasUnsavedSettingsChanges
+								) {
+									setPendingTab(tab);
+									setIsUnsavedDialogOpen(true);
+									return;
+								}
+
 								if (tab === "support") {
 									setSupportOpen(true);
+									return;
+								}
+								if (tab === "logout") {
+									handleLogout();
 									return;
 								}
 								// Only allow tess-edi tab for admins
@@ -361,6 +446,7 @@ export default function ProfilePage() {
 									return;
 								}
 								setActiveTab(tab);
+								router.replace(`/profile?tab=${tab}`, { scroll: false });
 								// Reset selected order when switching tabs
 								if (tab === "tess-edi") {
 									setSelectedAvvikendeOrdreId(null);
@@ -409,22 +495,17 @@ export default function ProfilePage() {
 														},
 													]
 												: []),
-											// {
-											// 	href: "catalog",
-											// 	label: t("ProfilePage.sidebar.catalog"),
-											// 	icon: "/icons/profile/navbar/lock-time-outline.svg",
-											// },
-											// {
-											// 	href: "settings",
-											// 	label: t("ProfilePage.sidebar.settings"),
-											// 	icon: Settings,
-											// },
-											// {
-											// 	href: "logout",
-											// 	label: t("ProfilePage.sidebar.logout"),
-											// 	icon: LogOut,
-											// 	variant: "logout",
-											// },
+											{
+												href: "settings",
+												label: t("ProfilePage.sidebar.settings"),
+												icon: Settings,
+											},
+											{
+												href: "logout",
+												label: t("ProfilePage.sidebar.logout"),
+												icon: LogOut,
+												variant: "logout",
+											},
 										]
 									: activeMode === "tess-edi"
 										? [
@@ -546,6 +627,10 @@ export default function ProfilePage() {
 							</TabsContent>
 						)}
 
+						<TabsContent value="settings">
+							<InnstillingerTab onDirtyChange={setHasUnsavedSettingsChanges} />
+						</TabsContent>
+
 						<TabsContent value="addresses">
 							<UserAddressesTab />
 						</TabsContent>
@@ -625,6 +710,41 @@ export default function ProfilePage() {
 					console.log("Support submit", { subject, message, file });
 				}}
 			/>
+
+			<Dialog
+				open={isUnsavedDialogOpen}
+				onOpenChange={(open) => {
+					if (!open) {
+						setIsUnsavedDialogOpen(false);
+					}
+				}}>
+				<DialogContent className="!max-w-sm rounded-xl bg-white p-6 sm:p-7">
+					<div className="space-y-3">
+						<h2 className="text-xl font-semibold text-[#0F1912]">
+							{t("ProfilePage.unsavedChanges.title")}
+						</h2>
+						<p className="text-sm font-bold leading-snug text-gray-500">
+							{t("ProfilePage.unsavedChanges.descriptionLine1")}
+							<br />
+							{t("ProfilePage.unsavedChanges.descriptionLine2")}
+						</p>
+						<div className="mt-4 flex justify-start gap-3">
+							<Button
+								variant="outline"
+								onClick={handleCancelDiscardChanges}
+								className="border border-[#D1D5D3] bg-white px-5 py-2 text-sm font-medium text-[#0F1912]">
+								{t("ProfilePage.unsavedChanges.cancel")}
+							</Button>
+							<Button
+								variant="destructive"
+								onClick={handleConfirmDiscardChanges}
+								className="bg-[#C81E1E] px-5 py-2 text-sm text-white hover:bg-[#B71C1C]">
+								{t("ProfilePage.unsavedChanges.discard")}
+							</Button>
+						</div>
+					</div>
+				</DialogContent>
+			</Dialog>
 		</main>
 	);
 }

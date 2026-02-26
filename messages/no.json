@@ -1140,6 +1140,13 @@
 			"requests": "Foresp\u00f8rsler",
 			"recentActivities": "Siste aktiviteter"
 		},
+		"unsavedChanges": {
+			"title": "Endringer ikke lagret",
+			"descriptionLine1": "Du har gjort endringer som ikke er lagret.",
+			"descriptionLine2": "Vil du forkaste endringene?",
+			"cancel": "Nei, avbryt",
+			"discard": "Forkast endringer"
+		},
 		"sidebar": {
 			"orders": "Ordre",
 			"myOrders": "Mine bestillinger",
@@ -1213,5 +1220,34 @@
 		"description": "Du er i ferd med \u00e5 oppdatere {count} brukere. Alle utfylte felter vil bli endret for disse brukerne.",
 		"cancel": "Avbryt",
 		"confirm": "Bekreft endringene"
+	},
+	"InnstillingerTab": {
+		"loadingProfile": "Laster profil...",
+		"loadingAccess": "Laster tilganger...",
+		"saveChanges": "Lagre endringer",
+		"userRights": "Brukerrettigheter",
+		"yourRole": "Din rolle:",
+		"roleLabel": {
+			"admin": "Admin",
+			"superuser": "Superbruker",
+			"employee": "Ansatt"
+		},
+		"roleDescription": {
+			"admin": "Du har alle administratorrettigheter. Du kan opprette brukere og endre innstillinger.",
+			"superuser": "Du kan opprette brukere med egne innstillinger, godkjenne rekvisjoner, sette budsjetter på ansatte og opprette dimensjoner.",
+			"employee": "Du kan kun handle på vegne av deg selv."
+		},
+		"superuserBanner": {
+			"title": "Endring av standardlager er mulig",
+			"line1": "Noen valg er forhåndssatt for deg, men kan endres.",
+			"line2": "Andre innstillinger er fastsatt av administrator og kan ikke endres."
+		},
+		"employeeBanner": {
+			"title": "Tilgangene dine er faste",
+			"line": "Innstillingene dine er satt av brukeren som la deg til."
+		},
+		"customerAccessLabel": "Kundetilgang:",
+		"tessCompanyLabel": "TESS firma:",
+		"catalogLabel": "Kundekatalog:"
 	}
 }
