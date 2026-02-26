@@ -8,8 +8,8 @@ import { useTranslations } from "next-intl";
 
 import { AddressSelector } from "./address-selector";
 import { Button } from "../ui/button";
-import { Checkbox } from "../ui/checkbox";
 import { CharLimitFeedback } from "../ui/char-limit-feedback";
+import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Modal } from "../ui/modal";
