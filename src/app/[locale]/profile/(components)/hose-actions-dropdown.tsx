@@ -64,12 +64,11 @@ export function HoseActionsDropdown({
 	const defaultTrigger = (
 		<button
 			className={cn(
-				"group inline-flex h-[52px] w-full cursor-pointer items-center gap-2 rounded-tr-md px-3 py-2 text-sm font-medium transition-colors",
+				"group inline-flex h-[52px] w-full cursor-pointer items-center gap-2 rounded-tl-md px-3 py-2 text-sm font-medium transition-colors",
 				selectedCount > 0
 					? "border-[#0E7B34] bg-[#005522] text-white"
 					: "border-[#C1C4C2] text-[#5A615D] data-[state=open]:bg-[#003D1A] data-[state=open]:text-white",
 			)}>
-			<span className="tracking-wide">{t("action")}</span>
 			<ChevronDown
 				className={cn(
 					"h-4 w-4 transition-colors",
@@ -78,6 +77,7 @@ export function HoseActionsDropdown({
 						: "text-[#5A615D] group-data-[state=open]:text-white",
 				)}
 			/>
+			<span className="tracking-wide">{t("action")}</span>
 		</button>
 	);
 

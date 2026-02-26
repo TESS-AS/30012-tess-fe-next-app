@@ -7,6 +7,7 @@ import { extractUniqueDimensions } from "@/utils/dimensionFormaters";
 import { useTranslations } from "next-intl";
 
 import { DimensionSearchInput } from "./dimension-search-input";
+import { CharLimitFeedback } from "../ui/char-limit-feedback";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
@@ -32,11 +33,15 @@ export const UserDimensionsInput: React.FC<Props> = ({
 	setDimensionInputMode,
 }) => {
 	const t = useTranslations("Checkout.dimensions");
+	const MAX_DIMENSION_FIELD_LENGTH = 35;
 	const [userDimensions, setUserDimensions] = useState<UserDimensionItem[]>([]);
 	const [userDimension, setUserDimension] = useState("");
 	const [userDimensionOne, setUserDimensionOne] = useState("");
 	const [userDimensionTwo, setUserDimensionTwo] = useState("");
 	const [userDimensionThree, setUserDimensionThree] = useState("");
+	const [tooLongFields, setTooLongFields] = useState<Record<string, boolean>>(
+		{},
+	);
 	const [userDimensionOneId, setUserDimensionOneId] = useState("");
 	const [userDimensionTwoId, setUserDimensionTwoId] = useState("");
 	const [userDimensionThreeId, setUserDimensionThreeId] = useState("");
@@ -347,46 +352,97 @@ export const UserDimensionsInput: React.FC<Props> = ({
 						type="text"
 						placeholder={t("dimension1")}
 						value={userDimensionOne}
+						maxLength={MAX_DIMENSION_FIELD_LENGTH}
 						onChange={(e) => {
-							setUserDimensionOne(e.target.value);
+							const nextValue = e.target.value;
+							setTooLongFields((prev) => ({
+								...prev,
+								dimension1: nextValue.length > MAX_DIMENSION_FIELD_LENGTH,
+							}));
+							const normalizedValue = nextValue.slice(
+								0,
+								MAX_DIMENSION_FIELD_LENGTH,
+							);
+							setUserDimensionOne(normalizedValue);
 							setOrderData((prev) => ({
 								...prev,
 								salesOrderHeader: {
 									...prev.salesOrderHeader,
-									customersOrderReference: e.target.value,
+									customersOrderReference: normalizedValue,
 								},
 							}));
 						}}
+						className="mb-0"
+					/>
+					<CharLimitFeedback
+						valueLength={userDimensionOne.length}
+						maxLength={MAX_DIMENSION_FIELD_LENGTH}
+						showTooLong={tooLongFields.dimension1}
+						exceededText={`Maks ${MAX_DIMENSION_FIELD_LENGTH} tegn`}
 					/>
 					<Input
 						type="text"
 						placeholder={t("dimension2")}
 						value={userDimensionTwo}
+						maxLength={MAX_DIMENSION_FIELD_LENGTH}
 						onChange={(e) => {
-							setUserDimensionTwo(e.target.value);
+							const nextValue = e.target.value;
+							setTooLongFields((prev) => ({
+								...prev,
+								dimension2: nextValue.length > MAX_DIMENSION_FIELD_LENGTH,
+							}));
+							const normalizedValue = nextValue.slice(
+								0,
+								MAX_DIMENSION_FIELD_LENGTH,
+							);
+							setUserDimensionTwo(normalizedValue);
 							setOrderData((prev) => ({
 								...prev,
 								salesOrderHeader: {
 									...prev.salesOrderHeader,
-									customerReference: e.target.value,
+									customerReference: normalizedValue,
 								},
 							}));
 						}}
+						className="mb-0"
+					/>
+					<CharLimitFeedback
+						valueLength={userDimensionTwo.length}
+						maxLength={MAX_DIMENSION_FIELD_LENGTH}
+						showTooLong={tooLongFields.dimension2}
+						exceededText={`Maks ${MAX_DIMENSION_FIELD_LENGTH} tegn`}
 					/>
 					<Input
 						type="text"
 						placeholder={t("dimension3")}
 						value={userDimensionThree}
+						maxLength={MAX_DIMENSION_FIELD_LENGTH}
 						onChange={(e) => {
-							setUserDimensionThree(e.target.value);
+							const nextValue = e.target.value;
+							setTooLongFields((prev) => ({
+								...prev,
+								dimension3: nextValue.length > MAX_DIMENSION_FIELD_LENGTH,
+							}));
+							const normalizedValue = nextValue.slice(
+								0,
+								MAX_DIMENSION_FIELD_LENGTH,
+							);
+							setUserDimensionThree(normalizedValue);
 							setOrderData((prev) => ({
 								...prev,
 								salesOrderLines: prev.salesOrderLines.map((line) => ({
 									...line,
-									accountPart3: e.target.value,
+									accountPart3: normalizedValue,
 								})),
 							}));
 						}}
+						className="mb-0"
+					/>
+					<CharLimitFeedback
+						valueLength={userDimensionThree.length}
+						maxLength={MAX_DIMENSION_FIELD_LENGTH}
+						showTooLong={tooLongFields.dimension3}
+						exceededText={`Maks ${MAX_DIMENSION_FIELD_LENGTH} tegn`}
 					/>
 				</>
 			)}

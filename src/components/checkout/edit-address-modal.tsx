@@ -9,6 +9,7 @@ import { useTranslations } from "next-intl";
 import { AddressSelector } from "./address-selector";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
+import { CharLimitFeedback } from "../ui/char-limit-feedback";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Modal } from "../ui/modal";
@@ -39,6 +40,7 @@ export const EditAddressModal: React.FC<EditAddressModalProps> = ({
 	initialData,
 }) => {
 	const t = useTranslations("Checkout.modals.address");
+	const MAX_ADDRESS_FIELD_LENGTH = 30;
 
 	const savedAddresses = useSavedAddresses();
 	const [formData, setFormData] = useState<SavedAddressData>({
@@ -55,6 +57,9 @@ export const EditAddressModal: React.FC<EditAddressModalProps> = ({
 	const [showExtra, setShowExtra] = useState(!!formData.extraInfo);
 	const [loading, setLoading] = useState(false);
 	const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+	const [tooLongFields, setTooLongFields] = useState<Record<string, boolean>>(
+		{},
+	);
 
 	const handleSave = () => {
 		onSave(formData);
@@ -71,7 +76,21 @@ export const EditAddressModal: React.FC<EditAddressModalProps> = ({
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
 	) => {
 		const { name, value } = e.target;
-		setFormData((prev) => ({ ...prev, [name]: value }));
+		const shouldLimitLength =
+			name === "street" ||
+			name === "houseNumber" ||
+			name === "extraInfo" ||
+			name === "city";
+		if (shouldLimitLength) {
+			setTooLongFields((prev) => ({
+				...prev,
+				[name]: value.length > MAX_ADDRESS_FIELD_LENGTH,
+			}));
+		}
+		const nextValue = shouldLimitLength
+			? value.slice(0, MAX_ADDRESS_FIELD_LENGTH)
+			: value;
+		setFormData((prev) => ({ ...prev, [name]: nextValue }));
 
 		// Real postal code validation
 		if (name === "postalCode") {
@@ -147,12 +166,27 @@ export const EditAddressModal: React.FC<EditAddressModalProps> = ({
 					<Input
 						name="addressName"
 						value={formData.addressName}
-						onChange={handleChange}
+						maxLength={MAX_ADDRESS_FIELD_LENGTH}
+						onChange={(e) => {
+							const nextValue = e.target.value;
+							setTooLongFields((prev) => ({
+								...prev,
+								addressName: nextValue.length > MAX_ADDRESS_FIELD_LENGTH,
+							}));
+							setFormData((prev) => ({
+								...prev,
+								addressName: nextValue.slice(0, MAX_ADDRESS_FIELD_LENGTH),
+							}));
+						}}
 						placeholder="Legg til navn"
 					/>
-					<p className="text-muted-foreground mt-1 text-xs font-medium">
-						{t("addressNameExample")}
-					</p>
+					<CharLimitFeedback
+						helperText={t("addressNameExample")}
+						valueLength={formData.addressName.length}
+						maxLength={MAX_ADDRESS_FIELD_LENGTH}
+						showTooLong={tooLongFields.addressName}
+						exceededText={`Maks ${MAX_ADDRESS_FIELD_LENGTH} tegn`}
+					/>
 				</div>
 
 				<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -162,11 +196,16 @@ export const EditAddressModal: React.FC<EditAddressModalProps> = ({
 							name="street"
 							value={formData.street}
 							onChange={handleChange}
+							maxLength={MAX_ADDRESS_FIELD_LENGTH}
 							placeholder="Legg til gatenavn"
 						/>
-						<p className="text-muted-foreground mt-1 text-xs font-medium">
-							{t("streetExample")}
-						</p>
+						<CharLimitFeedback
+							helperText={t("streetExample")}
+							valueLength={formData.street.length}
+							maxLength={MAX_ADDRESS_FIELD_LENGTH}
+							showTooLong={tooLongFields.street}
+							exceededText={`Maks ${MAX_ADDRESS_FIELD_LENGTH} tegn`}
+						/>
 					</div>
 					<div>
 						<Label>{t("houseNumber")}</Label>
@@ -174,11 +213,16 @@ export const EditAddressModal: React.FC<EditAddressModalProps> = ({
 							name="houseNumber"
 							value={formData.houseNumber}
 							onChange={handleChange}
+							maxLength={MAX_ADDRESS_FIELD_LENGTH}
 							placeholder="Legg til husnummer"
 						/>
-						<p className="text-muted-foreground mt-1 text-xs font-medium">
-							{t("houseNumberExample")}
-						</p>
+						<CharLimitFeedback
+							helperText={t("houseNumberExample")}
+							valueLength={formData.houseNumber.length}
+							maxLength={MAX_ADDRESS_FIELD_LENGTH}
+							showTooLong={tooLongFields.houseNumber}
+							exceededText={`Maks ${MAX_ADDRESS_FIELD_LENGTH} tegn`}
+						/>
 					</div>
 				</div>
 
@@ -198,11 +242,16 @@ export const EditAddressModal: React.FC<EditAddressModalProps> = ({
 							name="extraInfo"
 							value={formData.extraInfo}
 							onChange={handleChange}
+							maxLength={MAX_ADDRESS_FIELD_LENGTH}
 							placeholder="Legg til husnummer"
 						/>
-						<p className="text-muted-foreground mt-1 text-xs font-medium">
-							{t("extraInfoExample")}
-						</p>
+						<CharLimitFeedback
+							helperText={t("extraInfoExample")}
+							valueLength={(formData.extraInfo || "").length}
+							maxLength={MAX_ADDRESS_FIELD_LENGTH}
+							showTooLong={tooLongFields.extraInfo}
+							exceededText={`Maks ${MAX_ADDRESS_FIELD_LENGTH} tegn`}
+						/>
 					</div>
 				)}
 
@@ -234,11 +283,18 @@ export const EditAddressModal: React.FC<EditAddressModalProps> = ({
 							value={formData.city}
 							readOnly={cityReadOnly}
 							onChange={handleChange}
+							maxLength={MAX_ADDRESS_FIELD_LENGTH}
 							placeholder={
 								cityReadOnly
 									? t("cityPlaceholderAuto")
 									: t("cityPlaceholderManual")
 							}
+						/>
+						<CharLimitFeedback
+							valueLength={formData.city.length}
+							maxLength={MAX_ADDRESS_FIELD_LENGTH}
+							showTooLong={tooLongFields.city}
+							exceededText={`Maks ${MAX_ADDRESS_FIELD_LENGTH} tegn`}
 						/>
 					</div>
 				</div>

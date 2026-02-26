@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { CharLimitFeedback } from "@/components/ui/char-limit-feedback";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -41,6 +42,7 @@ interface AddressCardProps {
 }
 
 const POSTAL_CODE_REGEX = /^\d{4}$/;
+const MAX_ADDRESS_FIELD_LENGTH = 30;
 
 export const AddressCard: React.FC<AddressCardProps> = ({
 	name,
@@ -63,6 +65,9 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 	const [showExtra, setShowExtra] = useState(!!extraInfo);
 	const [isLoading, setIsLoading] = useState(false);
 	const [cityReadOnly, setCityReadOnly] = useState(true);
+	const [tooLongFields, setTooLongFields] = useState<Record<string, boolean>>(
+		{},
+	);
 	const [errors, setErrors] = useState<{
 		addressName?: string;
 		street?: string;
@@ -87,7 +92,22 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
 	) => {
 		const { name, value } = e.target;
-		setFormData((prev) => ({ ...prev, [name]: value }));
+		const shouldLimitLength =
+			name === "addressName" ||
+			name === "street" ||
+			name === "houseNumber" ||
+			name === "extraInfo" ||
+			name === "city";
+		if (shouldLimitLength) {
+			setTooLongFields((prev) => ({
+				...prev,
+				[name]: value.length > MAX_ADDRESS_FIELD_LENGTH,
+			}));
+		}
+		const nextValue = shouldLimitLength
+			? value.slice(0, MAX_ADDRESS_FIELD_LENGTH)
+			: value;
+		setFormData((prev) => ({ ...prev, [name]: nextValue }));
 		setErrors((prev) => {
 			const next = { ...prev };
 			// Clear error for the field being edited
@@ -252,11 +272,16 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 								name="addressName"
 								value={formData.addressName}
 								onChange={handleChange}
+								maxLength={MAX_ADDRESS_FIELD_LENGTH}
 								placeholder="Legg til navn"
 							/>
-							<p className="text-muted-foreground mt-1 text-xs font-medium">
-								{t("addressNameExample")}
-							</p>
+							<CharLimitFeedback
+								helperText={t("addressNameExample")}
+								valueLength={formData.addressName.length}
+								maxLength={MAX_ADDRESS_FIELD_LENGTH}
+								showTooLong={tooLongFields.addressName}
+								exceededText={`Maks ${MAX_ADDRESS_FIELD_LENGTH} tegn`}
+							/>
 							{errors.addressName && (
 								<p className="mt-1 text-xs font-medium text-red-600">
 									{errors.addressName}
@@ -271,11 +296,16 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 									name="street"
 									value={formData.street}
 									onChange={handleChange}
+									maxLength={MAX_ADDRESS_FIELD_LENGTH}
 									placeholder="Legg til gatenavn"
 								/>
-								<p className="text-muted-foreground mt-1 text-xs font-medium">
-									{t("streetExample")}
-								</p>
+								<CharLimitFeedback
+									helperText={t("streetExample")}
+									valueLength={formData.street?.length || 0}
+									maxLength={MAX_ADDRESS_FIELD_LENGTH}
+									showTooLong={tooLongFields.street}
+									exceededText={`Maks ${MAX_ADDRESS_FIELD_LENGTH} tegn`}
+								/>
 								{errors.street && (
 									<p className="mt-1 text-xs font-medium text-red-600">
 										{errors.street}
@@ -288,11 +318,16 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 									name="houseNumber"
 									value={formData.houseNumber}
 									onChange={handleChange}
+									maxLength={MAX_ADDRESS_FIELD_LENGTH}
 									placeholder="Legg til husnummer"
 								/>
-								<p className="text-muted-foreground mt-1 text-xs font-medium">
-									{t("houseNumberExample")}
-								</p>
+								<CharLimitFeedback
+									helperText={t("houseNumberExample")}
+									valueLength={formData.houseNumber.length}
+									maxLength={MAX_ADDRESS_FIELD_LENGTH}
+									showTooLong={tooLongFields.houseNumber}
+									exceededText={`Maks ${MAX_ADDRESS_FIELD_LENGTH} tegn`}
+								/>
 								{errors.houseNumber && (
 									<p className="mt-1 text-xs font-medium text-red-600">
 										{errors.houseNumber}
@@ -317,11 +352,16 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 									name="extraInfo"
 									value={formData.extraInfo}
 									onChange={handleChange}
+									maxLength={MAX_ADDRESS_FIELD_LENGTH}
 									placeholder="Legg til husnummer"
 								/>
-								<p className="text-muted-foreground mt-1 text-xs font-medium">
-									{t("extraInfoExample")}
-								</p>
+								<CharLimitFeedback
+									helperText={t("extraInfoExample")}
+									valueLength={(formData.extraInfo || "").length}
+									maxLength={MAX_ADDRESS_FIELD_LENGTH}
+									showTooLong={tooLongFields.extraInfo}
+									exceededText={`Maks ${MAX_ADDRESS_FIELD_LENGTH} tegn`}
+								/>
 							</div>
 						)}
 
@@ -358,11 +398,18 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 									value={formData.city}
 									readOnly={cityReadOnly}
 									onChange={handleChange}
+									maxLength={MAX_ADDRESS_FIELD_LENGTH}
 									placeholder={
 										cityReadOnly
 											? t("cityPlaceholderAuto")
 											: t("cityPlaceholderManual")
 									}
+								/>
+								<CharLimitFeedback
+									valueLength={formData.city.length}
+									maxLength={MAX_ADDRESS_FIELD_LENGTH}
+									showTooLong={tooLongFields.city}
+									exceededText={`Maks ${MAX_ADDRESS_FIELD_LENGTH} tegn`}
 								/>
 								{errors.city && (
 									<p className="mt-1 text-xs font-medium text-red-600">
