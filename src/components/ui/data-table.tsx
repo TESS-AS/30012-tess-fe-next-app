@@ -146,7 +146,7 @@ export function DataTable<
 														"min-w-[100px]": column.key === "price",
 														"min-w-[180px]": column.key === "status",
 														"sticky right-0 z-10": column.key === "action",
-														"p-0": column.key === "handling",
+														"p-0": column.key === "action",
 													},
 												)}>
 												<div className="flex items-center gap-1">
@@ -207,9 +207,7 @@ export function DataTable<
 													<tr
 														onClick={() => {
 															if (disabled) return;
-															if (onHoseClick && item?.hexagonId) {
-																onHoseClick(item.hexagonId);
-															} else if (onOrderClick) {
+															if (onOrderClick) {
 																onOrderClick(item.orderId);
 															}
 														}}
@@ -219,7 +217,7 @@ export function DataTable<
 																? "bg-[#F8F9F8] opacity-60"
 																: isSelected(item.orderId)
 																	? selectedRowBgClass
-																	: "hover:bg-[#F8F9F8]",
+																	: "hover:bg-[#F0FCF2]",
 															!disabled &&
 																(onHoseClick || onOrderClick) &&
 																"cursor-pointer",

@@ -30,6 +30,7 @@ import {
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { FilterOptions, useGetAssets } from "@/hooks/useGetAssets";
 import { useAppContext } from "@/lib/appContext";
+import { cn } from "@/lib/utils";
 import { postCartKit } from "@/services/carts.service";
 import { ProfileUser } from "@/types/user.types";
 import { Mail, MapPin, MoreHorizontal, ShoppingCart, X } from "lucide-react";
@@ -445,6 +446,16 @@ export function HosesAndEquipments({
 		window.scrollTo({ top: 0, behavior: "smooth" });
 	};
 
+	const handleHoseClick = (hoseId: string) => {
+		if (typeof window !== "undefined") {
+			window.localStorage.setItem(
+				HOSE_TABLE_PAGE_KEY,
+				String(pagination.currentPage),
+			);
+		}
+		goToHose?.(hoseId);
+	};
+
 	useEffect(() => {
 		if (typeof window === "undefined") return;
 		const storedPage = window.localStorage.getItem(HOSE_TABLE_PAGE_KEY);
@@ -492,7 +503,25 @@ export function HosesAndEquipments({
 		description: {
 			key: "beskrivelse",
 			header: t("columns.description"),
-			cell: (o) => <span>{o.beskrivelse}</span>,
+			cell: (o) => (
+				<button
+					type="button"
+					disabled={isEcomBlocked(o)}
+					className={cn(
+						"w-full text-left underline-offset-2",
+						!isEcomBlocked(o) &&
+							"cursor-pointer text-[#003D1A] decoration-[#003D1A]",
+						!isEcomBlocked(o) && "hover:underline focus-visible:underline",
+						isEcomBlocked(o) && "cursor-not-allowed",
+					)}
+					onClick={(e) => {
+						e.stopPropagation();
+						if (isEcomBlocked(o)) return;
+						handleHoseClick(o.hexagonId);
+					}}>
+					{o.beskrivelse}
+				</button>
+			),
 			sortable: true,
 		},
 		s1Location: {
@@ -539,6 +568,21 @@ export function HosesAndEquipments({
 		},
 		actions: {
 			key: "handling",
+			header: "",
+			cell: (order: HoseOrder) => (
+				<Checkbox
+					onClick={(e) => e.stopPropagation()}
+					disabled={isEcomBlocked(order)}
+					checked={isRowSelected(order.hexagonId)}
+					onCheckedChange={(val) => {
+						if (isEcomBlocked(order)) return;
+						handleSelectRow(order.hexagonId, val);
+					}}
+				/>
+			),
+		},
+		rowActions: {
+			key: "action",
 			header: () => (
 				<HoseActionsDropdown
 					selectedCount={selectedCount}
@@ -579,21 +623,6 @@ export function HosesAndEquipments({
 					allSelectedOnPage={allSelectedOnPage}
 				/>
 			),
-			cell: (order: HoseOrder) => (
-				<Checkbox
-					onClick={(e) => e.stopPropagation()}
-					disabled={isEcomBlocked(order)}
-					checked={isRowSelected(order.hexagonId)}
-					onCheckedChange={(val) => {
-						if (isEcomBlocked(order)) return;
-						handleSelectRow(order.hexagonId, val);
-					}}
-				/>
-			),
-		},
-		rowActions: {
-			key: "action",
-			header: "",
 			cell: (order: HoseOrder) => (
 				<div
 					className="flex items-center justify-end gap-2"
@@ -971,15 +1000,6 @@ export function HosesAndEquipments({
 						selectedIds={selectedRows}
 						selectedRowBgClass="bg-[#DCF7E0]"
 						isRowDisabled={(row) => Number(row.ecom) === 3}
-						onHoseClick={(hoseId) => {
-							if (typeof window !== "undefined") {
-								window.localStorage.setItem(
-									HOSE_TABLE_PAGE_KEY,
-									String(pagination.currentPage),
-								);
-							}
-							goToHose?.(hoseId);
-						}}
 					/>
 				</div>
 			</div>
