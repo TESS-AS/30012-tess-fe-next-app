@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import axiosClient from "@/services/axiosClient";
 
@@ -74,15 +74,21 @@ interface ProductData {
 	attributes: Attribute[];
 }
 
+/** API can return itemRelatedProducts as string ("No related products") or array of related product items */
+export type ItemRelatedProducts = string | Array<Record<string, unknown>>;
+
 interface ColumnAttributeApiResponse {
 	productNumber: string;
 	productData: ProductData;
 	variantData: VariantData[];
+	itemRelatedProducts?: ItemRelatedProducts;
 }
 
-type ColumnAttributeResponse = {
+export type ColumnAttributeResponse = {
 	productAttributes?: Attribute[]; // Product-level attributes
 	productData?: ProductData; // Full product-level object with shortDesc, longDesc, etc.
+	/** Per-variant: "No related products" or array of related products (from last fetched itemNumber) */
+	itemRelatedProducts?: ItemRelatedProducts;
 } & {
 	[itemNumber: string]:
 		| {
@@ -110,14 +116,23 @@ type ColumnAttributeResponse = {
 export function useGetColumnAttributes(variantNumber?: string) {
 	const [data, setData] = useState<ColumnAttributeResponse | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
+	const [isFetching, setIsFetching] = useState(false);
 	const [error, setError] = useState<unknown>(null);
+	const hasReceivedDataRef = useRef(false);
 
 	useEffect(() => {
 		if (!variantNumber) return;
 
 		const fetchAttributes = async () => {
-			try {
+			const isInitialLoad = !hasReceivedDataRef.current;
+			// Stale-while-revalidate: only show full loading on initial load so the table doesn't flash when refetching on variant change (e.g. for itemRelatedProducts)
+			if (isInitialLoad) {
 				setIsLoading(true);
+			} else {
+				setIsFetching(true);
+			}
+
+			try {
 				const params = new URLSearchParams();
 				params.append("itemNumber", variantNumber);
 				const response = await axiosClient.get<ColumnAttributeApiResponse>(
@@ -132,6 +147,12 @@ export function useGetColumnAttributes(variantNumber?: string) {
 					transformedData.productData = response.data.productData;
 					transformedData.productAttributes =
 						response.data.productData.attributes || [];
+				}
+
+				// Store itemRelatedProducts (varies per variant; needed when refetching on selection)
+				if (response.data.itemRelatedProducts !== undefined) {
+					transformedData.itemRelatedProducts =
+						response.data.itemRelatedProducts;
 				}
 
 				// Normalize mediaId: API may return array or single object (product-level is object, variant can be either)
@@ -171,16 +192,18 @@ export function useGetColumnAttributes(variantNumber?: string) {
 					});
 				}
 
+				hasReceivedDataRef.current = true;
 				setData(transformedData);
 			} catch (err) {
 				setError(err);
 			} finally {
 				setIsLoading(false);
+				setIsFetching(false);
 			}
 		};
 
 		fetchAttributes();
 	}, [variantNumber]);
 
-	return { data, isLoading, error };
+	return { data, isLoading, isFetching, error };
 }

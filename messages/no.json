@@ -149,7 +149,8 @@
 		"checkout": "Kassen",
 		"profile": "Profil",
 		"ehandel": "E-handel",
-		"hoseManagement": "Slangestyring"
+		"hoseManagement": "Slangestyring",
+		"faq": "FAQ"
 	},
 	"Profile": {
 		"tabs": {
@@ -274,25 +275,51 @@
 	},
 	"Faq": {
 		"title": "Vanlige sp\u00f8rsm\u00e5l (FAQ)",
+		"categories": {
+			"1": "F\u00f8r innlogging og opprettelse",
+			"2": "Priser og avtaler",
+			"3": "Produkter, kataloger og leveringsadresser",
+			"4": "Bestilling og ordre",
+			"5": "Levering, \u00e5pningstider og st\u00f8tte"
+		},
 		"questions": {
+			"accountFromBefore": "Jeg har konto fra f\u00f8r, hvorfor m\u00e5 jeg registrere meg p\u00e5 nytt?",
+			"howToGetAccess": "Hvordan f\u00e5r jeg tilgang til \u00e5 handle i nettbutikken?",
+			"howToBecomeCustomer": "Hvordan blir jeg TESS-kunde?",
+			"wrongNameWhenRegistering": "Jeg skrev feil navn da jeg opprettet brukerkonto. Hvordan endrer jeg det?",
 			"openingHours": "\u00c5pningstider?",
 			"delivery": "Leveranser fra TESS?",
 			"forgotPassword": "Glemt passord?",
 			"addToOrder": "Jeg \u00f8nsker \u00e5 legge til en vare p\u00e5 ordren. Er det mulig?",
+			"orderHistoryAndStatus": "Hvor ser jeg v\u00e5r ordrehistorikk og ordrestatus?",
+			"whyNoPrices": "Hvorfor ser jeg ikke priser?",
+			"agreementPricesInStore": "Har vi v\u00e5re avtalepriser i nettbutikken?",
 			"notFound": "Jeg finner ikke svar p\u00e5 det jeg vil vite. Hva gj\u00f8r jeg?",
+			"whereFindCatalog": "Hvor finner jeg v\u00e5r produktkatalog / sortilog?",
 			"missingProduct": "Jeg finner ikke varen jeg \u00f8nsker \u00e5 kj\u00f8pe. Hva gj\u00f8r jeg?",
+			"howToAddDeliveryAddresses": "Hvordan legger jeg inn og lagrer leveringsadresser?",
 			"contactErrors": "Hvem kontakter jeg om feil eller mangler i nettbutikken?",
 			"specificProduct": "Jeg vil vite mer om en spesifikk vare. Hvem kontakter jeg?"
 		},
 		"answers": {
-			"openingHours": "V\u00e5r nettbutikk er \u00e5pen 24 timer i d\u00f8gnet. De fleste servicesentre holder \u00e5pent fra 07:00 til 16:00. Finn ditt n\u00e6rmeste TESS <link>servicesenter</link>.",
-			"delivery": "Kontakt din lokale selger eller ditt n\u00e6rmeste TESS <link>kundesenter</link>. Du kan ogs\u00e5 henvende deg til v\u00e5rt sentrale kundesenter.",
-			"forgotPassword": "Trykk p\u00e5 \u00abglemt passord\u00bb p\u00e5 login siden. Passordlink sendes til e-posten din som du kan bruke for \u00e5 lage nytt passord.",
-			"addToOrder": "Nei, det er ikke mulig. Det m\u00e5 legges ny bestilling.",
-			"notFound": "Benytt v\u00e5r chat-tjeneste eller ta kontakt med din kundekontakt.",
-			"missingProduct": "Benytt v\u00e5r chat-tjeneste eller ta kontakt med din kundekontakt.",
-			"contactErrors": "Send feil eller mangler du finner til: <email>netthandel@tess.no</email>.",
-			"specificProduct": "Kontakt din lokale selger eller n\u00e6rmeste TESS <link>servicesenter</link>."
+			"accountFromBefore": "Vi har lansert en ny og sikrere nettbutikk.\nAv sikkerhetsgrunner kan vi ikke flytte over gamle brukere automatisk.\nDerfor m\u00e5 alle opprette ny bruker f\u00f8r de kan handle igjen.",
+			"howToGetAccess": "Du m\u00e5 ha et kundenummer hos TESS for \u00e5 kunne handle.\n\nSlik gj\u00f8r du det:\n1. G\u00e5 til tessix.no og velg @@LOGIN_LINK@@.\n2. Opprett bruker med e-postadressen din.\n3. Fyll inn hvilken bedrift du tilh\u00f8rer, og hvilket TESS servicesenter dere bruker.\n4. Send inn skjemaet. Vi kobler brukeren din til riktig kundenummer, priser og lager.\n\nDu f\u00e5r en velkomst-e-post n\u00e5r du er klar til \u00e5 handle.",
+			"howToBecomeCustomer": "Hvis bedriften din ikke enn\u00e5 har kundenummer hos TESS, kan du bli kunde ved \u00e5:\n\u2022 kontakte sentralbord/resepsjon p\u00e5 tess@tess.no, eller\n\u2022 fylle ut @@KUNDESKJEMA_LINK@@ p\u00e5 nettsidene v\u00e5re.",
+			"howToBecomeCustomerLinkText": "kundeskjemaet",
+			"wrongNameWhenRegistering": "Du kan endre navnet ditt under \u00abMine innstillinger\u00bb.\nG\u00e5 til profilen din, \u00e5pne \u00abMine innstillinger\u00bb, oppdater navnet og lagre endringene.",
+			"openingHours": "Nettbutikken er \u00e5pen hele d\u00f8gnet.\nDe fleste servicesentre holder \u00e5pent fra kl. 07.00 til 16.00.",
+			"delivery": "For sp\u00f8rsm\u00e5l om levering kontakter du din lokale selger eller n\u00e6rmeste TESS servicesenter.\nDu kan ogs\u00e5 henvende deg til v\u00e5rt sentrale kundesenter.",
+			"forgotPassword": "Hvis du logger inn med e-postadresse:\n1. G\u00e5 til tessix.no og velg \u00abLogg inn eller opprett bruker\u00bb.\n2. Skriv inn e-postadressen din og trykk \u00abNext\u00bb.\n3. Hvis adressen er registrert, f\u00e5r du opp \u00abForgotten your password?\u00bb.\n4. Klikk der og f\u00f8lg instruksjonene for \u00e5 f\u00e5 en e-post med lenke til nytt passord.\n\nLogger du inn via bedriftens SSO, bruker du bedriftens egen rutine for glemt passord eller kontakter IT-avdelingen.",
+			"addToOrder": "Det er ikke mulig \u00e5 legge til varer p\u00e5 en ordre som allerede er sendt.\nDu m\u00e5 legge inn en ny bestilling.",
+			"orderHistoryAndStatus": "N\u00e5r du er logget inn, g\u00e5r du til \u00abMin side\u00bb.\nDu finner \u00abMin side\u00bb ved \u00e5 klikke p\u00e5 profilikonet og velge \u00abG\u00e5 til min side\u00bb.",
+			"whyNoPrices": "Hvis du ikke ser priser, eller prisene virker feil, sjekk dette f\u00f8rst:\n\u2022 Er brukeren opprettet og godkjent i nettbutikken?\n\u2022 Er du logget inn?\n\u2022 Er brukeren knyttet til riktig kundenummer og lokalt lager i profilen din?\n\nHvis alt dette er p\u00e5 plass og prisene fortsatt ikke stemmer, eller noe er uklart, tar du kontakt med netthandel@tess.no.",
+			"agreementPricesInStore": "Ja. N\u00e5r brukeren din er koblet til riktig kundenummer, ser du bedriftens avtalepriser i nettbutikken.\nPrisene som vises er ferdig nedpriset etter rabattavtalen deres.\nRabatten ser du n\u00e5r du legger et produkt i handlekurven.",
+			"notFound": "Ta kontakt med din faste kundekontakt hos TESS.\nHar du ikke en kundekontakt, kan du sende e-post til netthandel@tess.no.",
+"whereFindCatalog": "Har du flere kataloger, kan du velge dem i s\u00f8kefeltet \u00f8verst p\u00e5 siden.\n\u2022 Klikk p\u00e5 katalogvelgeren ved siden av s\u00f8kefeltet, og velg \u00f8nsket produktkatalog eller sortilog.\n\nHvis du mangler kataloger du mener \u00e5 ha tilgang til, sender du en e-post til netthandel@tess.no.\nVi sjekker tilganger og hjelper deg videre.",
+			"missingProduct": "Ta kontakt med din kundekontakt eller ditt lokale TESS servicesenter.\nDe kan hjelpe deg med \u00e5 finne riktig produkt eller et alternativ.",
+			"howToAddDeliveryAddresses": "Du velger leveringsadresse i utsjekk n\u00e5r du bestiller varer.\nDa kan du bruke en lagret adresse eller skrive inn en ny.\nF\u00f8rste gang m\u00e5 du opprette og lagre leveringsadresse selv.\nN\u00e5r adressen er lagret, kan du velge den i utsjekk.",
+			"contactErrors": "Opplever du tekniske feil, problemer med innlogging eller andre mangler, kan du sende e-post til netthandel@tess.no.\nDu kan ogs\u00e5 ringe TESS Netthandel p\u00e5 telefon 32 84 41 50.",
+			"specificProduct": "Ta kontakt med din kundekontakt eller ditt lokale TESS servicesenter.\nDe gir deg mer informasjon om produktet og hjelper deg med valg."
 		},
 		"feedback": {
 			"question": "Fant du det du lette etter?",
@@ -308,7 +335,8 @@
 			"submittedMessage": "Takk! Din tilbakemelding er sendt."
 		},
 		"servicesenter": "servicesenter",
-		"kundesenter": "kundesenter"
+		"kundesenter": "kundesenter",
+		"loginOrCreateUser": "Logg inn eller opprett bruker"
 	},
 	"Kjopsbetingelser": {
 		"title": "Kj\u00f8psbetingelser for kunden (e-handel)",

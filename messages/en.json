@@ -146,7 +146,8 @@
 		"checkout": "Checkout",
 		"profile": "Profile",
 		"ehandel": "E-commerce",
-		"hoseManagement": "Hose Management"
+		"hoseManagement": "Hose Management",
+		"faq": "FAQ"
 	},
 	"Profile": {
 		"tabs": {
@@ -270,25 +271,51 @@
 	},
 	"Faq": {
 		"title": "Frequently Asked Questions (FAQ)",
+		"categories": {
+			"1": "Before login and registration",
+			"2": "Prices and agreements",
+			"3": "Products, catalogs and delivery addresses",
+			"4": "Ordering and orders",
+			"5": "Delivery, opening hours and support"
+		},
 		"questions": {
+			"accountFromBefore": "I have an account from before, why do I have to register again?",
+			"howToGetAccess": "How do I get access to shop in the online store?",
+			"howToBecomeCustomer": "How do I become a TESS customer?",
+			"wrongNameWhenRegistering": "I wrote the wrong name when I created my user account. How do I change it?",
 			"openingHours": "Opening hours?",
 			"delivery": "Deliveries from TESS?",
 			"forgotPassword": "Forgot password?",
 			"addToOrder": "Can I add an item to the order?",
+			"orderHistoryAndStatus": "Where can I see our order history and order status?",
+			"whyNoPrices": "Why don't I see prices?",
+			"agreementPricesInStore": "Do we have our agreement prices in the online store?",
 			"notFound": "I can't find the answer I'm looking for. What should I do?",
+			"whereFindCatalog": "Where do I find our product catalog / assortment?",
 			"missingProduct": "I can't find the product I want to buy. What should I do?",
+			"howToAddDeliveryAddresses": "How do I add and save delivery addresses?",
 			"contactErrors": "Who do I contact about errors or missing items in the webshop?",
 			"specificProduct": "I want to know more about a specific product. Who do I contact?"
 		},
 		"answers": {
-			"openingHours": "Our webshop is open 24/7. Most service centers are open from 07:00 to 16:00. Find your nearest TESS <link>service center</link>.",
-			"delivery": "Contact your local sales representative or your nearest TESS <link>customer center</link>. You can also contact our central customer center.",
-			"forgotPassword": "Click on 'forgot password' on the login page. A password link will be sent to your email to reset your password.",
-			"addToOrder": "No, this is not possible. A new order must be placed.",
-			"notFound": "Use our chat service or contact your customer representative.",
-			"missingProduct": "Use our chat service or contact your customer representative.",
-			"contactErrors": "Send errors or missing items you find to: <email>netthandel@tess.no</email>.",
-			"specificProduct": "Contact your local sales representative or the nearest TESS <link>service center</link>."
+			"accountFromBefore": "We have launched a new and more secure online store.\nFor security reasons we cannot automatically transfer old users.\nTherefore everyone must create a new user before they can shop again.",
+			"howToGetAccess": "You must have a customer number with TESS to be able to shop.\n\nHere's how to do it:\n1. Go to tessix.no and choose @@LOGIN_LINK@@.\n2. Create a user with your email address.\n3. Fill in which company you belong to, and which TESS service center you use.\n4. Submit the form. We will connect your user to the correct customer number, prices and stock.\n\nYou will receive a welcome email when you are ready to shop.",
+			"howToBecomeCustomer": "If your company does not yet have a customer number with TESS, you can become a customer by:\n\u2022 contacting the switchboard/reception at tess@tess.no, or\n\u2022 filling out @@KUNDESKJEMA_LINK@@ on our website.",
+			"howToBecomeCustomerLinkText": "the customer form",
+			"wrongNameWhenRegistering": "You can change your name under \u201cMy settings\u201d.\nGo to your profile, open \u201cMy settings\u201d, update the name and save the changes.",
+			"openingHours": "The online store is open 24/7.\nMost service centers are open from 07:00 to 16:00.",
+			"delivery": "For questions about delivery, contact your local sales representative or your nearest TESS service center.\nYou can also contact our central customer center.",
+			"forgotPassword": "If you log in with an email address:\n1. Go to tessix.no and select \u201cLog in or create user\u201d.\n2. Enter your email address and click \u201cNext\u201d.\n3. If the address is registered, you will see \u201cForgotten your password?\u201d.\n4. Click there and follow the instructions to receive an email with a link to set a new password.\n\nIf you log in via your company's SSO, use your company's own procedure for forgotten passwords or contact the IT department.",
+			"addToOrder": "It is not possible to add items to an order that has already been sent.\nYou must place a new order.",
+			"orderHistoryAndStatus": "When you are logged in, go to \u201cMy page\u201d.\nYou will find \u201cMy page\u201d by clicking on the profile icon and selecting \u201cGo to my page\u201d.",
+			"whyNoPrices": "If you don't see prices, or the prices seem wrong, check the following first:\n\u2022 Is the user created and approved in the online store?\n\u2022 Are you logged in?\n\u2022 Is the user linked to the correct customer number and local warehouse in your profile?\n\nIf all of this is in place and the prices still don't match, or something is unclear, contact netthandel@tess.no.",
+			"agreementPricesInStore": "Yes. When your user is linked to the correct customer number, you will see the company's agreement prices in the online store.\nThe prices displayed are already discounted according to your discount agreement.\nYou will see the discount when you add a product to the shopping cart.",
+			"notFound": "Contact your regular TESS customer contact.\nIf you don't have a customer contact, you can send an email to netthandel@tess.no.",
+"whereFindCatalog": "If you have multiple catalogs, you can select them in the search field at the top of the page.\n\u2022 Click on the catalog selector next to the search field, and select the desired product catalog or assortment.\n\nIf you are missing catalogs that you believe you should have access to, send an email to netthandel@tess.no.\nWe will check your access and help you further.",
+			"missingProduct": "Contact your customer contact or your local TESS service center.\nThey can help you find the right product or an alternative.",
+			"howToAddDeliveryAddresses": "You select the delivery address during checkout when ordering items.\nYou can then use a saved address or enter a new one.\nThe first time, you must create and save the delivery address yourself.\nOnce the address is saved, you can select it during checkout.",
+			"contactErrors": "If you experience technical errors, login problems, or other issues, you can send an email to netthandel@tess.no.\nYou can also call TESS Online Store at 32 84 41 50.",
+			"specificProduct": "Contact your customer contact or your local TESS service center.\nThey will give you more information about the product and help you with your choice."
 		},
 		"feedback": {
 			"question": "Did you find what you were looking for?",
@@ -304,7 +331,8 @@
 			"submittedMessage": "Thank you! Your feedback has been submitted."
 		},
 		"servicesenter": "service center",
-		"kundesenter": "customer service"
+		"kundesenter": "customer service",
+		"loginOrCreateUser": "Log in or create user"
 	},
 	"Kjopsbetingelser": {
 		"title": "Terms and Conditions for the Customer (e-commerce)",
