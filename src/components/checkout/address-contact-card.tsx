@@ -406,7 +406,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 									}
 								/>
 								<CharLimitFeedback
-									valueLength={formData.city.length}
+									valueLength={formData?.city?.length}
 									maxLength={MAX_ADDRESS_FIELD_LENGTH}
 									showTooLong={tooLongFields.city}
 									exceededText={`Maks ${MAX_ADDRESS_FIELD_LENGTH} tegn`}
