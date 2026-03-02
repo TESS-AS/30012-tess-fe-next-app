@@ -12,12 +12,17 @@ export const inputStyles = cva(
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
 	({ className, type, ...props }, ref) => {
+		const hasValueProp = Object.prototype.hasOwnProperty.call(props, "value");
+		const normalizedProps =
+			hasValueProp && (props.value === undefined || props.value === null)
+				? { ...props, value: "" }
+				: props;
 		return (
 			<input
 				type={type}
 				className={cn(inputStyles(), className)}
 				ref={ref}
-				{...props}
+				{...normalizedProps}
 			/>
 		);
 	},
