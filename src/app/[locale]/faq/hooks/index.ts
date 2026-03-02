@@ -1,0 +1,1 @@
+export { useFaqCategories } from "./useFaqCategories";

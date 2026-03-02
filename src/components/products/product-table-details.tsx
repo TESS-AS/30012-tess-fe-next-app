@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 interface ProductDetailsTableProps {
 	variants: Array<{ itemNumber?: string }>;
 	columnAttributes?: Record<string, unknown> | null;
+	loadingAttributes?: boolean;
 	productNumber?: string;
 	locale: string;
 	selectedItemNumber?: string;
@@ -16,6 +17,7 @@ interface ProductDetailsTableProps {
 export function ProductDetailsTable({
 	variants,
 	columnAttributes,
+	loadingAttributes = false,
 	productNumber,
 	locale,
 	selectedItemNumber,
@@ -43,7 +45,7 @@ export function ProductDetailsTable({
 					selectedItemNumber={selectedItemNumber}
 					onSelectVariant={onSelectVariant}
 					columnAttributes={columnAttributes ?? undefined}
-					loadingAttributes={false}
+					loadingAttributes={loadingAttributes}
 					onWarehouseChange={onWarehouseChange}
 				/>
 			) : (

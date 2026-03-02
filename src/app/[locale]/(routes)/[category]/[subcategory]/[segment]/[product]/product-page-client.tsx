@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import { ProductBreadcrumbs } from "@/components/products/product-breadcrumbs";
 import { ProductGallery } from "@/components/products/product-gallery";
@@ -18,7 +18,12 @@ const ProductDetailsTable = dynamic(
 		import("@/components/products/product-table-details").then((m) => ({
 			default: m.ProductDetailsTable,
 		})),
-	{ ssr: true, loading: () => <div className="min-h-[200px] animate-pulse rounded-lg bg-gray-100" /> },
+	{
+		ssr: true,
+		loading: () => (
+			<div className="min-h-[200px] animate-pulse rounded-lg bg-gray-100" />
+		),
+	},
 );
 
 const RelatedProducts = dynamic(
@@ -101,7 +106,9 @@ export function ProductPageClient({
 	]);
 
 	const firstVariant = productData?.items?.[0]?.itemNumber;
-	const { data: columnAttributes } = useGetColumnAttributes(firstVariant);
+	// Refetch when selection changes so itemRelatedProducts is correct for the selected variant
+	const { data: columnAttributes, isLoading: loadingAttributes } =
+		useGetColumnAttributes(selectedItemNumber ?? firstVariant);
 
 	const handleWarehouseChange = (
 		itemNumber: string,
@@ -117,6 +124,12 @@ export function ProductPageClient({
 		productData?.items?.find(
 			(item: { itemNumber?: string }) => item.itemNumber === selectedItemNumber,
 		) ?? null;
+
+	// itemRelatedProducts from API – must be before any early return (rules of hooks)
+	const relatedProducts = useMemo(() => {
+		const raw = columnAttributes?.itemRelatedProducts;
+		return typeof raw === "string" || !Array.isArray(raw) ? [] : raw;
+	}, [columnAttributes?.itemRelatedProducts]);
 
 	// Handle loading state
 	if (isLoading) {
@@ -140,7 +153,11 @@ export function ProductPageClient({
 			selectedItem && !Array.isArray(selectedItem)
 				? selectedItem.mediaId
 				: undefined;
-		if (selectedMedia && Array.isArray(selectedMedia) && selectedMedia.length > 0) {
+		if (
+			selectedMedia &&
+			Array.isArray(selectedMedia) &&
+			selectedMedia.length > 0
+		) {
 			return selectedMedia;
 		}
 		const firstItem = firstVariant && columnAttributes?.[firstVariant];
@@ -191,16 +208,13 @@ export function ProductPageClient({
 						price={productData.price}
 						productNumber={productData.productNumber}
 						pdfUrl={productData.pdfUrl}
-						gtin={
-							(() => {
-								const item =
-									selectedItemNumber &&
-									columnAttributes?.[selectedItemNumber];
-								if (item && !Array.isArray(item) && "GTIN" in item)
-									return item.GTIN ?? null;
-								return selectedVariant?.gtin ?? null;
-							})()
-						}
+						gtin={(() => {
+							const item =
+								selectedItemNumber && columnAttributes?.[selectedItemNumber];
+							if (item && !Array.isArray(item) && "GTIN" in item)
+								return item.GTIN ?? null;
+							return selectedVariant?.gtin ?? null;
+						})()}
 						imageUrl={
 							productImages?.[0]?.url ||
 							(productImages?.[0] as { thumbnail_url?: string } | undefined)
@@ -240,6 +254,7 @@ export function ProductPageClient({
 					<ProductDetailsTable
 						variants={productData.items}
 						columnAttributes={columnAttributes ?? undefined}
+						loadingAttributes={loadingAttributes}
 						productNumber={productData.productNumber}
 						locale={locale}
 						selectedItemNumber={selectedItemNumber}
@@ -250,7 +265,7 @@ export function ProductPageClient({
 			</div>
 
 			<RelatedProducts
-				products={[]}
+				products={relatedProducts}
 				category={category}
 			/>
 		</div>

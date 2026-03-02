@@ -19,11 +19,20 @@ export interface IVariation {
 	unspsc: string;
 }
 
+/** API (columnAttributes itemRelatedProducts) uses camelCase; other sources may use snake_case */
 export interface IRelatedProductRaw {
-	product_name_no: string;
-	product_number: string;
+	product_name_no?: string;
+	product_number?: string;
+	productName?: string;
+	productNumber?: string;
 	short_desc_no?: string;
 	media_id?: {
+		url: string;
+		filename: string;
+		picture_type: string;
+		thumbnail_url?: string;
+	}[];
+	mediaId?: {
 		url: string;
 		filename: string;
 		picture_type: string;

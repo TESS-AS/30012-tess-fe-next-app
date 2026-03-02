@@ -32,7 +32,7 @@ export function RelatedProducts({ products, category }: RelatedProductsProps) {
 	const { data: profile } = useGetProfileData();
 
 	const productNumbers = useMemo(
-		() => products.map((p) => p.product_number),
+		() => products.map((p) => p.product_number ?? p.productNumber ?? ""),
 		[products],
 	);
 
@@ -47,13 +47,17 @@ export function RelatedProducts({ products, category }: RelatedProductsProps) {
 
 	const normalizedProducts: IProduct[] = useMemo(
 		() =>
-			products.map((p: IRelatedProductRaw) => ({
-				productNumber: p.product_number,
-				productName: p.product_name_no,
-				mediaM: p.media_id?.[0]?.url ?? "",
-				shortDesc: p.short_desc_no ?? "",
-				price: productPrices[p.product_number],
-			})),
+			products.map((p: IRelatedProductRaw) => {
+				const productNumber = p.product_number ?? p.productNumber ?? "";
+				const media = p.media_id ?? p.mediaId;
+				return {
+					productNumber,
+					productName: p.product_name_no ?? p.productName ?? "",
+					mediaM: media?.[0]?.url ?? "",
+					shortDesc: p.short_desc_no ?? "",
+					price: productPrices[productNumber],
+				};
+			}),
 		[products, productPrices],
 	);
 

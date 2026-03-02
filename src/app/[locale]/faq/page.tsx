@@ -1,26 +1,28 @@
 "use client";
+
 import { InfoPage } from "@/components/info-page";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { useAppContext } from "@/lib/appContext";
 import { useTranslations } from "next-intl";
+
+import { useFaqCategories } from "./hooks";
 
 export default function FaqPage() {
 	const t = useTranslations("Faq");
-
-	const faqItems = [
-		{ q: t("questions.openingHours"), a: t("answers.openingHours") },
-		{ q: t("questions.delivery"), a: t("answers.delivery") },
-		{ q: t("questions.forgotPassword"), a: t("answers.forgotPassword") },
-		{ q: t("questions.addToOrder"), a: t("answers.addToOrder") },
-		{ q: t("questions.notFound"), a: t("answers.notFound") },
-		{ q: t("questions.missingProduct"), a: t("answers.missingProduct") },
-		{ q: t("questions.contactErrors"), a: t("answers.contactErrors") },
-		{ q: t("questions.specificProduct"), a: t("answers.specificProduct") },
-	];
+	const tCommon = useTranslations();
+	const { setIsAuthOpen } = useAppContext();
+	const categories = useFaqCategories(() => setIsAuthOpen(true));
 
 	return (
-		<InfoPage
-			title={t("title")}
-			items={faqItems}
-			withFeedback
-		/>
+		<main className="my-6 min-h-screen">
+			<Breadcrumb
+				showHome={false}
+				items={[
+					{ href: "/", label: tCommon("BreadCrumbs.home") },
+					{ href: "/faq", label: tCommon("BreadCrumbs.faq") },
+				]}
+			/>
+			<InfoPage title={t("title")} categories={categories} withFeedback />
+		</main>
 	);
 }
