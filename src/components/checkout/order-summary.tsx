@@ -50,10 +50,7 @@ export default function OrderSummary({
 	const [isSavingRequisition, setIsSavingRequisition] = useState(false);
 	const [requisitionSaved, setRequisitionSaved] = useState(false);
 
-	const isTessEmployee =
-		profile?.username?.includes("@tess.no") ||
-		profile?.username?.includes("@tessdata.no") ||
-		profile?.username?.includes("mads.tystad@banoconcept.com");
+	const isTessEmployee = profile?.role === "employee";
 
 	const handleSaveRequisition = async () => {
 		setIsSavingRequisition(true);
@@ -289,7 +286,7 @@ export default function OrderSummary({
 							HIDE_CHECKOUT_FOR_SPECIFIC_CUSTOMER_NUMBER &&
 							(!profile?.punchout ? (
 								// isTessEmployee
-								!isTessEmployee ? (
+								isTessEmployee ? (
 									<Button
 										variant="greenSolid"
 										className="mt-2 w-full"
