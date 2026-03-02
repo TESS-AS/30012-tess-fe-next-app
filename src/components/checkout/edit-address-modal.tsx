@@ -12,7 +12,7 @@ import { CharLimitFeedback } from "../ui/char-limit-feedback";
 import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { Modal } from "../ui/modal";
+import { Modal, ModalTitle } from "../ui/modal";
 
 export interface SavedAddressData {
 	id?: string;
@@ -136,7 +136,7 @@ export const EditAddressModal: React.FC<EditAddressModalProps> = ({
 			onOpenChange={onClose}>
 			<div className="mb-6 flex items-center gap-2">
 				<MapPin className="h-5 w-5" />
-				<h2 className="text-xl font-semibold">{t("title")}</h2>
+				<ModalTitle className="text-xl font-semibold">{t("title")}</ModalTitle>
 			</div>
 
 			<div className="space-y-4">
@@ -291,7 +291,7 @@ export const EditAddressModal: React.FC<EditAddressModalProps> = ({
 							}
 						/>
 						<CharLimitFeedback
-							valueLength={formData.city.length}
+							valueLength={formData?.city?.length}
 							maxLength={MAX_ADDRESS_FIELD_LENGTH}
 							showTooLong={tooLongFields.city}
 							exceededText={`Maks ${MAX_ADDRESS_FIELD_LENGTH} tegn`}

@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { UserDimensionsInput } from "./user-dimensions";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
-import { Modal } from "../ui/modal";
+import { Modal, ModalTitle } from "../ui/modal";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 
 interface EditPaymentModalProps {
@@ -47,7 +47,7 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
 			onOpenChange={onClose}>
 			<div className="mb-6 flex items-center gap-2">
 				<Wallet className="h-5 w-5" />
-				<h2 className="text-xl font-semibold">{t("title")}</h2>
+				<ModalTitle className="text-xl font-semibold">{t("title")}</ModalTitle>
 			</div>
 
 			<div className="space-y-6">
