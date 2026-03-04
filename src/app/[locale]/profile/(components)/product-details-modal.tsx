@@ -56,8 +56,14 @@ export default function ProductDetailsModal({
 							? String(hoseData.ferrule2).trim()
 							: undefined;
 
-	const { data: columnAttributes, isLoading: isLoadingAttributes } =
-		useGetColumnAttributes(itemNumberForAttributes);
+	const {
+		data: columnAttributes,
+		isLoading: isLoadingAttributes,
+		isFetching: isFetchingAttributes,
+	} = useGetColumnAttributes(itemNumberForAttributes);
+
+	const isAttributesLoading =
+		(isLoadingAttributes || isFetchingAttributes) && !!itemNumberForAttributes;
 
 	// Get product name from columnAttributes (Norwegian)
 	const productName =
@@ -167,10 +173,10 @@ export default function ProductDetailsModal({
 	// Check if SDS is available for the selected item
 	const hasSDS =
 		itemNumberForAttributes && columnAttributes?.[itemNumberForAttributes]
-			? (columnAttributes[itemNumberForAttributes] as { SDS?: string })
-					?.SDS === "True" ||
-				(columnAttributes[itemNumberForAttributes] as { SDS?: string })
-					?.SDS === "true"
+			? (columnAttributes[itemNumberForAttributes] as { SDS?: string })?.SDS ===
+					"True" ||
+				(columnAttributes[itemNumberForAttributes] as { SDS?: string })?.SDS ===
+					"true"
 			: false;
 
 	// Build Ecoonline URL
@@ -254,13 +260,19 @@ export default function ProductDetailsModal({
 				onPointerDownOutside={onClose}
 				onEscapeKeyDown={onClose}>
 				<div className="rounded-lg bg-white">
+					{isAttributesLoading ? (
+						<div className="flex min-h-[320px] items-center justify-center p-10">
+							<Loader2 className="h-8 w-8 animate-spin text-[#1C6D2C]" />
+						</div>
+					) : (
+						<>
 					<div className="flex gap-6 p-6">
 						<div className="flex h-[280px] w-[410px] shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-[#F8F9F8]">
 							{productImage?.url || productImage?.thumbnail_url ? (
 								<img
 									src={productImage.url || productImage.thumbnail_url}
 									alt={productName}
-									className="h-full w-full object-cover"
+									className="h-full w-full object-contain"
 								/>
 							) : (
 								<ImageIcon className="h-12 w-12 text-gray-400" />
@@ -293,8 +305,8 @@ export default function ProductDetailsModal({
 										</div>
 									)}
 								</div>
-								<div className="relative">
-									{sapNumber != null ? (
+								{sapNumber != null && (
+									<div className="relative">
 										<button
 											type="button"
 											onClick={handleCopySap}
@@ -303,18 +315,13 @@ export default function ProductDetailsModal({
 											<span>{sapNumber}</span>
 											<Files className="h-4 w-4 shrink-0 cursor-pointer text-gray-500" />
 										</button>
-									) : (
-										<span className="inline-flex items-center gap-1.5 text-[12px] font-light text-gray-500">
-											<span className="font-semibold text-black">SAP:</span>
-											<span>—</span>
-										</span>
-									)}
-									{copiedSap && sapNumber != null && (
-										<div className="absolute top-full left-0 z-10 mt-1 rounded-md bg-gray-800 px-2 py-1 text-xs text-white shadow">
-											Kopiert
-										</div>
-									)}
-								</div>
+										{copiedSap && (
+											<div className="absolute top-full left-0 z-10 mt-1 rounded-md bg-gray-800 px-2 py-1 text-xs text-white shadow">
+												Kopiert
+											</div>
+										)}
+									</div>
+								)}
 							</div>
 							{(hasShortDescription || hasLongDescription) && (
 								<div className="mt-3 border-b border-gray-200 pb-3">
@@ -466,6 +473,8 @@ export default function ProductDetailsModal({
 							{t("closeWindow")}
 						</Button>
 					</div>
+						</>
+					)}
 				</div>
 			</DialogContent>
 		</Dialog>
