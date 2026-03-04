@@ -193,3 +193,20 @@ export interface OpenConfirmationsResponse {
 	limit: number;
 	data: OpenOrderConfirmationRaw[];
 }
+
+/** Response shape for GET edi/order/openOrders/lines/:orderNumber (single line item) */
+export interface OpenOrderLineItemResponse {
+	dbOrderLine: {
+		orderLineNumber: string;
+		quantity: string;
+		unit: string;
+		netPrice: string;
+		lineStatus: string;
+		lineSum: string;
+		shipmentDate: string;
+		arrivalDate: string;
+		itemNumber: string;
+	};
+	incomingLines: string;
+	differences: string;
+}

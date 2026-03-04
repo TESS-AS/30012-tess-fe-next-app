@@ -2,6 +2,7 @@ import { OrderItems } from "@/types/orderHistory.types";
 import {
 	Order,
 	OpenConfirmationsResponse,
+	OpenOrderLineItemResponse,
 	UserOrderResponse,
 } from "@/types/orders.types";
 
@@ -152,6 +153,22 @@ export async function getOpenConfirmations(): Promise<OpenConfirmationsResponse>
 		return response.data;
 	} catch (error) {
 		console.error("Error fetching open confirmations:", error);
+		throw error;
+	}
+}
+
+/** Single order lines with mismatches for the Avvikende ordre detail view. Returns array of line items (API may return single object or array). */
+export async function getOpenOrderLines(
+	orderNumber: string,
+): Promise<OpenOrderLineItemResponse[]> {
+	try {
+		const response = await axiosInstance.get<
+			OpenOrderLineItemResponse | OpenOrderLineItemResponse[]
+		>(`/edi/order/openOrders/lines/${encodeURIComponent(orderNumber)}`);
+		const data = response.data;
+		return Array.isArray(data) ? data : data ? [data] : [];
+	} catch (error) {
+		console.error("Error fetching open order lines:", error);
 		throw error;
 	}
 }
