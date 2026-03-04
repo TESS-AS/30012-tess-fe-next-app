@@ -1245,6 +1245,18 @@
 		"cancel": "Cancel",
 		"confirm": "Confirm Changes"
 	},
+	"RejectOrderChangeModal": {
+		"title": "Reject order changes",
+		"message": "Are you sure you want to reject the supplier's changes? You must contact the supplier to resolve the deviation.",
+		"cancel": "No, cancel",
+		"confirm": "Yes, reject"
+	},
+	"ApproveOrderChangeModal": {
+		"title": "Approve order changes",
+		"message": "Do you want to approve order #{orderId}? This will update the order with the confirmed values.",
+		"cancel": "No, cancel",
+		"confirm": "Yes, approve"
+	},
 	"InnstillingerTab": {
 		"loadingProfile": "Loading profile...",
 		"loadingAccess": "Loading access...",

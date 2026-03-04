@@ -1249,6 +1249,18 @@
 		"cancel": "Avbryt",
 		"confirm": "Bekreft endringene"
 	},
+	"RejectOrderChangeModal": {
+		"title": "Avvis ordreendringer",
+		"message": "Er du sikker p\u00e5 at du vil avvise leverand\u00f8rens endringer? Du m\u00e5 kontakte leverand\u00f8ren for \u00e5 l\u00f8se avviket.",
+		"cancel": "Nei, avbryt",
+		"confirm": "Ja, avvis"
+	},
+	"ApproveOrderChangeModal": {
+		"title": "Godkjenn ordreendringer",
+		"message": "Vil du godkjenne ordre #{orderId}? Dette vil oppdatere ordren med de bekreftede verdiene.",
+		"cancel": "Nei, avbryt",
+		"confirm": "Ja, godkjenn"
+	},
 	"InnstillingerTab": {
 		"loadingProfile": "Laster profil...",
 		"loadingAccess": "Laster tilganger...",

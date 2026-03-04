@@ -3,6 +3,10 @@
 import { useState } from "react";
 
 import {
+	ApproveOrderChangeModal,
+	RejectOrderChangeModal,
+} from "@/app/[locale]/profile/(components)/order-change-modals";
+import {
 	OrderLineTable,
 } from "@/app/[locale]/profile/(components)/order-line-table";
 import { Button } from "@/components/ui/button";
@@ -17,6 +21,8 @@ export function AvvikendeOrdreDetail({
 	onBack: () => void;
 }) {
 	const [expandedLines, setExpandedLines] = useState<number[]>([]);
+	const [rejectModalOpen, setRejectModalOpen] = useState(false);
+	const [approveModalOpen, setApproveModalOpen] = useState(false);
 	const { data: order, isLoading, error } = useGetOpenOrderLines(orderId);
 
 	const toggleLine = (lineNumber: number) => {
@@ -97,7 +103,7 @@ export function AvvikendeOrdreDetail({
 					<h2 className="text-xl font-bold text-[#0F1912]">Avvik</h2>
 					<div className="flex gap-3">
 						<Button
-							onClick={handleReject}
+							onClick={() => setRejectModalOpen(true)}
 							variant="reject"
 							className="flex items-center gap-2 text-xs">
 							Avvis
@@ -106,7 +112,7 @@ export function AvvikendeOrdreDetail({
 							</div>
 						</Button>
 						<Button
-							onClick={handleApprove}
+							onClick={() => setApproveModalOpen(true)}
 							variant="approve"
 							className="flex items-center gap-2 text-xs">
 							Godkjenn
@@ -134,6 +140,18 @@ export function AvvikendeOrdreDetail({
 					})}
 				</div>
 			</div>
+
+			<RejectOrderChangeModal
+				open={rejectModalOpen}
+				onOpenChange={setRejectModalOpen}
+				onConfirm={handleReject}
+			/>
+			<ApproveOrderChangeModal
+				open={approveModalOpen}
+				onOpenChange={setApproveModalOpen}
+				onConfirm={handleApprove}
+				orderId={order.orderId}
+			/>
 		</div>
 	);
 }
