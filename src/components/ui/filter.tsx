@@ -247,83 +247,8 @@ export const Filter = React.forwardRef<
 			setLoadedChildren({});
 			setExpandedFilterChildren({});
 			loadingInitiatedRef.current.clear();
+			// eslint-disable-next-line react-hooks/exhaustive-deps
 		}, [query]);
-
-		// Initialize top 3 filters to be open by default
-		React.useEffect(() => {
-			if (filters && filters.length > 0 && openAccordions.length === 0) {
-				// Get all filters from all categories
-				const allFilters = filters.flatMap((category) => category.filters);
-				// Take the first 3 filter keys
-				const topThreeFilterKeys = allFilters
-					.slice(0, 3)
-					.map((filter) => filter.key);
-				if (topThreeFilterKeys.length > 0) {
-					setOpenAccordions(topThreeFilterKeys);
-					// Pre-load children for the top 3 filters
-					const filterArray: FilterValues[] = Object.entries(localSelectedFilters)
-						.filter(([key, values]) => key !== "category" && values.length > 0)
-						.map(([key, values]) => ({ key, values }));
-					topThreeFilterKeys.forEach((key) => {
-						if (!loadedChildren[key] && !loadingInitiatedRef.current.has(key)) {
-							loadingInitiatedRef.current.add(key);
-							loadChildrenForFilter(
-								key,
-								selectedCategory || categoryNumber,
-								filterArray,
-							).finally(() => {
-								loadingInitiatedRef.current.delete(key);
-							});
-						}
-					});
-				}
-			}
-			// eslint-disable-next-line react-hooks/exhaustive-deps
-		}, [filters]);
-
-		// Pre-load children for all filters when filters are received to check if they have 0 children
-		React.useEffect(() => {
-			if (!filters || filters.length === 0) return;
-
-			const filterArray: FilterValues[] = Object.entries(localSelectedFilters)
-				.filter(([key, values]) => key !== "category" && values.length > 0)
-				.map(([key, values]) => ({ key, values }));
-
-			// Load children for all filters to check if they have 0 children
-			const loadAllChildren = async () => {
-				const allFilterKeys = filters.flatMap((category) =>
-					category.filters.map((filter) => filter.key),
-				);
-
-				// Only load children for filters that haven't been loaded yet and haven't been initiated
-				const unloadedFilters = allFilterKeys.filter((key) => {
-					const notLoaded = !loadedChildren[key];
-					const notInitiated = !loadingInitiatedRef.current.has(key);
-					return notLoaded && notInitiated;
-				});
-
-				if (unloadedFilters.length === 0) return;
-
-				// Mark these as initiated
-				unloadedFilters.forEach((key) => loadingInitiatedRef.current.add(key));
-
-				await Promise.all(
-					unloadedFilters.map((key) =>
-						loadChildrenForFilter(
-							key,
-							selectedCategory || categoryNumber,
-							filterArray,
-						).finally(() => {
-							// Remove from initiated set once loading completes (success or failure)
-							loadingInitiatedRef.current.delete(key);
-						}),
-					),
-				);
-			};
-
-			loadAllChildren();
-			// eslint-disable-next-line react-hooks/exhaustive-deps
-		}, [filters]);
 
 		const handleCategorySelect = (cf: CategoryFilterItem) => {
 			setOpenAccordions([]);
