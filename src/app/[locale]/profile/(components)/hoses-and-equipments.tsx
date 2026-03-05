@@ -114,6 +114,8 @@ export function HosesAndEquipments({
 			? profile.defaultCustomerNumber
 			: customerNumber;
 
+	const [shouldInitAssets, setShouldInitAssets] = useState(false);
+
 	const {
 		assets,
 		pagination,
@@ -123,14 +125,15 @@ export function HosesAndEquipments({
 		s1CodesPagination,
 		fetchS1Codes,
 	} = useGetAssets(effectiveCustomerNumber, selectedS1Code, {
-		initAssets: true,
+		initAssets: shouldInitAssets,
 		initS1Codes: true,
 		s2Filter: false,
 	});
 
-	const [searchQuery, setSearchQuery] = useState(
-		localStorage.getItem("searchQuery") ?? "",
-	);
+	const [searchQuery, setSearchQuery] = useState(() => {
+		if (typeof window === "undefined") return "";
+		return window.localStorage.getItem("searchQuery") ?? "";
+	});
 	const [selectedColumns, setSelectedColumns] = useState<string[]>([
 		"id",
 		"customerId",
@@ -156,6 +159,8 @@ export function HosesAndEquipments({
 	const [selectedAgeRanges, setSelectedAgeRanges] = useState<string[]>([]);
 	const ITEMS_PER_PAGE = 10;
 	const HOSE_TABLE_PAGE_KEY = "hosesAndEquipments_page";
+	const didInitAssetsRef = useRef(false);
+	const currentPageRef = useRef<number>(1);
 
 	const transformedAssets: HoseOrder[] = assets.map((asset: any) => ({
 		id: asset?.hoseLine?.hexagonId?.toString?.() || "",
@@ -433,6 +438,7 @@ export function HosesAndEquipments({
 	};
 
 	const handlePageChange = (page: number) => {
+		currentPageRef.current = page;
 		const filters: FilterOptions = {
 			page,
 			pageSize: ITEMS_PER_PAGE,
@@ -448,13 +454,30 @@ export function HosesAndEquipments({
 
 	const handleHoseClick = (hoseId: string) => {
 		if (typeof window !== "undefined") {
-			window.localStorage.setItem(
-				HOSE_TABLE_PAGE_KEY,
-				String(pagination.currentPage),
-			);
+			const pageToPersist = currentPageRef.current || pagination.currentPage;
+			window.localStorage.setItem(HOSE_TABLE_PAGE_KEY, String(pageToPersist));
 		}
 		goToHose?.(hoseId);
 	};
+
+	useEffect(() => {
+		if (didInitAssetsRef.current) return;
+		if (!effectiveCustomerNumber) return;
+		if (typeof window === "undefined") return;
+
+		didInitAssetsRef.current = true;
+		const storedPage = window.localStorage.getItem(HOSE_TABLE_PAGE_KEY);
+		const page = Number(storedPage);
+		const nextPage = Number.isFinite(page) && page > 0 ? page : 1;
+		currentPageRef.current = nextPage;
+		fetchAssets({
+			page: nextPage,
+			pageSize: ITEMS_PER_PAGE,
+			...getActiveFilters(),
+			...(searchQuery ? { search: searchQuery } : {}),
+		});
+		setShouldInitAssets(true);
+	}, [effectiveCustomerNumber]);
 
 	useEffect(() => {
 		if (typeof window === "undefined") return;

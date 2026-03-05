@@ -76,6 +76,7 @@ export const getAssets = async (
 	spareSet?: string,
 	rejected?: string,
 	searchTerm?: string,
+	hexagonId?: string,
 ): Promise<PaginatedResponse<GetAssetsResponse>> => {
 	try {
 		const params = new URLSearchParams();
@@ -83,7 +84,7 @@ export const getAssets = async (
 		if (s1Code) params.append("s1Code", s1Code);
 		// params.append("s1Code", "1391731"); // TODO: Remove this
 		if (searchTerm) params.append("searchTerm", searchTerm);
-
+		if (hexagonId) params.append("hexagonId", hexagonId);
 		params.append("page", page.toString());
 		params.append("pageSize", pageSize.toString());
 		params.append("ageRange", ageRange || "");

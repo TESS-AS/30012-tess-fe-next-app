@@ -28,7 +28,8 @@ export const useGetHoseDetails = (
 					undefined, // replacementDue
 					undefined, // spareSet
 					undefined, // rejected
-					hexagonId, // searchTerm
+					undefined, // searchTerm
+					hexagonId, // hexagonId
 				);
 
 				if (response?.data && response.data.length > 0) {
