@@ -37,6 +37,7 @@ export default function Main({ children }: { children?: ReactNode }) {
 				<UserStateBanner />
 			</div>
 			<div
+				id="app-scroll-container"
 				className={cn(
 					"overflow-x-hidden overflow-y-auto transition-all duration-300",
 					pathname?.includes("/profile") ? "bg-[#E8EAE9]" : "bg-background",

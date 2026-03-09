@@ -110,6 +110,22 @@ export function ProductPageClient({
 	const { data: columnAttributes, isLoading: loadingAttributes } =
 		useGetColumnAttributes(selectedItemNumber ?? firstVariant);
 
+	const handleSelectVariant = (itemNumber: string) => {
+		setSelectedItemNumber(itemNumber);
+
+		if (typeof document !== "undefined") {
+			const container = document.getElementById("app-scroll-container");
+			if (container && "scrollTo" in container) {
+				(container as HTMLElement).scrollTo({ top: 0, behavior: "smooth" });
+				return;
+			}
+		}
+
+		if (typeof window !== "undefined") {
+			window.scrollTo({ top: 0, behavior: "smooth" });
+		}
+	};
+
 	const handleWarehouseChange = (
 		itemNumber: string,
 		warehouseNumber: string,
@@ -261,7 +277,7 @@ export function ProductPageClient({
 						productNumber={productData.productNumber}
 						locale={locale}
 						selectedItemNumber={selectedItemNumber}
-						onSelectVariant={setSelectedItemNumber}
+						onSelectVariant={handleSelectVariant}
 						onWarehouseChange={handleWarehouseChange}
 					/>
 				)}
