@@ -2,6 +2,8 @@ import { OrderItems } from "@/types/orderHistory.types";
 import {
 	Order,
 	OpenConfirmationsResponse,
+	OpenOrderLineItemResponse,
+	OpenOrderLinesDetailResponse,
 	UserOrderResponse,
 } from "@/types/orders.types";
 
@@ -152,6 +154,62 @@ export async function getOpenConfirmations(): Promise<OpenConfirmationsResponse>
 		return response.data;
 	} catch (error) {
 		console.error("Error fetching open confirmations:", error);
+		throw error;
+	}
+}
+
+/** Single order lines with mismatches for the Avvikende ordre detail view. Returns lines plus optional supplier/date from API. */
+export async function getOpenOrderLines(
+	orderNumber: string,
+): Promise<{
+	lines: OpenOrderLineItemResponse[];
+	supplier?: string;
+	date?: string;
+}> {
+	try {
+		const response = await axiosInstance.get<
+			| OpenOrderLineItemResponse[]
+			| OpenOrderLineItemResponse
+			| OpenOrderLinesDetailResponse
+		>(`/edi/order/openOrders/lines/${encodeURIComponent(orderNumber)}`);
+		const data = response.data;
+
+		if (Array.isArray(data)) {
+			return { lines: data };
+		}
+		if (data && typeof data === "object" && "lines" in data && Array.isArray(data.lines)) {
+			return {
+				lines: data.lines,
+				supplier: data.supplier,
+				date: data.date ?? data.orderDate,
+			};
+		}
+		if (data && typeof data === "object" && "dbOrderLine" in data) {
+			const single = data as OpenOrderLineItemResponse & { supplier?: string; date?: string; orderDate?: string };
+			return {
+				lines: [single],
+				supplier: single.supplier,
+				date: single.date ?? single.orderDate,
+			};
+		}
+		return { lines: [] };
+	} catch (error) {
+		console.error("Error fetching open order lines:", error);
+		throw error;
+	}
+}
+
+export async function updateOpenOrderStatus(
+	orderNumber: string,
+	approve: boolean,
+): Promise<void> {
+	try {
+		await axiosInstance.patch(
+			`/edi/order/openOrder/status/${encodeURIComponent(orderNumber)}`,
+			{ approve },
+		);
+	} catch (error) {
+		console.error("Error updating open order status:", error);
 		throw error;
 	}
 }

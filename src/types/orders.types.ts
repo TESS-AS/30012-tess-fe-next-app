@@ -193,3 +193,58 @@ export interface OpenConfirmationsResponse {
 	limit: number;
 	data: OpenOrderConfirmationRaw[];
 }
+
+/** One mismatch entry: field name -> database vs incoming value */
+export interface OrderLineMismatch {
+	database: string;
+	incoming: string;
+}
+
+/** One block of differences for a line (orderLineNumber can be 0 for header-level) */
+export interface OrderLineDifference {
+	orderLineNumber: number;
+	mismatches: Record<string, OrderLineMismatch>;
+}
+
+/** Incoming line from supplier (EDI) */
+export interface IncomingLineItem {
+	orderLineNumber: number;
+	itemNumber: string;
+	quantity: number;
+	unit: string;
+	netPrice: number;
+	lineSum: number;
+	lineStatus: number;
+	shipmentDate: string;
+	arrivalDate: string;
+	itemid?: number;
+	globalitemid?: number | null;
+	globalItemNumber?: string | null;
+	supplieritemid?: number;
+	supplierItemNumber?: string;
+}
+
+/** Response shape for GET edi/order/openOrders/lines/:orderNumber (single line item) */
+export interface OpenOrderLineItemResponse {
+	dbOrderLine: {
+		orderLineNumber: number;
+		quantity: number;
+		unit: string;
+		netPrice: number;
+		lineStatus: string;
+		lineSum: number;
+		shipmentDate: string;
+		arrivalDate: string;
+		itemNumber: string;
+	};
+	incomingLines: IncomingLineItem[];
+	differences: OrderLineDifference[];
+}
+
+/** Wrapped response when API returns supplier/date at root with lines array */
+export interface OpenOrderLinesDetailResponse {
+	supplier?: string;
+	date?: string;
+	orderDate?: string;
+	lines?: OpenOrderLineItemResponse[];
+}

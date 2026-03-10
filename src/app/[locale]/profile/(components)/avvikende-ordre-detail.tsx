@@ -3,99 +3,23 @@
 import { useState } from "react";
 
 import {
-	OrderLineField,
-	OrderLineTable,
-} from "@/app/[locale]/profile/(components)/order-line-table";
+	ApproveOrderChangeModal,
+	RejectOrderChangeModal,
+} from "@/app/[locale]/profile/(components)/order-change-modals";
+import { OrderLineTable } from "@/app/[locale]/profile/(components)/order-line-table";
 import { Button } from "@/components/ui/button";
-import { X, Check, ChevronLeft } from "lucide-react";
-
-type OrderLine = {
-	lineNumber: number;
-	deviationCount: number;
-	fields: OrderLineField[];
-};
-
-type AvvikendeOrdreDetail = {
-	orderId: string;
-	supplier: string;
-	date: string;
-	lines: OrderLine[];
-};
-
-// Mock data for order detail
-const mockOrderDetail: AvvikendeOrdreDetail = {
-	orderId: "100296071",
-	supplier: "Leverandør 1",
-	date: "19.11.2025, 11:33",
-	lines: [
-		{
-			lineNumber: 1,
-			deviationCount: 1,
-			fields: [
-				{
-					key: "varenummer",
-					label: "Varenummer",
-					bestilt: "FP10267-280",
-					bekreftet: "400",
-				},
-				{
-					key: "leveringsdato",
-					label: "Leveringsdato",
-					bestilt: "2025-11-13",
-					bekreftet: "2025-11-14",
-				},
-				{
-					key: "antall",
-					label: "Antall",
-					bestilt: "2",
-					bekreftet: "0",
-				},
-				{
-					key: "levVarenummer",
-					label: "Lev. varenummer",
-					bestilt: "2608597521",
-					bekreftet: "1600A01B20",
-				},
-			],
-		},
-		{
-			lineNumber: 8,
-			deviationCount: 2,
-			fields: [
-				{
-					key: "leveringsdato",
-					label: "Leveringsdato",
-					bestilt: "2025-11-13",
-					bekreftet: "2025-11-15",
-				},
-				{
-					key: "antall",
-					label: "Antall",
-					bestilt: "5",
-					bekreftet: "3",
-				},
-			],
-		},
-		{
-			lineNumber: 11,
-			deviationCount: 2,
-			fields: [
-				{
-					key: "varenummer",
-					label: "Varenummer",
-					bestilt: "FP10267-280",
-					bekreftet: "400",
-				},
-				{
-					key: "antall",
-					label: "Antall",
-					bestilt: "10",
-					bekreftet: "8",
-				},
-			],
-		},
-	],
-};
+import {
+	useGetOpenConfirmations,
+	openConfirmationsKeys,
+} from "@/hooks/useGetOpenConfirmations";
+import {
+	useGetOpenOrderLines,
+	openOrderLinesKeys,
+} from "@/hooks/useGetOpenOrderLines";
+import { updateOpenOrderStatus } from "@/services/orders.service";
+import { useQueryClient } from "@tanstack/react-query";
+import { Loader2, X, Check, ChevronLeft } from "lucide-react";
+import { toast } from "react-toastify";
 
 export function AvvikendeOrdreDetail({
 	orderId,
@@ -104,8 +28,12 @@ export function AvvikendeOrdreDetail({
 	orderId: string;
 	onBack: () => void;
 }) {
-	const [expandedLines, setExpandedLines] = useState<number[]>([1, 8]);
-	const order = mockOrderDetail; // In real implementation, fetch by orderId
+	const [expandedLines, setExpandedLines] = useState<number[]>([]);
+	const [rejectModalOpen, setRejectModalOpen] = useState(false);
+	const [approveModalOpen, setApproveModalOpen] = useState(false);
+	const queryClient = useQueryClient();
+	const { data: order, isLoading, error } = useGetOpenOrderLines(orderId);
+	const { refetch: refetchOpenConfirmations } = useGetOpenConfirmations(false);
 
 	const toggleLine = (lineNumber: number) => {
 		setExpandedLines((prev) =>
@@ -115,15 +43,69 @@ export function AvvikendeOrdreDetail({
 		);
 	};
 
-	const handleReject = () => {
-		// Handle reject action
-		console.log("Reject order", orderId);
+	const handleReject = async () => {
+		try {
+			await updateOpenOrderStatus(orderId, false);
+			await Promise.all([
+				queryClient.invalidateQueries({
+					queryKey: openOrderLinesKeys.detail(orderId),
+				}),
+				queryClient.invalidateQueries({
+					queryKey: openConfirmationsKeys.all,
+				}),
+				refetchOpenConfirmations(),
+			]);
+			toast.success(`Ordre ${orderId} ble avvist.`);
+			onBack();
+		} catch (e) {
+			console.error("Error rejecting open order", e);
+			toast.error(`Kunne ikke avvise ordre ${orderId}. Prøv igjen senere.`);
+		}
 	};
 
-	const handleApprove = () => {
-		// Handle approve action
-		console.log("Approve order", orderId);
+	const handleApprove = async () => {
+		try {
+			await updateOpenOrderStatus(orderId, true);
+			await Promise.all([
+				queryClient.invalidateQueries({
+					queryKey: openOrderLinesKeys.detail(orderId),
+				}),
+				queryClient.invalidateQueries({
+					queryKey: openConfirmationsKeys.all,
+				}),
+				refetchOpenConfirmations(),
+			]);
+			toast.success(`Ordre ${orderId} ble godkjent.`);
+			onBack();
+		} catch (e) {
+			console.error("Error approving open order", e);
+			toast.error(`Kunne ikke godkjenne ordre ${orderId}. Prøv igjen senere.`);
+		}
 	};
+
+	if (isLoading) {
+		return (
+			<div className="flex min-h-[200px] items-center justify-center">
+				<Loader2 className="h-8 w-8 animate-spin text-[#1C6D2C]" />
+			</div>
+		);
+	}
+
+	if (error || !order) {
+		return (
+			<div className="space-y-4">
+				<button
+					onClick={onBack}
+					className="flex items-center text-sm text-[#5A615D] hover:text-[#0F1912]">
+					<ChevronLeft className="mr-1 h-4 w-4" />
+					Gå tilbake
+				</button>
+				<p className="text-sm text-red-600">
+					{error instanceof Error ? error.message : "Kunne ikke laste ordre."}
+				</p>
+			</div>
+		);
+	}
 
 	return (
 		<div className="space-y-6">
@@ -161,7 +143,7 @@ export function AvvikendeOrdreDetail({
 					<h2 className="text-xl font-bold text-[#0F1912]">Avvik</h2>
 					<div className="flex gap-3">
 						<Button
-							onClick={handleReject}
+							onClick={() => setRejectModalOpen(true)}
 							variant="reject"
 							className="flex items-center gap-2 text-xs">
 							Avvis
@@ -170,7 +152,7 @@ export function AvvikendeOrdreDetail({
 							</div>
 						</Button>
 						<Button
-							onClick={handleApprove}
+							onClick={() => setApproveModalOpen(true)}
 							variant="approve"
 							className="flex items-center gap-2 text-xs">
 							Godkjenn
@@ -198,6 +180,18 @@ export function AvvikendeOrdreDetail({
 					})}
 				</div>
 			</div>
+
+			<RejectOrderChangeModal
+				open={rejectModalOpen}
+				onOpenChange={setRejectModalOpen}
+				onConfirm={handleReject}
+			/>
+			<ApproveOrderChangeModal
+				open={approveModalOpen}
+				onOpenChange={setApproveModalOpen}
+				onConfirm={handleApprove}
+				orderId={order.orderId}
+			/>
 		</div>
 	);
 }
