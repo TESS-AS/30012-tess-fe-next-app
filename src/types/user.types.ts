@@ -25,6 +25,7 @@ export interface ProfileUser {
 	 * - "onboarding" = onboarding notification banner
 	 */
 	userstate?: "new" | "connected" | "onboarding";
+	logo: string;
 }
 
 export interface UserAddress {

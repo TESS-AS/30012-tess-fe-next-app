@@ -55,6 +55,7 @@ import {
 	LogOut,
 	MessageSquareText,
 	Plus,
+	PlusIcon,
 	Search,
 	ShoppingCart,
 	User,
@@ -395,264 +396,225 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 
 	return (
 		<header
-			className={`bg-background relative z-50 h-[182px] w-full border-t ${isHoseManagementCustomer ? "flex flex-col justify-end pb-[50px]" : ""}`}>
+			className={`bg-background relative z-50 container mx-auto flex h-[130px] w-full flex-col justify-end border-t ${isHoseManagementCustomer ? "max-h-[80px] flex-row" : ""}`}>
 			<div className="container m-auto flex h-16 items-center justify-between">
-				<div className="flex items-center gap-4">
-					<Link
-						href="/"
-						className="flex items-center gap-4">
-						<Image
-							src="/icons/TESSLogo.svg"
-							alt="Logo"
-							width={144}
-							height={144}
-						/>
-					</Link>
-					<div className="flex items-center gap-8">
-						{!isHoseManagementCustomer && (
-							<Button
-								variant="ghost"
-								className={`text-md mb-2 rounded-none px-0 pb-2 hover:bg-transparent ${
-									!pathname.includes("/profile") &&
-									(pathname === "/" ||
-										pathname.startsWith("/en") ||
-										pathname.startsWith("/no"))
-										? "rounded-none border-b-2 border-[#003D1A] font-bold"
-										: "font-normal text-[#5A615D] hover:rounded-none hover:border-b-2 hover:border-[#003D1A]"
-								}`}
-								onClick={() => router.push("/")}>
-								E-handel
-							</Button>
-						)}
-						{profile && missingDefaultVariables && (
-							<CustomerNumberSwitcher
-								profile={profile}
-								forceOpen
-								blockUntilComplete
-								hideTrigger
+				<div className="flex items-center">
+					<div className="flex items-center gap-4">
+						<Link
+							href="/"
+							className="flex items-center gap-4">
+							<Image
+								src="/icons/TESSLogo.svg"
+								alt="Logo"
+								width={144}
+								height={144}
 							/>
-						)}
-						<Button
-							variant="ghost"
-							className={`text-md mb-2 px-0 pb-2 hover:bg-transparent ${
-								pathname.includes("/profile")
-									? "rounded-none border-b-2 border-[#003D1A] font-bold"
-									: "font-normal text-[#5A615D] hover:rounded-none hover:border-b-2 hover:border-[#003D1A]"
-							}`}
-							onClick={() =>
-								profile ? router.push("/profile") : setIsAuthOpen(true)
-							}>
-							{t("Home.myProfile")}
-						</Button>
+						</Link>
+						<div className="flex items-center gap-8">
+							{profile && missingDefaultVariables && (
+								<CustomerNumberSwitcher
+									profile={profile}
+									forceOpen
+									blockUntilComplete
+									hideTrigger
+								/>
+							)}
+							{isHoseManagementCustomer && (
+								<Button
+									variant="ghost"
+									className="text-md px-0 pb-2 font-normal text-[#5A615D] hover:rounded-none hover:border-[#003D1A] hover:bg-transparent"
+									onClick={() =>
+										profile ? router.push("/profile") : setIsAuthOpen(true)
+									}>
+									Hose Management
+								</Button>
+							)}
+						</div>
 					</div>
-				</div>
-				{profile && (
-					<div className="flex items-center gap-2 rounded-md bg-[#F0FCF2] px-3 py-1.5">
-						<Button
-							variant="ghost"
-							className="text-sm font-medium text-[#003D1A] hover:bg-transparent">
-							<MessageSquareText className="h-4 w-4" /> Vær med på utviklingen
-						</Button>
-						<Button
-							variant="outlineGrey"
-							onClick={() => setIsFeedbackDialogOpen(true)}>
-							<Plus className="h-4 w-4" /> Gi tilbakemelding
-						</Button>
-					</div>
-				)}
-			</div>
-			<div className="container m-auto mb-1 flex h-16 items-center justify-between">
-				<div className="flex items-center gap-2">
-					{!isHoseManagementCustomer && (
-						<div
-							className="relative hidden md:flex"
-							ref={assortmentDropdownRef}>
-							<div className="h-[50px] w-[max-content] overflow-hidden rounded-r-lg border border-gray-300 bg-white">
-								<form
-									onSubmit={handleSearch}
-									className="flex items-center">
-									<div
-										className="relative min-w-[400px] flex-1"
-										ref={isModalIdOpen ? null : searchRef}>
-										<Input
-											type="search"
-											placeholder={
-												isInputFocused
-													? t("Common.searchProducts")
-													: urlQueryForDisplay || t("Common.searchProducts")
-											}
-											className="h-[50px] !rounded-none !border-0 !border-none bg-transparent px-4 text-[#5A615D] focus-visible:ring-0 focus-visible:ring-offset-0"
-											value={searchQuery}
-											ref={inputRef}
-											onChange={(e) => {
-												isUserEditingRef.current = true;
-												setSearchQuery(e.target.value);
-											}}
-											onFocus={() => {
-												setIsInputFocused(true);
-												isUserEditingRef.current = true;
-												if (
-													urlQueryForDisplay &&
-													searchQuery === urlQueryForDisplay
-												) {
-													setSearchQuery("");
+					<div className="flex items-center gap-2">
+						{!isHoseManagementCustomer && (
+							<div
+								className="relative hidden md:flex"
+								ref={assortmentDropdownRef}>
+								<div className="h-[50px] w-[max-content] overflow-hidden rounded-r-lg border border-gray-300 bg-white">
+									<form
+										onSubmit={handleSearch}
+										className="flex items-center">
+										<div
+											className="relative min-w-[350px] flex-1"
+											ref={isModalIdOpen ? null : searchRef}>
+											<Input
+												type="search"
+												placeholder={
+													isInputFocused
+														? t("Common.searchProducts")
+														: urlQueryForDisplay || t("Common.searchProducts")
 												}
-											}}
-											onBlur={() => {
-												setIsInputFocused(false);
-												setTimeout(() => {
-													isUserEditingRef.current = false;
-												}, 200);
-											}}
-										/>
-										{searchQuery && (
-											<div className="animate-in fade-in-0 zoom-in-95 fixed top-34 left-1/2 z-[11] grid max-h-[80vh] w-[80vw] -translate-x-1/2 grid-cols-3 gap-4 overflow-y-auto bg-white p-4 shadow-lg duration-200">
-												<div className="col-span-1 space-y-4 pr-4">
-													<SearchAside
-														suggestions={
-															(searchData?.suggestions ??
-																[]) as unknown as string[]
-														}
-														categories={searchCategories}
-														query={searchQuery}
-														onPick={handlePick}
-													/>
-												</div>
-												<div className="col-span-2">
-													<div className="mb-3 flex items-center justify-between">
-														<h3 className="text-lg font-semibold">
-															{t("Search.resultsTitle", {
-																default: "Dine treff",
-															})}
-														</h3>
+												className="h-[50px] !rounded-none !border-0 !border-none bg-transparent px-4 text-[#5A615D] focus-visible:ring-0 focus-visible:ring-offset-0"
+												value={searchQuery}
+												ref={inputRef}
+												onChange={(e) => {
+													isUserEditingRef.current = true;
+													setSearchQuery(e.target.value);
+												}}
+												onFocus={() => {
+													setIsInputFocused(true);
+													isUserEditingRef.current = true;
+													if (
+														urlQueryForDisplay &&
+														searchQuery === urlQueryForDisplay
+													) {
+														setSearchQuery("");
+													}
+												}}
+												onBlur={() => {
+													setIsInputFocused(false);
+													setTimeout(() => {
+														isUserEditingRef.current = false;
+													}, 200);
+												}}
+											/>
+											{searchQuery && (
+												<div className="animate-in fade-in-0 zoom-in-95 fixed top-34 left-1/2 z-[11] grid max-h-[80vh] w-[80vw] -translate-x-1/2 grid-cols-3 gap-4 overflow-y-auto bg-white p-4 shadow-lg duration-200">
+													<div className="col-span-1 space-y-4 pr-4">
+														<SearchAside
+															suggestions={
+																(searchData?.suggestions ??
+																	[]) as unknown as string[]
+															}
+															categories={searchCategories}
+															query={searchQuery}
+															onPick={handlePick}
+														/>
 													</div>
+													<div className="col-span-2">
+														<div className="mb-3 flex items-center justify-between">
+															<h3 className="text-lg font-semibold">
+																{t("Search.resultsTitle", {
+																	default: "Dine treff",
+																})}
+															</h3>
+														</div>
 
-													{isSearchLoading ? (
-														<div className="flex items-center justify-center py-8">
-															<div className="h-6 w-6 animate-spin rounded-full border-b-2 border-green-600"></div>
-														</div>
-													) : searchData?.productRes?.length ? (
-														searchData.productRes.map(
-															(product: IProductSearch) => {
-																return (
-																	<ProductItem
-																		key={product.productNumber}
-																		product={product}
-																		currentLocale={currentLocale}
-																		setSearchQuery={setSearchQuery}
-																		isModalIdOpen={isModalIdOpen}
-																		setIsModalIdOpen={setIsModalIdOpen}
-																		getProductVariations={getProductVariations}
-																		setVariations={setVariations}
-																		variations={variations}
-																		searchQuery={searchQuery}
-																	/>
-																);
-															},
-														)
-													) : searchData ? (
-														<NoResults query={searchQuery} />
-													) : (
-														<div className="flex items-center justify-center py-8">
-															<span className="text-gray-500">
-																Skriv for å søke...
-															</span>
-														</div>
-													)}
+														{isSearchLoading ? (
+															<div className="flex items-center justify-center py-8">
+																<div className="h-6 w-6 animate-spin rounded-full border-b-2 border-green-600"></div>
+															</div>
+														) : searchData?.productRes?.length ? (
+															searchData.productRes.map(
+																(product: IProductSearch) => {
+																	return (
+																		<ProductItem
+																			key={product.productNumber}
+																			product={product}
+																			currentLocale={currentLocale}
+																			setSearchQuery={setSearchQuery}
+																			isModalIdOpen={isModalIdOpen}
+																			setIsModalIdOpen={setIsModalIdOpen}
+																			getProductVariations={
+																				getProductVariations
+																			}
+																			setVariations={setVariations}
+																			variations={variations}
+																			searchQuery={searchQuery}
+																		/>
+																	);
+																},
+															)
+														) : searchData ? (
+															<NoResults query={searchQuery} />
+														) : (
+															<div className="flex items-center justify-center py-8">
+																<span className="text-gray-500">
+																	Skriv for å søke...
+																</span>
+															</div>
+														)}
+													</div>
 												</div>
+											)}
+										</div>
+										{profile && assortments.length > 0 && (
+											<div className="max-w-[240px] border-l border-gray-300">
+												<Button
+													type="button"
+													variant="ghost"
+													className="flex h-[50px] w-full max-w-[240px] min-w-[240px] items-center justify-between gap-2 rounded-none bg-gray-100 px-4 text-[#0F1912]"
+													onClick={(e) => {
+														e.preventDefault();
+														e.stopPropagation();
+														setIsAssortmentDropdownOpen(
+															!isAssortmentDropdownOpen,
+														);
+													}}
+													disabled={isSaving}>
+													<BookOpen className="h-5 w-5 flex-shrink-0 text-[#003D1A]" />
+													<span className="truncate text-sm font-medium">
+														{getSelectedAssortmentName() ||
+															t("CustomerSwitcher.selectAssortmentPlaceholder")}
+													</span>
+													{isAssortmentDropdownOpen ? (
+														<ChevronUp className="h-4 w-4 flex-shrink-0" />
+													) : (
+														<ChevronDown className="h-4 w-4 flex-shrink-0" />
+													)}
+												</Button>
 											</div>
 										)}
-									</div>
-									{profile && assortments.length > 0 && (
-										<div className="max-w-[175px] border-l border-gray-300">
-											<Button
-												type="button"
-												variant="ghost"
-												className="flex h-[50px] w-full max-w-[175px] min-w-[175px] items-center gap-2 rounded-none bg-gray-100 px-4 text-[#0F1912]"
-												onClick={(e) => {
-													e.preventDefault();
-													e.stopPropagation();
-													setIsAssortmentDropdownOpen(
-														!isAssortmentDropdownOpen,
-													);
-												}}
-												disabled={isSaving}>
-												<BookOpen className="h-5 w-5 flex-shrink-0 text-[#003D1A]" />
-												<span className="truncate text-sm font-medium">
-													{getSelectedAssortmentName() ||
-														t("CustomerSwitcher.selectAssortmentPlaceholder")}
-												</span>
-												{isAssortmentDropdownOpen ? (
-													<ChevronUp className="h-4 w-4 flex-shrink-0" />
-												) : (
-													<ChevronDown className="h-4 w-4 flex-shrink-0" />
-												)}
-											</Button>
+										<Button
+											type="submit"
+											variant="greenSolid"
+											className="h-[50px] rounded-l-none rounded-r-lg border-0 px-5">
+											<Search className="h-5 w-5 text-white" />
+										</Button>
+									</form>
+								</div>
+								{profile &&
+									assortments.length > 0 &&
+									isAssortmentDropdownOpen && (
+										<div className="absolute top-[50px] right-0 z-[9999] w-[300px] max-w-[400px] rounded-b-lg bg-white py-2 shadow-lg">
+											<TooltipProvider>
+												{assortments.map((a: any) => (
+													<Tooltip key={a.assortmentnumber}>
+														<TooltipTrigger asChild>
+															<button
+																type="button"
+																onClick={(e) => {
+																	e.preventDefault();
+																	e.stopPropagation();
+																	handleAssortmentChange(a.assortmentnumber);
+																}}
+																className="flex w-full items-center gap-2 px-4 py-2 text-left transition-colors hover:bg-gray-50">
+																<div className="flex h-5 w-5 min-w-[20px] shrink-0 items-center justify-center">
+																	{selectedAssortment === a.assortmentnumber ? (
+																		<div className="h-4 w-4 rounded-full border-2 border-[#009640] bg-white" />
+																	) : (
+																		<div className="h-4 w-4 rounded-full border-2 border-gray-300" />
+																	)}
+																</div>
+																<span className="text-sm font-medium break-words text-[#0F1912]">
+																	{a.nameNo}
+																	{/* ({a.assortmentnumber}) */}
+																</span>
+															</button>
+														</TooltipTrigger>
+														{a.assortmentname.length > 30 && (
+															<TooltipContent
+																side="right"
+																className="max-w-[300px]">
+																<p className="break-words">
+																	{a.assortmentname}
+																</p>
+															</TooltipContent>
+														)}
+													</Tooltip>
+												))}
+											</TooltipProvider>
 										</div>
 									)}
-									{!profile && (
-										<div className="max-w-[175px] border-l border-gray-300">
-											<Button
-												type="button"
-												variant="ghost"
-												className="flex h-[50px] w-full max-w-[175px] min-w-[175px] items-center gap-2 rounded-none bg-gray-100 px-4 text-[#0F1912]">
-												<BookOpen className="h-5 w-5 flex-shrink-0 text-[#003D1A]" />
-												<span className="truncate text-sm font-medium">
-													TESS katalog
-												</span>
-											</Button>
-										</div>
-									)}
-									<Button
-										type="submit"
-										variant="greenSolid"
-										className="h-[50px] rounded-l-none rounded-r-lg border-0 px-5">
-										<Search className="h-5 w-5 text-white" />
-									</Button>
-								</form>
 							</div>
-							{profile &&
-								assortments.length > 0 &&
-								isAssortmentDropdownOpen && (
-									<div className="absolute top-[50px] right-0 z-[9999] w-[300px] max-w-[400px] rounded-b-lg bg-white py-2 shadow-lg">
-										<TooltipProvider>
-											{assortments.map((a: any) => (
-												<Tooltip key={a.assortmentnumber}>
-													<TooltipTrigger asChild>
-														<button
-															type="button"
-															onClick={(e) => {
-																e.preventDefault();
-																e.stopPropagation();
-																handleAssortmentChange(a.assortmentnumber);
-															}}
-															className="flex w-full items-center gap-2 px-4 py-2 text-left transition-colors hover:bg-gray-50">
-															<div className="flex h-5 w-5 min-w-[20px] shrink-0 items-center justify-center">
-																{selectedAssortment === a.assortmentnumber ? (
-																	<div className="h-4 w-4 rounded-full border-2 border-[#009640] bg-white" />
-																) : (
-																	<div className="h-4 w-4 rounded-full border-2 border-gray-300" />
-																)}
-															</div>
-															<span className="text-sm font-medium break-words text-[#0F1912]">
-																{a.nameNo} ({a.assortmentnumber})
-															</span>
-														</button>
-													</TooltipTrigger>
-													{a.assortmentname.length > 30 && (
-														<TooltipContent
-															side="right"
-															className="max-w-[300px]">
-															<p className="break-words">{a.assortmentname}</p>
-														</TooltipContent>
-													)}
-												</Tooltip>
-											))}
-										</TooltipProvider>
-									</div>
-								)}
-						</div>
-					)}
+						)}
+					</div>
 				</div>
 				<div className="flex items-center">
 					{profile && (
@@ -683,7 +645,19 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								<Button
 									variant="ghost"
 									className="gap-1 px-0 font-medium text-[#1A211C] hover:bg-transparent">
-									<UserIcon />
+									{profile.logo &&
+									profile.logo !== "missing url" &&
+									/^(https?:)?\/\//.test(profile.logo) ? (
+										<Image
+											src={profile.logo}
+											alt={profile.firstName ?? "Profile"}
+											width={20}
+											height={20}
+											className="h-5 w-5 rounded-full object-contain"
+										/>
+									) : (
+										<UserIcon />
+									)}
 									{profile.firstName ?? "Profile"}
 									<ChevronDown className="ml-1 h-4 w-4" />
 								</Button>
@@ -707,9 +681,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 										</DropdownMenuItem>
 										<DropdownMenuItem
 											className="text-gray-700"
-											onClick={() =>
-												router.push("/profile?tab=settings")
-											}>
+											onClick={() => router.push("/profile?tab=settings")}>
 											Innstillinger
 										</DropdownMenuItem>
 										<CustomerNumberSwitcher profile={profile} />
@@ -758,6 +730,13 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 									Du er besøkende
 								</span>
 							</div>
+							{/* show this button when Bli tess kunde is ready */}
+							{/* {<Button
+								variant="outlineGrey"
+								onClick={() => setIsAuthOpen(true)}>
+								<PlusIcon className="h-4 w-4" />
+								<span className="text-sm">Bli ny TESS kunde</span>
+							</Button>} */}
 							<Button
 								variant="outlineGrey"
 								onClick={() => setIsAuthOpen(true)}>
