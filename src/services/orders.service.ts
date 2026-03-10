@@ -198,3 +198,18 @@ export async function getOpenOrderLines(
 		throw error;
 	}
 }
+
+export async function updateOpenOrderStatus(
+	orderNumber: string,
+	approve: boolean,
+): Promise<void> {
+	try {
+		await axiosInstance.patch(
+			`/edi/order/openOrder/status/${encodeURIComponent(orderNumber)}`,
+			{ approve },
+		);
+	} catch (error) {
+		console.error("Error updating open order status:", error);
+		throw error;
+	}
+}

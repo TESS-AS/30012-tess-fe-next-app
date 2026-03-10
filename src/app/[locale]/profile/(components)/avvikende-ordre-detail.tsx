@@ -6,12 +6,20 @@ import {
 	ApproveOrderChangeModal,
 	RejectOrderChangeModal,
 } from "@/app/[locale]/profile/(components)/order-change-modals";
-import {
-	OrderLineTable,
-} from "@/app/[locale]/profile/(components)/order-line-table";
+import { OrderLineTable } from "@/app/[locale]/profile/(components)/order-line-table";
 import { Button } from "@/components/ui/button";
-import { useGetOpenOrderLines } from "@/hooks/useGetOpenOrderLines";
+import {
+	useGetOpenConfirmations,
+	openConfirmationsKeys,
+} from "@/hooks/useGetOpenConfirmations";
+import {
+	useGetOpenOrderLines,
+	openOrderLinesKeys,
+} from "@/hooks/useGetOpenOrderLines";
+import { updateOpenOrderStatus } from "@/services/orders.service";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, X, Check, ChevronLeft } from "lucide-react";
+import { toast } from "react-toastify";
 
 export function AvvikendeOrdreDetail({
 	orderId,
@@ -23,7 +31,9 @@ export function AvvikendeOrdreDetail({
 	const [expandedLines, setExpandedLines] = useState<number[]>([]);
 	const [rejectModalOpen, setRejectModalOpen] = useState(false);
 	const [approveModalOpen, setApproveModalOpen] = useState(false);
+	const queryClient = useQueryClient();
 	const { data: order, isLoading, error } = useGetOpenOrderLines(orderId);
+	const { refetch: refetchOpenConfirmations } = useGetOpenConfirmations(false);
 
 	const toggleLine = (lineNumber: number) => {
 		setExpandedLines((prev) =>
@@ -33,14 +43,44 @@ export function AvvikendeOrdreDetail({
 		);
 	};
 
-	const handleReject = () => {
-		// Handle reject action
-		console.log("Reject order", orderId);
+	const handleReject = async () => {
+		try {
+			await updateOpenOrderStatus(orderId, false);
+			await Promise.all([
+				queryClient.invalidateQueries({
+					queryKey: openOrderLinesKeys.detail(orderId),
+				}),
+				queryClient.invalidateQueries({
+					queryKey: openConfirmationsKeys.all,
+				}),
+				refetchOpenConfirmations(),
+			]);
+			toast.success(`Ordre ${orderId} ble avvist.`);
+			onBack();
+		} catch (e) {
+			console.error("Error rejecting open order", e);
+			toast.error(`Kunne ikke avvise ordre ${orderId}. Prøv igjen senere.`);
+		}
 	};
 
-	const handleApprove = () => {
-		// Handle approve action
-		console.log("Approve order", orderId);
+	const handleApprove = async () => {
+		try {
+			await updateOpenOrderStatus(orderId, true);
+			await Promise.all([
+				queryClient.invalidateQueries({
+					queryKey: openOrderLinesKeys.detail(orderId),
+				}),
+				queryClient.invalidateQueries({
+					queryKey: openConfirmationsKeys.all,
+				}),
+				refetchOpenConfirmations(),
+			]);
+			toast.success(`Ordre ${orderId} ble godkjent.`);
+			onBack();
+		} catch (e) {
+			console.error("Error approving open order", e);
+			toast.error(`Kunne ikke godkjenne ordre ${orderId}. Prøv igjen senere.`);
+		}
 	};
 
 	if (isLoading) {
