@@ -35,7 +35,6 @@ export const HoseAccordion = ({
 	const customerData = hoseDetails?.customerData;
 	const hoseLine = hoseDetails?.hoseLine;
 
-	console.log(hoseData, "dataa e hossiiit");
 	return (
 		<AccordionItem
 			value="slange"
@@ -120,7 +119,10 @@ export const HoseAccordion = ({
 										<button
 											type="button"
 											onClick={() =>
-												setIsProductModalOpen(true, hoseData.hoseType.hoseTypeName)
+												setIsProductModalOpen(
+													true,
+													hoseData.hoseType.hoseTypeName,
+												)
 											}
 											className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium text-[#0F1912] transition-colors hover:border-gray-400 hover:bg-gray-100 hover:text-green-600 active:border-2 active:border-green-600 active:bg-white active:shadow-sm">
 											{hoseData.hoseType.hoseTypeName}

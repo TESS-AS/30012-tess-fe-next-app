@@ -39,6 +39,7 @@ interface VariantItemData {
 	inventory: InventoryItem[];
 	attributes: Attribute[];
 	mediaId: MediaItem[];
+	relatedProducts?: Array<Record<string, unknown>>;
 }
 
 interface VariantData {
@@ -74,21 +75,15 @@ interface ProductData {
 	attributes: Attribute[];
 }
 
-/** API can return itemRelatedProducts as string ("No related products") or array of related product items */
-export type ItemRelatedProducts = string | Array<Record<string, unknown>>;
-
 interface ColumnAttributeApiResponse {
 	productNumber: string;
 	productData: ProductData;
 	variantData: VariantData[];
-	itemRelatedProducts?: ItemRelatedProducts;
 }
 
 export type ColumnAttributeResponse = {
 	productAttributes?: Attribute[]; // Product-level attributes
 	productData?: ProductData; // Full product-level object with shortDesc, longDesc, etc.
-	/** Per-variant: "No related products" or array of related products (from last fetched itemNumber) */
-	itemRelatedProducts?: ItemRelatedProducts;
 } & {
 	[itemNumber: string]:
 		| {
@@ -108,6 +103,7 @@ export type ColumnAttributeResponse = {
 				}[];
 				attributes: Attribute[];
 				mediaId?: MediaItem[];
+				relatedProducts?: Array<Record<string, unknown>>;
 		  }
 		| Attribute[]
 		| undefined;
@@ -149,12 +145,6 @@ export function useGetColumnAttributes(variantNumber?: string) {
 						response.data.productData.attributes || [];
 				}
 
-				// Store itemRelatedProducts (varies per variant; needed when refetching on selection)
-				if (response.data.itemRelatedProducts !== undefined) {
-					transformedData.itemRelatedProducts =
-						response.data.itemRelatedProducts;
-				}
-
 				// Normalize mediaId: API may return array or single object (product-level is object, variant can be either)
 				const toMediaArray = (raw: unknown): MediaItem[] => {
 					if (Array.isArray(raw)) return raw as MediaItem[];
@@ -188,6 +178,7 @@ export function useGetColumnAttributes(variantNumber?: string) {
 							})),
 							attributes: itemData.attributes || [],
 							mediaId: toMediaArray(itemData.mediaId),
+							relatedProducts: itemData.relatedProducts ?? [],
 						};
 					});
 				}

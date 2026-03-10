@@ -31,7 +31,7 @@ export default function ProductDetailsModal({
 	itemNumber,
 }: ProductDetailsModalProps) {
 	const t = useTranslations("ProductDetailsModal");
-	const [activeTab, setActiveTab] = useState<string>("variantinfo");
+	const [activeTab, setActiveTab] = useState<string>("produktinfo");
 	const [showFullDescription, setShowFullDescription] = useState(false);
 	const [copiedGtin, setCopiedGtin] = useState(false);
 	const [copiedSap, setCopiedSap] = useState(false);
@@ -56,8 +56,14 @@ export default function ProductDetailsModal({
 							? String(hoseData.ferrule2).trim()
 							: undefined;
 
-	const { data: columnAttributes, isLoading: isLoadingAttributes } =
-		useGetColumnAttributes(itemNumberForAttributes);
+	const {
+		data: columnAttributes,
+		isLoading: isLoadingAttributes,
+		isFetching: isFetchingAttributes,
+	} = useGetColumnAttributes(itemNumberForAttributes);
+
+	const isAttributesLoading =
+		(isLoadingAttributes || isFetchingAttributes) && !!itemNumberForAttributes;
 
 	// Get product name from columnAttributes (Norwegian)
 	const productName =
@@ -167,10 +173,10 @@ export default function ProductDetailsModal({
 	// Check if SDS is available for the selected item
 	const hasSDS =
 		itemNumberForAttributes && columnAttributes?.[itemNumberForAttributes]
-			? (columnAttributes[itemNumberForAttributes] as { SDS?: string })
-					?.SDS === "True" ||
-				(columnAttributes[itemNumberForAttributes] as { SDS?: string })
-					?.SDS === "true"
+			? (columnAttributes[itemNumberForAttributes] as { SDS?: string })?.SDS ===
+					"True" ||
+				(columnAttributes[itemNumberForAttributes] as { SDS?: string })?.SDS ===
+					"true"
 			: false;
 
 	// Build Ecoonline URL
@@ -238,10 +244,10 @@ export default function ProductDetailsModal({
 		}
 	};
 
-	// Reset to variantinfo tab when modal opens, itemNumber changes, or when columnAttributes loads
+	// Reset to produktinfo tab when modal opens, itemNumber changes, or when columnAttributes loads
 	useEffect(() => {
 		if (isOpen) {
-			setActiveTab("variantinfo");
+			setActiveTab("produktinfo");
 		}
 	}, [isOpen, itemNumber, columnAttributes]);
 
@@ -254,218 +260,227 @@ export default function ProductDetailsModal({
 				onPointerDownOutside={onClose}
 				onEscapeKeyDown={onClose}>
 				<div className="rounded-lg bg-white">
-					<div className="flex gap-6 p-6">
-						<div className="flex h-[280px] w-[410px] shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-[#F8F9F8]">
-							{productImage?.url || productImage?.thumbnail_url ? (
-								<img
-									src={productImage.url || productImage.thumbnail_url}
-									alt={productName}
-									className="h-full w-full object-cover"
-								/>
-							) : (
-								<ImageIcon className="h-12 w-12 text-gray-400" />
-							)}
+					{isAttributesLoading ? (
+						<div className="flex min-h-[320px] items-center justify-center p-10">
+							<Loader2 className="h-8 w-8 animate-spin text-[#1C6D2C]" />
 						</div>
-						<div className="min-w-0 flex-1">
-							<h2 className="text-[20px] font-bold text-[#0F1912]">
-								{productName}
-							</h2>
-							<div className="mt-2 flex flex-wrap items-center gap-4">
-								<div className="relative">
-									{gtinDisplay != null ? (
-										<button
-											type="button"
-											onClick={handleCopyGtin}
-											className="inline-flex items-center gap-1.5 text-[12px] font-light text-gray-500 hover:text-gray-700">
-											<span className="font-semibold text-black">GTIN:</span>
-											<span>{gtinDisplay}</span>
-											<Files className="h-4 w-4 shrink-0 cursor-pointer text-gray-500" />
-										</button>
+					) : (
+						<>
+							<div className="flex gap-6 p-6">
+								<div className="flex h-[280px] w-[410px] shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-[#F8F9F8]">
+									{productImage?.url || productImage?.thumbnail_url ? (
+										<img
+											src={productImage.url || productImage.thumbnail_url}
+											alt={productName}
+											className="h-full w-full object-contain"
+										/>
 									) : (
-										<span className="inline-flex items-center gap-1.5 text-[12px] font-light text-gray-500">
-											<span className="font-semibold text-black">GTIN:</span>
-											<span>—</span>
-										</span>
-									)}
-									{copiedGtin && gtinDisplay != null && (
-										<div className="absolute top-full left-0 z-10 mt-1 rounded-md bg-gray-800 px-2 py-1 text-xs text-white shadow">
-											Kopiert
-										</div>
+										<ImageIcon className="h-12 w-12 text-gray-400" />
 									)}
 								</div>
-								<div className="relative">
-									{sapNumber != null ? (
-										<button
-											type="button"
-											onClick={handleCopySap}
-											className="inline-flex items-center gap-1.5 text-[12px] font-light text-gray-500 hover:text-gray-700">
-											<span className="font-semibold text-black">SAP:</span>
-											<span>{sapNumber}</span>
-											<Files className="h-4 w-4 shrink-0 cursor-pointer text-gray-500" />
-										</button>
-									) : (
-										<span className="inline-flex items-center gap-1.5 text-[12px] font-light text-gray-500">
-											<span className="font-semibold text-black">SAP:</span>
-											<span>—</span>
-										</span>
-									)}
-									{copiedSap && sapNumber != null && (
-										<div className="absolute top-full left-0 z-10 mt-1 rounded-md bg-gray-800 px-2 py-1 text-xs text-white shadow">
-											Kopiert
+								<div className="min-w-0 flex-1">
+									<h2 className="text-[20px] font-bold text-[#0F1912]">
+										{productName}
+									</h2>
+									<div className="mt-2 flex flex-wrap items-center gap-4">
+										<div className="relative">
+											{gtinDisplay != null ? (
+												<button
+													type="button"
+													onClick={handleCopyGtin}
+													className="inline-flex items-center gap-1.5 text-[12px] font-light text-gray-500 hover:text-gray-700">
+													<span className="font-semibold text-black">
+														GTIN:
+													</span>
+													<span>{gtinDisplay}</span>
+													<Files className="h-4 w-4 shrink-0 cursor-pointer text-gray-500" />
+												</button>
+											) : (
+												<span className="inline-flex items-center gap-1.5 text-[12px] font-light text-gray-500">
+													<span className="font-semibold text-black">
+														GTIN:
+													</span>
+													<span>—</span>
+												</span>
+											)}
+											{copiedGtin && gtinDisplay != null && (
+												<div className="absolute top-full left-0 z-10 mt-1 rounded-md bg-gray-800 px-2 py-1 text-xs text-white shadow">
+													Kopiert
+												</div>
+											)}
+										</div>
+										{sapNumber != null && (
+											<div className="relative">
+												<button
+													type="button"
+													onClick={handleCopySap}
+													className="inline-flex items-center gap-1.5 text-[12px] font-light text-gray-500 hover:text-gray-700">
+													<span className="font-semibold text-black">SAP:</span>
+													<span>{sapNumber}</span>
+													<Files className="h-4 w-4 shrink-0 cursor-pointer text-gray-500" />
+												</button>
+												{copiedSap && (
+													<div className="absolute top-full left-0 z-10 mt-1 rounded-md bg-gray-800 px-2 py-1 text-xs text-white shadow">
+														Kopiert
+													</div>
+												)}
+											</div>
+										)}
+									</div>
+									{(hasShortDescription || hasLongDescription) && (
+										<div className="mt-3 border-b border-gray-200 pb-3">
+											<p className="text-sm font-light text-[#8A8F8C]">
+												{showFullDescription && hasLongDescription
+													? longDescription
+													: shortDescription}
+											</p>
+											{shouldShowToggle && (
+												<button
+													type="button"
+													onClick={() => setShowFullDescription((v) => !v)}
+													className="mt-4 text-sm font-light text-green-600 hover:underline">
+													{showFullDescription ? "Vis mindre" : "Les mer"} ›
+												</button>
+											)}
 										</div>
 									)}
 								</div>
 							</div>
-							{(hasShortDescription || hasLongDescription) && (
-								<div className="mt-3 border-b border-gray-200 pb-3">
-									<p className="text-sm font-light text-[#8A8F8C]">
-										{showFullDescription && hasLongDescription
-											? longDescription
-											: shortDescription}
-									</p>
-									{shouldShowToggle && (
-										<button
-											type="button"
-											onClick={() => setShowFullDescription((v) => !v)}
-											className="mt-4 text-sm font-light text-green-600 hover:underline">
-											{showFullDescription ? "Vis mindre" : "Les mer"} ›
-										</button>
-									)}
+
+							{(variantSpecs.length > 0 ||
+								productSpecs.length > 0 ||
+								documentCount > 0) && (
+								<div className="mx-2 rounded-md border border-gray-200">
+									<Tabs
+										value={activeTab}
+										onValueChange={setActiveTab}
+										className="w-full">
+										<TabsList className="flex h-auto w-full justify-start gap-6 rounded-none border-b border-gray-200 bg-transparent px-6 py-0">
+											{variantSpecs.length > 0 && (
+												<TabsTrigger
+													value="variantinfo"
+													className="rounded-none border-b-2 border-transparent bg-transparent px-3 py-3 text-left text-sm font-medium text-gray-500 data-[state=active]:border-green-900 data-[state=active]:bg-transparent data-[state=active]:text-green-900 data-[state=active]:shadow-none">
+													Variantinfo
+												</TabsTrigger>
+											)}
+											{productSpecs.length > 0 && (
+												<TabsTrigger
+													value="produktinfo"
+													className="rounded-none border-b-2 border-transparent bg-transparent px-3 py-3 text-left text-sm font-medium text-gray-500 data-[state=active]:border-green-900 data-[state=active]:bg-transparent data-[state=active]:text-green-900 data-[state=active]:shadow-none">
+													Produktinfo
+												</TabsTrigger>
+											)}
+											{documentCount > 0 && (
+												<TabsTrigger
+													value="documents"
+													className="rounded-none border-b-2 border-transparent bg-transparent px-3 py-3 text-left text-sm font-medium text-gray-500 data-[state=active]:border-green-900 data-[state=active]:bg-transparent data-[state=active]:text-green-900 data-[state=active]:shadow-none">
+													Dokumentasjon ({documentCount})
+												</TabsTrigger>
+											)}
+										</TabsList>
+
+										{variantSpecs.length > 0 && (
+											<TabsContent
+												value="variantinfo"
+												className="mt-0">
+												<div className="p-6">
+													<div className="grid grid-cols-2 gap-x-8 gap-y-3">
+														{variantSpecs.map((row, index) => (
+															<div key={`${row.label}-${index}`}>
+																<div className="grid grid-cols-2 gap-4 py-3">
+																	<dt className="text-left text-sm font-medium text-gray-900">
+																		{row.label}
+																	</dt>
+																	<dd className="text-right text-sm text-gray-500">
+																		{row.value}
+																	</dd>
+																</div>
+																{index < variantSpecs.length - 1 && (
+																	<hr className="border-gray-200" />
+																)}
+															</div>
+														))}
+													</div>
+												</div>
+											</TabsContent>
+										)}
+
+										{productSpecs.length > 0 && (
+											<TabsContent
+												value="produktinfo"
+												className="mt-0">
+												<div className="p-6">
+													<div className="grid grid-cols-2 gap-x-8 gap-y-3">
+														{productSpecs.map((row, index) => (
+															<div key={`${row.label}-${index}`}>
+																<div className="grid grid-cols-2 gap-4 py-3">
+																	<dt className="text-left text-sm font-medium text-gray-900">
+																		{row.label}
+																	</dt>
+																	<dd className="text-right text-sm text-gray-500">
+																		{row.value}
+																	</dd>
+																</div>
+																{index < productSpecs.length - 1 && (
+																	<hr className="border-gray-200" />
+																)}
+															</div>
+														))}
+													</div>
+												</div>
+											</TabsContent>
+										)}
+
+										{documentCount > 0 && (
+											<TabsContent
+												value="documents"
+												className="mt-0">
+												<div className="space-y-4 p-6">
+													<button
+														type="button"
+														onClick={handleDownloadPdf}
+														disabled={isGeneratingPdf || !columnAttributes}
+														className="flex cursor-pointer items-center gap-3 text-left disabled:cursor-not-allowed disabled:opacity-50">
+														{isGeneratingPdf ? (
+															<Loader2 className="h-5 w-5 animate-spin text-black" />
+														) : (
+															<FileText className="h-5 w-5 text-black" />
+														)}
+														<span className="text-sm font-normal text-green-700">
+															Last ned PDF
+														</span>
+													</button>
+
+													{hasSDS && ecoonlineUrl && (
+														<button
+															type="button"
+															onClick={() =>
+																window.open(ecoonlineUrl, "_blank")
+															}
+															className="flex cursor-pointer items-center gap-3 text-left">
+															<ExternalLink className="h-5 w-5 text-black" />
+															<span className="text-sm font-light text-green-700">
+																Sikkerhetsdatablad (Ecoonline)
+															</span>
+														</button>
+													)}
+												</div>
+											</TabsContent>
+										)}
+									</Tabs>
 								</div>
 							)}
-						</div>
-					</div>
 
-					{(variantSpecs.length > 0 ||
-						productSpecs.length > 0 ||
-						documentCount > 0) && (
-						<div className="mx-2 rounded-md border border-gray-200">
-							<Tabs
-								value={activeTab}
-								onValueChange={setActiveTab}
-								className="w-full">
-								<TabsList className="flex h-auto w-full justify-start gap-6 rounded-none border-b border-gray-200 bg-transparent px-6 py-0">
-									{variantSpecs.length > 0 && (
-										<TabsTrigger
-											value="variantinfo"
-											className="rounded-none border-b-2 border-transparent bg-transparent px-3 py-3 text-left text-sm font-medium text-gray-500 data-[state=active]:border-green-900 data-[state=active]:bg-transparent data-[state=active]:text-green-900 data-[state=active]:shadow-none">
-											Variantinfo
-										</TabsTrigger>
-									)}
-									{productSpecs.length > 0 && (
-										<TabsTrigger
-											value="produktinfo"
-											className="rounded-none border-b-2 border-transparent bg-transparent px-3 py-3 text-left text-sm font-medium text-gray-500 data-[state=active]:border-green-900 data-[state=active]:bg-transparent data-[state=active]:text-green-900 data-[state=active]:shadow-none">
-											Produktinfo
-										</TabsTrigger>
-									)}
-									{documentCount > 0 && (
-										<TabsTrigger
-											value="documents"
-											className="rounded-none border-b-2 border-transparent bg-transparent px-3 py-3 text-left text-sm font-medium text-gray-500 data-[state=active]:border-green-900 data-[state=active]:bg-transparent data-[state=active]:text-green-900 data-[state=active]:shadow-none">
-											Dokumentasjon ({documentCount})
-										</TabsTrigger>
-									)}
-								</TabsList>
-
-								{variantSpecs.length > 0 && (
-									<TabsContent
-										value="variantinfo"
-										className="mt-0">
-										<div className="p-6">
-											<div className="grid grid-cols-2 gap-x-8 gap-y-3">
-												{variantSpecs.map((row, index) => (
-													<div key={`${row.label}-${index}`}>
-														<div className="grid grid-cols-2 gap-4 py-3">
-															<dt className="text-left text-sm font-medium text-gray-900">
-																{row.label}
-															</dt>
-															<dd className="text-right text-sm text-gray-500">
-																{row.value}
-															</dd>
-														</div>
-														{index < variantSpecs.length - 1 && (
-															<hr className="border-gray-200" />
-														)}
-													</div>
-												))}
-											</div>
-										</div>
-									</TabsContent>
-								)}
-
-								{productSpecs.length > 0 && (
-									<TabsContent
-										value="produktinfo"
-										className="mt-0">
-										<div className="p-6">
-											<div className="grid grid-cols-2 gap-x-8 gap-y-3">
-												{productSpecs.map((row, index) => (
-													<div key={`${row.label}-${index}`}>
-														<div className="grid grid-cols-2 gap-4 py-3">
-															<dt className="text-left text-sm font-medium text-gray-900">
-																{row.label}
-															</dt>
-															<dd className="text-right text-sm text-gray-500">
-																{row.value}
-															</dd>
-														</div>
-														{index < productSpecs.length - 1 && (
-															<hr className="border-gray-200" />
-														)}
-													</div>
-												))}
-											</div>
-										</div>
-									</TabsContent>
-								)}
-
-								{documentCount > 0 && (
-									<TabsContent
-										value="documents"
-										className="mt-0">
-										<div className="space-y-4 p-6">
-											<button
-												type="button"
-												onClick={handleDownloadPdf}
-												disabled={isGeneratingPdf || !columnAttributes}
-												className="flex cursor-pointer items-center gap-3 text-left disabled:cursor-not-allowed disabled:opacity-50">
-												{isGeneratingPdf ? (
-													<Loader2 className="h-5 w-5 animate-spin text-black" />
-												) : (
-													<FileText className="h-5 w-5 text-black" />
-												)}
-												<span className="text-sm font-normal text-green-700">
-													Last ned PDF
-												</span>
-											</button>
-
-											{hasSDS && ecoonlineUrl && (
-												<button
-													type="button"
-													onClick={() => window.open(ecoonlineUrl, "_blank")}
-													className="flex cursor-pointer items-center gap-3 text-left">
-													<ExternalLink className="h-5 w-5 text-black" />
-													<span className="text-sm font-light text-green-700">
-														Sikkerhetsdatablad (Ecoonline)
-													</span>
-												</button>
-											)}
-										</div>
-									</TabsContent>
-								)}
-							</Tabs>
-						</div>
+							<div className="flex justify-center p-6 pt-4">
+								<Button
+									variant="greenSolid"
+									onClick={onClose}
+									className="rounded-md px-8 py-3">
+									{t("closeWindow")}
+								</Button>
+							</div>
+						</>
 					)}
-
-					<div className="flex justify-center p-6 pt-4">
-						<Button
-							variant="greenSolid"
-							onClick={onClose}
-							className="rounded-md px-8 py-3">
-							{t("closeWindow")}
-						</Button>
-					</div>
 				</div>
 			</DialogContent>
 		</Dialog>

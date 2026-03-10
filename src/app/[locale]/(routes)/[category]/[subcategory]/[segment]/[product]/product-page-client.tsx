@@ -106,9 +106,25 @@ export function ProductPageClient({
 	]);
 
 	const firstVariant = productData?.items?.[0]?.itemNumber;
-	// Refetch when selection changes so itemRelatedProducts is correct for the selected variant
+	// Refetch when selection changes so variant-level columnAttributes (including relatedProducts) are correct
 	const { data: columnAttributes, isLoading: loadingAttributes } =
 		useGetColumnAttributes(selectedItemNumber ?? firstVariant);
+
+	const handleSelectVariant = (itemNumber: string) => {
+		setSelectedItemNumber(itemNumber);
+
+		if (typeof document !== "undefined") {
+			const container = document.getElementById("app-scroll-container");
+			if (container && "scrollTo" in container) {
+				(container as HTMLElement).scrollTo({ top: 0, behavior: "smooth" });
+				return;
+			}
+		}
+
+		if (typeof window !== "undefined") {
+			window.scrollTo({ top: 0, behavior: "smooth" });
+		}
+	};
 
 	const handleWarehouseChange = (
 		itemNumber: string,
@@ -125,11 +141,14 @@ export function ProductPageClient({
 			(item: { itemNumber?: string }) => item.itemNumber === selectedItemNumber,
 		) ?? null;
 
-	// itemRelatedProducts from API – must be before any early return (rules of hooks)
+	// Variant-level related products – must be before any early return (rules of hooks)
 	const relatedProducts = useMemo(() => {
-		const raw = columnAttributes?.itemRelatedProducts;
-		return typeof raw === "string" || !Array.isArray(raw) ? [] : raw;
-	}, [columnAttributes?.itemRelatedProducts]);
+		const key = selectedItemNumber ?? firstVariant;
+		if (!key || !columnAttributes) return [];
+		const entry = columnAttributes[key];
+		if (!entry || Array.isArray(entry)) return [];
+		return Array.isArray(entry.relatedProducts) ? entry.relatedProducts : [];
+	}, [columnAttributes, selectedItemNumber, firstVariant]);
 
 	// Handle loading state
 	if (isLoading) {
@@ -258,7 +277,7 @@ export function ProductPageClient({
 						productNumber={productData.productNumber}
 						locale={locale}
 						selectedItemNumber={selectedItemNumber}
-						onSelectVariant={setSelectedItemNumber}
+						onSelectVariant={handleSelectVariant}
 						onWarehouseChange={handleWarehouseChange}
 					/>
 				)}
