@@ -187,7 +187,8 @@
 		"searchAttributes": "S\u00f8k etter attributter",
 		"attributes": "Attributter",
 		"showMore": "Vis mer",
-		"showLess": "Vis mindre"
+		"showLess": "Vis mindre",
+		"selectAll": "Velg alle"
 	},
 	"CustomerSwitcher": {
 		"title": "Bytt handlekonto",
@@ -315,7 +316,7 @@
 			"whyNoPrices": "Hvis du ikke ser priser, eller prisene virker feil, sjekk dette f\u00f8rst:\n\u2022 Er brukeren opprettet og godkjent i nettbutikken?\n\u2022 Er du logget inn?\n\u2022 Er brukeren knyttet til riktig kundenummer og lokalt lager i profilen din?\n\nHvis alt dette er p\u00e5 plass og prisene fortsatt ikke stemmer, eller noe er uklart, tar du kontakt med netthandel@tess.no.",
 			"agreementPricesInStore": "Ja. N\u00e5r brukeren din er koblet til riktig kundenummer, ser du bedriftens avtalepriser i nettbutikken.\nPrisene som vises er ferdig nedpriset etter rabattavtalen deres.\nRabatten ser du n\u00e5r du legger et produkt i handlekurven.",
 			"notFound": "Ta kontakt med din faste kundekontakt hos TESS.\nHar du ikke en kundekontakt, kan du sende e-post til netthandel@tess.no.",
-"whereFindCatalog": "Har du flere kataloger, kan du velge dem i s\u00f8kefeltet \u00f8verst p\u00e5 siden.\n\u2022 Klikk p\u00e5 katalogvelgeren ved siden av s\u00f8kefeltet, og velg \u00f8nsket produktkatalog eller sortilog.\n\nHvis du mangler kataloger du mener \u00e5 ha tilgang til, sender du en e-post til netthandel@tess.no.\nVi sjekker tilganger og hjelper deg videre.",
+			"whereFindCatalog": "Har du flere kataloger, kan du velge dem i s\u00f8kefeltet \u00f8verst p\u00e5 siden.\n\u2022 Klikk p\u00e5 katalogvelgeren ved siden av s\u00f8kefeltet, og velg \u00f8nsket produktkatalog eller sortilog.\n\nHvis du mangler kataloger du mener \u00e5 ha tilgang til, sender du en e-post til netthandel@tess.no.\nVi sjekker tilganger og hjelper deg videre.",
 			"missingProduct": "Ta kontakt med din kundekontakt eller ditt lokale TESS servicesenter.\nDe kan hjelpe deg med \u00e5 finne riktig produkt eller et alternativ.",
 			"howToAddDeliveryAddresses": "Du velger leveringsadresse i utsjekk n\u00e5r du bestiller varer.\nDa kan du bruke en lagret adresse eller skrive inn en ny.\nF\u00f8rste gang m\u00e5 du opprette og lagre leveringsadresse selv.\nN\u00e5r adressen er lagret, kan du velge den i utsjekk.",
 			"contactErrors": "Opplever du tekniske feil, problemer med innlogging eller andre mangler, kan du sende e-post til netthandel@tess.no.\nDu kan ogs\u00e5 ringe TESS Netthandel p\u00e5 telefon 32 84 41 50.",
@@ -670,7 +671,8 @@
 			"installationDate": "INSTALLASJONSDATO",
 			"productionDate": "PRODUKSJONSDATO",
 			"fillingDate": "P\u00c5FYLLINGSDATO",
-			"nextInspectionDate": "NESTE INSPEKSJONSDATO"
+			"nextInspectionDate": "NESTE INSPEKSJONSDATO",
+			"handlinger": "HANDLINGER"
 		},
 		"errors": {
 			"selectItemsFirst": "Vennligst velg elementer \u00e5 kontakte om"
@@ -989,7 +991,7 @@
 		"andMore": "og {count} flere"
 	},
 	"HoseColumnsDropdown": {
-		"addColumn": "Legg til kolonne"
+		"addColumn": "Endre tabell"
 	},
 	"HoseFiltersDropdown": {
 		"filter": "Filter",

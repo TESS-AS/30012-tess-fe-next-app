@@ -74,8 +74,11 @@ export function HosesAndEquipments({
 	profile,
 }: HosesAndEquipmentsProps) {
 	const t = useTranslations("HosesAndEquipments");
+	const tHoseActions = useTranslations("HoseActionsDropdown");
 	const router = useRouter();
 	const { setIsCartChanging, isCartChanging } = useAppContext();
+
+	const HOSE_COLUMNS_ORDER_KEY = "hosesAndEquipments_columnsOrder";
 
 	const S1_CODE_TROLL_A = "1391731";
 	const S1_CODE_GUDRUN = "1291619";
@@ -134,15 +137,6 @@ export function HosesAndEquipments({
 		if (typeof window === "undefined") return "";
 		return window.localStorage.getItem("searchQuery") ?? "";
 	});
-	const [selectedColumns, setSelectedColumns] = useState<string[]>([
-		"id",
-		"customerId",
-		"description",
-		"s1Location",
-		"s2Equipment",
-		"orderNumber",
-		"actions",
-	]);
 
 	const [selectedRows, setSelectedRows] = useState<string[]>(() => {
 		if (typeof window !== "undefined") {
@@ -227,6 +221,30 @@ export function HosesAndEquipments({
 		}
 		const set = new Set(selectedRows);
 		return purchasableAssets.every((a) => set.has(a.hexagonId));
+	}, [transformedAssets, selectedRows, allAcrossPages, deselectedIds]);
+
+	const someSelectedOnPage = useMemo(() => {
+		if (!transformedAssets.length) return false;
+		const purchasableAssets = transformedAssets.filter(
+			(a) => !isEcomBlocked(a),
+		);
+		if (purchasableAssets.length === 0) return false;
+		if (allAcrossPages) {
+			const selectedOnPageCount = purchasableAssets.filter(
+				(a) => !deselectedIds.has(a.hexagonId),
+			).length;
+			return (
+				selectedOnPageCount > 0 &&
+				selectedOnPageCount < purchasableAssets.length
+			);
+		}
+		const set = new Set(selectedRows);
+		const selectedOnPageCount = purchasableAssets.filter((a) =>
+			set.has(a.hexagonId),
+		).length;
+		return (
+			selectedOnPageCount > 0 && selectedOnPageCount < purchasableAssets.length
+		);
 	}, [transformedAssets, selectedRows, allAcrossPages, deselectedIds]);
 
 	const allSelectedGlobally = allAcrossPages && selectedCount > 0;
@@ -330,6 +348,15 @@ export function HosesAndEquipments({
 			localStorage.setItem("selectedHoseRows", JSON.stringify(next));
 			return next;
 		});
+	};
+
+	const clearSelection = () => {
+		setSelectedRows([]);
+		setAllAcrossPages(false);
+		setDeselectedIds(new Set());
+		if (typeof window !== "undefined") {
+			window.localStorage.setItem("selectedHoseRows", JSON.stringify([]));
+		}
 	};
 
 	const selectSingleRow = (hexagonId: string) => {
@@ -510,6 +537,35 @@ export function HosesAndEquipments({
 		"nextInspectionDate",
 	];
 
+	const [selectedColumns, setSelectedColumns] = useState<string[]>([
+		"id",
+		"customerId",
+		"description",
+		"s1Location",
+		"s2Equipment",
+		"orderNumber",
+		"actions",
+	]);
+
+	const [columnOrder, setColumnOrder] = useState<string[]>(() => {
+		if (typeof window === "undefined") return [...columnOptions];
+		try {
+			const raw = window.localStorage.getItem(HOSE_COLUMNS_ORDER_KEY);
+			if (!raw) return [...columnOptions];
+			const parsed = JSON.parse(raw) as unknown;
+			if (!Array.isArray(parsed)) return [...columnOptions];
+			const next = parsed.filter((x): x is string => typeof x === "string");
+			const allowed = new Set(columnOptions);
+			const cleaned = next.filter((k) => allowed.has(k));
+			for (const k of columnOptions) {
+				if (!cleaned.includes(k)) cleaned.push(k);
+			}
+			return cleaned;
+		} catch {
+			return [...columnOptions];
+		}
+	});
+
 	const allColumns: Record<string, Column<HoseOrder>> = {
 		id: {
 			key: "id",
@@ -591,7 +647,27 @@ export function HosesAndEquipments({
 		},
 		actions: {
 			key: "handling",
-			header: "",
+			header: () => {
+				const selectableCount = transformedAssets.filter(
+					(a) => !isEcomBlocked(a),
+				).length;
+				const checked: boolean | "indeterminate" = allSelectedOnPage
+					? true
+					: someSelectedOnPage
+						? "indeterminate"
+						: false;
+				return (
+					<Checkbox
+						onClick={(e) => e.stopPropagation()}
+						disabled={selectableCount === 0}
+						checked={checked}
+						aria-label={tHoseActions("selectAllOnPage")}
+						onCheckedChange={() => {
+							handleSelectAllOnPage();
+						}}
+					/>
+				);
+			},
 			cell: (order: HoseOrder) => (
 				<Checkbox
 					onClick={(e) => e.stopPropagation()}
@@ -606,46 +682,47 @@ export function HosesAndEquipments({
 		},
 		rowActions: {
 			key: "action",
-			header: () => (
-				<HoseActionsDropdown
-					selectedCount={selectedCount}
-					isAddingToCart={isAddingToCart}
-					onAddToCart={async () => {
-						setCartModalOpen(true);
-						await handleBulkAction("cart");
-						localStorage.setItem("selectedHoseRows", JSON.stringify([]));
-					}}
-					onContactSupport={() => {
-						if (selectedCount === 0) {
-							toast.error(t("errors.selectItemsFirst"));
-							return;
-						}
-						setSupportOpen(true);
-					}}
-					onReportReplacement={() => {
-						if (selectedCount === 0) return;
-						setRfqOpen(true);
-					}}
-					onDiscardEquipment={() => {
-						if (selectedCount === 0) return;
-						setDiscardOpen(true);
-					}}
-					onPrintCertificate={() => handleBulkAction("print-cert")}
-					onPrintTags={() => {
-						if (selectedCount === 0) return;
-						setPrintTagsOpen(true);
-					}}
-					onPrintTestCertificates={() => {
-						if (selectedCount === 0) return;
-						setPrintOpen(true);
-					}}
-					onExport={() => handleBulkAction("export")}
-					onSelectAll={() => handleSelectAllGlobally(!allAcrossPages)}
-					onSelectAllOnPage={handleSelectAllOnPage}
-					allSelected={allSelectedGlobally}
-					allSelectedOnPage={allSelectedOnPage}
-				/>
-			),
+			header: t("columns.handlinger"),
+			// header: () => (
+			// 	<HoseActionsDropdown
+			// 		selectedCount={selectedCount}
+			// 		isAddingToCart={isAddingToCart}
+			// 		onAddToCart={async () => {
+			// 			setCartModalOpen(true);
+			// 			await handleBulkAction("cart");
+			// 			localStorage.setItem("selectedHoseRows", JSON.stringify([]));
+			// 		}}
+			// 		onContactSupport={() => {
+			// 			if (selectedCount === 0) {
+			// 				toast.error(t("errors.selectItemsFirst"));
+			// 				return;
+			// 			}
+			// 			setSupportOpen(true);
+			// 		}}
+			// 		onReportReplacement={() => {
+			// 			if (selectedCount === 0) return;
+			// 			setRfqOpen(true);
+			// 		}}
+			// 		onDiscardEquipment={() => {
+			// 			if (selectedCount === 0) return;
+			// 			setDiscardOpen(true);
+			// 		}}
+			// 		onPrintCertificate={() => handleBulkAction("print-cert")}
+			// 		onPrintTags={() => {
+			// 			if (selectedCount === 0) return;
+			// 			setPrintTagsOpen(true);
+			// 		}}
+			// 		onPrintTestCertificates={() => {
+			// 			if (selectedCount === 0) return;
+			// 			setPrintOpen(true);
+			// 		}}
+			// 		onExport={() => handleBulkAction("export")}
+			// 		onSelectAll={() => handleSelectAllGlobally(!allAcrossPages)}
+			// 		onSelectAllOnPage={handleSelectAllOnPage}
+			// 		allSelected={allSelectedGlobally}
+			// 		allSelectedOnPage={allSelectedOnPage}
+			// 	/>
+			// ),
 			cell: (order: HoseOrder) => (
 				<div
 					className="flex items-center justify-end gap-2"
@@ -710,16 +787,26 @@ export function HosesAndEquipments({
 	};
 
 	const activeColumns = useMemo(() => {
-		const nonActions = selectedColumns.filter((n) => n !== "actions");
-		const cols: Column<HoseOrder>[] = nonActions
-			.map((n) => allColumns[n])
-			.filter(Boolean) as Column<HoseOrder>[];
-		if (selectedColumns.includes("actions"))
-			cols.unshift(allColumns["actions"]);
+		const selectedSet = new Set(selectedColumns);
+		const cols: Column<HoseOrder>[] = [];
+
+		if (selectedSet.has("actions")) {
+			cols.push(allColumns["actions"]);
+		}
+
+		for (const key of columnOrder) {
+			if (key === "actions") continue;
+			if (!selectedSet.has(key)) continue;
+			const col = allColumns[key];
+			if (!col) continue;
+			cols.push(col);
+		}
+
 		cols.push(allColumns["rowActions"]);
 		return cols;
 	}, [
 		selectedColumns,
+		columnOrder,
 		selectedRows,
 		allAcrossPages,
 		deselectedIds,
@@ -733,6 +820,32 @@ export function HosesAndEquipments({
 				: [...prev, value],
 		);
 	};
+
+	const handleReorderColumns = (nextOrder: string[]) => {
+		setColumnOrder(nextOrder);
+		if (typeof window === "undefined") return;
+		window.localStorage.setItem(
+			HOSE_COLUMNS_ORDER_KEY,
+			JSON.stringify(nextOrder),
+		);
+	};
+
+	const columnLabels = useMemo<Record<string, string>>(
+		() => ({
+			id: t("columns.id"),
+			customerId: t("columns.customerId"),
+			description: t("columns.description"),
+			s1Location: t("columns.s1Location"),
+			s2Equipment: t("columns.s2Equipment"),
+			orderNumber: t("columns.orderNumber"),
+			actions: t("columns.handlinger"),
+			installationDate: t("columns.installationDate"),
+			productionDate: t("columns.productionDate"),
+			fillingDate: t("columns.fillingDate"),
+			nextInspectionDate: t("columns.nextInspectionDate"),
+		}),
+		[t],
+	);
 
 	const handleFilterChange = async (
 		value: string,
@@ -982,34 +1095,107 @@ export function HosesAndEquipments({
 
 						<div className="flex items-center space-x-4">
 							<HoseColumnsDropdown
-								options={[...columnOptions]}
+								options={columnOrder}
 								selected={selectedColumns}
 								onToggle={handleColumnChange}
+								onReorder={handleReorderColumns}
+								labels={columnLabels}
 							/>
 
-							{profile?.defaultCustomerNumber !==
-								SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
-								<HoseFiltersDropdown
-									selectedFilters={selectedFilters}
-									selectedAgeRanges={selectedAgeRanges}
-									onToggleFilter={(value) => handleFilterChange(value)}
-									onToggleAgeRange={async (value) => {
-										const newRanges = selectedAgeRanges.includes(value)
-											? selectedAgeRanges.filter((r) => r !== value)
-											: [...selectedAgeRanges, value];
-										setSelectedAgeRanges(newRanges);
-										await fetchAssets({
-											page: 1,
-											pageSize: pagination.pageSize,
-											ageSize: newRanges.join(","),
-											...getActiveFilters(),
-											...(searchQuery ? { search: searchQuery } : {}),
-										});
-									}}
-								/>
-							)}
+							<HoseFiltersDropdown
+								selectedFilters={selectedFilters}
+								selectedAgeRanges={selectedAgeRanges}
+								onToggleFilter={(value) => handleFilterChange(value)}
+								onToggleAgeRange={async (value) => {
+									const newRanges = selectedAgeRanges.includes(value)
+										? selectedAgeRanges.filter((r) => r !== value)
+										: [...selectedAgeRanges, value];
+									setSelectedAgeRanges(newRanges);
+									await fetchAssets({
+										page: 1,
+										pageSize: pagination.pageSize,
+										ageSize: newRanges.join(","),
+										...getActiveFilters(),
+										...(searchQuery ? { search: searchQuery } : {}),
+									});
+								}}
+								profile={profile}
+							/>
 						</div>
 					</div>
+
+					{selectedCount > 0 && (
+						<div className="flex items-center justify-between gap-4 bg-[#DCF7E0] px-6 py-3">
+							<div className="flex items-center gap-3">
+								<div className="text-sm font-medium text-[#0F1912]">
+									{selectedCount} enheter valgt
+								</div>
+								<Button
+									onClick={async () => {
+										setCartModalOpen(true);
+										await handleBulkAction("cart");
+									}}
+									disabled={isAddingToCart}
+									className="h-9 bg-[#009640] px-4 text-sm font-medium text-white hover:bg-[#003D1A]">
+									<ShoppingCart className="mr-2 h-4 w-4" />
+									Legg til {selectedCount} enheter
+								</Button>
+								<HoseActionsDropdown
+									selectedCount={selectedCount}
+									isAddingToCart={isAddingToCart}
+									onAddToCart={async () => {
+										setCartModalOpen(true);
+										await handleBulkAction("cart");
+									}}
+									onContactSupport={() => {
+										if (selectedCount === 0) {
+											toast.error(t("errors.selectItemsFirst"));
+											return;
+										}
+										setSupportOpen(true);
+									}}
+									onReportReplacement={() => {
+										if (selectedCount === 0) return;
+										setRfqOpen(true);
+									}}
+									onDiscardEquipment={() => {
+										if (selectedCount === 0) return;
+										setDiscardOpen(true);
+									}}
+									onPrintCertificate={() => handleBulkAction("print-cert")}
+									onPrintTags={() => {
+										if (selectedCount === 0) return;
+										setPrintTagsOpen(true);
+									}}
+									onPrintTestCertificates={() => {
+										if (selectedCount === 0) return;
+										setPrintOpen(true);
+									}}
+									onExport={() => handleBulkAction("export")}
+									onSelectAll={() => handleSelectAllGlobally(!allAcrossPages)}
+									onSelectAllOnPage={handleSelectAllOnPage}
+									allSelected={allSelectedGlobally}
+									allSelectedOnPage={allSelectedOnPage}
+									align="start"
+									triggerButton={
+										<Button
+											variant="outline"
+											className="h-9 border-[#C1C4C2] bg-white px-4 text-sm font-medium text-[#0F1912] hover:bg-[#F8F9F8]">
+											<MoreHorizontal className="h-4 w-4" />
+											Flere handlinger
+										</Button>
+									}
+								/>
+							</div>
+							<Button
+								variant="outlineGrey"
+								onClick={clearSelection}
+								className="h-9 gap-2 border-[#C1C4C2] bg-white px-3 text-sm font-medium text-[#0F1912] hover:border-[#C1C4C2] hover:bg-white">
+								<X className="h-4 w-4" />
+								Fjern valg
+							</Button>
+						</div>
+					)}
 
 					<DataTable<HoseOrder>
 						data={loading ? [] : transformedAssets}
