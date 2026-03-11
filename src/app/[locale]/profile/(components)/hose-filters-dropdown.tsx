@@ -9,10 +9,10 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
+import { ProfileUser } from "@/types/user.types";
 import { Funnel, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { ProfileUser } from "@/types/user.types";
-import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 
 export interface HoseFiltersDropdownProps {
 	selectedFilters: string[];
