@@ -11,24 +11,17 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SAP_CUSTOMER } from "@/constants/checkout";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
 import { addToCart, getCart } from "@/services/carts.service";
 import { calculateItemPrice } from "@/services/product.service";
-import { useProductTabs } from "@/stores/useProductTabs";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
-import {
-	ExternalLink,
-	Files,
-	ShoppingCart,
-	Loader2,
-	CheckCircle,
-	FileText,
-} from "lucide-react";
+import { Files, ShoppingCart, Loader2, CheckCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
+
+import QuantityButtons from "../ui/quantity-buttons";
 
 interface ProductInfoProps {
 	name: string;
@@ -46,6 +39,9 @@ interface ProductInfoProps {
 	variants?: Array<{ itemNumber?: string }>;
 	selectedWarehouse?: string;
 	onWarehouseChange?: (itemNumber: string, warehouseNumber: string) => void;
+	/** Current quantity selected for the active variant (from variant table) */
+	selectedQuantity?: number;
+	onQuantityChange?: (itemNumber: string, quantity: number) => void;
 }
 
 export function ProductInfo({
@@ -63,12 +59,13 @@ export function ProductInfo({
 	variants = [],
 	selectedWarehouse,
 	onWarehouseChange,
+	selectedQuantity,
+	onQuantityChange,
 }: ProductInfoProps) {
 	const firstItemNumber = variants?.[0]?.itemNumber;
 	const t = useTranslations("Product");
 	const { data: profile } = useGetProfileData();
 	const { isCartChanging, setIsCartChanging } = useAppContext();
-	const { activeTab, setActiveTab } = useProductTabs();
 	const [copiedGtin, setCopiedGtin] = useState(false);
 	const [copiedSap, setCopiedSap] = useState(false);
 	const [showFullDescription, setShowFullDescription] = useState(false);
@@ -76,9 +73,6 @@ export function ProductInfo({
 	const [calculatedPrice, setCalculatedPrice] = useState<number | null>(null);
 	const [loadingPrice, setLoadingPrice] = useState(false);
 	const [adding, setAdding] = useState(false);
-	const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-	const [showAllAttributes, setShowAllAttributes] = useState(false);
-	const [showAllProductInfo, setShowAllProductInfo] = useState(false);
 
 	const isSapCustomer = profile?.defaultCustomerNumber === SAP_CUSTOMER;
 
@@ -93,24 +87,36 @@ export function ProductInfo({
 		setQuantity(multiple);
 	}, [multiple]);
 
-	// Get short and long description from columnAttributes productData
+	// When variant changes, default local quantity to 1 if external quantity is not provided
+	useEffect(() => {
+		if (selectedItemNumber && selectedQuantity === undefined) setQuantity(1);
+	}, [selectedItemNumber, selectedQuantity]);
+
+	// Get short and long description from columnAttributes productData (with cross-locale fallback for long when empty)
 	const getShortDescription = () => {
 		if (!columnAttributes?.productData) return undefined;
 		const desc =
 			locale === "no"
 				? columnAttributes.productData.shortDescNo
 				: columnAttributes.productData.shortDescEn;
-		// Return undefined if field doesn't exist, otherwise return the value (even if empty string)
 		return desc !== undefined ? desc : undefined;
 	};
 
 	const getLongDescription = () => {
 		if (!columnAttributes?.productData) return undefined;
+		const pd = columnAttributes.productData as Record<
+			string,
+			string | undefined
+		>;
+		const primary = locale === "no" ? pd.longDescNo : pd.longDescEn;
+		const fallback = locale === "no" ? pd.longDescEn : pd.longDescNo;
+		// Use current locale long desc; if empty, use other locale so "Les mer" / "Vis mindre" can still show
 		const desc =
-			locale === "no"
-				? columnAttributes.productData.longDescNo
-				: columnAttributes.productData.longDescEn;
-		// Return undefined if field doesn't exist, otherwise return the value (even if empty string)
+			primary !== undefined && primary.trim() !== ""
+				? primary
+				: fallback !== undefined && fallback.trim() !== ""
+					? fallback
+					: primary;
 		return desc !== undefined ? desc : undefined;
 	};
 
@@ -160,13 +166,6 @@ export function ProductInfo({
 
 	const sapNumber = getSapNumber();
 
-	// Check if SDS is available for the selected item
-	const hasSDS = useMemo(() => {
-		if (!selectedItemNumber || !columnAttributes) return false;
-		const sds = columnAttributes[selectedItemNumber]?.SDS;
-		return sds === "True" || sds === "true";
-	}, [selectedItemNumber, columnAttributes]);
-
 	const handleCopyGtin = () => {
 		if (gtin) {
 			navigator.clipboard.writeText(gtin);
@@ -182,13 +181,6 @@ export function ProductInfo({
 			setTimeout(() => setCopiedSap(false), 1000);
 		}
 	};
-
-	const currentItemNumber =
-		selectedItemNumber?.toString() || firstItemNumber?.toString() || "";
-
-	const ecoonlineUrl = currentItemNumber
-		? `https://app.ecoonline.com/ecosuite/applic/shoplink/shoplink.php?msdsCid=1000435&applicationID=9&msdsLang=1&viewForm=pdf&msdsEr=${currentItemNumber}`
-		: "";
 
 	// Get warehouse options: same as product-variant-table (company fallback, allow 0 balance, dedupe by warehouseId)
 	const warehouseOptions = useMemo(() => {
@@ -361,12 +353,6 @@ export function ProductInfo({
 			? "Ingen lager"
 			: "Velg lager";
 
-	// Always reset active tab to "attributes" when component mounts
-	useEffect(() => {
-		setActiveTab("attributes");
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
-
 	// Initialize warehouse selection if not set
 	useEffect(() => {
 		if (
@@ -390,12 +376,13 @@ export function ProductInfo({
 		const loadPrice = async () => {
 			if (!selectedItemNumber || !profile) return;
 			setLoadingPrice(true);
+			const effectiveQuantity = selectedQuantity ?? quantity;
 			try {
 				const result = await calculateItemPrice(
 					[
 						{
 							itemNumber: selectedItemNumber,
-							quantity,
+							quantity: effectiveQuantity,
 							warehouseNumber: profile.defaultWarehouseNumber || "",
 						},
 					],
@@ -415,7 +402,9 @@ export function ProductInfo({
 		};
 
 		loadPrice();
-	}, [selectedItemNumber, quantity, profile]);
+	}, [selectedItemNumber, selectedQuantity, quantity, profile]);
+
+	const effectiveQuantity = selectedQuantity ?? quantity;
 
 	// Add to cart handler
 	const handleAddToCart = async () => {
@@ -440,7 +429,7 @@ export function ProductInfo({
 			const response = await addToCart({
 				productNumber,
 				itemNumber: selectedItemNumber,
-				quantity,
+					quantity: selectedQuantity ?? quantity,
 				warehouseNumber,
 				companyNumber: profile?.defaultCompanyNumber.toString() || "1",
 			});
@@ -456,7 +445,6 @@ export function ProductInfo({
 				autoClose: 2000,
 			});
 
-			setQuantity(1);
 			await getCart();
 		} catch (err) {
 			console.error("Error adding to cart:", err);
@@ -467,187 +455,6 @@ export function ProductInfo({
 			});
 		} finally {
 			setAdding(false);
-		}
-	};
-
-	// Get attributes from columnAttributes for Variantinfo tab
-	// Item-specific attributes for Variantinfo tab
-	const allAttributes = useMemo(() => {
-		if (!selectedItemNumber || !columnAttributes) return [];
-
-		const attrs = columnAttributes[selectedItemNumber]?.attributes || [];
-		return attrs.filter((attr: any) =>
-			locale === "no"
-				? attr.language === "Norwegian"
-				: attr.language === "English",
-		);
-	}, [selectedItemNumber, columnAttributes, locale]);
-
-	// Get specifications (filtered attributes) from columnAttributes productData for Produktinfo tab
-	const filteredAttributes = useMemo(() => {
-		if (!columnAttributes?.productData?.attributes) return [];
-		return columnAttributes.productData.attributes.filter((attr: any) =>
-			locale === "no"
-				? attr.language === "Norwegian"
-				: attr.language === "English",
-		);
-	}, [columnAttributes?.productData?.attributes, locale]);
-
-	// Count documents
-	const documentCount = 1 + (hasSDS && ecoonlineUrl ? 1 : 0);
-
-	// Handle PDF download
-	const handleDownloadPdf = async () => {
-		if (!columnAttributes || !selectedItemNumber) {
-			toast(t("noDataAvailable"), {
-				type: "warning",
-				position: "bottom-right",
-				autoClose: 2000,
-			});
-			return;
-		}
-
-		setIsGeneratingPdf(true);
-
-		try {
-			const productAttrs = columnAttributes?.productData?.attributes ?? [];
-			const filteredAttributes = productAttrs.filter((attr: any) =>
-				locale === "no"
-					? attr.language === "Norwegian"
-					: attr.language === "English",
-			);
-			const specifications = filteredAttributes.map((attr: any) => ({
-				name: attr.name || attr.name_key_language || "",
-				value: attr.value_def || attr.valueDef || "-",
-			}));
-
-			const itemNumberForPdf =
-				selectedItemNumber?.toString() || firstItemNumber?.toString() || "-";
-
-			// Use variants prop (product items) for PDF
-			const itemVariants = variants ?? [];
-			let pdfVariants: Array<{
-				itemNumber: string;
-				attributes?: Record<string, string>;
-				price?: number;
-			}> = [];
-			let visibleAttributeNames: string[] = [];
-
-			if (itemVariants.length > 0 && columnAttributes) {
-				// Get all attribute names from columnAttributes (similar to ProductVariantTable)
-				const allAttributeNames = Array.from(
-					new Set(
-						itemVariants.flatMap(
-							(variant: any) =>
-								columnAttributes?.[variant.itemNumber]?.attributes?.map(
-									(a: any) => a.name,
-								) ?? [],
-						),
-					),
-				).filter(
-					(name): name is string =>
-						typeof name === "string" && name.trim() !== "",
-				);
-
-				// Filter out SAP NR for non-SAP customers
-				const filteredAttributeNames = isSapCustomer
-					? allAttributeNames
-					: allAttributeNames.filter(
-							(name) =>
-								name.toLowerCase() !== "sap nr" &&
-								name.toLowerCase() !== "sap number",
-						);
-
-				// Take first 4-5 attribute names for PDF table columns (more columns with shorter headers)
-				visibleAttributeNames = filteredAttributeNames.slice(0, 5);
-
-				// Fetch prices for all variants
-				const variantPrices: Record<string, number> = {};
-				if (profile && itemVariants.length > 0) {
-					try {
-						const priceRequests = itemVariants.map((variant: any) => ({
-							itemNumber: variant.itemNumber?.toString() || "",
-							quantity: 1,
-							warehouseNumber: profile.defaultWarehouseNumber || "",
-						}));
-
-						const priceResults = await calculateItemPrice(
-							priceRequests,
-							profile.defaultCustomerNumber,
-							profile.defaultCompanyNumber,
-						);
-
-						priceResults?.forEach((result: any) => {
-							if (result.itemNumber && result.bestPrice !== undefined) {
-								variantPrices[result.itemNumber.toString()] =
-									result.bestPrice || 0;
-							}
-						});
-					} catch (err) {
-						console.error("Error fetching variant prices for PDF:", err);
-					}
-				}
-
-				// Map variants to PDF format
-				pdfVariants = itemVariants.map((v: any) => {
-					const variantItemNumber = v.itemNumber?.toString() || "";
-					const attrs = columnAttributes?.[v.itemNumber]?.attributes || [];
-
-					// Create attributes object from columnAttributes
-					const attributes: Record<string, string> = {};
-					attrs.forEach((attr: any) => {
-						if (attr.name && attr.valueDef) {
-							attributes[attr.name] = attr.valueDef;
-						}
-					});
-
-					return {
-						itemNumber: variantItemNumber,
-						attributes,
-						price: variantPrices[variantItemNumber] || 0,
-					};
-				});
-			}
-
-			const { generateProductPdf } = await import("@/utils/generateProductPdf");
-			await generateProductPdf({
-				name,
-				itemNumber: itemNumberForPdf,
-				gtin: gtin || null,
-				imageUrl,
-				application: application || "",
-				notes:
-					columnAttributes?.productData?.remarksNo ??
-					columnAttributes?.productData?.remarksEn ??
-					"",
-				specifications,
-				variants: pdfVariants,
-				visibleAttributeNames,
-				locale,
-			});
-
-			toast(
-				locale === "no"
-					? "PDF generert vellykket"
-					: "PDF generated successfully",
-				{
-					type: "success",
-					position: "bottom-right",
-					autoClose: 2000,
-				},
-			);
-		} catch (error) {
-			console.error("Feil ved generering av PDF:", error);
-			toast(
-				locale === "no" ? "Feil ved generering av PDF" : "Error generating PDF",
-				{
-					type: "error",
-					position: "bottom-right",
-					autoClose: 2000,
-				},
-			);
-		} finally {
-			setIsGeneratingPdf(false);
 		}
 	};
 
@@ -662,7 +469,7 @@ export function ProductInfo({
 								<button
 									type="button"
 									onClick={handleCopyGtin}
-									className="inline-flex items-center gap-1.5 text-sm font-light text-gray-500">
+									className="inline-flex items-center gap-1.5 text-xs font-light text-gray-500">
 									<span className="font-semibold text-black">GTIN:</span>
 									<span>{gtin}</span>
 									<Files className="h-4 w-4 cursor-pointer text-gray-500" />
@@ -679,7 +486,7 @@ export function ProductInfo({
 								<button
 									type="button"
 									onClick={handleCopySap}
-									className="inline-flex items-center gap-1.5 text-sm font-light text-gray-500">
+									className="inline-flex items-center gap-1.5 text-xs font-light text-gray-500">
 									<span className="font-semibold text-black">SAP:</span>
 									<span>{sapNumber}</span>
 									<Files className="h-4 w-4 cursor-pointer text-gray-500" />
@@ -699,15 +506,15 @@ export function ProductInfo({
 			</div>
 			{displayDescription() && (
 				<>
-					<div className="flex items-start justify-between gap-4">
-						<p className="text-md mt-2 flex-1 font-normal text-[#5A615D]">
+					<div className="mt-2">
+						<p className="text-md font-light text-[#8A8F8C]">
 							{displayDescription()}
 						</p>
 						{shouldShowToggle && (
 							<button
 								type="button"
 								onClick={() => setShowFullDescription(!showFullDescription)}
-								className="mt-2 shrink-0 text-sm font-medium text-green-600 hover:underline">
+								className="mt-2 text-base font-light text-green-600 hover:underline">
 								{showFullDescription ? "Vis mindre" : "Les mer"} ›
 							</button>
 						)}
@@ -716,346 +523,181 @@ export function ProductInfo({
 				</>
 			)}
 
-			{/* Product action section */}
+			{/* Product action section: details card + Velg varianter, then price + quantity + add */}
 			{selectedItemNumber && columnAttributes && (
-				<div className="mt-4 flex items-center justify-between gap-4">
-					{/* Item number */}
-					<div className="w-1/2 flex-col gap-1">
-						<p className="text-sm font-light text-gray-500">
-							<span className="font-semibold text-black">
-								{locale === "no" ? "Varenummer:" : "Item number:"}
-							</span>{" "}
-							{selectedItemNumber}
-						</p>
-
-						{/* Warehouse selection */}
-						<Select
-							value={selectValue}
-							onValueChange={async (value) => {
-								if (selectedItemNumber) {
-									onWarehouseChange?.(selectedItemNumber, value);
-									// Recalculate price when warehouse changes
-									if (profile) {
-										setLoadingPrice(true);
-										try {
-											const result = await calculateItemPrice(
-												[
-													{
-														itemNumber: selectedItemNumber,
-														quantity,
-														warehouseNumber: value,
-													},
-												],
-												profile.defaultCustomerNumber,
-												profile.defaultCompanyNumber,
-											);
-
-											if (result?.[0]) {
-												setCalculatedPrice(result[0].bestPrice || 0);
-											}
-										} catch (err) {
-											console.error("Failed to load price", err);
-										} finally {
-											setLoadingPrice(false);
-										}
-									}
-								}
+				<div className="mt-4 space-y-4">
+					{/* Row 1: Product details card (70%) + Velg varianter button (30%) */}
+					<div className="flex flex-col gap-4 sm:flex-row sm:items-stretch sm:gap-4">
+						{/* Product details card */}
+						<div
+							className="min-w-0 flex-[0.7] rounded-lg border px-4 py-3"
+							style={{
+								borderColor: "#E8EAE9",
+								backgroundColor: "#F8F9F8",
 							}}>
-							<SelectTrigger className="w-auto border-0 bg-transparent p-0 shadow-none outline-none">
-								<div className="flex items-center gap-1">
-									{selectedOption && selectedOption.balance > 0 && (
-										<CheckCircle className="h-4 w-4 text-green-800" />
-									)}
-									<SelectValue>{warehouseTriggerLabel}</SelectValue>
-								</div>
-							</SelectTrigger>
-							<SelectContent className="max-h-[300px] overflow-y-auto">
-								{warehouseOptions.length === 0 ? (
-									<div className="px-2 py-1 text-sm text-gray-500">
-										Ingen lager tilgjengelig
-									</div>
-								) : (
-									warehouseOptions.map((w: any, index: number) => (
-										<SelectItem
-											key={`${selectedItemNumber}-${w.warehouseId}-${index}`}
-											value={w.warehouseId.toString()}>
-											<div className="flex items-center gap-2">
-												<CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
-												<span className="truncate">
-													{w.balance} {unit} på {w.warehouseName}
+							<div className="space-y-2 text-sm">
+								<p>
+									<span className="font-semibold text-black">
+										{locale === "no" ? "Varenummer:" : "Item number:"}
+									</span>{" "}
+									<span className="font-light text-[#434B46]">
+										{selectedItemNumber}
+									</span>
+								</p>
+								<p>
+									<span className="font-semibold text-black">
+										{locale === "no" ? "Varenavn:" : "Item name:"}
+									</span>{" "}
+									<span className="font-light uppercase text-[#434B46]">
+										{columnAttributes?.[selectedItemNumber]?.itemName ?? name}
+									</span>
+								</p>
+								<div className="flex items-center gap-1.5">
+									<span className="font-semibold text-black">
+										{locale === "no" ? "Tilgjengelighet:" : "Availability:"}
+									</span>
+									<Select
+										value={selectValue}
+										onValueChange={async (value) => {
+											if (selectedItemNumber) {
+												onWarehouseChange?.(selectedItemNumber, value);
+												if (profile) {
+													setLoadingPrice(true);
+													try {
+														const result = await calculateItemPrice(
+															[
+																{
+																	itemNumber: selectedItemNumber,
+																	quantity,
+																	warehouseNumber: value,
+																},
+															],
+															profile.defaultCustomerNumber,
+															profile.defaultCompanyNumber,
+														);
+														if (result?.[0]) {
+															setCalculatedPrice(result[0].bestPrice || 0);
+														}
+													} catch (err) {
+														console.error("Failed to load price", err);
+													} finally {
+														setLoadingPrice(false);
+													}
+												}
+											}
+										}}>
+										<SelectTrigger className="inline-flex h-auto w-auto min-w-0 border-0 bg-transparent p-0 shadow-none outline-none focus:ring-0">
+											<div className="flex items-center gap-1.5">
+												{selectedOption && selectedOption.balance > 0 && (
+													<CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
+												)}
+												<span className="text-green-700">
+													{warehouseTriggerLabel}
 												</span>
 											</div>
-										</SelectItem>
-									))
-								)}
-							</SelectContent>
-						</Select>
-					</div>
-
-					{/* Quantity, Add to Cart, and Price */}
-					<div className="flex items-center gap-4">
-						{/* Quantity selector */}
-						<div className="flex items-center gap-2">
-							<Button
-								className="h-8 w-8 border-[#C1C4C2] text-[#0F1912]"
-								variant="outline"
-								size="icon"
-								onClick={() =>
-									setQuantity((q) => Math.max(multiple, q - multiple))
-								}>
-								-
-							</Button>
-
-							<input
-								type="text"
-								inputMode="numeric"
-								value={quantity}
-								onChange={(e) => {
-									const value = e.target.value;
-									if (value === "") {
-										setQuantity(0);
-										return;
-									}
-									const numValue = parseFloat(value);
-									if (!isNaN(numValue) && numValue >= 0) {
-										const roundedValue =
-											Math.round(numValue / multiple) * multiple;
-										setQuantity(roundedValue || multiple);
-									}
-								}}
-								onBlur={(e) => {
-									const value = parseFloat(e.target.value);
-									if (isNaN(value) || value < multiple) {
-										setQuantity(multiple);
-									} else {
-										const roundedValue =
-											Math.round(value / multiple) * multiple;
-										setQuantity(roundedValue || multiple);
-									}
-								}}
-								className="h-8 w-16 border border-gray-200 px-2 text-center text-sm focus:border-[#009640] focus:ring-2 focus:ring-[#009640] focus:outline-none"
-							/>
-
-							<Button
-								className="h-8 w-8 border-[#C1C4C2] text-[#0F1912]"
-								variant="outline"
-								size="icon"
-								onClick={() => setQuantity((q) => q + multiple)}>
-								+
-							</Button>
+										</SelectTrigger>
+										<SelectContent className="max-h-[300px] overflow-y-auto">
+											{warehouseOptions.length === 0 ? (
+												<div className="px-2 py-1 text-sm text-gray-500">
+													{locale === "no"
+														? "Ingen lager tilgjengelig"
+														: "No warehouse available"}
+												</div>
+											) : (
+												warehouseOptions.map((w: any, index: number) => (
+													<SelectItem
+														key={`${selectedItemNumber}-${w.warehouseId}-${index}`}
+														value={w.warehouseId.toString()}>
+														<div className="flex items-center gap-2">
+															<CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
+															<span className="truncate">
+																{w.balance} {unit}{" "}
+																{locale === "no" ? "på" : "at"}{" "}
+																{w.warehouseName}
+															</span>
+														</div>
+													</SelectItem>
+												))
+											)}
+										</SelectContent>
+									</Select>
+								</div>
+							</div>
 						</div>
 
-						{/* Add to Cart button */}
-						<Button
-							disabled={adding || !selectedItemNumber}
-							variant="greenSolid"
-							className="rounded-md px-4 disabled:opacity-60"
-							onClick={handleAddToCart}>
-							{adding ? (
-								<>
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-									{t("adding")}
-								</>
-							) : (
-								<>
-									<ShoppingCart className="mr-2 h-4 w-4" />
-									{t("addToCart")}
-								</>
-							)}
-						</Button>
+						{/* Velg varianter button */}
+						{variants.length > 0 && (
+							<div className="flex flex-[0.3] items-start sm:justify-end">
+								<Button
+									type="button"
+									variant="outline"
+									className="h-auto w-full shrink-0 rounded-lg border-gray-200 bg-white px-4 py-2 text-sm font-normal text-black hover:bg-gray-50 sm:w-auto"
+								onClick={() => {
+									const el = document.getElementById("product-table-details");
+									el?.scrollIntoView({ behavior: "smooth", block: "start" });
+								}}>
+								{locale === "no"
+									? `Velg varianter (${variants.length})`
+									: `Select variants (${variants.length})`}
+							</Button>
+							</div>
+						)}
+					</div>
 
-						{/* Price */}
-						<div className="text-right">
-							<p className="text-xl leading-none font-semibold">
+					{/* Row 2: Price + quantity selector + Legg til */}
+					<div className="flex flex-wrap items-center justify-between gap-4">
+						{/* Price with unit */}
+						<div className="flex items-baseline gap-1">
+							<span className="text-xl font-semibold leading-none text-black">
 								{loadingPrice
 									? t("loadingPrice")
 									: calculatedPrice !== null
 										? formatNorwegianCurrency(calculatedPrice)
 										: "-"}
-							</p>
-							<p className="text-sm font-light text-gray-500">
-								{locale === "no" ? "eks mva" : t("excludingVat")}
-							</p>
+							</span>
+							<span className="text-sm font-normal text-gray-500">
+								/ {unit} ({locale === "no" ? "eks mva" : t("excludingVat")})
+							</span>
 						</div>
+
+						{/* Quantity selector between price and add-to-cart */}
+						<QuantityButtons
+							quantity={effectiveQuantity}
+							onIncrease={() => {
+								const next = effectiveQuantity + 1;
+								setQuantity(next);
+								if (selectedItemNumber && onQuantityChange) {
+									onQuantityChange(selectedItemNumber, next);
+								}
+							}}
+							onDecrease={() => {
+								const next = Math.max(1, effectiveQuantity - 1);
+								setQuantity(next);
+								if (selectedItemNumber && onQuantityChange) {
+									onQuantityChange(selectedItemNumber, next);
+								}
+							}}
+						/>
+
+						{/* Legg til button */}
+						<Button
+							disabled={adding || !selectedItemNumber}
+							className="w-[172px] rounded-lg border-0 px-4 font-light text-white disabled:opacity-60 hover:opacity-90"
+							style={{ backgroundColor: "#009640" }}
+							onClick={handleAddToCart}>
+							{adding ? (
+								<>
+									<Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+									{t("adding")}
+								</>
+							) : (
+								<>
+									<ShoppingCart className="mr-1.5 h-4 w-4" />
+									{t("addToCart")}
+								</>
+							)}
+						</Button>
 					</div>
-				</div>
-			)}
-
-			{/* Attributes, Produktinfo, and Documents Tabs */}
-			{(allAttributes.length > 0 ||
-				filteredAttributes.length > 0 ||
-				documentCount > 0) && (
-				<div className="mt-6 rounded-lg border border-gray-200 bg-white shadow-sm">
-					<Tabs
-						value={activeTab}
-						onValueChange={setActiveTab}
-						className="w-full">
-						<TabsList className="flex h-auto w-full justify-start gap-6 rounded-none border-b border-gray-200 bg-transparent px-6 py-0">
-							{allAttributes.length > 0 && (
-								<TabsTrigger
-									value="attributes"
-									className="justify-start rounded-none border-b-2 border-transparent bg-transparent px-3 py-3 text-left text-sm font-medium text-gray-500 shadow-none data-[state=active]:border-green-900 data-[state=active]:bg-transparent data-[state=active]:shadow-none">
-									{locale === "no" ? "Variantinfo" : "Attributes"}
-								</TabsTrigger>
-							)}
-							{filteredAttributes.length > 0 && (
-								<TabsTrigger
-									value="produktinfo"
-									className="justify-start rounded-none border-b-2 border-transparent bg-transparent px-3 py-3 text-left text-sm font-medium text-gray-500 shadow-none data-[state=active]:border-green-900 data-[state=active]:bg-transparent data-[state=active]:shadow-none">
-									{locale === "no" ? "Produktinfo" : "Product Info"}
-								</TabsTrigger>
-							)}
-							{documentCount > 0 && (
-								<TabsTrigger
-									value="documents"
-									className="justify-start rounded-none border-b-2 border-transparent bg-transparent px-3 py-3 text-left text-sm font-medium text-gray-500 shadow-none data-[state=active]:border-green-900 data-[state=active]:bg-transparent data-[state=active]:shadow-none">
-									{locale === "no"
-										? `Dokumentasjon (${documentCount})`
-										: `Documents (${documentCount})`}
-								</TabsTrigger>
-							)}
-						</TabsList>
-
-						{/* Attributes tab */}
-						{allAttributes.length > 0 && (
-							<TabsContent
-								value="attributes"
-								className="mt-0">
-								<div className="p-6">
-									<div className="grid grid-cols-2 gap-x-8 gap-y-3">
-										{(showAllAttributes
-											? allAttributes
-											: allAttributes.slice(0, 10)
-										).map((attr: any, index: number) => (
-											<div key={attr.attribute_identifier || index}>
-												<div className="grid grid-cols-2 gap-4 py-3">
-													<dt className="text-left text-sm font-medium text-gray-900">
-														{attr.name || attr.nameKeyLanguage || "-"}
-													</dt>
-													<dd className="text-right text-sm text-gray-500">
-														{attr.valueDef || attr.value_def || "-"}
-													</dd>
-												</div>
-												{index <
-													(showAllAttributes
-														? allAttributes.length - 1
-														: Math.min(allAttributes.length, 10) - 1) && (
-													<hr className="border-gray-200" />
-												)}
-											</div>
-										))}
-									</div>
-									{allAttributes.length > 10 && (
-										<div className="mt-4 flex justify-center">
-											<button
-												type="button"
-												onClick={() => setShowAllAttributes(!showAllAttributes)}
-												className="text-sm font-medium text-green-600 hover:underline">
-												{showAllAttributes
-													? locale === "no"
-														? "Vis mindre"
-														: "Show less"
-													: locale === "no"
-														? `Vis ${allAttributes.length - 10} flere`
-														: `Show ${allAttributes.length - 10} more`}
-											</button>
-										</div>
-									)}
-								</div>
-							</TabsContent>
-						)}
-
-						{/* Produktinfo tab - same layout as attributes */}
-						{filteredAttributes.length > 0 && (
-							<TabsContent
-								value="produktinfo"
-								className="mt-0">
-								<div className="p-6">
-									<div className="grid grid-cols-2 gap-x-8 gap-y-3">
-										{(showAllProductInfo
-											? filteredAttributes
-											: filteredAttributes.slice(0, 10)
-										).map((attr: any, index: number) => (
-											<div key={attr.attribute_identifier || index}>
-												<div className="grid grid-cols-2 gap-4 py-3">
-													<dt className="text-left text-sm font-medium text-gray-900">
-														{attr.name || attr.nameKeyLanguage || "-"}
-													</dt>
-													<dd className="text-right text-sm text-gray-500">
-														{attr.valueDef || attr.value_def || "-"}
-													</dd>
-												</div>
-												{index <
-													(showAllProductInfo
-														? filteredAttributes.length - 1
-														: Math.min(filteredAttributes.length, 10) - 1) && (
-													<hr className="border-gray-200" />
-												)}
-											</div>
-										))}
-									</div>
-									{filteredAttributes.length > 10 && (
-										<div className="mt-4 flex justify-center">
-											<button
-												type="button"
-												onClick={() =>
-													setShowAllProductInfo(!showAllProductInfo)
-												}
-												className="text-sm font-medium text-green-600 hover:underline">
-												{showAllProductInfo
-													? locale === "no"
-														? "Vis mindre"
-														: "Show less"
-													: locale === "no"
-														? `Vis ${filteredAttributes.length - 10} flere`
-														: `Show ${filteredAttributes.length - 10} more`}
-											</button>
-										</div>
-									)}
-								</div>
-							</TabsContent>
-						)}
-
-						{/* Documents tab */}
-						{documentCount > 0 && (
-							<TabsContent
-								value="documents"
-								className="mt-0">
-								<div className="space-y-4 p-6">
-									{/* PDF Download */}
-									<button
-										type="button"
-										onClick={handleDownloadPdf}
-										disabled={isGeneratingPdf || !columnAttributes}
-										className="flex cursor-pointer items-center gap-3 text-left disabled:cursor-not-allowed disabled:opacity-50">
-										{isGeneratingPdf ? (
-											<Loader2 className="h-5 w-5 animate-spin text-black" />
-										) : (
-											<FileText className="h-5 w-5 text-black" />
-										)}
-										<span className="text-sm font-normal text-green-700">
-											{locale === "no" ? "Last ned PDF" : "Download PDF"}
-										</span>
-									</button>
-
-									{/* Ecoonline link */}
-									{hasSDS && ecoonlineUrl && (
-										<button
-											type="button"
-											onClick={() => window.open(ecoonlineUrl, "_blank")}
-											className="flex cursor-pointer items-center gap-3 text-left">
-											<ExternalLink className="h-5 w-5 text-black" />
-											<span className="text-sm font-light text-green-700">
-												{locale === "no"
-													? "Sikkerhetsdatablad (Ecoonline)"
-													: "Safety Data Sheet (Ecoonline)"}
-											</span>
-										</button>
-									)}
-								</div>
-							</TabsContent>
-						)}
-					</Tabs>
 				</div>
 			)}
 		</div>

@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Minus, Plus } from "lucide-react";
 
@@ -32,40 +31,52 @@ const QuantityButtons = ({
 		disabled || isLoading || (max !== undefined && quantity >= max);
 
 	return (
-		<div className={cn("flex items-center gap-1", className)}>
-			<Button
-				size="icon"
-				variant="outline"
+		<div
+			className={cn(
+				"inline-flex h-8 items-stretch overflow-hidden rounded-md border border-[#D3D3D3] bg-[#F5F5F5]",
+				className,
+			)}>
+			<button
+				type="button"
 				disabled={isDecrementDisabled}
-				className={cn("h-6 w-6 bg-[#E8EAE9]", buttonClassName)}
+				className={cn(
+					"flex h-full min-w-[32px] items-center justify-center border-r border-[#D3D3D3] bg-[#F5F5F5] text-gray-800 transition-colors hover:bg-gray-200 disabled:opacity-50 disabled:hover:bg-[#F5F5F5]",
+					buttonClassName,
+				)}
 				onClick={(e) => {
 					e.stopPropagation();
 					onDecrease(e);
 				}}>
 				{isLoading ? (
-					<div className="border-t-primary h-4 w-4 animate-spin rounded-full border-2 border-gray-300" />
+					<div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
 				) : (
-					<Minus className="h-4 w-4" />
+					<Minus className="h-4 w-4" strokeWidth={2} />
 				)}
-			</Button>
-			<span className={cn("w-6 text-center font-bold", quantityClassName)}>
+			</button>
+			<span
+				className={cn(
+					"flex min-w-[2.5rem] items-center justify-center border-r border-[#D3D3D3] bg-white px-2 text-sm font-medium text-gray-900",
+					quantityClassName,
+				)}>
 				{quantity}
 			</span>
-			<Button
-				size="icon"
-				variant="outline"
+			<button
+				type="button"
 				disabled={isIncrementDisabled}
-				className={cn("h-6 w-6 bg-[#E8EAE9]", buttonClassName)}
+				className={cn(
+					"flex h-full min-w-[32px] items-center justify-center bg-[#F5F5F5] text-gray-800 transition-colors hover:bg-gray-200 disabled:opacity-50 disabled:hover:bg-[#F5F5F5]",
+					buttonClassName,
+				)}
 				onClick={(e) => {
 					e.stopPropagation();
 					onIncrease(e);
 				}}>
 				{isLoading ? (
-					<div className="border-t-primary h-4 w-4 animate-spin rounded-full border-2 border-gray-300" />
+					<div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
 				) : (
-					<Plus className="h-4 w-4" />
+					<Plus className="h-4 w-4" strokeWidth={2} />
 				)}
-			</Button>
+			</button>
 		</div>
 	);
 };

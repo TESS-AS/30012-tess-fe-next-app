@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 
 import { ProductBreadcrumbs } from "@/components/products/product-breadcrumbs";
+import { ProductDetailTabs } from "@/components/products/product-detail-tabs";
 import { ProductGallery } from "@/components/products/product-gallery";
 import { ProductInfo } from "@/components/products/product-info";
 import { useGetColumnAttributes } from "@/hooks/useGetColumnAttributes";
@@ -69,6 +70,9 @@ export function ProductPageClient({
 	const [selectedWarehouse, setSelectedWarehouse] = useState<
 		Record<string, string>
 	>({});
+	const [selectedQuantities, setSelectedQuantities] = useState<
+		Record<string, number>
+	>({});
 
 	useEffect(() => {
 		if (!productData?.items || productData.items.length === 0) return;
@@ -133,6 +137,13 @@ export function ProductPageClient({
 		setSelectedWarehouse((prev) => ({
 			...prev,
 			[itemNumber]: warehouseNumber,
+		}));
+	};
+
+	const handleQuantityChange = (itemNumber: string, quantity: number) => {
+		setSelectedQuantities((prev) => ({
+			...prev,
+			[itemNumber]: quantity,
 		}));
 	};
 
@@ -202,6 +213,11 @@ export function ProductPageClient({
 
 	const productImages = getProductImages();
 
+	const selectedQuantity =
+		(selectedItemNumber &&
+			selectedQuantities[selectedItemNumber.toString()]) ||
+		1;
+
 	return (
 		<div className="container mx-auto space-y-12 px-4 pt-8 pb-0">
 			<ProductBreadcrumbs
@@ -211,12 +227,12 @@ export function ProductPageClient({
 				}
 			/>
 
-			<div className="mb-0 grid grid-cols-12 gap-x-8 gap-y-2">
-				<div className="col-span-12 md:col-span-4">
+			<div className="mb-0 grid grid-cols-12 items-start gap-x-8 gap-y-2">
+				<div className="col-span-12 md:col-span-6">
 					<ProductGallery images={productImages} />
 				</div>
 
-				<div className="col-span-12 flex flex-col gap-2 md:col-span-8">
+				<div className="col-span-12 flex flex-col gap-2 md:col-span-6">
 					<ProductInfo
 						name={
 							locale === "en"
@@ -251,6 +267,8 @@ export function ProductPageClient({
 						variants={productData.items ?? []}
 						selectedWarehouse={selectedWarehouse[selectedItemNumber || ""]}
 						onWarehouseChange={handleWarehouseChange}
+						selectedQuantity={selectedQuantity}
+						onQuantityChange={handleQuantityChange}
 					/>
 
 					{/*<ProductVariantInfo*/}
@@ -268,6 +286,39 @@ export function ProductPageClient({
 				</div>
 			</div>
 
+			{/* Tabs section: under product info, full width (not part of ProductInfo) */}
+			<ProductDetailTabs
+				columnAttributes={columnAttributes ?? null}
+				selectedItemNumber={selectedItemNumber}
+				locale={locale}
+				name={
+					locale === "en"
+						? productData.productNameEn
+						: productData.productName
+				}
+				productNumber={productData.productNumber}
+				imageUrl={
+					productImages?.[0]?.url ||
+					(productImages?.[0] as { thumbnail_url?: string } | undefined)
+						?.thumbnail_url ||
+					undefined
+				}
+				application={
+					locale === "en"
+						? productData.applicationEn
+						: productData.applicationNo
+				}
+				gtin={(() => {
+					const item =
+						selectedItemNumber && columnAttributes?.[selectedItemNumber];
+					if (item && !Array.isArray(item) && "GTIN" in item)
+						return item.GTIN ?? null;
+					return selectedVariant?.gtin ?? null;
+				})()}
+				variants={productData.items ?? []}
+				firstItemNumber={productData.items?.[0]?.itemNumber}
+			/>
+
 			<div className="mb-1">
 				{productData.items && productData.items.length > 0 && (
 					<ProductDetailsTable
@@ -279,6 +330,7 @@ export function ProductPageClient({
 						selectedItemNumber={selectedItemNumber}
 						onSelectVariant={handleSelectVariant}
 						onWarehouseChange={handleWarehouseChange}
+						onQuantityChange={handleQuantityChange}
 					/>
 				)}
 			</div>

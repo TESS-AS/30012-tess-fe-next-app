@@ -355,7 +355,7 @@ export default function ProductDetailsModal({
 										value={activeTab}
 										onValueChange={setActiveTab}
 										className="w-full">
-										<TabsList className="flex h-auto w-full justify-start gap-6 rounded-none border-b border-gray-200 bg-transparent px-6 py-0">
+										<TabsList className="flex h-auto w-full justify-start gap-6 rounded-none border-b border-gray-200 bg-transparent px-6 py-1">
 											{variantSpecs.length > 0 && (
 												<TabsTrigger
 													value="variantinfo"
