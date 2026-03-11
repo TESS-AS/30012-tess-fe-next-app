@@ -41,7 +41,6 @@ import {
 } from "@/services/product.service";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import {
-	Pencil,
 	Search,
 	ChevronUp,
 	ChevronDown,
@@ -49,6 +48,7 @@ import {
 	Loader2,
 	ShoppingCart,
 	CheckCircle,
+	SquarePen,
 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -92,6 +92,7 @@ interface ProductVariantTableProps {
 	loadingAttributes?: boolean;
 	hasQuantity?: boolean;
 	onWarehouseChange?: (itemNumber: string, warehouseNumber: string) => void;
+	onQuantityChange?: (itemNumber: string, quantity: number) => void;
 }
 
 export default function ProductVariantTable({
@@ -105,6 +106,7 @@ export default function ProductVariantTable({
 	loadingAttributes,
 	hasQuantity = false,
 	onWarehouseChange,
+	onQuantityChange,
 }: ProductVariantTableProps) {
 	const t = useTranslations();
 	const { data: profile } = useGetProfileData();
@@ -431,7 +433,10 @@ export default function ProductVariantTable({
 		});
 	});
 
-	const calculatePriceForVariant = async (variant: ProductVariant) => {
+	const calculatePriceForVariant = async (
+		variant: ProductVariant,
+		quantityOverride?: number,
+	) => {
 		if (!profile) return;
 
 		try {
@@ -441,11 +446,14 @@ export default function ProductVariantTable({
 			const warehouseNumber =
 				selectedWarehouse || profile.defaultWarehouseNumber || "";
 
+			const effectiveQuantity =
+				quantityOverride ?? quantities[variant.itemNumber] ?? 1;
+
 			const [priceResult] = await calculateItemPrice(
 				[
 					{
 						itemNumber: variant.itemNumber.toString(),
-						quantity: 1,
+						quantity: effectiveQuantity,
 						warehouseNumber: warehouseNumber,
 					},
 				],
@@ -622,7 +630,12 @@ export default function ProductVariantTable({
 		const orderedStaticFirst: ColumnKey[] = [];
 		dropdownOrder
 			.filter(
-				(key) => key !== "quantity" && key !== "warehouse" && key !== "cart" && key !== "price" && key !== "image",
+				(key) =>
+					key !== "quantity" &&
+					key !== "warehouse" &&
+					key !== "cart" &&
+					key !== "price" &&
+					key !== "image",
 			)
 			.forEach((key) => {
 				if (visibleCols[key]) orderedStaticFirst.push(key);
@@ -633,17 +646,27 @@ export default function ProductVariantTable({
 		}
 
 		const fixedTail: ColumnKey[] = [];
-		if (hasQuantity && visibleCols.quantity) fixedTail.push("quantity");
-		if (visibleCols.warehouse) fixedTail.push("warehouse");
-		if (hasAddToCart && visibleCols.cart) fixedTail.push("cart");
+		const combinedPriceQuantityCart =
+			hasQuantity &&
+			hasAddToCart &&
+			visibleCols.quantity &&
+			visibleCols.cart;
 
-		// Insert price right before the last column in fixedTail
-		if (visibleCols.price && fixedTail.length > 0) {
-			const lastColumn = fixedTail.pop()!;
-			fixedTail.push("price");
-			fixedTail.push(lastColumn);
-		} else if (visibleCols.price && fixedTail.length === 0) {
-			// If no fixedTail columns, add price at the end
+		// Optional separate quantity column (when not combined into PRIS)
+		if (!combinedPriceQuantityCart) {
+			if (hasQuantity && visibleCols.quantity) fixedTail.push("quantity");
+		}
+
+		// Availability column
+		if (visibleCols.warehouse) fixedTail.push("warehouse");
+
+		// Optional separate cart column (when not combined into PRIS)
+		if (!combinedPriceQuantityCart) {
+			if (hasAddToCart && visibleCols.cart) fixedTail.push("cart");
+		}
+
+		// PRIS column should always be the last column
+		if (visibleCols.price) {
 			fixedTail.push("price");
 		}
 
@@ -695,11 +718,11 @@ export default function ProductVariantTable({
 						<DropdownMenuTrigger asChild>
 							<Button
 								variant="outline"
-								className="group h-9 rounded-md border px-2">
-								<Pencil className="mr-2 h-5 w-4" />
-								Rediger tabell
-								<ChevronDown className="ml-2 inline h-5 w-5 group-data-[state=open]:hidden" />
-								<ChevronUp className="ml-2 hidden h-5 w-5 group-data-[state=open]:inline" />
+								className="group inline-flex h-9 items-center rounded-md border border-[#D3D3D3] bg-white px-3 text-sm font-normal text-[#5A615D] shadow-none hover:bg-gray-50">
+								<SquarePen className="mr-2 h-4 w-4 text-[#5A615D]" />
+								<span>Rediger tabell</span>
+								<ChevronDown className="ml-1 inline h-4 w-4 text-[#5A615D] group-data-[state=open]:hidden" />
+								<ChevronUp className="ml-1 hidden h-4 w-4 text-[#5A615D] group-data-[state=open]:inline" />
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent
@@ -790,6 +813,11 @@ export default function ProductVariantTable({
 									["quantity", "warehouse", "cart", "price"].includes(col),
 								)
 								.map((col) => {
+									const combinedPriceQuantityCart =
+										hasQuantity &&
+										hasAddToCart &&
+										visibleCols.quantity &&
+										visibleCols.cart;
 									return (
 										<TableHead
 											key={col}
@@ -800,7 +828,9 @@ export default function ProductVariantTable({
 														? "min-w-[200px]"
 														: col === "cart"
 															? "min-w-[140px]"
-															: "min-w-[120px]"
+															: col === "price" && combinedPriceQuantityCart
+																? "min-w-[280px]"
+																: "min-w-[120px]"
 											}`}>
 											{columnLabels[col]}
 										</TableHead>
@@ -816,6 +846,12 @@ export default function ProductVariantTable({
 							const isSelected =
 								selectedItemNumber === variant.itemNumber.toString();
 
+							const combinedPriceQuantityCart =
+								hasQuantity &&
+								hasAddToCart &&
+								visibleCols.quantity &&
+								visibleCols.cart;
+
 							return (
 								<TableRow
 									key={variant.itemNumber}
@@ -825,7 +861,7 @@ export default function ProductVariantTable({
 											: ""
 									}`}
 									onClick={() => {
-										if (!hasAddToCart && onSelectVariant) {
+										if (onSelectVariant) {
 											onSelectVariant(variant.itemNumber.toString());
 										}
 									}}>
@@ -967,24 +1003,163 @@ export default function ProductVariantTable({
 															key="quantity"
 															className="min-w-[120px] py-2"
 															onClick={(e) => e.stopPropagation()}>
-															<QuantityButtons
-																quantity={qty}
-																onIncrease={() =>
-																	setQuantities((prev) => ({
-																		...prev,
-																		[variant.itemNumber]: qty + 1,
-																	}))
-																}
-																onDecrease={() =>
-																	setQuantities((prev) => ({
-																		...prev,
-																		[variant.itemNumber]: Math.max(1, qty - 1),
-																	}))
-																}
-															/>
+															<div className="flex justify-between">
+																<QuantityButtons
+																	quantity={qty}
+																	onIncrease={() => {
+																		const newQty = qty + 1;
+																		setQuantities((prev) => ({
+																			...prev,
+																			[variant.itemNumber]: newQty,
+																		}));
+																		onQuantityChange?.(
+																			variant.itemNumber.toString(),
+																			newQty,
+																		);
+																		void calculatePriceForVariant(
+																			variant,
+																			newQty,
+																		);
+																	}}
+																	onDecrease={() => {
+																		const newQty = Math.max(1, qty - 1);
+																		setQuantities((prev) => ({
+																			...prev,
+																			[variant.itemNumber]: newQty,
+																		}));
+																		onQuantityChange?.(
+																			variant.itemNumber.toString(),
+																			newQty,
+																		);
+																		void calculatePriceForVariant(
+																			variant,
+																			newQty,
+																		);
+																	}}
+																/>
+															</div>
 														</TableCell>
 													);
 												case "price":
+													if (combinedPriceQuantityCart) {
+														return (
+															<TableCell
+																key="price"
+																className="min-w-[280px] py-2 pr-12"
+																onClick={(e) => e.stopPropagation()}>
+																<div className="flex items-center justify-between gap-3">
+																	<div className="flex flex-wrap items-center gap-3">
+																		<span className="text-sm font-medium min-w-[96px] whitespace-nowrap">
+																			{loading[variant.itemNumber] ? (
+																				<span className="flex items-center gap-2 text-muted-foreground">
+																					<Loader2 className="h-4 w-4 animate-spin" />
+																					{t("Product.loadingPrice")}
+																				</span>
+																			) : (
+																				formatNorwegianCurrency(
+																					prices[variant.itemNumber] ?? 0,
+																				)
+																			)}
+																		</span>
+																		<QuantityButtons
+																			quantity={qty}
+																			onIncrease={() => {
+																				const newQty = qty + 1;
+																				setQuantities((prev) => ({
+																					...prev,
+																					[variant.itemNumber]: newQty,
+																				}));
+																				onQuantityChange?.(
+																					variant.itemNumber.toString(),
+																					newQty,
+																				);
+																				void calculatePriceForVariant(
+																					variant,
+																					newQty,
+																				);
+																			}}
+																			onDecrease={() => {
+																				const newQty = Math.max(1, qty - 1);
+																				setQuantities((prev) => ({
+																					...prev,
+																					[variant.itemNumber]: newQty,
+																				}));
+																				onQuantityChange?.(
+																					variant.itemNumber.toString(),
+																					newQty,
+																				);
+																				void calculatePriceForVariant(
+																					variant,
+																					newQty,
+																				);
+																			}}
+																		/>
+																	</div>
+																	{hasAddToCart && (
+																		<button
+																			type="button"
+																			className="ml-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#D3D3D3] bg-white text-gray-800 transition-colors hover:bg-gray-50 disabled:opacity-50"
+																			disabled={loading[variant.itemNumber]}
+																			onClick={async (e) => {
+																				e.stopPropagation();
+																				if (!selectedWarehouse) {
+																					toast(t("Product.selectWarehouseFirst"), {
+																						type: "warning",
+																						position: "bottom-right",
+																						autoClose: 2000,
+																					});
+																					return;
+																				}
+																				setLoading((prev) => ({
+																					...prev,
+																					[variant.itemNumber]: true,
+																				}));
+																				try {
+																					const response = await addToCart({
+																						productNumber,
+																						itemNumber: variant.itemNumber.toString(),
+																						quantity: qty,
+																						warehouseNumber: selectedWarehouse,
+																						companyNumber: "1",
+																					});
+																					setIsCartChanging(!isCartChanging);
+																					if (response.message === "Error adding to cart")
+																						throw new Error(response.message);
+																					toast(t("Product.addedToCart"), {
+																						type: "success",
+																						position: "bottom-right",
+																						autoClose: 2000,
+																					});
+																					setQuantities((prev) => ({
+																						...prev,
+																						[variant.itemNumber]: 1,
+																					}));
+																					await getCart();
+																				} catch (err) {
+																					console.error("Error adding to cart:", err);
+																					toast(t("Product.errorAddingToCart"), {
+																						type: "error",
+																						position: "bottom-right",
+																						autoClose: 2000,
+																					});
+																				} finally {
+																					setLoading((prev) => ({
+																						...prev,
+																						[variant.itemNumber]: false,
+																					}));
+																				}
+																			}}>
+																			{loading[variant.itemNumber] ? (
+																				<Loader2 className="h-4 w-4 animate-spin" />
+																			) : (
+																				<ShoppingCart className="h-4 w-4" strokeWidth={1.5} />
+																			)}
+																		</button>
+																	)}
+																</div>
+															</TableCell>
+														);
+													}
 													return (
 														<TableCell
 															key="price"

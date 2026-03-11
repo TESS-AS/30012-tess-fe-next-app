@@ -59,6 +59,7 @@ export function ZoomImage({
 					!isZoomed && "cursor-zoom-in",
 					className,
 				)}
+				style={{ maxWidth: width, maxHeight: height }}
 				onMouseMove={handleMouseMove}
 				onMouseEnter={() => setIsZoomed(true)}
 				onMouseLeave={() => setIsZoomed(false)}>
