@@ -184,7 +184,8 @@
 		"searchAttributes": "Search for attributes",
 		"showMore": "Show more",
 		"showLess": "Show less",
-		"attributes": "Attributes"
+		"attributes": "Attributes",
+		"selectAll": "Select all"
 	},
 	"Search": {
 		"categories": "Categories",
@@ -311,7 +312,7 @@
 			"whyNoPrices": "If you don't see prices, or the prices seem wrong, check the following first:\n\u2022 Is the user created and approved in the online store?\n\u2022 Are you logged in?\n\u2022 Is the user linked to the correct customer number and local warehouse in your profile?\n\nIf all of this is in place and the prices still don't match, or something is unclear, contact netthandel@tess.no.",
 			"agreementPricesInStore": "Yes. When your user is linked to the correct customer number, you will see the company's agreement prices in the online store.\nThe prices displayed are already discounted according to your discount agreement.\nYou will see the discount when you add a product to the shopping cart.",
 			"notFound": "Contact your regular TESS customer contact.\nIf you don't have a customer contact, you can send an email to netthandel@tess.no.",
-"whereFindCatalog": "If you have multiple catalogs, you can select them in the search field at the top of the page.\n\u2022 Click on the catalog selector next to the search field, and select the desired product catalog or assortment.\n\nIf you are missing catalogs that you believe you should have access to, send an email to netthandel@tess.no.\nWe will check your access and help you further.",
+			"whereFindCatalog": "If you have multiple catalogs, you can select them in the search field at the top of the page.\n\u2022 Click on the catalog selector next to the search field, and select the desired product catalog or assortment.\n\nIf you are missing catalogs that you believe you should have access to, send an email to netthandel@tess.no.\nWe will check your access and help you further.",
 			"missingProduct": "Contact your customer contact or your local TESS service center.\nThey can help you find the right product or an alternative.",
 			"howToAddDeliveryAddresses": "You select the delivery address during checkout when ordering items.\nYou can then use a saved address or enter a new one.\nThe first time, you must create and save the delivery address yourself.\nOnce the address is saved, you can select it during checkout.",
 			"contactErrors": "If you experience technical errors, login problems, or other issues, you can send an email to netthandel@tess.no.\nYou can also call TESS Online Store at 32 84 41 50.",
@@ -666,7 +667,8 @@
 			"installationDate": "INSTALLATION DATE",
 			"productionDate": "PRODUCTION DATE",
 			"fillingDate": "FILLING DATE",
-			"nextInspectionDate": "NEXT INSPECTION DATE"
+			"nextInspectionDate": "NEXT INSPECTION DATE",
+			"handlinger": "HANDLINGER"
 		},
 		"errors": {
 			"selectItemsFirst": "Please select items to contact about"
