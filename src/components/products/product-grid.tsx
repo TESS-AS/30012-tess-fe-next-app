@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState } from "react";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useProductFilter } from "@/hooks/useProductFilter";
 import { useProductPrices } from "@/hooks/useProductPrices";
@@ -15,14 +16,6 @@ import { useTranslations } from "next-intl";
 import { ProductCard } from "./product-card";
 import { Button } from "../ui/button";
 import { Filter, FilterCategory } from "../ui/filter";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "../ui/select";
-import { Skeleton } from "../ui/skeleton";
 import {
 	Tooltip,
 	TooltipContent,
@@ -44,15 +37,6 @@ interface ProductGridProps {
 	}[];
 }
 
-const SORT_OPTIONS = [
-	{ value: " ", label: "Sort By" },
-	{ value: "ALPHABETICAL", label: "A-Z" },
-	{ value: "ALPHABETICAL_DESC", label: "Z-A" },
-	{ value: "oldest", label: "Oldest" },
-	{ value: "lowest", label: "Lowest" },
-	{ value: "highest", label: "Highest" },
-];
-
 export function ProductGrid({
 	variant = "default",
 	filters,
@@ -68,7 +52,6 @@ export function ProductGrid({
 	const [isFiltering, setIsFiltering] = useState(false);
 	const [viewLayout, setViewLayout] = useState<string>("grid");
 	const observerTarget = useRef<HTMLDivElement>(null);
-	const [sort, setSort] = useState<string>("");
 	const [filtersState, setFiltersState] = useState(filters);
 	const filterRef = useRef<{
 		clearRangeFilter: (filterKey: string) => void;
@@ -200,11 +183,6 @@ export function ProductGrid({
 		};
 	}, [hasMore, isLoading, isFetchingNextPage, loadMore]);
 
-	const onSortChange = (value: string) => {
-		setSort(value);
-		handleSortChange(value);
-	};
-
 	return (
 		<div className="flex flex-col gap-8 lg:flex-row">
 			<aside className="w-full pr-4 lg:w-1/4">
@@ -236,24 +214,6 @@ export function ProductGrid({
 					<h2 className="text-2xl font-semibold">{query}</h2>
 
 					<div className="flex shrink-0 items-center gap-2">
-						<Select
-							value={sort}
-							onValueChange={onSortChange}>
-							<SelectTrigger className="out h-8 w-[90px] rounded-md border border-neutral-300 px-3 text-sm">
-								<SelectValue placeholder={t("Common.sort")} />
-							</SelectTrigger>
-							<SelectContent>
-								<>
-									{SORT_OPTIONS.map((option) => (
-										<SelectItem
-											key={option.value}
-											value={option.value}>
-											{option.label}
-										</SelectItem>
-									))}
-								</>
-							</SelectContent>
-						</Select>
 						<Button
 							variant="outline"
 							onClick={() => setViewLayout("list")}
@@ -424,8 +384,8 @@ export function ProductGrid({
 							const productHref = query
 								? `${pathname}/${product.productNumber}`
 								: searchParams.toString()
-								? `${pathname}/${product.productNumber}?${searchParams.toString()}`
-								: `${pathname}/${product.productNumber}`;
+									? `${pathname}/${product.productNumber}?${searchParams.toString()}`
+									: `${pathname}/${product.productNumber}`;
 
 							return (
 								<Link

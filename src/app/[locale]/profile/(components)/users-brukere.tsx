@@ -26,7 +26,6 @@ import { useUpdateUserRelations } from "@/hooks/useUpdateUserRelations";
 import { User, BulkEditChanges } from "@/types/user.types";
 import type { AxiosError } from "axios";
 import {
-	Plus,
 	Search,
 	MoreHorizontal,
 	Eye,
@@ -56,7 +55,6 @@ const UsersBrukere = () => {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [debouncedSearch, setDebouncedSearch] = useState("");
 	const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-	const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [userToDelete, setUserToDelete] = useState<User | null>(null);
 	const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -414,13 +412,7 @@ const UsersBrukere = () => {
 							/>
 						</div>
 
-						<div className="flex gap-3">
-							<Button
-								variant="greenSolid"
-								onClick={() => setIsAddUserModalOpen(true)}>
-								<Plus className="mr-2 h-4 w-4" /> {t("addUser")}
-							</Button>
-						</div>
+						<div className="flex gap-3" />
 					</div>
 				</div>
 
