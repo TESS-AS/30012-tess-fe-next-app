@@ -159,9 +159,7 @@ export async function getOpenConfirmations(): Promise<OpenConfirmationsResponse>
 }
 
 /** Single order lines with mismatches for the Avvikende ordre detail view. Returns lines plus optional supplier/date from API. */
-export async function getOpenOrderLines(
-	orderNumber: string,
-): Promise<{
+export async function getOpenOrderLines(orderNumber: string): Promise<{
 	lines: OpenOrderLineItemResponse[];
 	supplier?: string;
 	date?: string;
@@ -177,7 +175,12 @@ export async function getOpenOrderLines(
 		if (Array.isArray(data)) {
 			return { lines: data };
 		}
-		if (data && typeof data === "object" && "lines" in data && Array.isArray(data.lines)) {
+		if (
+			data &&
+			typeof data === "object" &&
+			"lines" in data &&
+			Array.isArray(data.lines)
+		) {
 			return {
 				lines: data.lines,
 				supplier: data.supplier,
@@ -185,7 +188,11 @@ export async function getOpenOrderLines(
 			};
 		}
 		if (data && typeof data === "object" && "dbOrderLine" in data) {
-			const single = data as OpenOrderLineItemResponse & { supplier?: string; date?: string; orderDate?: string };
+			const single = data as OpenOrderLineItemResponse & {
+				supplier?: string;
+				date?: string;
+				orderDate?: string;
+			};
 			return {
 				lines: [single],
 				supplier: single.supplier,
@@ -205,7 +212,7 @@ export async function updateOpenOrderStatus(
 ): Promise<void> {
 	try {
 		await axiosInstance.patch(
-			`/edi/order/openOrder/status/${encodeURIComponent(orderNumber)}`,
+			`/edi/order/openOrders/status/${encodeURIComponent(orderNumber)}`,
 			{ approve },
 		);
 	} catch (error) {
