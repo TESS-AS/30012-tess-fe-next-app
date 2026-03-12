@@ -393,7 +393,6 @@ export function Rekvisisjoner() {
 						);
 					}}
 					totalPages={totalPages}
-					isDropdownColumn
 				/>
 			</div>
 

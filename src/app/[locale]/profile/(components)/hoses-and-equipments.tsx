@@ -297,9 +297,8 @@ export function HosesAndEquipments({
 		[allAcrossPages],
 	);
 
-	const handleSelectAllOnPage = () => {
-		const currentAssets = transformedAssetsRef.current;
-		const ids = currentAssets
+	const handleSelectAllOnPage = useCallback(() => {
+		const ids = transformedAssets
 			.filter((a) => !isEcomBlocked(a))
 			.map((a) => a.hexagonId);
 
@@ -318,7 +317,13 @@ export function HosesAndEquipments({
 
 		const shouldSelect = !currentlyAllSelected;
 		handleBulkSelect(ids, shouldSelect);
-	};
+	}, [
+		transformedAssets,
+		allAcrossPages,
+		deselectedIds,
+		selectedRows,
+		handleBulkSelect,
+	]);
 
 	const handleSelectAllGlobally = (on: boolean) => {
 		if (on) {
@@ -807,6 +812,10 @@ export function HosesAndEquipments({
 	}, [
 		selectedColumns,
 		columnOrder,
+		transformedAssets,
+		allSelectedOnPage,
+		someSelectedOnPage,
+		handleSelectAllOnPage,
 		selectedRows,
 		allAcrossPages,
 		deselectedIds,
