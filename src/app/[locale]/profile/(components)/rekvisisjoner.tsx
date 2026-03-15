@@ -26,7 +26,7 @@ import { getStatusIcons } from "./mine-bestillinger";
 
 type Status = "Alle" | "Venter godkjenning" | "Godkjent" | "Avvist";
 
-const statuses: Status[] = ["Alle", "Venter godkjenning", "Godkjent", "Avvist"];
+const statuses: Status[] = ["Alle", "Godkjent", "Venter godkjenning", "Avvist"];
 
 const getStatusCount = (status: Status, rekvisisjoner: Rekvisisjon[]) => {
 	if (status === "Alle") return rekvisisjoner.length;
@@ -328,15 +328,17 @@ export function Rekvisisjoner() {
 												{status}
 											</Label>
 										</div>
-										{status !== "Alle" && count > 0 && (
-											<span
-												className={cn(
-													"ml-2 flex h-5 w-5 items-center justify-center rounded-full text-xs text-white",
-													badgeStyle,
-												)}>
-												{count}
-											</span>
-										)}
+										{status !== "Alle" &&
+											status !== "Godkjent" &&
+											count > 0 && (
+												<span
+													className={cn(
+														"ml-2 flex h-5 w-5 items-center justify-center rounded-full text-xs text-white",
+														badgeStyle,
+													)}>
+													{count}
+												</span>
+											)}
 									</div>
 								);
 							})}

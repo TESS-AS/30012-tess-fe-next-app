@@ -572,7 +572,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								{profile &&
 									assortments.length > 0 &&
 									isAssortmentDropdownOpen && (
-										<div className="absolute top-[50px] right-0 z-[9999] w-[300px] max-w-[400px] max-h-[260px] overflow-y-auto rounded-b-lg bg-white py-2 shadow-lg">
+										<div className="absolute top-[50px] right-0 z-[9999] max-h-[260px] w-[300px] max-w-[400px] overflow-y-auto rounded-b-lg bg-white py-2 shadow-lg">
 											<TooltipProvider>
 												{assortments.map((a: any) => (
 													<Tooltip key={a.assortmentnumber}>

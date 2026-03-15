@@ -304,10 +304,10 @@ export function DataTable<
 													{isExpandable &&
 														expandedRows.includes(index) &&
 														expandableContent && (
-															<tr className="animate-in fade-in-0 zoom-in-95 border-b border-[#C1C4C2] bg-[#F3FAF7] duration-200">
+															<tr className="animate-in fade-in-0 zoom-in-95 border-b-2 border-[#C1C4C2] duration-200">
 																<td
 																	colSpan={safeColumns.length + 2}
-																	className="border-t border-[#E5E7E6] py-6 pl-16">
+																	className="border-t border-[#E5E7E6] py-6 pl-20">
 																	{expandableContent(item)}
 																</td>
 															</tr>
