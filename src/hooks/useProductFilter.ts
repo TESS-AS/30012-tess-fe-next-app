@@ -1,14 +1,9 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 
-import { FilterCategory } from "@/components/ui/filter";
 import { normalizeFilterResponse } from "@/lib/category-utils";
 import { deserializeFilters, serializeFilters } from "@/lib/utils";
-import { loadFilterParents } from "@/services/categories.service";
-import {
-	CategoryFilterResponseItem,
-	FilterResponseItem,
-	FilterValues,
-} from "@/types/filter.types";
+import { loadFilterFamily } from "@/services/categories.service";
+import { FilterCategory, FilterValues } from "@/types/filter.types";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 
 import { useProductInfiniteQuery } from "./useProductInfiniteQuery";
@@ -18,14 +13,14 @@ interface UseProductFilterProps {
 	categoryName?: string;
 	query: string | null;
 	onFiltersUpdate?: (filters: FilterCategory[]) => void;
-	onRefetchChildren?: (filterArray: FilterValues[]) => Promise<void>;
+	onCategoriesUpdate?: (categories: any[]) => void;
 }
 
 export function useProductFilter({
 	categoryNumber: initialCategoryNumber,
 	query,
 	onFiltersUpdate,
-	onRefetchChildren,
+	onCategoriesUpdate,
 }: UseProductFilterProps) {
 	const searchParams = useSearchParams();
 	const pathname = usePathname();
@@ -62,16 +57,19 @@ export function useProductFilter({
 	}, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
 	const handleFilterChange = useCallback(
-		async (filters: FilterValues[]) => {
+		(filters: FilterValues[], categoryOverride?: string) => {
+			const effectiveCategoryNumber = categoryOverride ?? categoryNumber;
+
+			// Optimistic local updates so chips + sidebar react immediately
 			setCurrentFilters(filters?.length > 0 ? filters : null);
 
-			// Update selected filters state
 			const newSelectedFilters: Record<string, string[]> = {};
 			filters.forEach((filter) => {
 				newSelectedFilters[filter.key] = filter.values;
 			});
 			setSelectedFilters(newSelectedFilters);
 
+			// Sync filters into URL
 			const params = new URLSearchParams(searchParams.toString());
 			if (Object.keys(newSelectedFilters).length > 0) {
 				const filtersString = serializeFilters(newSelectedFilters);
@@ -83,10 +81,47 @@ export function useProductFilter({
 			const newUrl = `${pathname}${params.toString() ? `?${params.toString()}` : ""}`;
 			router.replace(newUrl, { scroll: false });
 
-			// React Query will automatically refetch when filters change
-			await refetch();
+			// Fire-and-forget: refresh filterFamily + products in background
+			(async () => {
+				if (onFiltersUpdate || onCategoriesUpdate) {
+					try {
+						const result = await loadFilterFamily({
+							categoryNumber: effectiveCategoryNumber || undefined,
+							searchTerm: query || undefined,
+							language: "no",
+							filters,
+						});
+
+						if (Array.isArray(result?.filters) && onFiltersUpdate) {
+							const normalized = normalizeFilterResponse(result.filters);
+							onFiltersUpdate(normalized);
+						}
+
+						if (Array.isArray(result?.categories) && onCategoriesUpdate) {
+							onCategoriesUpdate(result.categories);
+						}
+					} catch (err) {
+						console.error("Failed to reload filters/categories", err);
+					}
+				}
+
+				try {
+					await refetch();
+				} catch (err) {
+					console.error("Failed to refetch products after filter change", err);
+				}
+			})();
 		},
-		[refetch, searchParams, pathname, router],
+		[
+			refetch,
+			searchParams,
+			pathname,
+			router,
+			onFiltersUpdate,
+			onCategoriesUpdate,
+			categoryNumber,
+			query,
+		],
 	);
 
 	const handleCategoryChange = useCallback(
@@ -95,44 +130,69 @@ export function useProductFilter({
 			newCategoryName: string,
 			setFiltersFn: (filters: FilterCategory[]) => void,
 		) => {
-			setCategoryNumber(newCategoryNumber);
-			setSelectedFilters({
-				category: [newCategoryName],
+			// If a category is selected, switch context to that category
+			if (newCategoryNumber) {
+				setCategoryNumber(newCategoryNumber);
+				setSelectedFilters({
+					category: [newCategoryName],
+				});
+				setCurrentFilters(null);
+
+				try {
+					const result = await loadFilterFamily({
+						categoryNumber: newCategoryNumber,
+						searchTerm: query,
+						language: "no",
+						filters: [],
+					});
+
+					const normalized = normalizeFilterResponse(result?.filters ?? []);
+					setFiltersFn(normalized);
+
+					if (Array.isArray(result?.categories) && onCategoriesUpdate) {
+						onCategoriesUpdate(result.categories);
+					}
+				} catch (err) {
+					console.error("Failed to load filters for category", err);
+				}
+				return;
+			}
+
+			// If the category is deselected, revert back to the page's initial categoryNumber
+			const fallbackCategoryNumber = initialCategoryNumber || "";
+			setCategoryNumber(fallbackCategoryNumber);
+
+			// Remove the "category" filter from selectedFilters/currentFilters
+			setSelectedFilters((prev) => {
+				const next = { ...prev };
+				delete next.category;
+				return next;
 			});
-			setCurrentFilters(null);
+			setCurrentFilters((prev) => {
+				if (!prev) return null;
+				const withoutCategory = prev.filter((f) => f.key !== "category");
+				return withoutCategory.length > 0 ? withoutCategory : null;
+			});
 
 			try {
-				const result = await loadFilterParents({
-					categoryNumber: newCategoryNumber,
+				const result = await loadFilterFamily({
+					categoryNumber: fallbackCategoryNumber || undefined,
 					searchTerm: query,
+					language: "no",
+					filters: [],
 				});
 
-				if (!Array.isArray(result))
-					throw new Error("Expected result to be array");
+				const normalized = normalizeFilterResponse(result?.filters ?? []);
+				setFiltersFn(normalized);
 
-				const normalized = result
-					.map((item: any) => {
-						if ("filters" in item) {
-							return {
-								category: item.category,
-								categoryNumber: item.categoryNumber,
-								filters: item.filters.map((f: any) => ({
-									key: f.key,
-									values: [{ value: f.key, productcount: f.productCount }],
-								})),
-							};
-						}
-						console.warn("Unexpected item in filter response", item);
-						return null;
-					})
-					.filter(Boolean);
-
-				setFiltersFn(normalized as any);
+				if (Array.isArray(result?.categories) && onCategoriesUpdate) {
+					onCategoriesUpdate(result.categories);
+				}
 			} catch (err) {
-				console.error("Failed to load parent filters", err);
+				console.error("Failed to reload filters for fallback category", err);
 			}
 		},
-		[query, categoryNumber],
+		[query, categoryNumber, initialCategoryNumber, onCategoriesUpdate],
 	);
 
 	const handleSortChange = useCallback(
@@ -156,15 +216,16 @@ export function useProductFilter({
 	);
 
 	const removeFilter = useCallback(
-		async (key: string, value: string) => {
-			const newFilters = selectedFilters[key].filter((v) => v !== value);
+		(key: string, value: string) => {
+			const newFiltersForKey =
+				selectedFilters[key]?.filter((v) => v !== value) ?? [];
 
-			const updatedSelectedFilters = {
+			const updatedSelectedFilters: Record<string, string[]> = {
 				...selectedFilters,
-				[key]: newFilters,
+				[key]: newFiltersForKey,
 			};
 
-			if (newFilters.length === 0) {
+			if (newFiltersForKey.length === 0) {
 				delete updatedSelectedFilters[key];
 			}
 
@@ -175,46 +236,24 @@ export function useProductFilter({
 					values: vals,
 				}));
 
-			if (key === "category" && newFilters.length === 0) {
-				setCategoryNumber("");
+			let nextCategoryNumber = categoryNumber;
+
+			// When the category filter is cleared, fall back to the
+			// original categoryNumber from the page (if any), instead
+			// of removing category context entirely.
+			if (key === "category" && newFiltersForKey.length === 0) {
+				nextCategoryNumber = initialCategoryNumber || "";
+				setCategoryNumber(nextCategoryNumber);
 			}
 
-			// Reload parent filters with updated filter array
-			if (onFiltersUpdate) {
-				try {
-					const result = await loadFilterParents({
-						categoryNumber: categoryNumber || undefined,
-						searchTerm: query || undefined,
-						language: "no",
-						filters: filterArray,
-					});
-
-					if (Array.isArray(result)) {
-						const normalized = normalizeFilterResponse(result);
-						onFiltersUpdate(normalized);
-					}
-				} catch (err) {
-					console.error("Failed to reload parent filters", err);
-				}
-			}
-
-			if (onRefetchChildren) {
-				try {
-					await onRefetchChildren(filterArray);
-				} catch (err) {
-					console.error("Failed to refetch filter children", err);
-				}
-			}
-
-			await handleFilterChange(filterArray);
+			// Delegate to the same optimistic handler used by sidebar
+			handleFilterChange(filterArray, nextCategoryNumber);
 		},
 		[
 			handleFilterChange,
 			selectedFilters,
 			categoryNumber,
-			query,
-			onFiltersUpdate,
-			onRefetchChildren,
+			initialCategoryNumber,
 		],
 	);
 

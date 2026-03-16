@@ -3,11 +3,12 @@
 import { useEffect, useMemo, useState, use } from "react";
 
 import CategoryContent from "@/components/category/category-content";
-import type { FilterCategory } from "@/components/ui/filter";
 import { useCategories } from "@/lib/CategoriesProvider";
+import { normalizeFilterResponse } from "@/lib/category-utils";
 import { formatUrlToDisplayName } from "@/lib/utils";
-import { loadFilterParents } from "@/services/categories.service";
+import { loadFilterFamily } from "@/services/categories.service";
 import type { Category } from "@/types/categories.types";
+import type { FilterCategory } from "@/types/filter.types";
 import { notFound } from "next/navigation";
 import { useLocale } from "next-intl";
 
@@ -16,7 +17,10 @@ interface CategoryPageProps {
 	searchParams: Promise<{ query?: string }>;
 }
 
-export default function CategoryPage({ params, searchParams }: CategoryPageProps) {
+export default function CategoryPage({
+	params,
+	searchParams,
+}: CategoryPageProps) {
 	const resolvedParams = use(params);
 	const resolvedSearchParams = use(searchParams);
 	const { category } = resolvedParams;
@@ -45,54 +49,25 @@ export default function CategoryPage({ params, searchParams }: CategoryPageProps
 
 		const categoryNumber = matchedCategory?.groupId || null;
 
-		loadFilterParents({
+		loadFilterFamily({
 			categoryNumber,
 			searchTerm: query || null,
 			language: locale,
+			filters: [],
 		})
-			.then((filtersResponse) => {
-				const categoryFilters =
-					Array.isArray(filtersResponse) &&
-					"categoryFilters" in filtersResponse[0]
-						? filtersResponse[0].categoryFilters
-						: [];
-				setCategoryFilters(categoryFilters);
+			.then((response) => {
+				if (!response) {
+					setCategoryFilters([]);
+					setFilters([]);
+					return;
+				}
 
-				const mappedFilters: any[] = filtersResponse.map((item: any) => {
-					if ("categoryFilters" in item && "filter" in item) {
-						return {
-							category: item.category,
-							filters: (
-								item.filter as { key: string; productCount: number }[]
-							).map((f) => ({
-								key: f.key,
-								values: [
-									{
-										value: f.key,
-										productcount: f.productCount,
-									},
-								],
-							})),
-						};
-					} else {
-						return {
-							category: item.category,
-							categoryNumber: item.categoryNumber,
-							filters: (
-								item.filters as { key: string; productCount: number }[]
-							).map((f) => ({
-								key: f.key,
-								values: [
-									{
-										value: f.key,
-										productcount: f.productCount,
-									},
-								],
-							})),
-						};
-					}
-				});
+				const categoryFiltersArray = Array.isArray(response.categories)
+					? response.categories
+					: [];
+				setCategoryFilters(categoryFiltersArray);
 
+				const mappedFilters = normalizeFilterResponse(response.filters ?? []);
 				setFilters(mappedFilters);
 			})
 			.catch((error) => {

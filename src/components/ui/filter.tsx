@@ -12,14 +12,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import {
-	loadFilterChildren,
-	loadFilterParents,
-} from "@/services/categories.service";
 import type {
+	FilterCategory,
 	FilterValues,
 	FilterChildrenResponse,
 	SliderConfig,
+	FilterDefinition,
 } from "@/types/filter.types";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Search, X } from "lucide-react";
@@ -28,12 +26,6 @@ import { useTranslations } from "next-intl";
 import { Button } from "./button";
 import { Checkbox } from "./checkbox";
 import { SliderFilterInput } from "./slider-filter-input";
-
-export interface FilterCategory {
-	category: string;
-	filters: FilterValues[];
-	categoryNumber?: string;
-}
 
 type CategoryFilterItem = {
 	assortmentNumber: string;
@@ -111,12 +103,9 @@ export const Filter = React.forwardRef<
 
 		const [searchTerm, setSearchTerm] = React.useState("");
 		const [showAllCategories, setShowAllCategories] = React.useState(false);
-		const [expandedFilterChildren, setExpandedFilterChildren] = React.useState<
-			Record<string, boolean>
-		>({});
-		const [selectedCategory, setSelectedCategory] = React.useState<
-			string | null
-		>(null);
+		const [selectedCategory, setSelectedCategory] = React.useState<string | null>(
+			null,
+		);
 		const [localSelectedFilters, setLocalSelectedFilters] = React.useState<
 			Record<string, string[]>
 		>(externalSelectedFilters);
@@ -127,125 +116,46 @@ export const Filter = React.forwardRef<
 			Set<string>
 		>(new Set());
 
-		const [loadedChildren, setLoadedChildren] = React.useState<
-			Record<string, FilterChildrenResponse>
-		>({});
-
-		const [rangeValues, setRangeValues] = React.useState<
-			Record<string, [number, number]>
-		>({});
-
-		const [tempRangeValues, setTempRangeValues] = React.useState<
-			Record<string, [number, number]>
-		>({});
-
-		const [inputStrings, setInputStrings] = React.useState<
-			Record<string, [string, string]>
-		>({});
-
-		const handleInputRangeChange = useCallback(
-			(
-				filterKey: string,
-				index: 0 | 1,
-				value: number,
-				sliderConfig: SliderConfig,
-			) => {
-				setTempRangeValues((prev) => {
-					const currentValues = prev[filterKey] ||
-						rangeValues[filterKey] || [sliderConfig.min, sliderConfig.max];
-					const newValues: [number, number] = [...currentValues] as [
-						number,
-						number,
-					];
-					newValues[index] = value;
-					return { ...prev, [filterKey]: newValues };
-				});
-
-				if (debounceTimerRef.current[filterKey]) {
-					clearTimeout(debounceTimerRef.current[filterKey]);
-				}
-
-				debounceTimerRef.current[filterKey] = setTimeout(() => {
-					setTempRangeValues((prev) => {
-						const currentValues = prev[filterKey] ||
-							rangeValues[filterKey] || [sliderConfig.min, sliderConfig.max];
-						const newValues: [number, number] = [...currentValues] as [
-							number,
-							number,
-						];
-						newValues[index] = value;
-
-						setRangeValues((prevRange) => ({
-							...prevRange,
-							[filterKey]: newValues,
-						}));
-
-						return prev;
-					});
-				}, 500);
-			},
-			[rangeValues],
-		);
-
-		const selectedFilters = externalSelectedFilters;
-
-		const handleSliderInputChange = useCallback(
-			(filterKey: string, index: 0 | 1, value: number) => {
-				if (!loadedChildren[filterKey]?.slider) return;
-				handleInputRangeChange(
-					filterKey,
-					index,
-					value,
-					loadedChildren[filterKey].slider!,
-				);
-			},
-			[loadedChildren, handleInputRangeChange],
-		);
-
-		const handleInputStringChange = useCallback(
-			(filterKey: string, index: 0 | 1, value: string) => {
-				setInputStrings((prev) => {
-					const current = prev[filterKey] || ["", ""];
-					const newValues: [string, string] = [...current] as [string, string];
-					newValues[index] = value;
-					return {
-						...prev,
-						[filterKey]: newValues,
-					};
-				});
-			},
-			[],
-		);
-
-		const handleInputBlur = useCallback((filterKey: string, index: 0 | 1) => {
-			setInputStrings((prev) => {
-				const newState = { ...prev };
-				if (newState[filterKey]) {
-					delete newState[filterKey];
-				}
-				return newState;
-			});
-		}, []);
-
-		React.useEffect(() => {
-			return () => {
-				Object.values(debounceTimerRef.current).forEach((timer) => {
-					if (timer) clearTimeout(timer);
-				});
-			};
-		}, []);
 
 		React.useEffect(() => {
 			setLocalSelectedFilters(externalSelectedFilters);
 		}, [externalSelectedFilters]);
+
+		// Keep local selectedCategory in sync with external filters/category:
+		// - If there's no "category" filter selected, clear selectedCategory
+		//   so the Kategori list returns to its default state.
+		React.useEffect(() => {
+			const hasCategoryFilter =
+				Array.isArray(externalSelectedFilters.category) &&
+				externalSelectedFilters.category.length > 0;
+
+			if (!hasCategoryFilter) {
+				setSelectedCategory(null);
+			}
+		}, [externalSelectedFilters.category, categoryNumber]);
+
+		// Open the first 3 filters by default when filters change
+		React.useEffect(() => {
+			const firstThreeKeys: string[] = [];
+			for (const fc of filters) {
+				for (const f of fc.filters) {
+					if (!firstThreeKeys.includes(f.key)) {
+						firstThreeKeys.push(f.key);
+					}
+					if (firstThreeKeys.length >= 3) break;
+				}
+				if (firstThreeKeys.length >= 3) break;
+			}
+			if (firstThreeKeys.length > 0) {
+				setOpenAccordions(firstThreeKeys);
+			}
+		}, [filters]);
 
 		React.useEffect(() => {
 			// Reset filters when query changes
 			setLocalSelectedFilters({});
 			setSelectedCategory(null);
 			setOpenAccordions([]);
-			setLoadedChildren({});
-			setExpandedFilterChildren({});
 			loadingInitiatedRef.current.clear();
 			// eslint-disable-next-line react-hooks/exhaustive-deps
 		}, [query]);
@@ -262,32 +172,7 @@ export const Filter = React.forwardRef<
 			}
 		};
 
-		// Helper function to refetch all opened filter children
-		// Note: We use a ref to track loadedChildren to avoid stale closures
-		const loadedChildrenRef = React.useRef(loadedChildren);
-		React.useEffect(() => {
-			loadedChildrenRef.current = loadedChildren;
-		}, [loadedChildren]);
-
-		const refetchAllOpenedFilterChildren = useCallback(
-			async (filterArray: FilterValues[], excludeKey?: string) => {
-				// Refetch children for all filters that have been loaded (opened at least once)
-				// Use ref to get the latest loadedChildren state
-				const openedFilterKeys = Object.keys(loadedChildrenRef.current).filter(
-					(key) => key !== excludeKey,
-				);
-				await Promise.all(
-					openedFilterKeys.map((key) =>
-						loadChildrenForFilter(
-							key,
-							selectedCategory || categoryNumber,
-							filterArray,
-						),
-					),
-				);
-			},
-			[selectedCategory, categoryNumber],
-		);
+		const selectedFilters = externalSelectedFilters;
 
 		const handleFilterChange = useCallback(
 			async (filterKey: string, value: string) => {
@@ -311,23 +196,6 @@ export const Filter = React.forwardRef<
 					.filter(([key, values]) => key !== "category" && values.length > 0)
 					.map(([key, values]) => ({ key, values }));
 
-				await loadFilterParents({
-					categoryNumber: selectedCategory || categoryNumber,
-					searchTerm: query,
-					language: "no",
-					filters: filterArray,
-				});
-
-				// Refetch children for the changed filter
-				await loadChildrenForFilter(
-					filterKey,
-					selectedCategory || categoryNumber,
-					filterArray,
-				);
-
-				// Refetch children for all other opened filters (excluding the one we just changed)
-				await refetchAllOpenedFilterChildren(filterArray, filterKey);
-
 				onFilterChange(filterArray);
 			},
 			[
@@ -336,114 +204,61 @@ export const Filter = React.forwardRef<
 				categoryNumber,
 				query,
 				selectedCategory,
-				refetchAllOpenedFilterChildren,
 			],
 		);
 
-		// Debounced effect for range changes
-		React.useEffect(() => {
-			const timeoutId = setTimeout(() => {
-				Object.entries(tempRangeValues).forEach(([filterKey, values]) => {
-					if (rangeValues[filterKey]?.toString() !== values.toString()) {
-						handleRangeChangeDebounced(filterKey, values);
-					}
+		// Local UI state for slider-based (range) filters
+		const [rangeValues, setRangeValues] = React.useState<
+			Record<string, [number, number]>
+		>({});
+
+		const [tempRangeValues, setTempRangeValues] = React.useState<
+			Record<string, [number, number]>
+		>({});
+
+		const [inputStrings, setInputStrings] = React.useState<
+			Record<string, [string, string]>
+		>({});
+
+		const handleSliderInputChange = useCallback(
+			(filterKey: string, index: 0 | 1, value: number) => {
+				setTempRangeValues((prev) => {
+					const current =
+						prev[filterKey] || rangeValues[filterKey] || [value, value];
+					const next: [number, number] = [...current] as [number, number];
+					next[index] = value;
+					return { ...prev, [filterKey]: next };
 				});
-			}, 300); // 300ms debounce
-
-			return () => clearTimeout(timeoutId);
-		}, [tempRangeValues]);
-
-		const handleRangeChangeDebounced = useCallback(
-			async (filterKey: string, values: [number, number]) => {
-				setRangeValues((prev) => ({
-					...prev,
-					[filterKey]: values,
-				}));
-
-				// Check if range is at full range (min to max) - if so, clear the filter
-				const children = loadedChildren[filterKey];
-				if (children?.slider) {
-					const isFullRange =
-						values[0] === children.slider.min &&
-						values[1] === children.slider.max;
-
-					if (isFullRange) {
-						// Remove the filter entirely
-						const updatedFilters = { ...localSelectedFilters };
-						delete updatedFilters[filterKey];
-						setLocalSelectedFilters(updatedFilters);
-
-						const filterArray: FilterValues[] = Object.entries(updatedFilters)
-							.filter(
-								([key, values]) => key !== "category" && values.length > 0,
-							)
-							.map(([key, values]) => ({ key, values }));
-
-						await loadFilterParents({
-							categoryNumber: selectedCategory || categoryNumber,
-							searchTerm: query,
-							language: "no",
-							filters: filterArray,
-						});
-
-						// Refetch children for all opened filters (including the one being cleared)
-						await refetchAllOpenedFilterChildren(filterArray);
-
-						onFilterChange(filterArray);
-						return;
-					}
-				}
-
-				// Send range values as separate values separated by comma
-				const updatedFilters = {
-					...localSelectedFilters,
-					[filterKey]: [values[0].toString(), values[1].toString()],
-				};
-
-				setLocalSelectedFilters(updatedFilters);
-
-				const filterArray: FilterValues[] = Object.entries(updatedFilters)
-					.filter(([key, values]) => key !== "category" && values.length > 0)
-					.map(([key, values]) => ({ key, values }));
-
-				await loadFilterParents({
-					categoryNumber: selectedCategory || categoryNumber,
-					searchTerm: query,
-					language: "no",
-					filters: filterArray,
-				});
-
-				// Refetch children for the changed filter
-				await loadChildrenForFilter(
-					filterKey,
-					selectedCategory || categoryNumber,
-					filterArray,
-				);
-
-				// Refetch children for all other opened filters (excluding the one we just changed)
-				await refetchAllOpenedFilterChildren(filterArray, filterKey);
-
-				onFilterChange(filterArray);
 			},
-			[
-				onFilterChange,
-				localSelectedFilters,
-				categoryNumber,
-				query,
-				selectedCategory,
-				refetchAllOpenedFilterChildren,
-			],
+			[rangeValues],
 		);
+
+		const handleInputStringChange = useCallback(
+			(filterKey: string, index: 0 | 1, value: string) => {
+				setInputStrings((prev) => {
+					const current = prev[filterKey] || ["", ""];
+					const next: [string, string] = [...current] as [string, string];
+					next[index] = value;
+					return { ...prev, [filterKey]: next };
+				});
+			},
+			[],
+		);
+
+		const handleInputBlur = useCallback((filterKey: string) => {
+			setInputStrings((prev) => {
+				const copy = { ...prev };
+				delete copy[filterKey];
+				return copy;
+			});
+		}, []);
 
 		const handleRangeChange = useCallback(
-			(filterKey: string, values: [number, number]) => {
-				const children = loadedChildren[filterKey];
-				if (!children?.values) return;
+			(filter: FilterDefinition, values: [number, number]) => {
+				if (!filter.values?.length || !filter.slider) return;
 
-				// Extract available values and sort them
-				const availableValues = children.values
+				const availableValues = filter.values
 					.map((child) => {
-						// Handle values like "15, 20" by taking the first number
 						const firstValue = child.value.split(",")[0].trim();
 						return parseFloat(firstValue);
 					})
@@ -470,88 +285,51 @@ export const Filter = React.forwardRef<
 					snappedValues[0] = snappedValues[1];
 				}
 
-				setTempRangeValues((prev) => ({
-					...prev,
-					[filterKey]: snappedValues,
-				}));
-			},
-			[loadedChildren],
-		);
+				// If full range, clear the filter
+				const isFullRange =
+					snappedValues[0] === filter.slider.min &&
+					snappedValues[1] === filter.slider.max;
 
-		const clearRangeFilter = useCallback(
-			async (filterKey: string) => {
-				// Reset range values to full range
-				const children = loadedChildren[filterKey];
-				if (children?.slider) {
-					const fullRange: [number, number] = [
-						children.slider.min,
-						children.slider.max,
-					];
-					setRangeValues((prev) => ({
-						...prev,
-						[filterKey]: fullRange,
-					}));
-					setTempRangeValues((prev) => ({
-						...prev,
-						[filterKey]: fullRange,
-					}));
-
-					// Remove the filter from selected filters
+				if (isFullRange) {
 					const updatedFilters = { ...localSelectedFilters };
-					delete updatedFilters[filterKey];
+					delete updatedFilters[filter.key];
 					setLocalSelectedFilters(updatedFilters);
 
 					const filterArray: FilterValues[] = Object.entries(updatedFilters)
-						.filter(([key, values]) => key !== "category" && values.length > 0)
+						.filter(
+							([key, values]) => key !== "category" && values.length > 0,
+						)
 						.map(([key, values]) => ({ key, values }));
 
-					await loadFilterParents({
-						categoryNumber: selectedCategory || categoryNumber,
-						searchTerm: query,
-						language: "no",
-						filters: filterArray,
-					});
-
-					// Refetch children for all opened filters
-					await refetchAllOpenedFilterChildren(filterArray);
-
 					onFilterChange(filterArray);
+					return;
 				}
+
+				const updatedFilters = {
+					...localSelectedFilters,
+					[filter.key]: [
+						snappedValues[0].toString(),
+						snappedValues[1].toString(),
+					],
+				};
+
+				setLocalSelectedFilters(updatedFilters);
+
+				const filterArray: FilterValues[] = Object.entries(updatedFilters)
+					.filter(([key, values]) => key !== "category" && values.length > 0)
+					.map(([key, values]) => ({ key, values }));
+
+				onFilterChange(filterArray);
 			},
-			[
-				loadedChildren,
-				localSelectedFilters,
-				selectedCategory,
-				categoryNumber,
-				query,
-				onFilterChange,
-				refetchAllOpenedFilterChildren,
-			],
+			[localSelectedFilters, onFilterChange],
 		);
 
 		const resetFilters = useCallback(async () => {
-			setRangeValues({});
-			setTempRangeValues({});
 			setLocalSelectedFilters({});
-
-			// Refetch filter parents with empty filters
-			await loadFilterParents({
-				categoryNumber: selectedCategory || categoryNumber,
-				searchTerm: query,
-				language: "no",
-				filters: [],
-			});
-
-			// Refetch all opened filter children with empty filters
-			await refetchAllOpenedFilterChildren([], undefined);
 
 			onFilterChange([]);
 		}, [
 			onFilterChange,
-			selectedCategory,
-			categoryNumber,
-			query,
-			refetchAllOpenedFilterChildren,
 		]);
 
 		const selectedFilterCount = Object.values(selectedFilters).reduce(
@@ -559,108 +337,14 @@ export const Filter = React.forwardRef<
 			0,
 		);
 
-		// Expose clearRangeFilter and refetchAllChildren functions to parent component
-		useImperativeHandle(
-			ref,
-			() => ({
-				clearRangeFilter: (filterKey: string) => {
-					clearRangeFilter(filterKey);
-				},
-				refetchAllChildren: async (filterArray: FilterValues[]) => {
-					await refetchAllOpenedFilterChildren(filterArray);
-				},
-			}),
-			[clearRangeFilter, refetchAllOpenedFilterChildren],
-		);
-
-		const loadChildrenForFilter = async (
-			attributeKey: string,
-			categoryNumberFromCategory?: string,
-			filters: FilterValues[] = [],
-		) => {
-			const effectiveCategoryNumber =
-				categoryNumberFromCategory || categoryNumber;
-			const effectiveSearchTerm = query || searchTerm;
-
-			setLoadingChildrenKeys((prev) => new Set(prev).add(attributeKey));
-
-			try {
-				const result: FilterChildrenResponse = await loadFilterChildren({
-					attributeKey,
-					categoryNumber: effectiveCategoryNumber,
-					searchTerm: effectiveSearchTerm,
-					language: "no",
-					filters,
-				});
-
-				const normalized: FilterChildrenResponse =
-					Array.isArray(result) && result.length === 0
-						? { attributeKey, values: [] }
-						: result;
-
-				setLoadedChildren((prev) => ({
-					...prev,
-					[attributeKey]: normalized,
-				}));
-
-				if (normalized.slider && !rangeValues[attributeKey]) {
-					// Extract available values and use first and last as initial range
-					const availableValues = normalized.values
-						.map((child) => {
-							const firstValue = child.value.split(",")[0].trim();
-							return parseFloat(firstValue);
-						})
-						.filter((val) => !isNaN(val))
-						.sort((a, b) => a - b);
-
-					if (availableValues.length > 0) {
-						const initialRange: [number, number] = [
-							availableValues[0],
-							availableValues[availableValues.length - 1],
-						];
-
-						setRangeValues((prev) => ({
-							...prev,
-							[attributeKey]: initialRange,
-						}));
-					} else {
-						setRangeValues((prev) => ({
-							...prev,
-							[attributeKey]: [normalized.slider!.min, normalized.slider!.max],
-						}));
-					}
-				}
-			} catch (error) {
-				console.error("Failed to load filter children:", error);
-			} finally {
-				setLoadingChildrenKeys((prev) => {
-					const newSet = new Set(prev);
-					newSet.delete(attributeKey);
-					return newSet;
-				});
-			}
-		};
-
 		const filteredCategories = React.useMemo(() => {
-			// First, filter out filters with 0 children (either from initial productCount or loaded children)
+			// First, filter out filters with 0 children based on productCount / values length
 			const filtersWithoutEmpty = filters
 				.map((filterCategory) => {
 					const validFilters = filterCategory.filters.filter((filter) => {
-						// Check if filter has been loaded and has 0 children
-						const loadedChildrenData = loadedChildren[filter.key];
-						if (loadedChildrenData) {
-							// If children are loaded, check if they have any values
-							return (
-								loadedChildrenData.values &&
-								loadedChildrenData.values.length > 0
-							);
-						}
-
 						const firstValue = filter.values?.[0];
 						const initialProductCount =
-							typeof firstValue === "object" &&
-							firstValue !== null &&
-							"productcount" in firstValue
+							firstValue && "productcount" in firstValue
 								? (firstValue as { productcount: string | number }).productcount
 								: undefined;
 
@@ -672,11 +356,10 @@ export const Filter = React.forwardRef<
 								typeof initialProductCount === "string"
 									? parseInt(initialProductCount, 10)
 									: Number(initialProductCount);
-							// Remove if productCount is 0 or invalid
 							return !isNaN(count) && count > 0;
 						}
 
-						return true;
+						return (filter.values?.length ?? 0) > 0;
 					});
 
 					return { ...filterCategory, filters: validFilters };
@@ -689,7 +372,7 @@ export const Filter = React.forwardRef<
 			return filtersWithoutEmpty
 				.map((filterCategory) => {
 					const filteredFilters = filterCategory.filters.filter((filter) => {
-						const children = loadedChildren[filter.key]?.values || [];
+						const children = filter.values || [];
 
 						const matchesKey = filter.key
 							.toLowerCase()
@@ -705,7 +388,7 @@ export const Filter = React.forwardRef<
 					return { ...filterCategory, filters: filteredFilters };
 				})
 				.filter((category) => category.filters.length > 0);
-		}, [filters, searchTerm, loadedChildren]);
+		}, [filters, searchTerm]);
 
 		return (
 			<div
@@ -772,6 +455,23 @@ export const Filter = React.forwardRef<
 							</div>
 						</div>
 					)}
+				{Array.isArray(categoryFilters) && categoryFilters.length === 0 && (
+					<div className="space-y-2">
+						<h3 className="text-md font-semibold">Kategori</h3>
+						<div className="rounded-lg bg-white px-4 py-3 shadow-md">
+							<div className="space-y-2">
+								{[0, 1, 2].map((i) => (
+									<div
+										key={i}
+										className="flex items-center gap-2">
+										<Skeleton className="h-4 w-4 rounded-sm" />
+										<Skeleton className="h-4 w-32" />
+									</div>
+								))}
+							</div>
+						</div>
+					</div>
+				)}
 				<h3 className="text-md mb-[-10px] font-semibold">
 					{t("Common.attributes")}
 				</h3>
@@ -800,136 +500,101 @@ export const Filter = React.forwardRef<
 				)}
 
 				<div className="pr-2">
-					{filteredCategories.map((filterCategory) => (
-						<div
-							key={filterCategory.category}
-							className="space-y-4">
-							<Accordion
-								type="multiple"
-								value={openAccordions}
-								onValueChange={(val) => {
-									// Ensure val is always an array
-									const newValue = Array.isArray(val) ? val : val ? [val] : [];
-									setOpenAccordions(newValue);
-								}}
-								className="w-full">
-								{filterCategory.filters.map((filter) => {
-									const children = loadedChildren[filter.key];
-
-									return (
+					{filteredCategories.length === 0 ? (
+						// Loading skeletons while filters are being fetched
+						<div className="space-y-4">
+							{[0, 1, 2].map((i) => (
+								<div
+									key={i}
+									className="space-y-2">
+									<Skeleton className="h-4 w-32" />
+									<Skeleton className="h-4 w-40" />
+									<Skeleton className="h-4 w-28" />
+								</div>
+							))}
+						</div>
+					) : (
+						filteredCategories.map((filterCategory) => (
+							<div
+								key={filterCategory.category}
+								className="space-y-4">
+								<Accordion
+									type="multiple"
+									value={openAccordions}
+									onValueChange={(val) => {
+										// Ensure val is always an array
+										const newValue = Array.isArray(val) ? val : val ? [val] : [];
+										setOpenAccordions(newValue);
+									}}
+									className="w-full">
+									{filterCategory.filters.map((filter) => (
 										<AccordionItem
 											key={filter.key}
 											value={filter.key}
 											className="border-b">
-											<AccordionTrigger
-												className="text-md font-semibold hover:no-underline"
-												onClick={() => {
-													// Load children if not already loaded
-													if (!loadedChildren[filter.key]) {
-														loadChildrenForFilter(
-															filter.key,
-															selectedCategory || categoryNumber,
-															Object.entries(selectedFilters)
-																.filter(
-																	([key, values]) =>
-																		key !== "category" && values.length > 0,
-																)
-																.map(([key, values]) => ({ key, values })),
-														);
-													}
-												}}>
+											<AccordionTrigger className="text-md font-semibold hover:no-underline">
 												{filter.key}
 											</AccordionTrigger>
 											<AccordionContent className="pt-2">
-												{loadingChildrenKeys.has(filter.key) ? (
-													<>
-														<Skeleton className="mb-2 h-4 w-32" />
-														<Skeleton className="mb-2 h-4 w-32" />
-														<Skeleton className="mb-2 h-4 w-32" />
-													</>
-												) : children ? (
-													children.slider ? (
-														<SliderFilterInput
-															filterKey={filter.key}
-															sliderConfig={children.slider}
-															rangeValues={rangeValues}
-															tempRangeValues={tempRangeValues}
-															inputStrings={inputStrings}
-															onInputChange={handleSliderInputChange}
-															onSliderChange={handleRangeChange}
-															onInputStringChange={handleInputStringChange}
-															onInputBlur={handleInputBlur}
-															debounceTimerRef={debounceTimerRef}
-														/>
-													) : children.values.length > 0 ? (
-														<div className="space-y-2 pl-2">
-															{(expandedFilterChildren[filter.key]
-																? children.values
-																: children.values.slice(0, 5)
-															).map((child) => (
-																<div
-																	key={child.value}
-																	className="mb-5 flex items-center justify-between space-x-2 font-normal"
-																	onClick={(e) => e.stopPropagation()}>
-																	<Checkbox
-																		id={`${filter.key}-${child.value}`}
-																		checked={
-																			localSelectedFilters[
-																				filter.key
-																			]?.includes(child.value) || false
-																		}
-																		onCheckedChange={() =>
-																			handleFilterChange(
-																				filter.key,
-																				child.value,
-																			)
-																		}
-																	/>
-																	<label
-																		htmlFor={`${filter.key}-${child.value}`}
-																		className="flex w-full cursor-pointer justify-between text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-																		<span>{child.value}</span>
-																		<span className="text-muted-foreground">
-																			{child.productcount}
-																		</span>
-																	</label>
-																</div>
-															))}
-															{children.values.length > 5 && (
-																<Button
-																	variant="link"
-																	size="sm"
-																	onClick={(e) => {
-																		e.stopPropagation();
-																		setExpandedFilterChildren((prev) => ({
-																			...prev,
-																			[filter.key]: !prev[filter.key],
-																		}));
-																	}}
-																	className="text-primary px-0 text-sm hover:underline">
-																	{expandedFilterChildren[filter.key]
-																		? "Vis mindre"
-																		: `Vis mer (${children.values.length - 5})`}
-																</Button>
-															)}
-														</div>
-													) : (
-														<div className="text-muted-foreground pl-2 text-sm italic">
-															Ingen alternativer tilgjengelig.
-														</div>
-													)
+												{filter.slider ? (
+													<SliderFilterInput
+														filterKey={filter.key}
+														sliderConfig={filter.slider}
+														rangeValues={rangeValues}
+														tempRangeValues={tempRangeValues}
+														inputStrings={inputStrings}
+														onInputChange={handleSliderInputChange}
+														onSliderChange={(_key, values) =>
+															handleRangeChange(filter, values)
+														}
+														onInputStringChange={handleInputStringChange}
+														onInputBlur={handleInputBlur}
+														debounceTimerRef={debounceTimerRef}
+													/>
+												) : filter.values.length > 0 ? (
+													<div className="space-y-2 pl-2">
+														{filter.values.map((child) => (
+															<div
+																key={child.value}
+																className="mb-5 flex items-center justify-between space-x-2 font-normal"
+																onClick={(e) => e.stopPropagation()}>
+																<Checkbox
+																	id={`${filter.key}-${child.value}`}
+																	checked={
+																		localSelectedFilters[filter.key]?.includes(
+																			child.value,
+																		) || false
+																	}
+																	onCheckedChange={() =>
+																		handleFilterChange(
+																			filter.key,
+																			child.value,
+																		)
+																	}
+																/>
+																<label
+																	htmlFor={`${filter.key}-${child.value}`}
+																	className="flex w-full cursor-pointer justify-between text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+																	<span>{child.value}</span>
+																	<span className="text-muted-foreground">
+																		{child.productcount}
+																	</span>
+																</label>
+															</div>
+														))}
+													</div>
 												) : (
-													<div className="text-muted-foreground pl-2 text-sm">
-														Laster...
+													<div className="text-muted-foreground pl-2 text-sm italic">
+														Ingen alternativer tilgjengelig.
 													</div>
 												)}
 											</AccordionContent>
 										</AccordionItem>
-									);
-								})}
-							</Accordion>
-						</div>
-					))}
+									))}
+								</Accordion>
+							</div>
+						))
+					)}
 				</div>
 			</div>
 		);
