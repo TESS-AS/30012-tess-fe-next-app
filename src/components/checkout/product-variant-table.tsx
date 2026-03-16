@@ -223,22 +223,9 @@ export default function ProductVariantTable({
 		variantsWithWarehouses.forEach((variant) => {
 			const inventory = columnAttributes?.[variant.itemNumber]?.inventory || [];
 
-			// First try to filter by company number if available (allow warehouses with 0 balance)
-			// Compare as numbers to handle string/number type differences (e.g., "03" vs 3)
-			let filteredInventory = inventory;
-			if (profile?.defaultCompanyNumber) {
-				const companyFiltered = inventory.filter((inv: any) => 
-					Number(inv.companyNumber) === Number(profile.defaultCompanyNumber)
-				);
-				// If we have matches for the company, use them; otherwise show all warehouses
-				if (companyFiltered.length > 0) {
-					filteredInventory = companyFiltered;
-				}
-			}
-
-			// Separate warehouses with balance > 0 and balance = 0
-			const warehousesWithBalance = filteredInventory.filter((inv: any) => inv.balance > 0);
-			const warehousesWithZeroBalance = filteredInventory.filter((inv: any) => inv.balance === 0);
+			// Use all warehouses across all companies; do not restrict to default company
+			const warehousesWithBalance = inventory.filter((inv: any) => inv.balance > 0);
+			const warehousesWithZeroBalance = inventory.filter((inv: any) => inv.balance === 0);
 
 			// Map and sort warehouses with balance (descending)
 			const warehousesWithBalanceOptions = warehousesWithBalance
@@ -281,7 +268,7 @@ export default function ProductVariantTable({
 		});
 
 		return optionsMap;
-	}, [variantsWithWarehouses, columnAttributes, profile?.defaultCompanyNumber, t]);
+	}, [variantsWithWarehouses, columnAttributes, t]);
 
 	useEffect(() => {
 		if (!allAttributeNames?.length) return;
@@ -534,23 +521,10 @@ export default function ProductVariantTable({
 					// Compute warehouse options directly from variants and columnAttributes
 					const inventory =
 						columnAttributes?.[variant.itemNumber]?.inventory || [];
-					
-					// First try to filter by company number if available (allow warehouses with 0 balance)
-					// Compare as numbers to handle string/number type differences (e.g., "03" vs 3)
-					let filteredInventory = inventory;
-					if (profile?.defaultCompanyNumber) {
-						const companyFiltered = inventory.filter((inv: any) => 
-							Number(inv.companyNumber) === Number(profile.defaultCompanyNumber)
-						);
-						// If we have matches for the company, use them; otherwise show all warehouses
-						if (companyFiltered.length > 0) {
-							filteredInventory = companyFiltered;
-						}
-					}
 
-					// Separate warehouses with balance > 0 and balance = 0
-					const warehousesWithBalance = filteredInventory.filter((inv: any) => inv.balance > 0);
-					const warehousesWithZeroBalance = filteredInventory.filter((inv: any) => inv.balance === 0);
+					// Use all warehouses across all companies; do not restrict to default company
+					const warehousesWithBalance = inventory.filter((inv: any) => inv.balance > 0);
+					const warehousesWithZeroBalance = inventory.filter((inv: any) => inv.balance === 0);
 
 					// Map and sort warehouses with balance (descending)
 					const warehousesWithBalanceOptions = warehousesWithBalance

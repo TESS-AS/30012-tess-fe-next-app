@@ -190,16 +190,8 @@ export function ProductInfo({
 			columnAttributes[String(selectedItemNumber)];
 		const inventory = variantData?.inventory || [];
 
-		let filtered = inventory;
-		if (profile?.defaultCompanyNumber) {
-			const byCompany = inventory.filter(
-				(inv: any) =>
-					Number(inv.companyNumber) === Number(profile.defaultCompanyNumber),
-			);
-			if (byCompany.length > 0) filtered = byCompany;
-		}
-
-		const withBalance = filtered
+		// Use all warehouses across all companies; do not restrict to default company
+		const withBalance = inventory
 			.filter((inv: any) => inv.balance > 0)
 			.map((inv: any) => ({
 				warehouseId: inv.warehouseId,
@@ -209,7 +201,7 @@ export function ProductInfo({
 				balance: inv.balance,
 			}))
 			.sort((a: any, b: any) => b.balance - a.balance);
-		const withZero = filtered
+		const withZero = inventory
 			.filter((inv: any) => inv.balance === 0)
 			.map((inv: any) => ({
 				warehouseId: inv.warehouseId,
@@ -229,12 +221,7 @@ export function ProductInfo({
 				return true;
 			})
 			.slice(0, 50);
-	}, [
-		selectedItemNumber,
-		columnAttributes,
-		profile?.defaultCompanyNumber,
-		locale,
-	]);
+	}, [selectedItemNumber, columnAttributes, locale]);
 
 	// Get warehouse info for selected warehouse
 	const getWarehouseInfo = () => {
