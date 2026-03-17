@@ -7,7 +7,7 @@ import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useProductFilter } from "@/hooks/useProductFilter";
 import { useProductPrices } from "@/hooks/useProductPrices";
 import { cn } from "@/lib/utils";
-import { FilterValues } from "@/types/filter.types";
+import { FilterCategory, FilterValues } from "@/types/filter.types";
 import { LayoutGrid, AlignJustify, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -15,7 +15,7 @@ import { useTranslations } from "next-intl";
 
 import { ProductCard } from "./product-card";
 import { Button } from "../ui/button";
-import { Filter, FilterCategory } from "../ui/filter";
+import { Filter } from "../ui/filter";
 import {
 	Tooltip,
 	TooltipContent,
@@ -53,10 +53,9 @@ export function ProductGrid({
 	const [viewLayout, setViewLayout] = useState<string>("grid");
 	const observerTarget = useRef<HTMLDivElement>(null);
 	const [filtersState, setFiltersState] = useState(filters);
-	const filterRef = useRef<{
-		clearRangeFilter: (filterKey: string) => void;
-		refetchAllChildren: (filterArray: FilterValues[]) => Promise<void>;
-	} | null>(null);
+	const [categoryFiltersState, setCategoryFiltersState] = useState(
+		categoryFilters ?? [],
+	);
 	const isLoadingMoreRef = useRef(false);
 	const loadMoreTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const {
@@ -75,11 +74,7 @@ export function ProductGrid({
 		categoryName,
 		query,
 		onFiltersUpdate: setFiltersState,
-		onRefetchChildren: async (filterArray) => {
-			if (filterRef.current?.refetchAllChildren) {
-				await filterRef.current.refetchAllChildren(filterArray);
-			}
-		},
+		onCategoriesUpdate: setCategoryFiltersState,
 	});
 
 	// Use React Query for prices - much faster with caching
@@ -93,9 +88,12 @@ export function ProductGrid({
 		});
 
 	const onFilterChange = useCallback(
-		async (newFilters: FilterValues[]) => {
+		(newFilters: FilterValues[]) => {
+			// Show skeletons in the filter panel while updated filters load
 			setIsFiltering(true);
-			await handleFilterChange(newFilters);
+			setFiltersState([]);
+			setCategoryFiltersState([]);
+			handleFilterChange(newFilters);
 			setIsFiltering(false);
 		},
 		[handleFilterChange],
@@ -104,6 +102,9 @@ export function ProductGrid({
 	useEffect(() => {
 		if (filters.length > 0) {
 			setFiltersState(filters);
+		}
+		if (categoryFilters && categoryFilters.length > 0) {
+			setCategoryFiltersState(categoryFilters);
 		}
 		// Reset loading state when filters or query change
 		isLoadingMoreRef.current = false;
@@ -187,7 +188,6 @@ export function ProductGrid({
 		<div className="flex flex-col gap-8 lg:flex-row">
 			<aside className="w-full pr-4 lg:w-1/4">
 				<Filter
-					ref={filterRef}
 					filters={filtersState}
 					variant="default"
 					size="default"
@@ -195,7 +195,7 @@ export function ProductGrid({
 						onFilterChange(newFilters);
 					}}
 					selectedFilters={selectedFilters}
-					categoryFilters={categoryFilters}
+					categoryFilters={categoryFiltersState}
 					query={query}
 					categoryNumber={categoryNumber}
 					categoryName={categoryName}
@@ -266,7 +266,6 @@ export function ProductGrid({
 								values[0] !== values[1];
 
 							if (isRangeFilter) {
-								// Display range as single chip
 								const rangeValue = `${values[0]} - ${values[1]}`;
 								return (
 									<div
@@ -293,13 +292,10 @@ export function ProductGrid({
 										</TooltipProvider>
 										<button
 											onClick={() => {
-												// Clear the range filter using the filter component's method
-												if (filterRef.current?.clearRangeFilter) {
-													filterRef.current.clearRangeFilter(key);
-												} else {
-													// Fallback: remove the entire range filter
-													values.forEach((value) => removeFilter(key, value));
-												}
+												// Show filter + kategori skeletons while updating and remove range
+												setFiltersState([]);
+												setCategoryFiltersState([]);
+												values.forEach((value) => removeFilter(key, value));
 											}}
 											className="hover:bg-primary/20 ml-1 rounded-md p-0.5">
 											<X className="h-3 w-3" />
@@ -335,7 +331,11 @@ export function ProductGrid({
 											</Tooltip>
 										</TooltipProvider>
 										<button
-											onClick={() => removeFilter(key, value)}
+											onClick={() => {
+												setFiltersState([]);
+												setCategoryFiltersState([]);
+												removeFilter(key, value);
+											}}
 											className="hover:bg-primary/20 ml-1 rounded-md p-0.5">
 											<X className="h-3 w-3" />
 										</button>

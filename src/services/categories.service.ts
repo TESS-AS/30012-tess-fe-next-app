@@ -1,8 +1,4 @@
-import {
-	CategoryFilterResponseItem,
-	FilterResponseItem,
-	FilterValues,
-} from "@/types/filter.types";
+import { FilterValues } from "@/types/filter.types";
 import { AxiosResponse } from "axios";
 
 import axiosInstance from "./axiosClient";
@@ -43,53 +39,22 @@ export async function loadFilters({
 	}
 }
 
-export async function loadFilterParents(params: {
+export async function loadFilterFamily(params: {
 	categoryNumber?: string | null;
 	searchTerm?: string | null;
 	language?: string | null;
 	filters?: FilterValues[];
-}): Promise<any[]> {
+}): Promise<any> {
 	const query = new URLSearchParams();
 	if (params.categoryNumber)
 		query.append("categoryNumber", params.categoryNumber);
 	if (params.searchTerm) query.append("searchTerm", params.searchTerm);
 	if (params.language) query.append("language", params.language);
 
-	const url = `/filter/parent?${query.toString()}`;
-	const response = await axiosInstance.post(url, params.filters ?? []);
-
-	return response.data;
-}
-
-export async function loadFilterChildren({
-	attributeKey,
-	categoryNumber,
-	searchTerm,
-	language,
-	filters = [],
-}: {
-	attributeKey: string;
-	categoryNumber?: string;
-	searchTerm?: string;
-	language?: string;
-	filters?: FilterValues[];
-}) {
-	const params = new URLSearchParams();
-	if (categoryNumber) params.append("categoryNumber", categoryNumber);
-	if (searchTerm) params.append("searchTerm", searchTerm);
-	if (language) params.append("language", language);
-
-	const url = `/filter/child?${params.toString()}`;
-
-	const response = await axiosInstance.post(
-		url,
-		{ filters },
-		{
-			params: {
-				attributeKey,
-			},
-		},
-	);
+	const url = `/filterFamily${query.toString() ? `?${query.toString()}` : ""}`;
+	const response = await axiosInstance.post(url, {
+		filters: params.filters ?? [],
+	});
 
 	return response.data;
 }

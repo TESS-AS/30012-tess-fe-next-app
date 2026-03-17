@@ -191,12 +191,7 @@ const CartPage = () => {
 				const itemNumbers = cartItems.cart.map((item) =>
 					item.itemNumber.toString(),
 				);
-				const warehouseNumbers = warehouses.map((item) => item.id);
-				const warehousesData = await getItemBalanceArray(
-					itemNumbers,
-					warehouseNumbers,
-					profile?.defaultCompanyNumber || "01",
-				);
+				const warehousesData = await getItemBalanceArray(itemNumbers);
 				setWarehouseBalance(
 					Array.isArray(warehousesData) ? warehousesData : [],
 				);
@@ -205,7 +200,7 @@ const CartPage = () => {
 			}
 		}
 		if (!isLoading) loadWarehousesData();
-	}, [cartItems, isLoading, warehouses, profile?.defaultCompanyNumber]);
+	}, [cartItems, isLoading]);
 
 	const handleCheckout = async () => {
 		setIsCheckoutLoading(true);
@@ -258,7 +253,7 @@ const CartPage = () => {
 		try {
 			const anyOutOfStock = (warehouseBalancePerItem ?? []).some((batch) => {
 				const wh = batch.warehouses?.find(
-					(w) => w.warehouse_number === warehouseNumber,
+					(w) => w.warehouseNumber === warehouseNumber,
 				);
 				return !wh || (wh.balance ?? 0) <= 0;
 			});
@@ -356,12 +351,28 @@ const CartPage = () => {
 							/>
 						</SelectTrigger>
 						<SelectContent>
-							{warehouseBalancePerItem
-								.find((w) => w.item_number === item.itemNumber)
-								?.warehouses?.map((warehouse) => (
+							{(() => {
+								const batch = warehouseBalancePerItem.find(
+									(w) => w.itemNumber === item.itemNumber,
+								);
+								const warehouses = batch?.warehouses ?? [];
+
+								if (!warehouses.length) {
+									return (
+										<SelectItem
+											disabled
+											value={item.warehouseNumber || ""}>
+											<div className="flex items-center justify-center p-0 text-xs text-[#0F1912]">
+												Ikke på lager
+											</div>
+										</SelectItem>
+									);
+								}
+
+								return warehouses.map((warehouse) => (
 									<SelectItem
-										key={warehouse.warehouse_number}
-										value={warehouse.warehouse_number}>
+										key={`${warehouse.companyNumber}-${warehouse.warehouseNumber}`}
+										value={warehouse.warehouseNumber}>
 										<div
 											className={`flex items-center justify-center p-0 text-xs ${
 												warehouse.balance > 0
@@ -374,10 +385,11 @@ const CartPage = () => {
 												<CircleAlert className="mr-1 h-4 w-4 text-[#E3A008]" />
 											)}
 											{warehouse.balance} tilgjengelig (
-											{warehouse.warehouse_name})
+											{warehouse.warehouseName})
 										</div>
 									</SelectItem>
-								))}
+								));
+							})()}
 						</SelectContent>
 					</Select>
 

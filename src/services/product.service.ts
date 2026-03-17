@@ -14,14 +14,13 @@ interface WarehouseBalance {
 }
 
 export interface WarehouseBatch {
-	item_number: string;
-	warehouses: [
-		{
-			warehouse_number: string;
-			warehouse_name: string;
-			balance: number;
-		},
-	];
+	itemNumber: string;
+	warehouses: Array<{
+		warehouseNumber: string;
+		warehouseName: string;
+		balance: number;
+		companyNumber: string;
+	}>;
 }
 
 interface SearchListResponse {

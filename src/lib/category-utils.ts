@@ -1,9 +1,9 @@
-import type { FilterCategory } from "@/components/ui/filter";
 import { formatUrlToDisplayName, mapCategoryTree } from "@/lib/utils";
 import axiosInstance from "@/services/axiosServer";
 import { searchProducts } from "@/services/product.service";
 import { Category, RawCategory } from "@/types/categories.types";
-import { FilterValues } from "@/types/filter.types";
+import type { FilterCategory } from "@/types/filter.types";
+import { FilterDefinition, FilterValues } from "@/types/filter.types";
 
 export async function fetchCategories(locale: string) {
 	try {
@@ -111,18 +111,15 @@ export function buildCategoryPath(
 		}
 		// Search in subcategories
 		if (category.subcategories?.length) {
-			const result = buildCategoryPath(
-				category.subcategories,
-				targetCategory,
-				[...path, category.slug],
-			);
+			const result = buildCategoryPath(category.subcategories, targetCategory, [
+				...path,
+				category.slug,
+			]);
 			if (result) return result;
 		}
 	}
 	return null;
 }
-
-
 
 export async function fetchProducts(
 	categoryNumber: string | null,
@@ -153,45 +150,67 @@ export function normalizeFilterResponse(
 	const result: FilterCategory[] = [];
 
 	for (const item of filtersResponse) {
-		// Handle SearchFilterResponseItem (has categoryFilters and filter)
+		const buildFilterDefinitions = (filters: any[]): FilterDefinition[] => {
+			return filters.map((f: any) => {
+				// New /filterFamily format is expected to already contain values + optional slider.
+				const values: any[] =
+					Array.isArray(f.values) && f.values.length > 0
+						? f.values
+						: [
+								{
+									value: f.key,
+									productcount: f.productCount ?? 0,
+								},
+							];
+
+				return {
+					key: f.key,
+					values,
+					slider: f.slider,
+				};
+			});
+		};
+
+		// New /filterFamily "filters" shape: flat list of { key, attributeIdentifier, children: [{ val, count }] }
+		if ("key" in item && "children" in item && !("filters" in item)) {
+			const filters: FilterDefinition[] = filtersResponse.map((f: any) => ({
+				key: f.key,
+				values: (f.children ?? []).map((c: any) => ({
+					value: c.val,
+					type: "",
+					productcount: c.count,
+				})),
+				slider: f.slider,
+			}));
+
+			result.push({
+				category: item.category ?? "Attributes",
+				filters,
+			});
+			break;
+		}
+
+		// Legacy SearchFilterResponseItem: has categoryFilters and filter[]
 		if ("categoryFilters" in item && "filter" in item) {
 			result.push({
 				category: item.category,
-				filters: (item.filter as { key: string; productCount: number }[]).map(
-					(f) => ({
-						key: f.key,
-						values: [
-							{
-								value: f.key,
-								productcount: f.productCount,
-							},
-						],
-					}),
-				) as unknown as FilterValues[],
+				filters: buildFilterDefinitions(item.filter ?? []),
 			});
 			continue;
 		}
-		// Handle CategoryFilterResponseItem (has filters and categoryNumber)
+
+		// CategoryFilterResponseItem or unified /filterFamily item: has filters[] and categoryNumber
 		if ("filters" in item) {
 			result.push({
 				category: item.category,
 				categoryNumber: item.categoryNumber,
-				filters: (item.filters as { key: string; productCount: number }[]).map(
-					(f) => ({
-						key: f.key,
-						values: [
-							{
-								value: f.key,
-								productcount: f.productCount,
-							},
-						],
-					}),
-				) as unknown as FilterValues[],
+				filters: buildFilterDefinitions(item.filters ?? []),
 			});
 			continue;
 		}
+
 		// Unknown format, log warning and skip
-		console.warn("Unexpected item in filter response", item);
+		console.warn("Unexpected item in filterFamily response", item);
 	}
 
 	return result;
