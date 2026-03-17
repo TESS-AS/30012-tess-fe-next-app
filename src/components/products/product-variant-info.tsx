@@ -82,17 +82,19 @@ export function ProductVariantInfo({
 		if (!selectedWarehouse && !profile?.defaultWarehouseNumber) return null;
 
 		let warehouseInfo;
-		
+
 		if (selectedWarehouse) {
 			// selectedWarehouse from table is warehouseId (unique)
 			const warehouseId = parseInt(selectedWarehouse);
-			warehouseInfo = inventory.find((inv: any) => inv.warehouseId === warehouseId);
+			warehouseInfo = inventory.find(
+				(inv: any) => inv.warehouseId === warehouseId,
+			);
 		} else {
 			// profile default uses warehouseNumber + companyNumber (combination is unique)
 			const defaultWarehouseNumber = profile?.defaultWarehouseNumber;
 			const defaultCompanyNumber = profile?.defaultCompanyNumber;
 			warehouseInfo = inventory.find(
-				(inv: any) => 
+				(inv: any) =>
 					inv.warehouseNumber === defaultWarehouseNumber &&
 					Number(inv.companyNumber) === Number(defaultCompanyNumber),
 			);
@@ -101,7 +103,8 @@ export function ProductVariantInfo({
 		if (warehouseInfo) {
 			return {
 				balance: warehouseInfo.balance || 0,
-				warehouseName: warehouseInfo.warehouseName || `Lager ${warehouseInfo.warehouseId}`,
+				warehouseName:
+					warehouseInfo.warehouseName || `Lager ${warehouseInfo.warehouseId}`,
 			};
 		}
 
@@ -110,14 +113,16 @@ export function ProductVariantInfo({
 
 	const warehouseInfo = getWarehouseInfo();
 	const selectedWarehouseBalance = warehouseInfo ? warehouseInfo.balance : 0;
-	const selectedWarehouseName = warehouseInfo ? warehouseInfo.warehouseName : "hovedlager";
+	const selectedWarehouseName = warehouseInfo
+		? warehouseInfo.warehouseName
+		: "hovedlager";
 
 	// Get unit (enhet) for the selected item
 	const getUnit = () => {
 		if (!selectedItemNumber || !columnAttributes) return "STK";
 
 		const attrs = columnAttributes[selectedItemNumber]?.attributes || [];
-		
+
 		// Try to find contentUnit from attributes
 		const contentUnitAttr = attrs.find((attr: any) => attr.contentUnit);
 		if (contentUnitAttr?.contentUnit) {
@@ -193,23 +198,6 @@ export function ProductVariantInfo({
 		if (!selectedItemNumber) return;
 
 		const warehouseNumber = profile?.defaultWarehouseNumber || "";
-		// if (!warehouseNumber) {
-		// 	toast(t("selectWarehouseFirst"), {
-		// 		type: "warning",
-		// 		position: "bottom-right",
-		// 		autoClose: 2000,
-		// 	});
-		// 	return;
-		// }
-
-		const balance =
-			variantData?.stockByWarehouse?.find(
-				(w: any) => w.warehouse_number === warehouseNumber,
-			)?.balance ?? null;
-
-		if (balance === null || balance === undefined) {
-			/* empty */
-		}
 
 		setAdding(true);
 		try {
@@ -295,7 +283,8 @@ export function ProductVariantInfo({
 				</div>
 				{isSapCustomer && sapNumber && (
 					<p className="text-md font-light text-gray-500">
-						<span className="font-semibold text-black">SAP nr:</span> {sapNumber}
+						<span className="font-semibold text-black">SAP nr:</span>{" "}
+						{sapNumber}
 					</p>
 				)}
 				<p className="text-md font-semibold text-[#0F1912]">Attributter:</p>

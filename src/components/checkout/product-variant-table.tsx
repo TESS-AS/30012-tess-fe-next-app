@@ -148,8 +148,9 @@ export default function ProductVariantTable({
 
 	const allAttributeNames = useMemo(() => {
 		// Get default attributes from productData (prioritized first)
-		const defaultAttributes = columnAttributes?.productData?.defaultAttributes || [];
-		
+		const defaultAttributes =
+			columnAttributes?.productData?.defaultAttributes || [];
+
 		// Check if mediaId is in defaultAttributes (by name or attributeIdentifier)
 		const hasMediaIdInDefaults = defaultAttributes.some(
 			(attr: any) =>
@@ -161,7 +162,10 @@ export default function ProductVariantTable({
 
 		const defaultAttributeNames = defaultAttributes
 			.map((attr: any) => attr.name)
-			.filter((name: any): name is string => typeof name === "string" && name.trim() !== "")
+			.filter(
+				(name: any): name is string =>
+					typeof name === "string" && name.trim() !== "",
+			)
 			// Filter out mediaId from default attribute names
 			.filter(
 				(name: string) =>
@@ -180,7 +184,10 @@ export default function ProductVariantTable({
 				),
 			),
 		)
-			.filter((name): name is string => typeof name === "string" && name.trim() !== "")
+			.filter(
+				(name): name is string =>
+					typeof name === "string" && name.trim() !== "",
+			)
 			// Filter out mediaId from variant attribute names
 			.filter(
 				(name: string) =>
@@ -214,7 +221,7 @@ export default function ProductVariantTable({
 		return orderedNames;
 	}, [variantsWithWarehouses, columnAttributes, isSapCustomer]);
 
-		const getWarehouseOptions = useMemo(() => {
+	const getWarehouseOptions = useMemo(() => {
 		const optionsMap: Record<
 			number,
 			Array<{ warehouseId: number; warehouseName: string; balance: number }>
@@ -224,8 +231,12 @@ export default function ProductVariantTable({
 			const inventory = columnAttributes?.[variant.itemNumber]?.inventory || [];
 
 			// Use all warehouses across all companies; do not restrict to default company
-			const warehousesWithBalance = inventory.filter((inv: any) => inv.balance > 0);
-			const warehousesWithZeroBalance = inventory.filter((inv: any) => inv.balance === 0);
+			const warehousesWithBalance = inventory.filter(
+				(inv: any) => inv.balance > 0,
+			);
+			const warehousesWithZeroBalance = inventory.filter(
+				(inv: any) => inv.balance === 0,
+			);
 
 			// Map and sort warehouses with balance (descending)
 			const warehousesWithBalanceOptions = warehousesWithBalance
@@ -253,7 +264,7 @@ export default function ProductVariantTable({
 			// so the same warehouse doesn't appear twice (would make both show as selected).
 			const combined = [
 				...warehousesWithBalanceOptions,
-				...warehousesWithZeroBalanceOptions
+				...warehousesWithZeroBalanceOptions,
 			];
 			const seenIds = new Set<number>();
 			const warehouseOptions = combined
@@ -274,7 +285,8 @@ export default function ProductVariantTable({
 		if (!allAttributeNames?.length) return;
 
 		// Check if defaultAttributes exist
-		const defaultAttributes = columnAttributes?.productData?.defaultAttributes || [];
+		const defaultAttributes =
+			columnAttributes?.productData?.defaultAttributes || [];
 		const hasDefaultAttributes = defaultAttributes.length > 0;
 
 		setVisibleAttributes((prev) => {
@@ -293,7 +305,10 @@ export default function ProductVariantTable({
 				// If defaultAttributes exist, show ONLY those attributes (excluding mediaId)
 				const defaultAttributeNames = defaultAttributes
 					.map((attr: any) => attr.name)
-					.filter((name: any): name is string => typeof name === "string" && name.trim() !== "")
+					.filter(
+						(name: any): name is string =>
+							typeof name === "string" && name.trim() !== "",
+					)
 					// Filter out mediaId from default attribute names
 					.filter(
 						(name: string) =>
@@ -321,7 +336,8 @@ export default function ProductVariantTable({
 					}
 					// Show if it's in defaultAttributes, or if it's "bilde" and mediaId is in defaults
 					const isInDefaults = defaultAttributeNames.includes(name);
-					const isBildeMapping = name?.toLowerCase() === "bilde" && hasMediaIdInDefaults;
+					const isBildeMapping =
+						name?.toLowerCase() === "bilde" && hasMediaIdInDefaults;
 					next[name] = isInDefaults || isBildeMapping;
 				}
 			} else {
@@ -375,9 +391,11 @@ export default function ProductVariantTable({
 	// Process pending warehouse changes after state updates to avoid updating parent during render
 	useEffect(() => {
 		if (pendingWarehouseChangesRef.current.length > 0 && onWarehouseChange) {
-			pendingWarehouseChangesRef.current.forEach(([itemNumber, warehouseNumber]) => {
-				onWarehouseChange(itemNumber, warehouseNumber);
-			});
+			pendingWarehouseChangesRef.current.forEach(
+				([itemNumber, warehouseNumber]) => {
+					onWarehouseChange(itemNumber, warehouseNumber);
+				},
+			);
 			pendingWarehouseChangesRef.current = [];
 		}
 	}, [warehouse, onWarehouseChange]);
@@ -419,6 +437,59 @@ export default function ProductVariantTable({
 			return item.includes(tok) || uns.includes(tok);
 		});
 	});
+
+	const handleAddToCart = async (
+		variant: ProductVariant,
+		qty: number,
+		selectedWarehouse?: string,
+	) => {
+		setLoading((prev) => ({
+			...prev,
+			[variant.itemNumber]: true,
+		}));
+
+		try {
+			const response = await addToCart({
+				productNumber,
+				itemNumber: variant.itemNumber.toString(),
+				quantity: qty,
+				warehouseNumber:
+					selectedWarehouse || (profile?.defaultWarehouseNumber as any),
+				companyNumber: profile?.defaultCompanyNumber.toString() || "1",
+			});
+
+			setIsCartChanging(!isCartChanging);
+
+			if (response.message === "Error adding to cart") {
+				throw new Error(response.message);
+			}
+
+			toast(t("Product.addedToCart"), {
+				type: "success",
+				position: "bottom-right",
+				autoClose: 2000,
+			});
+
+			setQuantities((prev) => ({
+				...prev,
+				[variant.itemNumber]: 1,
+			}));
+
+			await getCart();
+		} catch (err) {
+			console.error("Error adding to cart:", err);
+			toast(t("Product.errorAddingToCart"), {
+				type: "error",
+				position: "bottom-right",
+				autoClose: 2000,
+			});
+		} finally {
+			setLoading((prev) => ({
+				...prev,
+				[variant.itemNumber]: false,
+			}));
+		}
+	};
 
 	const calculatePriceForVariant = async (
 		variant: ProductVariant,
@@ -523,8 +594,12 @@ export default function ProductVariantTable({
 						columnAttributes?.[variant.itemNumber]?.inventory || [];
 
 					// Use all warehouses across all companies; do not restrict to default company
-					const warehousesWithBalance = inventory.filter((inv: any) => inv.balance > 0);
-					const warehousesWithZeroBalance = inventory.filter((inv: any) => inv.balance === 0);
+					const warehousesWithBalance = inventory.filter(
+						(inv: any) => inv.balance > 0,
+					);
+					const warehousesWithZeroBalance = inventory.filter(
+						(inv: any) => inv.balance === 0,
+					);
 
 					// Map and sort warehouses with balance (descending)
 					const warehousesWithBalanceOptions = warehousesWithBalance
@@ -552,7 +627,7 @@ export default function ProductVariantTable({
 					// so the same warehouse doesn't appear twice (would make both show as selected).
 					const combined = [
 						...warehousesWithBalanceOptions,
-						...warehousesWithZeroBalanceOptions
+						...warehousesWithZeroBalanceOptions,
 					];
 					const seenIds = new Set<number>();
 					const warehouseOptions = combined
@@ -563,21 +638,31 @@ export default function ProductVariantTable({
 						})
 						.slice(0, 50);
 
-					const warehouses = warehouseOptions.map((w: { warehouseId: { toString: () => any; }; warehouseName: any; balance: any; }) => ({
-						warehouseNumber: w.warehouseId.toString(),
-						warehouseName: w.warehouseName,
-						balance: w.balance,
-					}));
+					const warehouses = warehouseOptions.map(
+						(w: {
+							warehouseId: { toString: () => any };
+							warehouseName: any;
+							balance: any;
+						}) => ({
+							warehouseNumber: w.warehouseId.toString(),
+							warehouseName: w.warehouseName,
+							balance: w.balance,
+						}),
+					);
 
 					if (warehouseOptions.length > 0) {
 						const variantKey = variant.itemNumber;
 
 						if (!initializedWarehousesRef.current.has(variantKey)) {
-							const warehouseToPreselect = warehouseOptions[0].warehouseId.toString();
+							const warehouseToPreselect =
+								warehouseOptions[0].warehouseId.toString();
 							initializedWarehousesRef.current.add(variantKey);
 							setWarehouse((prev) => {
 								if (prev[variantKey]) return prev;
-								pendingWarehouseChangesRef.current.push([variantKey.toString(), warehouseToPreselect]);
+								pendingWarehouseChangesRef.current.push([
+									variantKey.toString(),
+									warehouseToPreselect,
+								]);
 								return { ...prev, [variantKey]: warehouseToPreselect };
 							});
 						}
@@ -621,10 +706,7 @@ export default function ProductVariantTable({
 
 		const fixedTail: ColumnKey[] = [];
 		const combinedPriceQuantityCart =
-			hasQuantity &&
-			hasAddToCart &&
-			visibleCols.quantity &&
-			visibleCols.cart;
+			hasQuantity && hasAddToCart && visibleCols.quantity && visibleCols.cart;
 
 		// Optional separate quantity column (when not combined into PRIS)
 		if (!combinedPriceQuantityCart) {
@@ -703,7 +785,12 @@ export default function ProductVariantTable({
 							align="end"
 							className="w-64 rounded-2xl p-2 shadow-lg">
 							{dropdownOrder
-								.filter((key) => key !== "quantity" && key !== "warehouse" && key !== "image") // ❌ exclude fixed ones and image
+								.filter(
+									(key) =>
+										key !== "quantity" &&
+										key !== "warehouse" &&
+										key !== "image",
+								) // ❌ exclude fixed ones and image
 								.map((key) => {
 									const locked = lockedCols.includes(key);
 									return (
@@ -752,7 +839,14 @@ export default function ProductVariantTable({
 						<TableRow>
 							{renderColumns()
 								.filter(
-									(col) => !["quantity", "warehouse", "cart", "price", "image"].includes(col),
+									(col) =>
+										![
+											"quantity",
+											"warehouse",
+											"cart",
+											"price",
+											"image",
+										].includes(col),
 								)
 								.map((col) => {
 									return (
@@ -841,7 +935,14 @@ export default function ProductVariantTable({
 									}}>
 									{renderColumns()
 										.filter(
-											(col) => !["quantity", "warehouse", "cart", "price", "image"].includes(col),
+											(col) =>
+												![
+													"quantity",
+													"warehouse",
+													"cart",
+													"price",
+													"image",
+												].includes(col),
 										)
 										.map((col) => {
 											switch (col) {
@@ -911,7 +1012,8 @@ export default function ProductVariantTable({
 										.map((name) => {
 											// Map "bilde" to mediaId
 											if (name?.toLowerCase() === "bilde") {
-												const variantAttrs = columnAttributes?.[variant.itemNumber];
+												const variantAttrs =
+													columnAttributes?.[variant.itemNumber];
 												const mediaId =
 													variantAttrs && !Array.isArray(variantAttrs)
 														? variantAttrs.mediaId?.[0]?.url
@@ -939,15 +1041,16 @@ export default function ProductVariantTable({
 											const attrs =
 												columnAttributes?.[variant.itemNumber]?.attributes ??
 												[];
-											
+
 											// Try to find by name first
 											let attr = attrs.find((a: any) => a.name === name);
-											
+
 											// If not found and this is a default attribute, try matching by attributeIdentifier
 											if (!attr) {
-												const defaultAttr = columnAttributes?.productData?.defaultAttributes?.find(
-													(da: any) => da.name === name,
-												);
+												const defaultAttr =
+													columnAttributes?.productData?.defaultAttributes?.find(
+														(da: any) => da.name === name,
+													);
 												if (defaultAttr?.attributeIdentifier) {
 													attr = attrs.find(
 														(a: any) =>
@@ -1023,9 +1126,9 @@ export default function ProductVariantTable({
 																onClick={(e) => e.stopPropagation()}>
 																<div className="flex items-center justify-between gap-3">
 																	<div className="flex flex-wrap items-center gap-3">
-																		<span className="text-sm font-medium min-w-[96px] whitespace-nowrap">
+																		<span className="min-w-[96px] text-sm font-medium whitespace-nowrap">
 																			{loading[variant.itemNumber] ? (
-																				<span className="flex items-center gap-2 text-muted-foreground">
+																				<span className="text-muted-foreground flex items-center gap-2">
 																					<Loader2 className="h-4 w-4 animate-spin" />
 																					{t("Product.loadingPrice")}
 																				</span>
@@ -1076,57 +1179,19 @@ export default function ProductVariantTable({
 																			disabled={loading[variant.itemNumber]}
 																			onClick={async (e) => {
 																				e.stopPropagation();
-																				if (!selectedWarehouse) {
-																					toast(t("Product.selectWarehouseFirst"), {
-																						type: "warning",
-																						position: "bottom-right",
-																						autoClose: 2000,
-																					});
-																					return;
-																				}
-																				setLoading((prev) => ({
-																					...prev,
-																					[variant.itemNumber]: true,
-																				}));
-																				try {
-																					const response = await addToCart({
-																						productNumber,
-																						itemNumber: variant.itemNumber.toString(),
-																						quantity: qty,
-																						warehouseNumber: selectedWarehouse,
-																						companyNumber: "1",
-																					});
-																					setIsCartChanging(!isCartChanging);
-																					if (response.message === "Error adding to cart")
-																						throw new Error(response.message);
-																					toast(t("Product.addedToCart"), {
-																						type: "success",
-																						position: "bottom-right",
-																						autoClose: 2000,
-																					});
-																					setQuantities((prev) => ({
-																						...prev,
-																						[variant.itemNumber]: 1,
-																					}));
-																					await getCart();
-																				} catch (err) {
-																					console.error("Error adding to cart:", err);
-																					toast(t("Product.errorAddingToCart"), {
-																						type: "error",
-																						position: "bottom-right",
-																						autoClose: 2000,
-																					});
-																				} finally {
-																					setLoading((prev) => ({
-																						...prev,
-																						[variant.itemNumber]: false,
-																					}));
-																				}
+																				await handleAddToCart(
+																					variant,
+																					qty,
+																					selectedWarehouse,
+																				);
 																			}}>
 																			{loading[variant.itemNumber] ? (
 																				<Loader2 className="h-4 w-4 animate-spin" />
 																			) : (
-																				<ShoppingCart className="h-4 w-4" strokeWidth={1.5} />
+																				<ShoppingCart
+																					className="h-4 w-4"
+																					strokeWidth={1.5}
+																				/>
 																			)}
 																		</button>
 																	)}
@@ -1267,72 +1332,11 @@ export default function ProductVariantTable({
 																	size="sm"
 																	disabled={loading[variant.itemNumber]}
 																	onClick={async () => {
-																		if (!selectedWarehouse) {
-																			toast(t("Product.selectWarehouseFirst"), {
-																				type: "warning",
-																				position: "bottom-right",
-																				autoClose: 2000,
-																			});
-																			return;
-																		}
-																		const selectedWarehouseData =
-																			variant.warehouses?.find(
-																				(w) =>
-																					w.warehouseNumber ===
-																					selectedWarehouse,
-																			);
-																		// Allow adding to cart even if balance is 0
-
-																		setLoading((prev) => ({
-																			...prev,
-																			[variant.itemNumber]: true,
-																		}));
-																		try {
-																			const response = await addToCart({
-																				productNumber,
-																				itemNumber:
-																					variant.itemNumber.toString(),
-																				quantity: qty,
-																				warehouseNumber: selectedWarehouse,
-																				companyNumber: "1",
-																			});
-
-																			setIsCartChanging(!isCartChanging);
-
-																			if (
-																				response.message ===
-																				"Error adding to cart"
-																			) {
-																				throw new Error(response.message);
-																			}
-
-																			toast(t("Product.addedToCart"), {
-																				type: "success",
-																				position: "bottom-right",
-																				autoClose: 2000,
-																			});
-
-																			setQuantities((prev) => ({
-																				...prev,
-																				[variant.itemNumber]: 1,
-																			}));
-																			await getCart();
-																		} catch (err) {
-																			console.error(
-																				"Error adding to cart:",
-																				err,
-																			);
-																			toast(t("Product.errorAddingToCart"), {
-																				type: "error",
-																				position: "bottom-right",
-																				autoClose: 2000,
-																			});
-																		} finally {
-																			setLoading((prev) => ({
-																				...prev,
-																				[variant.itemNumber]: false,
-																			}));
-																		}
+																		await handleAddToCart(
+																			variant,
+																			qty,
+																			selectedWarehouse,
+																		);
 																	}}>
 																	{loading[variant.itemNumber] ? (
 																		<>
