@@ -146,7 +146,7 @@ export function DataTable<
 														"min-w-[100px]": column.key === "price",
 														"min-w-[180px]": column.key === "status",
 														"sticky right-0 z-10": column.key === "action",
-														"p-0": column.key === "action",
+														// "p-0": column.key === "action",
 													},
 												)}>
 												<div className="flex items-center gap-1">

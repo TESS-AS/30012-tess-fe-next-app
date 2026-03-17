@@ -239,7 +239,7 @@ export function Rekvisisjoner() {
 							</Button>
 						</>
 					)}
-					{rekvisisjon.status === "Avvist" && (
+					{rekvisisjon.status === "Godkjent" && (
 						<Button
 							variant="outline"
 							size="sm"

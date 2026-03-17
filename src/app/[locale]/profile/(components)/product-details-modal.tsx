@@ -31,7 +31,7 @@ export default function ProductDetailsModal({
 	itemNumber,
 }: ProductDetailsModalProps) {
 	const t = useTranslations("ProductDetailsModal");
-	const [activeTab, setActiveTab] = useState<string>("produktinfo");
+	const [activeTab, setActiveTab] = useState<string>("variantinfo");
 	const [showFullDescription, setShowFullDescription] = useState(false);
 	const [copiedGtin, setCopiedGtin] = useState(false);
 	const [copiedSap, setCopiedSap] = useState(false);
@@ -247,7 +247,7 @@ export default function ProductDetailsModal({
 	// Reset to produktinfo tab when modal opens, itemNumber changes, or when columnAttributes loads
 	useEffect(() => {
 		if (isOpen) {
-			setActiveTab("produktinfo");
+			setActiveTab("variantinfo");
 		}
 	}, [isOpen, itemNumber, columnAttributes]);
 

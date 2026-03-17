@@ -40,6 +40,51 @@ export async function salesOrder(
 	}
 }
 
+export interface ExcelOrderConfirmationCartPayload {
+	salesOrderHeader: {
+		warehouseCode: string;
+	};
+	salesOrderLines: Array<{
+		itemCode: string;
+		orderedQuantity: number;
+		salesPrice: number;
+	}>;
+}
+
+export async function excelOrderConfirmationForCart(
+	payload: ExcelOrderConfirmationCartPayload,
+): Promise<{ blob: Blob; filename: string }> {
+	try {
+		const response = await axiosInstance.post(
+			"/excelOrderConfirmation",
+			payload,
+			{
+				responseType: "blob",
+			},
+		);
+
+		const contentDisposition = response.headers["content-disposition"];
+		let filename = `order_confirmation_${new Date().getTime()}.xlsx`;
+
+		if (contentDisposition) {
+			const filenameMatch = contentDisposition.match(
+				/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/,
+			);
+			if (filenameMatch && filenameMatch[1]) {
+				filename = filenameMatch[1].replace(/['"]/g, "");
+			}
+		}
+
+		return {
+			blob: response.data,
+			filename,
+		};
+	} catch (error) {
+		console.error("Error fetching Excel order confirmation:", error);
+		throw error;
+	}
+}
+
 export async function excelOrderConfirmation(
 	payload: Order,
 ): Promise<{ blob: Blob; filename: string }> {

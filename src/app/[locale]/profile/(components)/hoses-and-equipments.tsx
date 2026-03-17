@@ -730,7 +730,7 @@ export function HosesAndEquipments({
 			// ),
 			cell: (order: HoseOrder) => (
 				<div
-					className="flex items-center justify-end gap-2"
+					className="flex items-center justify-center gap-2"
 					onClick={(e) => e.stopPropagation()}>
 					<Button
 						variant="ghost"
@@ -747,7 +747,7 @@ export function HosesAndEquipments({
 						/>
 					</Button>
 
-					<DropdownMenu>
+					{/* <DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button
 								variant="ghost"
@@ -785,7 +785,7 @@ export function HosesAndEquipments({
 								<span>Send forespørsel om tilbud (RFQ)</span>
 							</DropdownMenuItem>
 						</DropdownMenuContent>
-					</DropdownMenu>
+					</DropdownMenu> */}
 				</div>
 			),
 		},

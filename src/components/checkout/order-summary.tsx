@@ -16,9 +16,10 @@ import { useOrderSummary } from "@/hooks/useOrderSummary";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
+import { excelOrderConfirmationForCart } from "@/services/orders.service";
 import { createRequisition } from "@/services/requisitions.service";
 import { Separator } from "@radix-ui/react-select";
-import { ArrowRight, ChevronLeft, Loader2, X } from "lucide-react";
+import { ArrowRight, ChevronLeft, Info, Loader2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
@@ -40,7 +41,7 @@ export default function OrderSummary({
 	const t = useTranslations();
 
 	const { data: profile } = usePunchoutProfile();
-	const { cartItems, isLoading, handleClearCart } = useAppContext();
+	const { cartItems, isLoading, handleClearCart, unitPrices } = useAppContext();
 	const isCartEmpty =
 		(!cartItems?.cart || cartItems.cart.length === 0) &&
 		(!cartItems?.cartKit || cartItems.cartKit.length === 0);
@@ -52,13 +53,10 @@ export default function OrderSummary({
 	const [requisitionSaved, setRequisitionSaved] = useState(false);
 	const [isExcelExportViewOpen, setIsExcelExportViewOpen] = useState(false);
 	const [warehouseCode, setWarehouseCode] = useState("");
-	const [excelRequisitionName, setExcelRequisitionName] = useState("");
+	const [isDownloadingExcel, setIsDownloadingExcel] = useState(false);
 	const [warehouseCodeError, setWarehouseCodeError] = useState<string | null>(
 		null,
 	);
-	const [excelRequisitionNameError, setExcelRequisitionNameError] = useState<
-		string | null
-	>(null);
 
 	const isTessEmployee = profile?.role === "employee";
 	const isExcelExportCustomer =
@@ -66,18 +64,12 @@ export default function OrderSummary({
 
 	const validateExcelExport = () => {
 		const trimmedWarehouseCode = warehouseCode.trim();
-		const trimmedReqName = excelRequisitionName.trim();
 
 		setWarehouseCodeError(null);
-		setExcelRequisitionNameError(null);
 
 		let ok = true;
 		if (!trimmedWarehouseCode) {
 			setWarehouseCodeError("Lagerkode er påkrevd");
-			ok = false;
-		}
-		if (!trimmedReqName) {
-			setExcelRequisitionNameError("Rekvisisjonsnavn er påkrevd");
 			ok = false;
 		}
 		return ok;
@@ -85,21 +77,70 @@ export default function OrderSummary({
 
 	const handleExcelExportClick = async () => {
 		if (!validateExcelExport()) return;
-		toast(
-			"Excel-nedlasting er ikke koblet på enda. Trenger avklaring på hvor Excel genereres.",
-			{
-				type: "info",
+		if (isDownloadingExcel) return;
+		try {
+			setIsDownloadingExcel(true);
+
+			const cartLines = cartItems?.cart ?? [];
+			if (cartLines.length === 0) {
+				toast("Handlekurven er tom.", {
+					type: "warning",
+					position: "top-right",
+					autoClose: 3000,
+				});
+				return;
+			}
+
+			const payload = {
+				salesOrderHeader: {
+					warehouseCode: warehouseCode.trim(),
+				},
+				salesOrderLines: cartLines
+					.filter((l) => l.itemNumber && l.quantity)
+					.map((l) => ({
+						itemCode: l.itemNumber,
+						orderedQuantity: l.quantity,
+						salesPrice: unitPrices?.[l.itemNumber] ?? 0,
+					})),
+			};
+
+			const { blob, filename } = await excelOrderConfirmationForCart(payload);
+
+			const url = window.URL.createObjectURL(blob);
+			const link = document.createElement("a");
+			link.href = url;
+			link.download = filename;
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			window.URL.revokeObjectURL(url);
+
+			await handleClearCart();
+
+			toast("Excel-fil lastet ned og handlekurv tømt.", {
+				type: "success",
 				position: "top-right",
 				autoClose: 3000,
-			},
-		);
+			});
+			setIsExcelExportViewOpen(false);
+			setWarehouseCode("");
+			setWarehouseCodeError(null);
+		} catch (error) {
+			console.error("Excel export failed", error);
+			toast("Kunne ikke generere Excel-fil. Prøv igjen.", {
+				type: "error",
+				position: "top-right",
+				autoClose: 3000,
+			});
+		} finally {
+			setIsDownloadingExcel(false);
+		}
 	};
 
 	const openExcelExportView = () => {
 		setIsRequisitionViewOpen(false);
 		setIsExcelExportViewOpen(true);
 		setWarehouseCodeError(null);
-		setExcelRequisitionNameError(null);
 	};
 
 	const handleSaveRequisition = async () => {
@@ -201,7 +242,7 @@ export default function OrderSummary({
 	return (
 		<div className="space-y-6">
 			<div className="bg-card border-lightGray rounded-lg border p-6">
-				{isExcelExportViewOpen ? (
+				{isExcelExportCustomer && isExcelExportViewOpen ? (
 					<div className="space-y-4">
 						<div className="text-sm text-green-700">
 							<button
@@ -210,9 +251,7 @@ export default function OrderSummary({
 								onClick={() => {
 									setIsExcelExportViewOpen(false);
 									setWarehouseCode("");
-									setExcelRequisitionName("");
 									setWarehouseCodeError(null);
-									setExcelRequisitionNameError(null);
 								}}>
 								<ChevronLeft /> Gå tilbake
 							</button>
@@ -254,37 +293,6 @@ export default function OrderSummary({
 							</p>
 						</div>
 
-						<div className="space-y-2">
-							<Label htmlFor="excelRequisitionName">Rekvisisjonsnavn</Label>
-							<div className="relative">
-								<Input
-									id="excelRequisitionName"
-									placeholder="F.eks. Service Troll A"
-									value={excelRequisitionName}
-									onChange={(e) => {
-										setExcelRequisitionName(e.target.value);
-										if (excelRequisitionNameError)
-											setExcelRequisitionNameError(null);
-									}}
-									className="pr-10"
-								/>
-								{excelRequisitionName.trim().length > 0 && (
-									<button
-										type="button"
-										className="absolute top-1/2 right-3 -translate-y-1/2 text-[#5A615D] hover:text-[#0F1912]"
-										onClick={() => setExcelRequisitionName("")}
-										aria-label="Clear">
-										<X className="h-4 w-4" />
-									</button>
-								)}
-							</div>
-							{excelRequisitionNameError && (
-								<p className="text-sm text-red-600">
-									{excelRequisitionNameError}
-								</p>
-							)}
-						</div>
-
 						<Button
 							variant="greenSolid"
 							className="w-full"
@@ -298,7 +306,7 @@ export default function OrderSummary({
 						</Button>
 
 						<div className="flex items-start gap-2 rounded-md bg-[#F0FCF2] p-3 text-sm text-[#5A615D]">
-							<span className="mt-0.5">i</span>
+							<Info className="mt-0.5 h-4 w-4 shrink-0 text-[#009640]" />
 							<span>
 								Handlekurven overføres til en Excel-fil og tømmes. Legg inn
 								varene på nytt for å handle videre.
@@ -436,8 +444,25 @@ export default function OrderSummary({
 							)}
 						</div>
 
-						{profile?.defaultCustomerNumber !==
-							HIDE_CHECKOUT_FOR_SPECIFIC_CUSTOMER_NUMBER &&
+						{isExcelExportCustomer ? (
+							<Button
+								variant="greenSolid"
+								className="mt-2 w-full"
+								disabled={
+									isCartEmpty ||
+									isCheckoutLoading ||
+									(!acceptedTerms && currentStep === 2)
+								}
+								onClick={openExcelExportView}>
+								{isCheckoutLoading || isLoading ? (
+									<Loader2 className="h-4 w-4 animate-spin" />
+								) : (
+									"Last ned handlekurv som Excel-fil"
+								)}
+							</Button>
+						) : (
+							profile?.defaultCustomerNumber !==
+								HIDE_CHECKOUT_FOR_SPECIFIC_CUSTOMER_NUMBER &&
 							(!profile?.punchout ? (
 								// isTessEmployee
 								isTessEmployee ? (
@@ -470,18 +495,9 @@ export default function OrderSummary({
 											isCheckoutLoading ||
 											(!acceptedTerms && currentStep === 2)
 										}
-										onClick={() => {
-											if (isExcelExportCustomer) {
-												openExcelExportView();
-												return;
-											}
-											handleCheckout();
-										}}>
+										onClick={handleCheckout}>
 										{isCheckoutLoading || isLoading ? (
 											<Loader2 className="h-4 w-4 animate-spin" />
-										) : profile?.defaultCustomerNumber ===
-										  SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER ? (
-											t("OrderSummary.exportToExcel")
 										) : (
 											t(
 												currentStep === null
@@ -501,21 +517,16 @@ export default function OrderSummary({
 										(!acceptedTerms && currentStep === 2)
 									}
 									onClick={() => {
-										if (isExcelExportCustomer) {
-											openExcelExportView();
-											return;
-										}
 										handleCheckout();
 									}}>
 									{isCheckoutLoading || isLoading ? (
 										<Loader2 className="h-4 w-4 animate-spin" />
-									) : isExcelExportCustomer ? (
-										t("OrderSummary.exportToExcel")
 									) : (
 										t("OrderSummary.punchoutCart")
 									)}
 								</Button>
-							))}
+							))
+						)}
 
 						<Button
 							variant="link"
