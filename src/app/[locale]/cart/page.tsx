@@ -73,6 +73,7 @@ const CartPage = () => {
 		calculatedPrices,
 		unitPrices,
 		prices,
+		setIsCartChanging,
 		updateQuantity,
 		updateWarehouse,
 		updateWarehouseForAllItems,
@@ -621,25 +622,20 @@ const CartPage = () => {
 													</div>
 													<div className="flex items-center gap-6">
 														<QuantityButtons
-															isLoading={!!loadingItems[item.hose.itemNumber]}
+															isLoading={!!loadingItems[item.hexagonId]}
 															quantity={item.ferrule1.quantity}
 															onIncrease={async (e) => {
 																e.stopPropagation();
 																setLoadingItems((prev) => ({
 																	...prev,
-																	[item.hose.itemNumber]: true,
+																	[item.hexagonId]: true,
 																}));
 																try {
-																	await postCartKit([
-																		{
-																			hexagonId: Number(item.hexagonId),
-																			quantity: 1,
-																			warehouseNumber:
-																				profile?.defaultWarehouseNumber,
-																			companyNumber:
-																				profile?.defaultCompanyNumber,
-																		},
-																	]);
+																	await updateQuantity(
+																		item.cartLine ?? 0,
+																		item.hexagonId,
+																		item.ferrule1.quantity + 1,
+																	);
 																} finally {
 																	setLoadingItems((prev) => ({
 																		...prev,
@@ -651,18 +647,21 @@ const CartPage = () => {
 																e.stopPropagation();
 																setLoadingItems((prev) => ({
 																	...prev,
-																	[item.hose.itemNumber]: true,
+																	[item.hexagonId]: true,
 																}));
 																try {
-																	await removeItemOptimistic(item.cartLine);
+																	await updateQuantity(
+																		item.cartLine ?? 0,
+																		item.hexagonId,
+																		item.ferrule1.quantity - 1,
+																	);
 																} finally {
 																	setLoadingItems((prev) => ({
 																		...prev,
-																		[item.hose.itemNumber]: false,
+																		[item.hexagonId]: false,
 																	}));
 																}
 															}}
-															disabled
 														/>
 														<div className="flex items-center gap-6">
 															<span className="font-semibold">

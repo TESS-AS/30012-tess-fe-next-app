@@ -572,7 +572,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								{profile &&
 									assortments.length > 0 &&
 									isAssortmentDropdownOpen && (
-										<div className="absolute top-[50px] right-0 z-[9999] w-[300px] max-w-[400px] max-h-[260px] overflow-y-auto rounded-b-lg bg-white py-2 shadow-lg">
+										<div className="absolute top-[50px] right-0 z-[9999] max-h-[260px] w-[300px] max-w-[400px] overflow-y-auto rounded-b-lg bg-white py-2 shadow-lg">
 											<TooltipProvider>
 												{assortments.map((a: any) => (
 													<Tooltip key={a.assortmentnumber}>
@@ -671,55 +671,51 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 									</div>
 									<div className="text-[14px]">{profile.email}</div>
 								</div>
-								{!isHoseManagementCustomer && (
+								{/* {!isHoseManagementCustomer && (
+									<> */}
+								<DropdownMenuSeparator />
+								<DropdownMenuItem
+									className="text-gray-700"
+									onClick={() => router.push("/profile")}>
+									Gå til din side
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									className="text-gray-700"
+									onClick={() => router.push("/profile?tab=settings")}>
+									Innstillinger
+								</DropdownMenuItem>
+								<CustomerNumberSwitcher profile={profile} />
+								{(hasHoseManagementAccess || hasTessEdiAccess) && (
 									<>
 										<DropdownMenuSeparator />
-										<DropdownMenuItem
-											className="text-gray-700"
-											onClick={() => router.push("/profile")}>
-											Gå til din side
-										</DropdownMenuItem>
-										<DropdownMenuItem
-											className="text-gray-700"
-											onClick={() => router.push("/profile?tab=settings")}>
-											Innstillinger
-										</DropdownMenuItem>
-										<CustomerNumberSwitcher profile={profile} />
-										{(hasHoseManagementAccess || hasTessEdiAccess) && (
-											<>
-												<DropdownMenuSeparator />
-												<DropdownMenuLabel className="text-sm font-semibold text-gray-700">
-													Tjenester
-												</DropdownMenuLabel>
-												{hasHoseManagementAccess && (
-													<DropdownMenuItem
-														className="text-gray-700"
-														onClick={() =>
-															router.push("/profile?tab=hose-orders")
-														}>
-														Hose management
-													</DropdownMenuItem>
-												)}
-												{hasTessEdiAccess && (
-													<DropdownMenuItem
-														className="text-gray-700"
-														onClick={() =>
-															router.push("/profile?tab=tess-edi")
-														}>
-														TESS EDI
-													</DropdownMenuItem>
-												)}
-												<DropdownMenuSeparator />
-											</>
+										<DropdownMenuLabel className="text-sm font-semibold text-gray-700">
+											Tjenester
+										</DropdownMenuLabel>
+										{hasHoseManagementAccess && (
+											<DropdownMenuItem
+												className="text-gray-700"
+												onClick={() => router.push("/profile?tab=hose-orders")}>
+												Hose management
+											</DropdownMenuItem>
 										)}
-										<DropdownMenuItem
-											onClick={handleLogout}
-											className="text-red-700">
-											<LogOut className="mr-2 h-4 w-4 text-red-700" />
-											Logg ut
-										</DropdownMenuItem>
+										{hasTessEdiAccess && (
+											<DropdownMenuItem
+												className="text-gray-700"
+												onClick={() => router.push("/profile?tab=tess-edi")}>
+												TESS EDI
+											</DropdownMenuItem>
+										)}
+										<DropdownMenuSeparator />
 									</>
 								)}
+								<DropdownMenuItem
+									onClick={handleLogout}
+									className="text-red-700">
+									<LogOut className="mr-2 h-4 w-4 text-red-700" />
+									Logg ut
+								</DropdownMenuItem>
+								{/* </>
+								)} */}
 							</DropdownMenuContent>
 						</DropdownMenu>
 					) : (

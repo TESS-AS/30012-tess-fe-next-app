@@ -107,7 +107,7 @@ export function TilgangerSection({
 				? `${INNSTILLINGER_CLASSES.cardMutedRoundedBottom} ${superuserBannerDismissed ? "rounded-t-lg" : ""}`
 				: "";
 
-	if (currentUser == null) return null;
+	// if (currentUser == null) return null;
 
 	return (
 		<>
@@ -142,21 +142,21 @@ export function TilgangerSection({
 						<div className="space-y-4">
 							<ReadOnlyAccessField
 								label={tSettings("customerAccessLabel")}
-								value={formatReadOnlyValue(currentUser.customerAccess)}
+								value={formatReadOnlyValue(currentUser?.customerAccess)}
 							/>
 							<ReadOnlyAccessField
 								label={tBulk("standardWarehouse")}
-								value={formatReadOnlyValue(currentUser.warehouse)}
+								value={formatReadOnlyValue(currentUser?.warehouse)}
 							/>
 						</div>
 						<div className="space-y-4">
 							<ReadOnlyAccessField
 								label={tSettings("catalogLabel")}
-								value={formatReadOnlyValue(currentUser.catalog)}
+								value={formatReadOnlyValue(currentUser?.catalog)}
 							/>
 							<ReadOnlyAccessField
 								label={tSettings("tessCompanyLabel")}
-								value={formatReadOnlyValue(currentUser.company)}
+								value={formatReadOnlyValue(currentUser?.company)}
 							/>
 						</div>
 					</div>
@@ -201,15 +201,15 @@ export function TilgangerSection({
 						<div className="space-y-4">
 							<ReadOnlyAccessField
 								label={tSettings("customerAccessLabel")}
-								value={formatReadOnlyValue(currentUser.customerAccess)}
+								value={formatReadOnlyValue(currentUser?.customerAccess)}
 							/>
 							<ReadOnlyAccessField
 								label={tSettings("tessCompanyLabel")}
-								value={formatReadOnlyValue(currentUser.company)}
+								value={formatReadOnlyValue(currentUser?.company)}
 							/>
 							<ReadOnlyAccessField
 								label={tSettings("catalogLabel")}
-								value={formatReadOnlyValue(currentUser.catalog)}
+								value={formatReadOnlyValue(currentUser?.catalog)}
 							/>
 						</div>
 					</div>
@@ -227,6 +227,158 @@ export function TilgangerSection({
 						</Button>
 					</div>
 				</div>
+			) : roleKey === PROFILE_ROLE.EMPLOYEE ? (
+				<>
+					<div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+						<div className="space-y-2">
+							<Label className={INNSTILLINGER_CLASSES.labelDark}>
+								{tBulk("customerAccess")}
+							</Label>
+							<MultiSelectWithTags
+								options={options.customerOptions}
+								selected={selected.customers}
+								onChange={(v) => {
+									setSelectedCustomers(normalizeCustomerNumbers(v));
+									onDirtyChange?.(true);
+								}}
+								onSearchChange={(v) => {
+									setCustomerSearch(v);
+									setCustomerPage(1);
+								}}
+								page={state.customerPage}
+								isLoading={isLoadingOptions}
+								onPrevPage={
+									state.customerPage > 1
+										? () => setCustomerPage((p) => p - 1)
+										: undefined
+								}
+								onNextPage={
+									listLengths.customers >= TILGANGER_PAGE_SIZE
+										? () => setCustomerPage((p) => p + 1)
+										: undefined
+								}
+								canPrevPage={state.customerPage > 1}
+								canNextPage={listLengths.customers >= TILGANGER_PAGE_SIZE}
+								placeholder={tBulk("customerAccessPlaceholder", {
+									count: selected.customers.length,
+								})}
+							/>
+						</div>
+						<div className="space-y-2">
+							<Label className={INNSTILLINGER_CLASSES.labelDark}>
+								{tBulk("catalog")}
+							</Label>
+							<MultiSelectWithTags
+								options={options.assortmentOptions}
+								selected={selected.catalogs}
+								onChange={(v) => {
+									setSelectedCatalogs(normalizeAssortmentNumbers(v));
+									onDirtyChange?.(true);
+								}}
+								onSearchChange={(v) => {
+									setAssortmentSearch(v);
+									setAssortmentPage(1);
+								}}
+								page={state.assortmentPage}
+								isLoading={isLoadingOptions}
+								onPrevPage={
+									state.assortmentPage > 1
+										? () => setAssortmentPage((p) => p - 1)
+										: undefined
+								}
+								onNextPage={
+									listLengths.assortments >= TILGANGER_PAGE_SIZE
+										? () => setAssortmentPage((p) => p + 1)
+										: undefined
+								}
+								canPrevPage={state.assortmentPage > 1}
+								canNextPage={listLengths.assortments >= TILGANGER_PAGE_SIZE}
+								placeholder={tBulk("catalogPlaceholder")}
+							/>
+						</div>
+					</div>
+					<div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+						<div className="space-y-2">
+							<Label className={INNSTILLINGER_CLASSES.labelDark}>
+								{tBulk("standardWarehouse")}
+							</Label>
+							<MultiSelectWithTags
+								options={options.warehouseOptions}
+								selected={selected.warehouses}
+								onChange={(value) => {
+									setSelectedWarehouses(value);
+									onDirtyChange?.(true);
+								}}
+								onSearchChange={(v) => {
+									setWarehouseSearch(v);
+									setWarehousePage(1);
+								}}
+								page={state.warehousePage}
+								isLoading={isLoadingOptions}
+								onPrevPage={
+									state.warehousePage > 1
+										? () => setWarehousePage((p) => p - 1)
+										: undefined
+								}
+								onNextPage={
+									listLengths.warehouses >= TILGANGER_PAGE_SIZE
+										? () => setWarehousePage((p) => p + 1)
+										: undefined
+								}
+								canPrevPage={state.warehousePage > 1}
+								canNextPage={listLengths.warehouses >= TILGANGER_PAGE_SIZE}
+								placeholder={tBulk("warehousePlaceholder", {
+									count: selected.warehouses.length,
+								})}
+							/>
+						</div>
+						<div className="space-y-2">
+							<Label className={INNSTILLINGER_CLASSES.labelDark}>
+								{tBulk("tessCompany")}
+							</Label>
+							<MultiSelectWithTags
+								options={options.companyOptions}
+								selected={selected.companies}
+								onChange={(v) => {
+									setSelectedCompanies(normalizeCompanyNumbers(v));
+									onDirtyChange?.(true);
+								}}
+								onSearchChange={(v) => {
+									setCompanySearch(v);
+									setCompanyPage(1);
+								}}
+								page={state.companyPage}
+								isLoading={isLoadingOptions}
+								onPrevPage={
+									state.companyPage > 1
+										? () => setCompanyPage((p) => p - 1)
+										: undefined
+								}
+								onNextPage={
+									listLengths.companies >= TILGANGER_PAGE_SIZE
+										? () => setCompanyPage((p) => p + 1)
+										: undefined
+								}
+								canPrevPage={state.companyPage > 1}
+								canNextPage={listLengths.companies >= TILGANGER_PAGE_SIZE}
+								placeholder={tBulk("companyPlaceholder")}
+							/>
+						</div>
+					</div>
+					<div className="flex justify-start">
+						<Button
+							type="button"
+							variant="green"
+							onClick={handleSaveAccess}
+							disabled={isSavingAccess}
+							className="rounded-md px-6">
+							{isSavingAccess && (
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							)}
+							{tSettings("saveChanges")}
+						</Button>
+					</div>
+				</>
 			) : (
 				<>
 					<div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">

@@ -146,7 +146,7 @@ export function DataTable<
 														"min-w-[100px]": column.key === "price",
 														"min-w-[180px]": column.key === "status",
 														"sticky right-0 z-10": column.key === "action",
-														"p-0": column.key === "action",
+														// "p-0": column.key === "action",
 													},
 												)}>
 												<div className="flex items-center gap-1">
@@ -304,10 +304,10 @@ export function DataTable<
 													{isExpandable &&
 														expandedRows.includes(index) &&
 														expandableContent && (
-															<tr className="animate-in fade-in-0 zoom-in-95 border-b border-[#C1C4C2] bg-[#F3FAF7] duration-200">
+															<tr className="animate-in fade-in-0 zoom-in-95 border-b-2 border-[#C1C4C2] duration-200">
 																<td
 																	colSpan={safeColumns.length + 2}
-																	className="border-t border-[#E5E7E6] py-6 pl-16">
+																	className="border-t border-[#E5E7E6] py-6 pl-20">
 																	{expandableContent(item)}
 																</td>
 															</tr>
