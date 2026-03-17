@@ -416,7 +416,7 @@ export function ProductInfo({
 			const response = await addToCart({
 				productNumber,
 				itemNumber: selectedItemNumber,
-					quantity: selectedQuantity ?? quantity,
+				quantity: selectedQuantity ?? quantity,
 				warehouseNumber,
 				companyNumber: profile?.defaultCompanyNumber.toString() || "1",
 			});
@@ -535,7 +535,7 @@ export function ProductInfo({
 									<span className="font-semibold text-black">
 										{locale === "no" ? "Varenavn:" : "Item name:"}
 									</span>{" "}
-									<span className="font-light uppercase text-[#434B46]">
+									<span className="font-light text-[#434B46] uppercase">
 										{columnAttributes?.[selectedItemNumber]?.itemName ?? name}
 									</span>
 								</p>
@@ -619,14 +619,14 @@ export function ProductInfo({
 									type="button"
 									variant="outline"
 									className="h-auto w-full shrink-0 rounded-lg border-gray-200 bg-white px-4 py-2 text-sm font-normal text-black hover:bg-gray-50 sm:w-auto"
-								onClick={() => {
-									const el = document.getElementById("product-table-details");
-									el?.scrollIntoView({ behavior: "smooth", block: "start" });
-								}}>
-								{locale === "no"
-									? `Velg varianter (${variants.length})`
-									: `Select variants (${variants.length})`}
-							</Button>
+									onClick={() => {
+										const el = document.getElementById("product-table-details");
+										el?.scrollIntoView({ behavior: "smooth", block: "start" });
+									}}>
+									{locale === "no"
+										? `Velg varianter (${variants.length})`
+										: `Select variants (${variants.length})`}
+								</Button>
 							</div>
 						)}
 					</div>
@@ -635,7 +635,7 @@ export function ProductInfo({
 					<div className="flex flex-wrap items-center justify-between gap-4">
 						{/* Price with unit */}
 						<div className="flex items-baseline gap-1">
-							<span className="text-xl font-semibold leading-none text-black">
+							<span className="text-xl leading-none font-semibold text-black">
 								{loadingPrice
 									? t("loadingPrice")
 									: calculatedPrice !== null
@@ -650,6 +650,13 @@ export function ProductInfo({
 						{/* Quantity selector between price and add-to-cart */}
 						<QuantityButtons
 							quantity={effectiveQuantity}
+							allowInput
+							onQuantityChange={(next) => {
+								setQuantity(next);
+								if (selectedItemNumber && onQuantityChange) {
+									onQuantityChange(selectedItemNumber, next);
+								}
+							}}
 							onIncrease={() => {
 								const next = effectiveQuantity + 1;
 								setQuantity(next);
@@ -669,7 +676,7 @@ export function ProductInfo({
 						{/* Legg til button */}
 						<Button
 							disabled={adding || !selectedItemNumber}
-							className="w-[172px] rounded-lg border-0 px-4 font-light text-white disabled:opacity-60 hover:opacity-90"
+							className="w-[172px] rounded-lg border-0 px-4 font-light text-white hover:opacity-90 disabled:opacity-60"
 							style={{ backgroundColor: "#009640" }}
 							onClick={handleAddToCart}>
 							{adding ? (
