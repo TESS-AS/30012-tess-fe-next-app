@@ -103,9 +103,9 @@ export const Filter = React.forwardRef<
 
 		const [searchTerm, setSearchTerm] = React.useState("");
 		const [showAllCategories, setShowAllCategories] = React.useState(false);
-		const [selectedCategory, setSelectedCategory] = React.useState<string | null>(
-			null,
-		);
+		const [selectedCategory, setSelectedCategory] = React.useState<
+			string | null
+		>(null);
 		const [localSelectedFilters, setLocalSelectedFilters] = React.useState<
 			Record<string, string[]>
 		>(externalSelectedFilters);
@@ -115,7 +115,6 @@ export const Filter = React.forwardRef<
 		const [loadingChildrenKeys, setLoadingChildrenKeys] = React.useState<
 			Set<string>
 		>(new Set());
-
 
 		React.useEffect(() => {
 			setLocalSelectedFilters(externalSelectedFilters);
@@ -223,8 +222,8 @@ export const Filter = React.forwardRef<
 		const handleSliderInputChange = useCallback(
 			(filterKey: string, index: 0 | 1, value: number) => {
 				setTempRangeValues((prev) => {
-					const current =
-						prev[filterKey] || rangeValues[filterKey] || [value, value];
+					const current = prev[filterKey] ||
+						rangeValues[filterKey] || [value, value];
 					const next: [number, number] = [...current] as [number, number];
 					next[index] = value;
 					return { ...prev, [filterKey]: next };
@@ -296,9 +295,7 @@ export const Filter = React.forwardRef<
 					setLocalSelectedFilters(updatedFilters);
 
 					const filterArray: FilterValues[] = Object.entries(updatedFilters)
-						.filter(
-							([key, values]) => key !== "category" && values.length > 0,
-						)
+						.filter(([key, values]) => key !== "category" && values.length > 0)
 						.map(([key, values]) => ({ key, values }));
 
 					onFilterChange(filterArray);
@@ -328,14 +325,16 @@ export const Filter = React.forwardRef<
 			setLocalSelectedFilters({});
 
 			onFilterChange([]);
-		}, [
-			onFilterChange,
-		]);
+		}, [onFilterChange]);
 
 		const selectedFilterCount = Object.values(selectedFilters).reduce(
 			(acc, values) => acc + values.length,
 			0,
 		);
+
+		const [expandedFilters, setExpandedFilters] = React.useState<
+			Record<string, boolean>
+		>({});
 
 		const filteredCategories = React.useMemo(() => {
 			// First, filter out filters with 0 children based on productCount / values length
@@ -523,7 +522,11 @@ export const Filter = React.forwardRef<
 									value={openAccordions}
 									onValueChange={(val) => {
 										// Ensure val is always an array
-										const newValue = Array.isArray(val) ? val : val ? [val] : [];
+										const newValue = Array.isArray(val)
+											? val
+											: val
+												? [val]
+												: [];
 										setOpenAccordions(newValue);
 									}}
 									className="w-full">
@@ -553,7 +556,10 @@ export const Filter = React.forwardRef<
 													/>
 												) : filter.values.length > 0 ? (
 													<div className="space-y-2 pl-2">
-														{filter.values.map((child) => (
+														{(expandedFilters[filter.key]
+															? filter.values
+															: filter.values.slice(0, 5)
+														).map((child) => (
 															<div
 																key={child.value}
 																className="mb-5 flex items-center justify-between space-x-2 font-normal"
@@ -566,10 +572,7 @@ export const Filter = React.forwardRef<
 																		) || false
 																	}
 																	onCheckedChange={() =>
-																		handleFilterChange(
-																			filter.key,
-																			child.value,
-																		)
+																		handleFilterChange(filter.key, child.value)
 																	}
 																/>
 																<label
@@ -582,6 +585,22 @@ export const Filter = React.forwardRef<
 																</label>
 															</div>
 														))}
+														{filter.values.length > 5 && (
+															<Button
+																variant="link"
+																size="sm"
+																onClick={() =>
+																	setExpandedFilters((prev) => ({
+																		...prev,
+																		[filter.key]: !prev[filter.key],
+																	}))
+																}
+																className="text-primary px-0 text-sm hover:underline">
+																{expandedFilters[filter.key]
+																	? "Vis mindre"
+																	: "Vis mer"}
+															</Button>
+														)}
 													</div>
 												) : (
 													<div className="text-muted-foreground pl-2 text-sm italic">
