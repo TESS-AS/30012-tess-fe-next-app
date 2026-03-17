@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PriceDisplay } from "@/components/ui/price-display";
 import {
@@ -49,8 +50,57 @@ export default function OrderSummary({
 	const [requisitionDescription, setRequisitionDescription] = useState("");
 	const [isSavingRequisition, setIsSavingRequisition] = useState(false);
 	const [requisitionSaved, setRequisitionSaved] = useState(false);
+	const [isExcelExportViewOpen, setIsExcelExportViewOpen] = useState(false);
+	const [warehouseCode, setWarehouseCode] = useState("");
+	const [excelRequisitionName, setExcelRequisitionName] = useState("");
+	const [warehouseCodeError, setWarehouseCodeError] = useState<string | null>(
+		null,
+	);
+	const [excelRequisitionNameError, setExcelRequisitionNameError] = useState<
+		string | null
+	>(null);
 
 	const isTessEmployee = profile?.role === "employee";
+	const isExcelExportCustomer =
+		profile?.defaultCustomerNumber === SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER;
+
+	const validateExcelExport = () => {
+		const trimmedWarehouseCode = warehouseCode.trim();
+		const trimmedReqName = excelRequisitionName.trim();
+
+		setWarehouseCodeError(null);
+		setExcelRequisitionNameError(null);
+
+		let ok = true;
+		if (!trimmedWarehouseCode) {
+			setWarehouseCodeError("Lagerkode er påkrevd");
+			ok = false;
+		}
+		if (!trimmedReqName) {
+			setExcelRequisitionNameError("Rekvisisjonsnavn er påkrevd");
+			ok = false;
+		}
+		return ok;
+	};
+
+	const handleExcelExportClick = async () => {
+		if (!validateExcelExport()) return;
+		toast(
+			"Excel-nedlasting er ikke koblet på enda. Trenger avklaring på hvor Excel genereres.",
+			{
+				type: "info",
+				position: "top-right",
+				autoClose: 3000,
+			},
+		);
+	};
+
+	const openExcelExportView = () => {
+		setIsRequisitionViewOpen(false);
+		setIsExcelExportViewOpen(true);
+		setWarehouseCodeError(null);
+		setExcelRequisitionNameError(null);
+	};
 
 	const handleSaveRequisition = async () => {
 		setIsSavingRequisition(true);
@@ -151,7 +201,111 @@ export default function OrderSummary({
 	return (
 		<div className="space-y-6">
 			<div className="bg-card border-lightGray rounded-lg border p-6">
-				{isRequisitionViewOpen ? (
+				{isExcelExportViewOpen ? (
+					<div className="space-y-4">
+						<div className="text-sm text-green-700">
+							<button
+								type="button"
+								className="flex items-center gap-2"
+								onClick={() => {
+									setIsExcelExportViewOpen(false);
+									setWarehouseCode("");
+									setExcelRequisitionName("");
+									setWarehouseCodeError(null);
+									setExcelRequisitionNameError(null);
+								}}>
+								<ChevronLeft /> Gå tilbake
+							</button>
+						</div>
+
+						<p className="text-lg font-medium text-gray-900">
+							Legg til lagerkode
+						</p>
+
+						<div className="space-y-2">
+							<Label htmlFor="warehouseCode">Lagerkode</Label>
+							<div className="relative">
+								<Input
+									id="warehouseCode"
+									placeholder="F.eks. 007B"
+									value={warehouseCode}
+									onChange={(e) => {
+										setWarehouseCode(e.target.value);
+										if (warehouseCodeError) setWarehouseCodeError(null);
+									}}
+									className="pr-10"
+								/>
+								{warehouseCode.trim().length > 0 && (
+									<button
+										type="button"
+										className="absolute top-1/2 right-3 -translate-y-1/2 text-[#5A615D] hover:text-[#0F1912]"
+										onClick={() => setWarehouseCode("")}
+										aria-label="Clear">
+										<X className="h-4 w-4" />
+									</button>
+								)}
+							</div>
+							{warehouseCodeError && (
+								<p className="text-sm text-red-600">{warehouseCodeError}</p>
+							)}
+							<p className="text-sm text-[#5A615D]">
+								Lagerkoden bestemmer mottaker og fakturering. Hver avdeling har
+								sin egen kode.
+							</p>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="excelRequisitionName">Rekvisisjonsnavn</Label>
+							<div className="relative">
+								<Input
+									id="excelRequisitionName"
+									placeholder="F.eks. Service Troll A"
+									value={excelRequisitionName}
+									onChange={(e) => {
+										setExcelRequisitionName(e.target.value);
+										if (excelRequisitionNameError)
+											setExcelRequisitionNameError(null);
+									}}
+									className="pr-10"
+								/>
+								{excelRequisitionName.trim().length > 0 && (
+									<button
+										type="button"
+										className="absolute top-1/2 right-3 -translate-y-1/2 text-[#5A615D] hover:text-[#0F1912]"
+										onClick={() => setExcelRequisitionName("")}
+										aria-label="Clear">
+										<X className="h-4 w-4" />
+									</button>
+								)}
+							</div>
+							{excelRequisitionNameError && (
+								<p className="text-sm text-red-600">
+									{excelRequisitionNameError}
+								</p>
+							)}
+						</div>
+
+						<Button
+							variant="greenSolid"
+							className="w-full"
+							disabled={isCartEmpty || isCheckoutLoading}
+							onClick={handleExcelExportClick}>
+							{isCheckoutLoading || isLoading ? (
+								<Loader2 className="h-4 w-4 animate-spin" />
+							) : (
+								"Last ned handlekurv som Excel-fil"
+							)}
+						</Button>
+
+						<div className="flex items-start gap-2 rounded-md bg-[#F0FCF2] p-3 text-sm text-[#5A615D]">
+							<span className="mt-0.5">i</span>
+							<span>
+								Handlekurven overføres til en Excel-fil og tømmes. Legg inn
+								varene på nytt for å handle videre.
+							</span>
+						</div>
+					</div>
+				) : isRequisitionViewOpen ? (
 					<div className="space-y-4">
 						<div className="text-sm text-green-700">
 							<button
@@ -316,7 +470,13 @@ export default function OrderSummary({
 											isCheckoutLoading ||
 											(!acceptedTerms && currentStep === 2)
 										}
-										onClick={handleCheckout}>
+										onClick={() => {
+											if (isExcelExportCustomer) {
+												openExcelExportView();
+												return;
+											}
+											handleCheckout();
+										}}>
 										{isCheckoutLoading || isLoading ? (
 											<Loader2 className="h-4 w-4 animate-spin" />
 										) : profile?.defaultCustomerNumber ===
@@ -340,9 +500,17 @@ export default function OrderSummary({
 										isCheckoutLoading ||
 										(!acceptedTerms && currentStep === 2)
 									}
-									onClick={handleCheckout}>
+									onClick={() => {
+										if (isExcelExportCustomer) {
+											openExcelExportView();
+											return;
+										}
+										handleCheckout();
+									}}>
 									{isCheckoutLoading || isLoading ? (
 										<Loader2 className="h-4 w-4 animate-spin" />
+									) : isExcelExportCustomer ? (
+										t("OrderSummary.exportToExcel")
 									) : (
 										t("OrderSummary.punchoutCart")
 									)}

@@ -2,10 +2,12 @@
 
 import {
 	createContext,
+	Dispatch,
 	ReactNode,
 	useContext,
 	useEffect,
 	useMemo,
+	SetStateAction,
 	useState,
 } from "react";
 
@@ -31,7 +33,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 interface AppContextType {
 	isCartChanging: boolean;
-	setIsCartChanging: (value: boolean) => void;
+	setIsCartChanging: Dispatch<SetStateAction<boolean>>;
 
 	cartItems: CartKitResponse | undefined;
 	setCartItems: (value: CartKitResponse) => void;

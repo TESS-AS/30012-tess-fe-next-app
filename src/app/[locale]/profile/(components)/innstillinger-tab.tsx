@@ -98,21 +98,19 @@ export function InnstillingerTab({ onDirtyChange }: InnstillingerTabProps) {
 
 			<UserRightsSection roleKey={roleKey} />
 
-			{currentUser != null && (
-				<TilgangerSection
-					roleKey={roleKey}
-					profileUserId={profile.userId}
-					currentUser={currentUser}
-					isLoadingCurrentUser={isLoadingCurrentUser}
-					superuserBannerDismissed={superuserBannerDismissed}
-					employeeBannerDismissed={employeeBannerDismissed}
-					onSuperuserBannerDismiss={() => setSuperuserBannerDismissed(true)}
-					onEmployeeBannerDismiss={() => setEmployeeBannerDismissed(true)}
-					onSaveAccess={handleSaveAccess}
-					isSavingAccess={isSavingAccess}
-					onDirtyChange={onDirtyChange}
-				/>
-			)}
+			<TilgangerSection
+				roleKey={roleKey}
+				profileUserId={profile.userId}
+				currentUser={currentUser}
+				isLoadingCurrentUser={isLoadingCurrentUser}
+				superuserBannerDismissed={superuserBannerDismissed}
+				employeeBannerDismissed={employeeBannerDismissed}
+				onSuperuserBannerDismiss={() => setSuperuserBannerDismissed(true)}
+				onEmployeeBannerDismiss={() => setEmployeeBannerDismissed(true)}
+				onSaveAccess={handleSaveAccess}
+				isSavingAccess={isSavingAccess}
+				onDirtyChange={onDirtyChange}
+			/>
 		</div>
 	);
 }
