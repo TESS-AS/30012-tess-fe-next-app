@@ -173,8 +173,21 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 			const cartKitPriceRequests =
 				cart.cartKit?.flatMap((item) => {
-					const serviceItemNumbers = Object.values(item.services ?? {}).filter(
-						(v): v is string => typeof v === "string" && v.trim().length > 0,
+					const serviceItems = (
+						Object.values(item.services ?? {}) as unknown[]
+					).filter(
+						(
+							v,
+						): v is {
+							itemNumber: string;
+							quantity?: number;
+						} => {
+							if (v == null || typeof v !== "object") return false;
+							const itemNumber = (v as { itemNumber?: unknown }).itemNumber;
+							return (
+								typeof itemNumber === "string" && itemNumber.trim().length > 0
+							);
+						},
 					);
 
 					return [
@@ -203,9 +216,9 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 							quantity: item.insert2.quantity || 1,
 							warehouseNumber: profile?.defaultWarehouseNumber || "",
 						},
-						...serviceItemNumbers.map((itemNumber) => ({
-							itemNumber,
-							quantity: 1,
+						...serviceItems.map((service) => ({
+							itemNumber: service.itemNumber,
+							quantity: service.quantity || 1,
 							warehouseNumber: profile?.defaultWarehouseNumber || "",
 						})),
 					];
