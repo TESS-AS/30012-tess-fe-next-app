@@ -41,6 +41,7 @@ export default function Main({ children }: { children?: ReactNode }) {
 				className={cn(
 					"overflow-x-hidden overflow-y-auto transition-all duration-300",
 					pathname?.includes("/profile") ? "bg-[#E8EAE9]" : "bg-background",
+					// When nav menu is open, blur background content and block interactions
 					isOpen && "pointer-events-none blur-xs",
 				)}
 				style={{ height: `calc(100vh - ${headerHeight}px)` }}>

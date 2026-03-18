@@ -3,7 +3,6 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu";
 import { cva } from "class-variance-authority";
-import { ChevronDownIcon } from "lucide-react";
 
 function NavigationMenu({
 	className,
@@ -75,11 +74,7 @@ function NavigationMenuTrigger({
 			data-slot="navigation-menu-trigger"
 			className={cn(navigationMenuTriggerStyle(), "group", className)}
 			{...props}>
-			{children}{" "}
-			<ChevronDownIcon
-				className="relative top-[1px] ml-1 size-3 transition duration-300 group-data-[state=open]:rotate-180"
-				aria-hidden="true"
-			/>
+			{children}
 		</NavigationMenuPrimitive.Trigger>
 	);
 }
@@ -108,12 +103,14 @@ function NavigationMenuViewport({
 	return (
 		<div
 			className={cn(
-				"absolute top-full left-0 isolate z-50 mt-[-15px] flex justify-center",
+				// Stretch viewport across full header width instead of centering it
+				"absolute top-full left-0 isolate z-50 mt-[-15px] flex w-full justify-start",
 			)}>
 			<NavigationMenuPrimitive.Viewport
 				data-slot="navigation-menu-viewport"
 				className={cn(
-					"origin-top-center bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 relative mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden shadow md:w-[var(--radix-navigation-menu-viewport-width)]",
+					// Fixed-height, full-width viewport; inner content scrolls when overflowing
+					"origin-top-center bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 relative mt-1.5 h-[520px] w-screen overflow-hidden",
 					className,
 				)}
 				{...props}

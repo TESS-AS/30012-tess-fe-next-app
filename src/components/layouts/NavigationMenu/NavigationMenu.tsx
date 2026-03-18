@@ -1,25 +1,20 @@
 "use client";
 
-import * as React from "react";
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import {
-	NavigationMenu,
-	NavigationMenuContent,
-	NavigationMenuItem,
-	NavigationMenuLink,
-	NavigationMenuList,
-	NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useIsBaneNorKatalog } from "@/hooks/useIsBaneNorKatalog";
-import { getCategoryImage } from "@/lib/category-utils";
 import { cn } from "@/lib/utils";
 import { useNavMenuStore } from "@/stores/useNavMenuStore";
 import type { Category } from "@/types/categories.types";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ClipboardList } from "lucide-react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+
+import { MAX_NAV_CATEGORIES } from "./constants";
+import { DropdownFooter } from "./DropdownFooter";
+import { NavLink } from "./NavLink";
+import { NavTrigger } from "./NavTrigger";
+import { Overlay } from "./Overlay";
+import { SubcategoryItem } from "./SubcategoryItem";
 
 export default function CategoryNavigationMenu({
 	categories,
@@ -30,157 +25,123 @@ export default function CategoryNavigationMenu({
 	loading: boolean;
 	selectedAssortment?: string;
 }) {
-	const t = useTranslations();
-	const [query, setQuery] = useState("");
-	const [openMenu, setOpenMenu] = useState<any>(false);
+	const [openMenu, setOpenMenu] = useState<string | false>(false);
 	const { setIsOpen } = useNavMenuStore();
-	const isBaneNorKatalog = useIsBaneNorKatalog(selectedAssortment);
+	const rootRef = useRef<HTMLElement | null>(null);
+
+	const closeMenu = useCallback(() => {
+		setOpenMenu(false);
+		setIsOpen(false);
+	}, [setIsOpen]);
+
+	const toggleMenu = useCallback(
+		(slug: string) => {
+			const next = openMenu === slug ? false : slug;
+			setOpenMenu(next);
+			setIsOpen(!!next);
+		},
+		[openMenu, setIsOpen],
+	);
+
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
+				closeMenu();
+			}
+		};
+
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.key === "Escape") closeMenu();
+		};
+
+		document.addEventListener("mousedown", handleClickOutside);
+		document.addEventListener("keydown", handleKeyDown);
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+			document.removeEventListener("keydown", handleKeyDown);
+		};
+	}, [closeMenu]);
+
+	const activeCategory = categories?.find((c) => c.slug === openMenu);
+	const visibleCategories = categories?.slice(0, MAX_NAV_CATEGORIES);
 
 	return (
-		<NavigationMenu
-			value={openMenu}
-			onValueChange={(val) => {
-				setOpenMenu(val);
-				setIsOpen(!!val);
-			}}
-			className="container hidden w-full justify-between md:flex">
-			<NavigationMenuList className="container flex w-full max-w-full justify-center gap-2 px-0">
-				{loading
-					? Array.from({ length: 7 }).map((_, i) => (
-							<NavigationMenuItem key={i}>
-								<Skeleton className="h-8 w-24 rounded-md" />
-							</NavigationMenuItem>
-						))
-					: categories?.slice(0, 7).map((category) => (
-							<NavigationMenuItem
-								key={category.slug}
-								value={category.slug}>
-								{category.subcategories?.length ? (
-									<>
-										<NavigationMenuTrigger
-											onClick={(e) => {
-												e.preventDefault();
-												window.location.href = `/${category.slug}`;
-											}}
-											className={cn(
-												"flex items-center gap-1 px-4 py-2 text-sm font-medium transition-all duration-300 ease-out",
-												"border-b-2 border-transparent hover:border-emerald-500",
-												"hover:bg-red rounded-none",
-											)}>
-											{category.name}
-										</NavigationMenuTrigger>
-										<NavigationMenuContent>
-											<ul className="xs:columns-2 container min-h-[500px] min-w-[calc(100vw-200px)] gap-x-1 overflow-y-scroll p-2 sm:columns-3 md:columns-4">
-												{category.subcategories.map((subcategory) => {
-													const subcategoryImage = getCategoryImage(subcategory);
-													return (
-														<li
-															key={subcategory.slug}
-															className="mb-8 break-inside-avoid">
-															<div className="relative mb-2">
-																{subcategoryImage && (
-																	<img
-																		src={subcategoryImage}
-																		alt={subcategory.name}
-																		className="absolute top-0 left-5 h-15 w-15 object-contain"
-																	/>
-																)}
-																<div
-																	className={`text-md font-bold ${subcategoryImage ? "pl-24" : ""}`}>
-																	<Link
-																		onClick={() => setOpenMenu(false)}
-																		href={`/${category.slug}/${subcategory.slug}`}
-																		className="hover:underline">
-																		{subcategory.name}
-																	</Link>
-																</div>
-															</div>
-															{Array.isArray(subcategory.subcategories) &&
-																subcategory.subcategories && (
-																	<ul
-																		className={`space-y-1 ${subcategoryImage ? "pl-24" : ""}`}>
-																	{subcategory.subcategories.map((child) => (
-																		<li key={child.slug}>
-																			<Link
-																				onClick={() => setOpenMenu(false)}
-																				href={`/${category.slug}/${subcategory.slug}/${child.slug}`}
-																				className="hover:text-foreground text-md font-medium text-gray-700 transition-colors">
-																				{child.name}
-																			</Link>
-																		</li>
-																	))}
-
-																	{!isBaneNorKatalog && (
-																		<li>
-																			<Link
-																				onClick={() => setOpenMenu(false)}
-																				href={`/${category.slug}/${subcategory.slug}`}
-																				className="text-md border-b-1 border-[#009640] pb-[1px] font-medium text-[#009640] hover:text-[#009640]">
-																				{`Alle ${subcategory.name}`}
-																			</Link>
-																		</li>
-																	)}
-																</ul>
-															)}
-														</li>
-													);
-												})}
-											</ul>
-										</NavigationMenuContent>
-									</>
-								) : (
-									<NavigationMenuLink asChild>
-										<Link
-											href={`/${category.slug}`}
-											className="hover:bg-accent hover:text-accent-foreground text-md block rounded-md px-4 py-2 font-medium transition-colors">
-											{category.name}
-										</Link>
-									</NavigationMenuLink>
-								)}
-							</NavigationMenuItem>
-						))}
+		<nav
+			ref={rootRef}
+			className="container relative mx-auto hidden w-full justify-between md:flex"
+		>
+			<ul className="flex w-full list-none items-center justify-between">
 				{!loading && categories?.length > 0 && (
-					<NavigationMenuItem className="flex items-center">
-						<NavigationMenuLink
-							asChild
-							className="hover:!bg-transparent focus:!bg-transparent">
-							<div className="flex flex-shrink-0 flex-nowrap items-center overflow-hidden text-ellipsis whitespace-nowrap">
-								<Link
-									href="/alle-kategorier"
-									className="text-foreground hover:text-foreground group flex items-center gap-2 rounded-none border-b-2 border-transparent bg-transparent px-4 py-2 text-sm font-medium transition-all duration-300 ease-out hover:border-emerald-500 hover:bg-transparent focus:bg-transparent">
-									{t("Category.viewAll")}
-									<ChevronRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5" />
-								</Link>
-							</div>
-						</NavigationMenuLink>
-					</NavigationMenuItem>
+					<li className="relative flex items-center">
+						<Link
+							href="/alle-kategorier"
+							className={cn(
+								"group text-foreground flex items-center gap-1 border-b-2 border-transparent",
+								"bg-transparent py-2 pr-4 pl-0 text-sm font-medium",
+								"transition-all duration-150 ease-out",
+								"hover:border-b-4 hover:border-[#009640] hover:font-extrabold hover:text-[#009640]",
+								"focus:bg-transparent",
+							)}
+						>
+							<ClipboardList className="h-3.5 w-3.5" />
+							Alle kategorier
+							<ChevronRight className="ml-1 h-3 w-3 stroke-[3] transition-transform duration-150 group-hover:translate-x-0.5" />
+						</Link>
+					</li>
 				)}
-			</NavigationMenuList>
-		</NavigationMenu>
+
+				{loading
+					? Array.from({ length: MAX_NAV_CATEGORIES }).map((_, i) => (
+							<li key={i} className="relative">
+								<Skeleton className="h-8 w-24 rounded-md" />
+							</li>
+						))
+					: visibleCategories?.map((category, index, arr) => {
+							const isLast = index === arr.length - 1;
+							return (
+								<li key={category.slug} className="relative">
+									{category.subcategories?.length ? (
+										<NavTrigger
+											category={category}
+											isActive={openMenu === category.slug}
+											isLast={isLast}
+											onToggle={() => toggleMenu(category.slug)}
+										/>
+									) : (
+										<NavLink category={category} isLast={isLast} />
+									)}
+								</li>
+							);
+						})}
+			</ul>
+
+			{openMenu && activeCategory?.subcategories?.length && (
+				<>
+					<Overlay navRef={rootRef} onClose={closeMenu} />
+					<div
+						className="fixed right-0 left-0 z-50"
+						style={{
+							top: rootRef.current
+								? `${rootRef.current.getBoundingClientRect().bottom}px`
+								: undefined,
+						}}
+					>
+						<div className="bg-popover text-popover-foreground flex min-h-[560px] max-h-[80vh] w-full flex-col overflow-y-auto animate-in fade-in zoom-in-90 duration-200">
+							<ul className="container mx-auto grid flex-1 grid-cols-1 items-start justify-items-start gap-x-6 gap-y-8 px-0 pt-12 pb-4 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
+								{activeCategory.subcategories.map((subcategory) => (
+									<SubcategoryItem
+										key={subcategory.slug}
+										subcategory={subcategory}
+										parentSlug={activeCategory.slug}
+										onClose={closeMenu}
+									/>
+								))}
+							</ul>
+							<DropdownFooter category={activeCategory} onClose={closeMenu} />
+						</div>
+					</div>
+				</>
+			)}
+		</nav>
 	);
 }
-
-const ListItem = React.forwardRef<
-	React.ElementRef<"a">,
-	React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, ...props }, ref) => {
-	return (
-		<li>
-			<NavigationMenuLink asChild>
-				<a
-					ref={ref}
-					className={cn(
-						"hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground block space-y-1 rounded-md p-3 leading-none no-underline transition-colors outline-none select-none",
-						className,
-					)}
-					{...props}>
-					<div className="text-sm leading-none font-medium">{title}</div>
-					<p className="text-muted-foreground text-md line-clamp-2 leading-snug">
-						{children}
-					</p>
-				</a>
-			</NavigationMenuLink>
-		</li>
-	);
-});
-ListItem.displayName = "ListItem";
