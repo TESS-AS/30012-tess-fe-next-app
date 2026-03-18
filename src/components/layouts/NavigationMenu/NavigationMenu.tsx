@@ -3,11 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 import { useNavMenuStore } from "@/stores/useNavMenuStore";
 import type { Category } from "@/types/categories.types";
-import { ChevronRight, ClipboardList } from "lucide-react";
-import Link from "next/link";
 
 import { MAX_NAV_CATEGORIES } from "./constants";
 import { DropdownFooter } from "./DropdownFooter";
@@ -71,25 +68,6 @@ export default function CategoryNavigationMenu({
 			className="container relative mx-auto hidden w-full justify-between md:flex"
 		>
 			<ul className="flex w-full list-none items-center justify-between">
-				{!loading && categories?.length > 0 && (
-					<li className="relative flex items-center">
-						<Link
-							href="/alle-kategorier"
-							className={cn(
-								"group text-foreground flex items-center gap-1 border-b-2 border-transparent",
-								"bg-transparent py-2 pr-4 pl-0 text-sm font-medium",
-								"transition-all duration-150 ease-out",
-								"hover:border-b-4 hover:border-[#009640] hover:font-extrabold hover:text-[#009640]",
-								"focus:bg-transparent",
-							)}
-						>
-							<ClipboardList className="h-3.5 w-3.5" />
-							Alle kategorier
-							<ChevronRight className="ml-1 h-3 w-3 stroke-[3] transition-transform duration-150 group-hover:translate-x-0.5" />
-						</Link>
-					</li>
-				)}
-
 				{loading
 					? Array.from({ length: MAX_NAV_CATEGORIES }).map((_, i) => (
 							<li key={i} className="relative">
