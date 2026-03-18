@@ -33,10 +33,7 @@ export function SubcategoryItem({
 					<Link
 						onClick={onClose}
 						href={`/${parentSlug}/${subcategory.slug}`}
-						className={cn(
-							"text-md hover:underline",
-							hasChildren ? "font-bold" : "font-medium text-gray-700",
-						)}
+						className="text-md font-bold hover:underline"
 					>
 						{subcategory.name}
 					</Link>
