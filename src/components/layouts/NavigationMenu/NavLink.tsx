@@ -13,7 +13,10 @@ export function NavLink({
 		<Link
 			href={`/${category.slug}`}
 			className={cn(
-				"hover:bg-accent hover:text-accent-foreground text-md block rounded-md px-4 py-2 font-medium transition-colors",
+				"inline-flex h-9 w-max items-center justify-center gap-1 rounded-none px-4 py-2 text-sm font-medium",
+				"border-b-2 border-transparent transition-all duration-150 ease-out",
+				"hover:border-b-4 hover:border-[#009640] hover:font-extrabold hover:text-[#009640]",
+				"outline-none focus-visible:ring-0 focus-visible:outline-none",
 				isLast && "pr-0",
 			)}
 		>

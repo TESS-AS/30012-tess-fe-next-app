@@ -15,6 +15,8 @@ export function SubcategoryItem({
 	onClose: () => void;
 }) {
 	const image = getCategoryImage(subcategory);
+	const hasChildren =
+		Array.isArray(subcategory.subcategories) && subcategory.subcategories.length > 0;
 	const indentClass = "pl-16";
 
 	return (
@@ -31,28 +33,32 @@ export function SubcategoryItem({
 					<Link
 						onClick={onClose}
 						href={`/${parentSlug}/${subcategory.slug}`}
-						className="text-md font-bold hover:underline">
+						className={cn(
+							"text-md hover:underline",
+							hasChildren ? "font-bold" : "font-medium text-gray-700",
+						)}
+					>
 						{subcategory.name}
 					</Link>
 				</div>
 			</div>
-			{Array.isArray(subcategory.subcategories) &&
-				subcategory.subcategories.length > 0 && (
-					<ul className={cn("space-y-1", indentClass)}>
-						{subcategory.subcategories
-							.slice(0, MAX_SUBCATEGORY_CHILDREN)
-							.map((child) => (
-								<li key={child.slug}>
-									<Link
-										onClick={onClose}
-										href={`/${parentSlug}/${subcategory.slug}/${child.slug}`}
-										className="hover:text-foreground text-md font-medium text-gray-700 transition-colors">
-										{child.name}
-									</Link>
-								</li>
-							))}
-					</ul>
-				)}
+			{hasChildren && (
+				<ul className={cn("space-y-1", indentClass)}>
+					{subcategory.subcategories!
+						.slice(0, MAX_SUBCATEGORY_CHILDREN)
+						.map((child) => (
+							<li key={child.slug}>
+								<Link
+									onClick={onClose}
+									href={`/${parentSlug}/${subcategory.slug}/${child.slug}`}
+									className="hover:text-foreground text-md font-medium text-gray-700 transition-colors"
+								>
+									{child.name}
+								</Link>
+							</li>
+						))}
+				</ul>
+			)}
 		</li>
 	);
 }
