@@ -33,8 +33,13 @@ export default function StepConfirmation({
 	handleContactPersonSave,
 }: any) {
 	const t = useTranslations("Checkout.confirmation");
-	const { cartItems, calculatedPrices, setUpdatedAddress, prices } =
-		useAppContext();
+	const {
+		cartItems,
+		calculatedPrices,
+		setUpdatedAddress,
+		cartKitTotals,
+		getCalculatedPrice,
+	} = useAppContext();
 
 	const [expandedItems, setExpandedItems] = useState<{
 		[key: string]: boolean;
@@ -177,32 +182,9 @@ export default function StepConfirmation({
 											<div className="flex items-center gap-6">
 												<div className="flex items-center gap-6">
 													<span className="font-semibold">
-														{(() => {
-															const servicesTotal = Object.values(
-																item.services ?? {},
-															)
-																.filter(
-																	(v): v is string =>
-																		typeof v === "string" &&
-																		v.trim().length > 0,
-																)
-																.reduce(
-																	(sum, itemNumber) =>
-																		sum + (calculatedPrices[itemNumber] ?? 0),
-																	0,
-																);
-
-															const total = [
-																calculatedPrices[item.hose.itemNumber] ?? 0,
-																calculatedPrices[item.ferrule1.itemNumber] ?? 0,
-																calculatedPrices[item.ferrule2.itemNumber] ?? 0,
-																calculatedPrices[item.insert1.itemNumber] ?? 0,
-																calculatedPrices[item.insert2.itemNumber] ?? 0,
-															].reduce((sum, price) => sum + price, 0);
-															return formatNorwegianCurrency(
-																total + servicesTotal,
-															);
-														})()}
+														{formatNorwegianCurrency(
+															cartKitTotals?.[item.hexagonId] ?? 0,
+														)}
 													</span>
 												</div>
 											</div>
@@ -223,8 +205,10 @@ export default function StepConfirmation({
 															</div>
 															<p className="font-bold">
 																{formatNorwegianCurrency(
-																	(prices[item.hose.itemNumber] ?? 0) *
-																		(item.hose.quantity || 1),
+																	getCalculatedPrice(
+																		item.hose.itemNumber,
+																		item.hose.quantity || 1,
+																	),
 																)}
 															</p>
 														</div>
@@ -240,8 +224,10 @@ export default function StepConfirmation({
 
 															<p className="font-bold">
 																{formatNorwegianCurrency(
-																	(prices[item.ferrule1.itemNumber] ?? 0) *
-																		(item.hose.quantity || 1),
+																	getCalculatedPrice(
+																		item.ferrule1.itemNumber,
+																		item.ferrule1.quantity || 1,
+																	),
 																)}
 															</p>
 														</div>
@@ -256,8 +242,10 @@ export default function StepConfirmation({
 															</div>
 															<p className="font-bold">
 																{formatNorwegianCurrency(
-																	(prices[item.ferrule2.itemNumber] ?? 0) *
-																		(item.hose.quantity || 1),
+																	getCalculatedPrice(
+																		item.ferrule2.itemNumber,
+																		item.ferrule2.quantity || 1,
+																	),
 																)}
 															</p>
 														</div>
@@ -272,8 +260,10 @@ export default function StepConfirmation({
 															</div>
 															<p className="font-bold">
 																{formatNorwegianCurrency(
-																	(prices[item.insert1.itemNumber] ?? 0) *
-																		(item.hose.quantity || 1),
+																	getCalculatedPrice(
+																		item.insert1.itemNumber,
+																		item.insert1.quantity || 1,
+																	),
 																)}
 															</p>
 														</div>
@@ -288,33 +278,57 @@ export default function StepConfirmation({
 															</div>
 															<p className="font-bold">
 																{formatNorwegianCurrency(
-																	(prices[item.insert2.itemNumber] ?? 0) *
-																		(item.hose.quantity || 1),
+																	getCalculatedPrice(
+																		item.insert2.itemNumber,
+																		item.insert2.quantity || 1,
+																	),
 																)}
 															</p>
 														</div>
 													</div>
-													{Object.values(item.services ?? {}).some(
-														(v) => typeof v === "string" && v.trim().length > 0,
-													) && (
+													{(
+														Object.values(item.services ?? {}) as unknown[]
+													).some((v) => {
+														if (v == null || typeof v !== "object")
+															return false;
+														const itemNumber = (v as { itemNumber?: unknown })
+															.itemNumber;
+														return (
+															typeof itemNumber === "string" &&
+															itemNumber.trim().length > 0
+														);
+													}) && (
 														<div className="space-y-4 pl-8">
 															{Object.entries(item.services ?? {})
-																.filter(
-																	([, v]) =>
-																		typeof v === "string" &&
-																		v.trim().length > 0,
-																)
-																.map(([key, itemNumber]) => {
+																.filter(([, v]) => {
+																	if (v == null || typeof v !== "object")
+																		return false;
+																	const itemNumber = (
+																		v as { itemNumber?: unknown }
+																	).itemNumber;
+																	return (
+																		typeof itemNumber === "string" &&
+																		itemNumber.trim().length > 0
+																	);
+																})
+																.map(([key, service]) => {
+																	const typedService = service as {
+																		itemNumber?: string;
+																		quantity?: number;
+																	};
+																	const itemNumber =
+																		typedService.itemNumber ?? "";
+																	const quantity = typedService.quantity || 1;
 																	const label = key
 																		.replace(/([a-z])([A-Z])/g, "$1 $2")
 																		.replace(/_/g, " ")
 																		.replace(/\s+/g, " ")
 																		.trim();
 
-																	const price =
-																		(prices[itemNumber] ??
-																			calculatedPrices[itemNumber] ??
-																			0) * (item.hose.quantity || 1);
+																	const price = getCalculatedPrice(
+																		itemNumber,
+																		quantity,
+																	);
 
 																	return (
 																		<div

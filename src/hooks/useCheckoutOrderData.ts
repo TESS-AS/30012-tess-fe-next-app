@@ -97,8 +97,21 @@ export function useCheckoutOrderData(
 					},
 				];
 
-				const serviceItemNumbers = Object.values(kitItem.services ?? {}).filter(
-					(v): v is string => typeof v === "string" && v.trim().length > 0,
+				const serviceItems = (
+					Object.values(kitItem.services ?? {}) as unknown[]
+				).filter(
+					(
+						v,
+					): v is {
+						itemNumber: string;
+						quantity?: number;
+					} => {
+						if (v == null || typeof v !== "object") return false;
+						const itemNumber = (v as { itemNumber?: unknown }).itemNumber;
+						return (
+							typeof itemNumber === "string" && itemNumber.trim().length > 0
+						);
+					},
 				);
 
 				const kitLines = kitComponents.map((component) => ({
@@ -115,13 +128,13 @@ export function useCheckoutOrderData(
 					text: `${kitItem.hexagonId};${kitItem.hose.itemDescription}`,
 				}));
 
-				const serviceLines = serviceItemNumbers.map((itemNumber) => ({
+				const serviceLines = serviceItems.map((service) => ({
 					customerOrderLine: lineCounter++,
 					warehouseNumber: warehouseNumber,
 					orderType: "S2",
-					itemCode: itemNumber,
-					orderedQuantity: 1,
-					salesPrice: unitPrices[itemNumber] || 0,
+					itemCode: service.itemNumber,
+					orderedQuantity: service.quantity || 1,
+					salesPrice: unitPrices[service.itemNumber] || 0,
 					requestedDeliveryDate,
 					accountPart3: "",
 					accountPart4: String(userId || ""),
