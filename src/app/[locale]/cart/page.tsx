@@ -631,11 +631,17 @@ const CartPage = () => {
 																	[item.hexagonId]: true,
 																}));
 																try {
-																	await updateQuantity(
-																		item.cartLine ?? 0,
-																		item.hexagonId,
-																		item.ferrule1.quantity + 1,
-																	);
+																	await postCartKit([
+																		{
+																			hexagonId: Number(item.hexagonId),
+																			quantity: 1,
+																			warehouseNumber:
+																				profile?.defaultWarehouseNumber,
+																			companyNumber:
+																				profile?.defaultCompanyNumber,
+																		},
+																	]);
+																	setIsCartChanging((v) => !v);
 																} finally {
 																	setLoadingItems((prev) => ({
 																		...prev,
@@ -650,11 +656,17 @@ const CartPage = () => {
 																	[item.hexagonId]: true,
 																}));
 																try {
-																	await updateQuantity(
-																		item.cartLine ?? 0,
-																		item.hexagonId,
-																		item.ferrule1.quantity - 1,
-																	);
+																	await postCartKit([
+																		{
+																			hexagonId: Number(item.hexagonId),
+																			quantity: -1,
+																			warehouseNumber:
+																				profile?.defaultWarehouseNumber,
+																			companyNumber:
+																				profile?.defaultCompanyNumber,
+																		},
+																	]);
+																	setIsCartChanging((v) => !v);
 																} finally {
 																	setLoadingItems((prev) => ({
 																		...prev,

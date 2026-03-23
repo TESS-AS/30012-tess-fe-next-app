@@ -177,6 +177,30 @@ export default function OrderSummary({
 						lines.push({ itemNumber: c.itemNumber, quantity: c.quantity });
 					}
 				}
+
+				const serviceItems = (
+					Object.values(kit.services ?? {}) as unknown[]
+				).filter(
+					(
+						v,
+					): v is {
+						itemNumber: string;
+						quantity?: number;
+					} => {
+						if (v == null || typeof v !== "object") return false;
+						const itemNumber = (v as { itemNumber?: unknown }).itemNumber;
+						return (
+							typeof itemNumber === "string" && itemNumber.trim().length > 0
+						);
+					},
+				);
+
+				for (const s of serviceItems) {
+					lines.push({
+						itemNumber: s.itemNumber,
+						quantity: s.quantity || 1,
+					});
+				}
 				return lines;
 			});
 
