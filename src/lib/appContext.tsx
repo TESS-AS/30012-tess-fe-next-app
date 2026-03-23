@@ -42,6 +42,7 @@ interface AppContextType {
 	calculatedPrices: Record<string, number>;
 	unitPrices: Record<string, number>;
 	cartKitTotals: Record<string, number>;
+	getCalculatedPrice: (itemNumber: string, quantity: number) => number;
 	isLoading: boolean;
 
 	updateQuantity: (
@@ -101,6 +102,9 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const [cartItems, setCartItems] = useState<CartKitResponse>();
 	const [prices, setPrices] = useState<Record<string, number>>({});
 	const [calculatedPrices, setCalculatedPrices] = useState<
+		Record<string, number>
+	>({});
+	const [calculatedPricesByQuantity, setCalculatedPricesByQuantity] = useState<
 		Record<string, number>
 	>({});
 	const [unitPrices, setUnitPrices] = useState<Record<string, number>>({});
@@ -235,12 +239,15 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 				const initialPrices: Record<string, number> = {};
 				const calculatedPrices: Record<string, number> = {};
+				const calculatedByQty: Record<string, number> = {};
 
 				const unitPricesMap: Record<string, number> = {};
 
 				for (const item of priceResults) {
 					initialPrices[item.itemNumber] = item.basePriceTotal || 0;
 					calculatedPrices[item.itemNumber] = item.bestPrice || 0;
+					calculatedByQty[`${item.itemNumber}:${item.quantity}`] =
+						item.bestPrice || 0;
 
 					const unitPrice =
 						item.quantity > 0
@@ -256,6 +263,10 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				setCalculatedPrices((prev) => ({
 					...prev,
 					...calculatedPrices,
+				}));
+				setCalculatedPricesByQuantity((prev) => ({
+					...prev,
+					...calculatedByQty,
 				}));
 				setUnitPrices((prev) => {
 					return {
@@ -301,14 +312,25 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 							quantity: k.insert2.quantity || 1,
 							warehouseNumber: profile?.defaultWarehouseNumber || "",
 						},
-						...Object.values(k.services ?? {})
+						...(Object.values(k.services ?? {}) as unknown[])
 							.filter(
-								(v): v is string =>
-									typeof v === "string" && v.trim().length > 0,
+								(
+									v,
+								): v is {
+									itemNumber: string;
+									quantity?: number;
+								} => {
+									if (v == null || typeof v !== "object") return false;
+									const itemNumber = (v as { itemNumber?: unknown }).itemNumber;
+									return (
+										typeof itemNumber === "string" &&
+										itemNumber.trim().length > 0
+									);
+								},
 							)
-							.map((itemNumber) => ({
-								itemNumber,
-								quantity: 1,
+							.map((service) => ({
+								itemNumber: service.itemNumber,
+								quantity: service.quantity || 1,
 								warehouseNumber: profile?.defaultWarehouseNumber || "",
 							})),
 					]),
@@ -342,6 +364,14 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 						}
 						setPrices((prev) => ({ ...prev, ...fallbackInitial }));
 						setCalculatedPrices((prev) => ({ ...prev, ...fallbackCalculated }));
+						setCalculatedPricesByQuantity((prev) => {
+							const next = { ...prev };
+							for (const item of fallbackResults) {
+								next[`${item.itemNumber}:${item.quantity}`] =
+									item.bestPrice || 0;
+							}
+							return next;
+						});
 						setUnitPrices((prev) => ({ ...prev, ...fallbackUnitPrices }));
 					} catch (e) {
 						console.warn("Fallback batch pricing failed", e);
@@ -387,6 +417,14 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		if (profile) loadCartData();
 	}, [profile, isCartChanging]);
 
+	const getCalculatedPrice = (itemNumber: string, quantity: number) => {
+		return (
+			calculatedPricesByQuantity[`${itemNumber}:${quantity}`] ??
+			calculatedPrices[itemNumber] ??
+			0
+		);
+	};
+
 	const totalPrice = useMemo(() => {
 		const regularTotal = (cartItems?.cart ?? []).reduce((sum, line) => {
 			const unit = calculatedPrices[line.itemNumber] ?? 0;
@@ -394,24 +432,44 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		}, 0);
 
 		const kitsTotal = (cartItems?.cartKit ?? []).reduce((sum, kit) => {
-			// we may need these quantities when we implement quantity buttons to send to BE for ferrule 1&2 and insert 1&2 because HOSEQTY is calculated in BE
-			const hoseQty = kit.hose?.quantity;
-			const ferrule1Qty = kit.ferrule1?.quantity ?? 1;
-			const ferrule2Qty = kit.ferrule2?.quantity ?? 1;
-			const insert1Qty = kit.insert1?.quantity ?? 1;
-			const insert2Qty = kit.insert2?.quantity ?? 1;
-
-			const hose = calculatedPrices[kit.hose.itemNumber] ?? 0;
-			const ferrule1 = calculatedPrices[kit.ferrule1.itemNumber] ?? 0;
-			const ferrule2 = calculatedPrices[kit.ferrule2.itemNumber] ?? 0;
-			const insert1 = calculatedPrices[kit.insert1.itemNumber] ?? 0;
-			const insert2 = calculatedPrices[kit.insert2.itemNumber] ?? 0;
-			const servicesTotal = Object.values(kit.services ?? {})
+			const hose = getCalculatedPrice(
+				kit.hose.itemNumber,
+				kit.hose.quantity || 1,
+			);
+			const ferrule1 = getCalculatedPrice(
+				kit.ferrule1.itemNumber,
+				kit.ferrule1.quantity || 1,
+			);
+			const ferrule2 = getCalculatedPrice(
+				kit.ferrule2.itemNumber,
+				kit.ferrule2.quantity || 1,
+			);
+			const insert1 = getCalculatedPrice(
+				kit.insert1.itemNumber,
+				kit.insert1.quantity || 1,
+			);
+			const insert2 = getCalculatedPrice(
+				kit.insert2.itemNumber,
+				kit.insert2.quantity || 1,
+			);
+			const servicesTotal = (Object.values(kit.services ?? {}) as unknown[])
 				.filter(
-					(v): v is string => typeof v === "string" && v.trim().length > 0,
+					(
+						v,
+					): v is {
+						itemNumber: string;
+						quantity?: number;
+					} => {
+						if (v == null || typeof v !== "object") return false;
+						const itemNumber = (v as { itemNumber?: unknown }).itemNumber;
+						return (
+							typeof itemNumber === "string" && itemNumber.trim().length > 0
+						);
+					},
 				)
 				.reduce(
-					(acc, itemNumber) => acc + (calculatedPrices[itemNumber] ?? 0),
+					(acc, service) =>
+						acc + getCalculatedPrice(service.itemNumber, service.quantity || 1),
 					0,
 				);
 			return (
@@ -420,7 +478,12 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		}, 0);
 
 		return regularTotal + kitsTotal;
-	}, [cartItems?.cart, cartItems?.cartKit, calculatedPrices]);
+	}, [
+		cartItems?.cart,
+		cartItems?.cartKit,
+		calculatedPrices,
+		calculatedPricesByQuantity,
+	]);
 
 	const surChargeTotalPrice = useMemo(
 		() => Object.values(surChargePrices).reduce((sum, v) => sum + v, 0),
@@ -448,19 +511,47 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			const insert1Qty = kit.insert1?.quantity ?? 1;
 			const insert2Qty = kit.insert2?.quantity ?? 1;
 
-			const hosePrice = calculatedPrices[kit.hose?.itemNumber] ?? 0;
-			const ferrule1Price = calculatedPrices[kit.ferrule1?.itemNumber] ?? 0;
-			const ferrule2Price = calculatedPrices[kit.ferrule2?.itemNumber] ?? 0;
-			const insert1Price = calculatedPrices[kit.insert1?.itemNumber] ?? 0;
-			const insert2Price = calculatedPrices[kit.insert2?.itemNumber] ?? 0;
-			const servicesTotal = Object.values(kit.services ?? {})
-				.filter(
-					(v): v is string => typeof v === "string" && v.trim().length > 0,
-				)
-				.reduce(
-					(acc, itemNumber) => acc + (calculatedPrices[itemNumber] ?? 0),
-					0,
-				);
+			const hosePrice = kit.hose?.itemNumber
+				? getCalculatedPrice(kit.hose.itemNumber, kit.hose.quantity || 1)
+				: 0;
+			const ferrule1Price = kit.ferrule1?.itemNumber
+				? getCalculatedPrice(
+						kit.ferrule1.itemNumber,
+						kit.ferrule1.quantity || 1,
+					)
+				: 0;
+			const ferrule2Price = kit.ferrule2?.itemNumber
+				? getCalculatedPrice(
+						kit.ferrule2.itemNumber,
+						kit.ferrule2.quantity || 1,
+					)
+				: 0;
+			const insert1Price = kit.insert1?.itemNumber
+				? getCalculatedPrice(kit.insert1.itemNumber, kit.insert1.quantity || 1)
+				: 0;
+			const insert2Price = kit.insert2?.itemNumber
+				? getCalculatedPrice(kit.insert2.itemNumber, kit.insert2.quantity || 1)
+				: 0;
+			const serviceItems = (
+				Object.values(kit.services ?? {}) as unknown[]
+			).filter(
+				(
+					v,
+				): v is {
+					itemNumber: string;
+					quantity?: number;
+				} => {
+					if (v == null || typeof v !== "object") return false;
+					const itemNumber = (v as { itemNumber?: unknown }).itemNumber;
+					return typeof itemNumber === "string" && itemNumber.trim().length > 0;
+				},
+			);
+
+			const servicesTotal = serviceItems.reduce(
+				(acc, service) =>
+					acc + getCalculatedPrice(service.itemNumber, service.quantity || 1),
+				0,
+			);
 
 			totals[kit.hexagonId] =
 				hosePrice +
@@ -469,10 +560,48 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				insert1Price +
 				insert2Price +
 				servicesTotal;
+
+			if (process.env.NODE_ENV !== "production") {
+				console.log("[cartKitTotals] kit", {
+					hexagonId: kit.hexagonId,
+					hose: {
+						itemNumber: kit.hose?.itemNumber,
+						quantity: hoseQty,
+						price: hosePrice,
+					},
+					ferrule1: {
+						itemNumber: kit.ferrule1?.itemNumber,
+						quantity: ferrule1Qty,
+						price: ferrule1Price,
+					},
+					ferrule2: {
+						itemNumber: kit.ferrule2?.itemNumber,
+						quantity: ferrule2Qty,
+						price: ferrule2Price,
+					},
+					insert1: {
+						itemNumber: kit.insert1?.itemNumber,
+						quantity: insert1Qty,
+						price: insert1Price,
+					},
+					insert2: {
+						itemNumber: kit.insert2?.itemNumber,
+						quantity: insert2Qty,
+						price: insert2Price,
+					},
+					services: serviceItems.map((s) => ({
+						itemNumber: s.itemNumber,
+						quantity: s.quantity,
+						price: calculatedPrices[s.itemNumber] ?? 0,
+					})),
+					servicesTotal,
+					total: totals[kit.hexagonId],
+				});
+			}
 		}
 
 		return totals;
-	}, [cartItems?.cartKit, calculatedPrices]);
+	}, [cartItems?.cartKit, calculatedPrices, calculatedPricesByQuantity]);
 
 	const updateQuantity = async (
 		cartLine: number,
@@ -534,9 +663,21 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				kitBackup.ferrule2.itemNumber,
 				kitBackup.insert1.itemNumber,
 				kitBackup.insert2.itemNumber,
-				...Object.values(kitBackup.services ?? {}).filter(
-					(v): v is string => typeof v === "string" && v.trim().length > 0,
-				),
+				...(Object.values(kitBackup.services ?? {}) as unknown[])
+					.filter(
+						(
+							v,
+						): v is {
+							itemNumber: string;
+						} => {
+							if (v == null || typeof v !== "object") return false;
+							const itemNumber = (v as { itemNumber?: unknown }).itemNumber;
+							return (
+								typeof itemNumber === "string" && itemNumber.trim().length > 0
+							);
+						},
+					)
+					.map((s) => s.itemNumber),
 			];
 
 			setCartItems((prev) => {
@@ -697,6 +838,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				calculatedPrices,
 				unitPrices,
 				cartKitTotals,
+				getCalculatedPrice,
 				isLoading,
 
 				updateQuantity,
