@@ -41,6 +41,12 @@ export default function AuthDialog({
 	// Close dialog when user is logged in (profile from backend /user)
 	useEffect(() => {
 		if (isOpen && profile) {
+			try {
+				localStorage.setItem("hosesAndEquipments_page", "1");
+			} catch {
+				// ignore
+			}
+
 			closeDialog();
 			setTimeout(() => {
 				router.push("/");
