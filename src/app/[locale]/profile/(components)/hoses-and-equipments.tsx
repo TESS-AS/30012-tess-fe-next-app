@@ -1143,6 +1143,7 @@ export function HosesAndEquipments({
 									onClick={async () => {
 										setCartModalOpen(true);
 										await handleBulkAction("cart");
+										localStorage.removeItem("selectedHoseRows");
 									}}
 									disabled={isAddingToCart}
 									className="h-9 bg-[#009640] px-4 text-sm font-medium text-white hover:bg-[#003D1A]">

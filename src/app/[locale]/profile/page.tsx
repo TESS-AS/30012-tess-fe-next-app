@@ -139,7 +139,11 @@ export default function ProfilePage() {
 	const [activeMode, setActiveMode] = useState<"hose" | "ehandel" | "tess-edi">(
 		"ehandel",
 	);
-	const [activeTab, setActiveTab] = useState("rekvisisjoner");
+	const [activeTab, setActiveTab] = useState(
+		profile?.role === "admin" || profile?.role === "superuser"
+			? "rekvisisjoner"
+			: "settings",
+	);
 	const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 	const [supportOpen, setSupportOpen] = useState(false);
 	const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -168,7 +172,11 @@ export default function ProfilePage() {
 			setActiveTab("hose-orders");
 		} else {
 			setActiveMode("ehandel");
-			setActiveTab("rekvisisjoner");
+			setActiveTab(
+				profile?.role === "admin" || profile?.role === "superuser"
+					? "rekvisisjoner"
+					: "settings",
+			);
 		}
 	}, [profile]);
 
@@ -457,25 +465,30 @@ export default function ProfilePage() {
 							items={
 								activeMode === "ehandel"
 									? [
-											{
-												href: "#",
-												label: t("ProfilePage.sidebar.orders"),
-												icon: ShoppingCart,
-												subitems: [
-													// {
-													// 	href: "mine-bestillinger",
-													// 	label: t("ProfilePage.sidebar.myOrders"),
-													// },
-													{
-														href: "rekvisisjoner",
-														label: t("ProfilePage.sidebar.requisitions"),
-													},
-													// {
-													// 	href: "ordrehistorikk",
-													// 	label: t("ProfilePage.sidebar.orderHistory"),
-													// },
-												],
-											},
+											...(profile.role === "admin" ||
+											profile.role === "superuser"
+												? [
+														{
+															href: "#",
+															label: t("ProfilePage.sidebar.orders"),
+															icon: ShoppingCart,
+															subitems: [
+																// {
+																// 	href: "mine-bestillinger",
+																// 	label: t("ProfilePage.sidebar.myOrders"),
+																// },
+																{
+																	href: "rekvisisjoner",
+																	label: t("ProfilePage.sidebar.requisitions"),
+																},
+																// {
+																// 	href: "ordrehistorikk",
+																// 	label: t("ProfilePage.sidebar.orderHistory"),
+																// },
+															],
+														},
+													]
+												: []),
 											// {
 											// 	href: "dimensions",
 											// 	label: t("ProfilePage.sidebar.dimensions"),
@@ -723,7 +736,7 @@ export default function ProfilePage() {
 						<h2 className="text-xl font-semibold text-[#0F1912]">
 							{t("ProfilePage.unsavedChanges.title")}
 						</h2>
-						<p className="text-sm font-bold leading-snug text-gray-500">
+						<p className="text-sm leading-snug font-bold text-gray-500">
 							{t("ProfilePage.unsavedChanges.descriptionLine1")}
 							<br />
 							{t("ProfilePage.unsavedChanges.descriptionLine2")}
