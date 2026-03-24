@@ -5,6 +5,7 @@ import { useEffect, useState, useMemo } from "react";
 
 import CustomerNumberSwitcher from "@/components/customer-profile/customer-number-switcher";
 import { NoResults } from "@/components/empty-search-result";
+import { MobileMenu } from "@/components/layouts/Header/MobileMenu";
 import CategoryNavigationMenu from "@/components/layouts/NavigationMenu/NavigationMenu";
 import { ProductItem } from "@/components/products/product-item-search";
 import SearchAside from "@/components/search-aside";
@@ -22,7 +23,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { PriceDisplay } from "@/components/ui/price-display";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
 	Tooltip,
 	TooltipContent,
@@ -48,12 +48,16 @@ import { IProductSearch } from "@/types/search.types";
 import { ProfileUser } from "@/types/user.types";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+	ArrowLeft,
 	BookOpen,
 	ChevronDown,
+	ChevronRight,
 	ChevronUp,
 	FileText,
 	LogOut,
+	Menu,
 	MessageSquareText,
+	X,
 	Plus,
 	PlusIcon,
 	Search,
@@ -111,7 +115,16 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		}
 	}, [pathname]);
 
+	const headerRef = useRef<HTMLElement>(null);
+	const topBarRef = useRef<HTMLDivElement>(null);
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
+	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+	const [isMobileProfileOpen, setIsMobileProfileOpen] = useState(false);
+
+	useEffect(() => {
+		setIsMobileMenuOpen(false);
+		setIsMobileProfileOpen(false);
+	}, [pathname]);
 	const [isModalIdOpen, setIsModalIdOpen] = useState<string | null>(null);
 	const [variations, setVariations] = useState<Record<string, any>>({});
 	const { sumAfterDiscount } = useOrderSummary();
@@ -363,13 +376,14 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 	};
 
 	const assortmentDropdownRef = useRef<HTMLDivElement>(null);
+	const mobileAssortmentRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
-			if (
-				assortmentDropdownRef.current &&
-				!assortmentDropdownRef.current.contains(event.target as Node)
-			) {
+			const target = event.target as Node;
+			const isOutsideDesktop = assortmentDropdownRef.current && !assortmentDropdownRef.current.contains(target);
+			const isOutsideMobile = !mobileAssortmentRef.current || !mobileAssortmentRef.current.contains(target);
+			if (isOutsideDesktop && isOutsideMobile) {
 				setIsAssortmentDropdownOpen(false);
 			}
 		};
@@ -396,8 +410,9 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 
 	return (
 		<header
-			className={`bg-background relative z-50 container mx-auto flex h-[130px] w-full flex-col justify-end border-t ${isHoseManagementCustomer ? "max-h-[80px] flex-row" : ""}`}>
-			<div className="container m-auto flex h-16 items-center justify-between">
+			ref={headerRef}
+			className={`bg-background relative z-50 flex w-full flex-col border-t ${isHoseManagementCustomer ? "max-h-[80px] flex-row" : "lg:h-[130px] lg:justify-end"}`}>
+			<div ref={topBarRef} className="flex h-16 w-full items-center justify-between border-b border-[#c1c4c2] px-4 lg:container lg:mx-auto lg:border-b-0 lg:px-0">
 				<div className="flex items-center">
 					<div className="flex items-center gap-4">
 						<Link
@@ -408,6 +423,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								alt="Logo"
 								width={144}
 								height={144}
+								className="h-auto w-[96px] lg:w-[144px]"
 							/>
 						</Link>
 						<div className="flex items-center gap-8">
@@ -434,7 +450,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 					<div className="flex items-center gap-2">
 						{!isHoseManagementCustomer && (
 							<div
-								className="relative hidden md:flex"
+								className="relative hidden lg:flex"
 								ref={assortmentDropdownRef}>
 								<div className="h-[50px] w-[max-content] overflow-hidden rounded-r-lg border border-gray-300 bg-white">
 									<form
@@ -616,112 +632,144 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 						)}
 					</div>
 				</div>
-				<div className="flex items-center">
+				<div className="flex items-center gap-2">
 					{profile && (
 						<Button
 							variant="ghost"
-							className="relative hover:bg-transparent"
+							className="relative px-4 hover:bg-transparent"
 							onClick={() => router.push("/cart")}>
-							<div className="relative mr-2 flex items-center">
+							<div className="relative flex items-center">
 								<ShoppingCart className="h-5 w-5" />
 								<Badge className="absolute -top-2.5 -right-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-[#005522] p-0 text-xs">
 									{(cartItems?.cart?.length || 0) +
 										(cartItems?.cartKit?.length || 0)}
 								</Badge>
 							</div>
-							{(cartItems?.cart?.length || 0) +
-								(cartItems?.cartKit?.length || 0) >
-							0 ? (
-								<PriceDisplay amount={sumAfterDiscount} />
-							) : (
-								""
-							)}
+							<span className="hidden md:inline">
+								{(cartItems?.cart?.length || 0) +
+									(cartItems?.cartKit?.length || 0) >
+								0 ? (
+									<PriceDisplay amount={sumAfterDiscount} />
+								) : (
+									""
+								)}
+							</span>
 							<span className="sr-only">Cart</span>
 						</Button>
 					)}
 					{profile ? (
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button
-									variant="ghost"
-									className="gap-1 px-0 font-medium text-[#1A211C] hover:bg-transparent">
-									{profile.logo &&
-									profile.logo !== "missing url" &&
-									/^(https?:)?\/\//.test(profile.logo) ? (
-										<Image
-											src={profile.logo}
-											alt={profile.firstName ?? "Profile"}
-											width={20}
-											height={20}
-											className="h-5 w-5 rounded-full object-contain"
-										/>
-									) : (
-										<UserIcon />
-									)}
-									{profile.firstName ?? "Profile"}
-									<ChevronDown className="ml-1 h-4 w-4" />
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent
-								align="end"
-								className="rounded-b-lg">
-								<div className="px-2 py-3">
-									<div className="text-[14px] font-medium">
-										{profile.firstName}
-									</div>
-									<div className="text-[14px]">{profile.email}</div>
-								</div>
-								{!isHoseManagementCustomer && (
-									<>
-										<DropdownMenuSeparator />
-										<DropdownMenuItem
-											className="text-gray-700"
-											onClick={() => router.push("/profile")}>
-											Gå til din side
-										</DropdownMenuItem>
-										<DropdownMenuItem
-											className="text-gray-700"
-											onClick={() => router.push("/profile?tab=settings")}>
-											Innstillinger
-										</DropdownMenuItem>
-										<CustomerNumberSwitcher profile={profile} />
-										{(hasHoseManagementAccess || hasTessEdiAccess) && (
+						<>
+							{/* Desktop profile dropdown */}
+							<div className="hidden lg:block">
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button
+											variant="ghost"
+											className="gap-1 px-0 font-medium text-[#1A211C] hover:bg-transparent">
+											{profile.logo &&
+											profile.logo !== "missing url" &&
+											/^(https?:)?\/\//.test(profile.logo) ? (
+												<Image
+													src={profile.logo}
+													alt={profile.firstName ?? "Profile"}
+													width={20}
+													height={20}
+													className="h-5 w-5 rounded-full object-contain"
+												/>
+											) : (
+												<UserIcon />
+											)}
+											{profile.firstName ?? "Profile"}
+											<ChevronDown className="ml-1 h-4 w-4" />
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent
+										align="end"
+										className="rounded-b-lg">
+										<div className="px-2 py-3">
+											<div className="text-[14px] font-medium">
+												{profile.firstName}
+											</div>
+											<div className="text-[14px]">{profile.email}</div>
+										</div>
+										{!isHoseManagementCustomer && (
 											<>
 												<DropdownMenuSeparator />
-												<DropdownMenuLabel className="text-sm font-semibold text-gray-700">
-													Tjenester
-												</DropdownMenuLabel>
-												{hasHoseManagementAccess && (
-													<DropdownMenuItem
-														className="text-gray-700"
-														onClick={() =>
-															router.push("/profile?tab=hose-orders")
-														}>
-														Hose management
-													</DropdownMenuItem>
+												<DropdownMenuItem
+													className="text-gray-700"
+													onClick={() => router.push("/profile")}>
+													Gå til din side
+												</DropdownMenuItem>
+												<DropdownMenuItem
+													className="text-gray-700"
+													onClick={() => router.push("/profile?tab=settings")}>
+													Innstillinger
+												</DropdownMenuItem>
+												<CustomerNumberSwitcher profile={profile} />
+												{(hasHoseManagementAccess || hasTessEdiAccess) && (
+													<>
+														<DropdownMenuSeparator />
+														<DropdownMenuLabel className="text-sm font-semibold text-gray-700">
+															Tjenester
+														</DropdownMenuLabel>
+														{hasHoseManagementAccess && (
+															<DropdownMenuItem
+																className="text-gray-700"
+																onClick={() =>
+																	router.push("/profile?tab=hose-orders")
+																}>
+																Hose management
+															</DropdownMenuItem>
+														)}
+														{hasTessEdiAccess && (
+															<DropdownMenuItem
+																className="text-gray-700"
+																onClick={() =>
+																	router.push("/profile?tab=tess-edi")
+																}>
+																TESS EDI
+															</DropdownMenuItem>
+														)}
+														<DropdownMenuSeparator />
+													</>
 												)}
-												{hasTessEdiAccess && (
-													<DropdownMenuItem
-														className="text-gray-700"
-														onClick={() =>
-															router.push("/profile?tab=tess-edi")
-														}>
-														TESS EDI
-													</DropdownMenuItem>
-												)}
-												<DropdownMenuSeparator />
+												<DropdownMenuItem
+													onClick={handleLogout}
+													className="text-red-700">
+													<LogOut className="mr-2 h-4 w-4 text-red-700" />
+													Logg ut
+												</DropdownMenuItem>
 											</>
 										)}
-										<DropdownMenuItem
-											onClick={handleLogout}
-											className="text-red-700">
-											<LogOut className="mr-2 h-4 w-4 text-red-700" />
-											Logg ut
-										</DropdownMenuItem>
-									</>
+									</DropdownMenuContent>
+								</DropdownMenu>
+							</div>
+							{/* Mobile profile trigger */}
+							<button
+								type="button"
+								onClick={() => {
+									setIsMobileProfileOpen(!isMobileProfileOpen);
+									setIsMobileMenuOpen(false);
+								}}
+								className="flex items-center gap-1 pl-4 pr-0 py-2 lg:hidden">
+								{profile.logo &&
+								profile.logo !== "missing url" &&
+								/^(https?:)?\/\//.test(profile.logo) ? (
+									<Image
+										src={profile.logo}
+										alt={profile.firstName ?? "Profile"}
+										width={16}
+										height={16}
+										className="h-4 w-4 rounded-full object-contain"
+									/>
+								) : (
+									<UserIcon className="h-4 w-4" />
 								)}
-							</DropdownMenuContent>
-						</DropdownMenu>
+								<span className="max-w-[120px] truncate text-sm font-medium text-[#0F1912]">
+									{profile.firstName ?? "Profile"}
+								</span>
+							</button>
+						</>
 					) : (
 						<div className="flex items-center gap-4 rounded-md bg-[#F0FCF2] px-3 py-1.5">
 							<div className="flex items-center gap-2">
@@ -746,72 +794,360 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 						</div>
 					)}
 
-					<Sheet
-						open={isSearchOpen}
-						onOpenChange={setIsSearchOpen}>
-						<SheetTrigger asChild>
-							<Button
-								variant="ghost"
-								size="icon"
-								className="md:hidden">
-								<Search className="h-5 w-5" />
-								<span className="sr-only">Search</span>
-							</Button>
-						</SheetTrigger>
-						<SheetContent
-							side="top"
-							className="h-auto">
-							<form
-								onSubmit={handleSearch}
-								className="pt-6">
-								<div className="relative">
-									<Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
-									<Input
-										type="search"
-										placeholder={
-											isInputFocused
-												? t("Common.searchProducts")
-												: urlQueryForDisplay || t("Common.searchProducts")
-										}
-										className="bg-background w-full pl-8"
-										value={searchQuery}
-										onChange={(e) => {
-											isUserEditingRef.current = true;
-											setSearchQuery(e.target.value);
-										}}
-										onFocus={() => {
-											setIsInputFocused(true);
-											isUserEditingRef.current = true;
-											if (
-												urlQueryForDisplay &&
-												searchQuery === urlQueryForDisplay
-											) {
-												setSearchQuery("");
-											}
-										}}
-										onBlur={() => {
-											setIsInputFocused(false);
-											setTimeout(() => {
-												isUserEditingRef.current = false;
-											}, 200);
-										}}
-										autoFocus
-									/>
-								</div>
-							</form>
-						</SheetContent>
-					</Sheet>
 				</div>
 			</div>
 
 			{!isHoseManagementCustomer && !fromAlleKategorier && (
-				<div className="border-t">
-					<div className="m-auto flex h-12 w-full items-center justify-between gap-4">
+				<div className="hidden border-t lg:block">
+					<div className="container mx-auto flex h-12 w-full items-center justify-between gap-4">
 						<CategoryNavigationMenu
 							categories={categories ?? []}
 							loading={loading}
 							selectedAssortment={selectedAssortment}
 						/>
+					</div>
+				</div>
+			)}
+
+			{!isHoseManagementCustomer && (
+				<div className="flex h-[45px] items-center justify-between border-b border-[#c1c4c2] lg:hidden">
+					<button
+						type="button"
+						onClick={() => setIsSearchOpen(true)}
+						className="flex h-[44px] items-center gap-2 px-4"
+					>
+						<Search className="h-4 w-4 text-[#0F1912]" />
+						<span className="hidden text-sm font-medium text-[#0F1912] md:inline">
+							Søk
+						</span>
+					</button>
+					<button
+						type="button"
+						onClick={() => {
+							setIsMobileMenuOpen(!isMobileMenuOpen);
+							setIsMobileProfileOpen(false);
+						}}
+						className="flex h-[44px] items-center gap-2 px-4"
+					>
+						{isMobileMenuOpen ? (
+							<>
+								<X className="h-4 w-4 text-[#0F1912]" />
+								<span className="text-sm font-medium text-[#0F1912]">
+									Lukk
+								</span>
+							</>
+						) : (
+							<>
+								<Menu className="h-4 w-4 text-[#0F1912]" />
+								<span className="text-sm font-medium text-[#0F1912]">
+									Meny
+								</span>
+							</>
+						)}
+					</button>
+				</div>
+			)}
+
+			{isMobileMenuOpen && (
+				<>
+					<div
+						className="fixed inset-x-0 bottom-0 z-40 cursor-pointer bg-[#0F1912]/25 lg:hidden"
+						onClick={() => setIsMobileMenuOpen(false)}
+						style={{
+							top: headerRef.current
+								? `${headerRef.current.getBoundingClientRect().bottom}px`
+								: undefined,
+						}}
+					/>
+					<div
+						className="fixed inset-x-0 z-50 min-h-[200px] max-h-[80vh] overflow-y-auto bg-white lg:hidden"
+						style={{
+							top: headerRef.current
+								? `${headerRef.current.getBoundingClientRect().bottom}px`
+								: undefined,
+						}}
+					>
+						<MobileMenu
+							categories={categories ?? []}
+							loading={loading}
+							onClose={() => setIsMobileMenuOpen(false)}
+						/>
+					</div>
+				</>
+			)}
+
+			{isMobileProfileOpen && profile && (
+				<>
+					<div
+						className="fixed inset-x-0 bottom-0 z-40 cursor-pointer bg-[#0F1912]/25 lg:hidden"
+						onClick={() => setIsMobileProfileOpen(false)}
+						style={{
+							top: topBarRef.current
+								? `${topBarRef.current.getBoundingClientRect().bottom}px`
+								: undefined,
+						}}
+					/>
+					<div
+						className="fixed inset-x-0 z-50 max-h-[80vh] overflow-y-auto bg-white lg:hidden"
+						style={{
+							top: topBarRef.current
+								? `${topBarRef.current.getBoundingClientRect().bottom}px`
+								: undefined,
+						}}
+					>
+						{/* User info */}
+						<div className="border-b border-[#c1c4c2] px-4 py-4">
+							<div className="text-sm font-bold text-[#0F1912]">
+								{profile.firstName}
+							</div>
+							<div className="text-sm text-[#2D3530]">
+								{profile.email}
+							</div>
+						</div>
+						{!isHoseManagementCustomer && (
+							<nav className="bg-white">
+								{/* E-handel section */}
+								<div className="border-b border-[#c1c4c2] px-4 py-3 text-sm font-bold text-[#0F1912]">
+									E-handel
+								</div>
+								<button
+									type="button"
+									onClick={() => {
+										router.push("/profile");
+										setIsMobileProfileOpen(false);
+									}}
+									className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]"
+								>
+									Min oversikt
+									<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
+								</button>
+								<button
+									type="button"
+									onClick={() => {
+										router.push("/profile?tab=settings");
+										setIsMobileProfileOpen(false);
+									}}
+									className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]"
+								>
+									Innstillinger
+									<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
+								</button>
+								<button
+									type="button"
+									onClick={() => {
+										setIsMobileProfileOpen(false);
+									}}
+									className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]"
+								>
+									Velg kjøpsprofil
+									<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
+								</button>
+								<button
+									type="button"
+									onClick={() => {
+										setIsFeedbackDialogOpen(true);
+										setIsMobileProfileOpen(false);
+									}}
+									className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]"
+								>
+									Gi tilbakemelding
+									<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
+								</button>
+
+								{/* Verktøy section */}
+								{(hasHoseManagementAccess || hasTessEdiAccess) && (
+									<>
+										<div className="border-b border-[#c1c4c2] border-t px-4 py-3 text-sm font-bold text-[#0F1912]">
+											Verktøy
+										</div>
+										{hasHoseManagementAccess && (
+											<button
+												type="button"
+												onClick={() => {
+													router.push("/profile?tab=hose-orders");
+													setIsMobileProfileOpen(false);
+												}}
+												className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]"
+											>
+												Hose management
+												<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
+											</button>
+										)}
+										{hasTessEdiAccess && (
+											<button
+												type="button"
+												onClick={() => {
+													router.push("/profile?tab=tess-edi");
+													setIsMobileProfileOpen(false);
+												}}
+												className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]"
+											>
+												TESS EDI
+												<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
+											</button>
+										)}
+									</>
+								)}
+
+								{/* Logg ut */}
+								<button
+									type="button"
+									onClick={() => {
+										handleLogout();
+										setIsMobileProfileOpen(false);
+									}}
+									className="flex min-h-[53px] w-full items-center justify-between border-t border-[#c1c4c2] px-4 text-left text-sm text-red-700"
+								>
+									<span className="flex items-center gap-2">
+										<LogOut className="h-4 w-4" />
+										Logg ut
+									</span>
+									<ChevronRight className="h-4 w-4 shrink-0 text-red-700" />
+								</button>
+							</nav>
+						)}
+					</div>
+				</>
+			)}
+
+			{isSearchOpen && (
+				<div className="fixed inset-0 z-[60] flex flex-col bg-white lg:hidden">
+					<form
+						onSubmit={handleSearch}
+						className="flex h-[52px] items-center gap-2 border-b border-[#c1c4c2]"
+					>
+						<button
+							type="button"
+							onClick={() => {
+								setIsSearchOpen(false);
+								clearSearch();
+							}}
+							className="flex h-[52px] w-[52px] shrink-0 items-center justify-center bg-[#009640]"
+						>
+							<ArrowLeft className="h-5 w-5 text-white" />
+						</button>
+						<Input
+							type="search"
+							placeholder="Hva leter du etter?"
+							className="h-[52px] flex-1 border-0 bg-transparent px-2 text-sm text-[#0F1912] shadow-none focus-visible:ring-0"
+							value={searchQuery}
+							onChange={(e) => {
+								isUserEditingRef.current = true;
+								setSearchQuery(e.target.value);
+							}}
+							onFocus={() => {
+								setIsInputFocused(true);
+								isUserEditingRef.current = true;
+								if (
+									urlQueryForDisplay &&
+									searchQuery === urlQueryForDisplay
+								) {
+									setSearchQuery("");
+								}
+							}}
+							onBlur={() => {
+								setIsInputFocused(false);
+								setTimeout(() => {
+									isUserEditingRef.current = false;
+								}, 200);
+							}}
+							autoFocus
+						/>
+						<button
+							type="button"
+							onClick={() => {
+								setIsSearchOpen(false);
+								clearSearch();
+							}}
+							className="flex shrink-0 items-center gap-1 px-4 text-sm font-medium text-[#0F1912]"
+						>
+							<X className="h-4 w-4" />
+							Avbryt
+						</button>
+					</form>
+					{profile && assortments.length > 0 && (
+						<div ref={mobileAssortmentRef}>
+							<button
+								type="button"
+								onClick={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+									setIsAssortmentDropdownOpen(!isAssortmentDropdownOpen);
+								}}
+								disabled={isSaving}
+								className="flex h-[44px] w-full items-center justify-center gap-2 bg-[#E8EAE9] text-sm font-medium text-[#0F1912]"
+							>
+								{getSelectedAssortmentName() || t("CustomerSwitcher.selectAssortmentPlaceholder")}
+								{isAssortmentDropdownOpen ? (
+									<ChevronUp className="h-4 w-4" />
+								) : (
+									<ChevronDown className="h-4 w-4" />
+								)}
+							</button>
+							{isAssortmentDropdownOpen && (
+								<div className="bg-white">
+									{assortments.map((a: any) => (
+										<button
+											key={a.assortmentnumber}
+											type="button"
+											onClick={(e) => {
+												e.preventDefault();
+												e.stopPropagation();
+												handleAssortmentChange(a.assortmentnumber);
+											}}
+											className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50"
+										>
+											<div className="flex h-5 w-5 shrink-0 items-center justify-center">
+												{selectedAssortment === a.assortmentnumber ? (
+													<div className="h-5 w-5 rounded-full border-[6px] border-[#005522]" />
+												) : (
+													<div className="h-5 w-5 rounded-full border-2 border-gray-300" />
+												)}
+											</div>
+											<span className="text-sm text-[#0F1912]">
+												{a.nameNo}
+											</span>
+										</button>
+									))}
+								</div>
+							)}
+						</div>
+					)}
+					<div className="relative flex-1 overflow-y-auto">
+						{isAssortmentDropdownOpen && (
+							<div
+								className="absolute inset-0 z-10 bg-[#8A8F8C]/60"
+								onClick={() => setIsAssortmentDropdownOpen(false)}
+							/>
+						)}
+						{searchQuery && searchData?.productRes?.length ? (
+							<div className="p-4">
+								{searchData.productRes.map(
+									(product: IProductSearch) => (
+										<ProductItem
+											key={product.productNumber}
+											product={product}
+											currentLocale={currentLocale}
+											setSearchQuery={setSearchQuery}
+											isModalIdOpen={isModalIdOpen}
+											setIsModalIdOpen={setIsModalIdOpen}
+											getProductVariations={getProductVariations}
+											setVariations={setVariations}
+											variations={variations}
+											searchQuery={searchQuery}
+										/>
+									),
+								)}
+							</div>
+						) : searchQuery && searchData && !searchData.productRes?.length ? (
+							<div className="p-4">
+								<NoResults query={searchQuery} />
+							</div>
+						) : (
+							<div className="flex flex-1 items-center justify-center py-20">
+								<Search className="h-24 w-24 text-gray-200" />
+							</div>
+						)}
 					</div>
 				</div>
 			)}

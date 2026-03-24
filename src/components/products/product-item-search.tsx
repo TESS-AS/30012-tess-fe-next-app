@@ -142,8 +142,8 @@ export function ProductItem({
 				onClick={handleProductClick}
 				className={isLoadingCategory ? "cursor-wait opacity-50" : ""}>
 				<div key={product.productNumber}>
-					<div className="group mb-3 flex w-full cursor-pointer items-center gap-4 rounded-md border border-gray-200 p-3 hover:border-gray-400">
-						<div className="flex h-32 w-32 min-w-32 items-center justify-center overflow-hidden rounded-md">
+					<div className="group mb-3 flex w-full cursor-pointer flex-col gap-3 rounded-md border border-gray-200 p-3 hover:border-gray-400 sm:flex-row sm:items-center sm:gap-4">
+						<div className="flex h-24 w-24 shrink-0 items-center justify-center self-center overflow-hidden rounded-md sm:h-32 sm:w-32">
 							{product.thumbnail ? (
 								<Image
 									src={product.thumbnail}
@@ -151,13 +151,13 @@ export function ProductItem({
 									unoptimized
 									width={128}
 									height={128}
-									className="max-h-23 max-w-32 object-contain"
+									className="max-h-24 max-w-24 object-contain sm:max-h-23 sm:max-w-32"
 								/>
 							) : (
-								<div className="h-32 w-32 rounded bg-gray-300" />
+								<div className="h-24 w-24 rounded bg-gray-300 sm:h-32 sm:w-32" />
 							)}
 						</div>
-						<div className="flex flex-1 flex-col justify-center gap-2">
+						<div className="flex flex-1 flex-col justify-center gap-1.5">
 							<Link
 								className="w-fit"
 								href={productLink}
@@ -170,17 +170,57 @@ export function ProductItem({
 									{highlightParts(product.productName, matchedAttributes)}
 								</span>
 							</Link>
-							<div className="flex max-w-xs flex-col gap-2">
-								{["searchAttribute1", "searchAttribute2"].map((k) => (
-									<div
-										key={k}
-										className="flex h-6 items-center rounded-sm bg-white text-[12px] text-gray-800">
-										{(product as unknown as Record<string, any>)?.[k] ?? ""}
-									</div>
-								))}
-							</div>
+							{["searchAttribute1", "searchAttribute2"].some(
+								(k) => (product as unknown as Record<string, any>)?.[k],
+							) && (
+								<div className="flex max-w-xs flex-col gap-1">
+									{["searchAttribute1", "searchAttribute2"].map((k) => {
+										const value = (product as unknown as Record<string, any>)?.[k];
+										if (!value) return null;
+										return (
+											<div
+												key={k}
+												className="flex items-center rounded-sm bg-white text-[12px] text-gray-800">
+												{value}
+											</div>
+										);
+									})}
+								</div>
+							)}
+							{product.inStock && (
+								<div className="flex w-fit items-center gap-1 rounded bg-[#DCF7E0] px-2 py-1 text-xs font-medium text-emerald-800 sm:hidden">
+									<BadgeCheck className="h-4 w-4 fill-emerald-800 text-white" />
+									<span>{t("Search.inMainWarehouse")}</span>
+								</div>
+							)}
+							<Button
+								type="button"
+								variant="outlineGreen"
+								className={cn(
+									"mt-1 w-full rounded-md px-5 py-2 text-sm font-medium transition-colors sm:hidden",
+									"group-hover:border-green-700 group-hover:bg-green-700 group-hover:text-white",
+								)}
+								onClick={async (e) => {
+									e.stopPropagation();
+									setIsModalIdOpen(product.productNumber);
+									const productVariations = await getProductVariations(
+										product.productNumber,
+										profile?.defaultWarehouseNumber || "",
+										profile?.defaultCompanyNumber || "",
+									);
+									setVariations((prev: Record<string, any>) => ({
+										...prev,
+										[product.productNumber]: productVariations,
+									}));
+
+									if (productVariations.length > 0) {
+										setSelectedVariantNumber(productVariations[0].itemNumber);
+									}
+								}}>
+								Se produktvarianter ({product.itemVariantCount || 0}) →
+							</Button>
 						</div>
-						<div className="ml-auto flex flex-col items-end gap-5">
+						<div className="ml-auto hidden flex-col items-end gap-5 sm:flex">
 							{product.inStock && (
 								<div className="flex items-center gap-1 rounded bg-[#DCF7E0] px-2 py-1 text-xs font-medium text-emerald-800">
 									<BadgeCheck className="h-4 w-4 fill-emerald-800 text-white" />

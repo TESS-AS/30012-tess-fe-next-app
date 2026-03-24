@@ -65,7 +65,7 @@ export default function CategoryNavigationMenu({
 	return (
 		<nav
 			ref={rootRef}
-			className="container relative mx-auto hidden w-full justify-between md:flex"
+			className="container relative mx-auto hidden w-full justify-between lg:flex"
 		>
 			<ul className="flex w-full list-none items-center justify-between">
 				{loading

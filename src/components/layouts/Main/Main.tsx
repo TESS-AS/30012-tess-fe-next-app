@@ -27,24 +27,19 @@ export default function Main({ children }: { children?: ReactNode }) {
 		return profile.userstate === "new";
 	}, [profile, isLoading, onboardingCompleted]);
 
-	// Fixed 182px to prevent CLS when profile loads (header always reserves 182px)
-	const headerHeight = 182;
-
 	return (
-		<div className="relative flex flex-1 flex-col min-md:overflow-hidden">
-			<div className="relative z-50">
+		<div className="relative flex h-dvh flex-col overflow-hidden">
+			<div className="relative z-50 shrink-0">
 				<Header profile={profile} />
 				<UserStateBanner />
 			</div>
 			<div
 				id="app-scroll-container"
 				className={cn(
-					"overflow-x-hidden overflow-y-auto transition-all duration-300",
+					"min-h-0 flex-1 overflow-x-hidden overflow-y-auto transition-all duration-300",
 					pathname?.includes("/profile") ? "bg-[#E8EAE9]" : "bg-background",
-					// When nav menu is open, blur background content and block interactions
 					isOpen && "pointer-events-none blur-xs",
-				)}
-				style={{ height: `calc(100vh - ${headerHeight}px)` }}>
+				)}>
 				<div className="container mx-auto">{children}</div>
 			</div>
 			<OnboardingModal
