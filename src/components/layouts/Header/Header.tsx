@@ -381,8 +381,12 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
 			const target = event.target as Node;
-			const isOutsideDesktop = assortmentDropdownRef.current && !assortmentDropdownRef.current.contains(target);
-			const isOutsideMobile = !mobileAssortmentRef.current || !mobileAssortmentRef.current.contains(target);
+			const isOutsideDesktop =
+				assortmentDropdownRef.current &&
+				!assortmentDropdownRef.current.contains(target);
+			const isOutsideMobile =
+				!mobileAssortmentRef.current ||
+				!mobileAssortmentRef.current.contains(target);
 			if (isOutsideDesktop && isOutsideMobile) {
 				setIsAssortmentDropdownOpen(false);
 			}
@@ -412,7 +416,9 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		<header
 			ref={headerRef}
 			className={`bg-background relative z-50 flex w-full flex-col border-t ${isHoseManagementCustomer ? "max-h-[80px] flex-row" : "lg:h-[130px] lg:justify-end"}`}>
-			<div ref={topBarRef} className="flex h-16 w-full items-center justify-between border-b border-[#c1c4c2] px-4 lg:container lg:mx-auto lg:border-b-0 lg:px-0">
+			<div
+				ref={topBarRef}
+				className="flex h-16 w-full items-center justify-between border-b border-[#c1c4c2] px-4 lg:container lg:mx-auto lg:border-b-0 lg:px-0">
 				<div className="flex items-center">
 					<div className="flex items-center gap-4">
 						<Link
@@ -751,7 +757,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 									setIsMobileProfileOpen(!isMobileProfileOpen);
 									setIsMobileMenuOpen(false);
 								}}
-								className="flex items-center gap-1 pl-4 pr-0 py-2 lg:hidden">
+								className="flex items-center gap-1 py-2 pr-0 pl-4 lg:hidden">
 								{profile.logo &&
 								profile.logo !== "missing url" &&
 								/^(https?:)?\/\//.test(profile.logo) ? (
@@ -793,7 +799,6 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 							</Button>
 						</div>
 					)}
-
 				</div>
 			</div>
 
@@ -814,8 +819,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 					<button
 						type="button"
 						onClick={() => setIsSearchOpen(true)}
-						className="flex h-[44px] items-center gap-2 px-4"
-					>
+						className="flex h-[44px] items-center gap-2 px-4">
 						<Search className="h-4 w-4 text-[#0F1912]" />
 						<span className="hidden text-sm font-medium text-[#0F1912] md:inline">
 							Søk
@@ -827,21 +831,16 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 							setIsMobileMenuOpen(!isMobileMenuOpen);
 							setIsMobileProfileOpen(false);
 						}}
-						className="flex h-[44px] items-center gap-2 px-4"
-					>
+						className="flex h-[44px] items-center gap-2 px-4">
 						{isMobileMenuOpen ? (
 							<>
 								<X className="h-4 w-4 text-[#0F1912]" />
-								<span className="text-sm font-medium text-[#0F1912]">
-									Lukk
-								</span>
+								<span className="text-sm font-medium text-[#0F1912]">Lukk</span>
 							</>
 						) : (
 							<>
 								<Menu className="h-4 w-4 text-[#0F1912]" />
-								<span className="text-sm font-medium text-[#0F1912]">
-									Meny
-								</span>
+								<span className="text-sm font-medium text-[#0F1912]">Meny</span>
 							</>
 						)}
 					</button>
@@ -860,13 +859,12 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 						}}
 					/>
 					<div
-						className="fixed inset-x-0 z-50 min-h-[200px] max-h-[80vh] overflow-y-auto bg-white lg:hidden"
+						className="fixed inset-x-0 z-50 max-h-[80vh] min-h-[200px] overflow-y-auto bg-white lg:hidden"
 						style={{
 							top: headerRef.current
 								? `${headerRef.current.getBoundingClientRect().bottom}px`
 								: undefined,
-						}}
-					>
+						}}>
 						<MobileMenu
 							categories={categories ?? []}
 							loading={loading}
@@ -893,16 +891,13 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 							top: topBarRef.current
 								? `${topBarRef.current.getBoundingClientRect().bottom}px`
 								: undefined,
-						}}
-					>
+						}}>
 						{/* User info */}
 						<div className="border-b border-[#c1c4c2] px-4 py-4">
 							<div className="text-sm font-bold text-[#0F1912]">
 								{profile.firstName}
 							</div>
-							<div className="text-sm text-[#2D3530]">
-								{profile.email}
-							</div>
+							<div className="text-sm text-[#2D3530]">{profile.email}</div>
 						</div>
 						{!isHoseManagementCustomer && (
 							<nav className="bg-white">
@@ -916,8 +911,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 										router.push("/profile");
 										setIsMobileProfileOpen(false);
 									}}
-									className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]"
-								>
+									className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]">
 									Min oversikt
 									<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
 								</button>
@@ -927,8 +921,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 										router.push("/profile?tab=settings");
 										setIsMobileProfileOpen(false);
 									}}
-									className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]"
-								>
+									className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]">
 									Innstillinger
 									<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
 								</button>
@@ -937,8 +930,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 									onClick={() => {
 										setIsMobileProfileOpen(false);
 									}}
-									className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]"
-								>
+									className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]">
 									Velg kjøpsprofil
 									<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
 								</button>
@@ -948,8 +940,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 										setIsFeedbackDialogOpen(true);
 										setIsMobileProfileOpen(false);
 									}}
-									className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]"
-								>
+									className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]">
 									Gi tilbakemelding
 									<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
 								</button>
@@ -957,7 +948,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								{/* Verktøy section */}
 								{(hasHoseManagementAccess || hasTessEdiAccess) && (
 									<>
-										<div className="border-b border-[#c1c4c2] border-t px-4 py-3 text-sm font-bold text-[#0F1912]">
+										<div className="border-t border-b border-[#c1c4c2] px-4 py-3 text-sm font-bold text-[#0F1912]">
 											Verktøy
 										</div>
 										{hasHoseManagementAccess && (
@@ -967,8 +958,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 													router.push("/profile?tab=hose-orders");
 													setIsMobileProfileOpen(false);
 												}}
-												className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]"
-											>
+												className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]">
 												Hose management
 												<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
 											</button>
@@ -980,8 +970,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 													router.push("/profile?tab=tess-edi");
 													setIsMobileProfileOpen(false);
 												}}
-												className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]"
-											>
+												className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]">
 												TESS EDI
 												<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
 											</button>
@@ -996,8 +985,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 										handleLogout();
 										setIsMobileProfileOpen(false);
 									}}
-									className="flex min-h-[53px] w-full items-center justify-between border-t border-[#c1c4c2] px-4 text-left text-sm text-red-700"
-								>
+									className="flex min-h-[53px] w-full items-center justify-between border-t border-[#c1c4c2] px-4 text-left text-sm text-red-700">
 									<span className="flex items-center gap-2">
 										<LogOut className="h-4 w-4" />
 										Logg ut
@@ -1014,16 +1002,14 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 				<div className="fixed inset-0 z-[60] flex flex-col bg-white lg:hidden">
 					<form
 						onSubmit={handleSearch}
-						className="flex h-[52px] items-center gap-2 border-b border-[#c1c4c2]"
-					>
+						className="flex h-[52px] items-center gap-2 border-b border-[#c1c4c2]">
 						<button
 							type="button"
 							onClick={() => {
 								setIsSearchOpen(false);
 								clearSearch();
 							}}
-							className="flex h-[52px] w-[52px] shrink-0 items-center justify-center bg-[#009640]"
-						>
+							className="flex h-[52px] w-[52px] shrink-0 items-center justify-center bg-[#009640]">
 							<ArrowLeft className="h-5 w-5 text-white" />
 						</button>
 						<Input
@@ -1038,10 +1024,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 							onFocus={() => {
 								setIsInputFocused(true);
 								isUserEditingRef.current = true;
-								if (
-									urlQueryForDisplay &&
-									searchQuery === urlQueryForDisplay
-								) {
+								if (urlQueryForDisplay && searchQuery === urlQueryForDisplay) {
 									setSearchQuery("");
 								}
 							}}
@@ -1059,8 +1042,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								setIsSearchOpen(false);
 								clearSearch();
 							}}
-							className="flex shrink-0 items-center gap-1 px-4 text-sm font-medium text-[#0F1912]"
-						>
+							className="flex shrink-0 items-center gap-1 px-4 text-sm font-medium text-[#0F1912]">
 							<X className="h-4 w-4" />
 							Avbryt
 						</button>
@@ -1075,9 +1057,9 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 									setIsAssortmentDropdownOpen(!isAssortmentDropdownOpen);
 								}}
 								disabled={isSaving}
-								className="flex h-[44px] w-full items-center justify-center gap-2 bg-[#E8EAE9] text-sm font-medium text-[#0F1912]"
-							>
-								{getSelectedAssortmentName() || t("CustomerSwitcher.selectAssortmentPlaceholder")}
+								className="flex h-[44px] w-full items-center justify-center gap-2 bg-[#E8EAE9] text-sm font-medium text-[#0F1912]">
+								{getSelectedAssortmentName() ||
+									t("CustomerSwitcher.selectAssortmentPlaceholder")}
 								{isAssortmentDropdownOpen ? (
 									<ChevronUp className="h-4 w-4" />
 								) : (
@@ -1095,8 +1077,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 												e.stopPropagation();
 												handleAssortmentChange(a.assortmentnumber);
 											}}
-											className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50"
-										>
+											className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50">
 											<div className="flex h-5 w-5 shrink-0 items-center justify-center">
 												{selectedAssortment === a.assortmentnumber ? (
 													<div className="h-5 w-5 rounded-full border-[6px] border-[#005522]" />
@@ -1104,9 +1085,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 													<div className="h-5 w-5 rounded-full border-2 border-gray-300" />
 												)}
 											</div>
-											<span className="text-sm text-[#0F1912]">
-												{a.nameNo}
-											</span>
+											<span className="text-sm text-[#0F1912]">{a.nameNo}</span>
 										</button>
 									))}
 								</div>
@@ -1122,22 +1101,20 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 						)}
 						{searchQuery && searchData?.productRes?.length ? (
 							<div className="p-4">
-								{searchData.productRes.map(
-									(product: IProductSearch) => (
-										<ProductItem
-											key={product.productNumber}
-											product={product}
-											currentLocale={currentLocale}
-											setSearchQuery={setSearchQuery}
-											isModalIdOpen={isModalIdOpen}
-											setIsModalIdOpen={setIsModalIdOpen}
-											getProductVariations={getProductVariations}
-											setVariations={setVariations}
-											variations={variations}
-											searchQuery={searchQuery}
-										/>
-									),
-								)}
+								{searchData.productRes.map((product: IProductSearch) => (
+									<ProductItem
+										key={product.productNumber}
+										product={product}
+										currentLocale={currentLocale}
+										setSearchQuery={setSearchQuery}
+										isModalIdOpen={isModalIdOpen}
+										setIsModalIdOpen={setIsModalIdOpen}
+										getProductVariations={getProductVariations}
+										setVariations={setVariations}
+										variations={variations}
+										searchQuery={searchQuery}
+									/>
+								))}
 							</div>
 						) : searchQuery && searchData && !searchData.productRes?.length ? (
 							<div className="p-4">
