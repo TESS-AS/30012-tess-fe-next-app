@@ -908,6 +908,7 @@ export function HosesAndEquipments({
 					setSelectedRows([]);
 					setAllAcrossPages(false);
 					setDeselectedIds(new Set());
+					localStorage.removeItem("hosesAndEquipments_page");
 				}}
 			/>
 
