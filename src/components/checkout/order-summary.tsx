@@ -565,6 +565,7 @@ export default function OrderSummary({
 									return;
 								}
 								router.push("/");
+								localStorage.removeItem("hosesAndEquipments_page");
 							}}>
 							{isCheckoutLoading || isLoading ? (
 								<Loader2 className="h-4 w-4 animate-spin" />

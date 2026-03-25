@@ -42,7 +42,7 @@ export default function AuthDialog({
 	useEffect(() => {
 		if (isOpen && profile) {
 			try {
-				localStorage.setItem("hosesAndEquipments_page", "1");
+				localStorage.removeItem("hosesAndEquipments_page");
 			} catch {
 				// ignore
 			}

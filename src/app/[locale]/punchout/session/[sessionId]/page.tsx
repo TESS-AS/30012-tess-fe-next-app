@@ -67,6 +67,7 @@ export default function PunchoutSessionPage() {
 					user[0]?.defaultCustomerNumber ===
 					SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
 				) {
+					localStorage.removeItem("hosesAndEquipments_page");
 					router.push("/profile");
 				} else {
 					router.push("/");
