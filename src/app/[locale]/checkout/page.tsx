@@ -163,16 +163,16 @@ export default function CheckoutPage() {
 					return;
 				}
 
-				if (currentStep === 1) {
-					const { customersOrderReference, customerReference } =
-						orderData.salesOrderHeader;
-					const accountPart3 = orderData.salesOrderLines?.[0]?.accountPart3;
+				// if (currentStep === 1) {
+				// 	const { customersOrderReference, customerReference } =
+				// 		orderData.salesOrderHeader;
+				// 	const accountPart3 = orderData.salesOrderLines?.[0]?.accountPart3;
 
-					if (!customersOrderReference) {
-						toast.error(t("Checkout.errors.dimensionsRequired"));
-						return;
-					}
-				}
+				// 	if (!customersOrderReference) {
+				// 		toast.error(t("Checkout.errors.dimensionsRequired"));
+				// 		return;
+				// 	}
+				// }
 				goToNext();
 				return;
 			}
