@@ -10,33 +10,33 @@ export default function MainCategorySection() {
 
 	return (
 		<>
-			<section className="relative right-1/2 left-1/2 -mx-[50vw] w-screen bg-white py-16">
+			<section className="relative right-1/2 left-1/2 -mx-[50vw] w-screen bg-white px-4 pt-8 md:py-12 lg:px-0 lg:py-16">
 				<div className="container mx-auto">
-					<div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
-						<div className="space-y-6">
-							<h2 className="text-6xl leading-tight font-light text-gray-900">
-								Velkommen til TESSIX netthandel
+					<div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2 md:gap-12">
+						<div className="space-y-4 md:space-y-6">
+							<h2 className="text-4xl leading-tight font-light text-gray-900 md:text-4xl lg:text-6xl">
+								Velkommen til TESSIX Netthandel
 							</h2>
-							<div className="space-y-6">
+							<div className="space-y-4 md:space-y-6">
 								<div className="space-y-1">
-									<p className="mb-0 text-lg leading-relaxed font-semibold text-gray-500">
+									<p className="mb-0 text-base leading-relaxed font-semibold text-gray-500 md:text-lg">
 										Vi utvikler stadig løsningen
 									</p>
-									<p className="mb-0 text-lg leading-relaxed text-gray-500">
+									<p className="mb-0 text-base leading-relaxed text-gray-500 md:text-lg">
 										Har du forslag som gjør arbeidsdagen din enklere?
 									</p>
 									<button
 										type="button"
 										onClick={() => setIsFeedbackDialogOpen(true)}
-										className="cursor-pointer text-lg text-green-700 hover:text-green-800">
+										className="cursor-pointer text-base text-green-700 hover:text-green-800 md:text-lg">
 										Gi tilbakemelding
 									</button>
 								</div>
-								<div className="space-y-1 pt-4">
-									<p className="mb-0 text-lg leading-relaxed font-semibold text-gray-500">
+								<div className="space-y-1 pt-2 md:pt-4">
+									<p className="mb-0 text-base leading-relaxed font-semibold text-gray-500 md:text-lg">
 										Trenger du hjelp?
 									</p>
-									<p className="text-lg leading-relaxed text-gray-500">
+									<p className="text-base leading-relaxed text-gray-500 md:text-lg">
 										Se{" "}
 										<a
 											href="/faq"
@@ -55,13 +55,13 @@ export default function MainCategorySection() {
 						</div>
 
 						<div className="flex justify-center md:justify-end">
-							<figure className="w-[640px] max-w-full text-center">
+							<figure className="w-full max-w-[640px] text-center">
 								<Image
 									src="/images/presentation.svg"
 									alt="Woman presenting at TESS conference"
 									width={640}
 									height={405}
-									className="mx-auto"
+									className="mx-auto w-full"
 								/>
 							</figure>
 						</div>

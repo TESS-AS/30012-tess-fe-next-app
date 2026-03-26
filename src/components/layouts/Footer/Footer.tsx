@@ -49,11 +49,11 @@ const socialLinks = [
 
 export function Footer() {
 	return (
-		<footer className="relative left-[calc(-50vw+50%)] w-[100vw] bg-[#1A211C] text-white">
-			<div className="relative container mx-auto px-6 py-16">
-				<div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
+		<footer className="relative left-[calc(-50vw+50%)] w-[100vw] overflow-hidden bg-[#1A211C] text-white">
+			<div className="relative container mx-auto px-4 py-10 sm:px-6 md:py-16">
+				<div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:gap-12 lg:grid-cols-12">
 					{/* Left Column - Logo and Company Info */}
-					<div className="lg:col-span-3">
+					<div className="sm:col-span-2 lg:col-span-3">
 						<div className="mb-6 flex items-center gap-3">
 							<Link
 								href="/"
@@ -67,21 +67,21 @@ export function Footer() {
 							</Link>
 						</div>
 
-						<p className="text-md mb-8 leading-relaxed font-light text-[#C1C4C2]">
+						<p className="text-base mb-6 leading-relaxed font-light text-[#C1C4C2] md:mb-8">
 							Din pålitelige partner innen teknisk utstyr og tjenester – siden
 							1968.
 						</p>
 
-						<div className="mb-8 space-y-3">
+						<div className="mb-6 space-y-3 md:mb-8">
 							<div className="flex items-center gap-3">
-								<Mail className="h-4 w-4 text-green-500" />
-								<span className="text-md font-light text-[#C1C4C2]">
+								<Mail className="h-4 w-4 shrink-0 text-green-500" />
+								<span className="text-base font-light text-[#C1C4C2]">
 									tess@tess.no
 								</span>
 							</div>
 							<div className="flex items-center gap-3">
-								<Phone className="h-4 w-4 text-green-500" />
-								<span className="text-md font-light text-[#C1C4C2]">
+								<Phone className="h-4 w-4 shrink-0 text-green-500" />
+								<span className="text-base font-light text-[#C1C4C2]">
 									Hovedkontor 32 84 40 00
 								</span>
 							</div>
@@ -106,13 +106,13 @@ export function Footer() {
 					</div>
 
 					<div className="lg:col-span-3">
-						<h3 className="text-md mb-6 font-semibold text-white">HJELP</h3>
+						<h3 className="text-base mb-4 font-semibold text-white md:mb-6">HJELP</h3>
 						<ul className="space-y-3">
 							{footerLinks.hjelp.map((link) => (
 								<li key={link.href}>
 									<Link
 										href={link.href}
-										className="text-md font-light text-[#C1C4C2] transition-colors hover:text-white">
+										className="text-base font-light text-[#C1C4C2] transition-colors hover:text-white">
 										{link.label}
 									</Link>
 								</li>
@@ -122,13 +122,13 @@ export function Footer() {
 
 					{/* TJENESTER Column */}
 					<div className="lg:col-span-3">
-						<h3 className="text-md mb-6 font-semibold text-white">TJENESTER</h3>
+						<h3 className="text-base mb-4 font-semibold text-white md:mb-6">TJENESTER</h3>
 						<ul className="space-y-3">
 							{footerLinks.tjenester.map((link) => (
 								<li key={link.href}>
 									<Link
 										href={link.href}
-										className="text-md font-light text-[#C1C4C2] transition-colors hover:text-white">
+										className="text-base font-light text-[#C1C4C2] transition-colors hover:text-white">
 										{link.label}
 									</Link>
 								</li>
@@ -138,7 +138,7 @@ export function Footer() {
 
 					{/* DETTE ER TESS Column */}
 					<div className="lg:col-span-3">
-						<h3 className="text-md mb-6 font-semibold text-white">
+						<h3 className="text-base mb-4 font-semibold text-white md:mb-6">
 							DETTE ER TESS
 						</h3>
 						<ul className="space-y-3">
@@ -146,7 +146,7 @@ export function Footer() {
 								<li key={link.href}>
 									<Link
 										href={link.href}
-										className="text-md font-light text-gray-300 transition-colors hover:text-white">
+										className="text-base font-light text-gray-300 transition-colors hover:text-white">
 										{link.label}
 									</Link>
 								</li>
@@ -155,18 +155,18 @@ export function Footer() {
 					</div>
 				</div>
 
-				<div className="mt-16 border-t border-gray-600 pt-8 pb-12">
+				<div className="mt-10 border-t border-gray-600 pt-6 pb-8 md:mt-16 md:pt-8 md:pb-12">
 					<div className="text-center">
-						<p className="text-md text-[#C1C4C2]">
+						<p className="text-base text-[#C1C4C2]">
 							© TESS AS {new Date().getFullYear()}
 						</p>
 					</div>
 				</div>
-				<div className="absolute right-10 bottom-0 flex h-32 w-full items-end justify-end">
-					<div className="flex gap-6 pr-8 pb-4">
-						<div className="h-20 w-12 origin-bottom-left -skew-x-[30deg] bg-[#00A651]"></div>
-						<div className="h-20 w-12 origin-bottom-left -skew-x-[30deg] bg-[#00A651]"></div>
-						<div className="h-20 w-12 origin-bottom-left -skew-x-[30deg] bg-[#00A651]"></div>
+								<div className="absolute right-0 bottom-0 flex h-20 w-full items-end justify-center pr-10 sm:h-28 md:w-auto md:justify-end">
+					<div className="flex gap-3 sm:gap-6">
+						<div className="h-10 w-7 origin-bottom-left -skew-x-[30deg] bg-[#00A651] sm:h-16 sm:w-10"></div>
+						<div className="h-10 w-7 origin-bottom-left -skew-x-[30deg] bg-[#00A651] sm:h-16 sm:w-10"></div>
+						<div className="h-10 w-7 origin-bottom-left -skew-x-[30deg] bg-[#00A651] sm:h-16 sm:w-10"></div>
 					</div>
 				</div>
 			</div>

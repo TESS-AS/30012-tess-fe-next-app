@@ -8,7 +8,7 @@ export default async function Home() {
 	const t = await getTranslations("Home");
 
 	return (
-		<div className="mt-[-20px] flex flex-col gap-16">
+		<div className="mt-[-20px] flex flex-col gap-8 md:gap-16">
 			<WelcomeSection />
 			<HomeBannerWithCategories />
 			<div className="flex flex-col justify-between gap-5">

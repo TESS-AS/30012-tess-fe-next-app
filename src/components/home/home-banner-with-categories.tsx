@@ -14,9 +14,15 @@ export function HomeBannerWithCategories() {
 	const isLoggedIn = !!profile;
 
 	return (
-		<>
-			{isLoggedIn && <MainCategorySection />}
-			<HomeBanner />
-		</>
+		<div className="flex flex-col">
+			{isLoggedIn && (
+				<div className="order-2 lg:order-1">
+					<MainCategorySection />
+				</div>
+			)}
+			<div className="order-1 lg:order-2">
+				<HomeBanner />
+			</div>
+		</div>
 	);
 }
