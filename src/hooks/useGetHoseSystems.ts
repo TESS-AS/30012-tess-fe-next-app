@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
 import { useProfile } from "@/contexts/ProfileContext";
+
 import { useGetAssets } from "./useGetAssets";
 
 type Status = "ok" | "warn" | "error";
