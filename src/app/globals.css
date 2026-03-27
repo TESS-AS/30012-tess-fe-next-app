@@ -169,6 +169,20 @@ nav {
 		}
 	}
 
+	.slim-scrollbar {
+		scrollbar-width: thin;
+	}
+	.slim-scrollbar::-webkit-scrollbar {
+		height: 4px;
+	}
+	.slim-scrollbar::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	.slim-scrollbar::-webkit-scrollbar-thumb {
+		background: #d1d5db;
+		border-radius: 9999px;
+	}
+
 	@keyframes fadeOut {
 		from {
 			opacity: 1;

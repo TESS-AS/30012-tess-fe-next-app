@@ -70,7 +70,7 @@ const QuantityButtons = ({
 	return (
 		<div
 			className={cn(
-				"inline-flex h-8 items-stretch overflow-hidden rounded-md border border-[#D3D3D3] bg-[#F5F5F5]",
+				"inline-flex h-8 shrink-0 items-stretch overflow-hidden rounded-md border border-[#D3D3D3] bg-[#F5F5F5]",
 				className,
 			)}>
 			<button
@@ -114,7 +114,7 @@ const QuantityButtons = ({
 						}
 					}}
 					className={cn(
-						"h-full w-[70px] border-r border-[#D3D3D3] bg-white text-center text-sm font-medium text-gray-900 outline-none",
+						"h-full w-[48px] border-r border-[#D3D3D3] bg-white text-center text-sm font-medium text-gray-900 outline-none",
 						quantityClassName,
 					)}
 				/>

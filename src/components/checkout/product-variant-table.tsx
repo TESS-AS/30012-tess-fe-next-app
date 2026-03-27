@@ -759,13 +759,13 @@ export default function ProductVariantTable({
 	return (
 		<div className="relative mt-4 w-full">
 			{hasSearch && (
-				<div className="flex items-center justify-between">
+				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 					<div className="relative flex items-center">
 						<Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
 						<Input
 							type="search"
 							placeholder={t("Common.searchProducts")}
-							className="color-[#8A8F8C] w-[350px] border-[#8A8F8C] bg-[#F8F9F8] pl-8"
+							className="color-[#8A8F8C] w-full border-[#8A8F8C] bg-[#F8F9F8] pl-8 sm:w-[350px]"
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
 						/>
@@ -774,7 +774,7 @@ export default function ProductVariantTable({
 						<DropdownMenuTrigger asChild>
 							<Button
 								variant="outline"
-								className="group inline-flex h-9 items-center rounded-md border border-[#D3D3D3] bg-white px-3 text-sm font-normal text-[#5A615D] shadow-none hover:bg-gray-50">
+								className="group hidden h-9 items-center rounded-md border border-[#D3D3D3] bg-white px-3 text-sm font-normal text-[#5A615D] shadow-none hover:bg-gray-50 md:inline-flex">
 								<SquarePen className="mr-2 h-4 w-4 text-[#5A615D]" />
 								<span>Rediger tabell</span>
 								<ChevronDown className="ml-1 inline h-4 w-4 text-[#5A615D] group-data-[state=open]:hidden" />
@@ -852,7 +852,7 @@ export default function ProductVariantTable({
 									return (
 										<TableHead
 											key={col}
-											className={`py-2 ${
+											className={`py-2 ${col !== "itemNumber" ? "hidden md:table-cell" : ""} ${
 												col === "itemNumber"
 													? "min-w-[120px]"
 													: col === "unspsc"
@@ -867,12 +867,15 @@ export default function ProductVariantTable({
 										</TableHead>
 									);
 								})}
+							<TableHead className="min-w-[150px] py-2">
+								NAVN
+							</TableHead>
 							{allAttributeNames
 								.filter((name) => visibleAttributes[name])
 								.map((name) => (
 									<TableHead
 										key={name}
-										className="min-w-[120px] py-2">
+										className="hidden min-w-[120px] py-2 md:table-cell">
 										{name.toUpperCase()}
 									</TableHead>
 								))}
@@ -889,7 +892,7 @@ export default function ProductVariantTable({
 									return (
 										<TableHead
 											key={col}
-											className={`py-2 ${
+											className={`hidden py-2 md:table-cell ${
 												col === "quantity"
 													? "min-w-[120px]"
 													: col === "warehouse"
@@ -972,7 +975,7 @@ export default function ProductVariantTable({
 													return (
 														<TableCell
 															key="unspsc"
-															className="min-w-[100px] py-2">
+															className="hidden min-w-[100px] py-2 md:table-cell">
 															{unspscValue}
 														</TableCell>
 													);
@@ -999,7 +1002,7 @@ export default function ProductVariantTable({
 													return (
 														<TableCell
 															key="contentUnit"
-															className="min-w-[80px] py-2">
+															className="hidden min-w-[80px] py-2 md:table-cell">
 															{contentUnitValue}
 														</TableCell>
 													);
@@ -1007,6 +1010,9 @@ export default function ProductVariantTable({
 													return null;
 											}
 										})}
+									<TableCell className="min-w-[150px] py-2">
+										{columnAttributes?.[variant.itemNumber]?.itemName ?? "-"}
+									</TableCell>
 									{allAttributeNames
 										.filter((name) => visibleAttributes[name])
 										.map((name) => {
@@ -1022,7 +1028,7 @@ export default function ProductVariantTable({
 												return (
 													<TableCell
 														key={`${variant.itemNumber}-${name}`}
-														className="min-w-[120px] py-2">
+														className="hidden min-w-[120px] py-2 md:table-cell">
 														{imageUrl ? (
 															<Image
 																src={imageUrl}
@@ -1063,7 +1069,7 @@ export default function ProductVariantTable({
 											return (
 												<TableCell
 													key={`${variant.itemNumber}-${name}`}
-													className="min-w-[120px] py-2">
+													className="hidden min-w-[120px] py-2 md:table-cell">
 													{attr?.valueDef ?? "-"}
 												</TableCell>
 											);
@@ -1078,7 +1084,7 @@ export default function ProductVariantTable({
 													return (
 														<TableCell
 															key="quantity"
-															className="min-w-[120px] py-2"
+															className="hidden min-w-[120px] py-2 md:table-cell"
 															onClick={(e) => e.stopPropagation()}>
 															<div className="flex justify-between">
 																<QuantityButtons
@@ -1122,7 +1128,7 @@ export default function ProductVariantTable({
 														return (
 															<TableCell
 																key="price"
-																className="min-w-[280px] py-2 pr-12"
+																className="hidden min-w-[280px] py-2 pr-12 md:table-cell"
 																onClick={(e) => e.stopPropagation()}>
 																<div className="flex items-center justify-between gap-3">
 																	<div className="flex flex-wrap items-center gap-3">
@@ -1202,7 +1208,7 @@ export default function ProductVariantTable({
 													return (
 														<TableCell
 															key="price"
-															className="min-w-[100px] py-2">
+															className="hidden min-w-[100px] py-2 md:table-cell">
 															{loading[variant.itemNumber] ? (
 																<div className="flex items-center gap-2">
 																	<Loader2 className="h-4 w-4 animate-spin" />
@@ -1261,7 +1267,7 @@ export default function ProductVariantTable({
 													return (
 														<TableCell
 															key="warehouse"
-															className="min-w-[200px] py-2"
+															className="hidden min-w-[200px] py-2 md:table-cell"
 															onClick={(e) => e.stopPropagation()}>
 															<Select
 																value={selectedWarehouse || ""}
@@ -1324,7 +1330,7 @@ export default function ProductVariantTable({
 													return (
 														<TableCell
 															key="cart"
-															className="min-w-[140px] py-2"
+															className="hidden min-w-[140px] py-2 md:table-cell"
 															onClick={(e) => e.stopPropagation()}>
 															{hasAddToCart ? (
 																<Button

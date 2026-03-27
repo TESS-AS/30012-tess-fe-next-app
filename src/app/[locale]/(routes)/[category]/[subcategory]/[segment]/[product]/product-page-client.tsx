@@ -227,7 +227,7 @@ export function ProductPageClient({
 				}
 			/>
 
-			<div className="mb-0 grid grid-cols-12 items-start gap-x-8 gap-y-2">
+			<div className="mb-0 grid grid-cols-12 items-start gap-x-0 gap-y-2 md:gap-x-8">
 				<div className="col-span-12 md:col-span-6">
 					<ProductGallery images={productImages} />
 				</div>

@@ -1113,6 +1113,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 										setVariations={setVariations}
 										variations={variations}
 										searchQuery={searchQuery}
+										onClose={() => setIsSearchOpen(false)}
 									/>
 								))}
 							</div>
