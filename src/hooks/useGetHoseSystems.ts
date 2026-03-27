@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+import { useProfile } from "@/contexts/ProfileContext";
 import { useGetAssets } from "./useGetAssets";
 
 type Status = "ok" | "warn" | "error";
@@ -24,12 +25,18 @@ export type LocationNode = {
 
 export const useGetHoseSystems = (enabled: boolean = true) => {
 	const [selectedS1Code] = useState<string | undefined>(undefined);
+	const { profile } = useProfile();
 
-	const { loading, s1Codes = [] } = useGetAssets("", selectedS1Code, {
-		initAssets: false,
-		initS1Codes: enabled,
-		s2Filter: true,
-	});
+	const { loading, s1Codes = [] } = useGetAssets(
+		"",
+		selectedS1Code,
+		profile?.defaultCustomerNumber,
+		{
+			initAssets: false,
+			initS1Codes: enabled,
+			s2Filter: true,
+		},
+	);
 
 	const locations: LocationNode[] = useMemo(() => {
 		return (s1Codes || [])

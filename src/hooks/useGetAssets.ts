@@ -29,13 +29,18 @@ export const assetsKeys = {
 		s1Code?: string;
 		filters?: FilterOptions;
 	}) => [...assetsKeys.lists(), params] as const,
-	s1Codes: (params: { page?: number; pageSize?: number; s2?: boolean }) =>
-		[...assetsKeys.all, "s1Codes", params] as const,
+	s1Codes: (params: {
+		page?: number;
+		pageSize?: number;
+		s2?: boolean;
+		defaultCustomerNumber?: string;
+	}) => [...assetsKeys.all, "s1Codes", params] as const,
 };
 
 export const useGetAssets = (
 	customerNumber?: string,
 	s1Code?: string,
+	defaultCustomerNumber?: string,
 	options: InitOptions = {
 		initAssets: true,
 		initS1Codes: true,
@@ -92,9 +97,10 @@ export const useGetAssets = (
 			page: 1,
 			pageSize: 100,
 			s2: options.s2Filter,
+			defaultCustomerNumber,
 		}),
 		queryFn: async () => {
-			return await getS1Codes(1, 100, options.s2Filter);
+			return await getS1Codes(1, 100, options.s2Filter, defaultCustomerNumber);
 		},
 		enabled: options.initS1Codes !== false,
 		staleTime: 10 * 60 * 1000,
@@ -110,11 +116,17 @@ export const useGetAssets = (
 		page: number = 1,
 		pageSize: number = 100,
 		s2?: boolean,
+		customerNo: string | undefined = defaultCustomerNumber,
 	) => {
-		const response = await getS1Codes(page, pageSize, s2);
+		const response = await getS1Codes(page, pageSize, s2, customerNo);
 
 		queryClient.setQueryData(
-			assetsKeys.s1Codes({ page, pageSize, s2 }),
+			assetsKeys.s1Codes({
+				page,
+				pageSize,
+				s2,
+				defaultCustomerNumber: customerNo,
+			}),
 			response,
 		);
 

@@ -32,7 +32,7 @@ const HoseInspections = () => {
 		s1Codes = [],
 		s1CodesPagination,
 		fetchS1Codes,
-	} = useGetAssets("", selectedS1Code, {
+	} = useGetAssets("", selectedS1Code, undefined, {
 		initAssets: false,
 		initS1Codes: true,
 		s2Filter: false,
