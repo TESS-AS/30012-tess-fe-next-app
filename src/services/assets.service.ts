@@ -110,8 +110,9 @@ export const getS1Codes = async (
 	page: number = 1,
 	pageSize: number = 100,
 	s2?: boolean,
+	defaultCustomerNumber?: string,
 ): Promise<S1CodesResponse> => {
-	const url = `/asset/getS1?page=${page}&pageSize=${pageSize}&s2=${s2}`;
+	const url = `/asset/getS1?page=${page}&pageSize=${pageSize}&s2=${s2}&customerNumber=${defaultCustomerNumber}`;
 	try {
 		const response = await axiosClient.get(url);
 		return (

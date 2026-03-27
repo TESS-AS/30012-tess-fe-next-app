@@ -127,11 +127,16 @@ export function HosesAndEquipments({
 		s1Codes,
 		s1CodesPagination,
 		fetchS1Codes,
-	} = useGetAssets(effectiveCustomerNumber, selectedS1Code, {
-		initAssets: shouldInitAssets,
-		initS1Codes: true,
-		s2Filter: false,
-	});
+	} = useGetAssets(
+		effectiveCustomerNumber,
+		selectedS1Code,
+		profile?.defaultCustomerNumber,
+		{
+			initAssets: shouldInitAssets,
+			initS1Codes: true,
+			s2Filter: false,
+		},
+	);
 
 	const [searchQuery, setSearchQuery] = useState(() => {
 		if (typeof window === "undefined") return "";

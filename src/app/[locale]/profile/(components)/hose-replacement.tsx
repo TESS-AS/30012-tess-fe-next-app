@@ -38,10 +38,15 @@ const HoseReplacement = () => {
 	const [selectedLocation, setSelectedLocation] = useState<string>("");
 	const [selectedS1Code] = useState<string | undefined>(undefined);
 
-	const { loading, s1Codes = [] } = useGetAssets("", selectedS1Code, {
-		initAssets: false,
-		initS1Codes: true,
-	});
+	const { loading, s1Codes = [] } = useGetAssets(
+		"",
+		selectedS1Code,
+		undefined,
+		{
+			initAssets: false,
+			initS1Codes: true,
+		},
+	);
 	const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
 		{
 			"Floatel Endurance": true,
@@ -254,7 +259,9 @@ const HoseReplacement = () => {
 
 														{group.estimatedCost && (
 															<div className="grid [grid-template-columns:3fr_1fr_1fr_1fr_1fr_1fr] items-center border-t border-[#003D1A] bg-[#F0FCF2] py-3 pr-4 text-sm text-[#0F1912]">
-																<div className="ps-18">{t("estimatedCosts")}</div>
+																<div className="ps-18">
+																	{t("estimatedCosts")}
+																</div>
 																<div>{group.estimatedCost}</div>
 																<div>{group.estimatedCost}</div>
 																<div>{group.estimatedCost}</div>
