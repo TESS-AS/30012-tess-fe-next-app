@@ -85,6 +85,7 @@
 	},
 	"Product": {
 		"notFound": "TESS - Teknisk Faghandel | Netthandel",
+		"backToPrevious": "Back",
 		"seeAllVariants": "See all variants",
 		"copied": "Copied!",
 		"productDescription": "Product Description",
@@ -565,6 +566,11 @@
 			"orderSubmissionFailed": "Order submission failed",
 			"dimensionsRequired": "Please fill in all required dimension fields"
 		},
+		"excelExportSuccess": "Excel file exported successfully",
+		"excelArchiveCartTitle": "Archive cart after export?",
+		"excelArchiveCartDescription": "After the Excel file is generated, do you want to archive the current cart? Choose Keep cart to continue shopping with the same lines.",
+		"excelArchiveCartNo": "Keep cart",
+		"excelArchiveCartYes": "Yes, archive cart",
 		"feedback": {
 			"rating": "Rating",
 			"comment": "Comment",

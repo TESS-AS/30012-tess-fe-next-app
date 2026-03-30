@@ -3,6 +3,7 @@
 import React, { ReactNode, useEffect, useMemo } from "react";
 
 import Header from "@/components/layouts/Header/Header";
+import { ScrollRestoreOnRoute } from "@/components/navigation/scroll-restore-on-route";
 import { OnboardingModal } from "@/components/ui/dialogs/onboarding-modal";
 import { UserStateBanner } from "@/components/user-state-banner";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
@@ -40,6 +41,7 @@ export default function Main({ children }: { children?: ReactNode }) {
 					pathname?.includes("/profile") ? "bg-[#E8EAE9]" : "bg-background",
 					isOpen && "pointer-events-none blur-xs",
 				)}>
+				<ScrollRestoreOnRoute />
 				<div className="container mx-auto">{children}</div>
 			</div>
 			<OnboardingModal

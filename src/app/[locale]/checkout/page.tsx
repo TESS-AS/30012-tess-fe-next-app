@@ -10,8 +10,18 @@ import StepConfirmation from "@/components/checkout/StepConfirmation";
 import StepContactDelivery from "@/components/checkout/StepContactDelivery";
 import StepPayment from "@/components/checkout/StepPayment";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import {
+	Modal,
+	ModalFooter,
+	ModalHeader,
+	ModalTitle,
+} from "@/components/ui/modal";
 import Stepper from "@/components/ui/stepper";
-import { HIDE_CHECKOUT_FOR_SPECIFIC_CUSTOMER_NUMBER } from "@/constants/checkout";
+import {
+	HIDE_CHECKOUT_FOR_SPECIFIC_CUSTOMER_NUMBER,
+	SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER,
+} from "@/constants/checkout";
 import { useCheckoutOrderData } from "@/hooks/useCheckoutOrderData";
 import { useContactPerson } from "@/hooks/useContactPerson";
 import { useFeedback } from "@/hooks/useFeedback";
@@ -64,6 +74,7 @@ export default function CheckoutPage() {
 	const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
 	const [showWarning, setShowWarning] = useState(true);
 	const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+	const [excelArchiveModalOpen, setExcelArchiveModalOpen] = useState(false);
 	const [submittedOrder, setSubmittedOrder] = useState<OrderResponse | null>(
 		null,
 	);
@@ -177,6 +188,13 @@ export default function CheckoutPage() {
 				return;
 			}
 
+			const isExcelCustomer =
+				profile?.defaultCustomerNumber === SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER;
+			if (isExcelCustomer) {
+				setExcelArchiveModalOpen(true);
+				return;
+			}
+
 			setIsCheckoutLoading(true);
 
 			try {
@@ -196,6 +214,20 @@ export default function CheckoutPage() {
 			} finally {
 				setIsCheckoutLoading(false);
 			}
+		}
+	};
+
+	const confirmExcelCheckout = async (archiveCartAfterExcelExport: boolean) => {
+		setExcelArchiveModalOpen(false);
+		setIsCheckoutLoading(true);
+		try {
+			await submitOrder(orderData, { archiveCartAfterExcelExport });
+			toast.success(t("Checkout.excelExportSuccess"));
+		} catch (error) {
+			console.error("Order submission failed:", error);
+			toast.error(t("Checkout.errors.orderSubmissionFailed"));
+		} finally {
+			setIsCheckoutLoading(false);
 		}
 	};
 
@@ -307,6 +339,30 @@ export default function CheckoutPage() {
 						/>
 					</>
 				)}
+				<Modal
+					open={excelArchiveModalOpen}
+					onOpenChange={setExcelArchiveModalOpen}>
+					<ModalHeader>
+						<ModalTitle>{t("Checkout.excelArchiveCartTitle")}</ModalTitle>
+					</ModalHeader>
+					<p className="text-sm text-[#5A615D]">
+						{t("Checkout.excelArchiveCartDescription")}
+					</p>
+					<ModalFooter className="gap-2 sm:gap-0">
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => confirmExcelCheckout(false)}>
+							{t("Checkout.excelArchiveCartNo")}
+						</Button>
+						<Button
+							type="button"
+							variant="greenSolid"
+							onClick={() => confirmExcelCheckout(true)}>
+							{t("Checkout.excelArchiveCartYes")}
+						</Button>
+					</ModalFooter>
+				</Modal>
 			</main>
 		</PayPalScriptProvider>
 	);

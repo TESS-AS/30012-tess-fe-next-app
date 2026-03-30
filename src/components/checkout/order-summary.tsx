@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+	Modal,
+	ModalFooter,
+	ModalHeader,
+	ModalTitle,
+} from "@/components/ui/modal";
 import { PriceDisplay } from "@/components/ui/price-display";
 import {
 	HIDE_CHECKOUT_FOR_SPECIFIC_CUSTOMER_NUMBER,
@@ -41,7 +47,13 @@ export default function OrderSummary({
 	const t = useTranslations();
 
 	const { data: profile } = usePunchoutProfile();
-	const { cartItems, isLoading, handleClearCart, unitPrices } = useAppContext();
+	const {
+		cartItems,
+		isLoading,
+		handleClearCart,
+		handleArchiveCart,
+		unitPrices,
+	} = useAppContext();
 	const isCartEmpty =
 		(!cartItems?.cart || cartItems.cart.length === 0) &&
 		(!cartItems?.cartKit || cartItems.cartKit.length === 0);
@@ -57,6 +69,7 @@ export default function OrderSummary({
 	const [warehouseCodeError, setWarehouseCodeError] = useState<string | null>(
 		null,
 	);
+	const [excelArchivePromptOpen, setExcelArchivePromptOpen] = useState(false);
 
 	const isTessEmployee = profile?.role === "employee";
 	const isExcelExportCustomer =
@@ -75,22 +88,27 @@ export default function OrderSummary({
 		return ok;
 	};
 
-	const handleExcelExportClick = async () => {
+	const handleExcelExportButtonClick = () => {
 		if (!validateExcelExport()) return;
+		const cartLines = cartItems?.cart ?? [];
+		if (cartLines.length === 0) {
+			toast("Handlekurven er tom.", {
+				type: "warning",
+				position: "top-right",
+				autoClose: 3000,
+			});
+			return;
+		}
+		setExcelArchivePromptOpen(true);
+	};
+
+	const runExcelExport = async (archiveCartAfter: boolean) => {
 		if (isDownloadingExcel) return;
 		try {
 			setIsDownloadingExcel(true);
+			setExcelArchivePromptOpen(false);
 
 			const cartLines = cartItems?.cart ?? [];
-			if (cartLines.length === 0) {
-				toast("Handlekurven er tom.", {
-					type: "warning",
-					position: "top-right",
-					autoClose: 3000,
-				});
-				return;
-			}
-
 			const payload = {
 				salesOrderHeader: {
 					warehouseCode: warehouseCode.trim(),
@@ -115,13 +133,20 @@ export default function OrderSummary({
 			document.body.removeChild(link);
 			window.URL.revokeObjectURL(url);
 
-			await handleClearCart();
-
-			toast("Excel-fil lastet ned og handlekurv tømt.", {
-				type: "success",
-				position: "top-right",
-				autoClose: 3000,
-			});
+			if (archiveCartAfter) {
+				await handleArchiveCart();
+				toast("Excel-fil lastet ned og handlekurv arkivert.", {
+					type: "success",
+					position: "top-right",
+					autoClose: 3000,
+				});
+			} else {
+				toast("Excel-fil lastet ned. Handlekurven er uendret.", {
+					type: "success",
+					position: "top-right",
+					autoClose: 3000,
+				});
+			}
 			setIsExcelExportViewOpen(false);
 			setWarehouseCode("");
 			setWarehouseCodeError(null);
@@ -188,7 +213,7 @@ export default function OrderSummary({
 						quantity?: number;
 					} => {
 						if (v == null || typeof v !== "object") return false;
-						const itemNumber = (v as { itemNumber?: unknown }).itemNumber;
+						const { itemNumber } = v as { itemNumber?: unknown };
 						return (
 							typeof itemNumber === "string" && itemNumber.trim().length > 0
 						);
@@ -265,6 +290,33 @@ export default function OrderSummary({
 		: summary;
 	return (
 		<div className="space-y-6">
+			<Modal
+				open={excelArchivePromptOpen}
+				onOpenChange={setExcelArchivePromptOpen}>
+				<ModalHeader>
+					<ModalTitle>{t("Checkout.excelArchiveCartTitle")}</ModalTitle>
+				</ModalHeader>
+				<p className="text-sm text-[#5A615D]">
+					{t("Checkout.excelArchiveCartDescription")}
+				</p>
+				<ModalFooter className="gap-2 sm:gap-0">
+					<Button
+						type="button"
+						variant="outline"
+						disabled={isDownloadingExcel}
+						onClick={() => runExcelExport(false)}>
+						{t("Checkout.excelArchiveCartNo")}
+					</Button>
+					<Button
+						type="button"
+						variant="greenSolid"
+						disabled={isDownloadingExcel}
+						onClick={() => runExcelExport(true)}>
+						{t("Checkout.excelArchiveCartYes")}
+					</Button>
+				</ModalFooter>
+			</Modal>
+
 			<div className="bg-card border-lightGray rounded-lg border p-6">
 				{isExcelExportCustomer && isExcelExportViewOpen ? (
 					<div className="space-y-4">
@@ -321,7 +373,7 @@ export default function OrderSummary({
 							variant="greenSolid"
 							className="w-full"
 							disabled={isCartEmpty || isCheckoutLoading}
-							onClick={handleExcelExportClick}>
+							onClick={handleExcelExportButtonClick}>
 							{isCheckoutLoading || isLoading ? (
 								<Loader2 className="h-4 w-4 animate-spin" />
 							) : (
@@ -332,8 +384,8 @@ export default function OrderSummary({
 						<div className="flex items-start gap-2 rounded-md bg-[#F0FCF2] p-3 text-sm text-[#5A615D]">
 							<Info className="mt-0.5 h-4 w-4 shrink-0 text-[#009640]" />
 							<span>
-								Handlekurven overføres til en Excel-fil og tømmes. Legg inn
-								varene på nytt for å handle videre.
+								Etter nedlasting kan du velge om handlekurven skal arkiveres
+								eller beholdes.
 							</span>
 						</div>
 					</div>
