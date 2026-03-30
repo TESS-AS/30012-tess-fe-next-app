@@ -6,11 +6,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useProductFilter } from "@/hooks/useProductFilter";
 import { useProductPrices } from "@/hooks/useProductPrices";
+import { usePathname } from "@/i18n/navigation";
+import { setProductReturnTarget } from "@/lib/productReturnNavigation";
 import { cn } from "@/lib/utils";
 import { FilterCategory, FilterValues } from "@/types/filter.types";
 import { LayoutGrid, AlignJustify, X } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { ProductCard } from "./product-card";
@@ -391,7 +393,18 @@ export function ProductGrid({
 								<Link
 									key={product.productNumber}
 									href={productHref}
-									className="h-full">
+									className="h-full"
+									onClick={() => {
+										const qs = searchParams.toString();
+										const listingPath = qs
+											? `${pathname}?${qs}`
+											: pathname;
+										setProductReturnTarget(listingPath, {
+											scrollY:
+												document.getElementById("app-scroll-container")
+													?.scrollTop ?? window.scrollY,
+										});
+									}}>
 									<ProductCard
 										{...product}
 										searchAttribute1={searchAttribute1}

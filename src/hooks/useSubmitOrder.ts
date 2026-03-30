@@ -10,7 +10,10 @@ export const useSubmitOrder = (
 	handleArchiveCart: () => Promise<void>,
 ) => {
 	const formatDate = (d: Date) => d.toISOString().split("T")[0];
-	const submitOrder = async (orderData: Order): Promise<Order | null> => {
+	const submitOrder = async (
+		orderData: Order,
+		options?: { archiveCartAfterExcelExport?: boolean },
+	): Promise<Order | null> => {
 		const baseDispatchDate = new Date();
 		if (String(profile?.defaultCustomerNumber ?? "") === "184200") {
 			baseDispatchDate.setDate(baseDispatchDate.getDate() + 14);
@@ -51,8 +54,9 @@ export const useSubmitOrder = (
 				window.URL.revokeObjectURL(url);
 
 				localStorage.removeItem("selectedHoseRows");
-				// Don't clear cart when exporting to Excel
-				// await handleArchiveCart();
+				if (options?.archiveCartAfterExcelExport) {
+					await handleArchiveCart();
+				}
 				return null;
 			} else {
 				const updatedPayload = payload.salesOrderHeader.customerReference

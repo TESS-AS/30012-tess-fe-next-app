@@ -6,7 +6,12 @@ import OrderSummary from "@/components/checkout/order-summary";
 import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
+import {
+	Modal,
+	ModalFooter,
+	ModalHeader,
+	ModalTitle,
+} from "@/components/ui/modal";
 import { NotificationCard } from "@/components/ui/notification-card";
 import QuantityButtons from "@/components/ui/quantity-buttons";
 import {
@@ -142,6 +147,7 @@ const CartPage = () => {
 	}>({});
 
 	const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+	const [excelArchiveModalOpen, setExcelArchiveModalOpen] = useState(false);
 	const [categoryPaths, setCategoryPaths] = useState<{
 		[key: string]: string[];
 	}>({});
@@ -203,29 +209,46 @@ const CartPage = () => {
 	}, [cartItems, isLoading]);
 
 	const handleCheckout = async () => {
+		const isExcelCustomer =
+			profile?.defaultCustomerNumber === SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER;
+
+		if (isExcelCustomer) {
+			setExcelArchiveModalOpen(true);
+			return;
+		}
+
 		setIsCheckoutLoading(true);
 		try {
-			const isExcelCustomer =
-				profile?.defaultCustomerNumber === SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER;
-
-			if (profile?.punchout || isExcelCustomer) {
+			if (profile?.punchout) {
 				const result = await submitOrder(orderData);
-				if (isExcelCustomer) {
-					toast.success(
-						t("Checkout.excelExportSuccess") ||
-							"Excel file exported successfully",
-					);
-				} else {
-					handleArchiveCart();
-					if (result) {
-						setSubmittedOrder(result);
-						setShowOrderConfirmation(true);
-						setTimeout(() => setShowFeedbackModal(true), 2000);
-					}
+				handleArchiveCart();
+				if (result) {
+					setSubmittedOrder(result);
+					setShowOrderConfirmation(true);
+					setTimeout(() => setShowFeedbackModal(true), 2000);
 				}
 			} else {
 				router.push("/checkout");
 			}
+		} catch (error) {
+			console.error("Checkout failed:", error);
+			toast.error(
+				t("Checkout.errors.orderSubmissionFailed") || "Failed to process order",
+			);
+		} finally {
+			setIsCheckoutLoading(false);
+		}
+	};
+
+	const confirmExcelCheckout = async (archiveCartAfterExcelExport: boolean) => {
+		setExcelArchiveModalOpen(false);
+		setIsCheckoutLoading(true);
+		try {
+			await submitOrder(orderData, { archiveCartAfterExcelExport });
+			toast.success(
+				t("Checkout.excelExportSuccess") ||
+					"Excel file exported successfully",
+			);
 		} catch (error) {
 			console.error("Checkout failed:", error);
 			toast.error(
@@ -879,6 +902,31 @@ const CartPage = () => {
 					currentStep={null}
 				/>
 			</div>
+
+			<Modal
+				open={excelArchiveModalOpen}
+				onOpenChange={setExcelArchiveModalOpen}>
+				<ModalHeader>
+					<ModalTitle>{t("Checkout.excelArchiveCartTitle")}</ModalTitle>
+				</ModalHeader>
+				<p className="text-sm text-[#5A615D]">
+					{t("Checkout.excelArchiveCartDescription")}
+				</p>
+				<ModalFooter className="gap-2 sm:gap-0">
+					<Button
+						type="button"
+						variant="outline"
+						onClick={() => confirmExcelCheckout(false)}>
+						{t("Checkout.excelArchiveCartNo")}
+					</Button>
+					<Button
+						type="button"
+						variant="greenSolid"
+						onClick={() => confirmExcelCheckout(true)}>
+						{t("Checkout.excelArchiveCartYes")}
+					</Button>
+				</ModalFooter>
+			</Modal>
 		</main>
 	);
 };
