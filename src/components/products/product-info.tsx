@@ -447,9 +447,9 @@ export function ProductInfo({
 
 	return (
 		<div>
-			<div className="flex items-center justify-between">
-				<div className="flex w-full justify-between gap-4">
-					<h1 className="text-3xl font-semibold">{name}</h1>
+			<div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between">
+				<h1 className="text-xl font-semibold lg:text-3xl">{name}</h1>
+				{(gtin || (sapNumber && isSapCustomer)) && (
 					<div className="flex items-center gap-4">
 						{gtin && (
 							<div className="relative">
@@ -486,10 +486,7 @@ export function ProductInfo({
 							</div>
 						)}
 					</div>
-				</div>
-				<div className="flex items-center gap-8">
-					{/* Documents moved to tabs */}
-				</div>
+				)}
 			</div>
 			{displayDescription() && (
 				<>
@@ -539,8 +536,8 @@ export function ProductInfo({
 										{columnAttributes?.[selectedItemNumber]?.itemName ?? name}
 									</span>
 								</p>
-								<div className="flex items-center gap-1.5">
-									<span className="font-semibold text-black">
+								<div className="flex flex-wrap items-center gap-1.5">
+									<span className="shrink-0 font-semibold text-black">
 										{locale === "no" ? "Tilgjengelighet:" : "Availability:"}
 									</span>
 									<Select
@@ -631,23 +628,22 @@ export function ProductInfo({
 						)}
 					</div>
 
-					{/* Row 2: Price + quantity selector + Legg til */}
-					<div className="flex flex-wrap items-center justify-between gap-4">
-						{/* Price with unit */}
-						<div className="flex items-baseline gap-1">
-							<span className="text-xl leading-none font-semibold text-black">
-								{loadingPrice
-									? t("loadingPrice")
-									: calculatedPrice !== null
-										? formatNorwegianCurrency(calculatedPrice)
-										: "-"}
-							</span>
-							<span className="text-sm font-normal text-gray-500">
-								/ {unit} ({locale === "no" ? "eks mva" : t("excludingVat")})
-							</span>
-						</div>
+					{/* Price */}
+					<div className="flex items-baseline gap-1">
+						<span className="text-xl leading-none font-semibold text-black">
+							{loadingPrice
+								? t("loadingPrice")
+								: calculatedPrice !== null
+									? formatNorwegianCurrency(calculatedPrice)
+									: "-"}
+						</span>
+						<span className="text-sm font-normal text-gray-500">
+							/ {unit} ({locale === "no" ? "eks mva" : t("excludingVat")})
+						</span>
+					</div>
 
-						{/* Quantity selector between price and add-to-cart */}
+					{/* Quantity selector + Legg til */}
+					<div className="flex items-center justify-between gap-4">
 						<QuantityButtons
 							quantity={effectiveQuantity}
 							allowInput
@@ -673,10 +669,9 @@ export function ProductInfo({
 							}}
 						/>
 
-						{/* Legg til button */}
 						<Button
 							disabled={adding || !selectedItemNumber}
-							className="w-[172px] rounded-lg border-0 px-4 font-light text-white hover:opacity-90 disabled:opacity-60"
+							className="min-w-0 shrink rounded-lg border-0 px-4 font-light text-white hover:opacity-90 disabled:opacity-60 md:w-[172px]"
 							style={{ backgroundColor: "#009640" }}
 							onClick={handleAddToCart}>
 							{adding ? (

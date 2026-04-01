@@ -31,6 +31,7 @@ interface Props {
 	setVariations: (variations: Record<string, any>) => void;
 	variations: Record<string, any>;
 	searchQuery: string;
+	onClose?: () => void;
 }
 
 export function ProductItem({
@@ -43,6 +44,7 @@ export function ProductItem({
 	setVariations,
 	variations,
 	searchQuery,
+	onClose,
 }: Props) {
 	const { profile } = useProfile();
 	const t = useTranslations();
@@ -158,6 +160,7 @@ export function ProductItem({
 	const handleProductClick = () => {
 		captureReturnTarget();
 		setSearchQuery("");
+		onClose?.();
 		if (!isLoadingCategory) {
 			router.push(productLink);
 		}

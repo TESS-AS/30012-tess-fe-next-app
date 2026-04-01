@@ -248,31 +248,31 @@ export function ProductDetailTabs({
 
 	return (
 		<div
-			className="mt-8 mb-6 w-full rounded-lg border border-gray-200 bg-white"
+			className="mt-8 mb-6 w-full overflow-hidden rounded-lg border border-gray-200 bg-white"
 			aria-label={locale === "no" ? "Produktdetaljer" : "Product details"}>
 			<Tabs
 				value={activeTab}
 				onValueChange={setActiveTab}
 				className="w-full pt-2">
-				<TabsList className="flex h-auto w-full justify-start gap-6 rounded-none border-b border-gray-200 bg-transparent px-6 py-0">
+				<TabsList className="slim-scrollbar flex h-auto w-full min-w-0 justify-start gap-6 overflow-x-auto rounded-none border-b border-gray-200 bg-transparent px-6 py-0">
 					{allAttributes.length > 0 && (
 						<TabsTrigger
 							value="attributes"
-							className="justify-start rounded-none border-b-2 border-transparent bg-transparent px-3 py-3 text-left text-sm font-medium text-gray-500 shadow-none data-[state=active]:border-green-900 data-[state=active]:bg-transparent data-[state=active]:text-green-900 data-[state=active]:shadow-none">
+							className="shrink-0 whitespace-nowrap justify-start rounded-none border-b-2 border-transparent bg-transparent px-3 py-3 text-left text-sm font-medium text-gray-500 shadow-none data-[state=active]:border-green-900 data-[state=active]:bg-transparent data-[state=active]:text-green-900 data-[state=active]:shadow-none">
 							{locale === "no" ? "Variantinfo" : "Attributes"}
 						</TabsTrigger>
 					)}
 					{filteredAttributes.length > 0 && (
 						<TabsTrigger
 							value="produktinfo"
-							className="justify-start rounded-none border-b-2 border-transparent bg-transparent px-3 py-3 text-left text-sm font-medium text-gray-500 shadow-none data-[state=active]:border-green-900 data-[state=active]:bg-transparent data-[state=active]:text-green-900 data-[state=active]:shadow-none">
+							className="shrink-0 whitespace-nowrap justify-start rounded-none border-b-2 border-transparent bg-transparent px-3 py-3 text-left text-sm font-medium text-gray-500 shadow-none data-[state=active]:border-green-900 data-[state=active]:bg-transparent data-[state=active]:text-green-900 data-[state=active]:shadow-none">
 							{locale === "no" ? "Produktinfo" : "Product Info"}
 						</TabsTrigger>
 					)}
 					{documentCount > 0 && (
 						<TabsTrigger
 							value="documents"
-							className="justify-start rounded-none border-b-2 border-transparent bg-transparent px-3 py-3 text-left text-sm font-medium text-gray-500 shadow-none data-[state=active]:border-green-900 data-[state=active]:bg-transparent data-[state=active]:text-green-900 data-[state=active]:shadow-none">
+							className="shrink-0 whitespace-nowrap justify-start rounded-none border-b-2 border-transparent bg-transparent px-3 py-3 text-left text-sm font-medium text-gray-500 shadow-none data-[state=active]:border-green-900 data-[state=active]:bg-transparent data-[state=active]:text-green-900 data-[state=active]:shadow-none">
 							{locale === "no"
 								? `Dokumentasjon (${documentCount})`
 								: `Documents (${documentCount})`}
@@ -285,7 +285,7 @@ export function ProductDetailTabs({
 						value="attributes"
 						className="mt-0">
 						<div className="p-6">
-							<div className="grid grid-cols-2 gap-x-8 gap-y-3">
+							<div className="grid grid-cols-1 gap-x-8 gap-y-3 lg:grid-cols-2">
 								{(showAllAttributes
 									? allAttributes
 									: allAttributes.slice(0, 10)
@@ -295,7 +295,7 @@ export function ProductDetailTabs({
 											<dt className="text-left text-sm font-medium text-gray-900">
 												{attr.name || attr.nameKeyLanguage || "-"}
 											</dt>
-											<dd className="pr-24 text-right text-sm font-light text-gray-500">
+											<dd className="text-right text-sm font-light text-gray-500 lg:pr-24">
 												{attr.valueDef || attr.value_def || "-"}
 											</dd>
 										</div>
@@ -328,7 +328,7 @@ export function ProductDetailTabs({
 						value="produktinfo"
 						className="mt-0">
 						<div className="p-6">
-							<div className="grid grid-cols-2 gap-x-8 gap-y-3">
+							<div className="grid grid-cols-1 gap-x-8 gap-y-3 lg:grid-cols-2">
 								{(showAllProductInfo
 									? filteredAttributes
 									: filteredAttributes.slice(0, 10)
@@ -338,7 +338,7 @@ export function ProductDetailTabs({
 											<dt className="text-left text-sm font-medium text-gray-900">
 												{attr.name || attr.nameKeyLanguage || "-"}
 											</dt>
-											<dd className="pr-24 text-right text-sm font-light text-gray-500">
+											<dd className="text-right text-sm font-light text-gray-500 lg:pr-24">
 												{attr.valueDef || attr.value_def || "-"}
 											</dd>
 										</div>

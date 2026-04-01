@@ -55,7 +55,7 @@ export function ProductDetailsTable({
 						onQuantityChange={onQuantityChange}
 					/>
 					<p className="mt-5 flex items-center gap-2 text-sm font-light text-[#5A615D]">
-						<span className="flex h-3 w-3 items-center justify-center rounded-full bg-green-900 text-[10px] text-white">
+						<span className="flex h-3 w-3 shrink-0 items-center justify-center rounded-full bg-green-900 text-[10px] text-white">
 							i
 						</span>
 						<span>{t("stockInfo")}</span>
