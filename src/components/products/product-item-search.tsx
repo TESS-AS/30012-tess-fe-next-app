@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
 import { useProfile } from "@/contexts/ProfileContext";
 import { useGetColumnAttributes } from "@/hooks/useGetColumnAttributes";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { setProductReturnTarget } from "@/lib/productReturnNavigation";
 import { categoryTreeToUrlPath, cn } from "@/lib/utils";
 import { loadCategoryTree } from "@/services/categories.service";
 import { IProductSearch } from "@/types/search.types";
 import { BadgeCheck } from "lucide-react";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 
 import ProductVariantTable from "../checkout/product-variant-table";
@@ -55,6 +57,30 @@ export function ProductItem({
 	);
 	const [isLoadingCategory, setIsLoadingCategory] = useState(false);
 	const router = useRouter();
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
+
+	const captureReturnTarget = () => {
+		const q = (searchQuery || "").trim();
+		if (q) {
+			setProductReturnTarget(`/search?query=${encodeURIComponent(q)}`, {
+				scrollY:
+					typeof document !== "undefined"
+						? document.getElementById("app-scroll-container")?.scrollTop ??
+							window.scrollY
+						: 0,
+			});
+			return;
+		}
+		const qs = searchParams.toString();
+		setProductReturnTarget(qs ? `${pathname}?${qs}` : pathname, {
+			scrollY:
+				typeof document !== "undefined"
+					? document.getElementById("app-scroll-container")?.scrollTop ??
+						window.scrollY
+					: 0,
+		});
+	};
 
 	// Fetch category tree and build proper URL path
 	useEffect(() => {
@@ -132,6 +158,7 @@ export function ProductItem({
 		useGetColumnAttributes(selectedVariantNumber ?? undefined);
 
 	const handleProductClick = () => {
+		captureReturnTarget();
 		setSearchQuery("");
 		onClose?.();
 		if (!isLoadingCategory) {
@@ -165,8 +192,8 @@ export function ProductItem({
 								className="w-fit"
 								href={productLink}
 								onClick={() => {
+									captureReturnTarget();
 									setSearchQuery("");
-									onClose?.();
 								}}>
 								<span
 									className={cn(
