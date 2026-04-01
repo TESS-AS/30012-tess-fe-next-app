@@ -42,7 +42,9 @@ export default function Main({ children }: { children?: ReactNode }) {
 					isOpen && "pointer-events-none blur-xs",
 				)}>
 				<ScrollRestoreOnRoute />
-				<div className="container mx-auto">{children}</div>
+				<div className="container mx-auto px-4 sm:px-6 lg:px-8">
+					{children}
+				</div>
 			</div>
 			<OnboardingModal
 				isOpen={isNewUser}

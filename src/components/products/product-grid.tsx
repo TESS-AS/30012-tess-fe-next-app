@@ -10,7 +10,7 @@ import { usePathname } from "@/i18n/navigation";
 import { setProductReturnTarget } from "@/lib/productReturnNavigation";
 import { cn } from "@/lib/utils";
 import { FilterCategory, FilterValues } from "@/types/filter.types";
-import { LayoutGrid, AlignJustify, X } from "lucide-react";
+import { LayoutGrid, AlignJustify, ArrowLeft, SlidersHorizontal, X } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -60,6 +60,7 @@ export function ProductGrid({
 	);
 	const isLoadingMoreRef = useRef(false);
 	const loadMoreTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 	const {
 		products,
 		isLoading,
@@ -186,9 +187,18 @@ export function ProductGrid({
 		};
 	}, [hasMore, isLoading, isFetchingNextPage, loadMore]);
 
+	useEffect(() => {
+		if (!mobileFiltersOpen) return;
+		const onKeyDown = (e: KeyboardEvent) => {
+			if (e.key === "Escape") setMobileFiltersOpen(false);
+		};
+		window.addEventListener("keydown", onKeyDown);
+		return () => window.removeEventListener("keydown", onKeyDown);
+	}, [mobileFiltersOpen]);
+
 	return (
 		<div className="flex flex-col gap-8 lg:flex-row">
-			<aside className="w-full pr-4 lg:w-1/4">
+			<aside className="hidden w-full pr-4 lg:block lg:w-1/4">
 				<Filter
 					filters={filtersState}
 					variant="default"
@@ -211,7 +221,66 @@ export function ProductGrid({
 				/>
 			</aside>
 
+			{mobileFiltersOpen ? (
+				<div
+					className="fixed inset-0 z-[60] flex flex-col bg-white lg:hidden"
+					role="dialog"
+					aria-modal="true"
+					aria-labelledby="mobile-filters-title">
+					<div className="grid h-[52px] shrink-0 grid-cols-[48px_minmax(0,1fr)_48px] items-center bg-white">
+						<button
+							type="button"
+							onClick={() => setMobileFiltersOpen(false)}
+							className="flex h-12 w-12 items-center justify-center text-[#001e00] hover:bg-black/[0.04]"
+							aria-label={t("Product.backToPrevious")}>
+							<ArrowLeft className="h-5 w-5 stroke-[1.5]" />
+						</button>
+						<h2
+							id="mobile-filters-title"
+							className="truncate text-center text-base font-medium text-[#001e00]">
+							{t("ProductList.filterAndSort")}
+						</h2>
+						<div className="h-12 w-12 shrink-0" aria-hidden />
+					</div>
+					<div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-white">
+						<Filter
+							idPrefix="mob-"
+							mobileSheet
+							onMobileSheetDone={() => setMobileFiltersOpen(false)}
+							filters={filtersState}
+							variant="default"
+							size="sm"
+							className="rounded-none"
+							onFilterChange={(newFilters) => {
+								onFilterChange(newFilters);
+							}}
+							selectedFilters={selectedFilters}
+							categoryFilters={categoryFiltersState}
+							query={query}
+							categoryNumber={categoryNumber}
+							categoryName={categoryName}
+							handleCategoryChange={(newCategoryNumber, newCategoryName) =>
+								handleCategoryChange(
+									newCategoryNumber,
+									newCategoryName,
+									setFiltersState,
+								)
+							}
+						/>
+					</div>
+				</div>
+			) : null}
+
 			<div className="flex-1">
+				<Button
+					type="button"
+					variant="outline"
+					className="border-border text-foreground mb-4 flex h-11 w-full items-center justify-center gap-2 rounded-md bg-white font-medium lg:hidden"
+					onClick={() => setMobileFiltersOpen(true)}>
+					<SlidersHorizontal className="h-4 w-4" />
+					{t("ProductList.filterAndSort")}
+				</Button>
+
 				<div className="mb-4 flex flex-wrap items-center justify-between gap-4">
 					<h2 className="text-2xl font-semibold">{query}</h2>
 
@@ -348,9 +417,9 @@ export function ProductGrid({
 				</div>
 				<div
 					className={cn(
-						"grid items-stretch gap-6",
+						"grid items-stretch gap-3 sm:gap-4 lg:gap-6",
 						variant === "compact"
-							? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+							? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
 							: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
 						viewLayout === "list" && "lg:grid-cols-1",
 					)}>
@@ -423,7 +492,7 @@ export function ProductGrid({
 							className={cn(
 								"text-muted-foreground flex h-[400px] items-center justify-center",
 								variant === "compact"
-									? "col-span-2 sm:col-span-3 lg:col-span-4"
+									? "col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4"
 									: "col-span-1 sm:col-span-2 lg:col-span-3",
 								viewLayout === "list" && "lg:col-span-1",
 							)}>

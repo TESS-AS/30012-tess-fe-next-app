@@ -418,7 +418,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 			className={`bg-background relative z-50 flex w-full flex-col border-t ${isHoseManagementCustomer ? "max-h-[80px] flex-row" : "lg:h-[130px] lg:justify-end"}`}>
 			<div
 				ref={topBarRef}
-				className="flex h-16 w-full items-center justify-between border-b border-[#c1c4c2] px-4 lg:container lg:mx-auto lg:border-b-0 lg:px-0">
+				className="flex h-16 w-full items-center justify-between border-b border-[#c1c4c2] px-4 sm:px-6 lg:container lg:mx-auto lg:border-b-0 lg:px-0">
 				<div className="flex items-center">
 					<div className="flex items-center gap-4">
 						<Link
@@ -815,11 +815,11 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 			)}
 
 			{!isHoseManagementCustomer && (
-				<div className="flex h-[45px] items-center justify-between border-b border-[#c1c4c2] lg:hidden">
+				<div className="flex h-[45px] items-center justify-between border-b border-[#c1c4c2] px-4 sm:px-6 lg:hidden">
 					<button
 						type="button"
 						onClick={() => setIsSearchOpen(true)}
-						className="flex h-[44px] items-center gap-2 px-4">
+						className="flex h-[44px] items-center gap-2">
 						<Search className="h-4 w-4 text-[#0F1912]" />
 						<span className="hidden text-sm font-medium text-[#0F1912] md:inline">
 							Søk
@@ -831,7 +831,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 							setIsMobileMenuOpen(!isMobileMenuOpen);
 							setIsMobileProfileOpen(false);
 						}}
-						className="flex h-[44px] items-center gap-2 px-4">
+						className="flex h-[44px] items-center gap-2">
 						{isMobileMenuOpen ? (
 							<>
 								<X className="h-4 w-4 text-[#0F1912]" />

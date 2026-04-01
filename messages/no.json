@@ -79,6 +79,11 @@
 	"Products": {
 		"noProducts": "Ingen produkter funnet"
 	},
+	"ProductList": {
+		"filterAndSort": "Filter og sorter",
+		"showAllResults": "Vis alle resultat",
+		"cancel": "Avbryt"
+	},
 	"Category": {
 		"noResults": "Ingen resultater funnet",
 		"viewAll": "Se alle kategorier",
