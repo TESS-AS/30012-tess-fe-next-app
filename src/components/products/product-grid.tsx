@@ -281,7 +281,7 @@ export function ProductGrid({
 					{t("ProductList.filterAndSort")}
 				</Button>
 
-				<div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+				<div className="mb-4 hidden flex-wrap items-center justify-between gap-4 md:flex">
 					<h2 className="text-2xl font-semibold">{query}</h2>
 
 					<div className="flex shrink-0 items-center gap-2">
@@ -415,9 +415,14 @@ export function ProductGrid({
 						})}
 					</div>
 				</div>
+				{query ? (
+					<h2 className="text-foreground mt-4 mb-6 line-clamp-3 text-xl font-semibold md:hidden">
+						{query}
+					</h2>
+				) : null}
 				<div
 					className={cn(
-						"grid items-stretch gap-3 sm:gap-4 lg:gap-6",
+						"grid items-stretch gap-5 sm:gap-5 lg:gap-6",
 						variant === "compact"
 							? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
 							: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",

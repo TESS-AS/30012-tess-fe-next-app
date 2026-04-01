@@ -831,7 +831,7 @@ export const Filter = React.forwardRef<
 					<div className="bg-background shrink-0 px-4 pt-5 pb-8">
 						<Button
 							type="button"
-							variant="default"
+							variant="outlineGreen"
 							className="h-11 w-full rounded-lg text-sm font-medium"
 							onClick={onMobileSheetDone}>
 							{mobileSheetResultsCountLabel
