@@ -93,13 +93,13 @@ export function RelatedProducts({ products, category }: RelatedProductsProps) {
 	return (
 		<div className="relative right-1/2 left-1/2 mt-8 -mr-[50vw] -ml-[50vw] w-screen bg-gray-50 py-14 pb-16">
 			<section className="container mx-auto px-4">
-				<div className="mb-6 flex items-center justify-between">
-					<h2 className="text-2xl font-semibold text-[#0F1912]">
+				<div className="mb-6 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+					<h2 className="text-xl font-semibold text-[#0F1912] md:text-2xl">
 						{t("Product.relatedProducts")}
 					</h2>
 
 					{!isEmpty && (
-						<div className="flex items-center gap-2">
+						<div className="hidden items-center gap-2 md:flex">
 							<Button
 								variant="ghost"
 								size="icon"
@@ -130,25 +130,42 @@ export function RelatedProducts({ products, category }: RelatedProductsProps) {
 						{t("Product.noRelatedProducts")}
 					</p>
 				) : (
-					<div className="px-0">
-						<div
-							ref={sliderRef}
-							className="keen-slider w-full">
+					<>
+						{/* Mobile: vertical stack */}
+						<div className="flex flex-col gap-4 md:hidden">
 							{normalizedProducts.map((product) => (
-								<div
+								<Link
 									key={product.productNumber}
-									className="keen-slider__slide">
-									<Link href={product.productNumber}>
-										<ProductCard
-											{...product}
-											variant="default"
-											isPriceLoading={isFetchingPrices}
-										/>
-									</Link>
-								</div>
+									href={product.productNumber}>
+									<ProductCard
+										{...product}
+										variant="default"
+										isPriceLoading={isFetchingPrices}
+									/>
+								</Link>
 							))}
 						</div>
-					</div>
+						{/* Desktop: slider */}
+						<div className="hidden px-0 md:block">
+							<div
+								ref={sliderRef}
+								className="keen-slider w-full">
+								{normalizedProducts.map((product) => (
+									<div
+										key={product.productNumber}
+										className="keen-slider__slide">
+										<Link href={product.productNumber}>
+											<ProductCard
+												{...product}
+												variant="default"
+												isPriceLoading={isFetchingPrices}
+											/>
+										</Link>
+									</div>
+								))}
+							</div>
+						</div>
+					</>
 				)}
 			</section>
 		</div>
