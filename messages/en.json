@@ -81,6 +81,7 @@
 	},
 	"Category": {
 		"noResults": "Ingen resultater funnet",
+		"subcategories": "subcategories",
 		"viewAll": "See all categories"
 	},
 	"Product": {
