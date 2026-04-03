@@ -309,13 +309,13 @@ const CartPage = () => {
 							console.error("Error fetching variations:", error);
 						}
 					}}
-					className={`border-lightGray mb-4 flex transform items-center justify-between gap-4 rounded-md border border-b border-gray-200 p-4 transition-all duration-300 ease-in-out ${
+					className={`border-lightGray mb-4 flex transform flex-col gap-3 rounded-md border border-b border-gray-200 p-4 transition-all duration-300 ease-in-out md:flex-row md:items-center md:justify-between md:gap-4 ${
 						itemsToRemove.has(id)
 							? "pointer-events-none -translate-y-4 scale-95 opacity-0"
 							: "translate-y-0 scale-100 opacity-100"
 					}`}>
 					<div className="flex items-center gap-4">
-						<div className="bg-muted relative h-17 w-17 rounded">
+						<div className="bg-muted relative h-17 w-17 shrink-0 rounded">
 							{item.mediaId?.[0]?.url ? (
 								<Image
 									src={item.mediaId[0].url}
@@ -330,7 +330,7 @@ const CartPage = () => {
 						</div>
 
 						<div className="flex flex-col">
-							<span className="mb-2 block max-w-[170px] truncate font-medium text-[#0F1912] hover:underline">
+							<span className="mb-2 block max-w-[170px] truncate font-medium text-[#0F1912] hover:underline md:max-w-[170px]">
 								<Link
 									className="block truncate"
 									href={`/${
@@ -346,7 +346,12 @@ const CartPage = () => {
 								<ChevronRight className="h-4 w-4" />
 							</p>
 						</div>
+
+						<p className="ml-auto font-bold md:hidden">
+							{formatNorwegianCurrency(calculatedPrices[item.itemNumber] ?? 0)}
+						</p>
 					</div>
+
 					<Select
 						onValueChange={async (warehouseNumber: string) => {
 							setLoadingItems((prev) => ({
@@ -367,7 +372,7 @@ const CartPage = () => {
 							}
 						}}
 						value={item.warehouseNumber || ""}>
-						<SelectTrigger className="flex h-[30px] w-[260px] cursor-pointer justify-center p-1.5">
+						<SelectTrigger className="flex h-[30px] w-full cursor-pointer justify-center p-1.5 md:w-[260px]">
 							<SelectValue
 								className="text-[#009640]"
 								placeholder="Select Warehouse"
@@ -416,7 +421,7 @@ const CartPage = () => {
 						</SelectContent>
 					</Select>
 
-					<div className="flex items-center gap-6">
+					<div className="flex items-center justify-between gap-4 md:gap-6">
 						<QuantityButtons
 							isLoading={!!loadingItems[item.itemNumber]}
 							quantity={item.quantity}
@@ -460,7 +465,7 @@ const CartPage = () => {
 							}}
 						/>
 
-						<p className="font-bold">
+						<p className="hidden font-bold md:block">
 							{formatNorwegianCurrency(calculatedPrices[item.itemNumber] ?? 0)}
 						</p>
 
@@ -519,7 +524,7 @@ const CartPage = () => {
 					onOpenChange={(open) =>
 						setOpenModalId(open ? item.productNumber : null)
 					}
-					className="min-w-[75%]">
+					className="min-w-[95%] md:min-w-[75%]">
 					<ModalHeader>
 						<ModalTitle>Velg produktvariant</ModalTitle>
 					</ModalHeader>
@@ -538,9 +543,9 @@ const CartPage = () => {
 	};
 
 	return (
-		<main className="container min-h-screen py-10">
-			<div className="grid grid-cols-1 gap-10 md:grid-cols-3">
-				<div className="space-y-6 md:col-span-2">
+		<main className="container min-h-screen px-4 py-6 md:px-0 md:py-10">
+			<div className="grid grid-cols-1 gap-6 md:gap-10 lg:grid-cols-3">
+				<div className="space-y-6 lg:col-span-2">
 					<Breadcrumb
 						items={[
 							{ href: "/", label: t("BreadCrumbs.home") },
@@ -548,9 +553,9 @@ const CartPage = () => {
 						]}
 					/>
 
-					<div className="flex items-center justify-between">
-						<div className="flex w-[70%] items-center gap-2">
-							<p className="text-base font-normal">
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+						<div className="flex flex-1 items-center gap-2">
+							<p className="shrink-0 text-sm font-normal sm:text-base">
 								{t("Cart.showStockStatus")}
 							</p>
 							<WarehouseCombobox
@@ -562,7 +567,7 @@ const CartPage = () => {
 						<Button
 							onClick={handleClearCart}
 							variant="outline"
-							className="border-[#C81E1E] text-[#C81E1E]">
+							className="self-end border-[#C81E1E] text-[#C81E1E] sm:self-auto">
 							<Trash2 className="h-4 w-4" />
 						</Button>
 					</div>
@@ -578,8 +583,8 @@ const CartPage = () => {
 					)}
 
 					{cartItems?.cart && cartItems.cart.length > 0 && (
-						<div className="flex items-center justify-between">
-							<h1 className="text-2xl font-semibold">
+						<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+							<h1 className="text-xl font-semibold sm:text-2xl">
 								{t("Cart.yourCart")} (
 								{(cartItems?.cart?.length || 0) +
 									(cartItems?.cartKit?.length || 0)}
@@ -589,12 +594,13 @@ const CartPage = () => {
 								<Button
 									variant="outline"
 									onClick={() => handleArchiveCart()}
-									className="mr-2">
+									className="mr-2 text-sm">
 									{t("Cart.archiveCart")}
 								</Button>
 								<Button
 									variant="outline"
-									onClick={() => router.push("/cart/history")}>
+									onClick={() => router.push("/cart/history")}
+									className="text-sm">
 									{t("Cart.viewCartHistory")}
 								</Button>
 							</div>
@@ -629,21 +635,21 @@ const CartPage = () => {
 															}));
 														}
 													}}
-													className="flex w-full cursor-pointer items-center justify-between px-4 py-3">
+													className="flex w-full cursor-pointer flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:justify-between">
 													<div className="flex items-center gap-3">
 														{expandedItems[item.hexagonId] ? (
-															<ChevronUp className="h-4 w-4 text-[#5A615D]" />
+															<ChevronUp className="h-4 w-4 shrink-0 text-[#5A615D]" />
 														) : (
-															<ChevronDown className="h-4 w-4 text-[#5A615D]" />
+															<ChevronDown className="h-4 w-4 shrink-0 text-[#5A615D]" />
 														)}
 														<span className="text-sm text-[#5A615D]">
 															ID: {item.hexagonId}
 														</span>
-														<span className="font-medium text-[#0F1912]">
+														<span className="truncate font-medium text-[#0F1912]">
 															{item.hose.itemDescription}
 														</span>
 													</div>
-													<div className="flex items-center gap-6">
+													<div className="flex items-center justify-between gap-4 pl-7 md:gap-6 md:pl-0">
 														<QuantityButtons
 															isLoading={!!loadingItems[item.hexagonId]}
 															quantity={item.ferrule1.quantity}

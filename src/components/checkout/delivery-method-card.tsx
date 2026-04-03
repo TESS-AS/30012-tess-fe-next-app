@@ -15,7 +15,7 @@ export const DeliveryMethodCard: React.FC<DeliveryMethodCardProps> = ({
 	const t = useTranslations("Checkout.delivery");
 	return (
 		<Card className="rounded-lg shadow-none">
-			<CardContent className="p-6">
+			<CardContent className="p-4 sm:p-6">
 				{/* Header */}
 				<div className="mb-2 flex items-center gap-2">
 					<Truck className="text-foreground h-5 w-5" />

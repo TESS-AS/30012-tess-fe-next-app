@@ -205,7 +205,7 @@ export const AddressCard: React.FC<AddressCardProps> = ({
 
 	return (
 		<Card className="rounded-lg shadow-none">
-			<CardContent className="p-6">
+			<CardContent className="p-4 sm:p-6">
 				<div className="mb-3 flex w-full items-start justify-between">
 					<div className="flex items-start gap-2">
 						<MapPin className="mt-1 h-5 w-5" />

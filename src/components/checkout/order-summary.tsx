@@ -317,7 +317,7 @@ export default function OrderSummary({
 				</ModalFooter>
 			</Modal>
 
-			<div className="bg-card border-lightGray rounded-lg border p-6">
+			<div className="bg-card border-lightGray rounded-lg border p-4 sm:p-6">
 				{isExcelExportCustomer && isExcelExportViewOpen ? (
 					<div className="space-y-4">
 						<div className="text-sm text-green-700">
