@@ -248,7 +248,7 @@ export default function CheckoutPage() {
 
 	return (
 		<PayPalScriptProvider options={initialOptions}>
-			<main className="container mx-auto min-h-screen py-10">
+			<main className="container mx-auto min-h-screen px-4 py-6 md:px-0 md:py-10">
 				{!showOrderConfirmation ? (
 					<>
 						<Breadcrumb
@@ -263,13 +263,13 @@ export default function CheckoutPage() {
 							onStepClick={setCurrentStep}
 						/>
 
-						<div className="grid grid-cols-12 items-start gap-10 pt-6 pb-4">
+						<div className="grid grid-cols-1 items-start gap-6 pt-6 pb-4 lg:grid-cols-12 lg:gap-10">
 							<div
-								className={`${currentStep !== 2 ? "col-span-8" : "col-span-12"}`}>
+								className={`${currentStep !== 2 ? "lg:col-span-8" : "lg:col-span-12"}`}>
 								{renderStepContent()}
 							</div>
 							{currentStep !== 2 && (
-								<div className="col-span-4">
+								<div className="lg:col-span-4">
 									<OrderSummary
 										handleCheckout={handleCheckout}
 										currentStep={currentStep}
@@ -279,7 +279,7 @@ export default function CheckoutPage() {
 						</div>
 
 						{currentStep === 2 && (
-							<div className="col-span-12">
+							<div>
 								<OrderSummary
 									handleCheckout={handleCheckout}
 									isCheckoutLoading={isCheckoutLoading}

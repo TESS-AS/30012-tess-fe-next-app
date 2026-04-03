@@ -46,7 +46,7 @@ export default function StepConfirmation({
 	}>({});
 
 	return (
-		<div className="grid grid-cols-4 gap-6">
+		<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 lg:gap-6">
 			<ConfirmationCard
 				title={t("contactPerson")}
 				icon={<User2 className="h-5 w-5" />}
@@ -136,7 +136,7 @@ export default function StepConfirmation({
 				setDimensionInputMode={setDimensionInputMode}
 			/>
 
-			<div className="col-span-4 flex flex-col">
+			<div className="col-span-1 flex flex-col md:col-span-2 lg:col-span-4">
 				<h2 className="mb-4 text-xl font-semibold">{t("yourItems")}</h2>
 				<div className="flex flex-col space-y-4">
 					{cartItems?.cartKit && cartItems.cartKit.length > 0 && (
@@ -361,10 +361,10 @@ export default function StepConfirmation({
 					{cartItems?.cart?.map((item: any) => (
 						<Card
 							key={item.itemNumber}
-							className="rounded-lg border border-gray-200 p-6 shadow-none">
-							<div className="flex items-center justify-between">
-								<div className="flex items-center gap-6">
-									<div className="relative h-16 w-16 rounded bg-[#F7F7F7] p-2">
+							className="rounded-lg border border-gray-200 p-4 shadow-none md:p-6">
+							<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+								<div className="flex items-center gap-4 sm:gap-6">
+									<div className="relative h-14 w-14 shrink-0 rounded bg-[#F7F7F7] p-2 sm:h-16 sm:w-16">
 										{item.mediaId?.[0]?.url ? (
 											<Image
 												src={item.mediaId[0].url}
@@ -378,15 +378,15 @@ export default function StepConfirmation({
 										)}
 									</div>
 									<div className="flex flex-col gap-0.5">
-										<p className="text-base text-[#0F1912]">
+										<p className="text-sm text-[#0F1912] sm:text-base">
 											{item.productNumber}
 										</p>
-										<p className="text-sm text-[#5A615D]">{item.itemNumber}</p>
+										<p className="text-xs text-[#5A615D] sm:text-sm">{item.itemNumber}</p>
 									</div>
 								</div>
-								<div className="flex items-center gap-50">
+								<div className="flex items-center justify-between gap-4 pl-18 sm:gap-12 sm:pl-0 md:gap-50">
 									<p className="font-medium text-[#0F1912]">x{item.quantity}</p>
-									<p className="text-lg font-bold whitespace-nowrap">
+									<p className="text-base font-bold whitespace-nowrap md:text-lg">
 										{formatNorwegianCurrency(
 											calculatedPrices[item.itemNumber] ?? 0,
 										)}
