@@ -85,7 +85,7 @@ export function WarehouseCombobox({
 				<Button
 					variant="outline"
 					className={cn(
-						"w-[300px] justify-between rounded-md border-[#8A8F8C] bg-[#F8F9F8] text-[#5A615D]",
+						"w-full justify-between rounded-md border-[#8A8F8C] bg-[#F8F9F8] text-[#5A615D] sm:max-w-[300px]",
 						"shadow-sm transition-colors duration-200",
 						open &&
 							"border-[#ADEEBE bg-[#005522] text-white outline-[2px] outline-[#ADEEBE]",

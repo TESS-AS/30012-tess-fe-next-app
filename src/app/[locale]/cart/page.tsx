@@ -314,7 +314,7 @@ const CartPage = () => {
 							? "pointer-events-none -translate-y-4 scale-95 opacity-0"
 							: "translate-y-0 scale-100 opacity-100"
 					}`}>
-					<div className="flex items-center gap-4">
+					<div className="flex min-w-0 items-center gap-4">
 						<div className="bg-muted relative h-17 w-17 shrink-0 rounded">
 							{item.mediaId?.[0]?.url ? (
 								<Image
@@ -329,8 +329,8 @@ const CartPage = () => {
 							)}
 						</div>
 
-						<div className="flex flex-col">
-							<span className="mb-2 block max-w-[170px] truncate font-medium text-[#0F1912] hover:underline md:max-w-[170px]">
+						<div className="flex min-w-0 flex-1 flex-col">
+							<span className="mb-2 block truncate font-medium text-[#0F1912] hover:underline">
 								<Link
 									className="block truncate"
 									href={`/${
@@ -554,7 +554,7 @@ const CartPage = () => {
 					/>
 
 					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-						<div className="flex flex-1 items-center gap-2">
+						<div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center">
 							<p className="shrink-0 text-sm font-normal sm:text-base">
 								{t("Cart.showStockStatus")}
 							</p>
@@ -567,7 +567,7 @@ const CartPage = () => {
 						<Button
 							onClick={handleClearCart}
 							variant="outline"
-							className="self-end border-[#C81E1E] text-[#C81E1E] sm:self-auto">
+							className="self-start border-[#C81E1E] text-[#C81E1E] sm:self-auto">
 							<Trash2 className="h-4 w-4" />
 						</Button>
 					</div>
@@ -590,17 +590,17 @@ const CartPage = () => {
 									(cartItems?.cartKit?.length || 0)}
 								)
 							</h1>
-							<div className="flex items-center gap-2">
+							<div className="flex flex-col gap-2 sm:flex-row sm:items-center">
 								<Button
 									variant="outline"
 									onClick={() => handleArchiveCart()}
-									className="mr-2 text-sm">
+									className="w-full text-sm sm:w-auto">
 									{t("Cart.archiveCart")}
 								</Button>
 								<Button
 									variant="outline"
 									onClick={() => router.push("/cart/history")}
-									className="text-sm">
+									className="w-full text-sm sm:w-auto">
 									{t("Cart.viewCartHistory")}
 								</Button>
 							</div>
