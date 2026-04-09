@@ -119,7 +119,7 @@ export function CartAddedModal({
 								/>
 								<span>
 									{unavailableCount} vare
-									{unavailableCount === 1 ? "" : "r"} ikke tilgjengelig for salg
+									{unavailableCount === 1 ? "" : "r"} ikke tilgjengelig for bestilling
 								</span>
 							</div>
 						)}

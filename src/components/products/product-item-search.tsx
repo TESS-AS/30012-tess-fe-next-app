@@ -127,7 +127,7 @@ export function ProductItem({
 			lower.includes(part.toLowerCase()) ? (
 				<span
 					key={i}
-					className="rounded bg-emerald-100 px-1 font-semibold">
+					className="bg-emerald-100 font-semibold">
 					{part}
 				</span>
 			) : (

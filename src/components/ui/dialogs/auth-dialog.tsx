@@ -93,64 +93,66 @@ export default function AuthDialog({
 				</div>
 
 				<div className="relative z-10 flex min-h-screen items-center justify-center px-8 py-8">
-					<div className="w-full max-w-md rounded-md bg-white p-8 shadow-lg">
-						<h2 className="mb-2 text-xl font-bold text-black">
-							{t("AuthDialog.welcome")}
-						</h2>
+					{authenticatingProvider ? (
+						<div className="w-full max-w-md bg-white p-8">
+							<p className="text-center text-sm text-black">
+								Et øyeblikk, vi sjekker at alt stemmer …
+							</p>
+						</div>
+					) : (
+						<div className="w-full max-w-md bg-white p-8">
+							<h2 className="mb-2 text-xl font-bold text-black">
+								{t("AuthDialog.welcome")}
+							</h2>
 
-						<p className="mb-3 text-sm text-black">
-							{t("AuthDialog.welcomeDescription")}{" "}
-						</p>
+							<p className="mb-3 text-sm text-black">
+								{t("AuthDialog.welcomeDescription")}{" "}
+							</p>
 
-						<div className="mb-6 rounded-md bg-[#F0FCF2] p-4">
-							<Button
-								variant="outlineGrey"
-								className="text-md mb-2 h-[52px] w-full"
-								onClick={handleLoginWithTenantBe}
-								disabled={authenticatingProvider === "tenant-be"}>
-								<User
-									className="mr-2 h-4 w-4"
-									fill="currentColor"
-									stroke="none"
-								/>
-								{authenticatingProvider === "tenant-be"
-									? "Logging in..."
-									: t("AuthDialog.loginOrCreateUser")}
-							</Button>
+							<div className="mb-6 rounded-md bg-[#F0FCF2] p-4">
+								<Button
+									variant="outlineGrey"
+									className="text-md mb-2 h-[52px] w-full"
+									onClick={handleLoginWithTenantBe}>
+									<User
+										className="mr-2 h-4 w-4"
+										fill="currentColor"
+										stroke="none"
+									/>
+									{t("AuthDialog.loginOrCreateUser")}
+								</Button>
 
-							<div className="text- flex items-center gap-2 text-sm text-black">
-								<Info className="h-4 w-4 text-[#009640]" />
-								{t("AuthDialog.forPrivateAndBusiness")}
+								<div className="text- flex items-center gap-2 text-sm text-black">
+									<Info className="h-4 w-4 text-[#009640]" />
+									{t("AuthDialog.forPrivateAndBusiness")}
+								</div>
+							</div>
+
+							<div className="mb-6 flex items-center gap-4">
+								<div className="h-px flex-1 bg-gray-500" />
+								<span className="text-sm">{t("AuthDialog.or")}</span>
+								<div className="h-px flex-1 bg-gray-500" />
+							</div>
+
+							<div className="mb-6 rounded-md bg-[#F8F9F8] p-4">
+								<Button
+									variant="outlineGrey"
+									className="text-md h-[52px] w-full"
+									onClick={handleLoginWithBESso}>
+									{t("AuthDialog.loginAs")}
+								</Button>
+							</div>
+
+							<div className="text-center text-sm text-black">
+								{t("AuthDialog.needHelp")}{" "}
+								<a
+									className="text-[#009640] underline hover:text-[#007a2e]"
+									href="mailto:netthandel@tess.no">
+									{t("AuthDialog.contactUs")}
+								</a>
 							</div>
 						</div>
-
-						<div className="mb-6 flex items-center gap-4">
-							<div className="h-px flex-1 bg-gray-500" />
-							<span className="text-sm">{t("AuthDialog.or")}</span>
-							<div className="h-px flex-1 bg-gray-500" />
-						</div>
-
-						<div className="mb-6 rounded-md bg-[#F8F9F8] p-4">
-							<Button
-								variant="outlineGrey"
-								className="text-md h-[52px] w-full"
-								onClick={handleLoginWithBESso}
-								disabled={authenticatingProvider === "be-sso"}>
-								{authenticatingProvider === "be-sso"
-									? "Logging in..."
-									: t("AuthDialog.loginAs")}
-							</Button>
-						</div>
-
-						<div className="text-center text-sm text-black">
-							{t("AuthDialog.needHelp")}{" "}
-							<a
-								className="text-[#009640] underline hover:text-[#007a2e]"
-								href="mailto:netthandel@tess.no">
-								{t("AuthDialog.contactUs")}
-							</a>
-						</div>
-					</div>
+					)}
 				</div>
 			</DialogContent>
 		</Dialog>

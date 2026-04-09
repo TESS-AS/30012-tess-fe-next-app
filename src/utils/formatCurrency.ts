@@ -3,7 +3,7 @@ export const formatNorwegianCurrency = (amount: number): string => {
 		new Intl.NumberFormat("nb-NO", {
 			minimumFractionDigits: 2,
 			maximumFractionDigits: 2,
-			useGrouping: false,
+			useGrouping: true,
 		}).format(amount) + " kr"
 	);
 };
