@@ -98,7 +98,7 @@ export function HosesAndEquipments({
 	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
 		() => {
 			if (typeof window !== "undefined") {
-				return localStorage.getItem("selectedS1Code") || S1_CODE_TROLL_A;
+				return localStorage.getItem("selectedS1Code") || profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER ? S1_CODE_TROLL_A : "";
 			}
 			return undefined;
 		},
@@ -108,7 +108,7 @@ export function HosesAndEquipments({
 		if (typeof window === "undefined") return;
 		const stored = localStorage.getItem("selectedS1Code");
 		if (!stored) {
-			localStorage.setItem("selectedS1Code", S1_CODE_TROLL_A);
+			localStorage.setItem("selectedS1Code", profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER ? S1_CODE_TROLL_A : "");
 		}
 	}, []);
 
@@ -137,6 +137,7 @@ export function HosesAndEquipments({
 			s2Filter: false,
 		},
 	);
+	console.log(s1Codes,"s1Codes");
 
 	const [searchQuery, setSearchQuery] = useState(() => {
 		if (typeof window === "undefined") return "";
@@ -885,6 +886,29 @@ export function HosesAndEquipments({
 		});
 	};
 
+	const filteredS1Codes = profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER ? (s1Codes || [])
+	.filter((s1) => s1.S1Code && s1.S1Name)
+	.filter(
+		(s1) =>
+			s1.S1Code === S1_CODE_TROLL_A ||
+			s1.S1Code === S1_CODE_GUDRUN,
+	)
+	.map((s1) => (
+		<SelectItem
+			key={s1.S1Code}
+			value={s1.S1Code}>
+			{s1.S1Name}
+		</SelectItem>
+	)) :(s1Codes || [])
+	.filter((s1) => s1.S1Code && s1.S1Name)
+	.map((s1) => (
+		<SelectItem
+			key={s1.S1Code}
+			value={s1.S1Code}>
+			{s1.S1Name}
+		</SelectItem>
+	))
+
 	return (
 		<>
 			<CartAddedModal
@@ -1042,20 +1066,7 @@ export function HosesAndEquipments({
 											);
 										}
 									}}>
-									{(s1Codes || [])
-										.filter((s1) => s1.S1Code && s1.S1Name)
-										.filter(
-											(s1) =>
-												s1.S1Code === S1_CODE_TROLL_A ||
-												s1.S1Code === S1_CODE_GUDRUN,
-										)
-										.map((s1) => (
-											<SelectItem
-												key={s1.S1Code}
-												value={s1.S1Code}>
-												{s1.S1Name}
-											</SelectItem>
-										))}
+									{filteredS1Codes}
 									{loading && s1CodesPagination.currentPage > 1 && (
 										<div className="py-2 text-center text-sm text-gray-500">
 											{t("loadingMore")}
