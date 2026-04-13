@@ -4,7 +4,7 @@ import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { Check } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
@@ -31,30 +31,30 @@ export function CartAddedModal({
 	const unavailableCount = unavailableItems.length;
 	const addedCount = selectedItems.length;
 	const allUnavailable = addedCount === 0 && unavailableCount > 0;
+
 	return (
 		<Modal
-			className="max-w-[440px]"
+			className="max-w-[320px] rounded-xl p-4 shadow-[0_4px_24px_rgba(0,0,0,0.12)]"
 			open={open}
 			onOpenChange={onOpenChange}>
 			<div>
-				<ModalHeader>
-					<ModalTitle className="flex items-center gap-2">
+				<ModalHeader className="p-0">
+					<ModalTitle className="flex items-start gap-3 text-sm font-semibold">
 						{allUnavailable ? (
-							<Image
-								src="/icons/alert-filled.svg"
-								alt="Alert"
-								width={20}
-								height={20}
-							/>
+							<div className="flex h-8 w-8 flex-shrink-0 items-center justify-center">
+								<Image
+									src="/icons/alert-filled.svg"
+									alt="Alert"
+									width={20}
+									height={20}
+								/>
+							</div>
 						) : (
-							<Image
-								src="/icons/check-filled.svg"
-								alt="Check"
-								width={20}
-								height={20}
-							/>
+							<div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#009640]">
+								<Check className="h-4 w-4 text-white" strokeWidth={3} />
+							</div>
 						)}
-						<span>
+						<span className="pt-1">
 							{allUnavailable ? (
 								"Ingen av de valgte varene er tilgjengelig for direktekjøp."
 							) : (
@@ -67,71 +67,64 @@ export function CartAddedModal({
 					</ModalTitle>
 				</ModalHeader>
 
-				<div className="space-y-4 py-4">
-					<div className="space-y-2">
-						{allUnavailable ? (
-							<div className="space-y-3 text-sm text-gray-600">
-								<p>
-									Du kan be om å bli kontaktet eller sende en forespørsel om
-									tilbud.
-								</p>
-							</div>
-						) : addedCount === 0 ? (
-							<div className="text-sm text-gray-600">
-								{t("noItemsSelected")}
-							</div>
-						) : (
-							<>
-								{selectedItems
-									.slice(0, showAllItems ? undefined : 5)
-									.map((item, index) => (
-										<div
-											key={index}
-											className="text-sm text-gray-600">
-											1 × {item}
-										</div>
-									))}
-								{selectedItems.length > 5 && (
-									<button
-										onClick={() => setShowAllItems(!showAllItems)}
-										className="mt-2 flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
-										{showAllItems ? (
-											<>
-												{t("showLess")}{" "}
-												<Loader2 className="h-4 w-4 rotate-180 transform" />
-											</>
-										) : (
-											<>
-												{t("showAll")} <Loader2 className="h-4 w-4" />
-											</>
-										)}
-									</button>
-								)}
-							</>
-						)}
-						{!allUnavailable && unavailableCount > 0 && (
-							<div className="mt-4 flex items-center gap-3 rounded-md bg-[#FFF7D6] px-3 py-3 text-sm text-[#0F1912]">
-								<Image
-									src="/icons/alert-filled.svg"
-									alt="Alert"
-									width={20}
-									height={20}
-								/>
-								<span>
-									{unavailableCount} vare
-									{unavailableCount === 1 ? "" : "r"} ikke tilgjengelig for bestilling
-								</span>
-							</div>
-						)}
-					</div>
+				<div className="mt-2 space-y-1 pl-11">
+					{allUnavailable ? (
+						<p className="text-sm text-[#5A615D]">
+							Du kan be om å bli kontaktet eller sende en forespørsel om
+							tilbud.
+						</p>
+					) : addedCount === 0 ? (
+						<p className="text-sm text-[#5A615D]">
+							{t("noItemsSelected")}
+						</p>
+					) : (
+						<>
+							{selectedItems
+								.slice(0, showAllItems ? undefined : 5)
+								.map((item, index) => (
+									<p
+										key={index}
+										className="text-sm text-[#5A615D]">
+										1 × {item}
+									</p>
+								))}
+							{selectedItems.length > 5 && (
+								<button
+									onClick={() => setShowAllItems(!showAllItems)}
+									className="mt-1 text-sm text-[#009640] hover:underline">
+									{showAllItems ? t("showLess") : t("showAll")}
+								</button>
+							)}
+						</>
+					)}
 				</div>
 
-				<div className="flex">
+				{!allUnavailable && unavailableCount > 0 && (
+					<div className="mt-3 flex items-center gap-3 rounded-lg bg-[#FFF7D6] px-3 py-2.5 text-sm text-[#0F1912]">
+						<Image
+							src="/icons/alert-filled.svg"
+							alt="Alert"
+							width={20}
+							height={20}
+						/>
+						<span>
+							{unavailableCount} vare
+							{unavailableCount === 1 ? "" : "r"} ikke tilgjengelig for salg
+						</span>
+					</div>
+				)}
+
+				<div className="mt-4 flex gap-2">
 					<Button
-						variant="default"
-						className="w-full bg-[#1C6D2C] text-white hover:bg-[#164B1F]"
+						className="flex-1 bg-[#009640] text-white hover:bg-[#007a2e]"
 						onClick={onConfirm}>
 						{allUnavailable ? "Send forespørsel" : t("goToCart")}
+					</Button>
+					<Button
+						variant="outline"
+						className="border-gray-200 text-[#0F1912] hover:bg-gray-50"
+						onClick={() => onOpenChange(false)}>
+						Not now
 					</Button>
 				</div>
 			</div>
