@@ -60,7 +60,7 @@ export default function HoseDetailsPage({
 }: Props) {
 	const t = useTranslations("HoseDetailsPage");
 	const { data: profile } = usePunchoutProfile();
-	const { setIsCartChanging } = useAppContext();
+	const { setIsCartChanging, showCartNotification } = useAppContext();
 	const { hoseHistory, isLoading, error } = useGetHoseHistory(hexagonId);
 	const { hoseDetails, isLoading: isLoadingDetails } = useGetHoseDetails(
 		hexagonId,
@@ -141,7 +141,11 @@ export default function HoseDetailsPage({
 			setIsCartChanging(true);
 			setTimeout(() => setIsCartChanging(false), 100);
 			if (profile.defaultCustomerNumber !== "184200") {
-				toast.success("Item added to cart successfully");
+				showCartNotification({
+					itemName: hoseDetails.hoseLine.hexagonId,
+					itemNumber: hoseDetails.hoseLine.hexagonId,
+					quantity: 1,
+				});
 			}
 		} catch (error) {
 			toast.error("Failed to add item to cart");

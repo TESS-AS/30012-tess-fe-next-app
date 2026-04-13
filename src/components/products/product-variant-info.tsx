@@ -38,7 +38,7 @@ export function ProductVariantInfo({
 	columnAttributes,
 }: ProductVariantInfoProps) {
 	const t = useTranslations("Product");
-	const { isCartChanging, setIsCartChanging } = useAppContext();
+	const { isCartChanging, setIsCartChanging, showCartNotification } = useAppContext();
 
 	const [quantity, setQuantity] = useState(1);
 	const [price, setPrice] = useState<number | null>(null);
@@ -214,10 +214,10 @@ export function ProductVariantInfo({
 			}
 
 			setIsCartChanging(!isCartChanging);
-			toast(t("addedToCart"), {
-				type: "success",
-				position: "bottom-right",
-				autoClose: 2000,
+			showCartNotification({
+				itemName: variantData?.itemName ?? selectedItemNumber ?? "",
+				itemNumber: selectedItemNumber ?? "",
+				quantity,
 			});
 
 			setQuantity(1);

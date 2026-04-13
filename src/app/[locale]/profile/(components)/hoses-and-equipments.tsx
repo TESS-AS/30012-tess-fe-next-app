@@ -38,7 +38,6 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
-import { CartAddedModal } from "./cart-added-modal";
 import { HoseActionsDropdown } from "./hose-actions-dropdown";
 import { HoseColumnsDropdown } from "./hose-columns-dropdown";
 import { HoseFiltersDropdown } from "./hose-filters-dropdown";
@@ -76,7 +75,7 @@ export function HosesAndEquipments({
 	const t = useTranslations("HosesAndEquipments");
 	const tHoseActions = useTranslations("HoseActionsDropdown");
 	const router = useRouter();
-	const { setIsCartChanging, isCartChanging } = useAppContext();
+	const { setIsCartChanging, isCartChanging, showCartNotification } = useAppContext();
 
 	const HOSE_COLUMNS_ORDER_KEY = "hosesAndEquipments_columnsOrder";
 
@@ -84,16 +83,11 @@ export function HosesAndEquipments({
 	const S1_CODE_GUDRUN = "1291619";
 
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
-	const [cartModalOpen, setCartModalOpen] = useState(false);
 	const [supportOpen, setSupportOpen] = useState(false);
 	const [rfqOpen, setRfqOpen] = useState(false);
 	const [discardOpen, setDiscardOpen] = useState(false);
 	const [printOpen, setPrintOpen] = useState(false);
 	const [printTagsOpen, setPrintTagsOpen] = useState(false);
-	const [showAllItems, setShowAllItems] = useState(false);
-	const [addedToCartItems, setAddedToCartItems] = useState<string[]>([]);
-	const [unavailableForPurchaseItems, setUnavailableForPurchaseItems] =
-		useState<string[]>([]);
 	const [customerNumber, setCustomerNumber] = useState<string>("");
 	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
 		() => {
@@ -391,11 +385,12 @@ export function HosesAndEquipments({
 			];
 
 			await postCartKit(cartItems);
-			setAddedToCartItems([order.hexagonId]);
-			setUnavailableForPurchaseItems([]);
-			toast.success("Element lagt til i handlekurven");
 			setIsCartChanging(!isCartChanging);
-			setCartModalOpen(true);
+			showCartNotification({
+				itemName: order.hexagonId,
+				itemNumber: order.hexagonId,
+				quantity: 1,
+			});
 		} catch (error) {
 			toast.error("Kunne ikke legge til element i handlekurven");
 		} finally {
@@ -414,38 +409,50 @@ export function HosesAndEquipments({
 				setIsAddingToCart(true);
 				try {
 					const currentAssets = transformedAssetsRef.current;
-					const selectedAssets: Array<Pick<HoseOrder, "hexagonId" | "ecom">> =
+					const selectedAssets: Array<Pick<HoseOrder, "hexagonId" | "ecom" | "beskrivelse">> =
 						allAcrossPages
 							? currentAssets.filter((a) => !deselectedIds.has(a.hexagonId))
 							: selectedRows.map((hexagonId) => {
-									const meta = assetsByHexagonIdRef.current.get(hexagonId);
-									return { hexagonId, ecom: meta?.ecom };
+									const full = currentAssets.find((a) => a.hexagonId === hexagonId);
+									return { hexagonId, ecom: full?.ecom, beskrivelse: full?.beskrivelse ?? "" };
 								});
 
 					const unavailable = selectedAssets
-						.filter((a) => Number(a.ecom) === 3)
-						.map((a) => a.hexagonId);
+						.filter((a) => Number(a.ecom) === 3);
 					const available = selectedAssets
-						.filter((a) => Number(a.ecom) !== 3)
-						.map((a) => a.hexagonId);
-
-					setAddedToCartItems(available);
-					setUnavailableForPurchaseItems(unavailable);
+						.filter((a) => Number(a.ecom) !== 3);
 
 					if (available.length > 0) {
-						const cartItems = available.map((hexagonId) => ({
-							hexagonId: Number(hexagonId),
+						const cartItems = available.map((a) => ({
+							hexagonId: Number(a.hexagonId),
 							quantity: 1,
 							warehouseNumber: profile?.defaultWarehouseNumber,
 							companyNumber: profile?.defaultCompanyNumber,
 						}));
 
 						await postCartKit(cartItems);
-						toast.success("Elementer lagt til i handlekurven");
 						setIsCartChanging(!isCartChanging);
-					}
 
-					setCartModalOpen(true);
+						// Group by description for the notification item list
+						const grouped = new Map<string, number>();
+						available.forEach((a) => {
+							const name = a.beskrivelse || a.hexagonId;
+							grouped.set(name, (grouped.get(name) || 0) + 1);
+						});
+						const items = Array.from(grouped, ([name, quantity]) => ({ name, quantity }));
+
+						showCartNotification({
+							itemName: available.length === 1 ? (available[0].beskrivelse || available[0].hexagonId) : `${available.length} varer`,
+							itemNumber: available.length === 1 ? available[0].hexagonId : "",
+							quantity: available.length,
+							unavailableCount: unavailable.length,
+							items,
+						});
+					} else if (unavailable.length > 0) {
+						toast.error(
+							`${unavailable.length} vare${unavailable.length === 1 ? "" : "r"} ikke tilgjengelig for salg`,
+						);
+					}
 				} catch (error) {
 					toast.error("Kunne ikke legge til elementer i handlekurven");
 				} finally {
@@ -911,35 +918,6 @@ export function HosesAndEquipments({
 
 	return (
 		<>
-			<CartAddedModal
-				open={cartModalOpen}
-				onOpenChange={(open) => {
-					setCartModalOpen(open);
-					setAddedToCartItems([]);
-					setUnavailableForPurchaseItems([]);
-					setSelectedRows([]);
-					setAllAcrossPages(false);
-					setDeselectedIds(new Set());
-				}}
-				selectedItems={addedToCartItems}
-				unavailableItems={unavailableForPurchaseItems}
-				showAllItems={showAllItems}
-				setShowAllItems={setShowAllItems}
-				onConfirm={async () => {
-					setCartModalOpen(false);
-					if (addedToCartItems.length > 0) {
-						router.push("/cart");
-					} else {
-						setRfqOpen(true);
-					}
-					setAddedToCartItems([]);
-					setUnavailableForPurchaseItems([]);
-					setSelectedRows([]);
-					setAllAcrossPages(false);
-					setDeselectedIds(new Set());
-					localStorage.removeItem("hosesAndEquipments_page");
-				}}
-			/>
 
 			<SupportDialog
 				open={supportOpen}
@@ -1092,7 +1070,7 @@ export function HosesAndEquipments({
 					</div>
 				</div>
 
-				<div className="rounded-lg border border-[#C1C4C2] bg-white">
+				<div className="min-w-0 overflow-hidden rounded-lg border border-[#C1C4C2] bg-white">
 					<div className="flex items-start justify-between space-y-6 p-6">
 						<HoseSearchBar
 							value={searchQuery}
@@ -1158,7 +1136,6 @@ export function HosesAndEquipments({
 								</div>
 								<Button
 									onClick={async () => {
-										setCartModalOpen(true);
 										await handleBulkAction("cart");
 										localStorage.removeItem("selectedHoseRows");
 									}}
@@ -1171,7 +1148,6 @@ export function HosesAndEquipments({
 									selectedCount={selectedCount}
 									isAddingToCart={isAddingToCart}
 									onAddToCart={async () => {
-										setCartModalOpen(true);
 										await handleBulkAction("cart");
 									}}
 									onContactSupport={() => {

@@ -110,7 +110,7 @@ export default function ProductVariantTable({
 }: ProductVariantTableProps) {
 	const t = useTranslations();
 	const { data: profile } = useGetProfileData();
-	const { isCartChanging, setIsCartChanging, setIsAuthOpen } = useAppContext();
+	const { isCartChanging, setIsCartChanging, setIsAuthOpen, showCartNotification } = useAppContext();
 	const isSapCustomer = profile?.defaultCustomerNumber === SAP_CUSTOMER;
 
 	const [searchQuery, setSearchQuery] = useState<string>("");
@@ -464,10 +464,11 @@ export default function ProductVariantTable({
 				throw new Error(response.message);
 			}
 
-			toast(t("Product.addedToCart"), {
-				type: "success",
-				position: "bottom-right",
-				autoClose: 2000,
+			showCartNotification({
+				itemName: columnAttributes?.[variant.itemNumber]?.itemName ?? variant.itemNumber.toString(),
+				itemNumber: variant.itemNumber.toString(),
+				quantity: qty,
+				imageUrl: columnAttributes?.[variant.itemNumber]?.mediaId?.[0]?.url || variant.mediaId?.[0]?.url,
 			});
 
 			setQuantities((prev) => ({

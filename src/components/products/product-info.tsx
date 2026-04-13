@@ -65,7 +65,7 @@ export function ProductInfo({
 	const firstItemNumber = variants?.[0]?.itemNumber;
 	const t = useTranslations("Product");
 	const { data: profile } = useGetProfileData();
-	const { isCartChanging, setIsCartChanging, setIsAuthOpen } = useAppContext();
+	const { isCartChanging, setIsCartChanging, setIsAuthOpen, showCartNotification } = useAppContext();
 	const [copiedGtin, setCopiedGtin] = useState(false);
 	const [copiedSap, setCopiedSap] = useState(false);
 	const [showFullDescription, setShowFullDescription] = useState(false);
@@ -426,10 +426,11 @@ export function ProductInfo({
 			}
 
 			setIsCartChanging(!isCartChanging);
-			toast(t("addedToCart"), {
-				type: "success",
-				position: "bottom-right",
-				autoClose: 2000,
+			showCartNotification({
+				itemName: columnAttributes?.[selectedItemNumber]?.itemName ?? name,
+				itemNumber: selectedItemNumber,
+				quantity: selectedQuantity ?? quantity,
+				imageUrl,
 			});
 
 			await getCart();

@@ -145,7 +145,7 @@ export function DataTable<
 														"min-w-[120px]": column.key === "createdDate",
 														"min-w-[100px]": column.key === "price",
 														"min-w-[180px]": column.key === "status",
-														"sticky right-0 z-10": column.key === "action",
+														// "sticky right-0": column.key === "action",
 														// "p-0": column.key === "action",
 													},
 												)}>
@@ -253,8 +253,8 @@ export function DataTable<
 																key={column.key}
 																className={cn(
 																	"px-4 py-4 font-medium text-[#0F1912]",
-																	column.key === "action" &&
-																		"sticky right-0 bg-inherit",
+																	// column.key === "action" &&
+																	// 	"sticky right-0",
 																)}>
 																{column.cell(item)}
 															</td>

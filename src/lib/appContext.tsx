@@ -27,6 +27,7 @@ import {
 } from "@/services/product.service";
 import { AddressFormState } from "@/types/address";
 import { CartKitResponse, CartLine } from "@/types/carts.types";
+import { CartAddedNotification, CartNotificationData } from "@/components/ui/cart-added-notification";
 import { Order } from "@/types/orders.types";
 import { PriceResponse } from "@/types/search.types";
 import { usePathname, useRouter } from "next/navigation";
@@ -88,6 +89,8 @@ interface AppContextType {
 	rabatterTotalPrice: number;
 
 	handleClearCart: () => Promise<void>;
+
+	showCartNotification: (data: CartNotificationData) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -98,6 +101,11 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const [isAuthOpen, setIsAuthOpen] = useState(false);
 	const [currentStep, setCurrentStep] = useState(0);
 	const [isCartChanging, setIsCartChanging] = useState(false);
+	const [cartNotification, setCartNotification] = useState<CartNotificationData | null>(null);
+
+	const showCartNotification = (data: CartNotificationData) => {
+		setCartNotification(data);
+	};
 
 	const [cartItems, setCartItems] = useState<CartKitResponse>();
 	const [prices, setPrices] = useState<Record<string, number>>({});
@@ -874,7 +882,13 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 				rabatterTotalPrice,
 				orderSummaryTotalPriceFinal,
+
+				showCartNotification,
 			}}>
+			<CartAddedNotification
+				data={cartNotification}
+				onClose={() => setCartNotification(null)}
+			/>
 			{children}
 		</AppContext.Provider>
 	);

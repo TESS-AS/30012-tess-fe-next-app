@@ -587,6 +587,7 @@ export default function ProfilePage() {
 
 					<div
 						className={cn(
+							"min-w-0",
 							isSidebarCollapsed
 								? "w-[calc(100%-80px)]"
 								: "w-[calc(100%-350px)]",
