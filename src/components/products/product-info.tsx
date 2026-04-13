@@ -65,7 +65,7 @@ export function ProductInfo({
 	const firstItemNumber = variants?.[0]?.itemNumber;
 	const t = useTranslations("Product");
 	const { data: profile } = useGetProfileData();
-	const { isCartChanging, setIsCartChanging } = useAppContext();
+	const { isCartChanging, setIsCartChanging, setIsAuthOpen } = useAppContext();
 	const [copiedGtin, setCopiedGtin] = useState(false);
 	const [copiedSap, setCopiedSap] = useState(false);
 	const [showFullDescription, setShowFullDescription] = useState(false);
@@ -536,7 +536,7 @@ export function ProductInfo({
 										{columnAttributes?.[selectedItemNumber]?.itemName ?? name}
 									</span>
 								</p>
-								<div className="flex flex-wrap items-center gap-1.5">
+								{profile && <div className="flex flex-wrap items-center gap-1.5">
 									<span className="shrink-0 font-semibold text-black">
 										{locale === "no" ? "Tilgjengelighet:" : "Availability:"}
 									</span>
@@ -605,7 +605,7 @@ export function ProductInfo({
 											)}
 										</SelectContent>
 									</Select>
-								</div>
+								</div>}
 							</div>
 						</div>
 
@@ -629,21 +629,33 @@ export function ProductInfo({
 					</div>
 
 					{/* Price */}
-					<div className="flex items-baseline gap-1">
-						<span className="text-xl leading-none font-semibold text-black">
-							{loadingPrice
-								? t("loadingPrice")
-								: calculatedPrice !== null
-									? formatNorwegianCurrency(calculatedPrice)
-									: "-"}
-						</span>
-						<span className="text-sm font-normal text-gray-500">
-							/ {unit} ({locale === "no" ? "eks mva" : t("excludingVat")})
-						</span>
-					</div>
+					{profile ? (
+						<div className="flex items-baseline gap-1">
+							<span className="text-xl leading-none font-semibold text-black">
+								{loadingPrice
+									? t("loadingPrice")
+									: calculatedPrice !== null
+										? formatNorwegianCurrency(calculatedPrice)
+										: "-"}
+							</span>
+							<span className="text-sm font-normal text-gray-500">
+								/ {unit} ({locale === "no" ? "eks mva" : t("excludingVat")})
+							</span>
+						</div>
+					) : (
+						<p className="text-sm text-gray-500">
+							<button
+								type="button"
+								className="text-[#009640] underline hover:text-[#007a2e]"
+								onClick={() => setIsAuthOpen(true)}>
+								Logg inn
+							</button>{" "}
+							for pris
+						</p>
+					)}
 
-					{/* Quantity selector + Legg til */}
-					<div className="flex items-center justify-between gap-4">
+					{/* Quantity selector + Legg til (only for logged-in users) */}
+					{profile && <div className="flex items-center justify-between gap-4">
 						<QuantityButtons
 							quantity={effectiveQuantity}
 							allowInput
@@ -686,7 +698,7 @@ export function ProductInfo({
 								</>
 							)}
 						</Button>
-					</div>
+					</div>}
 				</div>
 			)}
 		</div>

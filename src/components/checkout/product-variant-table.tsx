@@ -110,7 +110,7 @@ export default function ProductVariantTable({
 }: ProductVariantTableProps) {
 	const t = useTranslations();
 	const { data: profile } = useGetProfileData();
-	const { isCartChanging, setIsCartChanging } = useAppContext();
+	const { isCartChanging, setIsCartChanging, setIsAuthOpen } = useAppContext();
 	const isSapCustomer = profile?.defaultCustomerNumber === SAP_CUSTOMER;
 
 	const [searchQuery, setSearchQuery] = useState<string>("");
@@ -708,17 +708,18 @@ export default function ProductVariantTable({
 		const combinedPriceQuantityCart =
 			hasQuantity && hasAddToCart && visibleCols.quantity && visibleCols.cart;
 
+		// Hide quantity, warehouse, and cart columns for logged-out users
 		// Optional separate quantity column (when not combined into PRIS)
 		if (!combinedPriceQuantityCart) {
-			if (hasQuantity && visibleCols.quantity) fixedTail.push("quantity");
+			if (hasQuantity && visibleCols.quantity && profile) fixedTail.push("quantity");
 		}
 
 		// Availability column
-		if (visibleCols.warehouse) fixedTail.push("warehouse");
+		if (visibleCols.warehouse && profile) fixedTail.push("warehouse");
 
 		// Optional separate cart column (when not combined into PRIS)
 		if (!combinedPriceQuantityCart) {
-			if (hasAddToCart && visibleCols.cart) fixedTail.push("cart");
+			if (hasAddToCart && visibleCols.cart && profile) fixedTail.push("cart");
 		}
 
 		// PRIS column should always be the last column
@@ -926,7 +927,7 @@ export default function ProductVariantTable({
 							return (
 								<TableRow
 									key={variant.itemNumber}
-									className={`cursor-pointer hover:bg-[#F0FCF2] ${
+									className={`cursor-pointer hover:bg-[#F0FCF2] h-[52px] ${
 										isSelected
 											? "border-l-4 border-l-green-700 bg-[#F0FCF2]"
 											: ""
@@ -1124,6 +1125,26 @@ export default function ProductVariantTable({
 														</TableCell>
 													);
 												case "price":
+													if (!profile) {
+														return (
+															<TableCell
+																key="price"
+																className="hidden min-w-[100px] py-2 md:table-cell">
+																<span className="text-sm text-gray-500">
+																	<button
+																		type="button"
+																		className="text-[#009640] underline hover:text-[#007a2e]"
+																		onClick={(e) => {
+																			e.stopPropagation();
+																			setIsAuthOpen(true);
+																		}}>
+																		Logg inn
+																	</button>{" "}
+																	for pris
+																</span>
+															</TableCell>
+														);
+													}
 													if (combinedPriceQuantityCart) {
 														return (
 															<TableCell
