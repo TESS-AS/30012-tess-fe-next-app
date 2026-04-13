@@ -130,6 +130,7 @@ export const useGetAssets = (
 			response,
 		);
 
+		console.log("response", response);
 		return response;
 	};
 
