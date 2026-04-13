@@ -11,6 +11,10 @@ import {
 	useState,
 } from "react";
 
+import {
+	CartAddedNotification,
+	CartNotificationData,
+} from "@/components/ui/cart-added-notification";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import {
@@ -27,7 +31,6 @@ import {
 } from "@/services/product.service";
 import { AddressFormState } from "@/types/address";
 import { CartKitResponse, CartLine } from "@/types/carts.types";
-import { CartAddedNotification, CartNotificationData } from "@/components/ui/cart-added-notification";
 import { Order } from "@/types/orders.types";
 import { PriceResponse } from "@/types/search.types";
 import { usePathname, useRouter } from "next/navigation";
@@ -101,7 +104,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const [isAuthOpen, setIsAuthOpen] = useState(false);
 	const [currentStep, setCurrentStep] = useState(0);
 	const [isCartChanging, setIsCartChanging] = useState(false);
-	const [cartNotification, setCartNotification] = useState<CartNotificationData | null>(null);
+	const [cartNotification, setCartNotification] =
+		useState<CartNotificationData | null>(null);
 
 	const showCartNotification = (data: CartNotificationData) => {
 		setCartNotification(data);
@@ -195,7 +199,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 							quantity?: number;
 						} => {
 							if (v == null || typeof v !== "object") return false;
-							const itemNumber = (v as { itemNumber?: unknown }).itemNumber;
+							const { itemNumber } = v as { itemNumber?: unknown };
 							return (
 								typeof itemNumber === "string" && itemNumber.trim().length > 0
 							);
@@ -329,7 +333,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 									quantity?: number;
 								} => {
 									if (v == null || typeof v !== "object") return false;
-									const itemNumber = (v as { itemNumber?: unknown }).itemNumber;
+									const { itemNumber } = v as { itemNumber?: unknown };
 									return (
 										typeof itemNumber === "string" &&
 										itemNumber.trim().length > 0
@@ -469,7 +473,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 						quantity?: number;
 					} => {
 						if (v == null || typeof v !== "object") return false;
-						const itemNumber = (v as { itemNumber?: unknown }).itemNumber;
+						const { itemNumber } = v as { itemNumber?: unknown };
 						return (
 							typeof itemNumber === "string" && itemNumber.trim().length > 0
 						);
@@ -550,7 +554,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					quantity?: number;
 				} => {
 					if (v == null || typeof v !== "object") return false;
-					const itemNumber = (v as { itemNumber?: unknown }).itemNumber;
+					const { itemNumber } = v as { itemNumber?: unknown };
 					return typeof itemNumber === "string" && itemNumber.trim().length > 0;
 				},
 			);
@@ -679,7 +683,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 							itemNumber: string;
 						} => {
 							if (v == null || typeof v !== "object") return false;
-							const itemNumber = (v as { itemNumber?: unknown }).itemNumber;
+							const { itemNumber } = v as { itemNumber?: unknown };
 							return (
 								typeof itemNumber === "string" && itemNumber.trim().length > 0
 							);
