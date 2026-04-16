@@ -23,14 +23,25 @@ import {
 import { useGetCompanies } from "@/hooks/useGetCompanies";
 import { useGetProfileData, profileKeys } from "@/hooks/useGetProfileData";
 import { useGetWarehouses } from "@/hooks/useGetWarehouse";
-import { triggerProfileRefetch } from "@/hooks/usePunchoutProfile";
+import {
+	SUPPORT_EMAIL_RECIPIENT,
+	buildOnboardingEmailHtml,
+	buildOnboardingEmailSubject,
+} from "@/lib/email-templates";
+import axiosClient from "@/services/axiosClient";
 import {
 	getOrganizationAddresses,
 	patchUserState,
 	type OrganizationRecord,
 } from "@/services/user.service";
 import { useQueryClient } from "@tanstack/react-query";
-import { Building2, Search, Loader2, ChevronRight, CheckCircle2 } from "lucide-react";
+import {
+	Building2,
+	Search,
+	Loader2,
+	ChevronRight,
+	CheckCircle2,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 
 interface OnboardingModalProps {
@@ -131,6 +142,24 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 
 			// Set userstate to "onboarding" so onboarding notification shows under header
 			await patchUserState("onboarding");
+
+			// Send email notification to customer support
+			const htmlBody = buildOnboardingEmailHtml({
+				userEmail: profile?.email ?? "Ikke tilgjengelig",
+				userId: profile?.userId ?? "Ukjent",
+				companyName,
+				department: department || undefined,
+				orgNumber: orgNumber || undefined,
+				serviceCenterName: warehouseName,
+			});
+
+			const formData = new FormData();
+			formData.append("toEmail", SUPPORT_EMAIL_RECIPIENT);
+			formData.append("subject", buildOnboardingEmailSubject(companyName));
+			formData.append("htmlBody", htmlBody);
+			formData.append("category", "Onboarding");
+
+			await axiosClient.post("/sendgrid/sendEmail", formData);
 
 			// Refetch profile so banner appears
 			await queryClient.invalidateQueries({
