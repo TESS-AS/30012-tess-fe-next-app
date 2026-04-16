@@ -3,6 +3,12 @@
 import { useState } from "react";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useProfile } from "@/contexts/ProfileContext";
+import { useFeedback } from "@/hooks/useFeedback";
+import {
+	buildFaqFeedbackEmailHtml,
+	buildFaqFeedbackEmailSubject,
+} from "@/lib/email-templates";
 import { CheckCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -29,17 +35,36 @@ export function InfoPage({
 	withFeedback = false,
 }: InfoPageProps) {
 	const t = useTranslations("Faq");
+	const { profile } = useProfile();
 	const [feedback, setFeedback] = useState<"yes" | "no" | null>(null);
 	const [text, setText] = useState("");
 	const [contactMe, setContactMe] = useState<boolean | null>(null);
 	const [submitted, setSubmitted] = useState(false);
+	const { submitFeedback, loading } = useFeedback();
 	// First two questions in category 1 ("Før innlogging og opprettelse") open by default
 	const [category1Open, setCategory1Open] = useState<string[]>([
 		"cat-1-item-0",
 		"cat-1-item-1",
 	]);
 
-	const handleSubmit = () => {
+	const handleSubmit = async () => {
+		const userName = profile
+			? `${profile.firstName} ${profile.lastName}`
+			: "Ukjent bruker";
+		const userEmail = profile?.email ?? "Ikke tilgjengelig";
+
+		const htmlBody = buildFaqFeedbackEmailHtml({
+			userName,
+			userEmail,
+			faqTitle: title,
+			message: text,
+			wantsContact: contactMe ?? false,
+		});
+
+		await submitFeedback("FAQ", text, {
+			subject: buildFaqFeedbackEmailSubject(title),
+			htmlBody,
+		});
 		setSubmitted(true);
 	};
 
@@ -115,7 +140,6 @@ export function InfoPage({
 			</div>
 			)}
 
-			{/* Ja/Nei feedback section – commented out for now (no borders; re-enable when needed)
 			{withFeedback && (
 				<div className="mt-12 rounded-lg border border-[#E5E7E6] bg-white p-6 shadow-sm">
 					<div className="flex flex-wrap items-center gap-4">
@@ -204,8 +228,9 @@ export function InfoPage({
 							<button
 								type="button"
 								onClick={handleSubmit}
-								className="rounded-md bg-[#1C6D2C] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#165a24]">
-								{t("feedback.send")}
+								disabled={loading || !text.trim()}
+								className="rounded-md bg-[#1C6D2C] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#165a24] disabled:opacity-50">
+								{loading ? "Sender..." : t("feedback.send")}
 							</button>
 						</div>
 					)}
@@ -218,7 +243,6 @@ export function InfoPage({
 					)}
 				</div>
 			)}
-			*/}
 		</div>
 	);
 }
