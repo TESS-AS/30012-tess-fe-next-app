@@ -136,7 +136,7 @@ export function RelatedProducts({ products, category }: RelatedProductsProps) {
 							{normalizedProducts.map((product) => (
 								<Link
 									key={product.productNumber}
-									href={product.productNumber}>
+									href={encodeURIComponent(product.productNumber)}>
 									<ProductCard
 										{...product}
 										variant="default"
@@ -154,7 +154,7 @@ export function RelatedProducts({ products, category }: RelatedProductsProps) {
 									<div
 										key={product.productNumber}
 										className="keen-slider__slide">
-										<Link href={product.productNumber}>
+										<Link href={encodeURIComponent(product.productNumber)}>
 											<ProductCard
 												{...product}
 												variant="default"

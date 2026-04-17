@@ -383,11 +383,12 @@ export function ProductGrid({
 
 							// Only preserve search params when on category pages (not search pages)
 							// This prevents 431 errors from overly long URLs when coming from search
+							const encodedProductNumber = encodeURIComponent(product.productNumber);
 							const productHref = query
-								? `${pathname}/${product.productNumber}`
+								? `${pathname}/${encodedProductNumber}`
 								: searchParams.toString()
-									? `${pathname}/${product.productNumber}?${searchParams.toString()}`
-									: `${pathname}/${product.productNumber}`;
+									? `${pathname}/${encodedProductNumber}?${searchParams.toString()}`
+									: `${pathname}/${encodedProductNumber}`;
 
 							return (
 								<Link

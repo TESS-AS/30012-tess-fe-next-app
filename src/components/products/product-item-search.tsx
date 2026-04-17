@@ -53,7 +53,7 @@ export function ProductItem({
 		string | null
 	>(null);
 	const [productLink, setProductLink] = useState<string>(
-		`/produkt/${product.productNumber}`,
+		`/produkt/${encodeURIComponent(product.productNumber)}`,
 	);
 	const [isLoadingCategory, setIsLoadingCategory] = useState(false);
 	const router = useRouter();
@@ -96,20 +96,20 @@ export function ProductItem({
 					const pathParts = [...pathSlugs];
 					// Only add product number if we have at least one category
 					if (pathParts.length > 0) {
-						pathParts.push(product.productNumber);
+						pathParts.push(encodeURIComponent(product.productNumber));
 						setProductLink(`/${pathParts.join("/")}`);
 					} else {
 						// Fallback: use product number only if no categories available
-						setProductLink(`/produkt/${product.productNumber}`);
+						setProductLink(`/produkt/${encodeURIComponent(product.productNumber)}`);
 					}
 				} else {
 					// Fallback: use product number even without category tree
-					setProductLink(`/produkt/${product.productNumber}`);
+					setProductLink(`/produkt/${encodeURIComponent(product.productNumber)}`);
 				}
 			} catch (error) {
 				console.error("Error loading category tree for product:", error);
 				// Fallback to default product link with product number
-				setProductLink(`/produkt/${product.productNumber}`);
+				setProductLink(`/produkt/${encodeURIComponent(product.productNumber)}`);
 			} finally {
 				setIsLoadingCategory(false);
 			}
