@@ -63,7 +63,7 @@ export async function loadFilterFamily(params: {
 
 export async function loadCategoryTree(productNumber: string) {
 	try {
-		const url = `/categoryTree/${productNumber}`;
+		const url = `/categoryTree/${encodeURIComponent(productNumber)}`;
 		const response: AxiosResponse = await axiosInstance.get(url);
 		return response.data;
 	} catch (error) {

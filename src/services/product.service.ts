@@ -37,7 +37,7 @@ interface FilterValues {
 
 export async function productFetch(productName: string) {
 	try {
-		const url = `/searchResult/${productName}`;
+		const url = `/searchResult/${encodeURIComponent(productName)}`;
 		const response = await axiosInstance.get(url);
 		return response.data;
 	} catch (error) {
@@ -48,7 +48,7 @@ export async function productFetch(productName: string) {
 
 export async function loadCategories(query: string) {
 	try {
-		const url = `/searchCategory/${query}`;
+		const url = `/searchCategory/${encodeURIComponent(query)}`;
 		const response: AxiosResponse = await axiosInstance.get(url);
 		return response.data;
 	} catch (error) {
@@ -77,7 +77,7 @@ export async function getItemCompanyBalance(
 ): Promise<WarehouseBalance[]> {
 	try {
 		const response = await axiosInstance.get(
-			`/item/company/balance?itemNumber=${itemNumber}&companyNumber=${companyNumber}`,
+			`/item/company/balance?itemNumber=${encodeURIComponent(itemNumber)}&companyNumber=${encodeURIComponent(companyNumber)}`,
 		);
 		return response.data.result;
 	} catch (error) {
@@ -92,7 +92,7 @@ export async function getProductCompanyBalance(
 ): Promise<WarehouseBalance[]> {
 	try {
 		const response = await axiosInstance.get(
-			`/product/company/balance?productNumber=${productNumber}&companyNumber=${companyNumber}`,
+			`/product/company/balance?productNumber=${encodeURIComponent(productNumber)}&companyNumber=${encodeURIComponent(companyNumber)}`,
 		);
 		return response.data.result;
 	} catch (error) {
@@ -107,7 +107,7 @@ export async function getItemWarehouseBalance(
 ): Promise<WarehouseBalance> {
 	try {
 		const response = await axiosInstance.get(
-			`/item/company/balance?itemNumber=${itemNumber}&companyNumber=${companyNumber}`,
+			`/item/company/balance?itemNumber=${encodeURIComponent(itemNumber)}&companyNumber=${encodeURIComponent(companyNumber)}`,
 		);
 		return response.data;
 	} catch (error) {
@@ -123,7 +123,7 @@ export async function getProductWarehouseBalance(
 ): Promise<WarehouseBalance[]> {
 	try {
 		const response = await axiosInstance.get(
-			`/product/company/balance?productNumber=${productNumber}&companyNumber=${companyNumber}&warehouseNumber=${warehouseNumber}`,
+			`/product/company/balance?productNumber=${encodeURIComponent(productNumber)}&companyNumber=${encodeURIComponent(companyNumber)}&warehouseNumber=${encodeURIComponent(warehouseNumber)}`,
 		);
 		return response.data.result;
 	} catch (error) {
@@ -145,7 +145,7 @@ export async function calculateItemPrice(
 ) {
 	try {
 		const response = await axiosInstance.post(
-			`/item/price/${customerNumber}/${companyNumber}`,
+			`/item/price/${encodeURIComponent(customerNumber)}/${encodeURIComponent(companyNumber)}`,
 			request,
 		);
 		return response.data;
@@ -163,7 +163,7 @@ export async function getProductPrice(
 ): Promise<PriceResponse[]> {
 	try {
 		const response = await axiosInstance.get(
-			`/product/price/${customerNumber}/${companyNumber}/${productNumber}/${warehouseNumber}`,
+			`/product/price/${encodeURIComponent(customerNumber)}/${encodeURIComponent(companyNumber)}/${encodeURIComponent(productNumber)}/${encodeURIComponent(warehouseNumber)}`,
 		);
 		return response.data;
 	} catch (error) {
@@ -174,7 +174,7 @@ export async function getProductPrice(
 
 export async function getProductVariations(productNumber: string) {
 	try {
-		const response = await axiosInstance.get(`/item/variants/${productNumber}`);
+		const response = await axiosInstance.get(`/item/variants/${encodeURIComponent(productNumber)}`);
 		return response.data;
 	} catch (error) {
 		console.error("Error fetching product variations:", error);
