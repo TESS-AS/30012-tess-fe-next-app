@@ -188,18 +188,16 @@ export function Rekvisisjoner() {
 											requisitionId: rekvisisjon.requisitionId,
 											status: "approved",
 										});
-										await Promise.all(
-											rekvisisjon.items.map((item) =>
-												addToCart({
-													productNumber: item.productNumber,
-													itemNumber: item.itemNumber,
-													quantity: item.quantity,
-													warehouseNumber: "1",
-													companyNumber:
-														profile?.defaultCompanyNumber?.toString() || "1",
-												}),
-											),
-										);
+										for (const item of rekvisisjon.items) {
+											await addToCart({
+												productNumber: item.productNumber,
+												itemNumber: item.itemNumber,
+												quantity: item.quantity,
+												warehouseNumber: "1",
+												companyNumber:
+													profile?.defaultCompanyNumber?.toString() || "1",
+											});
+										}
 										getRequisitions();
 									} catch (error) {
 										console.error(
