@@ -5,8 +5,9 @@ const supportedLocales = ["en", "no"];
 function redirectToLocale(request: NextRequest): NextResponse | null {
 	const { pathname } = request.nextUrl;
 
-	const hasLocale = supportedLocales.some((locale) =>
-		pathname.startsWith(`/${locale}`),
+	const hasLocale = supportedLocales.some(
+		(locale) =>
+			pathname === `/${locale}` || pathname.startsWith(`/${locale}/`),
 	);
 
 	if (!hasLocale) {
