@@ -1,35 +1,29 @@
-import { useCallback, useEffect, useState } from "react";
-
 import axiosClient from "@/services/axiosClient";
+import { useQuery } from "@tanstack/react-query";
 
 interface Customer {
 	customerNumber: string;
 	customerName: string;
 }
 
+export const customerKeys = {
+	all: ["customers"] as const,
+	list: (companyNumber?: string) =>
+		[...customerKeys.all, companyNumber ?? "all"] as const,
+};
+
 export function useGetCustomers(shouldFetch: boolean, companyNumber?: string | number) {
-	const [customers, setCustomers] = useState<Customer[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState<unknown>(null);
+	const companyStr = companyNumber != null ? String(companyNumber) : undefined;
 
-	const fetchCustomers = useCallback(async () => {
-		if (!shouldFetch) return;
-
-		try {
-			setIsLoading(true);
-			const params = companyNumber ? { companyNumber: String(companyNumber) } : {};
+	const { data, isLoading, error, refetch } = useQuery({
+		queryKey: customerKeys.list(companyStr),
+		queryFn: async () => {
+			const params = companyStr ? { companyNumber: companyStr } : {};
 			const response = await axiosClient.get("/customer", { params });
-			setCustomers(response.data); // Keep the full customer object
-		} catch (err) {
-			setError(err);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [shouldFetch, companyNumber]);
+			return response.data as Customer[];
+		},
+		enabled: shouldFetch,
+	});
 
-	useEffect(() => {
-		fetchCustomers();
-	}, [fetchCustomers]);
-
-	return { customers, isLoading, error, refetch: fetchCustomers };
+	return { customers: data ?? [], isLoading, error, refetch };
 }

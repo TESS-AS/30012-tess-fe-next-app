@@ -1,30 +1,24 @@
-import { useCallback, useEffect, useState } from "react";
-
 import axiosClient from "@/services/axiosClient";
+import { useQuery } from "@tanstack/react-query";
+
+export const assortmentKeys = {
+	all: ["assortments"] as const,
+	list: (companyNumber?: string) =>
+		[...assortmentKeys.all, companyNumber ?? "all"] as const,
+};
 
 export function useGetAssortments(shouldFetch: boolean, companyNumber?: string | number) {
-	const [assortments, setAssortments] = useState<any[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState<unknown>(null);
+	const companyStr = companyNumber != null ? String(companyNumber) : undefined;
 
-	const fetchAssortments = useCallback(async () => {
-		if (!shouldFetch) return;
-
-		try {
-			setIsLoading(true);
-			const params = companyNumber ? { companyNumber: String(companyNumber) } : {};
+	const { data, isLoading, error, refetch } = useQuery({
+		queryKey: assortmentKeys.list(companyStr),
+		queryFn: async () => {
+			const params = companyStr ? { companyNumber: companyStr } : {};
 			const response = await axiosClient.get("/assortment", { params });
-			setAssortments(response.data ?? []);
-		} catch (err) {
-			setError(err);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [shouldFetch, companyNumber]);
+			return response.data ?? [];
+		},
+		enabled: shouldFetch,
+	});
 
-	useEffect(() => {
-		fetchAssortments();
-	}, [fetchAssortments]);
-
-	return { assortments, isLoading, error, refetch: fetchAssortments };
+	return { assortments: (data ?? []) as any[], isLoading, error, refetch };
 }

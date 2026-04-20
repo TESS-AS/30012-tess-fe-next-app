@@ -6,7 +6,11 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { userDataBrukereKeys } from "./useFetchUserDataBrukere";
+import { assortmentKeys } from "./useGetAssortments";
+import { companyKeys } from "./useGetCompanies";
+import { customerKeys } from "./useGetCustomers";
 import { editableUsersKeys } from "./useGetEditableUsers";
+import { warehouseKeys } from "./useGetWarehouse";
 
 export function useUpdateUserRelations() {
 	const queryClient = useQueryClient();
@@ -27,6 +31,22 @@ export function useUpdateUserRelations() {
 
 			queryClient.invalidateQueries({
 				queryKey: userDataBrukereKeys.all,
+			});
+
+			queryClient.invalidateQueries({
+				queryKey: assortmentKeys.all,
+			});
+
+			queryClient.invalidateQueries({
+				queryKey: customerKeys.all,
+			});
+
+			queryClient.invalidateQueries({
+				queryKey: warehouseKeys.all,
+			});
+
+			queryClient.invalidateQueries({
+				queryKey: companyKeys.all,
 			});
 		},
 		onError: (error) => {

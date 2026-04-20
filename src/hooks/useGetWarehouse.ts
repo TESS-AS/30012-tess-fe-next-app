@@ -1,40 +1,32 @@
-import { useCallback, useEffect, useState } from "react";
-
 import axiosClient from "@/services/axiosClient";
+import { useQuery } from "@tanstack/react-query";
 
 interface Warehouse {
 	id: string;
 	name: string;
 }
 
+export const warehouseKeys = {
+	all: ["warehouses"] as const,
+	list: (companyNumber?: string) =>
+		[...warehouseKeys.all, companyNumber ?? "all"] as const,
+};
+
 export function useGetWarehouses(shouldFetch: boolean, companyNumber?: string | number) {
-	const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState<unknown>(null);
+	const companyStr = companyNumber != null ? String(companyNumber) : undefined;
 
-	const fetchWarehouses = useCallback(async () => {
-		if (!shouldFetch) return;
-
-		try {
-			setIsLoading(true);
-			const params = companyNumber ? { companyNumber: String(companyNumber) } : {};
+	const { data, isLoading, error, refetch } = useQuery({
+		queryKey: warehouseKeys.list(companyStr),
+		queryFn: async () => {
+			const params = companyStr ? { companyNumber: companyStr } : {};
 			const response = await axiosClient.get("/warehouse", { params });
-			setWarehouses(
-				response.data.map((w: any) => ({
-					id: w.warehousenumber,
-					name: w.warehousename,
-				})),
-			);
-		} catch (err) {
-			setError(err);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [shouldFetch, companyNumber]);
+			return (response.data as any[]).map((w) => ({
+				id: w.warehousenumber as string,
+				name: w.warehousename as string,
+			}));
+		},
+		enabled: shouldFetch,
+	});
 
-	useEffect(() => {
-		fetchWarehouses();
-	}, [fetchWarehouses]);
-
-	return { warehouses, isLoading, error, refetch: fetchWarehouses };
+	return { warehouses: (data ?? []) as Warehouse[], isLoading, error, refetch };
 }
