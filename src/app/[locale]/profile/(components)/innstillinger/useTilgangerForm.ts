@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useFetchUserDataBrukere } from "@/hooks/useFetchUserDataBrukere";
 import { useMergedPagedItems } from "@/hooks/useMergedPagedItems";
@@ -58,6 +58,12 @@ export interface UseTilgangerFormReturn {
 	normalizeCompanyNumbers: (values: string[]) => string[];
 	buildWarehousesPayload: () => { warehouseNumber: string; companyNumber: string; isDefault: false }[];
 	isLoading: boolean;
+	/** Whether the form has been initialized with data from currentUser. */
+	isInitialized: boolean;
+	/** Whether the user has made changes since initialization. */
+	isDirty: boolean;
+	/** Reset dirty state (e.g. after a successful save). */
+	resetDirty: () => void;
 	/** Lengths of merged option lists (for pagination canNextPage). */
 	listLengths: { customers: number; assortments: number; warehouses: number; companies: number };
 }
@@ -78,6 +84,10 @@ export function useTilgangerForm(currentUser: User | null): UseTilgangerFormRetu
 	const [extraWarehouseCompanyMap, setExtraWarehouseCompanyMap] = useState(
 		() => new Map<string, string>(),
 	);
+	const [isInitialized, setIsInitialized] = useState(false);
+	const [isDirty, setIsDirty] = useState(false);
+	const initRef = useRef(false);
+	const resetDirty = useCallback(() => setIsDirty(false), []);
 
 	const { data: customersData, isLoading: isLoadingCustomers } =
 		useFetchUserDataBrukere(
@@ -342,7 +352,13 @@ export function useTilgangerForm(currentUser: User | null): UseTilgangerFormRetu
 	}, [companies, selectedUsersForOptions]);
 
 	useEffect(() => {
-		if (!currentUser) return;
+		if (!currentUser) {
+			if (initRef.current) {
+				setIsInitialized(false);
+				initRef.current = false;
+			}
+			return;
+		}
 		const customerAccessSet = new Set<string>();
 		const catalogSet = new Set<string>();
 		const warehouseSet = new Set<string>();
@@ -374,6 +390,9 @@ export function useTilgangerForm(currentUser: User | null): UseTilgangerFormRetu
 		setSelectedCatalogs(normAssortment(Array.from(catalogSet)));
 		setSelectedWarehouses(Array.from(warehouseSet));
 		setSelectedCompanies(normCompany(Array.from(companySet)));
+		setIsInitialized(true);
+		setIsDirty(false);
+		initRef.current = true;
 	}, [currentUser]);
 
 	const normalizeCustomerNumbers = (values: string[]) =>
@@ -457,5 +476,8 @@ export function useTilgangerForm(currentUser: User | null): UseTilgangerFormRetu
 		normalizeCompanyNumbers,
 		buildWarehousesPayload,
 		isLoading,
+		isInitialized,
+		isDirty,
+		resetDirty,
 	};
 }

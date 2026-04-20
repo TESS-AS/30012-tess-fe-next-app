@@ -87,10 +87,16 @@ export function TilgangerSection({
 		normalizeCompanyNumbers,
 		buildWarehousesPayload,
 		isLoading: isLoadingOptions,
+		isInitialized,
+		isDirty,
+		resetDirty,
 	} = form;
 
+	const isSaveDisabled =
+		isSavingAccess || !isInitialized || !currentUser;
+
 	const handleSaveAccess = async () => {
-		if (!profileUserId) return;
+		if (!profileUserId || !isInitialized || !currentUser) return;
 		await onSaveAccess({
 			userId: [profileUserId],
 			assortments: selected.catalogs.filter(Boolean),
@@ -98,6 +104,7 @@ export function TilgangerSection({
 			warehouses: buildWarehousesPayload(),
 			companies: selected.companies.filter(Boolean),
 		});
+		resetDirty();
 	};
 
 	const graySectionClass =
@@ -106,8 +113,6 @@ export function TilgangerSection({
 			: roleKey === PROFILE_ROLE.SUPERUSER
 				? `${INNSTILLINGER_CLASSES.cardMutedRoundedBottom} ${superuserBannerDismissed ? "rounded-t-lg" : ""}`
 				: "";
-
-	// if (currentUser == null) return null;
 
 	return (
 		<>
@@ -218,7 +223,7 @@ export function TilgangerSection({
 							type="button"
 							variant="green"
 							onClick={handleSaveAccess}
-							disabled={isSavingAccess}
+							disabled={isSaveDisabled}
 							className="rounded-md px-6">
 							{isSavingAccess && (
 								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -370,7 +375,7 @@ export function TilgangerSection({
 							type="button"
 							variant="green"
 							onClick={handleSaveAccess}
-							disabled={isSavingAccess}
+							disabled={isSaveDisabled}
 							className="rounded-md px-6">
 							{isSavingAccess && (
 								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -522,7 +527,7 @@ export function TilgangerSection({
 							type="button"
 							variant="green"
 							onClick={handleSaveAccess}
-							disabled={isSavingAccess}
+							disabled={isSaveDisabled}
 							className="rounded-md px-6">
 							{isSavingAccess && (
 								<Loader2 className="mr-2 h-4 w-4 animate-spin" />

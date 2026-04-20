@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
-
 import axiosClient from "@/services/axiosClient";
+import { useQuery } from "@tanstack/react-query";
 
 interface Company {
 	companyNumber: number;
@@ -8,28 +7,19 @@ interface Company {
 	companyName: string;
 }
 
+export const companyKeys = {
+	all: ["companies"] as const,
+};
+
 export function useGetCompanies(shouldFetch: boolean) {
-	const [companies, setCompanies] = useState<Company[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState<unknown>(null);
+	const { data, isLoading, error } = useQuery({
+		queryKey: companyKeys.all,
+		queryFn: async () => {
+			const response = await axiosClient.get("/company");
+			return response.data as Company[];
+		},
+		enabled: shouldFetch,
+	});
 
-	useEffect(() => {
-		if (!shouldFetch) return;
-
-		const fetchCompanies = async () => {
-			try {
-				setIsLoading(true);
-				const response = await axiosClient.get("/company");
-				setCompanies(response.data);
-			} catch (err) {
-				setError(err);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchCompanies();
-	}, [shouldFetch]);
-
-	return { companies, isLoading, error };
+	return { companies: data ?? [], isLoading, error };
 }
