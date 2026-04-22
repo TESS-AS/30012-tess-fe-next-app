@@ -33,7 +33,7 @@ export function AvvikendeOrdreDetail({
 	const [approveModalOpen, setApproveModalOpen] = useState(false);
 	const queryClient = useQueryClient();
 	const { data: order, isLoading, error } = useGetOpenOrderLines(orderId);
-	const { refetch: refetchOpenConfirmations } = useGetOpenConfirmations(false);
+	const { refetch: refetchOpenConfirmations } = useGetOpenConfirmations(1, 25, false);
 
 	const toggleLine = (lineNumber: number) => {
 		setExpandedLines((prev) =>

@@ -25,9 +25,12 @@ export function AvvikendeOrdre({
 	const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(
 		null,
 	);
-	const ITEMS_PER_PAGE = 10;
+	const ITEMS_PER_PAGE = 25;
 
-	const { data: orders, isLoading } = useGetOpenConfirmations();
+	const { data: orders, totalCount, isLoading } = useGetOpenConfirmations(
+		currentPage,
+		ITEMS_PER_PAGE,
+	);
 
 	const statuses = ["Alle", "Venter godkjenning", "Godkjent", "Avvist"];
 
@@ -155,13 +158,9 @@ export function AvvikendeOrdre({
 		Avvist: orders?.filter((o) => o.status === "Avvist").length || 0,
 	};
 
-	// Pagination
-	const totalPages = Math.ceil(sortedOrders.length / ITEMS_PER_PAGE);
-	const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-	const paginatedOrders = sortedOrders.slice(
-		startIndex,
-		startIndex + ITEMS_PER_PAGE,
-	);
+	// Pagination — server-driven when totalCount is available, client fallback otherwise
+	const totalItems = totalCount ?? sortedOrders.length;
+	const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
 	const columns = [
 		{
@@ -276,11 +275,11 @@ export function AvvikendeOrdre({
 					</div>
 				</div>
 				<DataTable
-					data={paginatedOrders}
+					data={sortedOrders}
 					columns={columns}
 					currentPage={currentPage}
 					totalPages={totalPages}
-					totalItems={sortedOrders.length}
+					totalItems={totalItems}
 					itemsPerPage={ITEMS_PER_PAGE}
 					onPageChange={(page) => {
 						setCurrentPage(page);

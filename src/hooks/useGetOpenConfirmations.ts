@@ -8,7 +8,8 @@ import { useQuery } from "@tanstack/react-query";
 export const openConfirmationsKeys = {
 	all: ["openConfirmations"] as const,
 	lists: () => [...openConfirmationsKeys.all, "list"] as const,
-	list: () => [...openConfirmationsKeys.lists()] as const,
+	list: (page: number, limit: number) =>
+		[...openConfirmationsKeys.lists(), { page, limit }] as const,
 };
 
 /**
@@ -45,7 +46,6 @@ function transformOrderData(
 		: formatDate(rawOrder.createDateTime);
 
 	// Use supplierNumber as supplier identifier
-	// The API response shows supplierNumber like "738100", "741580", "755160"
 	const supplier = `Leverandør ${rawOrder.supplierNumber}`;
 
 	return {
@@ -58,24 +58,31 @@ function transformOrderData(
 	};
 }
 
-export function useGetOpenConfirmations(enabled: boolean = true) {
+export function useGetOpenConfirmations(
+	page: number = 1,
+	limit: number = 25,
+	enabled: boolean = true,
+) {
 	const { data, isLoading, error, refetch } = useQuery({
-		queryKey: openConfirmationsKeys.list(),
+		queryKey: openConfirmationsKeys.list(page, limit),
 		queryFn: async () => {
-			const response = await getOpenConfirmations();
-			// Transform the raw orders array to match component expectations
-			// New API structure uses `data` instead of `orders`
-			return (response.data || []).map(transformOrderData);
+			const response = await getOpenConfirmations(page, limit);
+			return {
+				orders: (response.data || []).map(transformOrderData),
+				totalCount: response.totalCount,
+			};
 		},
 		enabled,
 		staleTime: 1000 * 60 * 5, // 5 minutes
 		gcTime: 1000 * 60 * 10, // 10 minutes
 		refetchOnWindowFocus: false,
 		refetchOnMount: true,
+		placeholderData: (previousData) => previousData,
 	});
 
 	return {
-		data: (data as OpenOrderConfirmation[]) || [],
+		data: data?.orders ?? [],
+		totalCount: data?.totalCount,
 		isLoading,
 		error,
 		refetch,

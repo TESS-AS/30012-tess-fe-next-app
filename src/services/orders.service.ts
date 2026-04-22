@@ -191,10 +191,14 @@ export async function getUserOrders(
 	}
 }
 
-export async function getOpenConfirmations(): Promise<OpenConfirmationsResponse> {
+export async function getOpenConfirmations(
+	page: number = 1,
+	limit: number = 25,
+): Promise<OpenConfirmationsResponse> {
 	try {
 		const response = await axiosInstance.get<OpenConfirmationsResponse>(
 			"/edi/order/openOrders",
+			{ params: { page, limit } },
 		);
 		return response.data;
 	} catch (error) {

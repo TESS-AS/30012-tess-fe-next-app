@@ -191,6 +191,7 @@ export interface OpenOrderConfirmation {
 export interface OpenConfirmationsResponse {
 	page: number;
 	limit: number;
+	totalCount?: number;
 	data: OpenOrderConfirmationRaw[];
 }
 
