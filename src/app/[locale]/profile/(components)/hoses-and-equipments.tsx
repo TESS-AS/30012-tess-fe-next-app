@@ -1140,7 +1140,7 @@ export function HosesAndEquipments({
 										localStorage.removeItem("selectedHoseRows");
 									}}
 									disabled={isAddingToCart}
-									className="h-9 bg-[#009640] px-4 text-sm font-medium text-white hover:bg-[#003D1A]">
+									className="h-9 px-4 text-sm font-medium">
 									<ShoppingCart className="mr-2 h-4 w-4" />
 									Legg til {selectedCount} enheter
 								</Button>

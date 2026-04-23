@@ -647,7 +647,7 @@ export function ProductInfo({
 						<p className="text-sm text-gray-500">
 							<button
 								type="button"
-								className="text-[#009640] underline hover:text-[#007a2e]"
+								className="text-[#009640] underline hover:text-[#005522]"
 								onClick={() => setIsAuthOpen(true)}>
 								Logg inn
 							</button>{" "}
@@ -684,8 +684,7 @@ export function ProductInfo({
 
 						<Button
 							disabled={adding || !selectedItemNumber}
-							className="min-w-0 shrink rounded-lg border-0 px-4 font-light text-white hover:opacity-90 disabled:opacity-60 md:w-[172px]"
-							style={{ backgroundColor: "#009640" }}
+							className="min-w-0 shrink rounded-lg border-0 px-4 font-light hover:opacity-90 disabled:opacity-60 md:w-[172px]"
 							onClick={handleAddToCart}>
 							{adding ? (
 								<>

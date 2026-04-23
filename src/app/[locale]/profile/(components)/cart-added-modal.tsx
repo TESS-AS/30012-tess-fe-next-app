@@ -116,7 +116,7 @@ export function CartAddedModal({
 
 				<div className="mt-4 flex gap-2">
 					<Button
-						className="flex-1 bg-[#009640] text-white hover:bg-[#007a2e]"
+						className="flex-1"
 						onClick={onConfirm}>
 						{allUnavailable ? "Send forespørsel" : t("goToCart")}
 					</Button>

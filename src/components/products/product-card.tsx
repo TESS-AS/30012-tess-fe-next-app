@@ -113,7 +113,7 @@ export function ProductCard({
 					<Button
 						variant="outlineGrey"
 						size="sm"
-						className="h-[35px] !text-sm text-gray-900 transition-colors group-hover:border-[#00B84C] group-hover:bg-[#00B84C] group-hover:text-white hover:!bg-[#F0FCF2] hover:text-gray-900">
+						className="h-[35px] !text-sm text-gray-900 transition-colors group-hover:border-[#009640] group-hover:bg-[#009640] group-hover:text-white hover:!border-[#005522] hover:!bg-[#005522] hover:!text-white">
 						Vis produkt
 					</Button>
 				</div>

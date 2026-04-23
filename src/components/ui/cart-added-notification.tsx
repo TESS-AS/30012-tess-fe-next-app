@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AlertTriangle, Check, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -172,15 +173,15 @@ export function CartAddedNotification({
 							</div>
 						) : null}
 						<div className="mt-5">
-							<button
+							<Button
 								type="button"
 								onClick={() => {
 									handleClose();
 									setTimeout(() => router.push("/cart"), prefersReducedMotion ? 0 : EXIT_ANIMATION_MS);
 								}}
-								className="w-full rounded-lg bg-[#009640] py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#007a2e]">
+								className="w-full rounded-lg py-2.5 text-sm font-medium">
 								Til handlekurven
-							</button>
+							</Button>
 						</div>
 					</>
 				)}

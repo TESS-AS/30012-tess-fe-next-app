@@ -146,7 +146,7 @@ export function SupportDialog({
 							Legg til vedlegg
 						</label>
 						<div className="flex items-center gap-3 rounded-md border border-[#8A8F8C]">
-							<label className="inline-flex cursor-pointer items-center rounded-l-md bg-[#003D1A] px-3 py-2 text-sm font-medium text-white hover:bg-[#164B1F]">
+							<label className="inline-flex cursor-pointer items-center rounded-l-md bg-[#003D1A] px-3 py-2 text-sm font-medium text-white hover:bg-[#003D1A]/80">
 								Velg fil
 								<input
 									type="file"
@@ -165,7 +165,7 @@ export function SupportDialog({
 					</div>
 
 					<Button
-						className="mt-2 w-full bg-[#1C6D2C] text-white hover:bg-[#164B1F]"
+						className="mt-2 w-full"
 						disabled={submitting || !subject.trim() || !message.trim()}
 						onClick={handleSubmit}>
 						{submitting ? "Sender..." : "Send melding"}

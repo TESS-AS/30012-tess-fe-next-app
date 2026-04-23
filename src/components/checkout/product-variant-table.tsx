@@ -1134,7 +1134,7 @@ export default function ProductVariantTable({
 																<span className="text-sm text-gray-500">
 																	<button
 																		type="button"
-																		className="text-[#009640] underline hover:text-[#007a2e]"
+																		className="text-[#009640] underline hover:text-[#005522]"
 																		onClick={(e) => {
 																			e.stopPropagation();
 																			setIsAuthOpen(true);

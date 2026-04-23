@@ -1009,7 +1009,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								setIsSearchOpen(false);
 								clearSearch();
 							}}
-							className="flex h-[52px] w-[52px] shrink-0 items-center justify-center bg-[#009640]">
+							className="flex h-[52px] w-[52px] shrink-0 items-center justify-center bg-[#009640] hover:bg-[#005522] transition-colors">
 							<ArrowLeft className="h-5 w-5 text-white" />
 						</button>
 						<Input

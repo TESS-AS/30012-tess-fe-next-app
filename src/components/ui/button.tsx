@@ -9,24 +9,24 @@ const buttonVariants = cva(
 	{
 		variants: {
 			variant: {
-				default: "bg-[#00B84C] text-white shadow-xs hover:bg-[#028f48]",
-				darkGreen: "bg-[#003D1A] text-white shadow-xs hover:bg-green-700",
+				default: "bg-[#009640] text-white shadow-xs hover:bg-[#005522]",
+				darkGreen: "bg-[#003D1A] text-white shadow-xs hover:bg-[#003D1A]/80",
 				outlineGrey:
-					"bg-white border border-[#C1C4C2] hover:border-green-700 hover:bg-[#F0FCF2] gap-1.5",
+					"bg-white border border-[#C1C4C2] hover:border-[#009640] hover:bg-[#F0FCF2] gap-1.5",
 				destructive:
 					"bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
 				outline:
 					"border border-[#5A615D] text-[#5A615D] shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
 				outlineGreen:
-					"border border-green-700 text-green-700 hover:bg-green-700 hover:text-white shadow-xs",
+					"border border-[#009640] text-[#009640] hover:bg-[#009640] hover:text-white shadow-xs",
 				secondary:
 					"bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
 				ghost:
 					"hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
 				link: "text-primary underline-offset-4 hover:underline",
-				green: "bg-[#02a554] text-white hover:bg-[#028f48]",
-				greenSolid: "bg-green-700 text-white shadow-xs hover:bg-green-800",
-				approve: "bg-green-700 text-white shadow-xs hover:bg-green-800 text-xs",
+				green: "bg-[#009640] text-white hover:bg-[#005522]",
+				greenSolid: "bg-[#009640] text-white shadow-xs hover:bg-[#005522]",
+				approve: "bg-[#009640] text-white shadow-xs hover:bg-[#005522] text-xs",
 				reject: "bg-red-700 text-white shadow-xs hover:bg-red-800 text-xs",
 			},
 			size: {
