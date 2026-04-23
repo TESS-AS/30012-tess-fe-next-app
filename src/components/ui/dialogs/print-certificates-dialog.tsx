@@ -115,10 +115,9 @@ export function PrintCertificatesDialog({
 
 						<Button
 							type="button"
-							variant="default"
 							onClick={handlePrint}
 							variant="darkGreen"
-						className="ml-auto">
+							className="ml-auto">
 							<Printer className="mr-2 h-4 w-4" /> Skriv ut
 						</Button>
 					</div>
