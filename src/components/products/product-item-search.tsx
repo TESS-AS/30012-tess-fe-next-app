@@ -228,10 +228,11 @@ export function ProductItem({
 							)}
 							<Button
 								type="button"
-								variant="outlineGreen"
+								variant="outlineGrey"
 								className={cn(
 									"mt-1 w-full rounded-md px-5 py-2 text-sm font-medium transition-colors sm:hidden",
-									"group-hover:border-green-700 group-hover:bg-green-700 group-hover:text-white",
+									"group-hover:border-[#009640] group-hover:bg-[#009640] group-hover:text-white",
+									"hover:border-[#005522] hover:bg-[#005522] hover:text-white",
 								)}
 								onClick={async (e) => {
 									e.stopPropagation();
@@ -263,10 +264,11 @@ export function ProductItem({
 
 							<Button
 								type="button"
-								variant="outlineGreen"
+								variant="outlineGrey"
 								className={cn(
 									"mt-2 ml-auto self-center rounded-md px-5 py-2 text-sm font-medium transition-colors",
-									"group-hover:border-green-700 group-hover:bg-green-700 group-hover:text-white",
+									"group-hover:border-[#009640] group-hover:bg-[#009640] group-hover:text-white",
+									"hover:border-[#005522] hover:bg-[#005522] hover:text-white",
 								)}
 								onClick={async (e) => {
 									e.stopPropagation();

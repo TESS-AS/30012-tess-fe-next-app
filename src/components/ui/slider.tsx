@@ -41,7 +41,7 @@ const SliderRange = React.forwardRef<
 >(({ className, ...props }, ref) => (
 	<SliderPrimitive.Range
 		ref={ref}
-		className={cn("absolute h-full bg-[#00B84C]", className)}
+		className={cn("absolute h-full bg-[#009640]", className)}
 		{...props}
 	/>
 ));

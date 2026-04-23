@@ -58,7 +58,7 @@ export function HoseFiltersDropdown({
 						className={
 							"flex w-full items-center justify-between rounded-md border border-[#C1C4C2] bg-white px-3 py-2 text-[#5A615D] " +
 							(hasActiveFilters
-								? "border-[#0E7B34] text-[#005522]"
+								? "border-[#009640] text-[#005522]"
 								: "border-[#C1C4C2] text-[#5A615D]")
 						}>
 						<div className="flex items-center gap-2">

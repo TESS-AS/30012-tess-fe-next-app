@@ -117,7 +117,8 @@ export function PrintCertificatesDialog({
 							type="button"
 							variant="default"
 							onClick={handlePrint}
-							className="ml-auto bg-[#003D1A] text-white hover:bg-[#164B1F]">
+							variant="darkGreen"
+						className="ml-auto">
 							<Printer className="mr-2 h-4 w-4" /> Skriv ut
 						</Button>
 					</div>

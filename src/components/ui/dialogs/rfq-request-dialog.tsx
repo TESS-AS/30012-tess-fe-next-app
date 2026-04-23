@@ -150,7 +150,7 @@ export function RFQRequestDialog({
 					</div>
 
 					<Button
-						className="mt-2 w-full bg-[#1C6D2C] text-white hover:bg-[#164B1F]"
+						className="mt-2 w-full"
 						disabled={submitting || !requestType}
 						onClick={handleSubmit}>
 						{submitting ? "Sender..." : "Send forespørsel"}

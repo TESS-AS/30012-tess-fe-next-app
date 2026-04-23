@@ -66,7 +66,7 @@ export function HoseActionsDropdown({
 			className={cn(
 				"group inline-flex h-[52px] w-full cursor-pointer items-center gap-2 rounded-tr-md p-0 px-3 py-2 text-sm font-medium transition-colors",
 				selectedCount > 0
-					? "border-[#0E7B34] bg-[#005522] text-white"
+					? "border-[#005522] bg-[#005522] text-white"
 					: "border-[#C1C4C2] text-[#5A615D] data-[state=open]:bg-[#003D1A] data-[state=open]:text-white",
 			)}>
 			<span className="tracking-wide">{t("action")}</span>

@@ -146,7 +146,7 @@ export default function AuthDialog({
 							<div className="text-center text-sm text-black">
 								{t("AuthDialog.needHelp")}{" "}
 								<a
-									className="text-[#009640] underline hover:text-[#007a2e]"
+									className="text-[#009640] underline hover:text-[#005522]"
 									href="mailto:netthandel@tess.no">
 									{t("AuthDialog.contactUs")}
 								</a>

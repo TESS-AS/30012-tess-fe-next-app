@@ -109,12 +109,13 @@ export function PrintTagsDialog({
 
 					<div className="flex flex-wrap items-center gap-3">
 						<span className="text-sm text-[#0F1912]">Velg Template:</span>
-						<button
+						<Button
 							type="button"
+							variant="darkGreen"
 							onClick={() => setTemplate("Detaljert TAG bar S1 S2")}
-							className="rounded-full bg-[#003D1A] px-3 py-1 text-xs font-semibold text-white hover:bg-[#164B1F]">
+							className="rounded-full px-3 py-1 text-xs font-semibold">
 							{template}
-						</button>
+						</Button>
 					</div>
 
 					<div className="space-y-2">
@@ -146,7 +147,7 @@ export function PrintTagsDialog({
 						</Button>
 						<Button
 							type="button"
-							className="bg-[#1C6D2C] text-white hover:bg-[#164B1F]"
+							variant="default"
 							onClick={handlePrint}>
 							<Printer className="mr-2 h-4 w-4" /> Print
 						</Button>

@@ -446,7 +446,7 @@ export function Rekvisisjoner() {
 					<div className="flex">
 						<Button
 							variant="default"
-							className="w-full bg-[#1C6D2C] text-white hover:bg-[#164B1F]"
+							className="w-full"
 							onClick={async () => {
 								setApprovalModalOpen(false);
 

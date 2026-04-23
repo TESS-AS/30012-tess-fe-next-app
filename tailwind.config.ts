@@ -57,7 +57,7 @@ const config = {
 			},
 			colors: {
 				main: "#0F1912",
-				lightGreen: "#00B84C",
+				lightGreen: "#009640",
 				lightGray: "#C1C4C2",
 				common: "hsl(var(--common))",
 				azure: "hsl(var(--azure))",
@@ -102,7 +102,7 @@ const config = {
 					DEFAULT: "hsl(var(--card))",
 					foreground: "hsl(var(--card-foreground))",
 				},
-				green: "#02a554",
+				green: "#009640",
 				"blue-dark": "#efce3925",
 			},
 			borderRadius: {
