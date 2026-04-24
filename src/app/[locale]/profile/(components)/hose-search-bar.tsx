@@ -48,7 +48,7 @@ export function HoseSearchBar({
 		};
 	}, [value]);
 	return (
-		<div className={cn("relative flex w-full max-w-[480px]", className)}>
+		<div className={cn("relative flex w-full max-w-[530px]", className)}>
 			<Search className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-[#5A615D]" />
 			<Input
 				placeholder={t("placeholder")}

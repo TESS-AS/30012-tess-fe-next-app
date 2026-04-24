@@ -936,6 +936,7 @@ export default function ProductVariantTable({
 									onClick={() => {
 										if (onSelectVariant) {
 											onSelectVariant(variant.itemNumber.toString());
+											setSearchQuery("");
 										}
 									}}>
 									{renderColumns()
