@@ -75,12 +75,15 @@ export function HosesAndEquipments({
 	const t = useTranslations("HosesAndEquipments");
 	const tHoseActions = useTranslations("HoseActionsDropdown");
 	const router = useRouter();
-	const { setIsCartChanging, isCartChanging, showCartNotification } = useAppContext();
+	const { setIsCartChanging, isCartChanging, showCartNotification } =
+		useAppContext();
 
 	const HOSE_COLUMNS_ORDER_KEY = "hosesAndEquipments_columnsOrder";
 
 	const S1_CODE_TROLL_A = "1391731";
 	const S1_CODE_GUDRUN = "1291619";
+	const S1_CODE_DRAUPNER = "2090222";
+	const S1_CODE_VALEMON = "1291617";
 
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
 	const [supportOpen, setSupportOpen] = useState(false);
@@ -92,7 +95,11 @@ export function HosesAndEquipments({
 	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
 		() => {
 			if (typeof window !== "undefined") {
-				return localStorage.getItem("selectedS1Code") || profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER ? S1_CODE_TROLL_A : "";
+				return localStorage.getItem("selectedS1Code") ||
+					profile?.defaultCustomerNumber ===
+						SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+					? S1_CODE_TROLL_A
+					: "";
 			}
 			return undefined;
 		},
@@ -102,7 +109,13 @@ export function HosesAndEquipments({
 		if (typeof window === "undefined") return;
 		const stored = localStorage.getItem("selectedS1Code");
 		if (!stored) {
-			localStorage.setItem("selectedS1Code", profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER ? S1_CODE_TROLL_A : "");
+			localStorage.setItem(
+				"selectedS1Code",
+				profile?.defaultCustomerNumber ===
+					SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+					? S1_CODE_TROLL_A
+					: "",
+			);
 		}
 	}, []);
 
@@ -131,7 +144,6 @@ export function HosesAndEquipments({
 			s2Filter: false,
 		},
 	);
-	console.log(s1Codes,"s1Codes");
 
 	const [searchQuery, setSearchQuery] = useState(() => {
 		if (typeof window === "undefined") return "";
@@ -409,18 +421,25 @@ export function HosesAndEquipments({
 				setIsAddingToCart(true);
 				try {
 					const currentAssets = transformedAssetsRef.current;
-					const selectedAssets: Array<Pick<HoseOrder, "hexagonId" | "ecom" | "beskrivelse">> =
-						allAcrossPages
-							? currentAssets.filter((a) => !deselectedIds.has(a.hexagonId))
-							: selectedRows.map((hexagonId) => {
-									const full = currentAssets.find((a) => a.hexagonId === hexagonId);
-									return { hexagonId, ecom: full?.ecom, beskrivelse: full?.beskrivelse ?? "" };
-								});
+					const selectedAssets: Array<
+						Pick<HoseOrder, "hexagonId" | "ecom" | "beskrivelse">
+					> = allAcrossPages
+						? currentAssets.filter((a) => !deselectedIds.has(a.hexagonId))
+						: selectedRows.map((hexagonId) => {
+								const full = currentAssets.find(
+									(a) => a.hexagonId === hexagonId,
+								);
+								return {
+									hexagonId,
+									ecom: full?.ecom,
+									beskrivelse: full?.beskrivelse ?? "",
+								};
+							});
 
-					const unavailable = selectedAssets
-						.filter((a) => Number(a.ecom) === 3);
-					const available = selectedAssets
-						.filter((a) => Number(a.ecom) !== 3);
+					const unavailable = selectedAssets.filter(
+						(a) => Number(a.ecom) === 3,
+					);
+					const available = selectedAssets.filter((a) => Number(a.ecom) !== 3);
 
 					if (available.length > 0) {
 						const cartItems = available.map((a) => ({
@@ -439,10 +458,16 @@ export function HosesAndEquipments({
 							const name = a.beskrivelse || a.hexagonId;
 							grouped.set(name, (grouped.get(name) || 0) + 1);
 						});
-						const items = Array.from(grouped, ([name, quantity]) => ({ name, quantity }));
+						const items = Array.from(grouped, ([name, quantity]) => ({
+							name,
+							quantity,
+						}));
 
 						showCartNotification({
-							itemName: available.length === 1 ? (available[0].beskrivelse || available[0].hexagonId) : `${available.length} varer`,
+							itemName:
+								available.length === 1
+									? available[0].beskrivelse || available[0].hexagonId
+									: `${available.length} varer`,
 							itemNumber: available.length === 1 ? available[0].hexagonId : "",
 							quantity: available.length,
 							unavailableCount: unavailable.length,
@@ -893,32 +918,36 @@ export function HosesAndEquipments({
 		});
 	};
 
-	const filteredS1Codes = profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER ? (s1Codes || [])
-	.filter((s1) => s1.S1Code && s1.S1Name)
-	.filter(
-		(s1) =>
-			s1.S1Code === S1_CODE_TROLL_A ||
-			s1.S1Code === S1_CODE_GUDRUN,
-	)
-	.map((s1) => (
-		<SelectItem
-			key={s1.S1Code}
-			value={s1.S1Code}>
-			{s1.S1Name}
-		</SelectItem>
-	)) :(s1Codes || [])
-	.filter((s1) => s1.S1Code && s1.S1Name)
-	.map((s1) => (
-		<SelectItem
-			key={s1.S1Code}
-			value={s1.S1Code}>
-			{s1.S1Name}
-		</SelectItem>
-	))
+	const filteredS1Codes =
+		profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+			? (s1Codes || [])
+					.filter((s1) => s1.S1Code && s1.S1Name)
+					.filter(
+						(s1) =>
+							s1.S1Code === S1_CODE_TROLL_A ||
+							s1.S1Code === S1_CODE_GUDRUN ||
+							s1.S1Code === S1_CODE_DRAUPNER ||
+							s1.S1Code === S1_CODE_VALEMON,
+					)
+					.map((s1) => (
+						<SelectItem
+							key={s1.S1Code}
+							value={s1.S1Code}>
+							{s1.S1Name}
+						</SelectItem>
+					))
+			: (s1Codes || [])
+					.filter((s1) => s1.S1Code && s1.S1Name)
+					.map((s1) => (
+						<SelectItem
+							key={s1.S1Code}
+							value={s1.S1Code}>
+							{s1.S1Name}
+						</SelectItem>
+					));
 
 	return (
 		<>
-
 			<SupportDialog
 				open={supportOpen}
 				onOpenChange={setSupportOpen}
