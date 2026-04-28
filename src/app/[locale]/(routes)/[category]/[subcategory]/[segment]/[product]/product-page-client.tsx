@@ -7,6 +7,7 @@ import { ProductDetailTabs } from "@/components/products/product-detail-tabs";
 import { ProductGallery } from "@/components/products/product-gallery";
 import { ProductInfo } from "@/components/products/product-info";
 import { ProductReturnButton } from "@/components/products/product-return-button";
+import { FeedbackSideTab } from "@/components/ui/feedback-side-tab";
 import { useGetColumnAttributes } from "@/hooks/useGetColumnAttributes";
 import { useProductFetch } from "@/hooks/useProductFetch";
 import { Loader2 } from "lucide-react";
@@ -220,6 +221,7 @@ export function ProductPageClient({
 
 	return (
 		<div className="container mx-auto space-y-12 px-4 pt-8 pb-0">
+			<FeedbackSideTab />
 			<ProductReturnButton />
 			<ProductBreadcrumbs
 				segment={segment}

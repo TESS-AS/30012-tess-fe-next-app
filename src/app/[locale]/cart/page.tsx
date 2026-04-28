@@ -6,6 +6,7 @@ import OrderSummary from "@/components/checkout/order-summary";
 import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { FeedbackSideTab } from "@/components/ui/feedback-side-tab";
 import {
 	Modal,
 	ModalFooter,
@@ -246,8 +247,7 @@ const CartPage = () => {
 		try {
 			await submitOrder(orderData, { archiveCartAfterExcelExport });
 			toast.success(
-				t("Checkout.excelExportSuccess") ||
-					"Excel file exported successfully",
+				t("Checkout.excelExportSuccess") || "Excel file exported successfully",
 			);
 		} catch (error) {
 			console.error("Checkout failed:", error);
@@ -544,6 +544,7 @@ const CartPage = () => {
 
 	return (
 		<main className="container min-h-screen px-4 py-6 md:px-0 md:py-10">
+			<FeedbackSideTab />
 			<div className="grid grid-cols-1 gap-6 md:gap-10 lg:grid-cols-3">
 				<div className="space-y-6 lg:col-span-2">
 					<Breadcrumb
