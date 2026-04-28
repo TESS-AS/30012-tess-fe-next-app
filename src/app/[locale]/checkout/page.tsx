@@ -11,6 +11,7 @@ import StepContactDelivery from "@/components/checkout/StepContactDelivery";
 import StepPayment from "@/components/checkout/StepPayment";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { FeedbackSideTab } from "@/components/ui/feedback-side-tab";
 import {
 	Modal,
 	ModalFooter,
@@ -249,6 +250,7 @@ export default function CheckoutPage() {
 	return (
 		<PayPalScriptProvider options={initialOptions}>
 			<main className="container mx-auto min-h-screen px-4 py-6 md:px-0 md:py-10">
+				<FeedbackSideTab />
 				{!showOrderConfirmation ? (
 					<>
 						<Breadcrumb
