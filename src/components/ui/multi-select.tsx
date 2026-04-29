@@ -24,6 +24,7 @@ export interface BaseProps {
 	selected: string[];
 	onChange: (selected: string[]) => void;
 	placeholder?: string;
+	searchPlaceholder?: string;
 	className?: string;
 	onSearchChange?: (value: string) => void;
 	page?: number;
@@ -58,14 +59,17 @@ function useMultiSelectLogic({
 	}, [open, searchQuery, onSearchChange]);
 
 	const filteredOptions = React.useMemo(() => {
-		if (onSearchChange) return options;
-		return options.filter((o) => {
-			const q = searchQuery.toLowerCase();
-			const matchLabel = o?.label?.toLowerCase().includes(q);
-			const matchValue = o?.value?.toLowerCase().includes(q);
-			return matchLabel || matchValue;
-		});
-	}, [options, searchQuery, onSearchChange]);
+		const base = onSearchChange
+			? options
+			: options.filter((o) => {
+					const q = searchQuery.toLowerCase();
+					const matchLabel = o?.label?.toLowerCase().includes(q);
+					const matchValue = o?.value?.toLowerCase().includes(q);
+					return matchLabel || matchValue;
+				});
+		if (!searchQuery) return base;
+		return base.filter((o) => !selected.includes(o.value));
+	}, [options, searchQuery, onSearchChange, selected]);
 
 	const toggleValue = React.useCallback(
 		(value: string) => {
@@ -100,6 +104,7 @@ export function MultiSelectWithTags({
 	selected,
 	onChange,
 	placeholder = "Velg...",
+	searchPlaceholder = "Søk...",
 	className,
 	onSearchChange,
 	page,
@@ -218,13 +223,12 @@ export function MultiSelectWithTags({
 							"h-auto min-h-[40px] w-full justify-between border-[#C1C4C2] bg-white px-3 py-2 text-left font-normal hover:bg-white",
 							className,
 						)}>
-						{selected.length === 0 ? (
-							<span className="text-[#5A615D]">{placeholder}</span>
-						) : (
-							<span className="text-[#0F1912]">
-								{selected.length} kunde{selected.length !== 1 ? "r" : ""} valgt
-							</span>
-						)}
+						<span
+							className={
+								selected.length === 0 ? "text-[#5A615D]" : "text-[#0F1912]"
+							}>
+							{placeholder}
+						</span>
 						<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 					</Button>
 				</DropdownMenuTrigger>
@@ -237,7 +241,7 @@ export function MultiSelectWithTags({
 						<div className="relative">
 							<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#5A615D]" />
 							<Input
-								placeholder="Søk etter kunde..."
+								placeholder={searchPlaceholder}
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
 								onKeyDown={(e) => e.stopPropagation()}

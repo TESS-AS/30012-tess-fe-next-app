@@ -1,3 +1,4 @@
+import MainCategorySection from "@/components/categories/main-categories";
 import { CustomerWebPromo } from "@/components/customer-web-promo";
 import { HomeBannerWithCategories } from "@/components/home/home-banner-with-categories";
 import { WelcomeSection } from "@/components/home/welcome-section";
@@ -9,12 +10,13 @@ export default async function Home() {
 
 	return (
 		<div className="mt-[-20px] flex flex-col gap-8 md:gap-16">
+			<MainCategorySection />
 			<WelcomeSection />
-			<HomeBannerWithCategories />
-			<div className="flex flex-col justify-between gap-5">
+			<div className="flex flex-col">
 				<Quote />
-				<CustomerWebPromo />
+				<HomeBannerWithCategories />
 			</div>
+			<CustomerWebPromo />
 		</div>
 	);
 }

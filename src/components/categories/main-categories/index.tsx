@@ -3,10 +3,16 @@
 import { useState } from "react";
 
 import { FeedbackDialog } from "@/components/ui/dialogs/feedback-dialog";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import Image from "next/image";
 
 export default function MainCategorySection() {
 	const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
+	const { data: profile } = useGetProfileData();
+
+	if (!profile) {
+		return null;
+	}
 
 	return (
 		<>

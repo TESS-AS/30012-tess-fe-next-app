@@ -50,7 +50,7 @@ const socialLinks = [
 export function Footer() {
 	return (
 		<footer className="relative left-[calc(-50vw+50%)] w-[100vw] overflow-hidden bg-[#1A211C] text-white">
-			<div className="relative container mx-auto px-4 py-10 sm:px-6 md:py-16">
+			<div className="relative container mx-auto px-4 py-10 sm:px-6 md:py-16 lg:px-0">
 				<div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:gap-12 lg:grid-cols-12">
 					{/* Left Column - Logo and Company Info */}
 					<div className="sm:col-span-2 lg:col-span-3">

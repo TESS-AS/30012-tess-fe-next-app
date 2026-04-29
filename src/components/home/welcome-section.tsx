@@ -22,7 +22,7 @@ export function WelcomeSection() {
 			<div className="container mx-auto">
 				<div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2">
 					{/* Left: text content */}
-					<div className="flex flex-col justify-center px-4">
+					<div className="flex flex-col justify-center px-4 lg:pl-0">
 						<div className="max-w-xl space-y-6 md:space-y-8">
 							<div className="space-y-3 md:space-y-4">
 								<h1 className="text-3xl font-normal tracking-tight text-gray-900 sm:text-4xl lg:text-5xl xl:text-6xl">

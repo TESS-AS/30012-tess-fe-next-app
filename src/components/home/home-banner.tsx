@@ -25,7 +25,7 @@ export function HomeBanner() {
 						unoptimized={false}
 					/>
 					<div className="absolute inset-0 z-[1] bg-black/50" />
-					<div className="absolute inset-0 z-[2] container mx-auto flex flex-col justify-center px-4">
+					<div className="absolute inset-0 z-[2] container mx-auto flex flex-col justify-center px-4 lg:pl-0">
 						<div className="max-w-2xl space-y-4 text-white md:space-y-8">
 							<div className="space-y-3 md:space-y-4">
 								<h1 className="text-4xl leading-tight font-bold md:text-5xl lg:text-6xl">
