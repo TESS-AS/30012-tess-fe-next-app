@@ -201,6 +201,7 @@ export function TilgangerSection({
 								placeholder={tBulk("warehousePlaceholder", {
 									count: selected.warehouses.length,
 								})}
+								searchPlaceholder={tBulk("warehouseSearchPlaceholder")}
 							/>
 						</div>
 						<div className="space-y-4">
@@ -267,6 +268,7 @@ export function TilgangerSection({
 								placeholder={tBulk("customerAccessPlaceholder", {
 									count: selected.customers.length,
 								})}
+								searchPlaceholder={tBulk("customerAccessSearchPlaceholder")}
 							/>
 						</div>
 						<div className="space-y-2">
@@ -298,7 +300,10 @@ export function TilgangerSection({
 								}
 								canPrevPage={state.assortmentPage > 1}
 								canNextPage={listLengths.assortments >= TILGANGER_PAGE_SIZE}
-								placeholder={tBulk("catalogPlaceholder")}
+								placeholder={tBulk("catalogPlaceholder", {
+									count: selected.catalogs.length,
+								})}
+								searchPlaceholder={tBulk("catalogSearchPlaceholder")}
 							/>
 						</div>
 					</div>
@@ -335,6 +340,7 @@ export function TilgangerSection({
 								placeholder={tBulk("warehousePlaceholder", {
 									count: selected.warehouses.length,
 								})}
+								searchPlaceholder={tBulk("warehouseSearchPlaceholder")}
 							/>
 						</div>
 						<div className="space-y-2">
@@ -366,7 +372,10 @@ export function TilgangerSection({
 								}
 								canPrevPage={state.companyPage > 1}
 								canNextPage={listLengths.companies >= TILGANGER_PAGE_SIZE}
-								placeholder={tBulk("companyPlaceholder")}
+								placeholder={tBulk("companyPlaceholder", {
+									count: selected.companies.length,
+								})}
+								searchPlaceholder={tBulk("companySearchPlaceholder")}
 							/>
 						</div>
 					</div>
@@ -419,6 +428,7 @@ export function TilgangerSection({
 								placeholder={tBulk("customerAccessPlaceholder", {
 									count: selected.customers.length,
 								})}
+								searchPlaceholder={tBulk("customerAccessSearchPlaceholder")}
 							/>
 						</div>
 						<div className="space-y-2">
@@ -450,7 +460,10 @@ export function TilgangerSection({
 								}
 								canPrevPage={state.assortmentPage > 1}
 								canNextPage={listLengths.assortments >= TILGANGER_PAGE_SIZE}
-								placeholder={tBulk("catalogPlaceholder")}
+								placeholder={tBulk("catalogPlaceholder", {
+									count: selected.catalogs.length,
+								})}
+								searchPlaceholder={tBulk("catalogSearchPlaceholder")}
 							/>
 						</div>
 					</div>
@@ -487,6 +500,7 @@ export function TilgangerSection({
 								placeholder={tBulk("warehousePlaceholder", {
 									count: selected.warehouses.length,
 								})}
+								searchPlaceholder={tBulk("warehouseSearchPlaceholder")}
 							/>
 						</div>
 						<div className="space-y-2">
@@ -518,7 +532,10 @@ export function TilgangerSection({
 								}
 								canPrevPage={state.companyPage > 1}
 								canNextPage={listLengths.companies >= TILGANGER_PAGE_SIZE}
-								placeholder={tBulk("companyPlaceholder")}
+								placeholder={tBulk("companyPlaceholder", {
+									count: selected.companies.length,
+								})}
+								searchPlaceholder={tBulk("companySearchPlaceholder")}
 							/>
 						</div>
 					</div>

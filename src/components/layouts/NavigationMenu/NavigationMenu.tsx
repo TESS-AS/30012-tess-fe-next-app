@@ -65,9 +65,9 @@ export default function CategoryNavigationMenu({
 	return (
 		<nav
 			ref={rootRef}
-			className="container relative mx-auto hidden w-full justify-between lg:flex"
+			className="container relative mx-auto hidden w-full justify-start lg:flex"
 		>
-			<ul className="flex w-full list-none items-center justify-between">
+			<ul className="flex w-full list-none items-center justify-start gap-8">
 				{loading
 					? Array.from({ length: MAX_NAV_CATEGORIES }).map((_, i) => (
 							<li key={i} className="relative">
@@ -75,6 +75,7 @@ export default function CategoryNavigationMenu({
 							</li>
 						))
 					: visibleCategories?.map((category, index, arr) => {
+							const isFirst = index === 0;
 							const isLast = index === arr.length - 1;
 							return (
 								<li key={category.slug} className="relative">
@@ -82,11 +83,16 @@ export default function CategoryNavigationMenu({
 										<NavTrigger
 											category={category}
 											isActive={openMenu === category.slug}
+											isFirst={isFirst}
 											isLast={isLast}
 											onToggle={() => toggleMenu(category.slug)}
 										/>
 									) : (
-										<NavLink category={category} isLast={isLast} />
+										<NavLink
+											category={category}
+											isFirst={isFirst}
+											isLast={isLast}
+										/>
 									)}
 								</li>
 							);

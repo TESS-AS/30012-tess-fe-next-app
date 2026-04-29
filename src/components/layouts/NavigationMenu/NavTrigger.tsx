@@ -6,11 +6,13 @@ import { BRAND_GREEN } from "./constants";
 export function NavTrigger({
 	category,
 	isActive,
+	isFirst,
 	isLast,
 	onToggle,
 }: {
 	category: Category;
 	isActive: boolean;
+	isFirst: boolean;
 	isLast: boolean;
 	onToggle: () => void;
 }) {
@@ -25,6 +27,7 @@ export function NavTrigger({
 				"border-b-2 border-transparent transition-all duration-150 ease-out",
 				"hover:border-b-4 hover:border-[#009640] hover:font-extrabold hover:text-[#009640]",
 				"outline-none focus-visible:ring-0 focus-visible:outline-none",
+				isFirst && "pl-0",
 				isLast && "pr-0",
 				isActive && "border-b-4 border-[#009640] font-extrabold text-[#009640]",
 			)}
