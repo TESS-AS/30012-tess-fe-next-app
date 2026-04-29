@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import { useChildrenOverflow } from "@/hooks/useChildrenOverflow";
 import { useNavMenuStore } from "@/stores/useNavMenuStore";
 import type { Category } from "@/types/categories.types";
 
@@ -25,6 +26,7 @@ export default function CategoryNavigationMenu({
 	const [openMenu, setOpenMenu] = useState<string | false>(false);
 	const { setIsOpen } = useNavMenuStore();
 	const rootRef = useRef<HTMLElement | null>(null);
+	const ulRef = useRef<HTMLUListElement | null>(null);
 
 	const closeMenu = useCallback(() => {
 		setOpenMenu(false);
@@ -61,13 +63,18 @@ export default function CategoryNavigationMenu({
 
 	const activeCategory = categories?.find((c) => c.slug === openMenu);
 	const visibleCategories = categories?.slice(0, MAX_NAV_CATEGORIES);
+	const slugsKey = (visibleCategories ?? []).map((c) => c.slug).join("|");
+	const isTight = useChildrenOverflow(ulRef, slugsKey);
 
 	return (
 		<nav
 			ref={rootRef}
 			className="container relative mx-auto hidden w-full justify-start lg:flex"
 		>
-			<ul className="flex w-full list-none items-center justify-start gap-8">
+			<ul
+				ref={ulRef}
+				className="flex w-full min-w-0 list-none items-center justify-between"
+			>
 				{loading
 					? Array.from({ length: MAX_NAV_CATEGORIES }).map((_, i) => (
 							<li key={i} className="relative">
@@ -85,6 +92,7 @@ export default function CategoryNavigationMenu({
 											isActive={openMenu === category.slug}
 											isFirst={isFirst}
 											isLast={isLast}
+											isTight={isTight}
 											onToggle={() => toggleMenu(category.slug)}
 										/>
 									) : (
@@ -92,6 +100,7 @@ export default function CategoryNavigationMenu({
 											category={category}
 											isFirst={isFirst}
 											isLast={isLast}
+											isTight={isTight}
 										/>
 									)}
 								</li>
