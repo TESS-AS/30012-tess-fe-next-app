@@ -73,7 +73,11 @@ export default function CategoryNavigationMenu({
 		>
 			<ul
 				ref={ulRef}
-				className="flex w-full min-w-0 list-none items-center justify-between"
+				className={`flex w-full min-w-0 list-none items-center ${
+					(visibleCategories?.length ?? 0) < 7
+						? "justify-start"
+						: "justify-between"
+				}`}
 			>
 				{loading
 					? Array.from({ length: MAX_NAV_CATEGORIES }).map((_, i) => (
