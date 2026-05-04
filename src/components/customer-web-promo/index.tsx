@@ -77,6 +77,7 @@ export function CustomerWebPromo() {
 										width={640}
 										height={405}
 										className="mx-auto w-full"
+										loading="eager"
 									/>
 									<figcaption className="text-muted-foreground mt-2 text-sm">
 										{t("imageCaption")}
@@ -107,6 +108,7 @@ export function CustomerWebPromo() {
 										width={640}
 										height={400}
 										className="mx-auto w-full"
+										loading="eager"
 									/>
 									<figcaption className="text-muted-foreground mt-2 text-sm">
 										{t("imageCaption")}

@@ -84,6 +84,7 @@ export function SupportDialog({
 						fill
 						sizes="(max-width: 650px) 100vw, 650px"
 						className="object-cover grayscale"
+						loading="eager"
 					/>
 				</div>
 

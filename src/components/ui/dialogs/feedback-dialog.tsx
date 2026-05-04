@@ -62,6 +62,7 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
 						fill
 						sizes="(max-width: 448px) 100vw, 448px"
 						className="object-cover grayscale"
+						loading="eager"
 					/>
 				</div>
 

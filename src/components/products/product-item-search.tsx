@@ -182,6 +182,7 @@ export function ProductItem({
 									width={128}
 									height={128}
 									className="max-h-24 max-w-24 object-contain sm:max-h-23 sm:max-w-32"
+									loading="eager"
 								/>
 							) : (
 								<div className="h-24 w-24 rounded bg-gray-300 sm:h-32 sm:w-32" />

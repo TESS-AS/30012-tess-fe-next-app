@@ -46,6 +46,7 @@ const HoseOverview = ({ hoseSystems }: Props) => {
 									height={24}
 									src="/icons/settings.svg"
 									alt="Settings"
+									loading="eager"
 								/>
 								<p className="text-2xl font-bold text-[#0F1912]">
 									{t("equipmentOverview")}
@@ -102,6 +103,7 @@ const HoseOverview = ({ hoseSystems }: Props) => {
 															height={24}
 															src="/icons/alert-icons/red-exclamation-point.svg"
 															alt="Red Exclamation Point"
+															loading="eager"
 														/>
 														<MapPin className="ms-2h-4 w-4 text-[#5A615D]" />
 														<span className="text-sm text-[#0F1912]">
@@ -136,6 +138,7 @@ const HoseOverview = ({ hoseSystems }: Props) => {
 																					src="/icons/alert-icons/red-exclamation-point.svg"
 																					// src={`/icons/alert-icons/${child.status === "error" ? "red" : child.status === "warn" ? "yelllow" : "green"}-exclamation-point.svg`}
 																					alt="Status Icon"
+																					loading="eager"
 																				/>
 																				<Settings className="h-4 w-4 text-[#5A615D]" />
 																				<span className="text-sm text-[#0F1912]">
@@ -162,6 +165,7 @@ const HoseOverview = ({ hoseSystems }: Props) => {
 																								height={24}
 																								src={`/icons/alert-icons/${subChild.status === "error" ? "red" : subChild.status === "warn" ? "yelllow" : "green"}-exclamation-point.svg`}
 																								alt="Status Icon"
+																								loading="eager"
 																							/>
 																							<Settings className="h-4 w-4 text-[#5A615D]" />
 																							<span className="text-sm text-[#0F1912]">
@@ -210,6 +214,7 @@ const HoseOverview = ({ hoseSystems }: Props) => {
 								height={24}
 								src="/icons/search.svg"
 								alt="Search"
+								loading="eager"
 							/>
 							<p className="text-2xl font-bold text-[#0F1912]">
 								{t("inspection.title")}
@@ -225,6 +230,7 @@ const HoseOverview = ({ hoseSystems }: Props) => {
 											height={24}
 											src="/icons/alert-icons/red-exclamation-point.svg"
 											alt="Red Exclamation Point"
+											loading="eager"
 										/>
 										<span className="text-2xl font-bold">
 											{counts.rejected}
@@ -244,6 +250,7 @@ const HoseOverview = ({ hoseSystems }: Props) => {
 											height={24}
 											src="/icons/alert-icons/yelllow-exclamation-point.svg"
 											alt="Yellow Exclamation Point"
+											loading="eager"
 										/>
 										<span className="text-2xl font-bold">
 											{counts.approved}
@@ -263,6 +270,7 @@ const HoseOverview = ({ hoseSystems }: Props) => {
 											height={24}
 											src="/icons/alert-icons/time-yellow.svg"
 											alt="Time Yellow"
+											loading="eager"
 										/>
 										<span className="text-2xl font-bold">{counts.overdue}</span>
 									</div>
@@ -280,6 +288,7 @@ const HoseOverview = ({ hoseSystems }: Props) => {
 											height={24}
 											src="/icons/alert-icons/time-aquamarine.svg"
 											alt="Time Aquamarine"
+											loading="eager"
 										/>
 										<span className="text-2xl font-bold">
 											{counts.upcomingInspection}
@@ -301,6 +310,7 @@ const HoseOverview = ({ hoseSystems }: Props) => {
 								height={24}
 								src="/icons/reload.svg"
 								alt="Reload"
+								loading="eager"
 							/>
 							<p className="text-2xl font-bold text-[#0F1912]">
 								{t("replacement.title")}
@@ -316,6 +326,7 @@ const HoseOverview = ({ hoseSystems }: Props) => {
 											height={24}
 											src="/icons/alert-icons/time-yellow.svg"
 											alt="Time Yellow"
+											loading="eager"
 										/>
 										<span className="text-2xl font-bold">
 											{counts.replacementDue}
@@ -335,6 +346,7 @@ const HoseOverview = ({ hoseSystems }: Props) => {
 											height={24}
 											src="/icons/alert-icons/time-aquamarine.svg"
 											alt="Time Aquamarine"
+											loading="eager"
 										/>
 										<span className="text-2xl font-bold">
 											{counts.upcomingReplacement}

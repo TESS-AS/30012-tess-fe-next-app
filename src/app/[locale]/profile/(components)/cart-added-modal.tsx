@@ -47,6 +47,7 @@ export function CartAddedModal({
 									alt="Alert"
 									width={20}
 									height={20}
+									loading="eager"
 								/>
 							</div>
 						) : (
@@ -106,6 +107,7 @@ export function CartAddedModal({
 							alt="Alert"
 							width={20}
 							height={20}
+							loading="eager"
 						/>
 						<span>
 							{unavailableCount} vare

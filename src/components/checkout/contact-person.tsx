@@ -161,6 +161,7 @@ export const ContactPerson: React.FC<ContactPersonProps> = ({
 							alt="map-pin-alt"
 							width={10}
 							height={10}
+							loading="eager"
 						/>
 						{t("fetchedFromProfile")}
 					</div>

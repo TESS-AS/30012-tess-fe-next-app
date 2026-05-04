@@ -98,6 +98,7 @@ const CartHistoryPage = () => {
 						fill
 						sizes="48px"
 						className="object-contain"
+						loading="eager"
 					/>
 				) : (
 					<div className="h-full w-full bg-gray-200" />
@@ -275,6 +276,7 @@ const CartHistoryPage = () => {
 																							fill
 																							sizes="64px"
 																							className="object-contain"
+																							loading="eager"
 																						/>
 																					) : (
 																						<div className="h-full w-full bg-gray-200" />

@@ -68,6 +68,7 @@ export default function MainCategorySection() {
 									width={640}
 									height={405}
 									className="mx-auto w-full"
+									loading="eager"
 								/>
 							</figure>
 						</div>

@@ -430,6 +430,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								width={144}
 								height={144}
 								className="h-auto w-[96px] lg:w-[144px]"
+								loading="eager"
 							/>
 						</Link>
 						<div className="flex items-center gap-8">
@@ -681,6 +682,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 													width={20}
 													height={20}
 													className="h-5 w-5 rounded-full object-contain"
+													loading="eager"
 												/>
 											) : (
 												<UserIcon />
@@ -767,6 +769,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 										width={16}
 										height={16}
 										className="h-4 w-4 rounded-full object-contain"
+										loading="eager"
 									/>
 								) : (
 									<UserIcon className="h-4 w-4" />

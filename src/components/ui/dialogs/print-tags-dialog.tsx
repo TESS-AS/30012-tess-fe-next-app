@@ -128,6 +128,7 @@ export function PrintTagsDialog({
 									src={previewUrl}
 									alt="tag-preview"
 									className="mx-auto max-h-[220px] object-contain"
+									loading="eager"
 								/>
 							) : (
 								<div className="flex h-[220px] items-center justify-center text-sm text-[#5A615D]">

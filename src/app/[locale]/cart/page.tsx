@@ -323,6 +323,7 @@ const CartPage = () => {
 									fill
 									sizes="80px"
 									className="object-contain"
+									loading="eager"
 								/>
 							) : (
 								<div className="h-full w-full bg-gray-200" />

@@ -63,6 +63,7 @@ export function Footer() {
 									alt="Logo"
 									width={190}
 									height={190}
+									loading="eager"
 								/>
 							</Link>
 						</div>

@@ -408,6 +408,7 @@ export function Rekvisisjoner() {
 								alt="Check"
 								width={20}
 								height={20}
+								loading="eager"
 							/>
 							<span>
 								{t("itemsAddedToCart", {

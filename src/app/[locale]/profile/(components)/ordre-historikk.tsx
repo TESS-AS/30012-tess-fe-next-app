@@ -27,6 +27,7 @@ export const getStatusIcons = (status: string) => {
 					alt="Like"
 					width={12}
 					height={12}
+					loading="eager"
 				/>
 			);
 		case "Bekreftet":
@@ -37,6 +38,7 @@ export const getStatusIcons = (status: string) => {
 					alt="Tick"
 					width={12}
 					height={12}
+					loading="eager"
 				/>
 			);
 		case "Under transport":
@@ -46,6 +48,7 @@ export const getStatusIcons = (status: string) => {
 					alt="Truck"
 					width={12}
 					height={12}
+					loading="eager"
 				/>
 			);
 		case "Levert":
@@ -56,6 +59,7 @@ export const getStatusIcons = (status: string) => {
 					width={12}
 					height={12}
 					className="[filter:brightness(0)_invert(1)]"
+					loading="eager"
 				/>
 			);
 		case "Kansellert":
@@ -65,6 +69,7 @@ export const getStatusIcons = (status: string) => {
 					alt="X"
 					width={12}
 					height={12}
+					loading="eager"
 				/>
 			);
 		default:

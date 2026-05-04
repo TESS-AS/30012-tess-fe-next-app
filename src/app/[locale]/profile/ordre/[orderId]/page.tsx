@@ -189,6 +189,7 @@ export default function OrderDetails({
 											alt={item.name}
 											width={48}
 											height={48}
+											loading="eager"
 										/>
 									</div>
 									<div>

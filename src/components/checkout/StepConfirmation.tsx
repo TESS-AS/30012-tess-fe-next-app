@@ -372,6 +372,7 @@ export default function StepConfirmation({
 												fill
 												sizes="64px"
 												className="object-contain p-1"
+												loading="eager"
 											/>
 										) : (
 											<div className="h-full w-full rounded bg-gray-100" />

@@ -72,6 +72,7 @@ export function SidebarNav({
 								alt="Hose Management"
 								width={24}
 								height={24}
+								loading="eager"
 							/>
 						</div>
 						<span>{t("hoseManagement")}</span>
@@ -94,6 +95,7 @@ export function SidebarNav({
 										alt="E-handel"
 										width={24}
 										height={24}
+										loading="eager"
 									/>
 								</div>
 								<span>{t("eCommerce")}</span>
@@ -114,6 +116,7 @@ export function SidebarNav({
 											alt="TESS EDI"
 											width={24}
 											height={24}
+											loading="eager"
 										/>
 									</div>
 									<span>TESS EDI</span>
@@ -173,6 +176,7 @@ export function SidebarNav({
 															alt=""
 															width={20}
 															height={20}
+															loading="eager"
 														/>
 													) : (
 														(() => {

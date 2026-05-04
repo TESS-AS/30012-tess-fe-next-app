@@ -55,6 +55,7 @@ const Stepper: React.FC<StepperProps> = ({
 								width={16}
 								height={16}
 								className="mr-2"
+								loading="eager"
 							/>
 						) : (
 							""

@@ -129,6 +129,7 @@ const HoseReplacement = () => {
 									alt="Chevron down"
 									width={8}
 									height={8}
+									loading="eager"
 								/>
 							</div>
 							<div className="flex items-center gap-1">
@@ -138,6 +139,7 @@ const HoseReplacement = () => {
 									alt="Chevron down"
 									width={8}
 									height={8}
+									loading="eager"
 								/>
 							</div>
 							<div className="flex items-center gap-1">
@@ -147,6 +149,7 @@ const HoseReplacement = () => {
 									alt="Chevron down"
 									width={8}
 									height={8}
+									loading="eager"
 								/>
 							</div>
 							<div className="flex items-center gap-1">
@@ -156,6 +159,7 @@ const HoseReplacement = () => {
 									alt="Chevron down"
 									width={8}
 									height={8}
+									loading="eager"
 								/>
 							</div>
 							<div>{t("total")}</div>
