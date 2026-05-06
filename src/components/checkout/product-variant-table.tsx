@@ -111,7 +111,7 @@ export default function ProductVariantTable({
 	const t = useTranslations();
 	const { data: profile } = useGetProfileData();
 	const { isCartChanging, setIsCartChanging, setIsAuthOpen, showCartNotification } = useAppContext();
-	const isSapCustomer = profile?.defaultCustomerNumber === SAP_CUSTOMER;
+	const isSapCustomer = SAP_CUSTOMER.includes(profile?.defaultCustomerNumber || "");
 
 	const [searchQuery, setSearchQuery] = useState<string>("");
 	const [quantities, setQuantities] = useState<Record<number, number>>({});

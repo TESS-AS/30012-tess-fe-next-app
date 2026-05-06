@@ -39,7 +39,7 @@ export function ProductDetailTabs({
 	const t = useTranslations("Product");
 	const { data: profile } = useGetProfileData();
 	const { activeTab, setActiveTab } = useProductTabs();
-	const isSapCustomer = profile?.defaultCustomerNumber === SAP_CUSTOMER;
+	const isSapCustomer = SAP_CUSTOMER.includes(profile?.defaultCustomerNumber || "");
 
 	const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 	const [showAllAttributes, setShowAllAttributes] = useState(false);
