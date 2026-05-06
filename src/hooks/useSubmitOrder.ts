@@ -38,7 +38,7 @@ export const useSubmitOrder = (
 		try {
 			const customerNumber = profile?.defaultCustomerNumber;
 			const isExcelCustomer =
-				customerNumber === SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER;
+			 SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER.includes(profile?.defaultCustomerNumber ?? "");
 
 			if (isExcelCustomer) {
 				const { blob, filename } = await excelOrderConfirmation(payload);

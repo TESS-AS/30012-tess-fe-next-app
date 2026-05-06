@@ -7,7 +7,7 @@ import Image from "next/image";
 
 export function HomeBanner() {
 	const { data: profile } = useGetProfileData();
-	const isSapCustomer = profile?.defaultCustomerNumber === SAP_CUSTOMER;
+	const isSapCustomer = SAP_CUSTOMER.includes(profile?.defaultCustomerNumber || "");
 
 	return (
 		<div className="relative right-1/2 left-1/2 -mr-[50vw] -ml-[50vw] w-screen">

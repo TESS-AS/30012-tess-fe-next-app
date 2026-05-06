@@ -211,7 +211,7 @@ const CartPage = () => {
 
 	const handleCheckout = async () => {
 		const isExcelCustomer =
-			profile?.defaultCustomerNumber === SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER;
+		 SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER.includes(profile.defaultCustomerNumber);
 
 		if (isExcelCustomer) {
 			setExcelArchiveModalOpen(true);

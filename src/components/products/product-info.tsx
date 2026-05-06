@@ -74,7 +74,7 @@ export function ProductInfo({
 	const [loadingPrice, setLoadingPrice] = useState(false);
 	const [adding, setAdding] = useState(false);
 
-	const isSapCustomer = profile?.defaultCustomerNumber === SAP_CUSTOMER;
+	const isSapCustomer = SAP_CUSTOMER.includes(profile?.defaultCustomerNumber || "");
 
 	const multiple = useMemo(() => {
 		const multipleValue = columnAttributes?.productData?.multiple;

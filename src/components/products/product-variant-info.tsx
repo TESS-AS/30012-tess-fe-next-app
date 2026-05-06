@@ -57,7 +57,7 @@ export function ProductVariantInfo({
 	const { data: profile } = useGetProfileData();
 
 	// Check if current customer is SAP customer
-	const isSapCustomer = profile?.defaultCustomerNumber === SAP_CUSTOMER;
+	const isSapCustomer = SAP_CUSTOMER.includes(profile?.defaultCustomerNumber || "");
 
 	// Get SAP number from columnAttributes for SAP customer
 	const getSapNumber = () => {
