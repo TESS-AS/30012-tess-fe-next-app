@@ -40,6 +40,12 @@ export default function PunchoutSessionPage() {
 						withCredentials: true,
 					},
 				);
+
+				const refreshedToken = response.data?.token;
+				if (refreshedToken) {
+					axiosClient.defaults.headers.common.Authorization = `Bearer ${refreshedToken}`;
+				}
+
 				localStorage.removeItem("hosesAndEquipments_page");
 
 				clearPunchoutProfile();

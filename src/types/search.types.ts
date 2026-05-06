@@ -8,8 +8,6 @@ export interface IProductSearch {
 	searchAttribute1?: string | null;
 	searchAttribute2?: string | null;
 	redirect?: string;
-	itemNumberMatch?: boolean;
-	sapNumberMatch?: boolean;
 }
 
 export interface ProductAttributes {
