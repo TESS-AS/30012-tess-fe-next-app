@@ -73,7 +73,7 @@ export default function OrderSummary({
 
 	const isTessEmployee = profile?.role === "employee";
 	const isExcelExportCustomer =
-		 SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER.includes(profile.defaultCustomerNumber);
+		 SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER.includes(profile?.defaultCustomerNumber || "");
 
 	const validateExcelExport = () => {
 		const trimmedWarehouseCode = warehouseCode.trim();
