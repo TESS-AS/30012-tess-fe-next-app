@@ -39,7 +39,7 @@ export function SubcategoryItem({
 						{subcategory.name}
 						<ChevronRight
 							strokeWidth={2.5}
-							className="h-5 w-5 transition-transform duration-200 ease-out group-hover:translate-x-1"
+							className="h-5 w-5 transition-all duration-200 ease-out group-hover:translate-x-1 group-hover:text-green-700"
 						/>
 					</Link>
 				</div>
