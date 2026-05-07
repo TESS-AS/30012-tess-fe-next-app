@@ -69,7 +69,7 @@ export default function CategoryNavigationMenu({
 	return (
 		<nav
 			ref={rootRef}
-			className="container relative mx-auto hidden w-full justify-start lg:flex"
+			className="container relative mx-auto hidden w-full justify-start lg:-ml-[12px] lg:flex"
 		>
 			<ul
 				ref={ulRef}
@@ -81,9 +81,8 @@ export default function CategoryNavigationMenu({
 								<Skeleton className="h-8 w-24 rounded-md" />
 							</li>
 						))
-					: visibleCategories?.map((category, index, arr) => {
+					: visibleCategories?.map((category, index) => {
 							const isFirst = index === 0;
-							const isLast = index === arr.length - 1;
 							return (
 								<li key={category.slug} className="relative">
 									{category.subcategories?.length ? (
@@ -91,7 +90,6 @@ export default function CategoryNavigationMenu({
 											category={category}
 											isActive={openMenu === category.slug}
 											isFirst={isFirst}
-											isLast={isLast}
 											isTight={isTight}
 											onToggle={() => toggleMenu(category.slug)}
 										/>
@@ -99,7 +97,6 @@ export default function CategoryNavigationMenu({
 										<NavLink
 											category={category}
 											isFirst={isFirst}
-											isLast={isLast}
 											isTight={isTight}
 										/>
 									)}

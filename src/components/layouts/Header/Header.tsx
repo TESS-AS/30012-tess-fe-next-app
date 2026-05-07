@@ -388,7 +388,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 			<div
 				ref={topBarRef}
 				className="flex h-16 w-full items-center justify-between border-b border-[#c1c4c2] px-4 lg:container lg:mx-auto lg:border-b-0 lg:px-0">
-				<div className="flex items-center">
+				<div className="flex items-center lg:-ml-2">
 					<div className="flex items-center gap-4">
 						<Link
 							href="/"

@@ -5,28 +5,27 @@ import Link from "next/link";
 export function NavLink({
 	category,
 	isFirst,
-	isLast,
 	isTight,
 }: {
 	category: Category;
 	isFirst: boolean;
-	isLast: boolean;
 	isTight: boolean;
 }) {
 	return (
 		<Link
 			href={`/${category.slug}`}
 			className={cn(
-				"inline-flex h-9 items-center justify-center rounded-none py-2 text-sm font-medium whitespace-nowrap",
+				"group inline-flex h-9 items-center justify-center rounded-none py-2 text-sm font-medium whitespace-nowrap",
 				isTight ? "gap-0.5 px-1" : "gap-1 px-4",
-				"border-b-2 border-transparent transition-all duration-150 ease-out",
-				"hover:border-b-4 hover:border-[#009640] hover:font-extrabold hover:text-[#009640]",
+				"transition-all duration-150 ease-out",
+				"hover:font-extrabold hover:text-[#009640]",
 				"outline-none focus-visible:ring-0 focus-visible:outline-none",
 				isFirst && "pl-0",
-				isLast && "pr-0",
 			)}
 		>
-			{category.name}
+			<span className="border-b-2 border-transparent px-1 group-hover:border-[#009640]">
+				{category.name}
+			</span>
 		</Link>
 	);
 }
