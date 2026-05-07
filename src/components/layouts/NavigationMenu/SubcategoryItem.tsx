@@ -1,6 +1,7 @@
 import { getCategoryImage } from "@/lib/category-utils";
 import { cn } from "@/lib/utils";
 import type { Category } from "@/types/categories.types";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 import { MAX_SUBCATEGORY_CHILDREN } from "./constants";
@@ -33,9 +34,13 @@ export function SubcategoryItem({
 					<Link
 						onClick={onClose}
 						href={`/${parentSlug}/${subcategory.slug}`}
-						className="text-md font-bold hover:underline"
+						className="text-md group inline-flex items-center gap-1 font-bold hover:underline"
 					>
 						{subcategory.name}
+						<ChevronRight
+							strokeWidth={2.5}
+							className="h-5 w-5 transition-transform duration-200 ease-out group-hover:translate-x-1"
+						/>
 					</Link>
 				</div>
 			</div>

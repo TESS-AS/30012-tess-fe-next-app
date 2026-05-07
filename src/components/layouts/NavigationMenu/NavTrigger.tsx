@@ -25,8 +25,8 @@ export function NavTrigger({
 			aria-haspopup="true"
 			onClick={onToggle}
 			className={cn(
-				"inline-flex h-9 items-center justify-center gap-1 rounded-none py-2 text-sm font-medium whitespace-nowrap",
-				isTight ? "px-1" : "px-4",
+				"inline-flex h-9 items-center justify-center rounded-none py-2 text-sm font-medium whitespace-nowrap",
+				isTight ? "gap-0.5 px-1" : "gap-1 px-4",
 				"border-b-2 border-transparent transition-all duration-150 ease-out",
 				"hover:border-b-4 hover:border-[#009640] hover:font-extrabold hover:text-[#009640]",
 				"outline-none focus-visible:ring-0 focus-visible:outline-none",
