@@ -163,11 +163,13 @@ export function Footer() {
 						</p>
 					</div>
 				</div>
-								<div className="absolute right-0 bottom-0 flex h-20 w-full items-end justify-center pr-10 sm:h-28 md:w-auto md:justify-end">
-					<div className="flex gap-3 sm:gap-6">
-						<div className="h-10 w-7 origin-bottom-left -skew-x-[30deg] bg-[#00A651] sm:h-16 sm:w-10"></div>
-						<div className="h-10 w-7 origin-bottom-left -skew-x-[30deg] bg-[#00A651] sm:h-16 sm:w-10"></div>
-						<div className="h-10 w-7 origin-bottom-left -skew-x-[30deg] bg-[#00A651] sm:h-16 sm:w-10"></div>
+			</div>
+			<div className="pointer-events-none absolute inset-x-0 bottom-0">
+				<div className="container mx-auto flex justify-end px-4 pr-5 sm:px-6 sm:pr-8 lg:px-0 lg:pr-4">
+					<div className="flex gap-3 sm:gap-5">
+						<div className="h-5 w-9 origin-bottom-left -skew-x-[30deg] bg-[#009640] sm:h-9 sm:w-14"></div>
+						<div className="h-5 w-9 origin-bottom-left -skew-x-[30deg] bg-[#009640] sm:h-9 sm:w-14"></div>
+						<div className="h-5 w-9 origin-bottom-left -skew-x-[30deg] bg-[#009640] sm:h-9 sm:w-14"></div>
 					</div>
 				</div>
 			</div>
