@@ -412,14 +412,9 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								/>
 							)}
 							{isHoseManagementCustomer && (
-								<Button
-									variant="ghost"
-									className="text-md px-0 pb-2 font-normal text-[#5A615D] hover:rounded-none hover:border-[#003D1A] hover:bg-transparent"
-									onClick={() =>
-										profile ? router.push("/profile") : setIsAuthOpen(true)
-									}>
-									Hose Management
-								</Button>
+								<span className="text-md font-normal text-[#0F1912]">
+									Hose management
+								</span>
 							)}
 						</div>
 					</div>
@@ -981,7 +976,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								setIsSearchOpen(false);
 								clearSearch();
 							}}
-							className="flex h-[52px] w-[52px] shrink-0 items-center justify-center bg-[#009640] hover:bg-[#005522] transition-colors">
+							className="flex h-[52px] w-[52px] shrink-0 items-center justify-center bg-[#009640] transition-colors hover:bg-[#005522]">
 							<ArrowLeft className="h-5 w-5 text-white" />
 						</button>
 						<Input

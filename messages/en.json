@@ -677,6 +677,27 @@
 			"nextInspectionDate": "NEXT INSPECTION DATE",
 			"handlinger": "HANDLINGER"
 		},
+		"tooltip": {
+			"id": "ID",
+			"location": "Location (S1)",
+			"equipment": "Equipment (S2)",
+			"orderNumber": "Order #",
+			"installationDate": "Installed",
+			"productionDate": "Produced",
+			"fillingDate": "Filled",
+			"nextInspectionDate": "Next inspection"
+		},
+		"welcome": {
+			"headerLabel": "Hose management",
+			"title": "Welcome to TESS Ordering",
+			"intro": "Here you order items for your company. Items are automatically added to the order system.",
+			"checkIds": "Check the ID numbers before confirming.",
+			"checkIdsTail": "You cannot change them afterwards.",
+			"incompleteHoses": "Hoses with incomplete information must be ordered via request.",
+			"incompleteHosesTail": "You can do both here.",
+			"dontShowAgain": "Don't show this message again",
+			"cta": "Go to ordering"
+		},
 		"errors": {
 			"selectItemsFirst": "Please select items to contact about"
 		},
@@ -684,6 +705,10 @@
 			"supportMessageSent": "Message sent to TESS support",
 			"requestSent": "Request sent",
 			"equipmentDiscarded": "Equipment discarded"
+		},
+		"pagination": {
+			"itemsPerPage": "items per page",
+			"perPageOption": "{size} per page"
 		}
 	},
 	"HoseOverview": {

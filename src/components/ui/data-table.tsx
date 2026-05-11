@@ -22,6 +22,13 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "./dropdown-menu";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "./select";
 
 export interface Column<T> {
 	key: string;
@@ -45,6 +52,10 @@ interface DataTableProps<T> {
 	totalItems: number;
 	itemsPerPage: number;
 	onPageChange?: (page: number) => void;
+	itemsPerPageOptions?: number[];
+	onItemsPerPageChange?: (size: number) => void;
+	itemsPerPageLabel?: string;
+	perPageOptionLabel?: (size: number) => string;
 	isLoading?: boolean;
 	className?: string;
 	isDropdownColumn?: boolean;
@@ -75,6 +86,10 @@ export function DataTable<
 	totalItems,
 	itemsPerPage,
 	onPageChange,
+	itemsPerPageOptions,
+	onItemsPerPageChange,
+	itemsPerPageLabel,
+	perPageOptionLabel,
 	isLoading,
 	className,
 	isDropdownColumn,
@@ -94,8 +109,15 @@ export function DataTable<
 	const isSelected = (id: string) => selectedIds.includes(id);
 	const emptyColSpan =
 		safeColumns.length + (isExpandable ? 1 : 0) + (isDropdownColumn ? 1 : 0);
-	const showPagination =
-		!isLoading && totalItems > itemsPerPage && data.length > 0;
+	const showItemsPerPageSelector =
+		!!onItemsPerPageChange &&
+		!!itemsPerPageOptions &&
+		itemsPerPageOptions.length > 0;
+	const showPageNav = totalItems > itemsPerPage;
+	const showPaginationRow =
+		!isLoading &&
+		data.length > 0 &&
+		(showPageNav || showItemsPerPageSelector);
 	return (
 		<div className={className}>
 			<div className="overflow-hidden">
@@ -207,7 +229,9 @@ export function DataTable<
 													<tr
 														onClick={() => {
 															if (disabled) return;
-															if (onOrderClick) {
+															if (onHoseClick && item.hexagonId) {
+																onHoseClick(item.hexagonId);
+															} else if (onOrderClick) {
 																onOrderClick(item.orderId);
 															}
 														}}
@@ -323,72 +347,110 @@ export function DataTable<
 				</div>
 			</div>
 
-			{showPagination && (
-				<div className="flex items-center justify-between px-2 py-4">
-					<p className="text-sm text-gray-700">
-						Viser {(currentPage - 1) * itemsPerPage + 1} til{" "}
-						{Math.min(currentPage * itemsPerPage, totalItems)} av {totalItems}{" "}
-						resultater
-					</p>
-					<div className="flex items-center justify-center">
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => onPageChange?.(currentPage - 1)}
-							disabled={currentPage <= 1}
-							className="h-8 w-8 rounded-none rounded-l-md border-[#8A8F8C] p-0">
-							<ChevronLeft className="h-4 w-4" />
-						</Button>
-
-						<div className="flex items-center">
-							{Array.from({ length: totalPages }).map((_, index) => {
-								const pageNumber = index + 1;
-								const shouldShow =
-									pageNumber === 1 ||
-									pageNumber === totalPages ||
-									Math.abs(pageNumber - currentPage) <= 1;
-
-								if (shouldShow) {
-									return (
-										<Button
-											key={pageNumber}
-											variant="outline"
-											size="sm"
-											className={cn(
-												"h-8 w-8 rounded-none border-r-[0.5px] border-l-0 border-[#8A8F8C] p-0 font-medium text-[#5A615D]",
-												pageNumber === currentPage &&
-													"border-[#8A8F8C] bg-[#DCF7E0] text-[#009640] hover:bg-[#DCF7E0] hover:text-[#009640]",
-											)}
-											onClick={() => onPageChange?.(pageNumber)}>
-											{pageNumber}
-										</Button>
-									);
-								} else if (
-									(pageNumber === 2 && currentPage > 3) ||
-									(pageNumber === totalPages - 1 &&
-										currentPage < totalPages - 2)
-								) {
-									return (
-										<span
-											key={pageNumber}
-											className="flex h-8 w-8 items-center justify-center border-1 border-l-0 border-[#8A8F8C] p-0 font-medium text-[#5A615D]">
-											...
-										</span>
-									);
-								}
-								return null;
-							})}
-						</div>
-
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => onPageChange?.(currentPage + 1)}
-							disabled={totalPages === 0 || currentPage >= totalPages}
-							className="h-8 w-8 rounded-none rounded-r-md border-l-0 border-[#8A8F8C] p-0">
-							<ChevronRight className="h-4 w-4" />
-						</Button>
+			{showPaginationRow && (
+				<div className="flex items-center justify-between gap-4 px-2 py-4">
+					<div className="flex items-center gap-3 text-sm text-gray-700">
+						{showItemsPerPageSelector ? (
+							<>
+								<span>
+									Viser{" "}
+									<span className="font-semibold">
+										{(currentPage - 1) * itemsPerPage + 1}-
+										{Math.min(currentPage * itemsPerPage, totalItems)}
+									</span>{" "}
+									av <span className="font-semibold">{totalItems}</span>
+								</span>
+								<Select
+									value={String(itemsPerPage)}
+									onValueChange={(value) =>
+										onItemsPerPageChange?.(Number(value))
+									}>
+									<SelectTrigger className="h-8 w-[72px] border-[#8A8F8C] bg-white px-2 text-sm font-medium text-[#0F1912]">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										{itemsPerPageOptions!.map((size) => (
+											<SelectItem
+												key={size}
+												value={String(size)}>
+												{perPageOptionLabel
+													? perPageOptionLabel(size)
+													: `${size} per side`}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								<span>{itemsPerPageLabel ?? "antall oppføringer per side"}</span>
+							</>
+						) : (
+							<p>
+								Viser {(currentPage - 1) * itemsPerPage + 1} til{" "}
+								{Math.min(currentPage * itemsPerPage, totalItems)} av{" "}
+								{totalItems} resultater
+							</p>
+						)}
 					</div>
+					{showPageNav && (
+						<div className="flex items-center justify-center">
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => onPageChange?.(currentPage - 1)}
+								disabled={currentPage <= 1}
+								className="h-8 w-8 rounded-none rounded-l-md border-[#8A8F8C] p-0">
+								<ChevronLeft className="h-4 w-4" />
+							</Button>
+
+							<div className="flex items-center">
+								{Array.from({ length: totalPages }).map((_, index) => {
+									const pageNumber = index + 1;
+									const shouldShow =
+										pageNumber === 1 ||
+										pageNumber === totalPages ||
+										Math.abs(pageNumber - currentPage) <= 1;
+
+									if (shouldShow) {
+										return (
+											<Button
+												key={pageNumber}
+												variant="outline"
+												size="sm"
+												className={cn(
+													"h-8 w-8 rounded-none border-r-[0.5px] border-l-0 border-[#8A8F8C] p-0 font-medium text-[#5A615D]",
+													pageNumber === currentPage &&
+														"border-[#8A8F8C] bg-[#DCF7E0] text-[#009640] hover:bg-[#DCF7E0] hover:text-[#009640]",
+												)}
+												onClick={() => onPageChange?.(pageNumber)}>
+												{pageNumber}
+											</Button>
+										);
+									} else if (
+										(pageNumber === 2 && currentPage > 3) ||
+										(pageNumber === totalPages - 1 &&
+											currentPage < totalPages - 2)
+									) {
+										return (
+											<span
+												key={pageNumber}
+												className="flex h-8 w-8 items-center justify-center border-1 border-l-0 border-[#8A8F8C] p-0 font-medium text-[#5A615D]">
+												...
+											</span>
+										);
+									}
+									return null;
+								})}
+							</div>
+
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() => onPageChange?.(currentPage + 1)}
+								disabled={totalPages === 0 || currentPage >= totalPages}
+								className="h-8 w-8 rounded-none rounded-r-md border-l-0 border-[#8A8F8C] p-0">
+								<ChevronRight className="h-4 w-4" />
+							</Button>
+						</div>
+					)}
 				</div>
 			)}
 		</div>

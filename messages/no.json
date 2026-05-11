@@ -680,6 +680,27 @@
 			"nextInspectionDate": "NESTE INSPEKSJONSDATO",
 			"handlinger": "HANDLINGER"
 		},
+		"tooltip": {
+			"id": "ID",
+			"location": "Lokasjon (S1)",
+			"equipment": "Utstyr (S2)",
+			"orderNumber": "Ordrenr.",
+			"installationDate": "Installert",
+			"productionDate": "Produsert",
+			"fillingDate": "Påfylling",
+			"nextInspectionDate": "Neste inspeksjon"
+		},
+		"welcome": {
+			"headerLabel": "Hose management",
+			"title": "Velkommen til TESS Bestilling",
+			"intro": "Her bestiller du varer til din bedrift. Varene legges automatisk inn i ordresystemet.",
+			"checkIds": "Sjekk ID-numrene før du bekrefter.",
+			"checkIdsTail": "Du kan ikke endre dem etterpå.",
+			"incompleteHoses": "Slanger med ufullstendige opplysninger må bestilles via forespørsel.",
+			"incompleteHosesTail": "Du kan gjøre begge deler her.",
+			"dontShowAgain": "Ikke vis denne meldingen igjen",
+			"cta": "Gå til bestilling"
+		},
 		"errors": {
 			"selectItemsFirst": "Vennligst velg elementer \u00e5 kontakte om"
 		},
@@ -687,6 +708,10 @@
 			"supportMessageSent": "Meldingen ble sendt til TESS support",
 			"requestSent": "Foresp\u00f8rselen ble sendt",
 			"equipmentDiscarded": "Utstyr utrangert"
+		},
+		"pagination": {
+			"itemsPerPage": "antall oppføringer per side",
+			"perPageOption": "{size} per side"
 		}
 	},
 	"HoseOverview": {
