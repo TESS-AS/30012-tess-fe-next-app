@@ -542,7 +542,9 @@ export function BulkEditConfirmationModal({
 									}
 									canPrevPage={assortmentPage > 1}
 									canNextPage={assortments.length >= pageSize}
-									placeholder={t("catalogPlaceholder")}
+									placeholder={t("catalogPlaceholder", {
+										count: selectedCatalogs.length,
+									})}
 								/>
 							</div>
 						</div>
@@ -604,7 +606,9 @@ export function BulkEditConfirmationModal({
 									}
 									canPrevPage={companyPage > 1}
 									canNextPage={companies.length >= pageSize}
-									placeholder={t("companyPlaceholder")}
+									placeholder={t("companyPlaceholder", {
+										count: selectedCompanies.length,
+									})}
 								/>
 							</div>
 						</div>

@@ -54,12 +54,26 @@ export default function CheckoutPage() {
 		handleArchiveCart,
 		updatedAddress,
 		setUpdatedAddress,
+		requisitionPlacerInfo,
 	} = useAppContext();
 
 	const { data: profile, isLoading: isProfileLoading } = useGetProfileData();
 	const { data: defaultAddress, isLoading: isAddressLoading } =
 		useGetDefaultAddress();
 	const { submitFeedback, loading } = useFeedback();
+
+	const placerShippingOverride = requisitionPlacerInfo?.placerAddress
+		? {
+				name: requisitionPlacerInfo.placerName,
+				addressLine1: requisitionPlacerInfo.placerAddress.addressLine1 ?? "",
+				addressLine2: requisitionPlacerInfo.placerAddress.addressLine2 ?? "",
+				addressLine3: requisitionPlacerInfo.placerAddress.addressLine3 ?? "",
+				addressLine4: requisitionPlacerInfo.placerAddress.city ?? "",
+				postalCode: requisitionPlacerInfo.placerAddress.postalCode ?? "",
+				partyQualifier: "DP",
+				country: requisitionPlacerInfo.placerAddress.countryCode ?? "NO",
+			}
+		: null;
 
 	const selectedAddress = defaultAddress?.[0];
 
@@ -91,7 +105,7 @@ export default function CheckoutPage() {
 	const submitOrder = useSubmitOrder(
 		profile?.punchout || false,
 		profile,
-		{
+		placerShippingOverride ?? {
 			name: updatedAddress?.addressName || selectedAddress?.addressName || "",
 			addressLine1:
 				`${updatedAddress?.street} ${updatedAddress?.houseNumber}` ||
@@ -264,6 +278,24 @@ export default function CheckoutPage() {
 							currentStep={currentStep}
 							onStepClick={setCurrentStep}
 						/>
+
+						{placerShippingOverride && (
+							<div className="mt-4 rounded-md border border-[#C2E6CE] bg-[#DCF7E0] px-4 py-3 text-sm text-[#0F1912]">
+								<span className="font-semibold">
+									{t("Checkout.placerBanner.title")}:
+								</span>{" "}
+								{t("Checkout.placerBanner.body", {
+									name: placerShippingOverride.name,
+									address: [
+										placerShippingOverride.addressLine1,
+										placerShippingOverride.addressLine4,
+										placerShippingOverride.postalCode,
+									]
+										.filter(Boolean)
+										.join(", "),
+								})}
+							</div>
+						)}
 
 						<div className="grid grid-cols-1 items-start gap-6 pt-6 pb-4 lg:grid-cols-12 lg:gap-10">
 							<div

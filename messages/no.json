@@ -459,6 +459,10 @@
 		"helpText": "Trenger du hjelp i mellomtiden? Kontakt oss p\u00e5"
 	},
 	"Checkout": {
+		"placerBanner": {
+			"title": "Leveres til bestiller",
+			"body": "Ordren leveres til {name} – {address}"
+		},
 		"modals": {
 			"feedback": {
 				"title": "Tilbakemelding etter kj\u00f8p",
@@ -1155,7 +1159,10 @@
 		"itemsAddedToCart": "{count} varer lagt til i handlekurv",
 		"showLess": "Vis f\u00e6rre",
 		"showAll": "Vis alle",
-		"goToCart": "Til handlekurven"
+		"goToCart": "Til handlekurven",
+		"placer": {
+			"shipTo": "Leveres til: {name} – {address}"
+		}
 	},
 	"ProfilePage": {
 		"loadingProfile": "Laster profil...",
