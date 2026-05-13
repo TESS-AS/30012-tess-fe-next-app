@@ -1,3 +1,15 @@
+export type RequisitionType = 1 | 2;
+
+export interface PlacerAddress {
+	addressId: number;
+	addressLine1: string | null;
+	addressLine2: string | null;
+	addressLine3: string | null;
+	city: string | null;
+	postalCode: string | null;
+	countryCode: string | null;
+}
+
 export interface RequisitionResponse {
 	customerId: number;
 	requisitionId: number;
@@ -7,6 +19,9 @@ export interface RequisitionResponse {
 	status: string;
 	totalPrice: number;
 	fullName: string;
+	requisitionType?: RequisitionType | null;
+	placerUserId?: number | null;
+	placerAddress?: PlacerAddress[] | null;
 	requisitionLines: Array<{
 		requisitionLineId: number;
 		lineNumber: number;

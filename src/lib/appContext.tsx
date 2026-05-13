@@ -32,8 +32,18 @@ import {
 import { AddressFormState } from "@/types/address";
 import { CartKitResponse, CartLine } from "@/types/carts.types";
 import { Order } from "@/types/orders.types";
+import type { PlacerAddress } from "@/types/requisitions";
 import { PriceResponse } from "@/types/search.types";
 import { usePathname, useRouter } from "next/navigation";
+
+export interface RequisitionPlacerInfo {
+	requisitionId: number;
+	placerUserId: number | null;
+	placerAddress: PlacerAddress | null;
+	placerName: string;
+}
+
+const PLACER_INFO_STORAGE_KEY = "requisitionPlacerInfo";
 
 interface AppContextType {
 	isCartChanging: boolean;
@@ -88,6 +98,9 @@ interface AppContextType {
 	updatedAddress: AddressFormState | null;
 	setUpdatedAddress: (addr: AddressFormState | null) => void;
 
+	requisitionPlacerInfo: RequisitionPlacerInfo | null;
+	setRequisitionPlacerInfo: (info: RequisitionPlacerInfo | null) => void;
+
 	orderSummaryTotalPriceFinal: number;
 	rabatterTotalPrice: number;
 
@@ -137,6 +150,29 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const [updatedAddress, setUpdatedAddress] = useState<AddressFormState | null>(
 		null,
 	);
+	const [requisitionPlacerInfo, setRequisitionPlacerInfoState] =
+		useState<RequisitionPlacerInfo | null>(() => {
+			if (typeof window === "undefined") return null;
+			try {
+				const raw = window.sessionStorage.getItem(PLACER_INFO_STORAGE_KEY);
+				return raw ? (JSON.parse(raw) as RequisitionPlacerInfo) : null;
+			} catch {
+				return null;
+			}
+		});
+
+	const setRequisitionPlacerInfo = (info: RequisitionPlacerInfo | null) => {
+		setRequisitionPlacerInfoState(info);
+		if (typeof window === "undefined") return;
+		if (info) {
+			window.sessionStorage.setItem(
+				PLACER_INFO_STORAGE_KEY,
+				JSON.stringify(info),
+			);
+		} else {
+			window.sessionStorage.removeItem(PLACER_INFO_STORAGE_KEY);
+		}
+	};
 
 	const pathname = usePathname();
 	const router = useRouter();
@@ -811,6 +847,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const handleArchiveCart = async () => {
 		try {
 			await svcArchiveCart();
+			setRequisitionPlacerInfo(null);
 			setIsCartChanging((v) => !v);
 		} catch (error) {
 			console.error("Error archiving cart:", error);
@@ -830,6 +867,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			setSurChargePrices({});
 			setRabatterPrices({});
 			setOrderSummaryTotalPrice({});
+			setRequisitionPlacerInfo(null);
 			setIsCartChanging((v) => !v);
 		} catch (error) {
 			console.error("Error clearing cart:", error);
@@ -883,6 +921,9 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 				updatedAddress,
 				setUpdatedAddress,
+
+				requisitionPlacerInfo,
+				setRequisitionPlacerInfo,
 
 				rabatterTotalPrice,
 				orderSummaryTotalPriceFinal,

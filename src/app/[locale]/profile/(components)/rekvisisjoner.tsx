@@ -11,6 +11,7 @@ import { useAppContext } from "@/lib/appContext";
 import { cn, formatDate } from "@/lib/utils";
 import { addToCart } from "@/services/carts.service";
 import { updateRequisition } from "@/services/requisitions.service";
+import type { PlacerAddress, RequisitionType } from "@/types/requisitions";
 import { Label } from "@radix-ui/react-label";
 import {
 	Search,
@@ -52,7 +53,21 @@ interface Rekvisisjon {
 	pris: string;
 	status: Status;
 	items: OrderItem[];
+	requisitionType: RequisitionType | null;
+	placerUserId: number | null;
+	placerAddress: PlacerAddress | null;
 }
+
+const formatPlacerAddress = (address: PlacerAddress): string =>
+	[
+		address.addressLine1,
+		address.addressLine2,
+		address.addressLine3,
+		[address.postalCode, address.city].filter(Boolean).join(" "),
+		address.countryCode,
+	]
+		.filter(Boolean)
+		.join(", ");
 
 export const getStatusChipColor = (status: string) => {
 	switch (status) {
@@ -71,7 +86,8 @@ export function Rekvisisjoner() {
 	const t = useTranslations("Rekvisisjoner");
 	const router = useRouter();
 	const { data: profile } = usePunchoutProfile();
-	const { isCartChanging, setIsCartChanging } = useAppContext();
+	const { isCartChanging, setIsCartChanging, setRequisitionPlacerInfo } =
+		useAppContext();
 	const isCustomerRole = (profile?.role ?? "").toLowerCase() === "customer";
 
 	const [searchQuery, setSearchQuery] = useState("");
@@ -198,6 +214,14 @@ export function Rekvisisjoner() {
 													profile?.defaultCompanyNumber?.toString() || "1",
 											});
 										}
+										if (rekvisisjon.placerAddress) {
+											setRequisitionPlacerInfo({
+												requisitionId: rekvisisjon.requisitionId,
+												placerUserId: rekvisisjon.placerUserId,
+												placerAddress: rekvisisjon.placerAddress,
+												placerName: rekvisisjon.bestiller,
+											});
+										}
 										getRequisitions();
 									} catch (error) {
 										console.error(
@@ -269,7 +293,7 @@ export function Rekvisisjoner() {
 	];
 	return (
 		<div className="space-y-6">
-			<div className="flex items-baseline justify-between">
+			<div className="flex items-baseline justify-between gap-4">
 				<div className="flex items-center">
 					<h1 className="text-2xl font-semibold">{t("title")}</h1>
 					<p className="ml-4 text-[#5A615D]">{t("subtitle")}</p>
@@ -356,6 +380,14 @@ export function Rekvisisjoner() {
 					expandableContent={(rekvisisjon) => {
 						return (
 							<div>
+								{rekvisisjon.placerAddress && (
+									<p className="mb-4 text-sm font-medium text-[#0F1912]">
+										{t("placer.shipTo", {
+											name: rekvisisjon.bestiller,
+											address: formatPlacerAddress(rekvisisjon.placerAddress),
+										})}
+									</p>
+								)}
 								<table className="w-[70%]">
 									<thead>
 										<tr>
@@ -417,6 +449,14 @@ export function Rekvisisjoner() {
 							</span>
 						</ModalTitle>
 					</ModalHeader>
+					{selectedOrder?.placerAddress && (
+						<p className="pt-2 text-sm font-medium text-[#0F1912]">
+							{t("placer.shipTo", {
+								name: selectedOrder.bestiller,
+								address: formatPlacerAddress(selectedOrder.placerAddress),
+							})}
+						</p>
+					)}
 					<div className="space-y-2 py-4">
 						{selectedOrder?.items
 							?.slice(0, showAllItems ? undefined : 5)

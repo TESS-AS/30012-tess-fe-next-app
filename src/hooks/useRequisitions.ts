@@ -1,5 +1,9 @@
 import { getRequisition } from "@/services/requisitions.service";
-import type { RequisitionResponse } from "@/types/requisitions";
+import type {
+	PlacerAddress,
+	RequisitionResponse,
+	RequisitionType,
+} from "@/types/requisitions";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import { useQuery } from "@tanstack/react-query";
 
@@ -26,6 +30,9 @@ export interface Rekvisisjon {
 	requestDate: string;
 	requestTime: string;
 	description: string;
+	requisitionType: RequisitionType | null;
+	placerUserId: number | null;
+	placerAddress: PlacerAddress | null;
 }
 
 const mapApiStatus = (apiStatus: string): Status => {
@@ -96,6 +103,9 @@ export const useRequisitions = (customerNumber: string, status?: string) => {
 					requestDate: req.requestDate,
 					requestTime: req.requestTime,
 					description: req.description,
+					requisitionType: req.requisitionType ?? null,
+					placerUserId: req.placerUserId ?? null,
+					placerAddress: req.placerAddress?.[0] ?? null,
 				}),
 			);
 			return transformedRequisitions;
