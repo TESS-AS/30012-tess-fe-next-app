@@ -744,27 +744,12 @@ export default function ProductVariantTable({
 		}
 
 		const fixedTail: ColumnKey[] = [];
-		const combinedPriceQuantityCart =
-			hasQuantity && hasAddToCart && visibleCols.quantity && visibleCols.cart;
 
-		// Hide quantity, warehouse, and cart columns for logged-out users
-		// Optional separate quantity column (when not combined into PRIS)
-		if (!combinedPriceQuantityCart) {
-			if (hasQuantity && visibleCols.quantity && profile) fixedTail.push("quantity");
-		}
-
-		// Availability column
 		if (visibleCols.warehouse && profile) fixedTail.push("warehouse");
-
-		// Optional separate cart column (when not combined into PRIS)
-		if (!combinedPriceQuantityCart) {
-			if (hasAddToCart && visibleCols.cart && profile) fixedTail.push("cart");
-		}
-
-		// PRIS column should always be the last column
-		if (visibleCols.price) {
-			fixedTail.push("price");
-		}
+		if (visibleCols.price) fixedTail.push("price");
+		if (hasQuantity && visibleCols.quantity && profile)
+			fixedTail.push("quantity");
+		if (hasAddToCart && visibleCols.cart && profile) fixedTail.push("cart");
 
 		return [...orderedStaticFirst, ...fixedTail];
 	};
@@ -946,11 +931,6 @@ export default function ProductVariantTable({
 									["quantity", "warehouse", "cart", "price"].includes(col),
 								)
 								.map((col) => {
-									const combinedPriceQuantityCart =
-										hasQuantity &&
-										hasAddToCart &&
-										visibleCols.quantity &&
-										visibleCols.cart;
 									return (
 										<TableHead
 											key={col}
@@ -965,13 +945,11 @@ export default function ProductVariantTable({
 															: "min-w-[200px]"
 														: col === "cart"
 															? compact
-																? "min-w-[120px]"
-																: "min-w-[140px]"
-															: col === "price" && combinedPriceQuantityCart
-																? "min-w-[280px]"
-																: compact
-																	? "min-w-[90px]"
-																	: "min-w-[120px]"
+																? "min-w-[100px]"
+																: "min-w-[120px]"
+															: compact
+																? "min-w-[90px]"
+																: "min-w-[100px]"
 											}`}>
 											<span
 												className={compact ? "whitespace-pre-line" : ""}>
@@ -991,12 +969,6 @@ export default function ProductVariantTable({
 
 							const isSelected =
 								selectedItemNumber === variant.itemNumber.toString();
-
-							const combinedPriceQuantityCart =
-								hasQuantity &&
-								hasAddToCart &&
-								visibleCols.quantity &&
-								visibleCols.cart;
 
 							return (
 								<TableRow
@@ -1239,87 +1211,6 @@ export default function ProductVariantTable({
 															</TableCell>
 														);
 													}
-													if (combinedPriceQuantityCart) {
-														return (
-															<TableCell
-																key="price"
-																className="hidden min-w-[280px] py-2 pr-12 md:table-cell"
-																onClick={(e) => e.stopPropagation()}>
-																<div className="flex items-center justify-between gap-3">
-																	<div className="flex flex-wrap items-center gap-3">
-																		<span className="min-w-[96px] text-sm font-medium whitespace-nowrap">
-																			{loading[variant.itemNumber] ? (
-																				<span className="text-muted-foreground flex items-center gap-2">
-																					<Loader2 className="h-4 w-4 animate-spin" />
-																					{t("Product.loadingPrice")}
-																				</span>
-																			) : (
-																				formatNorwegianCurrency(
-																					prices[variant.itemNumber] ?? 0,
-																				)
-																			)}
-																		</span>
-																		<QuantityButtons
-																			quantity={qty}
-																			onIncrease={() => {
-																				const newQty = qty + 1;
-																				setQuantities((prev) => ({
-																					...prev,
-																					[variant.itemNumber]: newQty,
-																				}));
-																				onQuantityChange?.(
-																					variant.itemNumber.toString(),
-																					newQty,
-																				);
-																				void calculatePriceForVariant(
-																					variant,
-																					newQty,
-																				);
-																			}}
-																			onDecrease={() => {
-																				const newQty = Math.max(1, qty - 1);
-																				setQuantities((prev) => ({
-																					...prev,
-																					[variant.itemNumber]: newQty,
-																				}));
-																				onQuantityChange?.(
-																					variant.itemNumber.toString(),
-																					newQty,
-																				);
-																				void calculatePriceForVariant(
-																					variant,
-																					newQty,
-																				);
-																			}}
-																		/>
-																	</div>
-																	{hasAddToCart && (
-																		<button
-																			type="button"
-																			className="ml-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#D3D3D3] bg-white text-gray-800 transition-colors hover:bg-gray-50 disabled:opacity-50"
-																			disabled={loading[variant.itemNumber]}
-																			onClick={async (e) => {
-																				e.stopPropagation();
-																				await handleAddToCart(
-																					variant,
-																					qty,
-																					selectedWarehouse,
-																				);
-																			}}>
-																			{loading[variant.itemNumber] ? (
-																				<Loader2 className="h-4 w-4 animate-spin" />
-																			) : (
-																				<ShoppingCart
-																					className="h-4 w-4"
-																					strokeWidth={1.5}
-																				/>
-																			)}
-																		</button>
-																	)}
-																</div>
-															</TableCell>
-														);
-													}
 													return (
 														<TableCell
 															key="price"
@@ -1446,12 +1337,14 @@ export default function ProductVariantTable({
 													return (
 														<TableCell
 															key="cart"
-															className={`hidden py-2 md:table-cell ${compact ? "min-w-[120px] px-2" : "min-w-[140px] px-4"}`}
+															className={`hidden py-2 md:table-cell ${compact ? "min-w-[100px] px-2" : "min-w-[120px] px-4"}`}
 															onClick={(e) => e.stopPropagation()}>
 															{hasAddToCart ? (
-																<Button
-																	variant="outlineGreen"
-																	size="sm"
+																<button
+																	type="button"
+																	aria-label={t("Product.addToCart")}
+																	title={t("Product.addToCart")}
+																	className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#D3D3D3] bg-white text-gray-800 transition-colors hover:bg-gray-50 disabled:opacity-50"
 																	disabled={loading[variant.itemNumber]}
 																	onClick={async () => {
 																		await handleAddToCart(
@@ -1461,17 +1354,14 @@ export default function ProductVariantTable({
 																		);
 																	}}>
 																	{loading[variant.itemNumber] ? (
-																		<>
-																			<Loader2 className="inline h-4 w-4 animate-spin" />
-																			{t("Product.adding")}
-																		</>
+																		<Loader2 className="h-4 w-4 animate-spin" />
 																	) : (
-																		<>
-																			<ShoppingCart className="h-4 w-4" />
-																			{t("Product.addToCart")}
-																		</>
+																		<ShoppingCart
+																			className="h-4 w-4"
+																			strokeWidth={1.5}
+																		/>
 																	)}
-																</Button>
+																</button>
 															) : null}
 														</TableCell>
 													);

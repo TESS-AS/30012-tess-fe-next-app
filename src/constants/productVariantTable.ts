@@ -18,7 +18,7 @@ export const columnLabels: Record<ColumnKey, string> = {
 	price: "PRIS",
 	quantity: "ANTALL",
 	warehouse: "TILGJENGELIGHET",
-	cart: "HANDLEKURV",
+	cart: "LEGG TIL I HANDLEKURV",
 };
 
 export const columnHeaderLabels: Record<ColumnKey, string> = {
@@ -29,7 +29,7 @@ export const columnHeaderLabels: Record<ColumnKey, string> = {
 	price: "PRIS",
 	quantity: "ANTALL",
 	warehouse: "TILGJENGE-\nLIGHET",
-	cart: "HANDLE-\nKURV",
+	cart: "LEGG TIL I\nHANDLEKURV",
 };
 
 export const dropdownOrder: ColumnKey[] = [
