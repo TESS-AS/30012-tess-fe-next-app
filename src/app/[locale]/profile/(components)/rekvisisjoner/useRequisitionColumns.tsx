@@ -4,8 +4,8 @@ import type { Rekvisisjon } from "@/hooks/useRequisitions";
 import { formatDate } from "@/lib/utils";
 
 import { getStatusIcons } from "../mine-bestillinger";
-import { RequisitionActionsCell } from "./RequisitionActionsCell";
 import { getStatusChipColor } from "./rekvisisjoner.constants";
+import { RequisitionActionsCell } from "./RequisitionActionsCell";
 import type { RequisitionRowAction } from "./useRequisitionActions";
 
 interface UseRequisitionColumnsParams {
