@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ComponentType } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
@@ -18,6 +18,8 @@ import {
 	ChevronDown as ChevronDownIcon,
 	CircleX,
 	CircleCheck,
+	Loader2,
+	RotateCcw,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -69,6 +71,46 @@ const formatPlacerAddress = (address: PlacerAddress): string =>
 		.filter(Boolean)
 		.join(", ");
 
+type RequisitionRowAction = "approve" | "reject" | "restore";
+
+type PendingRequisitionAction = {
+	requisitionId: number;
+	action: RequisitionRowAction;
+} | null;
+
+function RequisitionActionButton({
+	label,
+	icon: Icon,
+	loading,
+	disabled,
+	className,
+	onClick,
+}: {
+	label: string;
+	icon: ComponentType<{ className?: string }>;
+	loading: boolean;
+	disabled?: boolean;
+	className?: string;
+	onClick: () => void | Promise<void>;
+}) {
+	return (
+		<Button
+			variant="outline"
+			size="sm"
+			disabled={disabled || loading}
+			aria-busy={loading}
+			className={cn("min-w-[6.5rem]", className)}
+			onClick={onClick}>
+			<span>{label}</span>
+			{loading ? (
+				<Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+			) : (
+				<Icon className="h-4 w-4 shrink-0" aria-hidden />
+			)}
+		</Button>
+	);
+}
+
 export const getStatusChipColor = (status: string) => {
 	switch (status) {
 		case "Godkjent":
@@ -86,8 +128,7 @@ export function Rekvisisjoner() {
 	const t = useTranslations("Rekvisisjoner");
 	const router = useRouter();
 	const { data: profile } = usePunchoutProfile();
-	const { isCartChanging, setIsCartChanging, setRequisitionPlacerInfo } =
-		useAppContext();
+	const { setIsCartChanging, setRequisitionPlacerInfo } = useAppContext();
 	const isCustomerRole = (profile?.role ?? "").toLowerCase() === "customer";
 
 	const [searchQuery, setSearchQuery] = useState("");
@@ -99,6 +140,8 @@ export function Rekvisisjoner() {
 	const [allRequisitionsCache, setAllRequisitionsCache] = useState<
 		Rekvisisjon[]
 	>([]);
+	const [pendingAction, setPendingAction] =
+		useState<PendingRequisitionAction>(null);
 
 	const itemsPerPage = 10;
 	const {
@@ -152,6 +195,30 @@ export function Rekvisisjoner() {
 	const totalItems = total;
 	const pagedRekvisisjoner = filteredRekvisisjoner;
 
+	const isRowActionPending = (
+		requisitionId: number,
+		action: RequisitionRowAction,
+	) =>
+		pendingAction?.requisitionId === requisitionId &&
+		pendingAction.action === action;
+
+	const runRequisitionAction = async (
+		requisitionId: number,
+		action: RequisitionRowAction,
+		fn: () => Promise<void>,
+	) => {
+		if (isCustomerRole || pendingAction) return;
+		setPendingAction({ requisitionId, action });
+		try {
+			await fn();
+			getRequisitions();
+		} catch (error) {
+			console.error(`Error on requisition ${action}`, error);
+		} finally {
+			setPendingAction(null);
+		}
+	};
+
 	const columns = [
 		{
 			key: "orderId",
@@ -188,112 +255,100 @@ export function Rekvisisjoner() {
 		{
 			key: "actions",
 			header: "",
-			cell: (rekvisisjon: Rekvisisjon) => (
-				<div className="flex justify-end gap-2">
-					{rekvisisjon.status === "Venter godkjenning" && (
-						<>
-							<Button
-								variant="outline"
-								size="sm"
-								disabled={isCustomerRole}
-								className="border-[#009640] text-[#009640] hover:border-[#005522] hover:bg-[#005522] hover:text-white"
-								onClick={async () => {
-									setIsCartChanging(true);
-									setSelectedOrder(rekvisisjon);
-									setShowAllItems(false);
-									setApprovalModalOpen(true);
-									try {
+			cell: (rekvisisjon: Rekvisisjon) => {
+				const rowId = rekvisisjon.requisitionId;
+				const actionsDisabled = isCustomerRole || pendingAction !== null;
+
+				return (
+					<div className="flex justify-end gap-2">
+						{rekvisisjon.status === "Venter godkjenning" && (
+							<>
+								<RequisitionActionButton
+									label={t("approve")}
+									icon={CircleCheck}
+									loading={isRowActionPending(rowId, "approve")}
+									disabled={actionsDisabled}
+									className="border-[#009640] text-[#009640] hover:border-[#005522] hover:bg-[#005522] hover:text-white disabled:hover:bg-transparent disabled:hover:text-[#009640]"
+									onClick={() =>
+										runRequisitionAction(rowId, "approve", async () => {
+											setIsCartChanging(true);
+											try {
+												await updateRequisition({
+													customerNumber:
+														profile?.defaultCustomerNumber?.toString() ?? "",
+													requisitionId: rowId,
+													status: "approved",
+												});
+												for (const item of rekvisisjon.items) {
+													await addToCart({
+														productNumber: item.productNumber,
+														itemNumber: item.itemNumber,
+														quantity: item.quantity,
+														warehouseNumber: "1",
+														companyNumber:
+															profile?.defaultCompanyNumber?.toString() ||
+															"1",
+													});
+												}
+												if (rekvisisjon.placerAddress) {
+													setRequisitionPlacerInfo({
+														requisitionId: rowId,
+														placerUserId: rekvisisjon.placerUserId,
+														placerAddress: rekvisisjon.placerAddress,
+														placerName: rekvisisjon.bestiller,
+													});
+												}
+												setSelectedOrder(rekvisisjon);
+												setShowAllItems(false);
+												setApprovalModalOpen(true);
+											} finally {
+												setIsCartChanging(false);
+											}
+										})
+									}
+								/>
+								<RequisitionActionButton
+									label={t("reject")}
+									icon={CircleX}
+									loading={isRowActionPending(rowId, "reject")}
+									disabled={actionsDisabled}
+									className="border-[#C81E1E] text-[#C81E1E] hover:border-[#9B1C1C] hover:bg-[#9B1C1C] hover:text-white disabled:hover:bg-transparent disabled:hover:text-[#C81E1E]"
+									onClick={() =>
+										runRequisitionAction(rowId, "reject", async () => {
+											await updateRequisition({
+												customerNumber:
+													profile?.defaultCustomerNumber?.toString() ?? "",
+												requisitionId: rowId,
+												status: "rejected",
+											});
+										})
+									}
+								/>
+							</>
+						)}
+						{(rekvisisjon.status === "Godkjent" ||
+							rekvisisjon.status === "Avvist") && (
+							<RequisitionActionButton
+								label={t("restore")}
+								icon={RotateCcw}
+								loading={isRowActionPending(rowId, "restore")}
+								disabled={actionsDisabled}
+								className="border-[#C1C4C2] text-[#0F1912] hover:bg-[#E8EAE9] hover:text-[#009640]"
+								onClick={() =>
+									runRequisitionAction(rowId, "restore", async () => {
 										await updateRequisition({
 											customerNumber:
 												profile?.defaultCustomerNumber?.toString() ?? "",
-											requisitionId: rekvisisjon.requisitionId,
-											status: "approved",
+											requisitionId: rowId,
+											status: "awaiting",
 										});
-										for (const item of rekvisisjon.items) {
-											await addToCart({
-												productNumber: item.productNumber,
-												itemNumber: item.itemNumber,
-												quantity: item.quantity,
-												warehouseNumber: "1",
-												companyNumber:
-													profile?.defaultCompanyNumber?.toString() || "1",
-											});
-										}
-										if (rekvisisjon.placerAddress) {
-											setRequisitionPlacerInfo({
-												requisitionId: rekvisisjon.requisitionId,
-												placerUserId: rekvisisjon.placerUserId,
-												placerAddress: rekvisisjon.placerAddress,
-												placerName: rekvisisjon.bestiller,
-											});
-										}
-										getRequisitions();
-									} catch (error) {
-										console.error(
-											"Error approving requisition and adding items to cart",
-											error,
-										);
-									} finally {
-										setIsCartChanging(false);
-									}
-								}}>
-								{t("approve")}
-								<CircleCheck />
-							</Button>
-							<Button
-								variant="outline"
-								size="sm"
-								disabled={isCustomerRole}
-								className="border-[#C81E1E] text-[#C81E1E] hover:border-[#9B1C1C] hover:bg-[#9B1C1C] hover:text-white"
-								onClick={async () => {
-									try {
-										await updateRequisition({
-											customerNumber:
-												profile?.defaultCustomerNumber?.toString() ?? "",
-											requisitionId: rekvisisjon.requisitionId,
-											status: "rejected",
-										});
-										getRequisitions();
-									} catch (error) {
-										console.error(
-											"Error updating requisition status to rejected",
-											error,
-										);
-									}
-								}}>
-								{t("reject")}
-								<CircleX />
-							</Button>
-						</>
-					)}
-					{rekvisisjon.status === "Godkjent" && (
-						<Button
-							variant="outline"
-							size="sm"
-							disabled={isCustomerRole}
-							className="border-[#C1C4C2] text-[#0F1912] hover:bg-[#E8EAE9] hover:text-[#009640]"
-							onClick={async () => {
-								if (isCustomerRole) return;
-								try {
-									await updateRequisition({
-										customerNumber:
-											profile?.defaultCustomerNumber?.toString() ?? "",
-										requisitionId: rekvisisjon.requisitionId,
-										status: "awaiting",
-									});
-									getRequisitions();
-								} catch (error) {
-									console.error(
-										"Error updating requisition status to awaiting",
-										error,
-									);
+									})
 								}
-							}}>
-							{t("restore")}
-						</Button>
-					)}
-				</div>
-			),
+							/>
+						)}
+					</div>
+				);
+			},
 		},
 	];
 	return (
