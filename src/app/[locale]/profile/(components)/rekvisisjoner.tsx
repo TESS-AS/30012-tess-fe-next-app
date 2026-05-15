@@ -100,9 +100,19 @@ export function Rekvisisjoner() {
 		Rekvisisjon[]
 	>([]);
 
-	const { requisitions, loading, error, getRequisitions } = useRequisitions(
+	const itemsPerPage = 10;
+	const {
+		requisitions,
+		total,
+		totalPages,
+		loading,
+		error,
+		getRequisitions,
+	} = useRequisitions(
 		profile?.defaultCustomerNumber ?? "",
 		selectedStatus,
+		currentPage,
+		itemsPerPage,
 	);
 
 	// Cache all requisitions when "Alle" is selected for accurate counts
@@ -139,13 +149,8 @@ export function Rekvisisjoner() {
 		setCurrentPage(1);
 	}, [searchQuery, selectedStatus]);
 
-	const itemsPerPage = 10;
-	const totalItems = filteredRekvisisjoner.length;
-	const totalPages = Math.ceil(totalItems / itemsPerPage);
-	const pagedRekvisisjoner = filteredRekvisisjoner.slice(
-		(currentPage - 1) * itemsPerPage,
-		currentPage * itemsPerPage,
-	);
+	const totalItems = total;
+	const pagedRekvisisjoner = filteredRekvisisjoner;
 
 	const columns = [
 		{
