@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 
 import { DataTable } from "@/components/ui/data-table";
-import { type Rekvisisjon, useRequisitions } from "@/hooks/useRequisitions";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
+import { type Rekvisisjon, useRequisitions } from "@/hooks/useRequisitions";
 import { useTranslations } from "next-intl";
 
 import { RequisitionApprovalModal } from "./rekvisisjoner/RequisitionApprovalModal";
@@ -33,18 +33,8 @@ export function Rekvisisjoner() {
 	>([]);
 
 	const itemsPerPage = 10;
-	const {
-		requisitions,
-		total,
-		totalPages,
-		loading,
-		getRequisitions,
-	} = useRequisitions(
-		customerNumber,
-		selectedStatus,
-		currentPage,
-		itemsPerPage,
-	);
+	const { requisitions, total, totalPages, loading, getRequisitions } =
+		useRequisitions(customerNumber, selectedStatus, currentPage, itemsPerPage);
 
 	useEffect(() => {
 		if (selectedStatus === "Alle" && requisitions.length > 0) {
