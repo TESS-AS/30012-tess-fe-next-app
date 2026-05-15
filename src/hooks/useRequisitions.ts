@@ -7,7 +7,13 @@ import type {
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import { useQuery } from "@tanstack/react-query";
 
-type Status = "Alle" | "Venter godkjenning" | "Godkjent" | "Avvist";
+export type RequisitionStatus =
+	| "Alle"
+	| "Venter godkjenning"
+	| "Godkjent"
+	| "Avvist";
+
+type Status = RequisitionStatus;
 
 interface OrderItem {
 	name: string;
