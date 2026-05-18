@@ -6,6 +6,7 @@ import { FeedbackModal } from "@/components/checkout/feedback-modal";
 import { OrderConfirmation } from "@/components/checkout/order-confirmation";
 import OrderSummary from "@/components/checkout/order-summary";
 import { OrderTrackingModal } from "@/components/checkout/order-tracking-modal";
+import { PlacerAddressPicker } from "@/components/checkout/placer-address-picker";
 import StepConfirmation from "@/components/checkout/StepConfirmation";
 import StepContactDelivery from "@/components/checkout/StepContactDelivery";
 import StepPayment from "@/components/checkout/StepPayment";
@@ -55,6 +56,7 @@ export default function CheckoutPage() {
 		updatedAddress,
 		setUpdatedAddress,
 		requisitionPlacerInfo,
+		setSelectedPlacerAddress,
 	} = useAppContext();
 
 	const { data: profile, isLoading: isProfileLoading } = useGetProfileData();
@@ -62,18 +64,38 @@ export default function CheckoutPage() {
 		useGetDefaultAddress();
 	const { submitFeedback, loading } = useFeedback();
 
-	const placerShippingOverride = requisitionPlacerInfo?.placerAddress
-		? {
-				name: requisitionPlacerInfo.placerName,
-				addressLine1: requisitionPlacerInfo.placerAddress.addressLine1 ?? "",
-				addressLine2: requisitionPlacerInfo.placerAddress.addressLine2 ?? "",
-				addressLine3: requisitionPlacerInfo.placerAddress.addressLine3 ?? "",
-				addressLine4: requisitionPlacerInfo.placerAddress.city ?? "",
-				postalCode: requisitionPlacerInfo.placerAddress.postalCode ?? "",
-				partyQualifier: "DP",
-				country: requisitionPlacerInfo.placerAddress.countryCode ?? "NO",
-			}
-		: null;
+	const selectedPlacerAddress =
+		requisitionPlacerInfo?.placerAddresses.find(
+			(a) => a.addressId === requisitionPlacerInfo.selectedPlacerAddressId,
+		) ?? requisitionPlacerInfo?.placerAddresses[0];
+
+	const placerShippingOverride =
+		requisitionPlacerInfo && selectedPlacerAddress
+			? {
+					name: requisitionPlacerInfo.placerName,
+					addressLine1: selectedPlacerAddress.addressLine1 ?? "",
+					addressLine2: selectedPlacerAddress.addressLine2 ?? "",
+					addressLine3: selectedPlacerAddress.addressLine3 ?? "",
+					addressLine4: selectedPlacerAddress.city ?? "",
+					postalCode: selectedPlacerAddress.postalCode ?? "",
+					partyQualifier: "DP",
+					country: selectedPlacerAddress.countryCode ?? "NO",
+				}
+			: null;
+
+	const placerAddressForCard =
+		requisitionPlacerInfo && selectedPlacerAddress
+			? {
+					name: requisitionPlacerInfo.placerName,
+					addressName: requisitionPlacerInfo.placerName,
+					street: selectedPlacerAddress.addressLine1 ?? "",
+					houseNumber: selectedPlacerAddress.addressLine2 ?? "",
+					extraInfo: selectedPlacerAddress.addressLine3 ?? "",
+					postalCode: selectedPlacerAddress.postalCode ?? "",
+					city: selectedPlacerAddress.city ?? "",
+					countryCode: selectedPlacerAddress.countryCode ?? "",
+				}
+			: null;
 
 	const selectedAddress = defaultAddress?.[0];
 
@@ -141,14 +163,28 @@ export default function CheckoutPage() {
 					);
 				}
 				return (
-					<StepContactDelivery
-						contactPerson={contactPerson}
-						handleContactPersonSave={handleContactPersonSave}
-						selectedAddress={updatedAddress || selectedAddress}
-						showWarning={showWarning}
-						setShowWarning={setShowWarning}
-						onSave={setUpdatedAddress}
-					/>
+					<>
+						{requisitionPlacerInfo && (
+							<PlacerAddressPicker
+								placerName={requisitionPlacerInfo.placerName}
+								addresses={requisitionPlacerInfo.placerAddresses}
+								selectedAddressId={
+									requisitionPlacerInfo.selectedPlacerAddressId
+								}
+								onSelect={setSelectedPlacerAddress}
+							/>
+						)}
+						<StepContactDelivery
+							contactPerson={contactPerson}
+							handleContactPersonSave={handleContactPersonSave}
+							selectedAddress={
+								placerAddressForCard ?? updatedAddress ?? selectedAddress
+							}
+							showWarning={showWarning}
+							setShowWarning={setShowWarning}
+							onSave={setUpdatedAddress}
+						/>
+					</>
 				);
 			case 1:
 				return (
@@ -165,7 +201,9 @@ export default function CheckoutPage() {
 				return (
 					<StepConfirmation
 						contactPerson={contactPerson}
-						selectedAddress={updatedAddress || selectedAddress}
+						selectedAddress={
+							placerAddressForCard ?? updatedAddress ?? selectedAddress
+						}
 						orderData={orderData}
 						modals={modals}
 						paymentMethod={paymentMethod}

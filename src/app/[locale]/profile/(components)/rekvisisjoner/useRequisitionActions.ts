@@ -78,11 +78,13 @@ export function useRequisitionActions({
 							companyNumber,
 						});
 					}
-					if (rekvisisjon.placerAddress) {
+					if (rekvisisjon.placerAddresses.length > 0) {
 						setRequisitionPlacerInfo({
 							requisitionId: rowId,
 							placerUserId: rekvisisjon.placerUserId,
-							placerAddress: rekvisisjon.placerAddress,
+							placerAddresses: rekvisisjon.placerAddresses,
+							selectedPlacerAddressId:
+								rekvisisjon.placerAddresses[0].addressId,
 							placerName: rekvisisjon.bestiller,
 						});
 					}

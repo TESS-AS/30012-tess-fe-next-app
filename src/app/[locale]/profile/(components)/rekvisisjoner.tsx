@@ -121,6 +121,8 @@ export function Rekvisisjoner() {
 							rekvisisjon={rekvisisjon}
 							labels={{
 								placerShipTo: (values) => t("placer.shipTo", values),
+								placerMoreAddresses: (values) =>
+									t("placer.moreAddresses", values),
 								units: t("units").toUpperCase(),
 								quantity: t("quantity").toUpperCase(),
 								price: t("price").toUpperCase(),
@@ -138,6 +140,8 @@ export function Rekvisisjoner() {
 				labels={{
 					itemsAddedToCart: (values) => t("itemsAddedToCart", values),
 					placerShipTo: (values) => t("placer.shipTo", values),
+					placerMoreAddresses: (values) =>
+						t("placer.moreAddresses", values),
 					showLess: t("showLess"),
 					showAll: t("showAll"),
 					goToCart: t("goToCart"),

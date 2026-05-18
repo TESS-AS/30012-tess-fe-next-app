@@ -18,6 +18,7 @@ interface RequisitionApprovalModalProps {
 	labels: {
 		itemsAddedToCart: (values: { count: number }) => string;
 		placerShipTo: (values: { name: string; address: string }) => string;
+		placerMoreAddresses: (values: { count: number }) => string;
 		showLess: string;
 		showAll: string;
 		goToCart: string;
@@ -62,12 +63,19 @@ export function RequisitionApprovalModal({
 						</span>
 					</ModalTitle>
 				</ModalHeader>
-				{selectedOrder?.placerAddress && (
+				{selectedOrder?.placerAddresses?.[0] && (
 					<p className="pt-2 text-sm font-medium text-[#0F1912]">
 						{labels.placerShipTo({
 							name: selectedOrder.bestiller,
-							address: formatPlacerAddress(selectedOrder.placerAddress),
+							address: formatPlacerAddress(selectedOrder.placerAddresses[0]),
 						})}
+						{selectedOrder.placerAddresses.length > 1 && (
+							<span className="ml-1 text-xs text-[#5A615D]">
+								{labels.placerMoreAddresses({
+									count: selectedOrder.placerAddresses.length - 1,
+								})}
+							</span>
+						)}
 					</p>
 				)}
 				<div className="space-y-2 py-4">

@@ -38,7 +38,7 @@ export interface Rekvisisjon {
 	description: string;
 	requisitionType: RequisitionType | null;
 	placerUserId: number | null;
-	placerAddress: PlacerAddress | null;
+	placerAddresses: PlacerAddress[];
 }
 
 const mapApiStatus = (apiStatus: string): Status => {
@@ -140,7 +140,7 @@ export const useRequisitions = (
 					description: req.description,
 					requisitionType: req.requisitionType ?? null,
 					placerUserId: req.placerUserId ?? null,
-					placerAddress: req.placerAddress?.[0] ?? null,
+					placerAddresses: req.placerAddress ?? [],
 				}),
 			);
 			return {

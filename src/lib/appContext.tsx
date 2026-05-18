@@ -39,11 +39,12 @@ import { usePathname, useRouter } from "next/navigation";
 export interface RequisitionPlacerInfo {
 	requisitionId: number;
 	placerUserId: number | null;
-	placerAddress: PlacerAddress | null;
+	placerAddresses: PlacerAddress[];
+	selectedPlacerAddressId: number | null;
 	placerName: string;
 }
 
-const PLACER_INFO_STORAGE_KEY = "requisitionPlacerInfo";
+const PLACER_INFO_STORAGE_KEY = "requisitionPlacerInfo_v2";
 
 interface AppContextType {
 	isCartChanging: boolean;
@@ -100,6 +101,7 @@ interface AppContextType {
 
 	requisitionPlacerInfo: RequisitionPlacerInfo | null;
 	setRequisitionPlacerInfo: (info: RequisitionPlacerInfo | null) => void;
+	setSelectedPlacerAddress: (addressId: number) => void;
 
 	orderSummaryTotalPriceFinal: number;
 	rabatterTotalPrice: number;
@@ -172,6 +174,23 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		} else {
 			window.sessionStorage.removeItem(PLACER_INFO_STORAGE_KEY);
 		}
+	};
+
+	const setSelectedPlacerAddress = (addressId: number) => {
+		setRequisitionPlacerInfoState((prev) => {
+			if (!prev) return prev;
+			const next: RequisitionPlacerInfo = {
+				...prev,
+				selectedPlacerAddressId: addressId,
+			};
+			if (typeof window !== "undefined") {
+				window.sessionStorage.setItem(
+					PLACER_INFO_STORAGE_KEY,
+					JSON.stringify(next),
+				);
+			}
+			return next;
+		});
 	};
 
 	const pathname = usePathname();
@@ -924,6 +943,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 				requisitionPlacerInfo,
 				setRequisitionPlacerInfo,
+				setSelectedPlacerAddress,
 
 				rabatterTotalPrice,
 				orderSummaryTotalPriceFinal,
