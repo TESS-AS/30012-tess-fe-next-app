@@ -62,7 +62,7 @@ export const shippingFields: Omit<FormFieldProps, "value" | "onChange">[] = [
 	},
 ];
 
-export const HIDE_CHECKOUT_FOR_SPECIFIC_CUSTOMER_NUMBER = "";
+export const HIDE_CHECKOUT_FOR_SPECIFIC_CUSTOMER_NUMBER = "169999";
 //this is Equinor
 export const SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER = "184200";
 export const SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER = [
