@@ -84,6 +84,7 @@ export function HosesAndEquipments({
 	const S1_CODE_GUDRUN = "1291619";
 	const S1_CODE_DRAUPNER = "2090222";
 	const S1_CODE_VALEMON = "1291617";
+	const S1_CODE_SNORRE_A = "1291622";
 
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
 	const [supportOpen, setSupportOpen] = useState(false);
@@ -927,7 +928,8 @@ export function HosesAndEquipments({
 							s1.S1Code === S1_CODE_TROLL_A ||
 							s1.S1Code === S1_CODE_GUDRUN ||
 							s1.S1Code === S1_CODE_DRAUPNER ||
-							s1.S1Code === S1_CODE_VALEMON,
+							s1.S1Code === S1_CODE_VALEMON ||
+							s1.S1Code === S1_CODE_SNORRE_A,
 					)
 					.map((s1) => (
 						<SelectItem
