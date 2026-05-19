@@ -103,7 +103,7 @@ export async function getProductCompanyBalance(
 
 export async function getItemWarehouseBalance(
 	itemNumber: string,
-	companyNumber: string = "01",
+	companyNumber: string,
 ): Promise<WarehouseBalance> {
 	try {
 		const response = await axiosInstance.get(
@@ -118,8 +118,8 @@ export async function getItemWarehouseBalance(
 
 export async function getProductWarehouseBalance(
 	productNumber: string,
-	companyNumber: string = "01",
-	warehouseNumber: string = "L01",
+	companyNumber: string,
+	warehouseNumber: string,
 ): Promise<WarehouseBalance[]> {
 	try {
 		const response = await axiosInstance.get(
@@ -140,8 +140,8 @@ interface PriceRequest {
 
 export async function calculateItemPrice(
 	request: PriceRequest[],
-	customerNumber: string = "169999",
-	companyNumber: string = "01",
+	customerNumber: string,
+	companyNumber: string,
 ) {
 	try {
 		const response = await axiosInstance.post(
@@ -156,10 +156,10 @@ export async function calculateItemPrice(
 }
 
 export async function getProductPrice(
-	customerNumber: string = "169999",
-	companyNumber: string = "01",
+	customerNumber: string,
+	companyNumber: string,
 	productNumber: string,
-	warehouseNumber: string = "L01",
+	warehouseNumber: string,
 ): Promise<PriceResponse[]> {
 	try {
 		const response = await axiosInstance.get(

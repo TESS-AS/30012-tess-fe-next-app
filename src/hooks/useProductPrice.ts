@@ -11,11 +11,13 @@ interface UseProductPriceProps {
 
 export function useProductPrice({
 	productNumber,
-	customerNumber = "169999",
-	companyNumber = "01",
-	warehouseNumber = "L01",
+	customerNumber,
+	companyNumber,
+	warehouseNumber,
 	enabled = true,
 }: UseProductPriceProps) {
+	const hasAllParams =
+		!!customerNumber && !!companyNumber && !!warehouseNumber;
 	const query = useQuery({
 		queryKey: [
 			"productPrice",
@@ -26,10 +28,10 @@ export function useProductPrice({
 		],
 		queryFn: async () => {
 			const priceData = await getProductPrice(
-				customerNumber,
-				companyNumber,
+				customerNumber!,
+				companyNumber!,
 				productNumber,
-				warehouseNumber,
+				warehouseNumber!,
 			);
 			// Get the minimum price from all variants (bestPrice)
 			const prices = priceData.map(
@@ -41,7 +43,7 @@ export function useProductPrice({
 					: undefined;
 			return minPrice as number | undefined;
 		},
-		enabled: enabled && !!productNumber,
+		enabled: enabled && !!productNumber && hasAllParams,
 		staleTime: 5 * 60 * 1000, // 5 minutes - prices don't change often
 		gcTime: 10 * 60 * 1000, // 10 minutes
 		retry: 1,

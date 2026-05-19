@@ -218,10 +218,14 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 			setCartItems(cart);
 
+			const customerNumber = profile?.defaultCustomerNumber;
+			const companyNumber = profile?.defaultCompanyNumber;
+			if (!customerNumber || !companyNumber) return;
+
 			for (const item of cart.cart) {
 				const priceData = await getProductPrice(
-					profile?.defaultCustomerNumber,
-					profile?.defaultCompanyNumber,
+					customerNumber,
+					companyNumber,
 					item.productNumber,
 					item.warehouseNumber,
 				);
@@ -300,8 +304,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			if (allPriceRequests.length > 0) {
 				const priceResults = await calculateItemPrice(
 					allPriceRequests,
-					profile?.defaultCustomerNumber,
-					profile?.defaultCompanyNumber,
+					customerNumber,
+					companyNumber,
 				);
 
 				const initialPrices: Record<string, number> = {};
@@ -411,8 +415,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					try {
 						const fallbackResults = await calculateItemPrice(
 							missingItems,
-							profile?.defaultCustomerNumber,
-							profile?.defaultCompanyNumber,
+							customerNumber,
+							companyNumber,
 						);
 						const fallbackCalculated: Record<string, number> = {};
 						const fallbackInitial: Record<string, number> = {};

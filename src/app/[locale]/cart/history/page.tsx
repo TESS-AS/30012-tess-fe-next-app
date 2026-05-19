@@ -40,11 +40,16 @@ const CartHistoryPage = () => {
 			setArchiveData(data);
 
 			// Fetch prices for all products
+			const customerNumber = profile?.defaultCustomerNumber;
+			if (!customerNumber) {
+				setIsLoading(false);
+				return;
+			}
 			const pricePromises = data.data.flatMap((item) =>
 				item.cart.map(async (cartItem) => {
 					try {
 						const price = await getProductPrice(
-							profile?.defaultCustomerNumber,
+							customerNumber,
 							cartItem.companyNumber,
 							cartItem.productNumber,
 							cartItem.warehouseNumber,
