@@ -13,9 +13,10 @@ DEV_BE_URL="https://30011-proxyapi-dev-gqdbfkd0bba4a4c3.norwayeast-01.azurewebsi
 echo "→ Building dev image $IMAGE"
 echo "  NEXT_PUBLIC_API_BASE_URL=$DEV_BE_URL"
 
-docker build \
+docker buildx build \
   --platform linux/amd64 \
   --build-arg NEXT_PUBLIC_API_BASE_URL="$DEV_BE_URL" \
+  --load \
   -t "$IMAGE" \
   .
 

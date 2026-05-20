@@ -21,9 +21,10 @@ PROD_BE_URL="https://api.tessix.no"
 echo "→ Building prod image $IMAGE"
 echo "  NEXT_PUBLIC_API_BASE_URL=$PROD_BE_URL"
 
-docker build \
+docker buildx build \
   --platform linux/amd64 \
   --build-arg NEXT_PUBLIC_API_BASE_URL="$PROD_BE_URL" \
+  --load \
   -t "$IMAGE" \
   .
 
