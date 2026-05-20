@@ -22,6 +22,7 @@ echo "→ Building prod image $IMAGE"
 echo "  NEXT_PUBLIC_API_BASE_URL=$PROD_BE_URL"
 
 docker build \
+  --platform linux/amd64 \
   --build-arg NEXT_PUBLIC_API_BASE_URL="$PROD_BE_URL" \
   -t "$IMAGE" \
   .
