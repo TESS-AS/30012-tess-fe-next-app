@@ -13,6 +13,11 @@ RUN yarn install --frozen-lockfile
 FROM node:20-alpine AS builder
 WORKDIR /app
 
+# NEXT_PUBLIC_* env vars must be baked into the bundle at build time.
+# Pass via `docker build --build-arg NEXT_PUBLIC_API_BASE_URL=...`.
+ARG NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN yarn build
