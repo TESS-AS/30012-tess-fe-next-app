@@ -8,7 +8,7 @@
 set -euo pipefail
 
 IMAGE="tesscontainerregistry0.azurecr.io/tessfe:latest"
-DEV_BE_URL="https://30011-proxyapi-dev-gqdbfkd0bba4a4c3.norwayeast-01.azurewebsites.net"
+DEV_BE_URL="https://api.dev.tessix.no"
 
 echo "→ Building dev image $IMAGE"
 echo "  NEXT_PUBLIC_API_BASE_URL=$DEV_BE_URL"
