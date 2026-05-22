@@ -16,6 +16,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 
 import ProductVariantTable from "../checkout/product-variant-table";
+import { VariantModalHeader } from "../checkout/variant-modal-header";
 
 interface Props {
 	product: IProductSearch;
@@ -307,8 +308,14 @@ export function ProductItem({
 				}}
 				className="min-w-[75%]">
 				<ModalHeader className="border-b border-gray-200 pb-5">
-					<ModalTitle>Velg produktvariant - {product.productName}</ModalTitle>
+					<ModalTitle>Velg produktvariant: {product.productName}</ModalTitle>
 				</ModalHeader>
+				<VariantModalHeader
+					productName={product.productName}
+					itemNumber={selectedVariantNumber ?? undefined}
+					imageUrl={product.thumbnail}
+					detailsHref={productLink}
+				/>
 				<div className="w-full overflow-hidden">
 					<ProductVariantTable
 						hasQuantity
