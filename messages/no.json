@@ -459,6 +459,10 @@
 		"helpText": "Trenger du hjelp i mellomtiden? Kontakt oss p\u00e5"
 	},
 	"Checkout": {
+		"variantModalHeader": {
+			"viewAllDetails": "Vis alle detaljer →",
+			"fallbackDescription": "Velg en variant fra tabellen nedenfor for å se detaljer og legge til i handlekurven."
+		},
 		"placerBanner": {
 			"title": "Leveres til bestiller",
 			"body": "Ordren leveres til {name} – {address}"

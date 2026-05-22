@@ -456,6 +456,10 @@
 		"helpText": "Need help in the meantime? Contact us at"
 	},
 	"Checkout": {
+		"variantModalHeader": {
+			"viewAllDetails": "View all details →",
+			"fallbackDescription": "Pick a variant from the table below to see details and add it to your cart."
+		},
 		"placerBanner": {
 			"title": "Shipping to placer",
 			"body": "Order will ship to {name} – {address}"
