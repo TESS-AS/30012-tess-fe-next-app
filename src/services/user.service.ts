@@ -6,7 +6,6 @@ import {
 	UpdateUserRelationsResponse,
 	UserDomainConfig,
 } from "@/types/user.types";
-import axios from "axios";
 
 import axiosInstance from "./axiosClient";
 
@@ -30,8 +29,8 @@ export async function getOrganizationAddresses(
 	orgNumber: string,
 ): Promise<OrganizationRecord | null> {
 	try {
-		const response = await axios.get<OrganizationRecord>(
-			`https://api.tessix.no/org/${encodeURIComponent(orgNumber)}`,
+		const response = await axiosInstance.get<OrganizationRecord>(
+			`/org/${encodeURIComponent(orgNumber)}`,
 		);
 		return response.data;
 	} catch (error) {

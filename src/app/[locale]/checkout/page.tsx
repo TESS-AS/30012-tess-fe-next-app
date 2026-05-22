@@ -6,6 +6,7 @@ import { FeedbackModal } from "@/components/checkout/feedback-modal";
 import { OrderConfirmation } from "@/components/checkout/order-confirmation";
 import OrderSummary from "@/components/checkout/order-summary";
 import { OrderTrackingModal } from "@/components/checkout/order-tracking-modal";
+import { PlacerAddressPicker } from "@/components/checkout/placer-address-picker";
 import StepConfirmation from "@/components/checkout/StepConfirmation";
 import StepContactDelivery from "@/components/checkout/StepContactDelivery";
 import StepPayment from "@/components/checkout/StepPayment";
@@ -54,12 +55,47 @@ export default function CheckoutPage() {
 		handleArchiveCart,
 		updatedAddress,
 		setUpdatedAddress,
+		requisitionPlacerInfo,
+		setSelectedPlacerAddress,
 	} = useAppContext();
 
 	const { data: profile, isLoading: isProfileLoading } = useGetProfileData();
 	const { data: defaultAddress, isLoading: isAddressLoading } =
 		useGetDefaultAddress();
 	const { submitFeedback, loading } = useFeedback();
+
+	const selectedPlacerAddress =
+		requisitionPlacerInfo?.placerAddresses.find(
+			(a) => a.addressId === requisitionPlacerInfo.selectedPlacerAddressId,
+		) ?? requisitionPlacerInfo?.placerAddresses[0];
+
+	const placerShippingOverride =
+		requisitionPlacerInfo && selectedPlacerAddress
+			? {
+					name: requisitionPlacerInfo.placerName,
+					addressLine1: selectedPlacerAddress.addressLine1 ?? "",
+					addressLine2: selectedPlacerAddress.addressLine2 ?? "",
+					addressLine3: selectedPlacerAddress.addressLine3 ?? "",
+					addressLine4: selectedPlacerAddress.city ?? "",
+					postalCode: selectedPlacerAddress.postalCode ?? "",
+					partyQualifier: "DP",
+					country: selectedPlacerAddress.countryCode ?? "NO",
+				}
+			: null;
+
+	const placerAddressForCard =
+		requisitionPlacerInfo && selectedPlacerAddress
+			? {
+					name: requisitionPlacerInfo.placerName,
+					addressName: requisitionPlacerInfo.placerName,
+					street: selectedPlacerAddress.addressLine1 ?? "",
+					houseNumber: selectedPlacerAddress.addressLine2 ?? "",
+					extraInfo: selectedPlacerAddress.addressLine3 ?? "",
+					postalCode: selectedPlacerAddress.postalCode ?? "",
+					city: selectedPlacerAddress.city ?? "",
+					countryCode: selectedPlacerAddress.countryCode ?? "",
+				}
+			: null;
 
 	const selectedAddress = defaultAddress?.[0];
 
@@ -91,7 +127,7 @@ export default function CheckoutPage() {
 	const submitOrder = useSubmitOrder(
 		profile?.punchout || false,
 		profile,
-		{
+		placerShippingOverride ?? {
 			name: updatedAddress?.addressName || selectedAddress?.addressName || "",
 			addressLine1:
 				`${updatedAddress?.street} ${updatedAddress?.houseNumber}` ||
@@ -127,14 +163,28 @@ export default function CheckoutPage() {
 					);
 				}
 				return (
-					<StepContactDelivery
-						contactPerson={contactPerson}
-						handleContactPersonSave={handleContactPersonSave}
-						selectedAddress={updatedAddress || selectedAddress}
-						showWarning={showWarning}
-						setShowWarning={setShowWarning}
-						onSave={setUpdatedAddress}
-					/>
+					<>
+						{requisitionPlacerInfo && (
+							<PlacerAddressPicker
+								placerName={requisitionPlacerInfo.placerName}
+								addresses={requisitionPlacerInfo.placerAddresses}
+								selectedAddressId={
+									requisitionPlacerInfo.selectedPlacerAddressId
+								}
+								onSelect={setSelectedPlacerAddress}
+							/>
+						)}
+						<StepContactDelivery
+							contactPerson={contactPerson}
+							handleContactPersonSave={handleContactPersonSave}
+							selectedAddress={
+								placerAddressForCard ?? updatedAddress ?? selectedAddress
+							}
+							showWarning={showWarning}
+							setShowWarning={setShowWarning}
+							onSave={setUpdatedAddress}
+						/>
+					</>
 				);
 			case 1:
 				return (
@@ -151,7 +201,9 @@ export default function CheckoutPage() {
 				return (
 					<StepConfirmation
 						contactPerson={contactPerson}
-						selectedAddress={updatedAddress || selectedAddress}
+						selectedAddress={
+							placerAddressForCard ?? updatedAddress ?? selectedAddress
+						}
 						orderData={orderData}
 						modals={modals}
 						paymentMethod={paymentMethod}
@@ -264,6 +316,24 @@ export default function CheckoutPage() {
 							currentStep={currentStep}
 							onStepClick={setCurrentStep}
 						/>
+
+						{placerShippingOverride && (
+							<div className="mt-4 rounded-md border border-[#C2E6CE] bg-[#DCF7E0] px-4 py-3 text-sm text-[#0F1912]">
+								<span className="font-semibold">
+									{t("Checkout.placerBanner.title")}:
+								</span>{" "}
+								{t("Checkout.placerBanner.body", {
+									name: placerShippingOverride.name,
+									address: [
+										placerShippingOverride.addressLine1,
+										placerShippingOverride.addressLine4,
+										placerShippingOverride.postalCode,
+									]
+										.filter(Boolean)
+										.join(", "),
+								})}
+							</div>
+						)}
 
 						<div className="grid grid-cols-1 items-start gap-6 pt-6 pb-4 lg:grid-cols-12 lg:gap-10">
 							<div

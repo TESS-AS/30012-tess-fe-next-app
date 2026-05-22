@@ -456,6 +456,10 @@
 		"helpText": "Need help in the meantime? Contact us at"
 	},
 	"Checkout": {
+		"placerBanner": {
+			"title": "Shipping to placer",
+			"body": "Order will ship to {name} – {address}"
+		},
 		"modals": {
 			"feedback": {
 				"title": "Purchase Feedback",
@@ -1177,7 +1181,10 @@
 		"itemsAddedToCart": "{count} items added to cart",
 		"showLess": "Show less",
 		"showAll": "Show all",
-		"goToCart": "Go to cart"
+		"goToCart": "Go to cart",
+		"placer": {
+			"shipTo": "Ship to: {name} – {address}"
+		}
 	},
 	"ProfilePage": {
 		"loadingProfile": "Loading profile...",

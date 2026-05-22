@@ -1,9 +1,19 @@
 import { getRequisition } from "@/services/requisitions.service";
-import type { RequisitionResponse } from "@/types/requisitions";
+import type {
+	PlacerAddress,
+	RequisitionResponse,
+	RequisitionType,
+} from "@/types/requisitions";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import { useQuery } from "@tanstack/react-query";
 
-type Status = "Alle" | "Venter godkjenning" | "Godkjent" | "Avvist";
+export type RequisitionStatus =
+	| "Alle"
+	| "Venter godkjenning"
+	| "Godkjent"
+	| "Avvist";
+
+type Status = RequisitionStatus;
 
 interface OrderItem {
 	name: string;
@@ -26,6 +36,9 @@ export interface Rekvisisjon {
 	requestDate: string;
 	requestTime: string;
 	description: string;
+	requisitionType: RequisitionType | null;
+	placerUserId: number | null;
+	placerAddresses: PlacerAddress[];
 }
 
 const mapApiStatus = (apiStatus: string): Status => {
@@ -59,21 +72,50 @@ const mapStatusToApi = (status: string): string | undefined => {
 export const requisitionsKeys = {
 	all: ["requisitions"] as const,
 	lists: () => [...requisitionsKeys.all, "list"] as const,
-	list: (customerNumber: string, status?: string) =>
-		[...requisitionsKeys.lists(), customerNumber, status] as const,
+	list: (
+		customerNumber: string,
+		status?: string,
+		page?: number,
+		pageSize?: number,
+	) =>
+		[
+			...requisitionsKeys.lists(),
+			customerNumber,
+			status,
+			page,
+			pageSize,
+		] as const,
 };
 
-export const useRequisitions = (customerNumber: string, status?: string) => {
+interface UseRequisitionsResult {
+	requisitions: Rekvisisjon[];
+	total: number;
+	page: number;
+	pageSize: number;
+	totalPages: number;
+}
+
+export const useRequisitions = (
+	customerNumber: string,
+	status?: string,
+	page = 1,
+	pageSize = 20,
+) => {
 	const {
-		data: requisitions = [],
+		data,
 		isLoading: loading,
 		error,
 		refetch: getRequisitions,
-	} = useQuery<Rekvisisjon[]>({
-		queryKey: requisitionsKeys.list(customerNumber, status),
+	} = useQuery<UseRequisitionsResult>({
+		queryKey: requisitionsKeys.list(customerNumber, status, page, pageSize),
 		queryFn: async () => {
 			const apiStatus = mapStatusToApi(status || "Alle");
-			const response = await getRequisition(customerNumber, apiStatus);
+			const response = await getRequisition(
+				customerNumber,
+				apiStatus,
+				page,
+				pageSize,
+			);
 			const transformedRequisitions = response.requisitions.map(
 				(req: RequisitionResponse) => ({
 					orderId: req.description,
@@ -96,14 +138,32 @@ export const useRequisitions = (customerNumber: string, status?: string) => {
 					requestDate: req.requestDate,
 					requestTime: req.requestTime,
 					description: req.description,
+					requisitionType: req.requisitionType ?? null,
+					placerUserId: req.placerUserId ?? null,
+					placerAddresses: req.placerAddress ?? [],
 				}),
 			);
-			return transformedRequisitions;
+			return {
+				requisitions: transformedRequisitions,
+				total: response.total,
+				page: response.page,
+				pageSize: response.pageSize,
+				totalPages: response.totalPages,
+			};
 		},
 		enabled: !!customerNumber,
 		staleTime: 1000 * 60 * 5,
 		gcTime: 1000 * 60 * 10,
 	});
 
-	return { requisitions, loading, error, getRequisitions };
+	return {
+		requisitions: data?.requisitions ?? [],
+		total: data?.total ?? 0,
+		page: data?.page ?? page,
+		pageSize: data?.pageSize ?? pageSize,
+		totalPages: data?.totalPages ?? 0,
+		loading,
+		error,
+		getRequisitions,
+	};
 };
