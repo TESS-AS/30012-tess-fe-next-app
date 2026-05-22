@@ -526,7 +526,7 @@ const CartPage = () => {
 					onOpenChange={(open) =>
 						setOpenModalId(open ? item.productNumber : null)
 					}
-					className="min-w-[95%] md:min-w-[75%]">
+					className="max-h-[90vh] min-w-[95%] overflow-y-auto md:min-w-[75%]">
 					<ModalHeader>
 						<ModalTitle>
 							Velg produktvariant
