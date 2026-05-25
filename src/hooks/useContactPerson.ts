@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
 import { useGetProfileData } from "@/hooks/useGetProfileData";
-import { updateUserProfile } from "@/services/user.service";
 
 export interface ContactPersonData {
 	firstName: string;
@@ -32,24 +31,8 @@ export const useContactPerson = () => {
 	}, [profile]);
 
 	const handleSave = async (updated: ContactPersonData) => {
-		try {
-			const response = await updateUserProfile(
-				updated.firstName,
-				updated.lastName,
-				updated.phone,
-			);
-			const updatedData = {
-				firstName: response.UpdatedFields[0].firstName,
-				lastName: response.UpdatedFields[0].lastName,
-				email: updated.email,
-				phone: response.UpdatedFields[0].userPhoneNumber,
-			};
-			setContactPerson(updatedData);
-			return updatedData;
-		} catch (error) {
-			console.error("Failed to update contact person:", error);
-			throw error;
-		}
+		setContactPerson(updated);
+		return updated;
 	};
 
 	return {
