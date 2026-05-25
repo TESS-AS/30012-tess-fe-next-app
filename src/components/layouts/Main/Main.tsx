@@ -36,6 +36,7 @@ export default function Main({ children }: { children?: ReactNode }) {
 			</div>
 			<div
 				id="app-scroll-container"
+				style={{ scrollbarGutter: "stable" }}
 				className={cn(
 					"min-h-0 flex-1 overflow-x-hidden overflow-y-auto transition-all duration-300",
 					pathname?.includes("/profile") ? "bg-[#E8EAE9]" : "bg-background",
