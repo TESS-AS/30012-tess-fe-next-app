@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 
 import OrderSummary from "@/components/checkout/order-summary";
 import ProductVariantTable from "@/components/checkout/product-variant-table";
+import { VariantModalHeader } from "@/components/checkout/variant-modal-header";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { FeedbackSideTab } from "@/components/ui/feedback-side-tab";
@@ -525,10 +526,19 @@ const CartPage = () => {
 					onOpenChange={(open) =>
 						setOpenModalId(open ? item.productNumber : null)
 					}
-					className="min-w-[95%] md:min-w-[75%]">
+					className="max-h-[90vh] min-w-[95%] overflow-y-auto md:min-w-[75%]">
 					<ModalHeader>
-						<ModalTitle>Velg produktvariant</ModalTitle>
+						<ModalTitle>
+							Velg produktvariant
+							{item.productName ? `: ${item.productName}` : ""}
+						</ModalTitle>
 					</ModalHeader>
+					<VariantModalHeader
+						productName={item.productName ?? item.productNumber}
+						itemNumber={item.itemNumber}
+						imageUrl={item.mediaId?.[0]?.url}
+						detailsHref={`/produkt/${encodeURIComponent(item.productNumber)}`}
+					/>
 					<div className="space-y-4 p-4">
 						<div className="space-y-2">
 							<ProductVariantTable

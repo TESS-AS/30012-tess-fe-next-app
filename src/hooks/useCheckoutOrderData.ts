@@ -56,7 +56,9 @@ export function useCheckoutOrderData(
 				const unitPrice = unitPrices[item.itemNumber] || 0;
 				return {
 					customerOrderLine: lineCounter++,
-					warehouseNumber: warehouseNumber,
+					// Use the per-line warehouse the user picked in the variant table;
+					// fall back to the profile default only if the cart line is missing one.
+					warehouseNumber: item.warehouseNumber || warehouseNumber,
 					orderType: "S2",
 					itemCode: item.itemNumber,
 					orderedQuantity: item.quantity,

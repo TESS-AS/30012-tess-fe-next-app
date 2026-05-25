@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-import { updateUserProfile } from "@/services/user.service";
 import { User2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -47,7 +46,6 @@ export const EditContactModal: React.FC<EditContactModalProps> = ({
 	const handleSave = () => {
 		onSave(formData);
 		onClose();
-		updateUserProfile(formData.firstName, formData.lastName, formData.phone);
 	};
 
 	return (

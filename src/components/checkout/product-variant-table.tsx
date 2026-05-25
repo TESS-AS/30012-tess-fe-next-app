@@ -858,7 +858,7 @@ export default function ProductVariantTable({
 
 			<div
 				ref={tableWrapperRef}
-				className="mt-5 max-h-[70vh] overflow-auto">
+				className="mt-5">
 				<Table
 					noOverflow
 					className="w-full min-w-max rounded-md">

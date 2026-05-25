@@ -56,12 +56,14 @@ export default function AuthDialog({
 
 	const handleLoginWithBESso = () => {
 		setAuthenticatingProvider("be-sso");
-		window.location.href = `${baseURL}/auth/sso`;
+		const returnTo = encodeURIComponent(window.location.origin);
+		window.location.href = `${baseURL}/auth/sso?returnTo=${returnTo}`;
 	};
 
 	const handleLoginWithTenantBe = () => {
 		setAuthenticatingProvider("tenant-be");
-		window.location.href = `${baseURL}/auth/tenant`;
+		const returnTo = encodeURIComponent(window.location.origin);
+		window.location.href = `${baseURL}/auth/tenant?returnTo=${returnTo}`;
 	};
 
 	return (
