@@ -20,12 +20,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useGetCompanies } from "@/hooks/useGetCompanies";
 import { useGetProfileData, profileKeys } from "@/hooks/useGetProfileData";
 import { useGetWarehouses } from "@/hooks/useGetWarehouse";
@@ -47,7 +41,6 @@ import {
 	Loader2,
 	ChevronRight,
 	CheckCircle2,
-	Info,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -275,28 +268,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 						<p className="text-sm text-gray-600">{t("orgSearchHelper")}</p>
 
 						<div className="space-y-2">
-							<div className="flex items-center gap-1.5">
-								<Label htmlFor="orgNumber">{t("orgNumberLabel")}</Label>
-								<TooltipProvider>
-									<Tooltip>
-										<TooltipTrigger asChild>
-											<button
-												type="button"
-												aria-label={t("orgNumberTooltip")}
-												className="text-gray-500 hover:text-gray-700 focus:outline-none">
-												<Info className="h-4 w-4" />
-											</button>
-										</TooltipTrigger>
-										<TooltipContent
-											side="top"
-											className="max-w-[260px]">
-											<p className="text-xs leading-relaxed">
-												{t("orgNumberTooltip")}
-											</p>
-										</TooltipContent>
-									</Tooltip>
-								</TooltipProvider>
-							</div>
+							<Label htmlFor="orgNumber">{t("orgNumberLabel")}</Label>
 							<div className="relative">
 								<Input
 									id="orgNumber"

@@ -9,7 +9,6 @@ import {
 	buildFaqFeedbackEmailHtml,
 	buildFaqFeedbackEmailSubject,
 } from "@/lib/email-templates";
-import { getUserSessionId } from "@/lib/sessionId";
 import { CheckCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -41,20 +40,7 @@ export function InfoPage({
 	const [text, setText] = useState("");
 	const [contactMe, setContactMe] = useState<boolean | null>(null);
 	const [submitted, setSubmitted] = useState(false);
-	const [capturedContext, setCapturedContext] = useState<{
-		topicTitle: string;
-		sessionId: string;
-	} | null>(null);
 	const { submitFeedback, loading } = useFeedback();
-
-	const handleNoClick = () => {
-		if (feedback !== null) return;
-		setCapturedContext({
-			topicTitle: title,
-			sessionId: getUserSessionId(),
-		});
-		setFeedback("no");
-	};
 	// First two questions in category 1 ("Før innlogging og opprettelse") open by default
 	const [category1Open, setCategory1Open] = useState<string[]>([
 		"cat-1-item-0",
@@ -66,20 +52,17 @@ export function InfoPage({
 			? `${profile.firstName} ${profile.lastName}`
 			: "Ukjent bruker";
 		const userEmail = profile?.email ?? "Ikke tilgjengelig";
-		const faqTitle = capturedContext?.topicTitle ?? title;
-		const sessionId = capturedContext?.sessionId ?? getUserSessionId();
 
 		const htmlBody = buildFaqFeedbackEmailHtml({
 			userName,
 			userEmail,
-			faqTitle,
+			faqTitle: title,
 			message: text,
 			wantsContact: contactMe ?? false,
-			sessionId,
 		});
 
 		await submitFeedback("FAQ", text, {
-			subject: buildFaqFeedbackEmailSubject(faqTitle),
+			subject: buildFaqFeedbackEmailSubject(title),
 			htmlBody,
 		});
 		setSubmitted(true);
@@ -177,7 +160,7 @@ export function InfoPage({
 							</button>
 							<button
 								type="button"
-								onClick={handleNoClick}
+								onClick={() => feedback === null && setFeedback("no")}
 								disabled={feedback !== null}
 								className={`min-w-[100px] border-l border-[#C1C4C2] px-4 py-2.5 text-sm font-medium transition-colors ${
 									feedback === "no"
