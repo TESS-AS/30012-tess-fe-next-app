@@ -44,6 +44,7 @@
 		"notMandatory": "not mandatory",
 		"orgSearchHelper": "Org. no. helps us connect your account faster",
 		"orgNumberLabel": "Organization number",
+		"orgNumberTooltip": "Adding your organization number helps us verify and link your account faster.",
 		"orgNumberPlaceholder": "Write organization number",
 		"orgNumberHint": "9 digits - fetches name and address automatically",
 		"orgNumberError": "Organization number must be 9 digits",

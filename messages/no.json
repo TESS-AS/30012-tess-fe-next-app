@@ -44,6 +44,7 @@
 		"notMandatory": "ikke obligatorisk",
 		"orgSearchHelper": "Org.nr. hjelper oss med \u00e5 koble kontoen din raskere",
 		"orgNumberLabel": "Organisasjonsnummer",
+		"orgNumberTooltip": "Ved å legge til organisasjonsnummeret ditt kan vi verifisere og koble kontoen din raskere.",
 		"orgNumberPlaceholder": "Skriv organisasjonsnummer",
 		"orgNumberHint": "9 siffer - henter navn og adresse automatisk",
 		"orgNumberError": "Organisasjonsnummer m\u00e5 v\u00e6re 9 siffer",
