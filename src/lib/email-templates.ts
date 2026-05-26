@@ -15,6 +15,7 @@ interface FaqFeedbackEmailParams {
 	faqTitle: string;
 	message: string;
 	wantsContact: boolean;
+	sessionId?: string;
 }
 
 function wrapEmailLayout(heading: string, content: string): string {
@@ -86,12 +87,14 @@ export function buildFaqFeedbackEmailHtml({
 	faqTitle,
 	message,
 	wantsContact,
+	sessionId,
 }: FaqFeedbackEmailParams): string {
 	const rows = [
 		infoRow("Bruker", `${userName} / ${userEmail}`),
 		infoRow("Opprinnelig FAQ-tema", faqTitle),
 		infoRow("Brukerens melding", message),
 		infoRow("Ønsker å bli kontaktet", wantsContact ? "Ja" : "Nei"),
+		...(sessionId ? [infoRow("Sesjons-ID", sessionId)] : []),
 	];
 
 	const content = `
