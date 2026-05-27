@@ -10,24 +10,24 @@ interface UseSearchQueryProps {
 export function useSearchQuery({ query, enabled = true }: UseSearchQueryProps) {
 	const searchQuery = useQuery({
 		queryKey: ["search", query],
-		queryFn: async ({ signal }): Promise<SearchResponse> => {
+		queryFn: async (): Promise<SearchResponse> => {
 			const response = await axiosClient.get<SearchResponse>(
 				`/search/${query}`,
-				{ signal },
 			);
 			return response.data;
 		},
 		enabled: enabled && query.length > 0,
 		staleTime: 0,
-		gcTime: 0,
-		refetchOnMount: "always",
+		gcTime: 2 * 60 * 1000,
+		refetchOnMount: false,
 		refetchOnReconnect: false,
+		placeholderData: (previousData) => previousData,
 		notifyOnChangeProps: ["data", "error", "isLoading", "isFetching"],
 	});
 
 	return {
 		data: searchQuery.data,
-		isLoading: searchQuery.isLoading,
+		isLoading: searchQuery.isLoading && !searchQuery.data,
 		isFetching: searchQuery.isFetching,
 		error: searchQuery.error,
 		isSuccess: searchQuery.isSuccess,
