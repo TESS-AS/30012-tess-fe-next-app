@@ -13,16 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import { useGetCompanies } from "@/hooks/useGetCompanies";
 import { useGetProfileData, profileKeys } from "@/hooks/useGetProfileData";
-import { useGetWarehouses } from "@/hooks/useGetWarehouse";
 import {
 	SUPPORT_EMAIL_RECIPIENT,
 	buildOnboardingEmailHtml,
@@ -56,17 +47,11 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 	const t = useTranslations("Onboarding");
 	const queryClient = useQueryClient();
 	const { data: profile } = useGetProfileData();
-	const { companies } = useGetCompanies(true);
-	const { warehouses, isLoading: isLoadingWarehouses } = useGetWarehouses(
-		true,
-		undefined,
-	);
 
 	const [companyName, setCompanyName] = useState("");
 	const [department, setDepartment] = useState("");
 	const [orgNumber, setOrgNumber] = useState("");
-	const [selectedCompanyNumber, setSelectedCompanyNumber] = useState("");
-	const [selectedWarehouseNumber, setSelectedWarehouseNumber] = useState("");
+	const [postalCode, setPostalCode] = useState("");
 	const [isSearchingOrg, setIsSearchingOrg] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [orgSearchError, setOrgSearchError] = useState<string | null>(null);
@@ -77,25 +62,10 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 
 	// Initialize form with profile data if available
 	useEffect(() => {
-		if (profile) {
-			if (profile.defaultCompanyName) {
-				setCompanyName(profile.defaultCompanyName);
-			}
-			if (profile.defaultCompanyNumber) {
-				setSelectedCompanyNumber(String(profile.defaultCompanyNumber));
-			}
-			if (profile.defaultWarehouseNumber) {
-				setSelectedWarehouseNumber(profile.defaultWarehouseNumber);
-			}
+		if (profile?.defaultCompanyName) {
+			setCompanyName(profile.defaultCompanyName);
 		}
 	}, [profile]);
-
-	// Filter warehouses based on selected company
-	const availableWarehouses = warehouses.filter((w) => {
-		if (!selectedCompanyNumber) return true;
-		// Note: Warehouse filtering by company might need adjustment based on API response structure
-		return true;
-	});
 
 	const handleOrgSearch = async () => {
 		if (!orgNumber || orgNumber.length !== 9) {
@@ -127,7 +97,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 	};
 
 	const handleSubmit = async () => {
-		if (!companyName || !selectedWarehouseNumber) {
+		if (!companyName) {
 			return;
 		}
 		if (!orgNumber || orgNumber.length !== 9) {
@@ -138,12 +108,6 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 		setIsSubmitting(true);
 
 		try {
-			// Get selected warehouse name
-			const selectedWarehouse = warehouses.find(
-				(w) => String(w.id) === selectedWarehouseNumber,
-			);
-			const warehouseName = selectedWarehouse?.name || selectedWarehouseNumber;
-
 			// Set userstate to "onboarding" so onboarding notification shows under header
 			await patchUserState("onboarding");
 
@@ -154,7 +118,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 				companyName,
 				department: department || undefined,
 				orgNumber: orgNumber || undefined,
-				serviceCenterName: warehouseName,
+				postalCode: postalCode.trim() || undefined,
 			});
 
 			const formData = new FormData();
@@ -194,11 +158,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 		}
 	};
 
-	const canSubmit =
-		companyName &&
-		selectedWarehouseNumber &&
-		orgNumber.length === 9 &&
-		!isSubmitting;
+	const canSubmit = companyName && orgNumber.length === 9 && !isSubmitting;
 
 	return (
 		<Dialog
@@ -377,32 +337,20 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 
 					{/* Service Center Section */}
 					<div className="space-y-4">
-						<h3 className="text-lg font-semibold">{t("serviceCenterTitle")}</h3>
+						<h3 className="text-lg font-semibold">{t("postalCodeTitle")}</h3>
 
 						<div className="space-y-2">
-							<Label htmlFor="serviceCenter">
-								{t("serviceCenterLabel")}{" "}
-								<span className="text-red-500">*</span>
-							</Label>
-							<Select
-								value={selectedWarehouseNumber}
-								onValueChange={setSelectedWarehouseNumber}
-								disabled={isLoadingWarehouses}>
-								<SelectTrigger id="serviceCenter">
-									<SelectValue placeholder={t("serviceCenterPlaceholder")} />
-								</SelectTrigger>
-								<SelectContent className="z-[9999]">
-									{availableWarehouses
-										.filter((w) => w.id != null && String(w.id) !== "")
-										.map((warehouse) => (
-											<SelectItem
-												key={String(warehouse.id)}
-												value={String(warehouse.id)}>
-												{warehouse.name} ({warehouse.id})
-											</SelectItem>
-										))}
-								</SelectContent>
-							</Select>
+							<Label htmlFor="postalCode">{t("postalCodeLabel")}</Label>
+							<Input
+								id="postalCode"
+								placeholder={t("postalCodePlaceholder")}
+								value={postalCode}
+								onChange={(e) =>
+									setPostalCode(e.target.value.replace(/\D/g, ""))
+								}
+								maxLength={4}
+								inputMode="numeric"
+							/>
 						</div>
 					</div>
 				</div>

@@ -6,7 +6,7 @@ interface OnboardingEmailParams {
 	companyName: string;
 	department?: string;
 	orgNumber?: string;
-	serviceCenterName: string;
+	postalCode?: string;
 }
 
 interface FaqFeedbackEmailParams {
@@ -50,7 +50,7 @@ export function buildOnboardingEmailHtml({
 	companyName,
 	department,
 	orgNumber,
-	serviceCenterName,
+	postalCode,
 }: OnboardingEmailParams): string {
 	const rows = [
 		infoRow("Bruker", userEmail),
@@ -58,7 +58,7 @@ export function buildOnboardingEmailHtml({
 		infoRow("Bedrift", companyName),
 		...(department ? [infoRow("Avdeling", department)] : []),
 		...(orgNumber ? [infoRow("Organisasjonsnummer", orgNumber)] : []),
-		infoRow("TESS servicesenter", serviceCenterName),
+		...(postalCode ? [infoRow("Postnummer", postalCode)] : []),
 	];
 
 	const content = `
