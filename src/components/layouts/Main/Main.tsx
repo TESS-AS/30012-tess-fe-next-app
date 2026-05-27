@@ -46,7 +46,7 @@ export default function Main({ children }: { children?: ReactNode }) {
 				<div className="container mx-auto">{children}</div>
 			</div>
 			<OnboardingModal
-				isOpen={isNewUser}
+				isOpen={true}
 				onClose={() => {
 					setOnboardingCompleted(true);
 				}}

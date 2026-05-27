@@ -130,13 +130,17 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 		if (!companyName || !selectedWarehouseNumber) {
 			return;
 		}
+		if (!orgNumber || orgNumber.length !== 9) {
+			setOrgSearchError(t("orgNumberError"));
+			return;
+		}
 
 		setIsSubmitting(true);
 
 		try {
 			// Get selected warehouse name
 			const selectedWarehouse = warehouses.find(
-				(w) => w.id === selectedWarehouseNumber,
+				(w) => String(w.id) === selectedWarehouseNumber,
 			);
 			const warehouseName = selectedWarehouse?.name || selectedWarehouseNumber;
 
@@ -190,7 +194,11 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 		}
 	};
 
-	const canSubmit = companyName && selectedWarehouseNumber && !isSubmitting;
+	const canSubmit =
+		companyName &&
+		selectedWarehouseNumber &&
+		orgNumber.length === 9 &&
+		!isSubmitting;
 
 	return (
 		<Dialog
@@ -259,16 +267,15 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 							)}
 							<h3 className="text-base font-semibold">
 								{t("orgSearchTitle")}
-								<span className="font-normal text-gray-500">
-									{" "}
-									({t("notMandatory")})
-								</span>
 							</h3>
 						</div>
 						<p className="text-sm text-gray-600">{t("orgSearchHelper")}</p>
 
 						<div className="space-y-2">
-							<Label htmlFor="orgNumber">{t("orgNumberLabel")}</Label>
+							<Label htmlFor="orgNumber">
+								{t("orgNumberLabel")}{" "}
+								<span className="text-red-500">*</span>
+							</Label>
 							<div className="relative">
 								<Input
 									id="orgNumber"
@@ -384,14 +391,16 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 								<SelectTrigger id="serviceCenter">
 									<SelectValue placeholder={t("serviceCenterPlaceholder")} />
 								</SelectTrigger>
-								<SelectContent>
-									{availableWarehouses.map((warehouse) => (
-										<SelectItem
-											key={warehouse.id}
-											value={warehouse.id}>
-											{warehouse.name}
-										</SelectItem>
-									))}
+								<SelectContent className="z-[9999]">
+									{availableWarehouses
+										.filter((w) => w.id != null && String(w.id) !== "")
+										.map((warehouse) => (
+											<SelectItem
+												key={String(warehouse.id)}
+												value={String(warehouse.id)}>
+												{warehouse.name} ({warehouse.id})
+											</SelectItem>
+										))}
 								</SelectContent>
 							</Select>
 						</div>
