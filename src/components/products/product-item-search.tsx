@@ -56,7 +56,6 @@ export function ProductItem({
 	const [productLink, setProductLink] = useState<string>(
 		`/produkt/${encodeURIComponent(product.productNumber)}`,
 	);
-	const [isLoadingCategory, setIsLoadingCategory] = useState(false);
 	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
@@ -87,7 +86,6 @@ export function ProductItem({
 	useEffect(() => {
 		const fetchCategoryPath = async () => {
 			try {
-				setIsLoadingCategory(true);
 				const categoryTree = await loadCategoryTree(product.productNumber);
 				if (categoryTree && categoryTree.length > 0) {
 					// Always use Norwegian for URL paths
@@ -111,8 +109,6 @@ export function ProductItem({
 				console.error("Error loading category tree for product:", error);
 				// Fallback to default product link with product number
 				setProductLink(`/produkt/${encodeURIComponent(product.productNumber)}`);
-			} finally {
-				setIsLoadingCategory(false);
 			}
 		};
 
@@ -162,16 +158,14 @@ export function ProductItem({
 		captureReturnTarget();
 		setSearchQuery("");
 		onClose?.();
-		if (!isLoadingCategory) {
-			router.push(productLink);
-		}
+		router.push(productLink);
 	};
 
 	return (
 		<div>
 			<div
 				onClick={handleProductClick}
-				className={isLoadingCategory ? "cursor-wait opacity-50" : ""}>
+				className="cursor-pointer">
 				<div key={product.productNumber}>
 					<div className="group mb-3 flex w-full cursor-pointer flex-col gap-3 rounded-md border border-gray-200 p-3 hover:border-gray-400 sm:flex-row sm:items-center sm:gap-4">
 						<div className="flex h-24 w-24 shrink-0 items-center justify-center self-center overflow-hidden rounded-md sm:h-32 sm:w-32">
