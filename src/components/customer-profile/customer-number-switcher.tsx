@@ -281,11 +281,7 @@ export default function CustomerNumberSwitcher({
 
 			<Modal
 				open={isCustomerModalOpen}
-				// hideCloseButton={shouldBlock}
-				onOpenChange={(nextOpen) => {
-					if (shouldBlock && !nextOpen) return;
-					setIsCustomerModalOpen(nextOpen);
-				}}>
+				onOpenChange={setIsCustomerModalOpen}>
 				<ModalHeader>
 					<ModalTitle>{t("CustomerSwitcher.title")}</ModalTitle>
 				</ModalHeader>
