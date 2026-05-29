@@ -12,7 +12,6 @@ import SearchAside from "@/components/search-aside";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import AuthDialog from "@/components/ui/dialogs/auth-dialog";
-import { FeedbackDialog } from "@/components/ui/dialogs/feedback-dialog";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -120,6 +119,8 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 	const [isMobileProfileOpen, setIsMobileProfileOpen] = useState(false);
+	const [isMobileCustomerSwitcherOpen, setIsMobileCustomerSwitcherOpen] =
+		useState(false);
 
 	useEffect(() => {
 		setIsMobileMenuOpen(false);
@@ -166,7 +167,6 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [searchParams]);
-	const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const justNavigatedRef = useRef(false);
 	const { shouldFocus, resetFocus } = useSearchStore();
@@ -873,18 +873,14 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 						</div>
 						{!isHoseManagementCustomer && (
 							<nav className="bg-white">
-								{/* E-handel section */}
-								<div className="border-b border-[#c1c4c2] px-4 py-3 text-sm font-bold text-[#0F1912]">
-									E-handel
-								</div>
 								<button
 									type="button"
 									onClick={() => {
 										router.push("/profile");
 										setIsMobileProfileOpen(false);
 									}}
-									className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]">
-									Min oversikt
+									className="flex min-h-[53px] w-full items-center justify-between border-t border-[#c1c4c2] px-4 text-left text-sm text-[#2D3530]">
+									Gå til din side
 									<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
 								</button>
 								<button
@@ -900,28 +896,18 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								<button
 									type="button"
 									onClick={() => {
+										setIsMobileCustomerSwitcherOpen(true);
 										setIsMobileProfileOpen(false);
 									}}
 									className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]">
-									Velg kjøpsprofil
-									<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
-								</button>
-								<button
-									type="button"
-									onClick={() => {
-										setIsFeedbackDialogOpen(true);
-										setIsMobileProfileOpen(false);
-									}}
-									className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]">
-									Gi tilbakemelding
+									Bytt handlekonto
 									<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
 								</button>
 
-								{/* Verktøy section */}
 								{(hasHoseManagementAccess || hasTessEdiAccess) && (
 									<>
 										<div className="border-t border-b border-[#c1c4c2] px-4 py-3 text-sm font-bold text-[#0F1912]">
-											Verktøy
+											Tjenester
 										</div>
 										{hasHoseManagementAccess && (
 											<button
@@ -1106,10 +1092,14 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 				isOpen={isAuthOpen}
 				onOpenChange={setIsAuthOpen}
 			/>
-			<FeedbackDialog
-				open={isFeedbackDialogOpen}
-				onOpenChange={setIsFeedbackDialogOpen}
-			/>
+			{profile && !isHoseManagementCustomer && (
+				<CustomerNumberSwitcher
+					profile={profile}
+					hideTrigger
+					open={isMobileCustomerSwitcherOpen}
+					onOpenChange={setIsMobileCustomerSwitcherOpen}
+				/>
+			)}
 		</header>
 	);
 }
