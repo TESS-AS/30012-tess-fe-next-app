@@ -14,7 +14,7 @@ export function Quote() {
 	const t = useTranslations();
 
 	return (
-		<section className="relative mt-8 mb-8 py-8 before:absolute before:inset-0 before:-mx-[9999px] before:bg-[#F0FCF2] before:content-[''] md:mt-[-65px] md:mb-0 md:py-8">
+		<section className="relative mt-8 mb-8 py-8 before:absolute before:inset-0 before:-mx-[9999px] before:bg-[#E8EAE9] before:content-[''] md:mt-[-65px] md:mb-0 md:py-8">
 			<div className="relative px-4 lg:px-0">
 				<div className="mb-6 flex flex-col gap-4 border-b pb-6 md:mb-8 md:flex-row md:items-center md:justify-between md:pb-10">
 					<h2 className="text-xl font-medium md:text-2xl">
