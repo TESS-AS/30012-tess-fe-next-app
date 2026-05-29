@@ -31,6 +31,8 @@ interface CustomerNumberSwitcherProps {
 	forceOpen?: boolean;
 	blockUntilComplete?: boolean;
 	hideTrigger?: boolean;
+	open?: boolean;
+	onOpenChange?: (open: boolean) => void;
 }
 
 export default function CustomerNumberSwitcher({
@@ -38,13 +40,25 @@ export default function CustomerNumberSwitcher({
 	forceOpen,
 	blockUntilComplete,
 	hideTrigger,
+	open,
+	onOpenChange,
 }: CustomerNumberSwitcherProps) {
 	const t = useTranslations();
 	const { refetch: refetchCategories } = useCategories();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 
-	const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+	const [internalCustomerModalOpen, setInternalCustomerModalOpen] =
+		useState(false);
+	const isControlled = open !== undefined;
+	const isCustomerModalOpen = isControlled ? open : internalCustomerModalOpen;
+	const setIsCustomerModalOpen = (next: boolean) => {
+		if (isControlled) {
+			onOpenChange?.(next);
+		} else {
+			setInternalCustomerModalOpen(next);
+		}
+	};
 	const [newCustomerNumber, setNewCustomerNumber] = useState("");
 	const [selectedWarehouse, setSelectedWarehouse] = useState("");
 	const [selectedCompanyNumber, setSelectedCompanyNumber] = useState("");
