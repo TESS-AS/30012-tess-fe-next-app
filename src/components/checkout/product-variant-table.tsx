@@ -114,6 +114,13 @@ export default function ProductVariantTable({
 	const { isCartChanging, setIsCartChanging, setIsAuthOpen, showCartNotification } = useAppContext();
 	const isSapCustomer = SAP_CUSTOMER.includes(profile?.defaultCustomerNumber || "");
 
+	const multiple = useMemo(() => {
+		const raw = columnAttributes?.productData?.multiple;
+		if (!raw) return 1;
+		const parsed = parseFloat(raw);
+		return isNaN(parsed) || parsed <= 0 ? 1 : parsed;
+	}, [columnAttributes?.productData?.multiple]);
+
 	const [searchQuery, setSearchQuery] = useState<string>("");
 	const [quantities, setQuantities] = useState<Record<number, number>>({});
 	const [warehouse, setWarehouse] = useState<Record<number, string>>({});
@@ -1156,8 +1163,10 @@ export default function ProductVariantTable({
 															<div className="flex justify-between">
 																<QuantityButtons
 																	quantity={qty}
+																	step={multiple}
+																	min={multiple}
 																	onIncrease={() => {
-																		const newQty = qty + 1;
+																		const newQty = qty + multiple;
 																		setQuantities((prev) => ({
 																			...prev,
 																			[variant.itemNumber]: newQty,
@@ -1172,7 +1181,7 @@ export default function ProductVariantTable({
 																		);
 																	}}
 																	onDecrease={() => {
-																		const newQty = Math.max(1, qty - 1);
+																		const newQty = Math.max(multiple, qty - multiple);
 																		setQuantities((prev) => ({
 																			...prev,
 																			[variant.itemNumber]: newQty,

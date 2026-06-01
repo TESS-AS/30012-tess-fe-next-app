@@ -660,6 +660,8 @@ export function ProductInfo({
 						<QuantityButtons
 							quantity={effectiveQuantity}
 							allowInput
+							step={multiple}
+							min={multiple}
 							onQuantityChange={(next) => {
 								setQuantity(next);
 								if (selectedItemNumber && onQuantityChange) {
@@ -667,14 +669,14 @@ export function ProductInfo({
 								}
 							}}
 							onIncrease={() => {
-								const next = effectiveQuantity + 1;
+								const next = effectiveQuantity + multiple;
 								setQuantity(next);
 								if (selectedItemNumber && onQuantityChange) {
 									onQuantityChange(selectedItemNumber, next);
 								}
 							}}
 							onDecrease={() => {
-								const next = Math.max(1, effectiveQuantity - 1);
+								const next = Math.max(multiple, effectiveQuantity - multiple);
 								setQuantity(next);
 								if (selectedItemNumber && onQuantityChange) {
 									onQuantityChange(selectedItemNumber, next);

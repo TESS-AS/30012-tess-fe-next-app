@@ -13,6 +13,7 @@ interface QuantityButtonsProps {
 	disabled?: boolean;
 	min?: number;
 	max?: number;
+	step?: number;
 	className?: string;
 	buttonClassName?: string;
 	quantityClassName?: string;
@@ -28,6 +29,7 @@ const QuantityButtons = ({
 	disabled = false,
 	min = 0,
 	max,
+	step = 1,
 	className,
 	buttonClassName,
 	quantityClassName,
@@ -60,9 +62,12 @@ const QuantityButtons = ({
 			return;
 		}
 
+		const safeStep = step > 0 ? step : 1;
+		const floor = Math.max(min, safeStep);
+		const snapped = Math.round(parsed / safeStep) * safeStep;
 		const next = Math.max(
-			min,
-			max !== undefined ? Math.min(max, parsed) : parsed,
+			floor,
+			max !== undefined ? Math.min(max, snapped) : snapped,
 		);
 		onQuantityChange(next);
 	};
@@ -100,6 +105,7 @@ const QuantityButtons = ({
 					disabled={disabled || isLoading}
 					min={min}
 					max={max}
+					step={step}
 					value={inputValue}
 					onChange={(e) => {
 						e.stopPropagation();
