@@ -6,6 +6,7 @@ export interface CartLine {
 	productName?: string;
 	itemNumber: string;
 	quantity: number;
+	multiple?: string;
 	warehouseNumber: string;
 	companyNumber: string;
 	price?: number;

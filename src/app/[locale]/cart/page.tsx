@@ -291,6 +291,9 @@ const CartPage = () => {
 
 	const renderRegularCartRow = (item: RegularCartItem) => {
 		const id = String(item.cartLine ?? item.itemNumber);
+		const parsedMultiple = item.multiple ? parseFloat(item.multiple) : NaN;
+		const multiple =
+			Number.isFinite(parsedMultiple) && parsedMultiple > 0 ? parsedMultiple : 1;
 
 		return (
 			<React.Fragment key={id}>
@@ -427,6 +430,8 @@ const CartPage = () => {
 						<QuantityButtons
 							isLoading={!!loadingItems[item.itemNumber]}
 							quantity={item.quantity}
+							step={multiple}
+							min={multiple}
 							onIncrease={async (e) => {
 								e.stopPropagation();
 								setLoadingItems((prev) => ({
@@ -437,7 +442,7 @@ const CartPage = () => {
 									await updateQuantity(
 										item.cartLine ?? 0,
 										item.itemNumber,
-										item.quantity + 1,
+										item.quantity + multiple,
 									);
 								} finally {
 									setLoadingItems((prev) => ({
@@ -456,7 +461,7 @@ const CartPage = () => {
 									await updateQuantity(
 										item.cartLine ?? 0,
 										item.itemNumber,
-										item.quantity - 1,
+										Math.max(multiple, item.quantity - multiple),
 									);
 								} finally {
 									setLoadingItems((prev) => ({
