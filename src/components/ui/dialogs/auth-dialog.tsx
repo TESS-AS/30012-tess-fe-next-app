@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -9,7 +9,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { useProfile } from "@/contexts/ProfileContext";
 import { baseURL } from "@/lib/axiosConfig";
 import { User, Info } from "lucide-react";
 import Image from "next/image";
@@ -25,7 +24,6 @@ export default function AuthDialog({
 }) {
 	const router = useRouter();
 	const t = useTranslations();
-	const { profile } = useProfile();
 	const [authenticatingProvider, setAuthenticatingProvider] = useState<
 		string | null
 	>(null);
@@ -34,25 +32,9 @@ export default function AuthDialog({
 		const params = new URLSearchParams(window.location.search);
 		params.delete("auth");
 		router.replace("?" + params.toString(), { scroll: false });
-		setAuthenticatingProvider(null); // Reset loading state when closing
+		setAuthenticatingProvider(null);
 		onOpenChange(false);
 	};
-
-	// Close dialog when user is logged in (profile from backend /user)
-	useEffect(() => {
-		if (isOpen && profile) {
-			try {
-				localStorage.removeItem("hosesAndEquipments_page");
-			} catch {
-				// ignore
-			}
-
-			closeDialog();
-			setTimeout(() => {
-				router.push("/");
-			}, 100);
-		}
-	}, [isOpen, profile]);
 
 	const handleLoginWithBESso = () => {
 		setAuthenticatingProvider("be-sso");
