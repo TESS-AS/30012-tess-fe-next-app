@@ -8,7 +8,6 @@ import { useIsBaneNorKatalog } from "@/hooks/useIsBaneNorKatalog";
 import { getCategoryImage } from "@/lib/category-utils";
 import { Category } from "@/types/categories.types";
 import { FilterCategory } from "@/types/filter.types";
-import { IProduct } from "@/types/product.types";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
