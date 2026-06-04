@@ -12,6 +12,11 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useFeedback } from "@/hooks/useFeedback";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
+import {
+	buildUserFeedbackEmailHtml,
+	buildUserFeedbackEmailSubject,
+} from "@/lib/email-templates";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { toast } from "react-toastify";
@@ -28,12 +33,31 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
 	const [message, setMessage] = React.useState("");
 
 	const { submitFeedback, loading } = useFeedback();
+	const { data: profile } = useGetProfileData();
 
 	const handleSubmit = async () => {
 		if (!selectedType || !message.trim()) return;
 
+		const trimmedMessage = message.trim();
+		const userName = profile
+			? `${profile.firstName ?? ""} ${profile.lastName ?? ""}`.trim() ||
+				"Ukjent bruker"
+			: "Ukjent bruker";
+		const userEmail = profile?.email ?? "Ikke tilgjengelig";
+
+		const htmlBody = buildUserFeedbackEmailHtml({
+			userName,
+			userEmail,
+			userId: profile?.userId,
+			feedbackType: selectedType,
+			message: trimmedMessage,
+		});
+
 		try {
-			await submitFeedback(selectedType, message.trim());
+			await submitFeedback(selectedType, trimmedMessage, {
+				subject: buildUserFeedbackEmailSubject(selectedType),
+				htmlBody,
+			});
 			toast.success("Tilbakemelding sendt!");
 			setSelectedType(null);
 			setMessage("");

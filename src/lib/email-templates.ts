@@ -17,6 +17,14 @@ interface FaqFeedbackEmailParams {
 	wantsContact: boolean;
 }
 
+interface UserFeedbackEmailParams {
+	userName: string;
+	userEmail: string;
+	userId?: string | number;
+	feedbackType: string;
+	message: string;
+}
+
 function wrapEmailLayout(heading: string, content: string): string {
 	return `
 		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a;">
@@ -115,4 +123,43 @@ export function buildFaqFeedbackEmailHtml({
 
 export function buildFaqFeedbackEmailSubject(faqTitle: string): string {
 	return `FAQ-oppfølging: Bruker trenger hjelp med ${faqTitle}`;
+}
+
+export function buildUserFeedbackEmailHtml({
+	userName,
+	userEmail,
+	userId,
+	feedbackType,
+	message,
+}: UserFeedbackEmailParams): string {
+	const escapedMessage = message
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/\n/g, "<br />");
+
+	const rows = [
+		infoRow("Bruker", userName),
+		infoRow("E-post", userEmail),
+		...(userId !== undefined && userId !== ""
+			? [infoRow("Bruker-ID", String(userId))]
+			: []),
+		infoRow("Type tilbakemelding", feedbackType),
+		infoRow("Melding", escapedMessage),
+	];
+
+	const content = `
+		<p style="margin: 0 0 16px; font-size: 14px; line-height: 1.6;">
+			En bruker har sendt inn en tilbakemelding via TESSIX netthandel.
+		</p>
+		<table style="width: 100%; border-collapse: collapse; font-size: 14px; border: 1px solid #e5e7e6; border-radius: 6px;">
+			${rows.join("")}
+		</table>
+	`;
+
+	return wrapEmailLayout("Ny tilbakemelding fra bruker", content);
+}
+
+export function buildUserFeedbackEmailSubject(feedbackType: string): string {
+	return `Tilbakemelding: ${feedbackType}`;
 }
