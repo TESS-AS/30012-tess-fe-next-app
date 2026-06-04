@@ -74,6 +74,7 @@ export const SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER = [
 	"258746",
 	"264866",
 	"274379",
+	"221443",
 ];
 export const SAP_CUSTOMER = [
 	"116476",
