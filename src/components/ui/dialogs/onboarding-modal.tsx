@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -59,13 +59,6 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const [foundOrganization, setFoundOrganization] =
 		useState<OrganizationRecord | null>(null);
-
-	// Initialize form with profile data if available
-	useEffect(() => {
-		if (profile?.defaultCompanyName) {
-			setCompanyName(profile.defaultCompanyName);
-		}
-	}, [profile]);
 
 	const handleOrgSearch = async () => {
 		if (!orgNumber || orgNumber.length !== 9) {
