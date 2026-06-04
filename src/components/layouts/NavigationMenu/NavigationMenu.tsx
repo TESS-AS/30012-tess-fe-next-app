@@ -24,7 +24,7 @@ export default function CategoryNavigationMenu({
 	selectedAssortment?: string;
 }) {
 	const [openMenu, setOpenMenu] = useState<string | false>(false);
-	const { setIsOpen } = useNavMenuStore();
+	const { setIsOpen, requestedOpenSlug, requestOpen } = useNavMenuStore();
 	const rootRef = useRef<HTMLElement | null>(null);
 	const ulRef = useRef<HTMLUListElement | null>(null);
 
@@ -41,6 +41,19 @@ export default function CategoryNavigationMenu({
 		},
 		[openMenu, setIsOpen],
 	);
+
+	// External pages (e.g. /alle-kategorier tiles) can request a category to be
+	// opened by writing its slug into the nav menu store. Consume + clear here.
+	useEffect(() => {
+		if (!requestedOpenSlug) return;
+		if (!categories?.some((c) => c.slug === requestedOpenSlug)) {
+			requestOpen(null);
+			return;
+		}
+		setOpenMenu(requestedOpenSlug);
+		setIsOpen(true);
+		requestOpen(null);
+	}, [requestedOpenSlug, categories, setIsOpen, requestOpen]);
 
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {

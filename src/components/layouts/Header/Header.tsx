@@ -84,36 +84,6 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 
-	// Check if user came from alle-kategorier page
-	const [fromAlleKategorier, setFromAlleKategorier] = useState(false);
-
-	useEffect(() => {
-		// Check if currently on alle-kategorier page
-		if (pathname?.includes("/alle-kategorier")) {
-			setFromAlleKategorier(true);
-			return;
-		}
-
-		// Check sessionStorage for flag (set when navigating from alle-kategorier to category)
-		const flag = sessionStorage.getItem("fromCategoriesPage");
-		if (flag === "true") {
-			// Check if we're on a category page (not subcategory/segment)
-			// Path structure: /[locale]/[category] = 2 segments, /[locale]/[category]/[subcategory] = 3 segments
-			const pathSegments = pathname?.split("/").filter(Boolean) || [];
-			const isCategoryPage = pathSegments.length === 2; // Only locale and category
-
-			if (isCategoryPage) {
-				setFromAlleKategorier(true);
-			} else {
-				// Clear flag when navigating deeper (subcategory/segment)
-				sessionStorage.removeItem("fromCategoriesPage");
-				setFromAlleKategorier(false);
-			}
-		} else {
-			setFromAlleKategorier(false);
-		}
-	}, [pathname]);
-
 	const headerRef = useRef<HTMLElement>(null);
 	const topBarRef = useRef<HTMLDivElement>(null);
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -774,7 +744,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 				</div>
 			</div>
 
-			{!isHoseManagementCustomer && !fromAlleKategorier && (
+			{!isHoseManagementCustomer && (
 				<div className="hidden border-t lg:block">
 					<div className="container mx-auto flex h-12 w-full items-center justify-between gap-4">
 						<CategoryNavigationMenu

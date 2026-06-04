@@ -4,14 +4,25 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCategories } from "@/lib/CategoriesProvider";
 import { getCategoryImage, getSubcategoryCount } from "@/lib/category-utils";
+import { useNavMenuStore } from "@/stores/useNavMenuStore";
 import { Category } from "@/types/categories.types";
 import { ChevronRight } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 export default function CategoriesPage() {
 	const { categories, loading, error } = useCategories();
 	const t = useTranslations();
+	const router = useRouter();
+	const requestOpen = useNavMenuStore((s) => s.requestOpen);
+
+	const handleTileClick = (category: Category) => {
+		if (category.subcategories && category.subcategories.length > 0) {
+			requestOpen(category.slug);
+		} else {
+			router.push(`/${category.slug}`);
+		}
+	};
 
 	if (loading) {
 		return (
@@ -71,14 +82,11 @@ export default function CategoriesPage() {
 					const categoryImage = getCategoryImage(category);
 
 					return (
-						<Link
+						<button
 							key={category.slug}
-							href={`/${category.slug}`}
-							onClick={() => {
-								// Set flag to indicate navigation from categories page
-								sessionStorage.setItem("fromCategoriesPage", "true");
-							}}
-							className="group relative flex flex-col rounded-lg border border-gray-200 bg-white p-6 transition-all hover:shadow-md">
+							type="button"
+							onClick={() => handleTileClick(category)}
+							className="group relative flex w-full flex-col rounded-lg border border-gray-200 bg-white p-6 text-left transition-all hover:shadow-md">
 							{/* Category Icon */}
 							<div className="mb-4 flex h-[150px] items-center justify-center">
 								{categoryImage ? (
@@ -121,7 +129,7 @@ export default function CategoriesPage() {
 							<div className="absolute right-4 top-1/2 -translate-y-1/2">
 								<ChevronRight className="h-5 w-5 text-gray-400 transition-transform group-hover:translate-x-1" />
 							</div>
-						</Link>
+						</button>
 					);
 				})}
 			</div>
