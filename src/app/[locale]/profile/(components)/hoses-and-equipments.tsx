@@ -10,9 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { DiscardEquipmentDialog } from "@/components/ui/dialogs/discard-equipment-dialog";
+import { EquinorSupportDialog } from "@/components/ui/dialogs/equinor-support-dialog";
 import { PrintCertificatesDialog } from "@/components/ui/dialogs/print-certificates-dialog";
 import { PrintTagsDialog } from "@/components/ui/dialogs/print-tags-dialog";
-import { EquinorSupportDialog } from "@/components/ui/dialogs/equinor-support-dialog";
 import { RFQRequestDialog } from "@/components/ui/dialogs/rfq-request-dialog";
 import {
 	DropdownMenu,
@@ -180,7 +180,9 @@ export function HosesAndEquipments({
 	const HOSE_TABLE_PAGE_SIZE_KEY = "hosesAndEquipments_pageSize";
 	const [itemsPerPage, setItemsPerPage] = useState<number>(() => {
 		if (typeof window === "undefined") return 10;
-		const stored = Number(window.localStorage.getItem(HOSE_TABLE_PAGE_SIZE_KEY));
+		const stored = Number(
+			window.localStorage.getItem(HOSE_TABLE_PAGE_SIZE_KEY),
+		);
 		return ITEMS_PER_PAGE_OPTIONS.includes(stored) ? stored : 10;
 	});
 	const didInitAssetsRef = useRef(false);
@@ -686,7 +688,7 @@ export function HosesAndEquipments({
 						<PopoverTrigger asChild>
 							<button
 								type="button"
-								className="w-full cursor-pointer text-left text-[#003D1A] underline-offset-2 decoration-[#003D1A] hover:underline focus-visible:underline"
+								className="w-full cursor-pointer text-left text-[#003D1A] decoration-[#003D1A] underline-offset-2 hover:underline focus-visible:underline"
 								onClick={(e) => e.stopPropagation()}>
 								{o.beskrivelse}
 							</button>
