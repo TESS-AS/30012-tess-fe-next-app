@@ -12,8 +12,8 @@ import { DataTable, type Column } from "@/components/ui/data-table";
 import { DiscardEquipmentDialog } from "@/components/ui/dialogs/discard-equipment-dialog";
 import { PrintCertificatesDialog } from "@/components/ui/dialogs/print-certificates-dialog";
 import { PrintTagsDialog } from "@/components/ui/dialogs/print-tags-dialog";
+import { EquinorSupportDialog } from "@/components/ui/dialogs/equinor-support-dialog";
 import { RFQRequestDialog } from "@/components/ui/dialogs/rfq-request-dialog";
-import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -1028,9 +1028,10 @@ export function HosesAndEquipments({
 
 	return (
 		<>
-			<SupportDialog
+			<EquinorSupportDialog
 				open={supportOpen}
 				onOpenChange={setSupportOpen}
+				profile={profile}
 				selectedIds={
 					allAcrossPages
 						? transformedAssets
@@ -1039,14 +1040,12 @@ export function HosesAndEquipments({
 						: selectedRows
 				}
 				onRemoveId={handleRemoveSelectedId}
-				onSubmit={async () => {
-					toast.success(t("success.supportMessageSent"));
-				}}
 			/>
 
 			<RFQRequestDialog
 				open={rfqOpen}
 				onOpenChange={setRfqOpen}
+				profile={profile}
 				selectedIds={
 					allAcrossPages
 						? transformedAssets
@@ -1055,9 +1054,6 @@ export function HosesAndEquipments({
 						: selectedRows
 				}
 				onRemoveId={handleRemoveSelectedId}
-				onSubmit={async () => {
-					toast.success(t("success.requestSent"));
-				}}
 			/>
 
 			<DiscardEquipmentDialog
@@ -1266,9 +1262,15 @@ export function HosesAndEquipments({
 										}
 										setSupportOpen(true);
 									}}
+									onSendRfq={() => {
+										if (selectedCount === 0) {
+											toast.error(t("errors.selectItemsFirst"));
+											return;
+										}
+										setRfqOpen(true);
+									}}
 									onReportReplacement={() => {
 										if (selectedCount === 0) return;
-										setRfqOpen(true);
 									}}
 									onDiscardEquipment={() => {
 										if (selectedCount === 0) return;

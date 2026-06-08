@@ -4,6 +4,8 @@ import { useState } from "react";
 
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { EquinorSupportDialog } from "@/components/ui/dialogs/equinor-support-dialog";
+import { RFQRequestDialog } from "@/components/ui/dialogs/rfq-request-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Tooltip,
@@ -78,6 +80,8 @@ export default function HoseDetailsPage({
 		hoseDetails?.hoseLine?.assetId?.toString() || "",
 	);
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
+	const [supportOpen, setSupportOpen] = useState(false);
+	const [rfqOpen, setRfqOpen] = useState(false);
 
 	const isDirectPurchaseBlocked = Number(hoseDetails?.hoseLine?.ecom) === 3;
 	const directPurchaseTooltipText =
@@ -263,7 +267,8 @@ export default function HoseDetailsPage({
 						isAddingToCart={isAddingToCart}
 						disableAddToCart={isDirectPurchaseBlocked}
 						onAddToCart={handleAddToCart}
-						onContactSupport={() => console.log("Contact support")}
+						onContactSupport={() => setSupportOpen(true)}
+						onSendRfq={() => setRfqOpen(true)}
 						onReportReplacement={() => console.log("Report replacement")}
 						onDiscardEquipment={() => console.log("Discard equipment")}
 						onPrintCertificate={() => console.log("Print certificate")}
@@ -436,7 +441,8 @@ export default function HoseDetailsPage({
 						isAddingToCart={isAddingToCart}
 						disableAddToCart={isDirectPurchaseBlocked}
 						onAddToCart={handleAddToCart}
-						onContactSupport={() => console.log("Contact support")}
+						onContactSupport={() => setSupportOpen(true)}
+						onSendRfq={() => setRfqOpen(true)}
 						onReportReplacement={() => console.log("Report replacement")}
 						onDiscardEquipment={() => console.log("Discard equipment")}
 						onPrintCertificate={() => console.log("Print certificate")}
@@ -521,6 +527,20 @@ export default function HoseDetailsPage({
 				}}
 				hoseDetails={hoseDetails ?? null}
 				itemNumber={selectedItemNumber}
+			/>
+
+			<EquinorSupportDialog
+				open={supportOpen}
+				onOpenChange={setSupportOpen}
+				profile={profile ?? null}
+				selectedIds={[hexagonId]}
+			/>
+
+			<RFQRequestDialog
+				open={rfqOpen}
+				onOpenChange={setRfqOpen}
+				profile={profile ?? null}
+				selectedIds={[hexagonId]}
 			/>
 		</div>
 	);
