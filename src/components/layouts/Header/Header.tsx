@@ -32,6 +32,7 @@ import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout"
 import { useProfile } from "@/contexts/ProfileContext";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useGetAssortments } from "@/hooks/useGetAssortments";
+import { useGetCustomers } from "@/hooks/useGetCustomers";
 import { profileKeys } from "@/hooks/useGetProfileData";
 import { useInstantSearch } from "@/hooks/useInstantSearch";
 import { useOrderSummary } from "@/hooks/useOrderSummary";
@@ -110,6 +111,34 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 			!profile.defaultAssortmentNumber
 		);
 	}, [profile]);
+
+	const isTessEmployee = useMemo(
+		() => !!profile?.email?.toLowerCase().endsWith("@tess.no"),
+		[profile?.email],
+	);
+
+	const { customers: employeeCustomers } = useGetCustomers(
+		isTessEmployee,
+		profile?.defaultCompanyNumber,
+	);
+
+	const currentCustomerName = useMemo(() => {
+		if (!isTessEmployee || !profile?.defaultCustomerNumber) return "";
+		return (
+			employeeCustomers.find(
+				(c) =>
+					String(c.customerNumber) === String(profile.defaultCustomerNumber),
+			)?.customerName ?? ""
+		);
+	}, [isTessEmployee, employeeCustomers, profile?.defaultCustomerNumber]);
+
+	const employeeContextLine = useMemo(() => {
+		if (!isTessEmployee) return "";
+		const parts = [currentCustomerName, profile?.defaultCompanyName].filter(
+			(p): p is string => Boolean(p),
+		);
+		return parts.join(", ");
+	}, [isTessEmployee, currentCustomerName, profile?.defaultCompanyName]);
 
 	const {
 		query: searchQuery,
@@ -611,7 +640,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 									<DropdownMenuTrigger asChild>
 										<Button
 											variant="ghost"
-											className="gap-1 px-0 font-medium text-[#1A211C] hover:bg-transparent">
+											className="h-auto gap-2 px-0 py-1 font-medium text-[#1A211C] hover:bg-transparent">
 											{profile.logo &&
 											profile.logo !== "missing url" &&
 											/^(https?:)?\/\//.test(profile.logo) ? (
@@ -626,8 +655,17 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 											) : (
 												<UserIcon />
 											)}
-											{profile.firstName ?? "Profile"}
-											<ChevronDown className="ml-1 h-4 w-4" />
+											<span className="flex flex-col items-start leading-tight">
+												<span className="flex items-center gap-1">
+													{profile.firstName ?? "Profile"}
+													<ChevronDown className="h-4 w-4" />
+												</span>
+												{employeeContextLine && (
+													<span className="max-w-[220px] truncate text-xs font-normal text-[#5A615D]">
+														{employeeContextLine}
+													</span>
+												)}
+											</span>
 										</Button>
 									</DropdownMenuTrigger>
 									<DropdownMenuContent
@@ -638,6 +676,11 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 												{profile.firstName}
 											</div>
 											<div className="text-[14px]">{profile.email}</div>
+											{employeeContextLine && (
+												<div className="mt-1 text-[12px] text-[#5A615D]">
+													{employeeContextLine}
+												</div>
+											)}
 										</div>
 										{!isHoseManagementCustomer && (
 											<>
@@ -713,8 +756,15 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								) : (
 									<UserIcon className="h-4 w-4" />
 								)}
-								<span className="max-w-[120px] truncate text-sm font-medium text-[#0F1912]">
-									{profile.firstName ?? "Profile"}
+								<span className="flex flex-col items-start leading-tight">
+									<span className="max-w-[140px] truncate text-sm font-medium text-[#0F1912]">
+										{profile.firstName ?? "Profile"}
+									</span>
+									{employeeContextLine && (
+										<span className="max-w-[160px] truncate text-[11px] font-normal text-[#5A615D]">
+											{employeeContextLine}
+										</span>
+									)}
 								</span>
 							</button>
 						</>
@@ -840,6 +890,11 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								{profile.firstName}
 							</div>
 							<div className="text-sm text-[#2D3530]">{profile.email}</div>
+							{employeeContextLine && (
+								<div className="mt-1 text-xs text-[#5A615D]">
+									{employeeContextLine}
+								</div>
+							)}
 						</div>
 						{!isHoseManagementCustomer && (
 							<nav className="bg-white">
