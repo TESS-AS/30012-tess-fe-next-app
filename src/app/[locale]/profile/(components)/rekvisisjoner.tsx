@@ -34,13 +34,23 @@ export function Rekvisisjoner() {
 
 	const itemsPerPage = 10;
 	const { requisitions, total, totalPages, loading, getRequisitions } =
-		useRequisitions(customerNumber, selectedStatus, currentPage, itemsPerPage);
+		useRequisitions(
+			customerNumber,
+			selectedStatus,
+			currentPage,
+			itemsPerPage,
+			searchQuery,
+		);
 
 	useEffect(() => {
-		if (selectedStatus === "Alle" && requisitions.length > 0) {
+		if (
+			selectedStatus === "Alle" &&
+			!searchQuery.trim() &&
+			requisitions.length > 0
+		) {
 			setAllRequisitionsCache(requisitions);
 		}
-	}, [selectedStatus, requisitions]);
+	}, [selectedStatus, searchQuery, requisitions]);
 
 	useEffect(() => {
 		setCurrentPage(1);
@@ -75,14 +85,6 @@ export function Rekvisisjoner() {
 		onRestore: handleRestore,
 	});
 
-	const filteredRekvisisjoner = requisitions.filter((rekvisisjon) => {
-		const query = searchQuery.toLowerCase();
-		return (
-			rekvisisjon.requisitionId.toString().toLowerCase().includes(query) ||
-			rekvisisjon.description.toLowerCase().includes(query)
-		);
-	});
-
 	return (
 		<div className="space-y-6">
 			<div className="flex items-baseline justify-between gap-4">
@@ -108,7 +110,7 @@ export function Rekvisisjoner() {
 				/>
 
 				<DataTable
-					data={filteredRekvisisjoner}
+					data={requisitions}
 					columns={columns}
 					currentPage={currentPage}
 					itemsPerPage={itemsPerPage}

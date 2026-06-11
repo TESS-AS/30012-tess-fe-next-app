@@ -13,11 +13,13 @@ export const getRequisition = async (
 	status?: string,
 	page = 1,
 	pageSize = 20,
+	search?: string,
 ): Promise<RequisitionListResponse> => {
 	try {
 		const url = `/requisition/getRequisition/${customerNumber}`;
 		const params: Record<string, string | number> = { page, pageSize };
 		if (status) params.status = status;
+		if (search?.trim()) params.search = search.trim();
 		const response = await axiosInstance.get(url, { params });
 		return response.data;
 	} catch (error) {
