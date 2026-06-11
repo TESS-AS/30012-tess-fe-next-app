@@ -18,6 +18,7 @@ import { useTranslations } from "next-intl";
 import CartSvg from "../../../../../public/icons/profile/cart.svg";
 import ClipboardSvg from "../../../../../public/icons/profile/clipboard-check.svg";
 import TessEdiSvg from "../../../../../public/icons/profile/navbar/tess-edi.svg";
+import ThmProjectsSvg from "../../../../../public/icons/arrow-right-arrow-left.svg";
 
 export function SidebarNav({
 	items,
@@ -122,6 +123,29 @@ export function SidebarNav({
 									<span>TESS EDI</span>
 								</button>
 							)}
+							{(profile?.role === "admin" ||
+								profile?.role === "thmAdmin") && (
+								<button
+									onClick={() => onModeChange("thm")}
+									className={cn(
+										"flex w-16 cursor-pointer flex-col items-center gap-1 rounded-md p-1 text-[10px] font-medium transition-colors",
+									)}>
+									<div
+										className={cn(
+											"flex h-[40px] w-[40px] items-center justify-center rounded",
+											activeMode === "thm" && "bg-[#DCF7E0]",
+										)}>
+										<Image
+											src={ThmProjectsSvg}
+											alt="THM Projects (MSL)"
+											width={24}
+											height={24}
+											loading="eager"
+										/>
+									</div>
+									<span>THM Projects (MSL)</span>
+								</button>
+							)}
 						</>
 					)}
 				</div>
@@ -134,6 +158,8 @@ export function SidebarNav({
 									? t("eCommerce")
 									: activeMode === "tess-edi"
 									? "TESS EDI"
+									: activeMode === "thm"
+									? "THM Projects (MSL)"
 									: t("hoseManagement")}
 							</p>
 							<div className="flex w-full flex-col py-2 pl-4">

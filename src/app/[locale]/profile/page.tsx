@@ -16,6 +16,7 @@ import { useGetHoseSystems } from "@/hooks/useGetHoseSystems";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { profileKeys } from "@/hooks/useGetProfileData";
 import { useRouter } from "@/i18n/navigation";
+import type { SidebarNavItem } from "@/types/sidebar.types";
 import { useAppContext } from "@/lib/appContext";
 import { cn } from "@/lib/utils";
 import axiosClient from "@/services/axiosClient";
@@ -103,6 +104,20 @@ const MineBestillinger = dynamic(
 		})),
 	{ ssr: false },
 );
+const ThmActiveProjects = dynamic(
+	() =>
+		import("./(components)/thm-projects/ThmActiveProjects").then((m) => ({
+			default: m.ThmActiveProjects,
+		})),
+	{ ssr: false },
+);
+const ThmWorkOrderDashboard = dynamic(
+	() =>
+		import("./(components)/thm-projects/ThmWorkOrderDashboard").then((m) => ({
+			default: m.ThmWorkOrderDashboard,
+		})),
+	{ ssr: false },
+);
 const OrdreDetaljer = dynamic(
 	() =>
 		import("./(components)/ordre-detaljer").then((m) => ({
@@ -136,9 +151,9 @@ export default function ProfilePage() {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 
-	const [activeMode, setActiveMode] = useState<"hose" | "ehandel" | "tess-edi">(
-		"ehandel",
-	);
+	const [activeMode, setActiveMode] = useState<
+		"hose" | "ehandel" | "tess-edi" | "thm"
+	>("ehandel");
 	const [activeTab, setActiveTab] = useState(
 		profile?.role === "admin" || profile?.role === "superuser"
 			? "rekvisisjoner"
@@ -211,6 +226,14 @@ export default function ProfilePage() {
 		if (tabParam === "settings") {
 			setActiveMode("ehandel");
 		}
+		if (tabParam?.startsWith("thm-")) {
+			if (profile?.role === "admin" || profile?.role === "thmAdmin") {
+				setActiveMode("thm");
+			} else {
+				setActiveTab("rekvisisjoner");
+				return;
+			}
+		}
 
 		setActiveTab(tabParam);
 
@@ -249,9 +272,19 @@ export default function ProfilePage() {
 		router.push("/");
 	};
 
-	const handleModeChange = (mode: "hose" | "ehandel" | "tess-edi") => {
+	const handleModeChange = (
+		mode: "hose" | "ehandel" | "tess-edi" | "thm",
+	) => {
 		// Only allow tess-edi mode for admins
 		if (mode === "tess-edi" && profile?.role !== "admin") {
+			return;
+		}
+		// Only allow thm mode for admin / thmAdmin
+		if (
+			mode === "thm" &&
+			profile?.role !== "admin" &&
+			profile?.role !== "thmAdmin"
+		) {
 			return;
 		}
 		setActiveMode(mode);
@@ -266,6 +299,9 @@ export default function ProfilePage() {
 			router.replace("/profile?tab=tess-edi", { scroll: false });
 			// Reset selected order when switching to tess-edi mode
 			setSelectedAvvikendeOrdreId(null);
+		} else if (mode === "thm") {
+			setActiveTab("thm-active-projects");
+			router.replace("/profile?tab=thm-active-projects", { scroll: false });
 		}
 	};
 
@@ -358,16 +394,21 @@ export default function ProfilePage() {
 			"hose-requests": t("ProfilePage.tabs.requests"),
 			"hose-activities": t("ProfilePage.tabs.recentActivities"),
 			"hose-settings": t("ProfilePage.tabs.settings"),
+			// THM Projects (MSL) tabs
+			"thm-active-projects": "Active Projects",
 		};
 
-		const modeLabel =
-			activeMode === "hose"
+		const isThmTab = activeTab?.startsWith("thm-");
+		const modeLabel = isThmTab
+			? "THM Projects (MSL)"
+			: activeMode === "hose"
 				? t("BreadCrumbs.hoseManagement")
 				: activeMode === "tess-edi"
 					? "TESS EDI"
 					: t("BreadCrumbs.ehandel");
-		const defaultTab =
-			activeMode === "hose"
+		const defaultTab = isThmTab
+			? "thm-active-projects"
+			: activeMode === "hose"
 				? "hose-orders"
 				: activeMode === "tess-edi"
 					? "tess-edi"
@@ -414,6 +455,25 @@ export default function ProfilePage() {
 
 		return items;
 	};
+
+	const commonBottomItems: SidebarNavItem[] = [
+		{
+			href: "settings",
+			label: t("ProfilePage.sidebar.settings"),
+			icon: Settings,
+		},
+		{
+			href: "support",
+			label: t("ProfilePage.sidebar.help"),
+			icon: "/icons/profile/navbar/support.svg",
+		},
+		{
+			href: "logout",
+			label: t("ProfilePage.sidebar.logout"),
+			icon: LogOut,
+			variant: "logout",
+		},
+	];
 
 	return (
 		<main className="my-6 min-h-screen">
@@ -508,17 +568,7 @@ export default function ProfilePage() {
 														},
 													]
 												: []),
-											{
-												href: "settings",
-												label: t("ProfilePage.sidebar.settings"),
-												icon: Settings,
-											},
-											{
-												href: "logout",
-												label: t("ProfilePage.sidebar.logout"),
-												icon: LogOut,
-												variant: "logout",
-											},
+											...commonBottomItems,
 										]
 									: activeMode === "tess-edi"
 										? [
@@ -527,8 +577,18 @@ export default function ProfilePage() {
 													label: "Avvikende ordre",
 													icon: List,
 												},
+												...commonBottomItems,
 											]
-										: [
+										: activeMode === "thm"
+											? [
+													{
+														href: "thm-active-projects",
+														label: "Active Projects",
+														icon: List,
+													},
+													...commonBottomItems,
+												]
+											: [
 												// {
 												// 	href: "hose-oversikt",
 												// 	label: t("ProfilePage.sidebar.overview"),
@@ -580,6 +640,7 @@ export default function ProfilePage() {
 												// 	icon: LogOut,
 												// 	variant: "logout",
 												// },
+												...commonBottomItems,
 											]
 							}
 						/>
@@ -640,6 +701,22 @@ export default function ProfilePage() {
 								)}
 							</TabsContent>
 						)}
+
+						<TabsContent
+							value="thm-active-projects"
+							className="mt-0">
+							{activeTab === "thm-active-projects" && <ThmActiveProjects />}
+						</TabsContent>
+
+						<TabsContent
+							value="thm-dashboard"
+							className="mt-0">
+							{activeTab === "thm-dashboard" && (
+								<ThmWorkOrderDashboard
+									workOrderNumber={searchParams.get("workOrder") ?? ""}
+								/>
+							)}
+						</TabsContent>
 
 						<TabsContent value="settings">
 							<InnstillingerTab onDirtyChange={setHasUnsavedSettingsChanges} />
