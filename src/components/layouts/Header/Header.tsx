@@ -379,6 +379,9 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		!!profile &&
 		profile.role === "admin" &&
 		profile.defaultCustomerNumber !== SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
+	const hasThmProjectsAccess =
+		!!profile &&
+		(profile.role === "admin" || profile.role === "thmAdmin");
 
 	return (
 		<header
@@ -696,7 +699,9 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 													Innstillinger
 												</DropdownMenuItem>
 												<CustomerNumberSwitcher profile={profile} />
-												{(hasHoseManagementAccess || hasTessEdiAccess) && (
+												{(hasHoseManagementAccess ||
+													hasTessEdiAccess ||
+													hasThmProjectsAccess) && (
 													<>
 														<DropdownMenuSeparator />
 														<DropdownMenuLabel className="text-sm font-semibold text-gray-700">
@@ -718,6 +723,15 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 																	router.push("/profile?tab=tess-edi")
 																}>
 																TESS EDI
+															</DropdownMenuItem>
+														)}
+														{hasThmProjectsAccess && (
+															<DropdownMenuItem
+																className="text-gray-700"
+																onClick={() =>
+																	router.push("/profile?tab=thm-active-projects")
+																}>
+																THM projects (MSL)
 															</DropdownMenuItem>
 														)}
 														<DropdownMenuSeparator />
@@ -929,7 +943,9 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 									<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
 								</button>
 
-								{(hasHoseManagementAccess || hasTessEdiAccess) && (
+								{(hasHoseManagementAccess ||
+									hasTessEdiAccess ||
+									hasThmProjectsAccess) && (
 									<>
 										<div className="border-t border-b border-[#c1c4c2] px-4 py-3 text-sm font-bold text-[#0F1912]">
 											Tjenester
@@ -955,6 +971,18 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 												}}
 												className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]">
 												TESS EDI
+												<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
+											</button>
+										)}
+										{hasThmProjectsAccess && (
+											<button
+												type="button"
+												onClick={() => {
+													router.push("/profile?tab=thm-active-projects");
+													setIsMobileProfileOpen(false);
+												}}
+												className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]">
+												THM projects (MSL)
 												<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
 											</button>
 										)}

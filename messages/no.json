@@ -1212,7 +1212,8 @@
 			"riskClass": "Risikoklasse",
 			"requests": "Foresp\u00f8rsler",
 			"recentActivities": "Siste aktiviteter",
-			"support": "Support"
+			"support": "Support",
+			"help": "Hjelp"
 		}
 	},
 	"ViewUserModal": {
