@@ -15,10 +15,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import ThmProjectsSvg from "../../../../../public/icons/arrow-right-arrow-left.svg";
 import CartSvg from "../../../../../public/icons/profile/cart.svg";
 import ClipboardSvg from "../../../../../public/icons/profile/clipboard-check.svg";
 import TessEdiSvg from "../../../../../public/icons/profile/navbar/tess-edi.svg";
-import ThmProjectsSvg from "../../../../../public/icons/arrow-right-arrow-left.svg";
 
 export function SidebarNav({
 	items,
@@ -123,8 +123,7 @@ export function SidebarNav({
 									<span>TESS EDI</span>
 								</button>
 							)}
-							{(profile?.role === "admin" ||
-								profile?.role === "thmAdmin") && (
+							{(profile?.role === "admin" || profile?.role === "thmAdmin") && (
 								<button
 									onClick={() => onModeChange("thm")}
 									className={cn(
@@ -157,16 +156,18 @@ export function SidebarNav({
 								{activeMode === "ehandel"
 									? t("eCommerce")
 									: activeMode === "tess-edi"
-									? "TESS EDI"
-									: activeMode === "thm"
-									? "THM Projects (MSL)"
-									: t("hoseManagement")}
+										? "TESS EDI"
+										: activeMode === "thm"
+											? "THM Projects (MSL)"
+											: t("hoseManagement")}
 							</p>
 							<div className="flex w-full flex-col py-2 pl-4">
 								{items.map((item, index) => {
 									const isActive =
 										pathname === item.href ||
-										item.subitems?.some((subitem) => pathname === subitem.href) ||
+										item.subitems?.some(
+											(subitem) => pathname === subitem.href,
+										) ||
 										(!item.subitems && item.href === activeTab);
 									const isLastTwoItems = index >= items.length - 2;
 
@@ -175,7 +176,8 @@ export function SidebarNav({
 											key={item.href}
 											className={cn(
 												"flex flex-col",
-												item.href === "settings" && "mt-4 border-t border-gray-200 pt-4",
+												item.href === "settings" &&
+													"mt-4 border-t border-gray-200 pt-4",
 											)}>
 											<button
 												onClick={() => {
@@ -187,7 +189,9 @@ export function SidebarNav({
 												}}
 												className={cn(
 													"mb-2 flex w-full cursor-pointer items-center justify-between rounded-md p-2 text-base font-medium transition-colors",
-													isActive && !item.subitems && "bg-[#DCF7E0] text-[#1C6D2C]",
+													isActive &&
+														!item.subitems &&
+														"bg-[#DCF7E0] text-[#1C6D2C]",
 													item.variant === "logout" &&
 														"mt-4 text-red-600 hover:text-red-700",
 												)}>
