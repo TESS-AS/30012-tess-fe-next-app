@@ -39,7 +39,7 @@ export function MobileMenu({ categories, loading, onClose }: MobileMenuProps) {
 	}
 
 	return (
-		<nav className="bg-white">
+		<nav className="w-full bg-white">
 			{categories.map((category) => {
 				const hasSubcategories = !!category.subcategories?.length;
 				const isExpanded = expandedSlug === category.slug;

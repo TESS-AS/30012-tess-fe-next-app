@@ -911,7 +911,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 							)}
 						</div>
 						{!isHoseManagementCustomer && (
-							<nav className="bg-white">
+							<nav className="w-full bg-white">
 								<button
 									type="button"
 									onClick={() => {
