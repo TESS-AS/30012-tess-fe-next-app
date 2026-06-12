@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
+import type { ProductCategoryNode } from "@/lib/product-breadcrumbs";
 import axiosClient from "@/services/axiosClient";
 
 interface Attribute {
@@ -79,11 +80,13 @@ interface ColumnAttributeApiResponse {
 	productNumber: string;
 	productData: ProductData;
 	variantData: VariantData[];
+	categories?: ProductCategoryNode[];
 }
 
 export type ColumnAttributeResponse = {
 	productAttributes?: Attribute[]; // Product-level attributes
 	productData?: ProductData; // Full product-level object with shortDesc, longDesc, etc.
+	categories?: ProductCategoryNode[]; // BE-driven breadcrumb tree(s)
 } & {
 	[itemNumber: string]:
 		| {
@@ -143,6 +146,10 @@ export function useGetColumnAttributes(variantNumber?: string) {
 					transformedData.productData = response.data.productData;
 					transformedData.productAttributes =
 						response.data.productData.attributes || [];
+				}
+
+				if (Array.isArray(response.data.categories)) {
+					transformedData.categories = response.data.categories;
 				}
 
 				// Normalize mediaId: API may return array or single object (product-level is object, variant can be either)
