@@ -23,11 +23,13 @@ export interface SidebarNavItem {
 	subitems?: SubItem[];
 }
 
+export type SidebarMode = "hose" | "ehandel" | "tess-edi" | "thm";
+
 export interface SidebarNavProps {
 	items: SidebarNavItem[];
-	activeMode: "hose" | "ehandel" | "tess-edi";
+	activeMode: SidebarMode;
 	activeTab: string;
-	onModeChange: (mode: "hose" | "ehandel" | "tess-edi") => void;
+	onModeChange: (mode: SidebarMode) => void;
 	onTabChange: (tab: string) => void;
 	onCollapse: (isCollapsed: boolean) => void;
 	profile: ProfileUser;

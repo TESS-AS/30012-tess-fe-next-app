@@ -18,6 +18,8 @@ export interface ProfileUser {
 	defaultWarehouseNumber: string;
 	punchout: boolean;
 	role: string;
+	thmUserId?: string | null;
+	thmRole?: string | null;
 	/**
 	 * From user endpoint. Drives banner under header and onboarding modal:
 	 * - "new" = show onboarding modal

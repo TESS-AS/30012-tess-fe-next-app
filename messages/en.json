@@ -1235,7 +1235,8 @@
 			"riskClass": "Risk Class",
 			"requests": "Requests",
 			"recentActivities": "Recent Activities",
-			"support": "Support"
+			"support": "Support",
+			"help": "Help"
 		}
 	},
 	"ViewUserModal": {

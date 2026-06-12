@@ -224,7 +224,10 @@ export function ProductPageClient({
 			<FeedbackSideTab />
 			<ProductReturnButton />
 			<ProductBreadcrumbs
+				categories={columnAttributes?.categories}
+				locale={locale}
 				segment={segment}
+				isLoading={loadingAttributes}
 				productName={
 					locale === "en" ? productData.productNameEn : productData.productName
 				}

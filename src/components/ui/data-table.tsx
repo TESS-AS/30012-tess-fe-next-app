@@ -66,6 +66,7 @@ interface DataTableProps<T> {
 	selectedRowBgClass?: string;
 	onHoseClick?: (hoseId: string) => void;
 	isRowDisabled?: (item: T) => boolean;
+	noWrap?: boolean;
 }
 
 export function DataTable<
@@ -100,6 +101,7 @@ export function DataTable<
 	selectedRowBgClass = "bg-[#E6F7EA]",
 	onHoseClick,
 	isRowDisabled,
+	noWrap = false,
 }: DataTableProps<T>) {
 	const [expandedRows, setExpandedRows] = useState<number[]>([]);
 	const safeColumns = useMemo(
@@ -161,6 +163,7 @@ export function DataTable<
 												key={column.key}
 												className={cn(
 													"border-b border-[#C1C4C2] bg-[#F8F9F8] px-4 py-4 text-left text-sm font-medium text-[#5A615D]",
+													noWrap && "whitespace-nowrap",
 													{
 														"min-w-[160px]": column.key === "orderId",
 														"min-w-[140px]": column.key === "requester",
@@ -277,6 +280,7 @@ export function DataTable<
 																key={column.key}
 																className={cn(
 																	"px-4 py-4 font-medium text-[#0F1912]",
+																	noWrap && "whitespace-nowrap",
 																	// column.key === "action" &&
 																	// 	"sticky right-0",
 																)}>

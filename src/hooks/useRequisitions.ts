@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 import { getRequisition } from "@/services/requisitions.service";
 import type {
 	PlacerAddress,
@@ -77,6 +79,7 @@ export const requisitionsKeys = {
 		status?: string,
 		page?: number,
 		pageSize?: number,
+		search?: string,
 	) =>
 		[
 			...requisitionsKeys.lists(),
@@ -84,6 +87,7 @@ export const requisitionsKeys = {
 			status,
 			page,
 			pageSize,
+			search,
 		] as const,
 };
 
@@ -100,14 +104,31 @@ export const useRequisitions = (
 	status?: string,
 	page = 1,
 	pageSize = 20,
+	search = "",
 ) => {
+	const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setDebouncedSearch(search);
+		}, 500);
+
+		return () => clearTimeout(timer);
+	}, [search]);
+
 	const {
 		data,
 		isLoading: loading,
 		error,
 		refetch: getRequisitions,
 	} = useQuery<UseRequisitionsResult>({
-		queryKey: requisitionsKeys.list(customerNumber, status, page, pageSize),
+		queryKey: requisitionsKeys.list(
+			customerNumber,
+			status,
+			page,
+			pageSize,
+			debouncedSearch,
+		),
 		queryFn: async () => {
 			const apiStatus = mapStatusToApi(status || "Alle");
 			const response = await getRequisition(
@@ -115,6 +136,7 @@ export const useRequisitions = (
 				apiStatus,
 				page,
 				pageSize,
+				debouncedSearch,
 			);
 			const transformedRequisitions = response.requisitions.map(
 				(req: RequisitionResponse) => ({
