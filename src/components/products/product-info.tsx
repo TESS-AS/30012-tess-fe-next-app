@@ -88,10 +88,14 @@ export function ProductInfo({
 		setQuantity(multiple);
 	}, [multiple]);
 
-	// When variant changes, default local quantity to 1 if external quantity is not provided
+	// When variant changes, default local quantity to `multiple` (the BE-defined
+	// pack size) if no external quantity is provided — products with
+	// multiple > 1 can't be sold below that quantity.
 	useEffect(() => {
-		if (selectedItemNumber && selectedQuantity === undefined) setQuantity(1);
-	}, [selectedItemNumber, selectedQuantity]);
+		if (selectedItemNumber && selectedQuantity === undefined) {
+			setQuantity(multiple);
+		}
+	}, [selectedItemNumber, selectedQuantity, multiple]);
 
 	// Get short and long description from columnAttributes productData (with cross-locale fallback for long when empty)
 	const getShortDescription = () => {
@@ -577,7 +581,7 @@ export function ProductInfo({
 										: "-"}
 							</span>
 							<span className="text-sm font-normal text-gray-500">
-								/ {unit} ({locale === "no" ? "eks mva" : t("excludingVat")})
+								({locale === "no" ? "eks mva" : t("excludingVat")})
 							</span>
 						</div>
 					) : (

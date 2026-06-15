@@ -522,7 +522,7 @@ export default function ProductVariantTable({
 			);
 
 			const effectiveQuantity =
-				quantityOverride ?? quantities[variant.itemNumber] ?? 1;
+				quantityOverride ?? quantities[variant.itemNumber] ?? multiple;
 
 			const [priceResult] = await calculateItemPrice(
 				[
@@ -936,7 +936,11 @@ export default function ProductVariantTable({
 					</TableHeader>
 					<TableBody>
 						{filteredVariants.map((variant) => {
-							const qty = quantities[variant.itemNumber] || 1;
+							// Default to `multiple` (BE-defined pack size) — products with
+							// multiple > 1 must be ordered in that step, so the initial
+							// displayed qty and the qty passed to add-to-cart should both
+							// honor it.
+							const qty = quantities[variant.itemNumber] || multiple;
 							const selectedWarehouse = warehouse[variant.itemNumber];
 
 							const isSelected =
