@@ -14,6 +14,7 @@ import {
 import { SAP_CUSTOMER } from "@/constants/checkout";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
+import { buildWarehouseOptions, resolveWarehouse } from "@/lib/warehouse";
 import { addToCart, getCart } from "@/services/carts.service";
 import { calculateItemPrice } from "@/services/product.service";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
@@ -182,120 +183,58 @@ export function ProductInfo({
 		}
 	};
 
-	// Get warehouse options: same as product-variant-table (company fallback, allow 0 balance, dedupe by warehouseId)
 	const warehouseOptions = useMemo(() => {
 		if (!selectedItemNumber || !columnAttributes) return [];
 		const variantData =
 			columnAttributes[selectedItemNumber] ??
 			columnAttributes[String(selectedItemNumber)];
-		const inventory = variantData?.inventory || [];
-
-		// Use all warehouses across all companies; do not restrict to default company
-		const withBalance = inventory
-			.filter((inv: any) => inv.balance > 0)
-			.map((inv: any) => ({
-				warehouseId: inv.warehouseId,
-				warehouseName:
-					inv.warehouseName ||
-					`${locale === "no" ? "Lager" : "Warehouse"} ${inv.warehouseId}`,
-				balance: inv.balance,
-			}))
-			.sort((a: any, b: any) => b.balance - a.balance);
-		const withZero = inventory
-			.filter((inv: any) => inv.balance === 0)
-			.map((inv: any) => ({
-				warehouseId: inv.warehouseId,
-				warehouseName:
-					inv.warehouseName ||
-					`${locale === "no" ? "Lager" : "Warehouse"} ${inv.warehouseId}`,
-				balance: inv.balance,
-			}))
-			.sort((a: any, b: any) => a.warehouseId - b.warehouseId);
-
-		const combined = [...withBalance, ...withZero];
-		const seen = new Set<number>();
-		return combined
-			.filter((w: { warehouseId: number }) => {
-				if (seen.has(w.warehouseId)) return false;
-				seen.add(w.warehouseId);
-				return true;
-			})
-			.slice(0, 50);
+		return buildWarehouseOptions(variantData?.inventory, {
+			warehouseLabel: locale === "no" ? "Lager" : "Warehouse",
+		});
 	}, [selectedItemNumber, columnAttributes, locale]);
 
-	// Get warehouse info for selected warehouse
-	const getWarehouseInfo = () => {
+	const resolvedWarehouse = useMemo(() => {
 		if (!selectedItemNumber || !columnAttributes) return null;
-		if (!selectedWarehouse && !profile?.defaultWarehouseNumber) return null;
-
 		const variantData =
 			columnAttributes[selectedItemNumber] ??
 			columnAttributes[String(selectedItemNumber)];
-		const inventory = variantData?.inventory || [];
+		return resolveWarehouse(variantData?.inventory, selectedWarehouse, {
+			warehouseNumber: profile?.defaultWarehouseNumber,
+			companyNumber: profile?.defaultCompanyNumber
+				? String(profile.defaultCompanyNumber)
+				: undefined,
+		});
+	}, [selectedWarehouse, selectedItemNumber, columnAttributes, profile]);
 
-		let warehouseInfo;
+	const activeWarehouseNumber =
+		resolvedWarehouse?.warehouseNumber ??
+		profile?.defaultWarehouseNumber ??
+		"";
+	// The selected warehouse may belong to a different company than the user's
+	// default — pricing/discounts must be scoped to that warehouse's company so
+	// the cart matches (BE: "warehouse, company, customerNumber must be the same").
+	const activeCompanyNumber =
+		resolvedWarehouse?.companyNumber != null
+			? String(resolvedWarehouse.companyNumber)
+			: profile?.defaultCompanyNumber
+				? String(profile.defaultCompanyNumber)
+				: "1";
 
-		if (selectedWarehouse) {
-			// selectedWarehouse from table is warehouseId (unique)
-			const warehouseId = parseInt(selectedWarehouse);
-			warehouseInfo = inventory.find(
-				(inv: any) => inv.warehouseId === warehouseId,
-			);
-		} else {
-			// profile default uses warehouseNumber + companyNumber (combination is unique)
-			const defaultWarehouseNumber = profile?.defaultWarehouseNumber;
-			const defaultCompanyNumber = profile?.defaultCompanyNumber;
-			warehouseInfo = inventory.find(
-				(inv: any) =>
-					inv.warehouseNumber === defaultWarehouseNumber &&
-					inv.companyNumber === defaultCompanyNumber,
-			);
-		}
+	const selectedWarehouseBalance = resolvedWarehouse?.balance ?? 0;
+	const selectedWarehouseName =
+		resolvedWarehouse?.warehouseName ?? "hovedlager";
 
-		if (warehouseInfo) {
-			return {
-				balance: warehouseInfo.balance || 0,
-				warehouseName:
-					warehouseInfo.warehouseName || `Lager ${warehouseInfo.warehouseId}`,
-			};
-		}
-
-		return null;
-	};
-
-	// Get warehouse info for selected warehouse (unique by warehouseId or warehouseNumber+companyNumber)
-	const warehouseInfo = getWarehouseInfo();
-	const selectedWarehouseBalance = warehouseInfo ? warehouseInfo.balance : 0;
-
-	const selectedWarehouseName = warehouseInfo
-		? warehouseInfo.warehouseName
-		: "hovedlager";
-
-	// For warehouse selection dropdown display
-	const warehouseNumber = selectedWarehouse || profile?.defaultWarehouseNumber;
-
-	// Normalize Select value to match an option (options use warehouseId.toString())
+	// Normalize Select value to match an option (options use warehouseNumber).
 	const selectValue = useMemo(() => {
-		if (!warehouseNumber || warehouseOptions.length === 0) return "";
-		const optionValues = warehouseOptions.map((w: { warehouseId: number }) =>
-			w.warehouseId.toString(),
-		);
-		if (optionValues.includes(warehouseNumber)) return warehouseNumber;
-		const variantData =
-			selectedItemNumber && columnAttributes
-				? (columnAttributes[selectedItemNumber] ??
-					columnAttributes[String(selectedItemNumber)])
-				: null;
-		const inventory = variantData?.inventory || [];
-		const inv = inventory.find(
-			(inv: any) =>
-				inv.warehouseId?.toString() === warehouseNumber ||
-				inv.warehouseNumber === warehouseNumber,
-		);
-		return inv
-			? inv.warehouseId.toString()
-			: warehouseOptions[0].warehouseId.toString();
-	}, [warehouseNumber, warehouseOptions, selectedItemNumber, columnAttributes]);
+		if (warehouseOptions.length === 0) return "";
+		if (resolvedWarehouse?.warehouseNumber) {
+			const match = warehouseOptions.find(
+				(w) => w.warehouseNumber === resolvedWarehouse.warehouseNumber,
+			);
+			if (match) return match.warehouseNumber;
+		}
+		return warehouseOptions[0].warehouseNumber;
+	}, [resolvedWarehouse, warehouseOptions]);
 
 	// Get unit (enhet) for the selected item
 	const getUnit = () => {
@@ -329,10 +268,7 @@ export function ProductInfo({
 
 	// Label for trigger: when we have a valid selection, show that option's label (never "Ingen lager")
 	const selectedOption = selectValue
-		? warehouseOptions.find(
-				(w: { warehouseId: number }) =>
-					w.warehouseId.toString() === selectValue,
-			)
+		? warehouseOptions.find((w) => w.warehouseNumber === selectValue)
 		: null;
 	const warehouseTriggerLabel = selectedOption
 		? `${selectedOption.balance} ${unit} på ${selectedOption.warehouseName}`
@@ -348,8 +284,7 @@ export function ProductInfo({
 			!selectedWarehouse &&
 			onWarehouseChange
 		) {
-			const firstWarehouse = warehouseOptions[0].warehouseId.toString();
-			onWarehouseChange(selectedItemNumber, firstWarehouse);
+			onWarehouseChange(selectedItemNumber, warehouseOptions[0].warehouseNumber);
 		}
 	}, [
 		selectedItemNumber,
@@ -358,7 +293,9 @@ export function ProductInfo({
 		onWarehouseChange,
 	]);
 
-	// Calculate price
+	// Calculate price for the active warehouse so the displayed price matches
+	// what the cart will recalculate (cart re-prices using the cart line's
+	// stored warehouseNumber — see appContext.loadCartData).
 	useEffect(() => {
 		const loadPrice = async () => {
 			if (!selectedItemNumber || !profile) return;
@@ -370,11 +307,11 @@ export function ProductInfo({
 						{
 							itemNumber: selectedItemNumber,
 							quantity: effectiveQuantity,
-							warehouseNumber: profile.defaultWarehouseNumber || "",
+							warehouseNumber: activeWarehouseNumber,
 						},
 					],
 					profile.defaultCustomerNumber,
-					profile.defaultCompanyNumber,
+					activeCompanyNumber,
 				);
 
 				if (result?.[0]) {
@@ -389,7 +326,14 @@ export function ProductInfo({
 		};
 
 		loadPrice();
-	}, [selectedItemNumber, selectedQuantity, quantity, profile]);
+	}, [
+		selectedItemNumber,
+		selectedQuantity,
+		quantity,
+		profile,
+		activeWarehouseNumber,
+		activeCompanyNumber,
+	]);
 
 	const effectiveQuantity = selectedQuantity ?? quantity;
 
@@ -397,28 +341,14 @@ export function ProductInfo({
 	const handleAddToCart = async () => {
 		if (!selectedItemNumber || !productNumber) return;
 
-		const warehouseNumber = profile?.defaultWarehouseNumber || "";
-
-		const inventory = columnAttributes?.[selectedItemNumber]?.inventory ?? [];
-		const balance =
-			inventory.find(
-				(inv: any) =>
-					inv.warehouseNumber === warehouseNumber ||
-					inv.warehouseId?.toString() === warehouseNumber,
-			)?.balance ?? null;
-
-		if (balance === null || balance === undefined) {
-			/* empty */
-		}
-
 		setAdding(true);
 		try {
 			const response = await addToCart({
 				productNumber,
 				itemNumber: selectedItemNumber,
 				quantity: selectedQuantity ?? quantity,
-				warehouseNumber,
-				companyNumber: profile?.defaultCompanyNumber.toString() || "1",
+				warehouseNumber: activeWarehouseNumber,
+				companyNumber: activeCompanyNumber,
 			});
 
 			if (response?.message === "Error adding to cart") {
@@ -549,6 +479,13 @@ export function ProductInfo({
 												if (profile) {
 													setLoadingPrice(true);
 													try {
+														const nextOption = warehouseOptions.find(
+															(w) => w.warehouseNumber === value,
+														);
+														const nextCompanyNumber =
+															nextOption?.companyNumber != null
+																? String(nextOption.companyNumber)
+																: activeCompanyNumber;
 														const result = await calculateItemPrice(
 															[
 																{
@@ -558,7 +495,7 @@ export function ProductInfo({
 																},
 															],
 															profile.defaultCustomerNumber,
-															profile.defaultCompanyNumber,
+															nextCompanyNumber,
 														);
 														if (result?.[0]) {
 															setCalculatedPrice(result[0].bestPrice || 0);
@@ -589,10 +526,10 @@ export function ProductInfo({
 														: "No warehouse available"}
 												</div>
 											) : (
-												warehouseOptions.map((w: any, index: number) => (
+												warehouseOptions.map((w, index: number) => (
 													<SelectItem
-														key={`${selectedItemNumber}-${w.warehouseId}-${index}`}
-														value={w.warehouseId.toString()}>
+														key={`${selectedItemNumber}-${w.warehouseNumber}-${index}`}
+														value={w.warehouseNumber}>
 														<div className="flex items-center gap-2">
 															<CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
 															<span className="truncate">
