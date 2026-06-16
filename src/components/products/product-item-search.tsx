@@ -84,6 +84,12 @@ export function ProductItem({
 
 	// Fetch category tree and build proper URL path
 	useEffect(() => {
+		if (product.redirect) {
+			const trimmed = product.redirect.trim();
+			setProductLink(trimmed.startsWith("/") ? trimmed : `/${trimmed}`);
+			return;
+		}
+
 		const fetchCategoryPath = async () => {
 			try {
 				const categoryTree = await loadCategoryTree(product.productNumber);
@@ -113,7 +119,7 @@ export function ProductItem({
 		};
 
 		fetchCategoryPath();
-	}, [product.productNumber, product.productName, locale]);
+	}, [product.productNumber, product.productName, product.redirect, locale]);
 
 	const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 	const highlightParts = (text: string, matches: string[] = []) => {

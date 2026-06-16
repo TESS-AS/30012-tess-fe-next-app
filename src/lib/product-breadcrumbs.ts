@@ -61,8 +61,17 @@ function isAssortmentNode(node: ProductCategoryNode): boolean {
 }
 
 function sanitizeSlugSegment(segment: string): string {
+	// FE category routes are built with transliterated ASCII slugs (see
+	// lib/utils.ts mapCategoryTree and hooks/useBreadcrumbs.ts), so BE slugs
+	// containing æ/ø/å must be transliterated the same way — otherwise the
+	// generic /[^a-z0-9-]/ strip would drop those letters and produce slugs
+	// like "lnn-skatt" that don't match any product page.
 	return segment
 		.toLowerCase()
+		.replace(/å/g, "a")
+		.replace(/ø/g, "o")
+		.replace(/æ/g, "ae")
+		.normalize("NFKD")
 		.replace(/[^a-z0-9-]/g, "")
 		.replace(/-+/g, "-")
 		.replace(/^-|-$/g, "");

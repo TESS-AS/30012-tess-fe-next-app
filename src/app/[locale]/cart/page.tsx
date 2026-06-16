@@ -364,10 +364,17 @@ const CartPage = () => {
 								[item.itemNumber]: true,
 							}));
 							try {
+								const batch = warehouseBalancePerItem.find(
+									(w) => w.itemNumber === item.itemNumber,
+								);
+								const nextCompanyNumber = batch?.warehouses?.find(
+									(w) => w.warehouseNumber === warehouseNumber,
+								)?.companyNumber;
 								await updateWarehouse(
 									item.cartLine ?? 0,
 									item.itemNumber,
 									warehouseNumber,
+									nextCompanyNumber,
 								);
 							} finally {
 								setLoadingItems((prev) => ({

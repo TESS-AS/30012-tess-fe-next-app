@@ -21,6 +21,7 @@ import {
 	EQUINOR_WELCOME_SEEN_THIS_SESSION_KEY,
 } from "@/constants/equinorWelcome";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { priceItemsByCompany } from "@/lib/cart-pricing";
 import {
 	getCart,
 	updateCart,
@@ -74,6 +75,7 @@ interface AppContextType {
 		cartLine: number,
 		itemNumber: string,
 		warehouseNumber: string,
+		companyNumber?: string,
 	) => Promise<void>;
 
 	updateWarehouseForAllItems: (warehouseNumber: string) => Promise<void>;
@@ -242,7 +244,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			for (const item of cart.cart) {
 				const priceData = await getProductPrice(
 					customerNumber,
-					companyNumber,
+					String(item.companyNumber ?? companyNumber),
 					item.productNumber,
 					item.warehouseNumber,
 				);
@@ -261,6 +263,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					quantity: item.quantity,
 					warehouseNumber:
 						item.warehouseNumber || profile?.defaultWarehouseNumber || "",
+					companyNumber: String(item.companyNumber ?? companyNumber),
 				})) ?? [];
 
 			const cartKitPriceRequests =
@@ -287,31 +290,37 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 							itemNumber: item.hose.itemNumber,
 							quantity: item.hose.quantity || 1,
 							warehouseNumber: profile?.defaultWarehouseNumber || "",
+							companyNumber: String(companyNumber),
 						},
 						{
 							itemNumber: item.ferrule1.itemNumber,
 							quantity: item.ferrule1.quantity || 1,
 							warehouseNumber: profile?.defaultWarehouseNumber || "",
+							companyNumber: String(companyNumber),
 						},
 						{
 							itemNumber: item.ferrule2.itemNumber,
 							quantity: item.ferrule2.quantity || 1,
 							warehouseNumber: profile?.defaultWarehouseNumber || "",
+							companyNumber: String(companyNumber),
 						},
 						{
 							itemNumber: item.insert1.itemNumber,
 							quantity: item.insert1.quantity || 1,
 							warehouseNumber: profile?.defaultWarehouseNumber || "",
+							companyNumber: String(companyNumber),
 						},
 						{
 							itemNumber: item.insert2.itemNumber,
 							quantity: item.insert2.quantity || 1,
 							warehouseNumber: profile?.defaultWarehouseNumber || "",
+							companyNumber: String(companyNumber),
 						},
 						...serviceItems.map((service) => ({
 							itemNumber: service.itemNumber,
 							quantity: service.quantity || 1,
 							warehouseNumber: profile?.defaultWarehouseNumber || "",
+							companyNumber: String(companyNumber),
 						})),
 					];
 				}) ?? [];
@@ -319,10 +328,10 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			const allPriceRequests = [...priceRequests, ...cartKitPriceRequests];
 
 			if (allPriceRequests.length > 0) {
-				const priceResults = await calculateItemPrice(
+				const priceResults = await priceItemsByCompany(
 					allPriceRequests,
 					customerNumber,
-					companyNumber,
+					String(companyNumber),
 				);
 
 				const initialPrices: Record<string, number> = {};
@@ -709,9 +718,14 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		cartLine: number,
 		itemNumber: string,
 		warehouseNumber: string,
+		companyNumber?: string,
 	) => {
 		try {
-			await updateCart(cartLine, { itemNumber, warehouseNumber });
+			await updateCart(cartLine, {
+				itemNumber,
+				warehouseNumber,
+				...(companyNumber ? { companyNumber } : {}),
+			});
 			setIsCartChanging((v) => !v);
 		} catch (error) {
 			console.error("Error updating cart warehouse:", error);

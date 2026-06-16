@@ -44,7 +44,7 @@ import { useSearchStore } from "@/lib/searchStore";
 import axiosClient from "@/services/axiosClient";
 import { getProductVariations } from "@/services/product.service";
 import { Category } from "@/types/categories.types";
-import { IProductSearch } from "@/types/search.types";
+import { IProductSearch, SearchResponse } from "@/types/search.types";
 import { ProfileUser } from "@/types/user.types";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -54,6 +54,7 @@ import {
 	ChevronRight,
 	ChevronUp,
 	FileText,
+	Loader2,
 	LogOut,
 	Menu,
 	MessageSquareText,
@@ -245,33 +246,58 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		setIsModalIdOpen(null);
 	}, [searchQuery]);
 
-	const handleSearch = (e: React.FormEvent) => {
+	const [isSearchSubmitting, setIsSearchSubmitting] = useState(false);
+	const isSearchSubmittingRef = useRef(false);
+
+	// Awaits the /search response before deciding redirect-to-product vs
+	// /search?query=… so a fast Enter on a slow connection doesn't fall
+	// through to the results page while the response is still in flight.
+	const handleSearch = async (e: React.FormEvent) => {
 		e.preventDefault();
 		const queryToSearch = searchQuery.trim() || urlQueryForDisplay.trim();
-		if (queryToSearch) {
-			const firstProduct = searchData?.productRes?.[0];
-			if (firstProduct?.redirect) {
-				justNavigatedRef.current = true;
-				let redirectPath = firstProduct.redirect.trim();
+		if (!queryToSearch) {
+			setIsSearchOpen(false);
+			return;
+		}
+		if (isSearchSubmittingRef.current) return;
+		isSearchSubmittingRef.current = true;
+		setIsSearchSubmitting(true);
 
+		try {
+			const data = await queryClient.fetchQuery<SearchResponse>({
+				queryKey: ["search", queryToSearch],
+				queryFn: async () => {
+					const response = await axiosClient.get<SearchResponse>(
+						`/search/${queryToSearch}`,
+					);
+					return response.data;
+				},
+				staleTime: 0,
+			});
+
+			justNavigatedRef.current = true;
+			const firstProduct = data?.productRes?.[0];
+			if (firstProduct?.redirect) {
+				let redirectPath = firstProduct.redirect.trim();
 				if (!redirectPath.startsWith("/")) {
 					redirectPath = `/${redirectPath}`;
 				}
-
 				router.push(redirectPath);
-				setSearchQuery("");
-				inputRef.current?.blur();
-				setIsInputFocused(false);
-				setIsSearchOpen(false);
-				return;
+			} else {
+				router.push(`/search?query=${encodeURIComponent(queryToSearch)}`);
 			}
+		} catch {
+			// BE error — fall back to the results page so the user isn't stuck.
 			justNavigatedRef.current = true;
 			router.push(`/search?query=${encodeURIComponent(queryToSearch)}`);
+		} finally {
 			setSearchQuery("");
 			inputRef.current?.blur();
 			setIsInputFocused(false);
+			setIsSearchOpen(false);
+			isSearchSubmittingRef.current = false;
+			setIsSearchSubmitting(false);
 		}
-		setIsSearchOpen(false);
 	};
 
 	const handleLanguageChange = (locale: string) => {
@@ -553,8 +579,14 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 										<Button
 											type="submit"
 											variant="greenSolid"
+											disabled={isSearchSubmitting}
+											aria-busy={isSearchSubmitting}
 											className="h-[50px] rounded-l-none rounded-r-lg border-0 px-5">
-											<Search className="h-5 w-5 text-white" />
+											{isSearchSubmitting ? (
+												<Loader2 className="h-5 w-5 animate-spin text-white" />
+											) : (
+												<Search className="h-5 w-5 text-white" />
+											)}
 										</Button>
 									</form>
 								</div>
@@ -1023,6 +1055,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 							placeholder="Hva leter du etter?"
 							className="h-[52px] flex-1 border-0 bg-transparent px-2 text-sm text-[#0F1912] shadow-none focus-visible:ring-0"
 							value={searchQuery}
+							disabled={isSearchSubmitting}
 							onChange={(e) => {
 								isUserEditingRef.current = true;
 								setSearchQuery(e.target.value);
@@ -1042,6 +1075,12 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 							}}
 							autoFocus
 						/>
+						{isSearchSubmitting && (
+							<Loader2
+								aria-label="Searching"
+								className="mr-1 h-5 w-5 shrink-0 animate-spin text-[#005522]"
+							/>
+						)}
 						<button
 							type="button"
 							onClick={() => {

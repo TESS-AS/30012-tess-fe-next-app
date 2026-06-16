@@ -76,10 +76,37 @@ export function ProductPageClient({
 		Record<string, number>
 	>({});
 
+	const firstVariant = productData?.items?.[0]?.itemNumber;
+	// Refetch when selection changes so variant-level columnAttributes (including relatedProducts) are correct
+	const { data: columnAttributes, isLoading: loadingAttributes } =
+		useGetColumnAttributes(selectedItemNumber ?? firstVariant);
+
+	// Lookup a variant's SAP number from columnAttributes. The search service
+	// puts SAP-style codes into `?itemNumber=...` in its redirect URL even
+	// though it isn't the variant's `item.itemNumber`, so we need to check the
+	// `sap nr` attribute as a fallback when the strict itemNumber match fails.
+	const findVariantBySapAttr = (candidate: string) => {
+		if (!productData?.items || !columnAttributes) return undefined;
+		return productData.items.find((item: any) => {
+			const attrs = (
+				columnAttributes as Record<
+					string,
+					{ attributes?: Array<{ name?: string; valueDef?: string }> }
+				>
+			)[item.itemNumber]?.attributes;
+			if (!Array.isArray(attrs)) return false;
+			const sapAttr = attrs.find(
+				(attr) => attr.name?.toLowerCase() === "sap nr",
+			);
+			return sapAttr?.valueDef === candidate;
+		});
+	};
+
 	useEffect(() => {
 		if (!productData?.items || productData.items.length === 0) return;
 
-		// Priority: SAP number first, then item number, then first item
+		// Priority: SAP number first, then item number (strict, then SAP-attr
+		// fallback once attributes have loaded), then first item.
 		if (preselectedSapNumber) {
 			const itemBySap = productData.items.find(
 				(item: any) =>
@@ -90,13 +117,23 @@ export function ProductPageClient({
 				setSelectedItemNumber(itemBySap.itemNumber);
 				return;
 			}
+			const itemBySapAttr = findVariantBySapAttr(preselectedSapNumber);
+			if (itemBySapAttr) {
+				setSelectedItemNumber(itemBySapAttr.itemNumber);
+				return;
+			}
 		}
 		if (preselectedItemNumber) {
-			const itemExists = productData.items.some(
+			const direct = productData.items.find(
 				(item: any) => item.itemNumber === preselectedItemNumber,
 			);
-			if (itemExists) {
-				setSelectedItemNumber(preselectedItemNumber);
+			if (direct) {
+				setSelectedItemNumber(direct.itemNumber);
+				return;
+			}
+			const itemBySapAttr = findVariantBySapAttr(preselectedItemNumber);
+			if (itemBySapAttr) {
+				setSelectedItemNumber(itemBySapAttr.itemNumber);
 				return;
 			}
 		}
@@ -104,17 +141,14 @@ export function ProductPageClient({
 		if (!selectedItemNumber) {
 			setSelectedItemNumber(productData.items[0]?.itemNumber);
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
 		preselectedItemNumber,
 		preselectedSapNumber,
 		productData?.items,
 		selectedItemNumber,
+		columnAttributes,
 	]);
-
-	const firstVariant = productData?.items?.[0]?.itemNumber;
-	// Refetch when selection changes so variant-level columnAttributes (including relatedProducts) are correct
-	const { data: columnAttributes, isLoading: loadingAttributes } =
-		useGetColumnAttributes(selectedItemNumber ?? firstVariant);
 
 	const handleSelectVariant = (itemNumber: string) => {
 		setSelectedItemNumber(itemNumber);
@@ -215,9 +249,13 @@ export function ProductPageClient({
 
 	const productImages = getProductImages();
 
-	const selectedQuantity =
-		(selectedItemNumber && selectedQuantities[selectedItemNumber.toString()]) ||
-		1;
+	// Pass `undefined` when the user hasn't picked a quantity yet so ProductInfo
+	// falls through to its local quantity state, which is initialized to the
+	// product's `multiple` (BE-defined pack size). Falling back to 1 here would
+	// override that and display 1 even when multiple > 1.
+	const selectedQuantity = selectedItemNumber
+		? selectedQuantities[selectedItemNumber.toString()]
+		: undefined;
 
 	return (
 		<div className="container mx-auto space-y-12 px-4 pt-8 pb-0">

@@ -35,6 +35,12 @@ import {
 } from "@/constants/productVariantTable";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
+import { priceItemsByCompany } from "@/lib/cart-pricing";
+import {
+	buildWarehouseOptions,
+	resolveWarehouse,
+	WarehouseOption,
+} from "@/lib/warehouse";
 import { addToCart, getCart } from "@/services/carts.service";
 import {
 	calculateItemPrice,
@@ -233,62 +239,14 @@ export default function ProductVariantTable({
 	}, [variantsWithWarehouses, columnAttributes, isSapCustomer]);
 
 	const getWarehouseOptions = useMemo(() => {
-		const optionsMap: Record<
-			number,
-			Array<{ warehouseId: number; warehouseName: string; balance: number }>
-		> = {};
-
+		const optionsMap: Record<number, WarehouseOption[]> = {};
+		const warehouseLabel = t("Product.warehouses");
 		variantsWithWarehouses.forEach((variant) => {
-			const inventory = columnAttributes?.[variant.itemNumber]?.inventory || [];
-
-			// Use all warehouses across all companies; do not restrict to default company
-			const warehousesWithBalance = inventory.filter(
-				(inv: any) => inv.balance > 0,
+			optionsMap[variant.itemNumber] = buildWarehouseOptions(
+				columnAttributes?.[variant.itemNumber]?.inventory,
+				{ warehouseLabel },
 			);
-			const warehousesWithZeroBalance = inventory.filter(
-				(inv: any) => inv.balance === 0,
-			);
-
-			// Map and sort warehouses with balance (descending)
-			const warehousesWithBalanceOptions = warehousesWithBalance
-				.map((inv: any) => ({
-					warehouseId: inv.warehouseId,
-					warehouseName:
-						inv.warehouseName ||
-						`${t("Product.warehouses")} ${inv.warehouseId}`,
-					balance: inv.balance,
-				}))
-				.sort((a: any, b: any) => b.balance - a.balance);
-
-			// Map warehouses with 0 balance (always show all options)
-			const warehousesWithZeroBalanceOptions = warehousesWithZeroBalance
-				.map((inv: any) => ({
-					warehouseId: inv.warehouseId,
-					warehouseName:
-						inv.warehouseName ||
-						`${t("Product.warehouses")} ${inv.warehouseId}`,
-					balance: inv.balance,
-				}))
-				.sort((a: any, b: any) => a.warehouseId - b.warehouseId); // Sort by warehouseId for consistency
-
-			// Combine: warehouses with balance first, then 0 balance. Dedupe by warehouseId
-			// so the same warehouse doesn't appear twice (would make both show as selected).
-			const combined = [
-				...warehousesWithBalanceOptions,
-				...warehousesWithZeroBalanceOptions,
-			];
-			const seenIds = new Set<number>();
-			const warehouseOptions = combined
-				.filter((w: { warehouseId: number }) => {
-					if (seenIds.has(w.warehouseId)) return false;
-					seenIds.add(w.warehouseId);
-					return true;
-				})
-				.slice(0, 50);
-
-			optionsMap[variant.itemNumber] = warehouseOptions;
 		});
-
 		return optionsMap;
 	}, [variantsWithWarehouses, columnAttributes, t]);
 
@@ -449,6 +407,49 @@ export default function ProductVariantTable({
 		});
 	});
 
+	const resolveVariantWarehouse = (
+		variantItemNumber: string | number,
+		candidate?: string,
+	): { warehouseNumber: string; companyNumber: string } => {
+		const resolved = resolveWarehouse(
+			columnAttributes?.[variantItemNumber]?.inventory,
+			candidate,
+			{
+				warehouseNumber: profile?.defaultWarehouseNumber,
+				companyNumber: profile?.defaultCompanyNumber
+					? String(profile.defaultCompanyNumber)
+					: undefined,
+			},
+		);
+		return {
+			warehouseNumber: resolved?.warehouseNumber ?? "",
+			companyNumber: resolved?.companyNumber ?? "1",
+		};
+	};
+
+	// Pick the active warehouse for a variant the same way the Select does:
+	// user's manual pick if any, else the auto-preselected first-in-stock
+	// warehouse. Used everywhere prices are calculated so the displayed price
+	// always matches what the Select shows (and what ProductInfo displays).
+	//
+	// `explicitCandidate` lets callers bypass the `warehouse` state — needed in
+	// the Select onValueChange where the just-picked value hasn't been flushed
+	// to state yet, so reading from closure would be stale.
+	const pickActiveWarehouseForVariant = (
+		variantItemNumber: string | number,
+		explicitCandidate?: string,
+	) => {
+		const candidate =
+			explicitCandidate ??
+			(warehouse as Record<string | number, string>)[variantItemNumber];
+		if (candidate) return resolveVariantWarehouse(variantItemNumber, candidate);
+		const firstInStock = buildWarehouseOptions(
+			columnAttributes?.[variantItemNumber]?.inventory,
+			{ warehouseLabel: t("Product.warehouses") },
+		)[0]?.warehouseNumber;
+		return resolveVariantWarehouse(variantItemNumber, firstInStock);
+	};
+
 	const handleAddToCart = async (
 		variant: ProductVariant,
 		qty: number,
@@ -460,13 +461,15 @@ export default function ProductVariantTable({
 		}));
 
 		try {
+			const { warehouseNumber, companyNumber } = selectedWarehouse
+				? resolveVariantWarehouse(variant.itemNumber, selectedWarehouse)
+				: pickActiveWarehouseForVariant(variant.itemNumber);
 			const response = await addToCart({
 				productNumber,
 				itemNumber: variant.itemNumber.toString(),
 				quantity: qty,
-				warehouseNumber:
-					selectedWarehouse || (profile?.defaultWarehouseNumber as any),
-				companyNumber: profile?.defaultCompanyNumber.toString() || "1",
+				warehouseNumber,
+				companyNumber,
 			});
 
 			setIsCartChanging(!isCartChanging);
@@ -506,29 +509,31 @@ export default function ProductVariantTable({
 	const calculatePriceForVariant = async (
 		variant: ProductVariant,
 		quantityOverride?: number,
+		warehouseOverride?: string,
 	) => {
 		if (!profile) return;
 
 		try {
 			setLoading((prev) => ({ ...prev, [variant.itemNumber]: true }));
 
-			const selectedWarehouse = warehouse[variant.itemNumber];
-			const warehouseNumber =
-				selectedWarehouse || profile.defaultWarehouseNumber || "";
+			const { warehouseNumber, companyNumber } = pickActiveWarehouseForVariant(
+				variant.itemNumber,
+				warehouseOverride,
+			);
 
 			const effectiveQuantity =
-				quantityOverride ?? quantities[variant.itemNumber] ?? 1;
+				quantityOverride ?? quantities[variant.itemNumber] ?? multiple;
 
 			const [priceResult] = await calculateItemPrice(
 				[
 					{
 						itemNumber: variant.itemNumber.toString(),
 						quantity: effectiveQuantity,
-						warehouseNumber: warehouseNumber,
+						warehouseNumber,
 					},
 				],
 				profile.defaultCustomerNumber,
-				profile.defaultCompanyNumber,
+				companyNumber,
 			);
 
 			if (priceResult) {
@@ -550,20 +555,30 @@ export default function ProductVariantTable({
 
 	useEffect(() => {
 		const loadPrices = async () => {
-			if (!variants?.length || !profile) return;
+			// Wait for columnAttributes — pickActiveWarehouseForVariant reads
+			// inventory from there to pick first-in-stock; without it we'd
+			// fall back to profile.defaultWarehouseNumber, which may not be
+			// what the Select ends up showing, and prices would mismatch
+			// ProductInfo.
+			if (!variants?.length || !profile || !columnAttributes) return;
 
 			try {
-				// Batch all price requests into a single API call
-				const priceRequests = variants.map((variant) => ({
-					itemNumber: variant.itemNumber.toString(),
-					quantity: 1,
-					warehouseNumber: profile.defaultWarehouseNumber || "",
-				}));
-
-				const priceResults = await calculateItemPrice(
-					priceRequests,
+				const requests = variants.map((variant) => {
+					const { warehouseNumber, companyNumber } =
+						pickActiveWarehouseForVariant(variant.itemNumber);
+					return {
+						itemNumber: variant.itemNumber.toString(),
+						quantity: 1,
+						warehouseNumber,
+						companyNumber,
+					};
+				});
+				const priceResults = await priceItemsByCompany(
+					requests,
 					profile.defaultCustomerNumber,
-					profile.defaultCompanyNumber,
+					profile.defaultCompanyNumber
+						? String(profile.defaultCompanyNumber)
+						: "1",
 				);
 
 				const priceMap = new Map<string, number>();
@@ -593,81 +608,31 @@ export default function ProductVariantTable({
 		};
 
 		loadPrices();
-	}, [variants, profile]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [variants, profile, columnAttributes]);
 
 	useEffect(() => {
 		const loadWarehousesData = async () => {
 			try {
 				if (!variants?.length) return;
 
+				const warehouseLabel = t("Product.warehouses");
 				const updatedVariants = variants.map((variant) => {
-					// Compute warehouse options directly from variants and columnAttributes
-					const inventory =
-						columnAttributes?.[variant.itemNumber]?.inventory || [];
-
-					// Use all warehouses across all companies; do not restrict to default company
-					const warehousesWithBalance = inventory.filter(
-						(inv: any) => inv.balance > 0,
+					const warehouseOptions = buildWarehouseOptions(
+						columnAttributes?.[variant.itemNumber]?.inventory,
+						{ warehouseLabel },
 					);
-					const warehousesWithZeroBalance = inventory.filter(
-						(inv: any) => inv.balance === 0,
-					);
-
-					// Map and sort warehouses with balance (descending)
-					const warehousesWithBalanceOptions = warehousesWithBalance
-						.map((inv: any) => ({
-							warehouseId: inv.warehouseId,
-							warehouseName:
-								inv.warehouseName ||
-								`${t("Product.warehouses")} ${inv.warehouseId}`,
-							balance: inv.balance,
-						}))
-						.sort((a: any, b: any) => b.balance - a.balance);
-
-					// Map warehouses with 0 balance (always show all options)
-					const warehousesWithZeroBalanceOptions = warehousesWithZeroBalance
-						.map((inv: any) => ({
-							warehouseId: inv.warehouseId,
-							warehouseName:
-								inv.warehouseName ||
-								`${t("Product.warehouses")} ${inv.warehouseId}`,
-							balance: inv.balance,
-						}))
-						.sort((a: any, b: any) => a.warehouseId - b.warehouseId); // Sort by warehouseId for consistency
-
-					// Combine: warehouses with balance first, then 0 balance. Dedupe by warehouseId
-					// so the same warehouse doesn't appear twice (would make both show as selected).
-					const combined = [
-						...warehousesWithBalanceOptions,
-						...warehousesWithZeroBalanceOptions,
-					];
-					const seenIds = new Set<number>();
-					const warehouseOptions = combined
-						.filter((w: { warehouseId: number }) => {
-							if (seenIds.has(w.warehouseId)) return false;
-							seenIds.add(w.warehouseId);
-							return true;
-						})
-						.slice(0, 50);
-
-					const warehouses = warehouseOptions.map(
-						(w: {
-							warehouseId: { toString: () => any };
-							warehouseName: any;
-							balance: any;
-						}) => ({
-							warehouseNumber: w.warehouseId.toString(),
-							warehouseName: w.warehouseName,
-							balance: w.balance,
-						}),
-					);
+					const warehouses = warehouseOptions.map((w) => ({
+						warehouseNumber: w.warehouseNumber,
+						warehouseName: w.warehouseName,
+						balance: w.balance,
+					}));
 
 					if (warehouseOptions.length > 0) {
 						const variantKey = variant.itemNumber;
 
 						if (!initializedWarehousesRef.current.has(variantKey)) {
-							const warehouseToPreselect =
-								warehouseOptions[0].warehouseId.toString();
+							const warehouseToPreselect = warehouseOptions[0].warehouseNumber;
 							initializedWarehousesRef.current.add(variantKey);
 							setWarehouse((prev) => {
 								if (prev[variantKey]) return prev;
@@ -971,7 +936,11 @@ export default function ProductVariantTable({
 					</TableHeader>
 					<TableBody>
 						{filteredVariants.map((variant) => {
-							const qty = quantities[variant.itemNumber] || 1;
+							// Default to `multiple` (BE-defined pack size) — products with
+							// multiple > 1 must be ordered in that step, so the initial
+							// displayed qty and the qty passed to add-to-cart should both
+							// honor it.
+							const qty = quantities[variant.itemNumber] || multiple;
 							const selectedWarehouse = warehouse[variant.itemNumber];
 
 							const isSelected =
@@ -1295,7 +1264,11 @@ export default function ProductVariantTable({
 																		variant.itemNumber.toString(),
 																		value,
 																	);
-																	await calculatePriceForVariant(variant);
+																	await calculatePriceForVariant(
+																		variant,
+																		undefined,
+																		value,
+																	);
 																}}>
 																<SelectTrigger
 																	className={`overflow-hidden border-0 bg-transparent shadow-none [&>span]:truncate ${compact ? "w-[160px]" : "w-[180px]"}`}>
@@ -1322,10 +1295,10 @@ export default function ProductVariantTable({
 																				</div>
 																			)}
 																			{warehouseOptions.map(
-																				(w: any, index: number) => (
+																				(w, index: number) => (
 																					<SelectItem
-																						key={`${variant.itemNumber}-${w.warehouseId}-${index}`}
-																						value={w.warehouseId.toString()}>
+																						key={`${variant.itemNumber}-${w.warehouseNumber}-${index}`}
+																						value={w.warehouseNumber}>
 																						<div className="flex items-center gap-2">
 																							<CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
 																							<span className="truncate">
