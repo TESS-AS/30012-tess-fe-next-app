@@ -21,18 +21,18 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-	Popover,
-	PopoverArrow,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
-import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { FilterOptions, useGetAssets } from "@/hooks/useGetAssets";
 import { useAppContext } from "@/lib/appContext";
@@ -67,6 +67,10 @@ export interface HoseOrder {
 	produksjonsdato?: string;
 	pafyllingsdato?: string;
 	neste_inspeksjonsdato?: string;
+	ferrule1?: string;
+	ferrule2?: string;
+	insert1?: string;
+	insert2?: string;
 }
 
 interface HosesAndEquipmentsProps {
@@ -206,6 +210,10 @@ export function HosesAndEquipments({
 		produksjonsdato: asset?.hoseLine?.productionDate ?? undefined,
 		pafyllingsdato: asset?.hoseLine?.refillDate ?? undefined,
 		neste_inspeksjonsdato: asset?.hoseLine?.nextInspectionDate ?? undefined,
+		ferrule1: asset?.hoseData?.ferrule1 ?? undefined,
+		ferrule2: asset?.hoseData?.ferrule2 ?? undefined,
+		insert1: asset?.hoseData?.insert1 ?? undefined,
+		insert2: asset?.hoseData?.insert2 ?? undefined,
 	}));
 
 	useEffect(() => {
@@ -662,62 +670,56 @@ export function HosesAndEquipments({
 			header: t("columns.description"),
 			cell: (o) => {
 				const rows: Array<{ label: string; value: string }> = [
-					{ label: t("tooltip.location"), value: o.s1_anlegg },
-					{ label: t("tooltip.equipment"), value: o.s2_utstyr },
-					{ label: t("tooltip.orderNumber"), value: o.ordrenr },
-					{
-						label: t("tooltip.installationDate"),
-						value: o.installasjonsdato ?? "",
-					},
-					{
-						label: t("tooltip.productionDate"),
-						value: o.produksjonsdato ?? "",
-					},
-					{
-						label: t("tooltip.fillingDate"),
-						value: o.pafyllingsdato ?? "",
-					},
-					{
-						label: t("tooltip.nextInspectionDate"),
-						value: o.neste_inspeksjonsdato ?? "",
-					},
+					{ label: t("tooltip.hose"), value: o.beskrivelse },
+					{ label: t("tooltip.ferrule1"), value: o.ferrule1 ?? "" },
+					{ label: t("tooltip.ferrule2"), value: o.ferrule2 ?? "" },
+					{ label: t("tooltip.insert1"), value: o.insert1 ?? "" },
+					{ label: t("tooltip.insert2"), value: o.insert2 ?? "" },
 				].filter((r) => r.value);
 
 				return (
-					<Popover>
-						<PopoverTrigger asChild>
-							<button
-								type="button"
-								className="w-full cursor-pointer text-left text-[#003D1A] decoration-[#003D1A] underline-offset-2 hover:underline focus-visible:underline"
-								onClick={(e) => e.stopPropagation()}>
-								{o.beskrivelse}
-							</button>
-						</PopoverTrigger>
-						<PopoverContent
-							side="top"
-							align="start"
-							sideOffset={8}
-							onClick={(e) => e.stopPropagation()}
-							className="w-auto max-w-md rounded-md border-none bg-[#1A211C] p-4 text-white shadow-lg">
-							<PopoverArrow
-								className="fill-[#1A211C]"
-								width={14}
-								height={8}
-							/>
-							<div className="mb-2 text-sm font-semibold">
-								{t("tooltip.id")}: {o.id}
-							</div>
-							{rows.length > 0 && (
-								<ul className="list-disc space-y-1 pl-5 text-sm">
-									{rows.map((r) => (
-										<li key={r.label}>
-											{r.label}: {r.value}
-										</li>
-									))}
-								</ul>
-							)}
-						</PopoverContent>
-					</Popover>
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<button
+									type="button"
+									disabled={isEcomBlocked(o)}
+									className={cn(
+										"w-full text-left underline-offset-2",
+										!isEcomBlocked(o) &&
+											"cursor-pointer text-[#003D1A] decoration-[#003D1A]",
+										!isEcomBlocked(o) &&
+											"hover:underline focus-visible:underline",
+										isEcomBlocked(o) && "cursor-not-allowed",
+									)}
+									onClick={(e) => {
+										e.stopPropagation();
+										if (isEcomBlocked(o)) return;
+										handleHoseClick(o.hexagonId);
+									}}>
+									{o.beskrivelse}
+								</button>
+							</TooltipTrigger>
+							<TooltipContent
+								side="top"
+								align="start"
+								sideOffset={8}
+								className="w-auto max-w-md rounded-md border-none bg-[#1A211C] p-4 text-white shadow-lg">
+								<div className="mb-2 text-sm font-semibold">
+									{t("tooltip.id")}: {o.id}
+								</div>
+								{rows.length > 0 && (
+									<ul className="list-disc space-y-1 pl-5 text-sm">
+										{rows.map((r) => (
+											<li key={r.label}>
+												{r.label}: {r.value}
+											</li>
+										))}
+									</ul>
+								)}
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
 				);
 			},
 			sortable: true,

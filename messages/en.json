@@ -687,13 +687,11 @@
 		},
 		"tooltip": {
 			"id": "ID",
-			"location": "Location (S1)",
-			"equipment": "Equipment (S2)",
-			"orderNumber": "Order #",
-			"installationDate": "Installed",
-			"productionDate": "Produced",
-			"fillingDate": "Filled",
-			"nextInspectionDate": "Next inspection"
+			"hose": "Hose",
+			"ferrule1": "Ferrule 1",
+			"ferrule2": "Ferrule 2",
+			"insert1": "Insert 1",
+			"insert2": "Insert 2"
 		},
 		"welcome": {
 			"headerLabel": "Hose management",

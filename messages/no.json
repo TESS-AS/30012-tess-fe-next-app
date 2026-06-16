@@ -690,13 +690,11 @@
 		},
 		"tooltip": {
 			"id": "ID",
-			"location": "Lokasjon (S1)",
-			"equipment": "Utstyr (S2)",
-			"orderNumber": "Ordrenr.",
-			"installationDate": "Installert",
-			"productionDate": "Produsert",
-			"fillingDate": "Påfylling",
-			"nextInspectionDate": "Neste inspeksjon"
+			"hose": "Slange",
+			"ferrule1": "Hylse 1",
+			"ferrule2": "Hylse 2",
+			"insert1": "Innstikk 1",
+			"insert2": "Innstikk 2"
 		},
 		"welcome": {
 			"headerLabel": "Hose management",

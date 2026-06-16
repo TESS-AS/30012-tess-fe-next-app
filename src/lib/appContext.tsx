@@ -204,29 +204,30 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 	useEffect(() => {
 		if (
-			profile?.defaultCustomerNumber ===
+			profile?.defaultCustomerNumber !==
 			SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
 		) {
-			const isProfile = pathname.includes("/profile");
-			const isCheckout = pathname.includes("/checkout");
-			const isCart = pathname.includes("/cart");
-			const isWelcome = pathname.includes("/welcome");
+			return;
+		}
 
-			if (!isProfile && !isCheckout && !isCart && !isWelcome) {
-				const dismissed =
-					typeof window !== "undefined" &&
-					localStorage.getItem(EQUINOR_WELCOME_DISMISSED_KEY) === "true";
-				const seenThisSession =
-					typeof window !== "undefined" &&
-					sessionStorage.getItem(EQUINOR_WELCOME_SEEN_THIS_SESSION_KEY) ===
-						"true";
+		const isProfile = pathname.includes("/profile");
+		const isCheckout = pathname.includes("/checkout");
+		const isCart = pathname.includes("/cart");
+		const isWelcome = pathname.includes("/welcome");
 
-				if (dismissed || seenThisSession) {
-					router.replace("/profile");
-				} else {
-					router.replace("/welcome");
-				}
-			}
+		if (isCheckout || isCart || isWelcome) return;
+
+		const dismissed =
+			typeof window !== "undefined" &&
+			localStorage.getItem(EQUINOR_WELCOME_DISMISSED_KEY) === "true";
+		const seenThisSession =
+			typeof window !== "undefined" &&
+			sessionStorage.getItem(EQUINOR_WELCOME_SEEN_THIS_SESSION_KEY) === "true";
+
+		if (!dismissed && !seenThisSession) {
+			router.replace("/welcome");
+		} else if (!isProfile) {
+			router.replace("/profile");
 		}
 	}, [profile, pathname, router]);
 
