@@ -245,7 +245,7 @@ export function buildOrderConfirmationEmailHtml({
 						<div style="font-weight: 600;">${escapeHtml(l.itemName)}</div>
 						<div style="font-size: 12px; color: #6b7280;">${escapeHtml(l.itemNumber)}</div>
 					</td>
-					<td style="padding: 8px 12px; border-bottom: 1px solid #e5e7e6; text-align: right; color: #1a1a1a;">x${l.quantity}</td>
+					<td style="padding: 8px 12px; border-bottom: 1px solid #e5e7e6; text-align: right; color: #1a1a1a;">${l.quantity}</td>
 					<td style="padding: 8px 12px; border-bottom: 1px solid #e5e7e6; text-align: right; color: #1a1a1a; white-space: nowrap;">${formatCurrencyForEmail(l.totalPrice)}</td>
 				</tr>
 			`,
