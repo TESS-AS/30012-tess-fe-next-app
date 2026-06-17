@@ -23,6 +23,7 @@ import Stepper from "@/components/ui/stepper";
 import {
 	HIDE_CHECKOUT_FOR_SPECIFIC_CUSTOMER_NUMBER,
 	SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER,
+	SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER,
 } from "@/constants/checkout";
 import { useCheckoutOrderData } from "@/hooks/useCheckoutOrderData";
 import { useContactPerson } from "@/hooks/useContactPerson";
@@ -33,6 +34,7 @@ import { useModals } from "@/hooks/useModals";
 import { useOrderStepper } from "@/hooks/useOrderStepper";
 import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { useAppContext } from "@/lib/appContext";
+import { sendOrderConfirmationEmail } from "@/lib/sendOrderConfirmationEmail";
 import { CartKitItem, CartLine } from "@/types/carts.types";
 import { Order, OrderResponse } from "@/types/orders.types";
 import type { PayPalScriptOptions } from "@paypal/paypal-js";
@@ -57,6 +59,12 @@ export default function CheckoutPage() {
 		setUpdatedAddress,
 		requisitionPlacerInfo,
 		setSelectedPlacerAddress,
+		totalPrice,
+		surChargeTotalPrice,
+		rabatterTotalPrice,
+		orderSummaryTotalPriceFinal,
+		cartKitTotals,
+		getCalculatedPrice,
 	} = useAppContext();
 
 	const { data: profile, isLoading: isProfileLoading } = useGetProfileData();
@@ -144,6 +152,7 @@ export default function CheckoutPage() {
 			country: "NO",
 		},
 		handleArchiveCart,
+		{ phone: contactPerson.phone, email: contactPerson.email },
 	);
 
 	const steps = [
@@ -242,7 +251,7 @@ export default function CheckoutPage() {
 			}
 
 			const isExcelCustomer =
-			 SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER.includes(profile?.defaultCustomerNumber || "");			
+			 SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER.includes(profile?.defaultCustomerNumber || "");
 			 if (isExcelCustomer) {
 				setExcelArchiveModalOpen(true);
 				return;
@@ -260,6 +269,26 @@ export default function CheckoutPage() {
 					setSubmittedOrder(orderResponse);
 					setShowOrderConfirmation(true);
 					setTimeout(() => setShowFeedbackModal(true), 1000);
+					void sendOrderConfirmationEmail({
+						orderResponse,
+						contactPerson,
+						paymentMethod,
+						showVat:
+							profile?.defaultCustomerNumber !==
+							SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER,
+						cartItems,
+						calculatedPrices,
+						cartKitTotals,
+						totals: {
+							totalPrice,
+							rabatterTotalPrice,
+							surChargeTotalPrice,
+							orderSummaryTotalPriceFinal,
+						},
+						placerAddress: placerAddressForCard,
+						updatedAddress,
+						selectedAddress,
+					});
 				}
 			} catch (error) {
 				console.error("Order submission failed:", error);
@@ -378,8 +407,12 @@ export default function CheckoutPage() {
 								submittedOrder?.order?.Ordrebekreftelse?.Addresse?.[0]
 									?.addressLine1 || ""
 							}
-							phone=""
-							email={submittedOrder?.order?.Ordrebekreftelse?.["E-post"] || ""}
+							phone={contactPerson.phone || ""}
+							email={
+								contactPerson.email ||
+								submittedOrder?.order?.Ordrebekreftelse?.["E-post"] ||
+								""
+							}
 							onTrackOrder={() => setShowTrackingModal(true)}
 						/>
 						<FeedbackModal

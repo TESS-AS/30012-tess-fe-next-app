@@ -1,4 +1,5 @@
 export const SUPPORT_EMAIL_RECIPIENT = "netthandel@tess.no";
+export const ORDER_TSS_EMAIL_RECIPIENT = "tess@tess.no";
 
 interface OnboardingEmailParams {
 	userEmail: string;
@@ -162,4 +163,147 @@ export function buildUserFeedbackEmailHtml({
 
 export function buildUserFeedbackEmailSubject(feedbackType: string): string {
 	return `Tilbakemelding: ${feedbackType}`;
+}
+
+interface OrderConfirmationEmailLine {
+	itemNumber: string;
+	itemName: string;
+	quantity: number;
+	totalPrice: number;
+}
+
+interface OrderConfirmationEmailTotals {
+	originalPrice: number;
+	discounts: number;
+	sumAfterDiscount: number;
+	deliverySurcharge: number;
+	vat: number;
+	totalIncVat: number;
+	showVat: boolean;
+}
+
+interface OrderConfirmationEmailParams {
+	orderNumber: string;
+	date: string;
+	paymentMethod: string;
+	name: string;
+	company: string;
+	addressLines: string[];
+	phone: string;
+	email: string;
+	lines: OrderConfirmationEmailLine[];
+	totals: OrderConfirmationEmailTotals;
+}
+
+function escapeHtml(value: string): string {
+	return value
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#39;");
+}
+
+function formatCurrencyForEmail(amount: number): string {
+	const safe = Number.isFinite(amount) ? amount : 0;
+	return `${safe.toLocaleString("nb-NO", {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+	})} kr`;
+}
+
+export function buildOrderConfirmationEmailHtml({
+	orderNumber,
+	date,
+	paymentMethod,
+	name,
+	company,
+	addressLines,
+	phone,
+	email,
+	lines,
+	totals,
+}: OrderConfirmationEmailParams): string {
+	const infoRows = [
+		infoRow("Ordrenummer", `#${escapeHtml(orderNumber)}`),
+		infoRow("Dato", escapeHtml(date)),
+		infoRow("Betalingsmåte", escapeHtml(paymentMethod)),
+		infoRow("Navn", escapeHtml(name)),
+		...(company ? [infoRow("Firma", escapeHtml(company))] : []),
+		...(addressLines.length
+			? [infoRow("Adresse", addressLines.map(escapeHtml).join("<br />"))]
+			: []),
+		...(phone ? [infoRow("Telefon", escapeHtml(phone))] : []),
+		...(email ? [infoRow("E-post", escapeHtml(email))] : []),
+	];
+
+	const lineRows = lines
+		.map(
+			(l) => `
+				<tr>
+					<td style="padding: 8px 12px; border-bottom: 1px solid #e5e7e6; color: #1a1a1a;">
+						<div style="font-weight: 600;">${escapeHtml(l.itemName)}</div>
+						<div style="font-size: 12px; color: #6b7280;">${escapeHtml(l.itemNumber)}</div>
+					</td>
+					<td style="padding: 8px 12px; border-bottom: 1px solid #e5e7e6; text-align: right; color: #1a1a1a;">x${l.quantity}</td>
+					<td style="padding: 8px 12px; border-bottom: 1px solid #e5e7e6; text-align: right; color: #1a1a1a; white-space: nowrap;">${formatCurrencyForEmail(l.totalPrice)}</td>
+				</tr>
+			`,
+		)
+		.join("");
+
+	const totalsRows = [
+		`<tr><td style="padding: 6px 12px; color: #5A615D;">Pris</td><td style="padding: 6px 12px; text-align: right; color: #1a1a1a;">${formatCurrencyForEmail(totals.originalPrice)}</td></tr>`,
+		`<tr><td style="padding: 6px 12px; color: #5A615D;">Rabatter</td><td style="padding: 6px 12px; text-align: right; color: #1a1a1a;">${formatCurrencyForEmail(totals.discounts)}</td></tr>`,
+		`<tr><td style="padding: 6px 12px; color: #5A615D;">Sum etter rabatt</td><td style="padding: 6px 12px; text-align: right; color: #1a1a1a;">${formatCurrencyForEmail(totals.sumAfterDiscount)}</td></tr>`,
+		`<tr><td style="padding: 6px 12px; color: #5A615D;">Frakttillegg</td><td style="padding: 6px 12px; text-align: right; color: #1a1a1a;">${formatCurrencyForEmail(totals.deliverySurcharge)}</td></tr>`,
+		...(totals.showVat
+			? [
+					`<tr><td style="padding: 6px 12px; color: #5A615D;">MVA</td><td style="padding: 6px 12px; text-align: right; color: #1a1a1a;">${formatCurrencyForEmail(totals.vat)}</td></tr>`,
+				]
+			: []),
+		`<tr><td style="padding: 10px 12px; border-top: 2px solid #1a1a1a; font-weight: 700; color: #1a1a1a;">Total inkl. MVA</td><td style="padding: 10px 12px; border-top: 2px solid #1a1a1a; text-align: right; font-weight: 700; color: #1a1a1a;">${formatCurrencyForEmail(totals.totalIncVat)}</td></tr>`,
+	].join("");
+
+	const content = `
+		<p style="margin: 0 0 16px; font-size: 14px; line-height: 1.6;">
+			Takk for din ordre! Bestillingen din er mottatt og bekreftet.
+		</p>
+		<table style="width: 100%; border-collapse: collapse; font-size: 14px; border: 1px solid #e5e7e6; border-radius: 6px; margin-bottom: 24px;">
+			${infoRows.join("")}
+		</table>
+
+		${
+			lineRows
+				? `
+					<h3 style="margin: 0 0 8px; font-size: 15px; color: #1a1a1a;">Varelinjer</h3>
+					<table style="width: 100%; border-collapse: collapse; font-size: 14px; border: 1px solid #e5e7e6; border-radius: 6px; margin-bottom: 24px;">
+						<thead>
+							<tr style="background-color: #f9fafb;">
+								<th style="padding: 8px 12px; text-align: left; color: #374151;">Vare</th>
+								<th style="padding: 8px 12px; text-align: right; color: #374151;">Antall</th>
+								<th style="padding: 8px 12px; text-align: right; color: #374151;">Pris</th>
+							</tr>
+						</thead>
+						<tbody>${lineRows}</tbody>
+					</table>
+				`
+				: ""
+		}
+
+		<h3 style="margin: 0 0 8px; font-size: 15px; color: #1a1a1a;">Sammendrag</h3>
+		<table style="width: 100%; border-collapse: collapse; font-size: 14px; border: 1px solid #e5e7e6; border-radius: 6px;">
+			${totalsRows}
+		</table>
+
+		<p style="margin: 24px 0 0; font-size: 13px; color: #6b7280; line-height: 1.5;">
+			Trenger du hjelp? Kontakt oss på <a href="mailto:${ORDER_TSS_EMAIL_RECIPIENT}" style="color: #1C6D2C;">${ORDER_TSS_EMAIL_RECIPIENT}</a>.
+		</p>
+	`;
+
+	return wrapEmailLayout(`Ordrebekreftelse #${escapeHtml(orderNumber)}`, content);
+}
+
+export function buildOrderConfirmationEmailSubject(orderNumber: string): string {
+	return `Ordrebekreftelse #${orderNumber}`;
 }

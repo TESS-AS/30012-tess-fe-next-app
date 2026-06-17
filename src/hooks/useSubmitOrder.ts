@@ -3,11 +3,17 @@ import { salesOrder, excelOrderConfirmation } from "@/services/orders.service";
 import { Order } from "@/types/orders.types";
 import { ProfileUser, SalesOrderAddress } from "@/types/user.types";
 
+export interface SubmitOrderContact {
+	phone?: string;
+	email?: string;
+}
+
 export const useSubmitOrder = (
 	isPunchoutUser: boolean,
 	profile: ProfileUser | null,
 	selectedAddress: SalesOrderAddress,
 	handleArchiveCart: () => Promise<void>,
+	contact?: SubmitOrderContact,
 ) => {
 	const formatDate = (d: Date) => d.toISOString().split("T")[0];
 	const submitOrder = async (
@@ -19,6 +25,9 @@ export const useSubmitOrder = (
 			baseDispatchDate.setDate(baseDispatchDate.getDate() + 14);
 		}
 		const dispatchDate = formatDate(baseDispatchDate);
+
+		const deliveryPhone = (contact?.phone ?? profile?.phoneNumber ?? "").trim();
+		const deliveryEmail = (contact?.email ?? profile?.email ?? "").trim();
 
 		const payload: Order = {
 			...orderData,
@@ -33,6 +42,15 @@ export const useSubmitOrder = (
 				dispatchDate,
 			},
 			salesOrderAddresses: [selectedAddress],
+			...(deliveryPhone || deliveryEmail
+				? {
+						salesOrderAddressesDeliveryInfo: {
+							phone: deliveryPhone,
+							email: deliveryEmail,
+							addressType: "D",
+						},
+					}
+				: {}),
 		};
 
 		try {
