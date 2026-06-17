@@ -1,4 +1,7 @@
-import { OrderItems } from "@/types/orderHistory.types";
+import {
+	mapLineStatusToOrderStatus,
+	OrderItems,
+} from "@/types/orderHistory.types";
 import {
 	Order,
 	OpenConfirmationsResponse,
@@ -135,6 +138,34 @@ export async function getPostalCode(
 	}
 }
 
+interface SearchOrderHistoryApiItem {
+	orderId: number;
+	orderNumber: string;
+	date: string;
+	sum: number;
+	orderLines: Array<{
+		orderLineNumber: number;
+		itemId: number;
+		itemName: string;
+		itemNumber: string;
+		quantity: number;
+		unit: string;
+		netPrice: number;
+		lineStatus: number;
+		lineSum: number;
+	}>;
+}
+
+interface SearchOrderHistoryApiResponse {
+	data: SearchOrderHistoryApiItem[];
+	meta: {
+		page: number;
+		pageSize: number;
+		totalPages: number;
+		totalItems: number;
+	};
+}
+
 export interface OrderHistoryResponse {
 	data: OrderItems[];
 	meta: {
@@ -152,22 +183,36 @@ export async function getOrderHistory(
 	pageSize: number,
 ): Promise<OrderHistoryResponse> {
 	try {
-		const params: Record<string, any> = {
-			page,
-			pageSize,
-		};
-
-		if (search && search.trim()) {
-			params.search = search;
+		const params: Record<string, string | number> = { page, pageSize };
+		if (search.trim()) {
+			params.search = search.trim();
 		}
 
-		const response = await axiosInstance.get(
+		const response = await axiosInstance.get<SearchOrderHistoryApiResponse>(
 			`/searchOrderHistory/${customerNumber}`,
-			{
-				params,
-			},
+			{ params },
 		);
-		return response.data;
+
+		const mapped: OrderItems[] = response.data.data.map((order) => {
+			const maxStatus = Math.max(
+				...order.orderLines.map((line) => line.lineStatus),
+				0,
+			);
+
+			return {
+				order_id: order.orderId,
+				orderNumber: order.orderNumber,
+				date: order.date,
+				status: mapLineStatusToOrderStatus(maxStatus),
+				total: order.sum,
+				items: order.orderLines,
+			};
+		});
+
+		return {
+			data: mapped,
+			meta: response.data.meta,
+		};
 	} catch (error) {
 		console.error("Error fetching order history:", error);
 		throw error;

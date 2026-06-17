@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { OrderFilters, useGetOrders } from "@/hooks/useGetOrders";
 import { useOrderHistory } from "@/hooks/useOrderHistory";
 import { cn, formatDate } from "@/lib/utils";
 import { OrderItems } from "@/types/orderHistory.types";
@@ -84,44 +83,22 @@ export function OrdreHistorikk({ customerNumber }: { customerNumber: string }) {
 	const [currentPage, setCurrentPage] = useState(1);
 	const ITEMS_PER_PAGE = 10;
 
-	// Use search query to determine which hook to use
-	const hasSearch = searchQuery.trim().length > 0;
-
-	const [filters, setFilters] = useState<OrderFilters>({
-		orderNumber: undefined,
-		invoiceNumber: "",
-		fromDate: "",
-		toDate: "",
-		status: undefined,
-	});
-
-	// Use useOrderHistory when searching (only enabled when hasSearch is true)
-	const {
-		orders: searchOrders,
-		isLoading: searchLoading,
-		totalPages: searchTotalPages,
-		totalItems: searchTotalItems,
-	} = useOrderHistory(
+	const { orders, isLoading, totalPages, totalItems } = useOrderHistory(
 		customerNumber,
 		searchQuery,
 		currentPage,
 		ITEMS_PER_PAGE,
-		hasSearch,
+		!!customerNumber,
 	);
 
-	// Use useGetOrders for initial load and filters (only enabled when hasSearch is false)
-	const {
-		data: filterOrders,
-		isLoading: filterLoading,
-		totalPages: filterTotalPages,
-		totalItems: filterTotalItems,
-	} = useGetOrders(currentPage, ITEMS_PER_PAGE, filters, !hasSearch);
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [searchQuery, selectedStatus]);
 
-	// Select which data to use based on search state
-	const orders = hasSearch ? searchOrders : filterOrders;
-	const isLoading = hasSearch ? searchLoading : filterLoading;
-	const totalPages = hasSearch ? searchTotalPages : filterTotalPages;
-	const totalItems = hasSearch ? searchTotalItems : filterTotalItems;
+	const filteredOrders = useMemo(() => {
+		if (selectedStatus === t("all")) return orders;
+		return orders.filter((order) => order.status === selectedStatus);
+	}, [orders, selectedStatus, t]);
 
 	const statuses = [
 		t("all"),
@@ -151,38 +128,7 @@ export function OrdreHistorikk({ customerNumber }: { customerNumber: string }) {
 		}
 	};
 
-	const getStatusNumber = (status: string): number | undefined => {
-		switch (status) {
-			case "Mottatt":
-				return 10; // Written
-			case "Bekreftet":
-				return 20; // Confirmed
-			case "Plukket":
-				return 30; // Picked
-			case "Under transport":
-				return 45; // Shipped
-			case "Levert":
-				return 60; // Invoiced
-			case "Kansellert":
-				return 0; // Something Wrong
-			default:
-				return undefined;
-		}
-	};
-
-	useEffect(() => {
-		const orderNumber = searchQuery
-			? parseInt(searchQuery.replace(/#/g, ""))
-			: undefined;
-		setFilters((prev) => ({
-			...prev,
-			orderNumber: orderNumber || undefined,
-			status:
-				selectedStatus === "Alle" ? undefined : getStatusNumber(selectedStatus),
-		}));
-	}, [searchQuery, selectedStatus]);
-
-	const tableData = (orders || []).map((order) => ({
+	const tableData = filteredOrders.map((order) => ({
 		...order,
 		orderId: String(order.order_id),
 	}));
@@ -244,9 +190,6 @@ export function OrdreHistorikk({ customerNumber }: { customerNumber: string }) {
 						/>
 						<Button
 							type="button"
-							onClick={() => {
-								/* optional manual trigger; filtering is instant */
-							}}
 							className="absolute top-1/2 right-0 h-10 -translate-y-1/2 rounded-none rounded-r-md border-1 border-l-2 border-[#8A8F8C] bg-white px-4 font-medium text-[#0F1912] hover:bg-white">
 							{t("search")}
 						</Button>

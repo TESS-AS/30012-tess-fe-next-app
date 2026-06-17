@@ -539,10 +539,10 @@ export default function ProfilePage() {
 																	href: "rekvisisjoner",
 																	label: t("ProfilePage.sidebar.requisitions"),
 																},
-																// {
-																// 	href: "ordrehistorikk",
-																// 	label: t("ProfilePage.sidebar.orderHistory"),
-																// },
+																{
+																	href: "ordrehistorikk",
+																	label: t("ProfilePage.sidebar.orderHistory"),
+																},
 															],
 														},
 													]
