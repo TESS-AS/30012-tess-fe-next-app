@@ -39,12 +39,19 @@ export interface OrderLines {
 	customerOrderLine?: number;
 }
 
+export interface SalesOrderAddressesDeliveryInfo {
+	phone: string;
+	email: string;
+	addressType: "D";
+}
+
 export interface Order {
 	documentControl: {
 		companyCode: string;
 	};
 	salesOrderHeader: SalesOrderHeader;
 	salesOrderAddresses: SalesOrderAddress[];
+	salesOrderAddressesDeliveryInfo?: SalesOrderAddressesDeliveryInfo;
 	salesOrderLines: OrderLines[];
 }
 
