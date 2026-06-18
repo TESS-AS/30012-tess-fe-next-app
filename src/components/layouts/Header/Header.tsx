@@ -31,6 +31,7 @@ import {
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useProfile } from "@/contexts/ProfileContext";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { useClickOutsideRef } from "@/hooks/useClickOutsideRef";
 import { useGetAssortments } from "@/hooks/useGetAssortments";
 import { useGetCustomers } from "@/hooks/useGetCustomers";
 import { profileKeys } from "@/hooks/useGetProfileData";
@@ -152,6 +153,8 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 
 	const [urlQueryForDisplay, setUrlQueryForDisplay] = useState<string>("");
 	const [isInputFocused, setIsInputFocused] = useState(false);
+	const [isDesktopOverlayDismissed, setIsDesktopOverlayDismissed] =
+		useState(false);
 	const isUserEditingRef = useRef(false);
 
 	useEffect(() => {
@@ -231,15 +234,16 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		if (justNavigatedRef.current) {
 			justNavigatedRef.current = false;
 			setIsSearchOpen(false);
+			setIsDesktopOverlayDismissed(false);
 			return;
-		}
-		const urlQuery = searchParams.get("query");
-		const isOnSearchPage = pathname.includes("/search");
-		if (!urlQuery && !isOnSearchPage) {
-			clearSearch();
 		}
 		setIsSearchOpen(false);
 	});
+
+	// Close the desktop search overlay whenever the user clicks outside the
+	// input field (including blank areas of the overlay itself). The term stays
+	// in the input — only the overlay is dismissed.
+	useClickOutsideRef(inputRef, () => setIsDesktopOverlayDismissed(true));
 
 	useEffect(() => {
 		setVariations({});
@@ -475,11 +479,13 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 												ref={inputRef}
 												onChange={(e) => {
 													isUserEditingRef.current = true;
+													setIsDesktopOverlayDismissed(false);
 													setSearchQuery(e.target.value);
 												}}
 												onFocus={() => {
 													setIsInputFocused(true);
 													isUserEditingRef.current = true;
+													setIsDesktopOverlayDismissed(false);
 													if (
 														urlQueryForDisplay &&
 														searchQuery === urlQueryForDisplay
@@ -494,7 +500,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 													}, 200);
 												}}
 											/>
-											{searchQuery && (
+											{searchQuery && !isDesktopOverlayDismissed && (
 												<div className="animate-in fade-in-0 zoom-in-95 fixed top-34 left-1/2 z-[11] grid max-h-[80vh] w-[80vw] -translate-x-1/2 grid-cols-3 gap-4 overflow-y-auto bg-white p-4 shadow-lg duration-200">
 													<div className="col-span-1 space-y-4 pr-4">
 														<SearchAside
