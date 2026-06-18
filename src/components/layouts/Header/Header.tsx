@@ -717,7 +717,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 												</div>
 											)}
 										</div>
-										{!isHoseManagementCustomer && (
+										{/* {!isHoseManagementCustomer && ( */}
 											<>
 												<DropdownMenuSeparator />
 												<DropdownMenuItem
@@ -776,7 +776,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 													Logg ut
 												</DropdownMenuItem>
 											</>
-										)}
+										{/* )} */}
 									</DropdownMenuContent>
 								</DropdownMenu>
 							</div>

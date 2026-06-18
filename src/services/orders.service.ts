@@ -1,5 +1,5 @@
 import {
-	mapLineStatusToOrderStatus,
+	deriveOrderStatusFromOrderLines,
 	OrderItems,
 } from "@/types/orderHistory.types";
 import {
@@ -181,29 +181,48 @@ export async function getOrderHistory(
 	search: string,
 	page: number,
 	pageSize: number,
+	status?: number | number[],
 ): Promise<OrderHistoryResponse> {
 	try {
-		const params: Record<string, string | number> = { page, pageSize };
+		const params: Record<string, string | number | number[]> = {
+			page,
+			pageSize,
+		};
 		if (search.trim()) {
 			params.search = search.trim();
+		}
+		const hasStatus =
+			status !== undefined &&
+			(!Array.isArray(status) || status.length > 0);
+		if (hasStatus) {
+			params.status = status;
 		}
 
 		const response = await axiosInstance.get<SearchOrderHistoryApiResponse>(
 			`/searchOrderHistory/${customerNumber}`,
-			{ params },
+			{
+				params,
+				paramsSerializer: (queryParams) =>
+					Object.entries(queryParams)
+						.filter(([, value]) => value !== undefined && value !== null)
+						.flatMap(([key, value]) =>
+							Array.isArray(value)
+								? value.map(
+										(item) =>
+											`${key}=${encodeURIComponent(String(item))}`,
+									)
+								: [`${key}=${encodeURIComponent(String(value))}`],
+						)
+						.join("&"),
+			},
 		);
 
 		const mapped: OrderItems[] = response.data.data.map((order) => {
-			const maxStatus = Math.max(
-				...order.orderLines.map((line) => line.lineStatus),
-				0,
-			);
-
 			return {
 				order_id: order.orderId,
 				orderNumber: order.orderNumber,
 				date: order.date,
-				status: mapLineStatusToOrderStatus(maxStatus),
+				status: deriveOrderStatusFromOrderLines(order.orderLines),
 				total: order.sum,
 				items: order.orderLines,
 			};
