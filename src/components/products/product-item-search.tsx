@@ -162,7 +162,6 @@ export function ProductItem({
 
 	const handleProductClick = () => {
 		captureReturnTarget();
-		setSearchQuery("");
 		onClose?.();
 		router.push(productLink);
 	};
@@ -195,7 +194,6 @@ export function ProductItem({
 								href={productLink}
 								onClick={() => {
 									captureReturnTarget();
-									setSearchQuery("");
 								}}>
 								<span
 									className={cn(

@@ -295,7 +295,6 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 			justNavigatedRef.current = true;
 			router.push(`/search?query=${encodeURIComponent(queryToSearch)}`);
 		} finally {
-			setSearchQuery("");
 			inputRef.current?.blur();
 			setIsInputFocused(false);
 			setIsSearchOpen(false);
@@ -311,7 +310,6 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 
 	const handlePick = (href: string) => {
 		router.push(href);
-		clearSearch();
 		setIsSearchOpen(false);
 	};
 
@@ -486,12 +484,6 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 													setIsInputFocused(true);
 													isUserEditingRef.current = true;
 													setIsDesktopOverlayDismissed(false);
-													if (
-														urlQueryForDisplay &&
-														searchQuery === urlQueryForDisplay
-													) {
-														setSearchQuery("");
-													}
 												}}
 												onBlur={() => {
 													setIsInputFocused(false);
@@ -1074,9 +1066,6 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 							onFocus={() => {
 								setIsInputFocused(true);
 								isUserEditingRef.current = true;
-								if (urlQueryForDisplay && searchQuery === urlQueryForDisplay) {
-									setSearchQuery("");
-								}
 							}}
 							onBlur={() => {
 								setIsInputFocused(false);
