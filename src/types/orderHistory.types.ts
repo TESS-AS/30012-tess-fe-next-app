@@ -20,13 +20,25 @@ export const mapLineStatusToOrderStatus = (status: number): OrderStatus => {
 		case 40:
 			return "Pakket";
 		case 45:
-			return "Under transport";
-		case 50:
 		case 60:
 			return "Levert";
 		default:
 			return "Kansellert";
 	}
+};
+
+export const deriveOrderStatusFromOrderLines = (
+	orderLines: Pick<OrderLine, "lineStatus">[],
+): OrderStatus => {
+	if (orderLines.length === 0) {
+		return "Kansellert";
+	}
+
+	const maxLineStatus = Math.max(
+		...orderLines.map((line) => line.lineStatus),
+	);
+
+	return mapLineStatusToOrderStatus(maxLineStatus);
 };
 
 export function getStatusBadgeProps(status: OrderStatus) {
