@@ -140,7 +140,9 @@
 		"cart": "Handlekurv",
 		"selected": "Valgt",
 		"select": "Velg",
-		"uniqueSellingPoints": "Viktige egenskaper"
+		"uniqueSellingPoints": "Viktige egenskaper",
+		"clickToExpand": "Klikk for å utvide kolonnen",
+		"clickToExpandHint": "Tips: Klikk på en kolonneoverskrift for å se hele innholdet."
 	},
 	"BreadCrumbs": {
 		"home": "Hjem",

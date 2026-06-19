@@ -25,6 +25,12 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { SAP_CUSTOMER } from "@/constants/checkout";
 import {
 	ColumnKey,
@@ -56,6 +62,7 @@ import {
 	ShoppingCart,
 	CheckCircle,
 	SquarePen,
+	Info,
 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -141,6 +148,14 @@ export default function ProductVariantTable({
 	const tableWrapperRef = useRef<HTMLDivElement>(null);
 	const looseTableWidthRef = useRef<number>(0);
 	const [compact, setCompact] = useState(false);
+	const [expandedColumns, setExpandedColumns] = useState<
+		Record<string, boolean>
+	>({});
+
+	const toggleColumnExpansion = (key: string) =>
+		setExpandedColumns((prev) => ({ ...prev, [key]: !prev[key] }));
+
+	const hasExpandedColumn = Object.values(expandedColumns).some(Boolean);
 
 	// Reset initialized warehouses when variants change
 	useEffect(() => {
@@ -830,7 +845,26 @@ export default function ProductVariantTable({
 
 			<div
 				ref={tableWrapperRef}
-				className="mt-5">
+				className={`relative mt-5 group/table ${hasExpandedColumn ? "overflow-x-auto" : ""}`}>
+				{compact && (
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<button
+									type="button"
+									aria-label={t("Product.clickToExpandHint")}
+									className="absolute -top-2 left-0 z-10 hidden h-7 w-7 items-center justify-center rounded-full border border-[#D3D3D3] bg-white text-[#5A615D] opacity-0 shadow-sm transition-opacity group-hover/table:opacity-100 group-hover/table:flex">
+									<Info className="h-4 w-4" />
+								</button>
+							</TooltipTrigger>
+							<TooltipContent
+								side="right"
+								className="max-w-[260px] text-left">
+								{t("Product.clickToExpandHint")}
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
+				)}
 				<Table
 					noOverflow
 					className="w-full min-w-max rounded-md">
@@ -882,22 +916,44 @@ export default function ProductVariantTable({
 									);
 								})}
 							<TableHead
-								className={`py-2 align-top ${compact ? "min-w-[110px] max-w-[140px] px-2" : "min-w-[150px] px-4"}`}>
+								className={`py-2 align-top ${compact ? "cursor-pointer select-none" : ""} ${compact && !expandedColumns["__name"] ? "min-w-[110px] max-w-[140px] px-2" : "min-w-[150px] px-4"}`}
+								onClick={
+									compact
+										? () => toggleColumnExpansion("__name")
+										: undefined
+								}
+								title={
+									compact ? t("Product.clickToExpand") : undefined
+								}>
 								NAVN
 							</TableHead>
 							{allAttributeNames
 								.filter((name) => visibleAttributes[name])
-								.map((name) => (
-									<TableHead
-										key={name}
-										className={`hidden py-2 align-top md:table-cell ${
-											compact
-												? "min-w-[90px] max-w-[110px] break-words px-2 whitespace-normal"
-												: "min-w-[120px] px-4"
-										}`}>
-										{name.toUpperCase()}
-									</TableHead>
-								))}
+								.map((name) => {
+									const isImage = name?.toLowerCase() === "bilde";
+									const isExpanded = !!expandedColumns[name];
+									return (
+										<TableHead
+											key={name}
+											className={`hidden py-2 align-top md:table-cell ${compact && !isImage ? "cursor-pointer select-none" : ""} ${
+												compact && !isExpanded
+													? "min-w-[90px] max-w-[110px] break-words px-2 whitespace-normal"
+													: "min-w-[120px] px-4"
+											}`}
+											onClick={
+												compact && !isImage
+													? () => toggleColumnExpansion(name)
+													: undefined
+											}
+											title={
+												compact && !isImage
+													? t("Product.clickToExpand")
+													: undefined
+											}>
+											{name.toUpperCase()}
+										</TableHead>
+									);
+								})}
 							{renderColumns()
 								.filter((col) =>
 									["quantity", "warehouse", "cart", "price"].includes(col),
@@ -1035,11 +1091,11 @@ export default function ProductVariantTable({
 											}
 										})}
 									<TableCell
-										className={`py-2 ${compact ? "min-w-[110px] max-w-[140px] px-2" : "min-w-[150px] px-4"}`}
+										className={`py-2 ${compact && !expandedColumns["__name"] ? "min-w-[110px] max-w-[140px] px-2" : "min-w-[150px] px-4"}`}
 										title={
 											columnAttributes?.[variant.itemNumber]?.itemName ?? undefined
 										}>
-										{compact ? (
+										{compact && !expandedColumns["__name"] ? (
 											<div className="truncate">
 												{columnAttributes?.[variant.itemNumber]?.itemName ??
 													"-"}
@@ -1105,9 +1161,9 @@ export default function ProductVariantTable({
 											return (
 												<TableCell
 													key={`${variant.itemNumber}-${name}`}
-													className={`hidden py-2 md:table-cell ${compact ? "min-w-[90px] max-w-[110px] px-2" : "min-w-[120px] px-4"}`}
+													className={`hidden py-2 md:table-cell ${compact && !expandedColumns[name] ? "min-w-[90px] max-w-[110px] px-2" : "min-w-[120px] px-4"}`}
 													title={attr?.valueDef ?? undefined}>
-													{compact ? (
+													{compact && !expandedColumns[name] ? (
 														<div className="truncate">
 															{attr?.valueDef ?? "-"}
 														</div>

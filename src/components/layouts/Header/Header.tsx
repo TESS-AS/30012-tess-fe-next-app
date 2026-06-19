@@ -408,8 +408,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		profile.role === "admin" &&
 		profile.defaultCustomerNumber !== SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
 	const hasThmProjectsAccess =
-		!!profile &&
-		(profile.role === "admin" || profile.role === "thmAdmin");
+		!!profile && (profile.role === "admin" || profile.role === "thmAdmin");
 
 	return (
 		<header
@@ -716,64 +715,80 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 											)}
 										</div>
 										{/* {!isHoseManagementCustomer && ( */}
-											<>
-												<DropdownMenuSeparator />
-												<DropdownMenuItem
-													className="text-gray-700"
-													onClick={() => router.push("/profile")}>
-													Gå til din side
-												</DropdownMenuItem>
-												<DropdownMenuItem
-													className="text-gray-700"
-													onClick={() => router.push("/profile?tab=settings")}>
-													Innstillinger
-												</DropdownMenuItem>
-												<CustomerNumberSwitcher profile={profile} />
-												{(hasHoseManagementAccess ||
-													hasTessEdiAccess ||
-													hasThmProjectsAccess) && (
-													<>
-														<DropdownMenuSeparator />
-														<DropdownMenuLabel className="text-sm font-semibold text-gray-700">
-															Tjenester
-														</DropdownMenuLabel>
-														{hasHoseManagementAccess && (
-															<DropdownMenuItem
-																className="text-gray-700"
-																onClick={() =>
-																	router.push("/profile?tab=hose-orders")
-																}>
-																Hose management
-															</DropdownMenuItem>
-														)}
-														{hasTessEdiAccess && (
-															<DropdownMenuItem
-																className="text-gray-700"
-																onClick={() =>
-																	router.push("/profile?tab=tess-edi")
-																}>
-																TESS EDI
-															</DropdownMenuItem>
-														)}
-														{hasThmProjectsAccess && (
-															<DropdownMenuItem
-																className="text-gray-700"
-																onClick={() =>
-																	router.push("/profile?tab=thm-active-projects")
-																}>
-																THM projects (MSL)
-															</DropdownMenuItem>
-														)}
-														<DropdownMenuSeparator />
-													</>
-												)}
-												<DropdownMenuItem
-													onClick={handleLogout}
-													className="text-red-700">
-													<LogOut className="mr-2 h-4 w-4 text-red-700" />
-													Logg ut
-												</DropdownMenuItem>
-											</>
+										<>
+											<DropdownMenuSeparator />
+											<DropdownMenuItem
+												className="text-gray-700"
+												onClick={() => router.push("/profile")}>
+												Gå til din side
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												className="text-gray-700"
+												onClick={() => router.push("/profile?tab=settings")}>
+												Innstillinger
+											</DropdownMenuItem>
+											<CustomerNumberSwitcher profile={profile} />
+											{(hasHoseManagementAccess ||
+												hasTessEdiAccess ||
+												hasThmProjectsAccess) && (
+												<>
+													<DropdownMenuSeparator />
+													<DropdownMenuLabel className="text-sm font-semibold text-gray-700">
+														Tjenester
+													</DropdownMenuLabel>
+													{hasHoseManagementAccess && (
+														<DropdownMenuItem
+															className="text-gray-700"
+															onClick={() =>
+																router.push("/profile?tab=hose-orders")
+															}>
+															Hose management
+														</DropdownMenuItem>
+													)}
+													{hasTessEdiAccess && (
+														<DropdownMenuItem
+															className="text-gray-700"
+															onClick={() =>
+																router.push("/profile?tab=tess-edi")
+															}>
+															TESS EDI
+														</DropdownMenuItem>
+													)}
+													{hasThmProjectsAccess && (
+														<DropdownMenuItem
+															className="text-gray-700"
+															onClick={() =>
+																router.push("/profile?tab=thm-active-projects")
+															}>
+															THM projects (MSL)
+														</DropdownMenuItem>
+													)}
+												</>
+											)}
+											{isTessEmployee && (
+												<>
+													<DropdownMenuSeparator />
+													<DropdownMenuItem
+														className="text-gray-700"
+														onClick={() =>
+															window.open(
+																"https://app.ecoonline.com/public/search-configuration/search?companyID=1000435&prodType=er&descrLang=1",
+																"_blank",
+																"noopener,noreferrer",
+															)
+														}>
+														Søk på ecoonline
+													</DropdownMenuItem>
+												</>
+											)}
+											<DropdownMenuSeparator />
+											<DropdownMenuItem
+												onClick={handleLogout}
+												className="text-red-700">
+												<LogOut className="mr-2 h-4 w-4 text-red-700" />
+												Logg ut
+											</DropdownMenuItem>
+										</>
 										{/* )} */}
 									</DropdownMenuContent>
 								</DropdownMenu>
@@ -1018,6 +1033,22 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 										)}
 									</>
 								)}
+								{isTessEmployee && (
+									<button
+										type="button"
+										onClick={() => {
+											window.open(
+												"https://app.ecoonline.com/public/search-configuration/search?companyID=1000435&prodType=er&descrLang=1",
+												"_blank",
+												"noopener,noreferrer",
+											);
+											setIsMobileProfileOpen(false);
+										}}
+										className="flex min-h-[53px] w-full items-center justify-between border-t border-[#c1c4c2] px-4 text-left text-sm text-[#2D3530]">
+										Søk på ecoonline
+										<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
+									</button>
+								)}
 
 								{/* Logg ut */}
 								<button
@@ -1050,7 +1081,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								setIsSearchOpen(false);
 								clearSearch();
 							}}
-							className="flex h-[52px] w-[52px] shrink-0 items-center justify-center bg-[#009640] hover:bg-[#005522] transition-colors">
+							className="flex h-[52px] w-[52px] shrink-0 items-center justify-center bg-[#009640] transition-colors hover:bg-[#005522]">
 							<ArrowLeft className="h-5 w-5 text-white" />
 						</button>
 						<Input
