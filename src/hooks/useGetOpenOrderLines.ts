@@ -2,7 +2,7 @@ import type { OrderLineField } from "@/app/[locale]/profile/(components)/order-l
 import { getOpenOrderLines } from "@/services/orders.service";
 import type {
 	OpenOrderLineItemResponse,
-	OrderLineDifference,
+	OrderLineMismatch,
 } from "@/types/orders.types";
 import { useQuery } from "@tanstack/react-query";
 
@@ -12,25 +12,21 @@ export const openOrderLinesKeys = {
 		[...openOrderLinesKeys.all, "detail", orderNumber] as const,
 };
 
-/** Build UI fields from API differences array (mismatches: database -> bestilt, incoming -> bekreftet) */
-function differencesToFields(differences: OrderLineDifference[]): OrderLineField[] {
-	if (!Array.isArray(differences)) return [];
+/** Convert a mismatches map (field -> {database, incoming}) into UI fields. */
+function mismatchesToFields(
+	mismatches: Record<string, OrderLineMismatch>,
+): OrderLineField[] {
 	const fields: OrderLineField[] = [];
-	for (const diff of differences) {
-		const mismatches = diff.mismatches;
-		if (!mismatches || typeof mismatches !== "object") continue;
-		for (const [key, val] of Object.entries(mismatches)) {
-			const m = val as { database?: string; incoming?: string };
-			const label =
-				key.charAt(0).toUpperCase() +
-				key.slice(1).replace(/([A-Z])/g, " $1").trim();
-			fields.push({
-				key,
-				label,
-				bestilt: String(m?.database ?? ""),
-				bekreftet: String(m?.incoming ?? ""),
-			});
-		}
+	for (const [key, val] of Object.entries(mismatches)) {
+		const label =
+			key.charAt(0).toUpperCase() +
+			key.slice(1).replace(/([A-Z])/g, " $1").trim();
+		fields.push({
+			key,
+			label,
+			bestilt: String(val?.database ?? ""),
+			bekreftet: String(val?.incoming ?? ""),
+		});
 	}
 	return fields;
 }
@@ -51,19 +47,36 @@ function transformToDetailView(
 	rawLines: OpenOrderLineItemResponse[],
 	options?: { supplier?: string; date?: string },
 ): OrderDetailView {
-	const lines = rawLines.map((item, index) => {
-		const db = item.dbOrderLine;
-		const lineNum =
-			typeof db?.orderLineNumber === "number"
-				? db.orderLineNumber
-				: parseInt(String(db?.orderLineNumber ?? ""), 10) || index + 1;
-		const fieldList = differencesToFields(item.differences ?? []);
-		return {
-			lineNumber: lineNum,
-			deviationCount: Math.max(1, fieldList.length),
-			fields: fieldList,
-		};
-	});
+	// The API may return either one entry per dbOrderLine or a single object whose
+	// `differences` array spans every orderLineNumber for the order. Either way, the
+	// mismatches' own `orderLineNumber` is the source of truth — group by it.
+	const mismatchesByLine = new Map<number, Record<string, OrderLineMismatch>>();
+	const lineNumbers = new Set<number>();
+
+	for (const item of rawLines) {
+		const dbLineNum = Number(item.dbOrderLine?.orderLineNumber);
+		if (Number.isFinite(dbLineNum)) lineNumbers.add(dbLineNum);
+
+		for (const diff of item.differences ?? []) {
+			const num = Number(diff?.orderLineNumber);
+			if (!Number.isFinite(num)) continue;
+			if (!diff.mismatches || typeof diff.mismatches !== "object") continue;
+			lineNumbers.add(num);
+			const existing = mismatchesByLine.get(num) ?? {};
+			mismatchesByLine.set(num, { ...existing, ...diff.mismatches });
+		}
+	}
+
+	const lines = Array.from(lineNumbers)
+		.sort((a, b) => a - b)
+		.map((lineNumber) => {
+			const fieldList = mismatchesToFields(mismatchesByLine.get(lineNumber) ?? {});
+			return {
+				lineNumber,
+				deviationCount: fieldList.length,
+				fields: fieldList,
+			};
+		});
 
 	const firstDb = rawLines[0]?.dbOrderLine;
 	const dateFallback =
