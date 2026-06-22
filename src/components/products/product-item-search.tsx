@@ -236,6 +236,7 @@ export function ProductItem({
 								)}
 								onClick={async (e) => {
 									e.stopPropagation();
+									e.nativeEvent.stopImmediatePropagation();
 									setIsModalIdOpen(product.productNumber);
 									const productVariations = await getProductVariations(
 										product.productNumber,
@@ -272,6 +273,7 @@ export function ProductItem({
 								)}
 								onClick={async (e) => {
 									e.stopPropagation();
+									e.nativeEvent.stopImmediatePropagation();
 									setIsModalIdOpen(product.productNumber);
 									const productVariations = await getProductVariations(
 										product.productNumber,
