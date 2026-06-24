@@ -334,9 +334,140 @@ export function buildOrderConfirmationEmailHtml({
 		</p>
 	`;
 
-	return wrapEmailLayout(`Ordrebekreftelse #${escapeHtml(orderNumber)}`, content);
+	return wrapEmailLayout(
+		`Ordrebekreftelse #${escapeHtml(orderNumber)}`,
+		content,
+	);
 }
 
-export function buildOrderConfirmationEmailSubject(orderNumber: string): string {
+export function buildOrderConfirmationEmailSubject(
+	orderNumber: string,
+): string {
 	return `Ordrebekreftelse #${orderNumber}`;
+}
+
+function renderHexagonIdChips(ids: string[]): string {
+	if (ids.length === 0) return "<em>Ingen valgt</em>";
+	return ids
+		.map(
+			(id) =>
+				`<span style="display:inline-block;margin:2px 4px 2px 0;padding:3px 8px;border-radius:4px;background:#E8EAE9;color:#005522;font-size:12px;">${escapeHtml(
+					id,
+				)}</span>`,
+		)
+		.join("");
+}
+
+export function buildHoseContactEmailHtml({
+	caseId,
+	userName,
+	userEmail,
+	userPhone,
+	customerNumber,
+	companyName,
+	contactMethod,
+	contactValue,
+	message,
+	urgent,
+	hexagonIds,
+}: HoseContactEmailParams): string {
+	const rows = [
+		infoRow("Saksnummer", caseId),
+		infoRow("Bruker", userName),
+		infoRow("E-post", userEmail),
+		...(userPhone ? [infoRow("Telefon", userPhone)] : []),
+		infoRow("Bedrift", `${companyName} (${customerNumber})`),
+		infoRow(
+			"Ønsket kontaktmåte",
+			contactMethod === "phone" ? "Ring meg" : "Send meg en e-post",
+		),
+		infoRow(
+			contactMethod === "phone" ? "Telefonnummer" : "E-postadresse",
+			escapeHtml(contactValue),
+		),
+		infoRow("Hastesak", urgent ? "Ja" : "Nei"),
+		infoRow("Valgte slanger", renderHexagonIdChips(hexagonIds)),
+		...(message
+			? [infoRow("Kort melding", escapeHtml(message).replace(/\n/g, "<br />"))]
+			: []),
+	];
+
+	const content = `
+		<p style="margin: 0 0 16px; font-size: 14px; line-height: 1.6;">
+			En bruker har bedt om å bli kontaktet av en fagperson om valgte slanger.
+		</p>
+		<table style="width: 100%; border-collapse: collapse; font-size: 14px; border: 1px solid #e5e7e6; border-radius: 6px;">
+			${rows.join("")}
+		</table>
+	`;
+
+	return wrapEmailLayout("Snakk med en fagperson — ny henvendelse", content);
+}
+
+export function buildHoseContactEmailSubject(
+	urgent: boolean,
+	customerNumber: string,
+): string {
+	const base = `Snakk med en fagperson — kunde ${customerNumber}`;
+	return urgent ? `URGENT: ${base}` : base;
+}
+
+export function buildHoseRfqEmailHtml({
+	caseId,
+	userName,
+	userEmail,
+	userPhone,
+	customerNumber,
+	companyName,
+	deliveryAddress,
+	comment,
+	includePressureTest,
+	urgent,
+	hexagonIds,
+}: HoseRfqEmailParams): string {
+	const rows = [
+		infoRow("Saksnummer", caseId),
+		infoRow("Bruker", userName),
+		infoRow("E-post", userEmail),
+		...(userPhone ? [infoRow("Telefon", userPhone)] : []),
+		infoRow("Bedrift", `${companyName} (${customerNumber})`),
+		infoRow(
+			"Leveringsadresse",
+			deliveryAddress ? escapeHtml(deliveryAddress) : "—",
+		),
+		infoRow(
+			"Inkluder trykktest og sertifikat",
+			includePressureTest ? "Ja" : "Nei",
+		),
+		infoRow("Hastesak", urgent ? "Ja" : "Nei"),
+		infoRow("Valgte slanger", renderHexagonIdChips(hexagonIds)),
+		...(comment
+			? [infoRow("Kommentar", escapeHtml(comment).replace(/\n/g, "<br />"))]
+			: []),
+	];
+
+	const content = `
+		<p style="margin: 0 0 16px; font-size: 14px; line-height: 1.6;">
+			En bruker har sendt en forespørsel om tilbud (RFQ) for valgte slanger.
+		</p>
+		<table style="width: 100%; border-collapse: collapse; font-size: 14px; border: 1px solid #e5e7e6; border-radius: 6px;">
+			${rows.join("")}
+		</table>
+	`;
+
+	return wrapEmailLayout("Send forespørsel om tilbud (RFQ)", content);
+}
+
+export function buildHoseRfqEmailSubject(
+	urgent: boolean,
+	customerNumber: string,
+): string {
+	const base = `RFQ — kunde ${customerNumber}`;
+	return urgent ? `URGENT: ${base}` : base;
+}
+
+export function generateCaseId(prefix: "KTAK" | "RFQ"): string {
+	const now = Date.now().toString(36).toUpperCase();
+	const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+	return `${prefix}-${now}-${rand}`;
 }

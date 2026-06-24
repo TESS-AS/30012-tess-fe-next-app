@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState, use } from "react";
 import CategoryContent from "@/components/category/category-content";
 import { useCategories } from "@/lib/CategoriesProvider";
 import {
-	findCategoryByPath,
+	findCategoryBySlugPath,
 	normalizeFilterResponse,
 } from "@/lib/category-utils";
 import { formatUrlToDisplayName } from "@/lib/utils";
@@ -39,7 +39,9 @@ export default function SubCategoryPage({ params }: SubCategoryPageProps) {
 	useEffect(() => {
 		if (!categories) return;
 
-		const subCategoryData = findCategoryByPath(categories, [
+		// Descend through any assortment wrappers so the path resolves for
+		// customer-specific catalogs (see findCategoryBySlugPath).
+		const subCategoryData = findCategoryBySlugPath(categories, [
 			category,
 			subcategory,
 		]);

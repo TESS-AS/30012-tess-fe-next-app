@@ -5,8 +5,7 @@ import { useEffect, useMemo, useState, use } from "react";
 import CategoryContent from "@/components/category/category-content";
 import { useCategories } from "@/lib/CategoriesProvider";
 import {
-	findSubCategoryRecursive,
-	findCategoryByPath,
+	findCategoryBySlugPath,
 	normalizeFilterResponse,
 } from "@/lib/category-utils";
 import { formatUrlToDisplayName } from "@/lib/utils";
@@ -45,12 +44,9 @@ export default function SegmentPage({ params }: SegmentPageProps) {
 	useEffect(() => {
 		if (!categories) return;
 
-		// const subCategoryData = findSubCategoryRecursive(
-		// 	categories,
-		// 	formattedSubCategory,
-		// 	formattedSegment,
-		// );
-		const subCategoryData = findCategoryByPath(categories, [
+		// Descend through any assortment wrappers so the path resolves for
+		// customer-specific catalogs (see findCategoryBySlugPath).
+		const subCategoryData = findCategoryBySlugPath(categories, [
 			category,
 			subcategory,
 			segment,

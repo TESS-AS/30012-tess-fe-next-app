@@ -77,6 +77,79 @@ export function findCategoryByPath(
 }
 
 /**
+ * Normalize a URL slug segment to the same form `mapCategoryTree` produces.
+ * Idempotent on already-slugged input.
+ *
+ * Centralizing this kept getting requested ("fix Norwegian chars once and for
+ * all"). Every slug-builder in the codebase performs these same six
+ * transliterations + the same character whitelist — match that exactly here.
+ */
+export function toCategorySlug(text: string): string {
+	if (!text) return "";
+	return text
+		.toLowerCase()
+		.replace(/å/g, "a")
+		.replace(/ø/g, "o")
+		.replace(/æ/g, "ae")
+		.normalize("NFKD")
+		.replace(/[^a-z0-9-]/g, "")
+		.replace(/-+/g, "-")
+		.replace(/^-|-$/g, "");
+}
+
+/**
+ * Find a category in the user's tree by a URL slug path.
+ *
+ * Two extras over `findCategoryByPath`:
+ *
+ * 1. Slug-normalizes each input via `toCategorySlug`, so a manually-typed
+ *    URL like `/fottøy` resolves the same as the canonical `/fottoy`.
+ *
+ * 2. Transparent wrapper descent. Customer-assortment users get a tree like
+ *    `[ { slug: "bane-nor-katalog", subcategories: [ { slug: "fottoy", ... } ] } ]`.
+ *    The product breadcrumb correctly skips the assortment wrapper and
+ *    generates `/fottoy` as the back-link — but the category route only saw
+ *    the wrapper at top level and gave up. This helper descends through
+ *    non-matching ancestors so the URL resolves regardless of how many
+ *    wrapper levels sit above the real category.
+ *
+ * The first loop is exact match at the current level; the second loop is the
+ * transparent skip (try the same target one level deeper for every node).
+ */
+export function findCategoryBySlugPath(
+	categories: Category[],
+	slugs: string[],
+): Category | null {
+	if (slugs.length === 0) return null;
+	const target = slugs.map(toCategorySlug).filter((s) => s.length > 0);
+	if (target.length === 0) return null;
+
+	function descend(level: Category[], path: string[]): Category | null {
+		const [head, ...rest] = path;
+		if (!head) return null;
+		for (const cat of level) {
+			if (cat.slug === head) {
+				if (rest.length === 0) return cat;
+				const sub = descend(cat.subcategories || [], rest);
+				if (sub) return sub;
+			}
+		}
+		// No match at this level — try one level deeper with the same target.
+		// Lets a URL `/fottoy` resolve when the user's tree wraps it in an
+		// assortment node.
+		for (const cat of level) {
+			if (cat.subcategories?.length) {
+				const sub = descend(cat.subcategories, path);
+				if (sub) return sub;
+			}
+		}
+		return null;
+	}
+
+	return descend(categories, target);
+}
+
+/**
  * Finds a category by groupId (categoryNumber) recursively in the category tree
  */
 export function findCategoryByGroupId(

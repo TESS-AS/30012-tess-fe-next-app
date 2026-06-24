@@ -306,7 +306,7 @@ export function ProductItem({
 						}));
 					}
 				}}
-				className="max-h-[90vh] min-w-[75%] overflow-y-auto">
+				className="max-h-[90vh] min-w-[88%] overflow-y-auto">
 				<ModalHeader className="border-b border-gray-200 pb-5">
 					<ModalTitle>Velg produktvariant: {product.productName}</ModalTitle>
 				</ModalHeader>

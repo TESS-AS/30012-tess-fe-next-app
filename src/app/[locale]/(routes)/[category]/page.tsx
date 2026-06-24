@@ -4,7 +4,10 @@ import { useEffect, useMemo, useState, use } from "react";
 
 import CategoryContent from "@/components/category/category-content";
 import { useCategories } from "@/lib/CategoriesProvider";
-import { normalizeFilterResponse } from "@/lib/category-utils";
+import {
+	findCategoryBySlugPath,
+	normalizeFilterResponse,
+} from "@/lib/category-utils";
 import { formatUrlToDisplayName } from "@/lib/utils";
 import { loadFilterFamily } from "@/services/categories.service";
 import type { Category } from "@/types/categories.types";
@@ -41,9 +44,10 @@ export default function CategoryPage({
 	useEffect(() => {
 		if (!categories) return;
 
-		const matchedCategory = categories.find(
-			(cat) => formatUrlToDisplayName(cat.slug) === formattedCategory,
-		);
+		// Walk the user's tree (which may wrap real categories in an
+		// assortment node for customer-specific catalogs) so `/fottoy` still
+		// resolves to the right category even when it sits below a wrapper.
+		const matchedCategory = findCategoryBySlugPath(categories, [category]);
 
 		setCategoryData(matchedCategory || null);
 

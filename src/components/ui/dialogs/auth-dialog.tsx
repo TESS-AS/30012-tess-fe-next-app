@@ -36,15 +36,28 @@ export default function AuthDialog({
 		onOpenChange(false);
 	};
 
+	/**
+	 * Build the post-login destination from the user's current URL — preserves
+	 * path and search params (e.g. ?itemNumber=…) so a user clicking "Logg inn"
+	 * on a product page lands back on that product, not on the home page.
+	 * `auth=true` is the query flag that re-opens this dialog; strip it so the
+	 * dialog doesn't bounce back open after a successful login.
+	 */
+	const buildReturnUrl = (): string => {
+		const url = new URL(window.location.href);
+		url.searchParams.delete("auth");
+		return url.toString();
+	};
+
 	const handleLoginWithBESso = () => {
 		setAuthenticatingProvider("be-sso");
-		const returnTo = encodeURIComponent(window.location.origin);
+		const returnTo = encodeURIComponent(buildReturnUrl());
 		window.location.href = `${baseURL}/auth/sso?returnTo=${returnTo}`;
 	};
 
 	const handleLoginWithTenantBe = () => {
 		setAuthenticatingProvider("tenant-be");
-		const returnTo = encodeURIComponent(window.location.origin);
+		const returnTo = encodeURIComponent(buildReturnUrl());
 		window.location.href = `${baseURL}/auth/tenant?returnTo=${returnTo}`;
 	};
 

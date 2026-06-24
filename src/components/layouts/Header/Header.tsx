@@ -243,7 +243,16 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 	// Close the desktop search overlay whenever the user clicks outside the
 	// input field (including blank areas of the overlay itself). The term stays
 	// in the input — only the overlay is dismissed.
-	useClickOutsideRef(inputRef, () => setIsDesktopOverlayDismissed(true));
+	//
+	// Skip dismissal while a product-variant modal is open. The modal renders
+	// via a Radix portal to <body>, so clicks inside it look "outside" the
+	// input — without this guard they cascade: dismiss overlay → unmount
+	// ProductItem → unmount Modal mid-interaction. The modal manages its own
+	// outside-click via Radix.
+	useClickOutsideRef(inputRef, () => {
+		if (isModalIdOpen) return;
+		setIsDesktopOverlayDismissed(true);
+	});
 
 	useEffect(() => {
 		setVariations({});
