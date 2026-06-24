@@ -10,10 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { DiscardEquipmentDialog } from "@/components/ui/dialogs/discard-equipment-dialog";
+import { EquinorSupportDialog } from "@/components/ui/dialogs/equinor-support-dialog";
 import { PrintCertificatesDialog } from "@/components/ui/dialogs/print-certificates-dialog";
 import { PrintTagsDialog } from "@/components/ui/dialogs/print-tags-dialog";
 import { RFQRequestDialog } from "@/components/ui/dialogs/rfq-request-dialog";
-import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -27,6 +27,12 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { FilterOptions, useGetAssets } from "@/hooks/useGetAssets";
 import { useAppContext } from "@/lib/appContext";
@@ -61,6 +67,10 @@ export interface HoseOrder {
 	produksjonsdato?: string;
 	pafyllingsdato?: string;
 	neste_inspeksjonsdato?: string;
+	ferrule1?: string;
+	ferrule2?: string;
+	insert1?: string;
+	insert2?: string;
 }
 
 interface HosesAndEquipmentsProps {
@@ -173,8 +183,16 @@ export function HosesAndEquipments({
 
 	const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 	const [selectedAgeRanges, setSelectedAgeRanges] = useState<string[]>([]);
-	const ITEMS_PER_PAGE = 10;
+	const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
 	const HOSE_TABLE_PAGE_KEY = "hosesAndEquipments_page";
+	const HOSE_TABLE_PAGE_SIZE_KEY = "hosesAndEquipments_pageSize";
+	const [itemsPerPage, setItemsPerPage] = useState<number>(() => {
+		if (typeof window === "undefined") return 10;
+		const stored = Number(
+			window.localStorage.getItem(HOSE_TABLE_PAGE_SIZE_KEY),
+		);
+		return ITEMS_PER_PAGE_OPTIONS.includes(stored) ? stored : 10;
+	});
 	const didInitAssetsRef = useRef(false);
 	const currentPageRef = useRef<number>(1);
 
@@ -196,6 +214,10 @@ export function HosesAndEquipments({
 		produksjonsdato: asset?.hoseLine?.productionDate ?? undefined,
 		pafyllingsdato: asset?.hoseLine?.refillDate ?? undefined,
 		neste_inspeksjonsdato: asset?.hoseLine?.nextInspectionDate ?? undefined,
+		ferrule1: asset?.hoseData?.ferrule1 ?? undefined,
+		ferrule2: asset?.hoseData?.ferrule2 ?? undefined,
+		insert1: asset?.hoseData?.insert1 ?? undefined,
+		insert2: asset?.hoseData?.insert2 ?? undefined,
 	}));
 
 	useEffect(() => {
@@ -521,7 +543,7 @@ export function HosesAndEquipments({
 		currentPageRef.current = page;
 		const filters: FilterOptions = {
 			page,
-			pageSize: ITEMS_PER_PAGE,
+			pageSize: itemsPerPage,
 			...getActiveFilters(),
 			...(searchQuery ? { search: searchQuery } : {}),
 		};
@@ -530,6 +552,21 @@ export function HosesAndEquipments({
 			window.localStorage.setItem(HOSE_TABLE_PAGE_KEY, String(page));
 		}
 		window.scrollTo({ top: 0, behavior: "smooth" });
+	};
+
+	const handleItemsPerPageChange = (size: number) => {
+		setItemsPerPage(size);
+		currentPageRef.current = 1;
+		if (typeof window !== "undefined") {
+			window.localStorage.setItem(HOSE_TABLE_PAGE_SIZE_KEY, String(size));
+			window.localStorage.setItem(HOSE_TABLE_PAGE_KEY, "1");
+		}
+		fetchAssets({
+			page: 1,
+			pageSize: size,
+			...getActiveFilters(),
+			...(searchQuery ? { search: searchQuery } : {}),
+		});
 	};
 
 	const handleHoseClick = (hoseId: string) => {
@@ -552,7 +589,7 @@ export function HosesAndEquipments({
 		currentPageRef.current = nextPage;
 		fetchAssets({
 			page: nextPage,
-			pageSize: ITEMS_PER_PAGE,
+			pageSize: itemsPerPage,
 			...getActiveFilters(),
 			...(searchQuery ? { search: searchQuery } : {}),
 		});
@@ -569,7 +606,7 @@ export function HosesAndEquipments({
 
 		const filters: FilterOptions = {
 			page,
-			pageSize: ITEMS_PER_PAGE,
+			pageSize: itemsPerPage,
 			...getActiveFilters(),
 			...(searchQuery ? { search: searchQuery } : {}),
 		};
@@ -635,25 +672,60 @@ export function HosesAndEquipments({
 		description: {
 			key: "beskrivelse",
 			header: t("columns.description"),
-			cell: (o) => (
-				<button
-					type="button"
-					disabled={isEcomBlocked(o)}
-					className={cn(
-						"w-full text-left underline-offset-2",
-						!isEcomBlocked(o) &&
-							"cursor-pointer text-[#003D1A] decoration-[#003D1A]",
-						!isEcomBlocked(o) && "hover:underline focus-visible:underline",
-						isEcomBlocked(o) && "cursor-not-allowed",
-					)}
-					onClick={(e) => {
-						e.stopPropagation();
-						if (isEcomBlocked(o)) return;
-						handleHoseClick(o.hexagonId);
-					}}>
-					{o.beskrivelse}
-				</button>
-			),
+			cell: (o) => {
+				const rows: Array<{ label: string; value: string }> = [
+					{ label: t("tooltip.hose"), value: o.beskrivelse },
+					{ label: t("tooltip.ferrule1"), value: o.ferrule1 ?? "" },
+					{ label: t("tooltip.ferrule2"), value: o.ferrule2 ?? "" },
+					{ label: t("tooltip.insert1"), value: o.insert1 ?? "" },
+					{ label: t("tooltip.insert2"), value: o.insert2 ?? "" },
+				].filter((r) => r.value);
+
+				return (
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<button
+									type="button"
+									disabled={isEcomBlocked(o)}
+									className={cn(
+										"w-full text-left underline-offset-2",
+										!isEcomBlocked(o) &&
+											"cursor-pointer text-[#003D1A] decoration-[#003D1A]",
+										!isEcomBlocked(o) &&
+											"hover:underline focus-visible:underline",
+										isEcomBlocked(o) && "cursor-not-allowed",
+									)}
+									onClick={(e) => {
+										e.stopPropagation();
+										if (isEcomBlocked(o)) return;
+										handleHoseClick(o.hexagonId);
+									}}>
+									{o.beskrivelse}
+								</button>
+							</TooltipTrigger>
+							<TooltipContent
+								side="top"
+								align="start"
+								sideOffset={8}
+								className="w-auto max-w-md rounded-md border-none bg-[#1A211C] p-4 text-white shadow-lg">
+								<div className="mb-2 text-sm font-semibold">
+									{t("tooltip.id")}: {o.id}
+								</div>
+								{rows.length > 0 && (
+									<ul className="list-disc space-y-1 pl-5 text-sm">
+										{rows.map((r) => (
+											<li key={r.label}>
+												{r.label}: {r.value}
+											</li>
+										))}
+									</ul>
+								)}
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
+				);
+			},
 			sortable: true,
 		},
 		s1Location: {
@@ -968,9 +1040,10 @@ export function HosesAndEquipments({
 
 	return (
 		<>
-			<SupportDialog
+			<EquinorSupportDialog
 				open={supportOpen}
 				onOpenChange={setSupportOpen}
+				profile={profile}
 				selectedIds={
 					allAcrossPages
 						? transformedAssets
@@ -979,14 +1052,12 @@ export function HosesAndEquipments({
 						: selectedRows
 				}
 				onRemoveId={handleRemoveSelectedId}
-				onSubmit={async () => {
-					toast.success(t("success.supportMessageSent"));
-				}}
 			/>
 
 			<RFQRequestDialog
 				open={rfqOpen}
 				onOpenChange={setRfqOpen}
+				profile={profile}
 				selectedIds={
 					allAcrossPages
 						? transformedAssets
@@ -995,9 +1066,6 @@ export function HosesAndEquipments({
 						: selectedRows
 				}
 				onRemoveId={handleRemoveSelectedId}
-				onSubmit={async () => {
-					toast.success(t("success.requestSent"));
-				}}
 			/>
 
 			<DiscardEquipmentDialog
@@ -1127,7 +1195,7 @@ export function HosesAndEquipments({
 							onSearch={() => {
 								fetchAssets({
 									page: 1,
-									pageSize: ITEMS_PER_PAGE,
+									pageSize: itemsPerPage,
 									search: searchQuery,
 									...getActiveFilters(),
 								});
@@ -1141,7 +1209,7 @@ export function HosesAndEquipments({
 								localStorage.removeItem("selectedHoseRows");
 								setSelectedFilters([]);
 								setSelectedAgeRanges([]);
-								fetchAssets({ page: 1, pageSize: ITEMS_PER_PAGE });
+								fetchAssets({ page: 1, pageSize: itemsPerPage });
 								localStorage.removeItem("searchQuery");
 							}}
 						/>
@@ -1206,9 +1274,15 @@ export function HosesAndEquipments({
 										}
 										setSupportOpen(true);
 									}}
+									onSendRfq={() => {
+										if (selectedCount === 0) {
+											toast.error(t("errors.selectItemsFirst"));
+											return;
+										}
+										setRfqOpen(true);
+									}}
 									onReportReplacement={() => {
 										if (selectedCount === 0) return;
-										setRfqOpen(true);
 									}}
 									onDiscardEquipment={() => {
 										if (selectedCount === 0) return;
@@ -1257,10 +1331,17 @@ export function HosesAndEquipments({
 						totalItems={pagination.totalItems}
 						itemsPerPage={pagination.pageSize}
 						onPageChange={handlePageChange}
+						itemsPerPageOptions={ITEMS_PER_PAGE_OPTIONS}
+						onItemsPerPageChange={handleItemsPerPageChange}
+						itemsPerPageLabel={t("pagination.itemsPerPage")}
+						perPageOptionLabel={(size) =>
+							t("pagination.perPageOption", { size })
+						}
 						isLoading={loading}
 						selectedIds={selectedRows}
 						selectedRowBgClass="bg-[#DCF7E0]"
 						isRowDisabled={(row) => Number(row.ecom) === 3}
+						onHoseClick={(hoseId) => handleHoseClick(hoseId)}
 					/>
 				</div>
 			</div>

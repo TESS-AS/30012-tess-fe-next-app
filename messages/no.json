@@ -690,6 +690,25 @@
 			"nextInspectionDate": "NESTE INSPEKSJONSDATO",
 			"handlinger": "HANDLINGER"
 		},
+		"tooltip": {
+			"id": "ID",
+			"hose": "Slange",
+			"ferrule1": "Hylse 1",
+			"ferrule2": "Hylse 2",
+			"insert1": "Innstikk 1",
+			"insert2": "Innstikk 2"
+		},
+		"welcome": {
+			"headerLabel": "Hose management",
+			"title": "Velkommen til TESS Bestilling",
+			"intro": "Her bestiller du varer til din bedrift. Varene legges automatisk inn i ordresystemet.",
+			"checkIds": "Sjekk ID-numrene før du bekrefter.",
+			"checkIdsTail": "Du kan ikke endre dem etterpå.",
+			"incompleteHoses": "Slanger med ufullstendige opplysninger må bestilles via forespørsel.",
+			"incompleteHosesTail": "Du kan gjøre begge deler her.",
+			"dontShowAgain": "Ikke vis denne meldingen igjen",
+			"cta": "Gå til bestilling"
+		},
 		"errors": {
 			"selectItemsFirst": "Vennligst velg elementer \u00e5 kontakte om"
 		},
@@ -697,6 +716,10 @@
 			"supportMessageSent": "Meldingen ble sendt til TESS support",
 			"requestSent": "Foresp\u00f8rselen ble sendt",
 			"equipmentDiscarded": "Utstyr utrangert"
+		},
+		"pagination": {
+			"itemsPerPage": "antall oppføringer per side",
+			"perPageOption": "{size} per side"
 		}
 	},
 	"HoseOverview": {
@@ -908,6 +931,7 @@
 		"addToCart": "Legg til i handlekurv",
 		"adding": "Legger til...",
 		"contactSupport": "Kontakt TESS support",
+		"sendRfq": "Send forespørsel om tilbud (RFQ)",
 		"reportReplacement": "Rapporter slangebytter",
 		"discardEquipment": "Kasser utstyr",
 		"printCertificate": "Skriv ut TESS trykktest-sertifikat",

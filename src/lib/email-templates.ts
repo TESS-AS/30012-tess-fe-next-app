@@ -1,6 +1,39 @@
 export const SUPPORT_EMAIL_RECIPIENT = "netthandel@tess.no";
 export const ORDER_TSS_EMAIL_RECIPIENT = "tess@tess.no";
 
+// TODO: confirm with stakeholder which inbox the THM hose team should receive these in
+export const THM_TEAM_EMAIL_RECIPIENT = "netthandel@tess.no";
+
+export type HoseContactMethod = "phone" | "email";
+
+interface HoseContactEmailParams {
+	caseId: string;
+	userName: string;
+	userEmail: string;
+	userPhone: string | null;
+	customerNumber: string;
+	companyName: string;
+	contactMethod: HoseContactMethod;
+	contactValue: string;
+	message: string;
+	urgent: boolean;
+	hexagonIds: string[];
+}
+
+interface HoseRfqEmailParams {
+	caseId: string;
+	userName: string;
+	userEmail: string;
+	userPhone: string | null;
+	customerNumber: string;
+	companyName: string;
+	deliveryAddress: string;
+	comment: string;
+	includePressureTest: boolean;
+	urgent: boolean;
+	hexagonIds: string[];
+}
+
 interface OnboardingEmailParams {
 	userEmail: string;
 	userId: string | number;

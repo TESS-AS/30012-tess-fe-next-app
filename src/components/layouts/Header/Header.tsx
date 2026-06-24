@@ -319,6 +319,9 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		} catch (error) {
 			console.error("Logout API failed", error);
 		}
+		if (typeof window !== "undefined") {
+			window.localStorage.removeItem("hosesAndEquipments_pageSize");
+		}
 		queryClient.setQueryData(profileKeys.detail(), null);
 		queryClient.invalidateQueries({ queryKey: profileKeys.all });
 		queryClient.removeQueries({ queryKey: profileKeys.all });
@@ -441,14 +444,9 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								/>
 							)}
 							{isHoseManagementCustomer && (
-								<Button
-									variant="ghost"
-									className="text-md px-0 pb-2 font-normal text-[#5A615D] hover:rounded-none hover:border-[#003D1A] hover:bg-transparent"
-									onClick={() =>
-										profile ? router.push("/profile") : setIsAuthOpen(true)
-									}>
-									Hose Management
-								</Button>
+								<span className="text-md font-normal text-[#0F1912]">
+									Hose management
+								</span>
 							)}
 						</div>
 					</div>

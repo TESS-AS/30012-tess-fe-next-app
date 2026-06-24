@@ -26,6 +26,7 @@ interface HoseActionsDropdownProps {
 	disableAddToCart?: boolean;
 	onAddToCart: () => void;
 	onContactSupport: () => void;
+	onSendRfq: () => void;
 	onReportReplacement: () => void;
 	onDiscardEquipment: () => void;
 	onPrintCertificate: () => void;
@@ -47,6 +48,7 @@ export function HoseActionsDropdown({
 	disableAddToCart = false,
 	onAddToCart,
 	onContactSupport,
+	onSendRfq,
 	onReportReplacement,
 	onDiscardEquipment,
 	onPrintCertificate,
@@ -107,12 +109,22 @@ export function HoseActionsDropdown({
 
 				<DropdownMenuItem
 					onClick={onContactSupport}
+					disabled={selectedCount === 0}
 					className={cn({
 						"cursor-not-allowed opacity-50": selectedCount === 0,
-					})}
-					disabled>
+					})}>
 					<Mail className="mr-3 h-4 w-4 text-[#005522]" />
 					<span>{t("contactSupport")}</span>
+				</DropdownMenuItem>
+
+				<DropdownMenuItem
+					onClick={onSendRfq}
+					disabled={selectedCount === 0}
+					className={cn({
+						"cursor-not-allowed opacity-50": selectedCount === 0,
+					})}>
+					<Mail className="mr-3 h-4 w-4 text-[#005522]" />
+					<span>{t("sendRfq")}</span>
 				</DropdownMenuItem>
 
 				<DropdownMenuItem
