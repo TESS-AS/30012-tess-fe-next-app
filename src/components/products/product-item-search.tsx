@@ -162,7 +162,6 @@ export function ProductItem({
 
 	const handleProductClick = () => {
 		captureReturnTarget();
-		setSearchQuery("");
 		onClose?.();
 		router.push(productLink);
 	};
@@ -195,7 +194,6 @@ export function ProductItem({
 								href={productLink}
 								onClick={() => {
 									captureReturnTarget();
-									setSearchQuery("");
 								}}>
 								<span
 									className={cn(
@@ -238,6 +236,7 @@ export function ProductItem({
 								)}
 								onClick={async (e) => {
 									e.stopPropagation();
+									e.nativeEvent.stopImmediatePropagation();
 									setIsModalIdOpen(product.productNumber);
 									const productVariations = await getProductVariations(
 										product.productNumber,
@@ -274,6 +273,7 @@ export function ProductItem({
 								)}
 								onClick={async (e) => {
 									e.stopPropagation();
+									e.nativeEvent.stopImmediatePropagation();
 									setIsModalIdOpen(product.productNumber);
 									const productVariations = await getProductVariations(
 										product.productNumber,

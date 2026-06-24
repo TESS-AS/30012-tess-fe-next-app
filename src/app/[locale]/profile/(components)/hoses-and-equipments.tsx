@@ -100,6 +100,10 @@ export function HosesAndEquipments({
 	const S1_CODE_GULLFAKS_B = "1291608";
 	const S1_CODE_GULLFAKS_C = "1291609";
 	const S1_CODE_NORNE_SHIP = "1292731";
+	const S1_CODE_1765_OSEBERG_C = "1291630";
+	const S1_CODE_1772_OSEBERG_FELTSENTER_ABDH = "1291633";
+	const S1_CODE_1219_AASTA_HANSTEEN = "1419515";
+	const S1_CODE_1821_NJORD_B = "1722691";
 
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
 	const [supportOpen, setSupportOpen] = useState(false);
@@ -1011,7 +1015,11 @@ export function HosesAndEquipments({
 							s1.S1Code === S1_CODE_SNORRE_B ||
 							s1.S1Code === S1_CODE_GULLFAKS_B ||
 							s1.S1Code === S1_CODE_GULLFAKS_C ||
-							s1.S1Code === S1_CODE_NORNE_SHIP,
+							s1.S1Code === S1_CODE_NORNE_SHIP ||
+							s1.S1Code === S1_CODE_1765_OSEBERG_C ||
+							s1.S1Code === S1_CODE_1772_OSEBERG_FELTSENTER_ABDH ||
+							s1.S1Code === S1_CODE_1219_AASTA_HANSTEEN ||
+							s1.S1Code === S1_CODE_1821_NJORD_B,
 					)
 					.map((s1) => (
 						<SelectItem

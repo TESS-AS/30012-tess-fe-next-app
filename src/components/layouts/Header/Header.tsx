@@ -31,6 +31,7 @@ import {
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useProfile } from "@/contexts/ProfileContext";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { useClickOutsideRef } from "@/hooks/useClickOutsideRef";
 import { useGetAssortments } from "@/hooks/useGetAssortments";
 import { useGetCustomers } from "@/hooks/useGetCustomers";
 import { profileKeys } from "@/hooks/useGetProfileData";
@@ -152,6 +153,8 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 
 	const [urlQueryForDisplay, setUrlQueryForDisplay] = useState<string>("");
 	const [isInputFocused, setIsInputFocused] = useState(false);
+	const [isDesktopOverlayDismissed, setIsDesktopOverlayDismissed] =
+		useState(false);
 	const isUserEditingRef = useRef(false);
 
 	useEffect(() => {
@@ -231,15 +234,16 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		if (justNavigatedRef.current) {
 			justNavigatedRef.current = false;
 			setIsSearchOpen(false);
+			setIsDesktopOverlayDismissed(false);
 			return;
-		}
-		const urlQuery = searchParams.get("query");
-		const isOnSearchPage = pathname.includes("/search");
-		if (!urlQuery && !isOnSearchPage) {
-			clearSearch();
 		}
 		setIsSearchOpen(false);
 	});
+
+	// Close the desktop search overlay whenever the user clicks outside the
+	// input field (including blank areas of the overlay itself). The term stays
+	// in the input — only the overlay is dismissed.
+	useClickOutsideRef(inputRef, () => setIsDesktopOverlayDismissed(true));
 
 	useEffect(() => {
 		setVariations({});
@@ -291,7 +295,6 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 			justNavigatedRef.current = true;
 			router.push(`/search?query=${encodeURIComponent(queryToSearch)}`);
 		} finally {
-			setSearchQuery("");
 			inputRef.current?.blur();
 			setIsInputFocused(false);
 			setIsSearchOpen(false);
@@ -307,7 +310,6 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 
 	const handlePick = (href: string) => {
 		router.push(href);
-		clearSearch();
 		setIsSearchOpen(false);
 	};
 
@@ -409,8 +411,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		profile.role === "admin" &&
 		profile.defaultCustomerNumber !== SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
 	const hasThmProjectsAccess =
-		!!profile &&
-		(profile.role === "admin" || profile.role === "thmAdmin");
+		!!profile && (profile.role === "admin" || profile.role === "thmAdmin");
 
 	return (
 		<header
@@ -473,17 +474,13 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 												ref={inputRef}
 												onChange={(e) => {
 													isUserEditingRef.current = true;
+													setIsDesktopOverlayDismissed(false);
 													setSearchQuery(e.target.value);
 												}}
 												onFocus={() => {
 													setIsInputFocused(true);
 													isUserEditingRef.current = true;
-													if (
-														urlQueryForDisplay &&
-														searchQuery === urlQueryForDisplay
-													) {
-														setSearchQuery("");
-													}
+													setIsDesktopOverlayDismissed(false);
 												}}
 												onBlur={() => {
 													setIsInputFocused(false);
@@ -492,7 +489,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 													}, 200);
 												}}
 											/>
-											{searchQuery && (
+											{searchQuery && !isDesktopOverlayDismissed && (
 												<div className="animate-in fade-in-0 zoom-in-95 fixed top-34 left-1/2 z-[11] grid max-h-[80vh] w-[80vw] -translate-x-1/2 grid-cols-3 gap-4 overflow-y-auto bg-white p-4 shadow-lg duration-200">
 													<div className="col-span-1 space-y-4 pr-4">
 														<SearchAside
@@ -715,66 +712,82 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 												</div>
 											)}
 										</div>
-										{!isHoseManagementCustomer && (
-											<>
-												<DropdownMenuSeparator />
-												<DropdownMenuItem
-													className="text-gray-700"
-													onClick={() => router.push("/profile")}>
-													Gå til din side
-												</DropdownMenuItem>
-												<DropdownMenuItem
-													className="text-gray-700"
-													onClick={() => router.push("/profile?tab=settings")}>
-													Innstillinger
-												</DropdownMenuItem>
-												<CustomerNumberSwitcher profile={profile} />
-												{(hasHoseManagementAccess ||
-													hasTessEdiAccess ||
-													hasThmProjectsAccess) && (
-													<>
-														<DropdownMenuSeparator />
-														<DropdownMenuLabel className="text-sm font-semibold text-gray-700">
-															Tjenester
-														</DropdownMenuLabel>
-														{hasHoseManagementAccess && (
-															<DropdownMenuItem
-																className="text-gray-700"
-																onClick={() =>
-																	router.push("/profile?tab=hose-orders")
-																}>
-																Hose management
-															</DropdownMenuItem>
-														)}
-														{hasTessEdiAccess && (
-															<DropdownMenuItem
-																className="text-gray-700"
-																onClick={() =>
-																	router.push("/profile?tab=tess-edi")
-																}>
-																TESS EDI
-															</DropdownMenuItem>
-														)}
-														{hasThmProjectsAccess && (
-															<DropdownMenuItem
-																className="text-gray-700"
-																onClick={() =>
-																	router.push("/profile?tab=thm-active-projects")
-																}>
-																THM projects (MSL)
-															</DropdownMenuItem>
-														)}
-														<DropdownMenuSeparator />
-													</>
-												)}
-												<DropdownMenuItem
-													onClick={handleLogout}
-													className="text-red-700">
-													<LogOut className="mr-2 h-4 w-4 text-red-700" />
-													Logg ut
-												</DropdownMenuItem>
-											</>
-										)}
+										{/* {!isHoseManagementCustomer && ( */}
+										<>
+											<DropdownMenuSeparator />
+											<DropdownMenuItem
+												className="text-gray-700"
+												onClick={() => router.push("/profile")}>
+												Gå til din side
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												className="text-gray-700"
+												onClick={() => router.push("/profile?tab=settings")}>
+												Innstillinger
+											</DropdownMenuItem>
+											<CustomerNumberSwitcher profile={profile} />
+											{(hasHoseManagementAccess ||
+												hasTessEdiAccess ||
+												hasThmProjectsAccess) && (
+												<>
+													<DropdownMenuSeparator />
+													<DropdownMenuLabel className="text-sm font-semibold text-gray-700">
+														Tjenester
+													</DropdownMenuLabel>
+													{hasHoseManagementAccess && (
+														<DropdownMenuItem
+															className="text-gray-700"
+															onClick={() =>
+																router.push("/profile?tab=hose-orders")
+															}>
+															Hose management
+														</DropdownMenuItem>
+													)}
+													{hasTessEdiAccess && (
+														<DropdownMenuItem
+															className="text-gray-700"
+															onClick={() =>
+																router.push("/profile?tab=tess-edi")
+															}>
+															TESS EDI
+														</DropdownMenuItem>
+													)}
+													{hasThmProjectsAccess && (
+														<DropdownMenuItem
+															className="text-gray-700"
+															onClick={() =>
+																router.push("/profile?tab=thm-active-projects")
+															}>
+															THM projects (MSL)
+														</DropdownMenuItem>
+													)}
+												</>
+											)}
+											{isTessEmployee && (
+												<>
+													<DropdownMenuSeparator />
+													<DropdownMenuItem
+														className="text-gray-700"
+														onClick={() =>
+															window.open(
+																"https://app.ecoonline.com/public/search-configuration/search?companyID=1000435&prodType=er&descrLang=1",
+																"_blank",
+																"noopener,noreferrer",
+															)
+														}>
+														Søk på ecoonline
+													</DropdownMenuItem>
+												</>
+											)}
+											<DropdownMenuSeparator />
+											<DropdownMenuItem
+												onClick={handleLogout}
+												className="text-red-700">
+												<LogOut className="mr-2 h-4 w-4 text-red-700" />
+												Logg ut
+											</DropdownMenuItem>
+										</>
+										{/* )} */}
 									</DropdownMenuContent>
 								</DropdownMenu>
 							</div>
@@ -1018,6 +1031,22 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 										)}
 									</>
 								)}
+								{isTessEmployee && (
+									<button
+										type="button"
+										onClick={() => {
+											window.open(
+												"https://app.ecoonline.com/public/search-configuration/search?companyID=1000435&prodType=er&descrLang=1",
+												"_blank",
+												"noopener,noreferrer",
+											);
+											setIsMobileProfileOpen(false);
+										}}
+										className="flex min-h-[53px] w-full items-center justify-between border-t border-[#c1c4c2] px-4 text-left text-sm text-[#2D3530]">
+										Søk på ecoonline
+										<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
+									</button>
+								)}
 
 								{/* Logg ut */}
 								<button
@@ -1066,9 +1095,6 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 							onFocus={() => {
 								setIsInputFocused(true);
 								isUserEditingRef.current = true;
-								if (urlQueryForDisplay && searchQuery === urlQueryForDisplay) {
-									setSearchQuery("");
-								}
 							}}
 							onBlur={() => {
 								setIsInputFocused(false);

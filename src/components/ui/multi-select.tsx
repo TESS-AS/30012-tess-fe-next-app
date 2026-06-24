@@ -11,8 +11,9 @@ import {
 	DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { X, ChevronDown, Search } from "lucide-react";
+import { X, ChevronDown, Loader2, Search } from "lucide-react";
 
 export interface MultiSelectOption {
 	label: string;
@@ -59,17 +60,42 @@ function useMultiSelectLogic({
 	}, [open, searchQuery, onSearchChange]);
 
 	const filteredOptions = React.useMemo(() => {
-		const base = onSearchChange
-			? options
-			: options.filter((o) => {
-					const q = searchQuery.toLowerCase();
-					const matchLabel = o?.label?.toLowerCase().includes(q);
-					const matchValue = o?.value?.toLowerCase().includes(q);
-					return matchLabel || matchValue;
-				});
-		if (!searchQuery) return base;
-		return base.filter((o) => !selected.includes(o.value));
-	}, [options, searchQuery, onSearchChange, selected]);
+		// When the parent owns search (BE-side filtering via onSearchChange), trust
+		// the options list contents as-is. Otherwise filter locally by label/value
+		// match. Selected options stay in the list either way so the user can
+		// see and toggle them off while searching.
+		let result: MultiSelectOption[];
+		if (onSearchChange) {
+			result = options;
+		} else if (!searchQuery) {
+			result = options;
+		} else {
+			const q = searchQuery.toLowerCase();
+			result = options.filter((o) => {
+				const matchLabel = o?.label?.toLowerCase().includes(q);
+				const matchValue = o?.value?.toLowerCase().includes(q);
+				return matchLabel || matchValue;
+			});
+		}
+
+		// Relevance-sort by the search query: exact match → starts-with →
+		// contains → no match. Stable inside each bucket so the BE's order is
+		// preserved as a tie-breaker.
+		if (!searchQuery) return result;
+		const q = searchQuery.toLowerCase();
+		const score = (o: MultiSelectOption) => {
+			const label = (o?.label ?? "").toLowerCase();
+			const value = (o?.value ?? "").toLowerCase();
+			if (label === q || value === q) return 0;
+			if (label.startsWith(q) || value.startsWith(q)) return 1;
+			if (label.includes(q) || value.includes(q)) return 2;
+			return 3;
+		};
+		return result
+			.map((o, i) => ({ o, i, s: score(o) }))
+			.sort((a, b) => a.s - b.s || a.i - b.i)
+			.map((x) => x.o);
+	}, [options, searchQuery, onSearchChange]);
 
 	const toggleValue = React.useCallback(
 		(value: string) => {
@@ -246,8 +272,14 @@ export function MultiSelectWithTags({
 								onChange={(e) => setSearchQuery(e.target.value)}
 								onKeyDown={(e) => e.stopPropagation()}
 								onPointerDown={(e) => e.stopPropagation()}
-								className="h-9 border-[#C1C4C2] pl-9"
+								className="h-9 border-[#C1C4C2] pl-9 pr-9"
 							/>
+							{isLoading && (
+								<Loader2
+									aria-label="Søker"
+									className="absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 animate-spin text-[#5A615D]"
+								/>
+							)}
 						</div>
 					</div>
 
@@ -255,8 +287,18 @@ export function MultiSelectWithTags({
 						className="max-h-[200px] overflow-y-auto p-2"
 						onScroll={handleScroll}>
 						{filteredOptions.length === 0 && isLoading ? (
-							<div className="py-6 text-center text-sm text-[#5A615D]">
-								Laster...
+							<div className="space-y-2 py-1">
+								{[0, 1, 2, 3, 4].map((i) => (
+									<div
+										key={i}
+										className="flex items-center gap-2 px-2 py-1.5">
+										<Skeleton className="h-4 w-4 shrink-0 rounded-sm" />
+										<Skeleton
+											className="h-4"
+											style={{ width: `${65 + ((i * 7) % 25)}%` }}
+										/>
+									</div>
+								))}
 							</div>
 						) : filteredOptions.length === 0 ? (
 							<div className="py-6 text-center text-sm text-[#5A615D]">
@@ -286,8 +328,18 @@ export function MultiSelectWithTags({
 							})
 						)}
 						{filteredOptions.length > 0 && isLoading && (
-							<div className="py-3 text-center text-sm text-[#5A615D]">
-								Laster...
+							<div className="space-y-2 py-1">
+								{[0, 1].map((i) => (
+									<div
+										key={i}
+										className="flex items-center gap-2 px-2 py-1.5">
+										<Skeleton className="h-4 w-4 shrink-0 rounded-sm" />
+										<Skeleton
+											className="h-4"
+											style={{ width: `${60 + ((i * 11) % 30)}%` }}
+										/>
+									</div>
+								))}
 							</div>
 						)}
 						{canNextPage && <div className="h-8" />}

@@ -138,7 +138,9 @@
 		"cart": "Cart",
 		"selected": "Selected",
 		"select": "Select",
-		"uniqueSellingPoints": "Attributes"
+		"uniqueSellingPoints": "Attributes",
+		"clickToExpand": "Click to expand column",
+		"clickToExpandHint": "Tip: Click a column header to see the full content."
 	},
 	"BreadCrumbs": {
 		"home": "Home",

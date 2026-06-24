@@ -1,4 +1,7 @@
-import { OrderItems } from "@/types/orderHistory.types";
+import {
+	deriveOrderStatusFromOrderLines,
+	OrderItems,
+} from "@/types/orderHistory.types";
 import {
 	Order,
 	OpenConfirmationsResponse,
@@ -135,6 +138,34 @@ export async function getPostalCode(
 	}
 }
 
+interface SearchOrderHistoryApiItem {
+	orderId: number;
+	orderNumber: string;
+	date: string;
+	sum: number;
+	orderLines: Array<{
+		orderLineNumber: number;
+		itemId: number;
+		itemName: string;
+		itemNumber: string;
+		quantity: number;
+		unit: string;
+		netPrice: number;
+		lineStatus: number;
+		lineSum: number;
+	}>;
+}
+
+interface SearchOrderHistoryApiResponse {
+	data: SearchOrderHistoryApiItem[];
+	meta: {
+		page: number;
+		pageSize: number;
+		totalPages: number;
+		totalItems: number;
+	};
+}
+
 export interface OrderHistoryResponse {
 	data: OrderItems[];
 	meta: {
@@ -150,24 +181,57 @@ export async function getOrderHistory(
 	search: string,
 	page: number,
 	pageSize: number,
+	status?: number | number[],
 ): Promise<OrderHistoryResponse> {
 	try {
-		const params: Record<string, any> = {
+		const params: Record<string, string | number | number[]> = {
 			page,
 			pageSize,
 		};
-
-		if (search && search.trim()) {
-			params.search = search;
+		if (search.trim()) {
+			params.search = search.trim();
+		}
+		const hasStatus =
+			status !== undefined &&
+			(!Array.isArray(status) || status.length > 0);
+		if (hasStatus) {
+			params.status = status;
 		}
 
-		const response = await axiosInstance.get(
+		const response = await axiosInstance.get<SearchOrderHistoryApiResponse>(
 			`/searchOrderHistory/${customerNumber}`,
 			{
 				params,
+				paramsSerializer: (queryParams) =>
+					Object.entries(queryParams)
+						.filter(([, value]) => value !== undefined && value !== null)
+						.flatMap(([key, value]) =>
+							Array.isArray(value)
+								? value.map(
+										(item) =>
+											`${key}=${encodeURIComponent(String(item))}`,
+									)
+								: [`${key}=${encodeURIComponent(String(value))}`],
+						)
+						.join("&"),
 			},
 		);
-		return response.data;
+
+		const mapped: OrderItems[] = response.data.data.map((order) => {
+			return {
+				order_id: order.orderId,
+				orderNumber: order.orderNumber,
+				date: order.date,
+				status: deriveOrderStatusFromOrderLines(order.orderLines),
+				total: order.sum,
+				items: order.orderLines,
+			};
+		});
+
+		return {
+			data: mapped,
+			meta: response.data.meta,
+		};
 	} catch (error) {
 		console.error("Error fetching order history:", error);
 		throw error;

@@ -7,8 +7,14 @@ const footerLinks = {
 	hjelp: [
 		{ label: "Kontakt oss", href: "https://www.tess.no/kontakt-oss" },
 		/*{ label: "Vanlige spørsmål", href: "/faq" },*/
-		{ label: "Kjøpsbetingelser(e-handel)", href: "https://www.tess.no/contentassets/4aa7934af5954974ac3a623fbe7faa61/salgsvilkar-for-varer.pdf" },
-		{ label: "Slangehåndbok", href: "https://viewer.ipaper.io/tess-as/slangehaandbok-2025-2026/" },
+		{
+			label: "Kjøpsbetingelser(e-handel)",
+			href: "https://www.tess.no/contentassets/4aa7934af5954974ac3a623fbe7faa61/salgsvilkar-for-varer.pdf",
+		},
+		{
+			label: "Slangehåndbok",
+			href: "https://viewer.ipaper.io/tess-as/slangehaandbok-2025-2026/",
+		},
 		{
 			label: "Salgs- og leveringsbetingelser",
 			href: "/salgs-leveringsbetingelser",
@@ -17,7 +23,10 @@ const footerLinks = {
 	],
 	tjenester: [
 		{ label: "Slangekontroll THM", href: "https://www.tess.no/thm" },
-		{ label: "Integrerte forsyningsløsninger", href: "https://www.tess.no/forsyningslosninger" },
+		{
+			label: "Integrerte forsyningsløsninger",
+			href: "https://www.tess.no/forsyningslosninger",
+		},
 		{ label: "Mobilservice", href: "https://www.tess.no/mobilservice" },
 		{ label: "Slangevakt 02018", href: "https://www.tess.no/slangevakt" },
 	],
@@ -34,7 +43,7 @@ const socialLinks = [
 		name: "LinkedIn",
 		href: "https://www.linkedin.com/company/tess/posts/?feedView=all",
 		icon: Linkedin,
-	}/*,
+	} /*,
 	{
 		name: "Instagram",
 		href: "https://instagram.com",
@@ -44,7 +53,7 @@ const socialLinks = [
 		name: "Facebook",
 		href: "https://facebook.com",
 		icon: Facebook,
-	},*/
+	},*/,
 ];
 
 export function Footer() {
@@ -68,7 +77,7 @@ export function Footer() {
 							</Link>
 						</div>
 
-						<p className="text-base mb-6 leading-relaxed font-light text-[#C1C4C2] md:mb-8">
+						<p className="mb-6 text-base leading-relaxed font-light text-[#C1C4C2] md:mb-8">
 							Din pålitelige partner innen teknisk utstyr og tjenester – siden
 							1968.
 						</p>
@@ -107,7 +116,9 @@ export function Footer() {
 					</div>
 
 					<div className="lg:col-span-3">
-						<h3 className="text-base mb-4 font-semibold text-white md:mb-6">HJELP</h3>
+						<h3 className="mb-4 text-base font-semibold text-white md:mb-6">
+							HJELP
+						</h3>
 						<ul className="space-y-3">
 							{footerLinks.hjelp.map((link) => (
 								<li key={link.href}>
@@ -123,7 +134,9 @@ export function Footer() {
 
 					{/* TJENESTER Column */}
 					<div className="lg:col-span-3">
-						<h3 className="text-base mb-4 font-semibold text-white md:mb-6">TJENESTER</h3>
+						<h3 className="mb-4 text-base font-semibold text-white md:mb-6">
+							TJENESTER
+						</h3>
 						<ul className="space-y-3">
 							{footerLinks.tjenester.map((link) => (
 								<li key={link.href}>
@@ -139,7 +152,7 @@ export function Footer() {
 
 					{/* DETTE ER TESS Column */}
 					<div className="lg:col-span-3">
-						<h3 className="text-base mb-4 font-semibold text-white md:mb-6">
+						<h3 className="mb-4 text-base font-semibold text-white md:mb-6">
 							DETTE ER TESS
 						</h3>
 						<ul className="space-y-3">
