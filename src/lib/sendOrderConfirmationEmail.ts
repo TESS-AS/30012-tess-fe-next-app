@@ -120,9 +120,16 @@ export async function sendOrderConfirmationEmail({
 
 	const cartLineRows = (cartItems?.cart ?? []).map((item) => ({
 		itemNumber: item.itemNumber,
-		itemName: item.productNumber || item.itemNumber,
+		// Prefer the parent product name (what the customer recognises in the
+		// store), then the variant name, then fall back to the product number
+		// so the row is never empty.
+		itemName:
+			item.productName || item.itemName || item.productNumber || item.itemNumber,
 		quantity: item.quantity,
 		totalPrice: calculatedPrices[item.itemNumber] ?? 0,
+		// First media URL from the cart line. May be undefined for items
+		// without a PIM image; the template hides the thumbnail column then.
+		imageUrl: item.mediaId?.[0]?.url ?? item.mediaId?.[0]?.thumbnail_url,
 	}));
 
 	const cartKitRows = (cartItems?.cartKit ?? []).map((kit) => ({
@@ -130,6 +137,7 @@ export async function sendOrderConfirmationEmail({
 		itemName: `${kit.hose.itemDescription || kit.hose.itemName || ""} (ID ${kit.hexagonId})`.trim(),
 		quantity: kit.hose.quantity || 1,
 		totalPrice: cartKitTotals?.[kit.hexagonId] ?? 0,
+		// Kit (hose) lines don't carry a mediaId — leave imageUrl undefined.
 	}));
 
 	const lines = [...cartLineRows, ...cartKitRows];

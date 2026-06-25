@@ -203,6 +203,8 @@ interface OrderConfirmationEmailLine {
 	itemName: string;
 	quantity: number;
 	totalPrice: number;
+	/** Absolute URL to a product thumbnail. Optional — kit lines won't have one. */
+	imageUrl?: string;
 }
 
 interface OrderConfirmationEmailTotals {
@@ -270,16 +272,37 @@ export function buildOrderConfirmationEmailHtml({
 		...(email ? [infoRow("E-post", escapeHtml(email))] : []),
 	];
 
+	// Nested table for the Vare cell so Outlook + Apple Mail align the
+	// thumbnail and the name/number block reliably. Inline-block / flex don't
+	// work consistently across email clients — table cells do.
+	const renderVareCell = (l: OrderConfirmationEmailLine): string => {
+		const imageHtml = l.imageUrl
+			? `<td style="padding-right: 10px; vertical-align: top; width: 56px;">
+					<img src="${escapeHtml(l.imageUrl)}" alt="" width="48" height="48" style="display: block; border: 0; border-radius: 4px; object-fit: contain; background: #f7f7f7;" />
+				</td>`
+			: "";
+		return `
+			<td style="padding: 8px 12px; border-bottom: 1px solid #e5e7e6; color: #1a1a1a; vertical-align: top;">
+				<table cellspacing="0" cellpadding="0" border="0" role="presentation">
+					<tr>
+						${imageHtml}
+						<td style="vertical-align: top;">
+							<div style="font-weight: 600;">${escapeHtml(l.itemName)}</div>
+							<div style="font-size: 12px; color: #6b7280;">${escapeHtml(l.itemNumber)}</div>
+						</td>
+					</tr>
+				</table>
+			</td>
+		`;
+	};
+
 	const lineRows = lines
 		.map(
 			(l) => `
 				<tr>
-					<td style="padding: 8px 12px; border-bottom: 1px solid #e5e7e6; color: #1a1a1a;">
-						<div style="font-weight: 600;">${escapeHtml(l.itemName)}</div>
-						<div style="font-size: 12px; color: #6b7280;">${escapeHtml(l.itemNumber)}</div>
-					</td>
-					<td style="padding: 8px 12px; border-bottom: 1px solid #e5e7e6; text-align: right; color: #1a1a1a;">${l.quantity}</td>
-					<td style="padding: 8px 12px; border-bottom: 1px solid #e5e7e6; text-align: right; color: #1a1a1a; white-space: nowrap;">${formatCurrencyForEmail(l.totalPrice)}</td>
+					${renderVareCell(l)}
+					<td style="padding: 8px 12px; border-bottom: 1px solid #e5e7e6; text-align: right; color: #1a1a1a; vertical-align: top;">${l.quantity}</td>
+					<td style="padding: 8px 12px; border-bottom: 1px solid #e5e7e6; text-align: right; color: #1a1a1a; white-space: nowrap; vertical-align: top;">${formatCurrencyForEmail(l.totalPrice)}</td>
 				</tr>
 			`,
 		)
