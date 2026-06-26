@@ -23,7 +23,6 @@ import axiosClient from "@/services/axiosClient";
 import { ProfileUser } from "@/types/user.types";
 import { useQueryClient } from "@tanstack/react-query";
 import { UserRoundCog } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 interface CustomerNumberSwitcherProps {
@@ -45,7 +44,6 @@ export default function CustomerNumberSwitcher({
 }: CustomerNumberSwitcherProps) {
 	const t = useTranslations();
 	const { refetch: refetchCategories } = useCategories();
-	const router = useRouter();
 	const queryClient = useQueryClient();
 
 	const [internalCustomerModalOpen, setInternalCustomerModalOpen] =
@@ -276,7 +274,6 @@ export default function CustomerNumberSwitcher({
 			]);
 
 			setIsCustomerModalOpen(false);
-			router.push("/");
 		} catch (err) {
 			console.error("Failed to update default customer number", err);
 		} finally {

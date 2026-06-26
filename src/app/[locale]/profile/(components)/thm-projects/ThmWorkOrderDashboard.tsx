@@ -164,10 +164,10 @@ export function ThmWorkOrderDashboard({
 						<dd className="font-medium text-[#0F1912]">
 							{data?.customerNumber ?? "—"}
 						</dd>
-						{/* TODO: source customerName + lastUpdated from /asset/getHose?workOrderNumber=X
-							or BE-extended /survey/getTag — fields are not on the current getTag response. */}
 						<dt className="text-[#5A615D]">Customer:</dt>
-						<dd className="font-medium text-[#0F1912]">—</dd>
+						<dd className="font-medium text-[#0F1912]">
+							{data?.customerName ?? "—"}
+						</dd>
 						<dt className="text-[#5A615D]">S1:</dt>
 						<dd className="font-medium text-[#0F1912]">
 							{data?.s1Name ?? "—"}

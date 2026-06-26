@@ -1026,7 +1026,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 												<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
 											</button>
 										)}
-										{hasThmProjectsAccess && (
+										{true && (
 											<button
 												type="button"
 												onClick={() => {

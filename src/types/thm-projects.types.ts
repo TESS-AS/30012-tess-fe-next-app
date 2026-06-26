@@ -66,6 +66,7 @@ export interface ThmDashboardDailyActivity {
 export interface ThmDashboardTag {
 	workOrderNumber: string;
 	customerNumber: string;
+	customerName: string;
 	s1Code: string;
 	s1Name: string;
 	totalRegistrations: number;
