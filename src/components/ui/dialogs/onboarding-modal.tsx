@@ -156,9 +156,12 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 	return (
 		<Dialog
 			open={isOpen}
+			onOpenChange={(open) => {
+				if (!open) onClose?.();
+			}}
 			modal={true}>
 			<DialogContent
-				className="flex max-h-[90vh] max-w-4xl flex-col overflow-y-auto [&>button]:hidden"
+				className="flex max-h-[90vh] max-w-4xl flex-col overflow-y-auto"
 				onInteractOutside={(e) => {
 					e.preventDefault();
 					e.stopPropagation();

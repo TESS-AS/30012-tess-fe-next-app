@@ -1,19 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { FeedbackDialog } from "@/components/ui/dialogs/feedback-dialog";
 import { ThumbsDown } from "lucide-react";
 
+const SCROLL_IDLE_MS = 600;
+
 export function FeedbackSideTab() {
 	const [isOpen, setIsOpen] = useState(false);
+	const [isScrolling, setIsScrolling] = useState(false);
+	const idleTimerRef = useRef<number | null>(null);
+
+	useEffect(() => {
+		const scrollContainer = document.getElementById("app-scroll-container");
+
+		const handleScroll = () => {
+			setIsScrolling(true);
+			if (idleTimerRef.current !== null) {
+				window.clearTimeout(idleTimerRef.current);
+			}
+			idleTimerRef.current = window.setTimeout(() => {
+				setIsScrolling(false);
+				idleTimerRef.current = null;
+			}, SCROLL_IDLE_MS);
+		};
+
+		const target: EventTarget = scrollContainer ?? window;
+		target.addEventListener("scroll", handleScroll, { passive: true });
+
+		return () => {
+			target.removeEventListener("scroll", handleScroll);
+			if (idleTimerRef.current !== null) {
+				window.clearTimeout(idleTimerRef.current);
+			}
+		};
+	}, []);
 
 	return (
 		<>
 			<button
 				type="button"
 				onClick={() => setIsOpen(true)}
-				className="fixed right-0 top-1/2 z-50 flex -translate-y-1/2 cursor-pointer flex-col items-center gap-1.5 rounded-l-md border-[3px] border-r-0 border-transparent bg-[#F0F5FF] px-1.5 py-1.5 shadow-md transition-colors hover:bg-[#E5EDFF] active:border-[#E5EDFF] active:bg-white md:gap-2.5 md:rounded-l-lg md:px-2.5 md:py-2.5"
+				className={`fixed right-0 top-1/2 z-50 flex -translate-y-1/2 cursor-pointer flex-col items-center gap-1.5 rounded-l-md border-[3px] border-r-0 border-transparent bg-[#F0F5FF] px-1.5 py-1.5 shadow-md transition-opacity duration-300 hover:bg-[#E5EDFF] active:border-[#E5EDFF] active:bg-white md:gap-2.5 md:rounded-l-lg md:px-2.5 md:py-2.5 ${
+					isScrolling ? "pointer-events-none opacity-0" : "opacity-100"
+				}`}
+				aria-hidden={isScrolling}
 				aria-label="Gi tilbakemelding"
 			>
 				<ThumbsDown className="h-4 w-4 text-[#362F78] md:h-5 md:w-5" />
