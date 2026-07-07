@@ -42,6 +42,12 @@ interface OnboardingModalProps {
 
 const SUPPORT_PHONE = "+47 32 84 40 30";
 const SUPPORT_EMAIL = "netthandel@tess.no";
+const ORG_NUMBER_MIN_LENGTH = 6;
+const ORG_NUMBER_MAX_LENGTH = 20;
+
+const isValidOrgNumber = (value: string) =>
+	value.length >= ORG_NUMBER_MIN_LENGTH &&
+	value.length <= ORG_NUMBER_MAX_LENGTH;
 
 export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 	const t = useTranslations("Onboarding");
@@ -61,7 +67,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 		useState<OrganizationRecord | null>(null);
 
 	const handleOrgSearch = async () => {
-		if (!orgNumber || orgNumber.length !== 9) {
+		if (!isValidOrgNumber(orgNumber)) {
 			setOrgSearchError(t("orgNumberError"));
 			return;
 		}
@@ -93,7 +99,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 		if (!companyName) {
 			return;
 		}
-		if (!orgNumber || orgNumber.length !== 9) {
+		if (!isValidOrgNumber(orgNumber)) {
 			setOrgSearchError(t("orgNumberError"));
 			return;
 		}
@@ -151,7 +157,8 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 		}
 	};
 
-	const canSubmit = companyName && orgNumber.length === 9 && !isSubmitting;
+	const canSubmit =
+		companyName && isValidOrgNumber(orgNumber) && !isSubmitting;
 
 	return (
 		<Dialog
@@ -242,7 +249,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 										setOrgSearchError(null);
 										setFoundOrganization(null);
 									}}
-									maxLength={9}
+									maxLength={ORG_NUMBER_MAX_LENGTH}
 									className="mt-1 h-[58px] pr-[70px]"
 								/>
 								<Button
