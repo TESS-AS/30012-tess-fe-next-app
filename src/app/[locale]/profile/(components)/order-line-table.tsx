@@ -12,10 +12,13 @@ export type OrderLineField = {
 	bekreftet: string;
 };
 
+export type OrderLineKind = "fieldMismatch" | "extraLine";
+
 export type OrderLineTableProps = {
 	lineNumber: number;
 	deviationCount: number;
 	fields: OrderLineField[];
+	kind?: OrderLineKind;
 	isExpanded?: boolean;
 	onToggle?: () => void;
 };
@@ -24,6 +27,7 @@ export function OrderLineTable({
 	lineNumber,
 	deviationCount,
 	fields,
+	kind = "fieldMismatch",
 	isExpanded: controlledExpanded,
 	onToggle,
 }: OrderLineTableProps) {
@@ -55,7 +59,9 @@ export function OrderLineTable({
 				<h3 className="text-xl font-semibold text-[#0F1912]">
 					Linje {lineNumber}{" "}
 					<span className="text-base font-medium text-gray-500">
-						({deviationCount} avvik)
+						{kind === "extraLine"
+							? "(Ny linje)"
+							: `(${deviationCount} avvik)`}
 					</span>
 				</h3>
 				{isExpanded ? (

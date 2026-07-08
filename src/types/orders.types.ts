@@ -208,10 +208,13 @@ export interface OrderLineMismatch {
 	incoming: string;
 }
 
-/** One block of differences for a line (orderLineNumber can be 0 for header-level) */
+/** One block of differences for a line (orderLineNumber can be 0 for header-level).
+ * `mismatches` is typed loosely because the BE sometimes emits a field-level
+ * `{database, incoming}` entry and sometimes an extra-line marker
+ * (`issue: string` + `incomingLine: IncomingLineItem`) under the same key. */
 export interface OrderLineDifference {
 	orderLineNumber: number;
-	mismatches: Record<string, OrderLineMismatch>;
+	mismatches: Record<string, unknown>;
 }
 
 /** Incoming line from supplier (EDI) */

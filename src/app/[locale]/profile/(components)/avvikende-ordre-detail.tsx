@@ -173,6 +173,7 @@ export function AvvikendeOrdreDetail({
 								lineNumber={line.lineNumber}
 								deviationCount={line.deviationCount}
 								fields={line.fields}
+								kind={line.kind}
 								isExpanded={isExpanded}
 								onToggle={() => toggleLine(line.lineNumber)}
 							/>
