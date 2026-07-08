@@ -79,3 +79,32 @@ export interface ThmDashboardParams {
 	startDate: string;
 	endDate: string;
 }
+
+// ---------- List view (hoses in survey WO) --------------------------------
+
+export type ThmHoseSyncStatus = "NotTouched" | "UpdatedFromMobile";
+
+export interface ThmHoseListItem {
+	posId: string;
+	s2: string;
+	status: ThmHoseSyncStatus;
+	uploaded: string; // ISO 8601 (yyyy-mm-dd)
+	synced: string; // ISO 8601 (yyyy-mm-dd)
+	imageCount: number | null; // null => "(-)"
+	hasImages: boolean; // controls the green icon variant
+	hoseStd: string;
+	hoseDim: string;
+}
+
+export interface ThmWorkOrderListViewParams {
+	workOrderNumber: string;
+	page?: number;
+	pageSize?: number;
+	search?: string;
+}
+
+export interface ThmWorkOrderListViewResponse {
+	data: ThmHoseListItem[];
+	meta: ThmWorkOrderListMeta;
+	title?: string; // e.g. "Ålesund – M/Tr Havbryn"
+}

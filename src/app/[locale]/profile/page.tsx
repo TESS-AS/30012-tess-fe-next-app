@@ -118,6 +118,13 @@ const ThmWorkOrderDashboard = dynamic(
 		})),
 	{ ssr: false },
 );
+const ThmWorkOrderList = dynamic(
+	() =>
+		import("./(components)/thm-projects/ThmWorkOrderList").then((m) => ({
+			default: m.ThmWorkOrderList,
+		})),
+	{ ssr: false },
+);
 const OrdreDetaljer = dynamic(
 	() =>
 		import("./(components)/ordre-detaljer").then((m) => ({
@@ -711,6 +718,16 @@ export default function ProfilePage() {
 							className="mt-0">
 							{activeTab === "thm-dashboard" && (
 								<ThmWorkOrderDashboard
+									workOrderNumber={searchParams.get("workOrder") ?? ""}
+								/>
+							)}
+						</TabsContent>
+
+						<TabsContent
+							value="thm-list"
+							className="mt-0">
+							{activeTab === "thm-list" && (
+								<ThmWorkOrderList
 									workOrderNumber={searchParams.get("workOrder") ?? ""}
 								/>
 							)}

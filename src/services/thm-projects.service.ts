@@ -14,9 +14,12 @@ import axiosClient from "@/services/axiosClient";
 import type {
 	ThmDashboardParams,
 	ThmDashboardTag,
+	ThmHoseListItem,
 	ThmWorkOrder,
 	ThmWorkOrderListParams,
 	ThmWorkOrderListResponse,
+	ThmWorkOrderListViewParams,
+	ThmWorkOrderListViewResponse,
 } from "@/types/thm-projects.types";
 
 // ---------- BE response shape (loose, partial) -----------------------------
@@ -169,5 +172,51 @@ export async function getThmDashboard({
 		},
 	);
 	return data.data?.[0] ?? null;
+}
+
+// ---------- List view (hoses in survey WO) --------------------------------
+
+// BE endpoint TBD — currently returning a mock so the FE can render.
+// Swap for `axiosClient.get("/asset/getHose", { params: ... })` (or similar)
+// once BE ships the per-hose list for a work order.
+export async function getThmWorkOrderHoses({
+	workOrderNumber,
+	page = 1,
+	pageSize = 50,
+	search,
+}: ThmWorkOrderListViewParams): Promise<ThmWorkOrderListViewResponse> {
+	void workOrderNumber;
+
+	const mockRows: ThmHoseListItem[] = Array.from({ length: 12 }, (_, i) => ({
+		posId: "2211879",
+		s2: "Kran A",
+		status: i === 0 ? "NotTouched" : "UpdatedFromMobile",
+		uploaded: "2026-04-13",
+		synced: "2026-04-15",
+		imageCount: [12, 35, 4, 9, null, 42, 42, 42, 9, 4, 12, 42][i] ?? null,
+		hasImages: i === 1,
+		hoseStd: "2SN",
+		hoseDim: '-16 (1")',
+	}));
+
+	const q = search?.trim().toLowerCase();
+	const filtered = q
+		? mockRows.filter((r) =>
+				[r.posId, r.s2, r.hoseStd, r.hoseDim]
+					.map((v) => v.toLowerCase())
+					.some((v) => v.includes(q)),
+			)
+		: mockRows;
+
+	const totalItems = filtered.length;
+	const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+	const start = (page - 1) * pageSize;
+	const slice = filtered.slice(start, start + pageSize);
+
+	return {
+		data: slice,
+		meta: { page, pageSize, totalItems, totalPages },
+		title: undefined,
+	};
 }
 

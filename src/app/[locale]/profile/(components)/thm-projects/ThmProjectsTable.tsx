@@ -66,6 +66,10 @@ export function ThmProjectsTable({
 			router.push(
 				`/profile?tab=thm-dashboard&workOrder=${encodeURIComponent(wo.workOrderNumber)}`,
 			);
+		} else if (view === "list") {
+			router.push(
+				`/profile?tab=thm-list&workOrder=${encodeURIComponent(wo.workOrderNumber)}`,
+			);
 		}
 		onOpenWorkOrder?.(wo, view);
 	};
