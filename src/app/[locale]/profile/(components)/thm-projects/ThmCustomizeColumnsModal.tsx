@@ -5,17 +5,13 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal, ModalHeader, ModalTitle } from "@/components/ui/modal";
+import type {
+	ColumnDef,
+	ColumnPreferences,
+} from "@/lib/thm-column-views";
 import { EyeOff, GripVertical, Plus, Search } from "lucide-react";
 
-export interface ColumnDef<K extends string> {
-	key: K;
-	label: string;
-}
-
-export interface ColumnPreferences<K extends string> {
-	order: K[];
-	visible: Record<K, boolean>;
-}
+export type { ColumnDef, ColumnPreferences };
 
 type FilterMode = "all" | "visible" | "hidden" | "global";
 

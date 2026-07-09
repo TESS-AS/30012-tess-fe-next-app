@@ -12,8 +12,21 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+	useCreateThmView,
+	useDeleteThmView,
+	useSaveThmView,
+	useThmViews,
+} from "@/hooks/useThmViews";
 import { useThmWorkOrderHoses } from "@/hooks/useThmWorkOrderHoses";
 import { useRouter } from "@/i18n/navigation";
+import {
+	type ColumnDef,
+	type ColumnPreferences,
+	pickInitialView,
+	preferencesToViewColumns,
+	viewColumnsToPreferences,
+} from "@/lib/thm-column-views";
 import type { ThmHoseListItem } from "@/types/thm-projects.types";
 import {
 	Calendar,
@@ -27,12 +40,9 @@ import {
 	Search,
 	SlidersHorizontal,
 } from "lucide-react";
+import { toast } from "react-toastify";
 
-import {
-	type ColumnDef,
-	type ColumnPreferences,
-	ThmCustomizeColumnsModal,
-} from "./ThmCustomizeColumnsModal";
+import { ThmCustomizeColumnsModal } from "./ThmCustomizeColumnsModal";
 
 interface ThmWorkOrderListProps {
 	workOrderNumber: string;
@@ -59,55 +69,18 @@ const COLUMNS: ColumnDef<ColumnKey>[] = [
 	{ key: "hoseDim", label: "Hose Dim" },
 ];
 
+const ALL_COLUMN_KEYS = COLUMNS.map((c) => c.key);
+
 const DEFAULT_PREFS: ColumnPreferences<ColumnKey> = {
-	order: COLUMNS.map((c) => c.key),
-	visible: {
-		posId: true,
-		s2: true,
-		status: true,
-		uploaded: true,
-		synced: true,
-		bildestatus: true,
-		hoseStd: true,
-		hoseDim: true,
-	},
+	order: ALL_COLUMN_KEYS,
+	visible: Object.fromEntries(ALL_COLUMN_KEYS.map((k) => [k, true])) as Record<
+		ColumnKey,
+		boolean
+	>,
 };
 
-const COLUMN_PREFS_STORAGE_KEY = "thm-list-columns-v1";
-
-function loadPrefs(): ColumnPreferences<ColumnKey> {
-	if (typeof window === "undefined") return DEFAULT_PREFS;
-	try {
-		const raw = window.localStorage.getItem(COLUMN_PREFS_STORAGE_KEY);
-		if (!raw) return DEFAULT_PREFS;
-		const parsed = JSON.parse(raw) as Partial<ColumnPreferences<ColumnKey>>;
-		const knownKeys = new Set(COLUMNS.map((c) => c.key));
-		// Filter out any keys we no longer recognise, then append any newly
-		// introduced columns at the end so the user picks them up automatically.
-		const savedOrder = (parsed.order ?? []).filter((k) =>
-			knownKeys.has(k as ColumnKey),
-		) as ColumnKey[];
-		const missing = DEFAULT_PREFS.order.filter((k) => !savedOrder.includes(k));
-		return {
-			order: [...savedOrder, ...missing],
-			visible: { ...DEFAULT_PREFS.visible, ...(parsed.visible ?? {}) },
-		};
-	} catch {
-		return DEFAULT_PREFS;
-	}
-}
-
-function savePrefs(prefs: ColumnPreferences<ColumnKey>) {
-	if (typeof window === "undefined") return;
-	try {
-		window.localStorage.setItem(
-			COLUMN_PREFS_STORAGE_KEY,
-			JSON.stringify(prefs),
-		);
-	} catch {
-		// storage full or blocked — non-fatal
-	}
-}
+// Shown as the "View Name:" label when the user hasn't created a view yet.
+const FALLBACK_VIEW_NAME = "Default View";
 
 function StatusBadge({ status }: { status: ThmHoseListItem["status"] }) {
 	if (status === "NotTouched") {
@@ -227,14 +200,36 @@ const DATE_COLUMNS = new Set<ColumnKey>(["uploaded", "synced"]);
 export function ThmWorkOrderList({ workOrderNumber }: ThmWorkOrderListProps) {
 	const router = useRouter();
 	const [search, setSearch] = useState("");
-	const [view, setView] = useState("favorite");
-	const [prefs, setPrefs] =
-		useState<ColumnPreferences<ColumnKey>>(DEFAULT_PREFS);
 	const [customizeOpen, setCustomizeOpen] = useState(false);
+	const [activeViewId, setActiveViewId] = useState<number | null>(null);
 
+	const { data: views = [], isLoading: viewsLoading } = useThmViews();
+	const createView = useCreateThmView();
+	const saveView = useSaveThmView();
+	const deleteView = useDeleteThmView();
+
+	// Sync the active view id with what the server has: on first load, pick
+	// the default (or first). If the active view got deleted (by us, or in
+	// another tab), fall back to the same rule.
 	useEffect(() => {
-		setPrefs(loadPrefs());
-	}, []);
+		if (activeViewId != null && views.some((v) => v.viewId === activeViewId)) {
+			return;
+		}
+		setActiveViewId(pickInitialView(views)?.viewId ?? null);
+	}, [views, activeViewId]);
+
+	const activeView = useMemo(
+		() => views.find((v) => v.viewId === activeViewId) ?? null,
+		[views, activeViewId],
+	);
+
+	const prefs = useMemo<ColumnPreferences<ColumnKey>>(
+		() =>
+			activeView
+				? viewColumnsToPreferences(activeView.columns, ALL_COLUMN_KEYS)
+				: DEFAULT_PREFS,
+		[activeView],
+	);
 
 	const visibleColumns = useMemo(
 		() => prefs.order.filter((key) => prefs.visible[key]),
@@ -258,15 +253,74 @@ export function ThmWorkOrderList({ workOrderNumber }: ThmWorkOrderListProps) {
 
 	const handleResetFilters = () => setSearch("");
 
-	const handleSavePrefs = (next: ColumnPreferences<ColumnKey>) => {
-		setPrefs(next);
-		savePrefs(next);
+	const currentViewName = activeView?.viewName ?? FALLBACK_VIEW_NAME;
+
+	const handleSavePrefs = async (
+		next: ColumnPreferences<ColumnKey>,
+		meta: { viewName: string },
+	) => {
+		const nextName = meta.viewName || currentViewName;
+		const payload = {
+			viewName: nextName,
+			// Preserve the existing default flag when updating; the first view a
+			// user creates becomes the default automatically.
+			isDefault: activeView?.isDefault ?? views.length === 0,
+			columns: preferencesToViewColumns(next),
+		};
+		try {
+			if (activeView) {
+				await saveView.mutateAsync({ viewId: activeView.viewId, payload });
+				toast.success(`Visningen "${nextName}" ble lagret.`);
+			} else {
+				const created = await createView.mutateAsync(payload);
+				setActiveViewId(created.viewId);
+				toast.success(`Visningen "${nextName}" ble opprettet.`);
+			}
+		} catch (e) {
+			console.error("Save view failed", e);
+			toast.error("Kunne ikke lagre visningen. Prøv igjen senere.");
+		}
 	};
 
-	// View presets are BE-owned (see the "View:" dropdown in the toolbar).
-	// Until BE ships the save/copy/delete endpoints, the modal treats the
-	// current view name as a display string only.
-	const currentViewName = "My favorite column order";
+	const handleCopyView = async () => {
+		const nextName = activeView
+			? `${activeView.viewName} (Copy)`
+			: currentViewName;
+		const payload = {
+			viewName: nextName,
+			isDefault: false,
+			columns: preferencesToViewColumns(prefs),
+		};
+		try {
+			const created = await createView.mutateAsync(payload);
+			setActiveViewId(created.viewId);
+			setCustomizeOpen(false);
+			toast.success(`Visningen "${nextName}" ble kopiert.`);
+		} catch (e) {
+			console.error("Copy view failed", e);
+			toast.error("Kunne ikke kopiere visningen. Prøv igjen senere.");
+		}
+	};
+
+	const handleDeleteView = async () => {
+		if (!activeView) {
+			setCustomizeOpen(false);
+			return;
+		}
+		const deletedName = activeView.viewName;
+		try {
+			await deleteView.mutateAsync(activeView.viewId);
+			// Optimistically flip to whatever the next best view is; the effect
+			// above will reconcile once the refetch lands.
+			const remaining = views.filter((v) => v.viewId !== activeView.viewId);
+			setActiveViewId(pickInitialView(remaining)?.viewId ?? null);
+			setCustomizeOpen(false);
+			toast.success(`Visningen "${deletedName}" ble slettet.`);
+		} catch (e) {
+			console.error("Delete view failed", e);
+			toast.error("Kunne ikke slette visningen. Prøv igjen senere.");
+		}
+	};
 
 	const columnLookup = new Map(COLUMNS.map((c) => [c.key, c]));
 
@@ -309,16 +363,20 @@ export function ThmWorkOrderList({ workOrderNumber }: ThmWorkOrderListProps) {
 					Reset filters
 				</Button>
 				<Select
-					value={view}
-					onValueChange={setView}>
+					value={activeViewId != null ? String(activeViewId) : ""}
+					onValueChange={(v) => setActiveViewId(Number(v))}
+					disabled={viewsLoading || views.length === 0}>
 					<SelectTrigger className="h-9 w-[260px] bg-white">
-						<SelectValue />
+						<SelectValue placeholder={`View: ${FALLBACK_VIEW_NAME}`} />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="favorite">
-							View: My favorite column order
-						</SelectItem>
-						<SelectItem value="default">View: Default</SelectItem>
+						{views.map((v) => (
+							<SelectItem
+								key={v.viewId}
+								value={String(v.viewId)}>
+								View: {v.viewName}
+							</SelectItem>
+						))}
 					</SelectContent>
 				</Select>
 				<Button
@@ -428,6 +486,8 @@ export function ThmWorkOrderList({ workOrderNumber }: ThmWorkOrderListProps) {
 				defaults={DEFAULT_PREFS}
 				viewName={currentViewName}
 				onSave={handleSavePrefs}
+				onCopyView={handleCopyView}
+				onDeleteView={handleDeleteView}
 			/>
 		</div>
 	);

@@ -108,3 +108,29 @@ export interface ThmWorkOrderListViewResponse {
 	meta: ThmWorkOrderListMeta;
 	title?: string; // e.g. "Ålesund – M/Tr Havbryn"
 }
+
+// ---------- Views (customize columns, per-user) ---------------------------
+
+/** A saved column view for the THM work-order hose list. Scope is
+ * work-order-list-only — BE stores views in a per-user bag with no
+ * table discriminator, so FE column keys are namespaced with a
+ * `hoseList.` prefix (see lib/thm-column-views). */
+export interface ThmView {
+	viewId: number;
+	userId: string;
+	viewName: string;
+	isDefault: boolean;
+	columns: string[]; // visible-only, ordered
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface ThmViewPayload {
+	viewName: string;
+	isDefault: boolean;
+	columns: string[];
+}
+
+export interface ThmGetViewsResponse {
+	data: ThmView[];
+}

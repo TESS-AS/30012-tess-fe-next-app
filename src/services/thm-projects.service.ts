@@ -14,7 +14,10 @@ import axiosClient from "@/services/axiosClient";
 import type {
 	ThmDashboardParams,
 	ThmDashboardTag,
+	ThmGetViewsResponse,
 	ThmHoseListItem,
+	ThmView,
+	ThmViewPayload,
 	ThmWorkOrder,
 	ThmWorkOrderListParams,
 	ThmWorkOrderListResponse,
@@ -218,5 +221,35 @@ export async function getThmWorkOrderHoses({
 		meta: { page, pageSize, totalItems, totalPages },
 		title: undefined,
 	};
+}
+
+// ---------- User column views (customize columns) -------------------------
+
+export async function getThmViews(): Promise<ThmView[]> {
+	const { data } = await axiosClient.get<ThmGetViewsResponse>("/user/getView");
+	return data.data ?? [];
+}
+
+export async function createThmView(payload: ThmViewPayload): Promise<ThmView> {
+	const { data } = await axiosClient.post<ThmView>(
+		"/user/createView",
+		payload,
+	);
+	return data;
+}
+
+export async function saveThmView(
+	viewId: number,
+	payload: ThmViewPayload,
+): Promise<ThmView> {
+	const { data } = await axiosClient.put<ThmView>(
+		`/user/saveView/${viewId}`,
+		payload,
+	);
+	return data;
+}
+
+export async function deleteThmView(viewId: number): Promise<void> {
+	await axiosClient.delete(`/user/deleteView/${viewId}`);
 }
 
