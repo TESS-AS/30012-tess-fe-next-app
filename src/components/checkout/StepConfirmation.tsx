@@ -33,6 +33,8 @@ export default function StepConfirmation({
 	handleContactPersonSave,
 }: any) {
 	const t = useTranslations("Checkout.confirmation");
+	const tContact = useTranslations("Checkout.contactPerson");
+	const phoneMissing = !contactPerson.phone?.trim();
 	const {
 		cartItems,
 		calculatedPrices,
@@ -55,7 +57,13 @@ export default function StepConfirmation({
 					{contactPerson.firstName} {contactPerson.lastName}
 				</p>
 				<p>{contactPerson.email}</p>
-				<p>{contactPerson.phone}</p>
+				{phoneMissing ? (
+					<p className="font-medium text-[#C81E1E]">
+						{tContact("phoneMissing")}
+					</p>
+				) : (
+					<p>{contactPerson.phone}</p>
+				)}
 			</ConfirmationCard>
 
 			<ConfirmationCard

@@ -29,6 +29,7 @@ export const EditContactModal: React.FC<EditContactModalProps> = ({
 	initialData,
 }) => {
 	const t = useTranslations("Checkout.modals.contact");
+	const tContact = useTranslations("Checkout.contactPerson");
 	const [formData, setFormData] = useState<ContactFormData>(
 		initialData || {
 			firstName: "",
@@ -38,12 +39,15 @@ export const EditContactModal: React.FC<EditContactModalProps> = ({
 		},
 	);
 
+	const phoneMissing = !formData.phone?.trim();
+
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
 		setFormData((prev) => ({ ...prev, [name]: value }));
 	};
 
 	const handleSave = () => {
+		if (phoneMissing) return;
 		onSave(formData);
 		onClose();
 	};
@@ -91,15 +95,31 @@ export const EditContactModal: React.FC<EditContactModalProps> = ({
 					</p>
 				</div>
 				<div>
-					<Label htmlFor="phone">{t("phone")}</Label>
+					<Label
+						htmlFor="phone"
+						className={phoneMissing ? "text-[#C81E1E]" : undefined}>
+						{t("phone")}
+						{phoneMissing && <span className="ml-1">*</span>}
+					</Label>
 					<Input
 						id="phone"
 						name="phone"
 						value={formData.phone}
 						onChange={handleChange}
+						aria-invalid={phoneMissing || undefined}
+						className={
+							phoneMissing
+								? "border-[#C81E1E] focus-visible:border-[#C81E1E] focus-visible:ring-[#C81E1E]"
+								: undefined
+						}
 					/>
-					<p className="text-muted-foreground mt-1 text-xs">
-						Eksempel: +47 123 45 678
+					<p
+						className={`mt-1 text-xs ${
+							phoneMissing
+								? "font-medium text-[#C81E1E]"
+								: "text-muted-foreground"
+						}`}>
+						{phoneMissing ? tContact("phoneMissing") : "Eksempel: +47 123 45 678"}
 					</p>
 				</div>
 			</div>
@@ -112,7 +132,8 @@ export const EditContactModal: React.FC<EditContactModalProps> = ({
 				</Button>
 				<Button
 					variant="greenSolid"
-					onClick={handleSave}>
+					onClick={handleSave}
+					disabled={phoneMissing}>
 					{t("save")}
 				</Button>
 			</div>

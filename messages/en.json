@@ -14,7 +14,7 @@
 		"title": "Home Page No",
 		"myProfile": "My Profile",
 		"bannerTitle": "Velkommen til TESS!",
-		"browseOurTopCategories": "Bla gjennom våre toppkategorier",
+		"browseOurTopCategories": "Bla gjennom v\u00e5re toppkategorier",
 		"ourCategories": "Our categories",
 		"seeCategories": "See Categories",
 		"learnMore": "Learn More",
@@ -119,10 +119,10 @@
 		"loadingVariant": "Loading variant...",
 		"unknownAttribute": "Unknown",
 		"itemNumber": "Item number",
-		"inStockDelivery": "In stock – delivered within 2–3 days",
+		"inStockDelivery": "In stock \u2013 delivered within 2\u20133 days",
 		"loadingPrice": "Loading price...",
 		"excludingVat": "excl. VAT",
-		"stockInfo": "Items not in stock can still be ordered – 3 extra days delivery time.",
+		"stockInfo": "Items not in stock can still be ordered \u2013 3 extra days delivery time.",
 		"documentsTitle": "Documentation",
 		"noDocumentsAvailable": "No documents are available for this product.",
 		"noRelatedProducts": "No related products are available for this product.",
@@ -178,7 +178,7 @@
 		"reset": "Nullstill",
 		"error": {
 			"title": "Noe gikk galt!",
-			"tryAgain": "Prøv igjen",
+			"tryAgain": "Pr\u00f8v igjen",
 			"categoryLoad": "Vi kunne ikke laste kategorien innhold.",
 			"subcategoryLoad": "Vi kunne ikke laste subkategorien innhold."
 		},
@@ -201,7 +201,7 @@
 		"inMainWarehouse": "In main warehouse",
 		"noResults": {
 			"title": "No results found",
-			"description": "Sorry. We couldn’t find any products matching \"{query}\"",
+			"description": "Sorry. We couldn\u2019t find any products matching \"{query}\"",
 			"tipsTitle": "Tips for better search results:",
 			"tips": {
 				"checkSpelling": "Check the spelling or try alternative spellings",
@@ -218,7 +218,7 @@
 	},
 	"Seo": {
 		"defaultTitle": "TESS - Teknisk Faghandel | Netthandel",
-		"defaultDescription": "Tess er din pålitelige leverandør av byggematerialer, sikkerhetsutstyr og industrielle produkter. Handle trygt og raskt på nett."
+		"defaultDescription": "Tess er din p\u00e5litelige leverand\u00f8r av byggematerialer, sikkerhetsutstyr og industrielle produkter. Handle trygt og raskt p\u00e5 nett."
 	},
 	"CustomerSwitcher": {
 		"title": "Customer Information",
@@ -243,15 +243,15 @@
 			"future": "Future Customer Web"
 		},
 		"customerWeb": {
-			"title": "The future customer web for THM – shaping the solution together",
-			"description": "We are now building the next-generation customer web for TESS Hose Management (THM). This is more than just an update – we are developing a modern platform that combines e-commerce with advanced decision support, giving you full insight and control over hoses and equipment.",
+			"title": "The future customer web for THM \u2013 shaping the solution together",
+			"description": "We are now building the next-generation customer web for TESS Hose Management (THM). This is more than just an update \u2013 we are developing a modern platform that combines e-commerce with advanced decision support, giving you full insight and control over hoses and equipment.",
 			"feedbackPrompt": "Do you have wishes or suggestions?",
-			"feedbackSubtext": "Leave us feedback – your experience is important to us.",
+			"feedbackSubtext": "Leave us feedback \u2013 your experience is important to us.",
 			"feedbackButton": "Give feedback"
 		},
 		"otherSection": {
-			"title": "Another section – sample text",
-			"description": "This view shows the content when the user selects the “Future Customer Web” option.",
+			"title": "Another section \u2013 sample text",
+			"description": "This view shows the content when the user selects the \u201cFuture Customer Web\u201d option.",
 			"cta": "Read more"
 		},
 		"imageAlt": "THM customer web promo",
@@ -328,7 +328,7 @@
 			"no": "No",
 			"thanks": "Thanks for your feedback!",
 			"closing": "We hope you found what you needed. Have a great day!",
-			"helpText": "Contact us and we’ll do our best to help you. We also use your input to improve the FAQ page.",
+			"helpText": "Contact us and we\u2019ll do our best to help you. We also use your input to improve the FAQ page.",
 			"whatWereYouLookingFor": "What were you looking for?",
 			"placeholder": "Tell us what you were looking for",
 			"contactQuestion": "Would you like to be contacted regarding the answer? We will contact you via your registered email.",
@@ -352,11 +352,11 @@
 			},
 			"deliveries": {
 				"title": "Deliveries",
-				"content": "At the customer’s expense."
+				"content": "At the customer\u2019s expense."
 			},
 			"ownership": {
 				"title": "Ownership",
-				"content": "The seller retains ownership of the sold goods until the purchase price, including interest and costs, has been paid in full (ref: The Mortgage Act, in particular §3-15). Invoicing fee: NOK 65,- + VAT."
+				"content": "The seller retains ownership of the sold goods until the purchase price, including interest and costs, has been paid in full (ref: The Mortgage Act, in particular \u00a73-15). Invoicing fee: NOK 65,- + VAT."
 			},
 			"returns": {
 				"title": "Returns",
@@ -459,12 +459,12 @@
 	},
 	"Checkout": {
 		"variantModalHeader": {
-			"viewAllDetails": "View all details →",
+			"viewAllDetails": "View all details \u2192",
 			"fallbackDescription": "Pick a variant from the table below to see details and add it to your cart."
 		},
 		"placerBanner": {
 			"title": "Shipping to placer",
-			"body": "Order will ship to {name} – {address}"
+			"body": "Order will ship to {name} \u2013 {address}"
 		},
 		"modals": {
 			"feedback": {
@@ -570,12 +570,13 @@
 			"project": "Project",
 			"department": "Department",
 			"category": "Category",
-			"notSpecified": "–"
+			"notSpecified": "\u2013"
 		},
 		"errors": {
 			"selectAddress": "Please select an address",
 			"orderSubmissionFailed": "Order submission failed",
-			"dimensionsRequired": "Please fill in all required dimension fields"
+			"dimensionsRequired": "Please fill in all required dimension fields",
+			"phoneRequired": "Phone number is missing. Please fill it in before continuing."
 		},
 		"excelExportSuccess": "Excel file exported successfully",
 		"excelArchiveCartTitle": "Archive cart after export?",
@@ -604,7 +605,8 @@
 			"phoneExample": "Example: +47 123 45 678",
 			"save": "Save Contact Person",
 			"cancel": "Cancel",
-			"fetchedFromProfile": "Fetched from profile"
+			"fetchedFromProfile": "Fetched from profile",
+			"phoneMissing": "Phone number missing \u2013 please fill it in!"
 		},
 		"address": {
 			"title": "Your Address",
@@ -814,7 +816,7 @@
 			"originalComment": "Original comment",
 			"commentEnd1": "Comment for end 1",
 			"commentEnd2": "Comment for end 2",
-			"angle": "0°"
+			"angle": "0\u00b0"
 		}
 	},
 	"S2EquipmentsAccordion": {
@@ -1188,7 +1190,7 @@
 		"showAll": "Show all",
 		"goToCart": "Go to cart",
 		"placer": {
-			"shipTo": "Ship to: {name} – {address}"
+			"shipTo": "Ship to: {name} \u2013 {address}"
 		}
 	},
 	"ProfilePage": {

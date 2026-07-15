@@ -42,6 +42,13 @@ export const ContactPerson: React.FC<ContactPersonProps> = ({
 		setFormData({ firstName, lastName, email, phone });
 	}, [firstName, lastName, email, phone]);
 
+	// Orders without a phone number default to the customer's TESS salespoint,
+	// which spams the branch. Force the user to fill it in before continuing.
+	const phoneMissing = !formData.phone?.trim();
+	useEffect(() => {
+		if (phoneMissing) setEditMode(true);
+	}, [phoneMissing]);
+
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
 		setFormData((prev) => ({ ...prev, [name]: value }));
@@ -117,15 +124,31 @@ export const ContactPerson: React.FC<ContactPersonProps> = ({
 						</div>
 
 						<div>
-							<Label htmlFor="phone">{t("phone")}</Label>
+							<Label
+								htmlFor="phone"
+								className={phoneMissing ? "text-[#C81E1E]" : undefined}>
+								{t("phone")}
+								{phoneMissing && <span className="ml-1">*</span>}
+							</Label>
 							<Input
 								id="phone"
 								name="phone"
 								value={formData.phone}
 								onChange={handleChange}
+								aria-invalid={phoneMissing || undefined}
+								className={
+									phoneMissing
+										? "border-[#C81E1E] focus-visible:border-[#C81E1E] focus-visible:ring-[#C81E1E]"
+										: undefined
+								}
 							/>
-							<p className="text-muted-foreground mt-1 text-xs">
-								{t("phoneExample")}
+							<p
+								className={`mt-1 text-xs ${
+									phoneMissing
+										? "font-medium text-[#C81E1E]"
+										: "text-muted-foreground"
+								}`}>
+								{phoneMissing ? t("phoneMissing") : t("phoneExample")}
 							</p>
 						</div>
 
@@ -150,7 +173,13 @@ export const ContactPerson: React.FC<ContactPersonProps> = ({
 							{formData.firstName} {formData.lastName}
 						</p>
 						<p className="text-foreground mb-1 text-sm">{formData.email}</p>
-						<p className="text-foreground text-sm">{formData.phone}</p>
+						{phoneMissing ? (
+							<p className="text-sm font-medium text-[#C81E1E]">
+								{t("phoneMissing")}
+							</p>
+						) : (
+							<p className="text-foreground text-sm">{formData.phone}</p>
+						)}
 					</div>
 				)}
 

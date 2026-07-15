@@ -230,6 +230,12 @@ export default function CheckoutPage() {
 
 	const handleCheckout = async () => {
 		if (!profile?.punchout) {
+			if (!contactPerson.phone?.trim()) {
+				toast.error(t("Checkout.errors.phoneRequired"));
+				setCurrentStep(0);
+				return;
+			}
+
 			if (currentStep < 2) {
 				if (!selectedAddress?.addressLine1 && !updatedAddress?.street) {
 					toast.error(t("Checkout.errors.selectAddress"));

@@ -49,7 +49,7 @@
 		"orgNumberError": "Organisasjonsnummer m\u00e5 v\u00e6re mellom 6 og 20 tegn",
 		"orgSearchError": "Kunne ikke finne bedrift med dette organisasjonsnummeret",
 		"search": "S\u00f8k",
-		"postalCodeTitle": "Hjelp oss med å finne ditt TESS servicesenter ved å fylle inn postnummer.",
+		"postalCodeTitle": "Hjelp oss med \u00e5 finne ditt TESS servicesenter ved \u00e5 fylle inn postnummer.",
 		"postalCodeLabel": "Postnummer",
 		"postalCodePlaceholder": "Skriv postnummer",
 		"helpText": "Usikker? F\u00e5 hjelp p\u00e5",
@@ -96,7 +96,7 @@
 		"adding": "Legger til i kassen...",
 		"addToCart": "Legg til",
 		"addToWishlist": "Legg til i \u00f8nskeliste",
-		"relatedProducts": "Tilhørende produkter",
+		"relatedProducts": "Tilh\u00f8rende produkter",
 		"viewAll": "Vis alle",
 		"specifications": "Spesifikasjoner",
 		"technicalInfo": "Teknisk informasjon",
@@ -109,7 +109,7 @@
 		"addedToCart": "Vare lagt i handlekurv",
 		"errorAddingToCart": "Kunne ikke legge til i kassen",
 		"selectWarehouse": "Velg lager",
-		"selectWarehouseFirst": "Logg inn for å legge til handlekurv",
+		"selectWarehouseFirst": "Logg inn for \u00e5 legge til handlekurv",
 		"noBalanceForWarehouse": "Ingen balanse tilgjengelig for denne lagerstasjonen",
 		"noWarehouses": "Ingen lager",
 		"noWarehousesAvailable": "Ingen lager tilgjengelig",
@@ -141,8 +141,8 @@
 		"selected": "Valgt",
 		"select": "Velg",
 		"uniqueSellingPoints": "Viktige egenskaper",
-		"clickToExpand": "Klikk for å utvide kolonnen",
-		"clickToExpandHint": "Tips: Klikk på en kolonneoverskrift for å se hele innholdet."
+		"clickToExpand": "Klikk for \u00e5 utvide kolonnen",
+		"clickToExpandHint": "Tips: Klikk p\u00e5 en kolonneoverskrift for \u00e5 se hele innholdet."
 	},
 	"BreadCrumbs": {
 		"home": "Hjem",
@@ -215,12 +215,11 @@
 			"news": "Nyhet",
 			"future": "Fremtidens kundeweb for THM"
 		},
-
 		"customerWeb": {
 			"title": "Fremtidens kundeweb for THM",
 			"description": "Vi bygger n\u00e5 neste generasjon kundeweb for TESS Hose Management (THM). Dette er mer enn en oppdatering \u2013 vi utvikler en moderne plattform som kombinerer e-handel og avansert beslutningsst\u00f8tte, slik at du f\u00e5r full oversikt og kontroll over slanger og utstyr.",
-			"feedbackPrompt": "Vær med og påvirk hvordan vi former løsningen",
-			"feedbackSubtext": "si oss dine behov, ønsker eller legg igjen et forslag.",
+			"feedbackPrompt": "V\u00e6r med og p\u00e5virk hvordan vi former l\u00f8sningen",
+			"feedbackSubtext": "si oss dine behov, \u00f8nsker eller legg igjen et forslag.",
 			"feedbackButton": "Legg igjen ditt forslag"
 		},
 		"otherSection": {
@@ -407,7 +406,7 @@
 	},
 	"Login": {
 		"title": "Login",
-		"loginToViewCart": "Logg inn for å se din handlekurv"
+		"loginToViewCart": "Logg inn for \u00e5 se din handlekurv"
 	},
 	"AuthDialog": {
 		"welcome": "Velkommen",
@@ -419,7 +418,7 @@
 		"loginWithBESso": "Logg inn med BE SSO",
 		"loginWithTenantBe": "Tenant login BE",
 		"or": "eller",
-		"needHelp": "Trenger du hjelp til å logge inn?",
+		"needHelp": "Trenger du hjelp til \u00e5 logge inn?",
 		"contactUs": "Kontakt oss",
 		"copyright": "2025 TESS",
 		"honest": "\u00c6rlig, p\u00e5litelig og profesjonell",
@@ -462,12 +461,12 @@
 	},
 	"Checkout": {
 		"variantModalHeader": {
-			"viewAllDetails": "Vis alle detaljer →",
-			"fallbackDescription": "Velg en variant fra tabellen nedenfor for å se detaljer og legge til i handlekurven."
+			"viewAllDetails": "Vis alle detaljer \u2192",
+			"fallbackDescription": "Velg en variant fra tabellen nedenfor for \u00e5 se detaljer og legge til i handlekurven."
 		},
 		"placerBanner": {
 			"title": "Leveres til bestiller",
-			"body": "Ordren leveres til {name} – {address}"
+			"body": "Ordren leveres til {name} \u2013 {address}"
 		},
 		"modals": {
 			"feedback": {
@@ -578,11 +577,12 @@
 		"errors": {
 			"selectAddress": "Vennligst velg en adresse",
 			"orderSubmissionFailed": "Bestillingen kunne ikke sendes",
-			"dimensionsRequired": "Vennligst fyll ut alle p\u00e5krevde dimensjonsfelt"
+			"dimensionsRequired": "Vennligst fyll ut alle p\u00e5krevde dimensjonsfelt",
+			"phoneRequired": "Telefonnummer mangler. Fyll det inn f\u00f8r du kan g\u00e5 videre."
 		},
 		"excelExportSuccess": "Excel-filen er lastet ned",
 		"excelArchiveCartTitle": "Arkivere handlekurv etter eksport?",
-		"excelArchiveCartDescription": "Etter at Excel-filen er generert, vil du arkivere handlekurven? Velg «Behold handlekurv» for \u00e5 fortsette med de samme varene.",
+		"excelArchiveCartDescription": "Etter at Excel-filen er generert, vil du arkivere handlekurven? Velg \u00abBehold handlekurv\u00bb for \u00e5 fortsette med de samme varene.",
 		"excelArchiveCartNo": "Behold handlekurv",
 		"excelArchiveCartYes": "Ja, arkiver handlekurv",
 		"feedback": {
@@ -598,7 +598,7 @@
 		},
 		"contactPerson": {
 			"title": "Kontaktperson",
-			"edit": "Du endrer nå en kontaktperson",
+			"edit": "Du endrer n\u00e5 en kontaktperson",
 			"firstName": "Fornavn",
 			"lastName": "Etternavn",
 			"email": "E-post",
@@ -607,11 +607,12 @@
 			"phoneExample": "Eksempel: +47 123 45 678",
 			"save": "Lagre kontaktperson",
 			"cancel": "Avbryt",
-			"fetchedFromProfile": "Hentet fra profil"
+			"fetchedFromProfile": "Hentet fra profil",
+			"phoneMissing": "Mangler telefonnummer \u2013 fyll inn!"
 		},
 		"address": {
 			"title": "Din adresse",
-			"edit": "Du endrer nå en adresse",
+			"edit": "Du endrer n\u00e5 en adresse",
 			"savedAddresses": "Lagrede adresser",
 			"addressName": "Adressenavn",
 			"addressNameExample": "Eksempel: Hjem, Jobb, Kontor",
@@ -702,12 +703,12 @@
 			"headerLabel": "Hose management",
 			"title": "Velkommen til TESS Bestilling",
 			"intro": "Her bestiller du varer til din bedrift. Varene legges automatisk inn i ordresystemet.",
-			"checkIds": "Sjekk ID-numrene før du bekrefter.",
-			"checkIdsTail": "Du kan ikke endre dem etterpå.",
-			"incompleteHoses": "Slanger med ufullstendige opplysninger må bestilles via forespørsel.",
-			"incompleteHosesTail": "Du kan gjøre begge deler her.",
+			"checkIds": "Sjekk ID-numrene f\u00f8r du bekrefter.",
+			"checkIdsTail": "Du kan ikke endre dem etterp\u00e5.",
+			"incompleteHoses": "Slanger med ufullstendige opplysninger m\u00e5 bestilles via foresp\u00f8rsel.",
+			"incompleteHosesTail": "Du kan gj\u00f8re begge deler her.",
 			"dontShowAgain": "Ikke vis denne meldingen igjen",
-			"cta": "Gå til bestilling"
+			"cta": "G\u00e5 til bestilling"
 		},
 		"errors": {
 			"selectItemsFirst": "Vennligst velg elementer \u00e5 kontakte om"
@@ -718,7 +719,7 @@
 			"equipmentDiscarded": "Utstyr utrangert"
 		},
 		"pagination": {
-			"itemsPerPage": "antall oppføringer per side",
+			"itemsPerPage": "antall oppf\u00f8ringer per side",
 			"perPageOption": "{size} per side"
 		}
 	},
@@ -783,12 +784,12 @@
 		"genericHoseType": "Generisk slangetype",
 		"couplingTypeEnd1": "Type kobling ende 1",
 		"genericDimEnd1": "Generisk dim ende 1",
-		"genderEnd1": "Kjønn ende 1",
+		"genderEnd1": "Kj\u00f8nn ende 1",
 		"angleEnd1": "Vinkel ende 1",
 		"materialQualityEnd1": "Materialkvalitet ende 1",
 		"couplingTypeEnd2": "Type kobling ende 2",
 		"genericDimEnd2": "Generisk dim ende 2",
-		"genderEnd2": "Kjønn ende 2",
+		"genderEnd2": "Kj\u00f8nn ende 2",
 		"angleEnd2": "Vinkel ende 2",
 		"materialQualityEnd2": "Materialkvalitet ende 2",
 		"generalCommentPtc": "Generell kommentar (PTC)",
@@ -817,7 +818,7 @@
 			"originalComment": "Opprinnelig kommentar",
 			"commentEnd1": "Kommentar for ende 1",
 			"commentEnd2": "Kommentar for ende 2",
-			"angle": "0°"
+			"angle": "0\u00b0"
 		}
 	},
 	"S2EquipmentsAccordion": {
@@ -931,7 +932,7 @@
 		"addToCart": "Legg til i handlekurv",
 		"adding": "Legger til...",
 		"contactSupport": "Kontakt TESS support",
-		"sendRfq": "Send forespørsel om tilbud (RFQ)",
+		"sendRfq": "Send foresp\u00f8rsel om tilbud (RFQ)",
 		"reportReplacement": "Rapporter slangebytter",
 		"discardEquipment": "Kasser utstyr",
 		"printCertificate": "Skriv ut TESS trykktest-sertifikat",
@@ -1191,7 +1192,7 @@
 		"showAll": "Vis alle",
 		"goToCart": "Til handlekurven",
 		"placer": {
-			"shipTo": "Leveres til: {name} – {address}"
+			"shipTo": "Leveres til: {name} \u2013 {address}"
 		}
 	},
 	"ProfilePage": {
@@ -1280,16 +1281,16 @@
 		"access": "Tilganger",
 		"customerAccess": "Kundetilgang",
 		"customerAccessPlaceholder": "{count} kunder valgt",
-		"customerAccessSearchPlaceholder": "Søk etter kunde...",
+		"customerAccessSearchPlaceholder": "S\u00f8k etter kunde...",
 		"catalog": "Kundekatalog",
 		"catalogPlaceholder": "{count} kataloger valgt",
-		"catalogSearchPlaceholder": "Søk etter katalog...",
+		"catalogSearchPlaceholder": "S\u00f8k etter katalog...",
 		"standardWarehouse": "Standard TESS lager",
 		"warehousePlaceholder": "{count} lager valgt",
-		"warehouseSearchPlaceholder": "Søk etter lager...",
+		"warehouseSearchPlaceholder": "S\u00f8k etter lager...",
 		"tessCompany": "TESS Firma",
 		"companyPlaceholder": "{count} firma valgt",
-		"companySearchPlaceholder": "Søk etter firma...",
+		"companySearchPlaceholder": "S\u00f8k etter firma...",
 		"updateUsers": "Oppdater {count} brukere",
 		"close": "Lukk"
 	},
@@ -1324,12 +1325,12 @@
 		},
 		"roleDescription": {
 			"admin": "Du har alle administratorrettigheter. Du kan opprette brukere og endre innstillinger.",
-			"superuser": "Du kan opprette brukere med egne innstillinger, godkjenne rekvisjoner, sette budsjetter på ansatte og opprette dimensjoner.",
-			"employee": "Du kan kun handle på vegne av deg selv."
+			"superuser": "Du kan opprette brukere med egne innstillinger, godkjenne rekvisjoner, sette budsjetter p\u00e5 ansatte og opprette dimensjoner.",
+			"employee": "Du kan kun handle p\u00e5 vegne av deg selv."
 		},
 		"superuserBanner": {
 			"title": "Endring av standardlager er mulig",
-			"line1": "Noen valg er forhåndssatt for deg, men kan endres.",
+			"line1": "Noen valg er forh\u00e5ndssatt for deg, men kan endres.",
 			"line2": "Andre innstillinger er fastsatt av administrator og kan ikke endres."
 		},
 		"employeeBanner": {
