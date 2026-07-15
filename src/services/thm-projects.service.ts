@@ -242,7 +242,7 @@ export async function saveThmView(
 	viewId: number,
 	payload: ThmViewPayload,
 ): Promise<ThmView> {
-	const { data } = await axiosClient.put<ThmView>(
+	const { data } = await axiosClient.patch<ThmView>(
 		`/user/saveView/${viewId}`,
 		payload,
 	);
