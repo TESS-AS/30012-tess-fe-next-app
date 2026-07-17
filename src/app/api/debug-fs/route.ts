@@ -86,5 +86,78 @@ export async function GET() {
 		result.maxOpenFiles = { error: err.code ?? err.message };
 	}
 
+	// Container-scoped memory (cgroup v2, falling back to v1). Unlike os.freemem()
+	// which reflects the host kernel, these are isolated to this container.
+	const readNum = async (path: string) => {
+		const raw = (await readFile(path, "utf8")).trim();
+		return raw === "max" ? "max" : Number(raw);
+	};
+	try {
+		result.cgroup = {
+			v: "v2",
+			currentBytes: await readNum("/sys/fs/cgroup/memory.current"),
+			maxBytes: await readNum("/sys/fs/cgroup/memory.max"),
+			swapCurrentBytes: await readNum("/sys/fs/cgroup/memory.swap.current").catch(
+				() => null,
+			),
+		};
+	} catch {
+		try {
+			result.cgroup = {
+				v: "v1",
+				usageBytes: await readNum(
+					"/sys/fs/cgroup/memory/memory.usage_in_bytes",
+				),
+				limitBytes: await readNum(
+					"/sys/fs/cgroup/memory/memory.limit_in_bytes",
+				),
+			};
+		} catch (e) {
+			const err = e as NodeJS.ErrnoException;
+			result.cgroup = { error: err.code ?? err.message };
+		}
+	}
+
+	// Process listing inside the container — catches child workers (sharp, etc.)
+	// that would consume memory outside this Node process's own heap.
+	try {
+		const entries = await readdir("/proc");
+		const pids = entries.filter((e) => /^\d+$/.test(e));
+		const procs = await Promise.all(
+			pids.map(async (pid) => {
+				try {
+					const [statusRaw, cmdlineRaw] = await Promise.all([
+						readFile(`/proc/${pid}/status`, "utf8"),
+						readFile(`/proc/${pid}/cmdline`, "utf8"),
+					]);
+					const pick = (k: string) =>
+						statusRaw
+							.split("\n")
+							.find((l) => l.startsWith(k))
+							?.split(":")[1]
+							?.trim();
+					return {
+						pid: Number(pid),
+						ppid: Number(pick("PPid")),
+						name: pick("Name"),
+						cmd: cmdlineRaw.replace(/\0/g, " ").trim() || pick("Name"),
+						rssKb: Number(pick("VmRSS")?.split(/\s+/)[0] ?? 0),
+					};
+				} catch {
+					return null;
+				}
+			}),
+		);
+		const active = procs.filter((p): p is NonNullable<typeof p> => p !== null);
+		result.processes = {
+			count: active.length,
+			totalRssKb: active.reduce((s, p) => s + (p.rssKb || 0), 0),
+			list: active.sort((a, b) => (b.rssKb || 0) - (a.rssKb || 0)),
+		};
+	} catch (e) {
+		const err = e as NodeJS.ErrnoException;
+		result.processes = { error: err.code ?? err.message };
+	}
+
 	return NextResponse.json(result, { status: 200 });
 }
