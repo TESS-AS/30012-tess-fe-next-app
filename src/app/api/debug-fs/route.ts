@@ -2,7 +2,8 @@
 // Hit https://tessix.no/api/debug-fs immediately after a restart, and again when images 400.
 // The FD count and openBanner.code are the smoking guns.
 import { NextResponse } from "next/server";
-import { open, readdir, stat } from "node:fs/promises";
+import { open, readdir, readFile, stat } from "node:fs/promises";
+import os from "node:os";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -17,7 +18,23 @@ export async function GET() {
 		pid: process.pid,
 		uptimeSeconds: Math.round(process.uptime()),
 		memory: process.memoryUsage(),
+		system: { freeMem: os.freemem(), totalMem: os.totalmem() },
 	};
+
+	try {
+		const meminfo = await readFile("/proc/meminfo", "utf8");
+		const pick = (key: string) =>
+			meminfo.split("\n").find((l) => l.startsWith(key))?.trim();
+		result.meminfo = {
+			memFree: pick("MemFree:"),
+			memAvailable: pick("MemAvailable:"),
+			swapTotal: pick("SwapTotal:"),
+			swapFree: pick("SwapFree:"),
+		};
+	} catch (e) {
+		const err = e as NodeJS.ErrnoException;
+		result.meminfo = { error: err.code ?? err.message };
+	}
 
 	try {
 		const files = await readdir(imagesPath);
@@ -59,7 +76,6 @@ export async function GET() {
 	}
 
 	try {
-		const { readFile } = await import("node:fs/promises");
 		const limits = await readFile(`/proc/${process.pid}/limits`, "utf8");
 		const openFilesLine = limits
 			.split("\n")
