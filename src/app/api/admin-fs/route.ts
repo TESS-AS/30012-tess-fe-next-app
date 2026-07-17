@@ -40,17 +40,12 @@ const TRUSTED_EXE_PREFIXES = [
 	"/lib/",
 	"/app/",
 ];
-const PROTECTED_PROCESS_NAMES = new Set([
-	"node",
-	"yarn",
-	"next-server",
-	"sh",
-	"bash",
-	"init",
-	"tini",
-	"dumb-init",
-	"npm",
-]);
+// Protection is exe-based, not name-based. A process whose exe resolves to a
+// trusted path (/usr/bin/node, /bin/sh, /app/*, etc.) is protected regardless
+// of what its /proc/<pid>/status "Name" field claims. Malware that unlinks its
+// on-disk binary (exe: null) or drops itself into /tmp is not protected — a
+// process claiming to be "sh" with a deleted exe is exactly the disguise we
+// want to catch.
 const KNOWN_DROP_PATHS = [
 	"/tmp/.ICEi-unix",
 	"/var/tmp/.bin",
@@ -144,9 +139,6 @@ async function safeKill(
 	}
 	const info = await processInfo(pid);
 	if (!info) return { ok: false, pid, reason: "no_such_process" };
-	if (info.name && PROTECTED_PROCESS_NAMES.has(info.name)) {
-		return { ok: false, pid, name: info.name, reason: "protected_name" };
-	}
 	if (isTrustedExe(info.exe)) {
 		return { ok: false, pid, exe: info.exe, reason: "trusted_exe" };
 	}
@@ -191,7 +183,6 @@ async function killAllSuspicious(): Promise<ActionResult[]> {
 		if (pid === 1 || pid === process.pid) continue;
 		const info = await processInfo(pid);
 		if (!info) continue;
-		if (info.name && PROTECTED_PROCESS_NAMES.has(info.name)) continue;
 		if (isTrustedExe(info.exe)) continue;
 		results.push(await safeKill(pid));
 	}
