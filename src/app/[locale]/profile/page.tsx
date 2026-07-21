@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import OrdersTab from "@/app/[locale]/profile/(components)/tabs/OrdersTab/OrdersTab";
 import PersonalInfoTab from "@/app/[locale]/profile/(components)/tabs/PersonalInfoTab";
 import UserAddressesTab from "@/app/[locale]/profile/(components)/tabs/UserAdresses/UserAddressesTab";
+import UsersBrukere from "@/app/[locale]/profile/(components)/users-brukere";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -146,9 +147,6 @@ const Rekvisisjoner = dynamic(
 		})),
 	{ ssr: false },
 );
-const UsersBrukere = dynamic(() => import("./(components)/users-brukere"), {
-	ssr: false,
-});
 
 export default function ProfilePage() {
 	const { setIsAuthOpen } = useAppContext();
