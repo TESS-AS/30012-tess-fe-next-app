@@ -107,7 +107,7 @@ export function ProductDetailTabs({
 											<dt className="text-sm font-semibold text-gray-900">
 												{attr.name || attr.nameKeyLanguage || "-"}
 											</dt>
-											<dd className="text-right text-sm font-light text-gray-800">
+											<dd className="text-right text-sm font-light text-black">
 												{attr.valueDef || attr.value_def || "-"}
 											</dd>
 										</div>
@@ -126,7 +126,7 @@ export function ProductDetailTabs({
 													<dt className="text-sm font-semibold text-gray-900">
 														GTIN
 													</dt>
-													<dd className="flex items-center gap-2 text-sm font-light text-gray-800">
+													<dd className="flex items-center gap-2 text-sm font-light text-black">
 														<span>{gtin}</span>
 														<button
 															type="button"
@@ -143,7 +143,7 @@ export function ProductDetailTabs({
 													<dt className="text-sm font-semibold text-gray-900">
 														SAP
 													</dt>
-													<dd className="flex items-center gap-2 text-sm font-light text-gray-800">
+													<dd className="flex items-center gap-2 text-sm font-light text-black">
 														<span>{sapNumber}</span>
 														<button
 															type="button"
@@ -176,7 +176,7 @@ export function ProductDetailTabs({
 										<dt className="text-sm font-semibold text-gray-900">
 											{attr.name || attr.nameKeyLanguage || "-"}
 										</dt>
-										<dd className="text-sm font-light text-gray-800">
+										<dd className="text-sm font-light text-black">
 											{attr.valueDef || attr.value_def || "-"}
 										</dd>
 									</div>

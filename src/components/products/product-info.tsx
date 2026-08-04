@@ -68,7 +68,6 @@ export function ProductInfo({
 	const t = useTranslations("Product");
 	const { data: profile } = useGetProfileData();
 	const { isCartChanging, setIsCartChanging, setIsAuthOpen, showCartNotification } = useAppContext();
-	const [copiedGtin, setCopiedGtin] = useState(false);
 	const [copiedSap, setCopiedSap] = useState(false);
 	const [quantity, setQuantity] = useState(1);
 	const [calculatedPrice, setCalculatedPrice] = useState<number | null>(null);
@@ -157,14 +156,6 @@ export function ProductInfo({
 	};
 
 	const sapNumber = getSapNumber();
-
-	const handleCopyGtin = () => {
-		if (gtin) {
-			navigator.clipboard.writeText(gtin);
-			setCopiedGtin(true);
-			setTimeout(() => setCopiedGtin(false), 1000);
-		}
-	};
 
 	const handleCopySap = () => {
 		if (sapNumber) {
@@ -374,48 +365,29 @@ export function ProductInfo({
 		<div>
 			<div className="flex flex-col gap-1 lg:flex-row lg:items-center lg:justify-between">
 				<h1 className="text-xl font-semibold lg:text-3xl">{name}</h1>
-				{(gtin || (sapNumber && isSapCustomer)) && (
+				{sapNumber && isSapCustomer && (
 					<div className="flex items-center gap-4">
-						{gtin && (
-							<div className="relative">
-								<button
-									type="button"
-									onClick={handleCopyGtin}
-									className="inline-flex items-center gap-1.5 text-xs font-light text-gray-500">
-									<span className="font-semibold text-black">GTIN:</span>
-									<span>{gtin}</span>
-									<Files className="h-4 w-4 cursor-pointer text-gray-500" />
-								</button>
-								{copiedGtin && (
-									<div className="absolute top-full left-0 mt-1 rounded-md bg-gray-800 px-2 py-1 text-xs text-white shadow">
-										{t("copied")}
-									</div>
-								)}
-							</div>
-						)}
-						{sapNumber && isSapCustomer && (
-							<div className="relative">
-								<button
-									type="button"
-									onClick={handleCopySap}
-									className="inline-flex items-center gap-1.5 text-xs font-light text-gray-500">
-									<span className="font-semibold text-black">SAP:</span>
-									<span>{sapNumber}</span>
-									<Files className="h-4 w-4 cursor-pointer text-gray-500" />
-								</button>
-								{copiedSap && (
-									<div className="absolute top-full left-0 mt-1 rounded-md bg-gray-800 px-2 py-1 text-xs text-white shadow">
-										{t("copied")}
-									</div>
-								)}
-							</div>
-						)}
+						<div className="relative">
+							<button
+								type="button"
+								onClick={handleCopySap}
+								className="inline-flex items-center gap-1.5 text-xs font-light text-gray-500">
+								<span className="font-semibold text-black">SAP:</span>
+								<span>{sapNumber}</span>
+								<Files className="h-4 w-4 cursor-pointer text-gray-500" />
+							</button>
+							{copiedSap && (
+								<div className="absolute top-full left-0 mt-1 rounded-md bg-gray-800 px-2 py-1 text-xs text-white shadow">
+									{t("copied")}
+								</div>
+							)}
+						</div>
 					</div>
 				)}
 			</div>
 			{description && (
 				<div className="mt-2">
-					<p className="text-md font-light text-[#8A8F8C]">{description}</p>
+					<p className="text-md font-light text-black">{description}</p>
 				</div>
 			)}
 
@@ -434,14 +406,14 @@ export function ProductInfo({
 								<span className="font-semibold text-black">
 									{locale === "no" ? "Varenummer:" : "Item number:"}
 								</span>
-								<span className="font-light text-[#434B46]">
+								<span className="font-light text-black">
 									{selectedItemNumber}
 								</span>
 
 								<span className="font-semibold text-black">
 									{locale === "no" ? "Varenavn:" : "Item name:"}
 								</span>
-								<span className="font-light text-[#434B46] uppercase">
+								<span className="font-light text-black uppercase">
 									{columnAttributes?.[selectedItemNumber]?.itemName ?? name}
 								</span>
 

@@ -91,7 +91,7 @@ export function RelatedProducts({ products, category }: RelatedProductsProps) {
 	}
 
 	return (
-		<div className="relative right-1/2 left-1/2 mt-8 -mr-[50vw] -ml-[50vw] w-screen bg-gray-50 py-14 pb-16">
+		<div className="relative right-1/2 left-1/2 mt-8 -mr-[50vw] -ml-[50vw] w-screen bg-gray-100 py-14 pb-16">
 			<section className="container mx-auto px-4">
 				<div className="mb-6 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
 					<h2 className="text-xl font-semibold text-[#0F1912] md:text-2xl">
