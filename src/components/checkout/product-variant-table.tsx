@@ -55,13 +55,11 @@ import {
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import {
 	Search,
-	ChevronUp,
-	ChevronDown,
 	Check,
 	Loader2,
 	ShoppingCart,
 	CheckCircle,
-	SquarePen,
+	Eye,
 	Info,
 } from "lucide-react";
 import Image from "next/image";
@@ -785,12 +783,9 @@ export default function ProductVariantTable({
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button
-								variant="outline"
-								className="group hidden h-9 items-center rounded-md border border-[#D3D3D3] bg-white px-3 text-sm font-normal text-[#5A615D] shadow-none hover:bg-gray-50 md:inline-flex">
-								<SquarePen className="mr-2 h-4 w-4 text-[#5A615D]" />
-								<span>Rediger tabell</span>
-								<ChevronDown className="ml-1 inline h-4 w-4 text-[#5A615D] group-data-[state=open]:hidden" />
-								<ChevronUp className="ml-1 hidden h-4 w-4 text-[#5A615D] group-data-[state=open]:inline" />
+								className="hidden h-9 items-center gap-1.5 rounded-md border-none bg-[#009640] px-3 text-sm font-normal text-white shadow-none hover:bg-[#007a33] md:inline-flex">
+								<Eye className="h-4 w-4 text-white" />
+								<span>Tilpass kolonner</span>
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent

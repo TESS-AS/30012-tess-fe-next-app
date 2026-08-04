@@ -861,8 +861,10 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 			</div>
 
 			{!isHoseManagementCustomer && (
-				<div className="hidden border-t lg:block">
-					<div className="container mx-auto flex h-12 w-full items-center justify-between gap-4">
+				<div
+					className="hidden border-t border-b-2 bg-[#F8F9F8] lg:block"
+					style={{ borderBottomColor: "#00B84C" }}>
+					<div className="container mx-auto flex h-12 w-full items-end justify-between gap-4">
 						<CategoryNavigationMenu
 							categories={categories ?? []}
 							loading={loading}

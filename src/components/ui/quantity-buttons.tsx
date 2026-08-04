@@ -17,6 +17,8 @@ interface QuantityButtonsProps {
 	className?: string;
 	buttonClassName?: string;
 	quantityClassName?: string;
+	/** Unit label shown next to the number (e.g. "STK", "MTR"). Rendered inside the field group. */
+	unit?: string;
 }
 
 const QuantityButtons = ({
@@ -33,6 +35,7 @@ const QuantityButtons = ({
 	className,
 	buttonClassName,
 	quantityClassName,
+	unit,
 }: QuantityButtonsProps) => {
 	const [inputValue, setInputValue] = React.useState<string>(String(quantity));
 
@@ -99,38 +102,44 @@ const QuantityButtons = ({
 				)}
 			</button>
 			{allowInput ? (
-				<input
-					type="number"
-					inputMode="numeric"
-					disabled={disabled || isLoading}
-					min={min}
-					max={max}
-					step={step}
-					value={inputValue}
-					onChange={(e) => {
-						e.stopPropagation();
-						setInputValue(e.target.value);
-					}}
-					onBlur={commitInput}
-					onKeyDown={(e) => {
-						e.stopPropagation();
-						if (e.key === "Enter") {
-							commitInput();
-							(e.target as HTMLInputElement).blur();
-						}
-					}}
-					className={cn(
-						"h-full w-[48px] border-r border-[#D3D3D3] bg-white text-center text-sm font-medium text-gray-900 outline-none",
-						quantityClassName,
+				<label className="flex h-full items-center justify-center gap-1 border-r border-[#D3D3D3] bg-white px-3">
+					<input
+						type="number"
+						inputMode="numeric"
+						disabled={disabled || isLoading}
+						min={min}
+						max={max}
+						step={step}
+						value={inputValue}
+						onChange={(e) => {
+							e.stopPropagation();
+							setInputValue(e.target.value);
+						}}
+						onBlur={commitInput}
+						onKeyDown={(e) => {
+							e.stopPropagation();
+							if (e.key === "Enter") {
+								commitInput();
+								(e.target as HTMLInputElement).blur();
+							}
+						}}
+						className={cn(
+							"w-[28px] bg-white p-0 text-right text-sm font-medium text-gray-900 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
+							quantityClassName,
+						)}
+					/>
+					{unit && (
+						<span className="text-sm font-medium text-gray-900">{unit}</span>
 					)}
-				/>
+				</label>
 			) : (
 				<span
 					className={cn(
-						"flex min-w-[2.5rem] items-center justify-center border-r border-[#D3D3D3] bg-white px-2 text-sm font-medium text-gray-900",
+						"flex min-w-[2.5rem] items-center justify-center gap-1 border-r border-[#D3D3D3] bg-white px-2 text-sm font-medium text-gray-900",
 						quantityClassName,
 					)}>
 					{quantity}
+					{unit && <span>{unit}</span>}
 				</span>
 			)}
 			<button

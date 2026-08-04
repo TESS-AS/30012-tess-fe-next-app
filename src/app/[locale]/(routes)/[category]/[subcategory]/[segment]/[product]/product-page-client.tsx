@@ -10,6 +10,7 @@ import { ProductReturnButton } from "@/components/products/product-return-button
 import { FeedbackSideTab } from "@/components/ui/feedback-side-tab";
 import { useGetColumnAttributes } from "@/hooks/useGetColumnAttributes";
 import { useProductFetch } from "@/hooks/useProductFetch";
+import { useSyncProductTopLevelNav } from "@/hooks/useSyncProductTopLevelNav";
 import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
@@ -80,6 +81,11 @@ export function ProductPageClient({
 	// Refetch when selection changes so variant-level columnAttributes (including relatedProducts) are correct
 	const { data: columnAttributes, isLoading: loadingAttributes } =
 		useGetColumnAttributes(selectedItemNumber ?? firstVariant);
+
+	// Sync the product's top-level category into the nav store so the header
+	// highlights the correct root even for URLs without category segments
+	// (e.g. /produkt/:id search-result links rewritten with __default).
+	useSyncProductTopLevelNav(columnAttributes?.categories);
 
 	// Lookup a variant's SAP number from columnAttributes. The search service
 	// puts SAP-style codes into `?itemNumber=...` in its redirect URL even
@@ -258,7 +264,7 @@ export function ProductPageClient({
 		: undefined;
 
 	return (
-		<div className="container mx-auto space-y-12 px-4 pt-8 pb-0">
+		<div className="container mx-auto space-y-8 px-4 pt-8 pb-0">
 			<FeedbackSideTab />
 			<ProductReturnButton />
 			<ProductBreadcrumbs
@@ -271,12 +277,12 @@ export function ProductPageClient({
 				}
 			/>
 
-			<div className="mb-0 grid grid-cols-12 items-start gap-x-0 gap-y-2 md:gap-x-8">
-				<div className="col-span-12 md:col-span-6">
+			<div className="mb-0 grid grid-cols-12 items-start gap-x-0 gap-y-2 md:gap-x-4">
+				<div className="col-span-12 md:col-span-5">
 					<ProductGallery images={productImages} />
 				</div>
 
-				<div className="col-span-12 flex flex-col gap-2 md:col-span-6">
+				<div className="col-span-12 flex flex-col gap-2 md:col-span-7">
 					<ProductInfo
 						name={
 							locale === "en"

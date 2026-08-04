@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useChildrenOverflow } from "@/hooks/useChildrenOverflow";
 import { useNavMenuStore } from "@/stores/useNavMenuStore";
 import type { Category } from "@/types/categories.types";
+import { useParams } from "next/navigation";
 
 import { MAX_NAV_CATEGORIES } from "./constants";
 import { DropdownFooter } from "./DropdownFooter";
@@ -13,6 +14,29 @@ import { NavLink } from "./NavLink";
 import { NavTrigger } from "./NavTrigger";
 import { Overlay } from "./Overlay";
 import { SubcategoryItem } from "./SubcategoryItem";
+
+function subtreeHasSlug(category: Category, slug: string): boolean {
+	if (category.slug === slug) return true;
+	return (
+		category.subcategories?.some((c) => subtreeHasSlug(c, slug)) ?? false
+	);
+}
+
+function findTopLevelSlugForUrl(
+	topLevels: Category[],
+	urlSegmentSlugs: string[],
+): string | null {
+	if (urlSegmentSlugs.length === 0) return null;
+	// Prefer the deepest URL segment we can match — a segment slug is more
+	// specific than the top `[category]` slug and less likely to collide
+	// across trees.
+	for (let i = urlSegmentSlugs.length - 1; i >= 0; i--) {
+		const slug = urlSegmentSlugs[i];
+		const match = topLevels.find((c) => subtreeHasSlug(c, slug));
+		if (match) return match.slug;
+	}
+	return null;
+}
 
 export default function CategoryNavigationMenu({
 	categories,
@@ -79,6 +103,24 @@ export default function CategoryNavigationMenu({
 	const slugsKey = (visibleCategories ?? []).map((c) => c.slug).join("|");
 	const isTight = useChildrenOverflow(ulRef, slugsKey);
 
+	// Persistently highlight the top-level nav item that owns the current
+	// product page. Two sources, in order:
+	//   1. Store value set by the product page from the fetched category tree.
+	//      Needed for `/produkt/:id` URLs rewritten with __default segments.
+	//   2. URL walk — for products reached via `/[category]/[subcategory]/...`,
+	//      match any URL segment against each top-level's descendant slugs.
+	const params = useParams();
+	const isProductPage = typeof params?.product === "string";
+	const storeTopLevelSlug = useNavMenuStore((s) => s.productTopLevelSlug);
+	const urlSegmentSlugs = isProductPage
+		? [params?.category, params?.subcategory, params?.segment]
+				.filter((s): s is string => typeof s === "string" && s !== "__default")
+		: [];
+	const currentTopLevelSlug = isProductPage
+		? storeTopLevelSlug ??
+			findTopLevelSlugForUrl(visibleCategories ?? [], urlSegmentSlugs)
+		: null;
+
 	return (
 		<nav
 			ref={rootRef}
@@ -86,7 +128,7 @@ export default function CategoryNavigationMenu({
 		>
 			<ul
 				ref={ulRef}
-				className="flex w-full min-w-0 list-none items-center justify-start"
+				className="relative flex w-full min-w-0 list-none items-end justify-start"
 			>
 				{loading
 					? Array.from({ length: MAX_NAV_CATEGORIES }).map((_, i) => (
@@ -96,12 +138,14 @@ export default function CategoryNavigationMenu({
 						))
 					: visibleCategories?.map((category, index) => {
 							const isFirst = index === 0;
+							const isCurrent = currentTopLevelSlug === category.slug;
 							return (
 								<li key={category.slug} className="relative">
 									{category.subcategories?.length ? (
 										<NavTrigger
 											category={category}
 											isActive={openMenu === category.slug}
+											isCurrent={isCurrent}
 											isFirst={isFirst}
 											isTight={isTight}
 											onToggle={() => toggleMenu(category.slug)}
@@ -109,6 +153,7 @@ export default function CategoryNavigationMenu({
 									) : (
 										<NavLink
 											category={category}
+											isCurrent={isCurrent}
 											isFirst={isFirst}
 											isTight={isTight}
 										/>

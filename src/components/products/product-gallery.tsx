@@ -58,17 +58,21 @@ export function ProductGallery({ images, className }: ProductGalleryProps) {
 
 	return (
 		<div className={cn("grid grid-cols-12 items-stretch gap-4", className)}>
-			<div className="col-span-12 flex justify-center">
-				<div className="w-full max-w-[562px] px-4">
-					<ZoomImage
-						src={selectedImage.url}
-						alt={selectedImage.filename}
-						width={562}
-						height={384}
-						className="aspect-square w-full rounded-lg object-contain"
-						priority
-						sizes="(min-width: 1024px) 562px, (min-width: 768px) 50vw, 100vw"
-					/>
+			<div className="col-span-12">
+				<div className="w-full">
+					<div
+						className="rounded-lg border p-4"
+						style={{ borderColor: "#C1C4C2" }}>
+						<ZoomImage
+							src={selectedImage.url}
+							alt={selectedImage.filename}
+							width={562}
+							height={384}
+							className="aspect-square w-full rounded-lg object-contain"
+							priority
+							sizes="(min-width: 1024px) 562px, (min-width: 768px) 50vw, 100vw"
+						/>
+					</div>
 
 					{/* Simple image pager: ← 1 of N → */}
 					{images.length > 1 && (

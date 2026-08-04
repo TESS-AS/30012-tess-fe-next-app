@@ -77,7 +77,7 @@ export function ProductBreadcrumbs({
 
 	if (isLoading && !hasBeCategories) {
 		return (
-			<div className="mb-10">
+			<div>
 				<BreadcrumbSkeleton />
 			</div>
 		);
@@ -86,7 +86,7 @@ export function ProductBreadcrumbs({
 	const breadcrumbs = hasBeCategories ? beBreadcrumbs : legacyBreadcrumbs;
 
 	return (
-		<div className="mb-10">
+		<div>
 			<Breadcrumb items={breadcrumbs} />
 		</div>
 	);

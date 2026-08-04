@@ -18,10 +18,11 @@ import { buildWarehouseOptions, resolveWarehouse } from "@/lib/warehouse";
 import { addToCart, getCart } from "@/services/carts.service";
 import { calculateItemPrice } from "@/services/product.service";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
-import { Files, ShoppingCart, Loader2, CheckCircle } from "lucide-react";
+import { Files, ShoppingCart, Loader2, CheckCircle, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
+import { ProductDocumentsDrawer } from "./product-documents-drawer";
 import QuantityButtons from "../ui/quantity-buttons";
 
 interface ProductInfoProps {
@@ -69,9 +70,11 @@ export function ProductInfo({
 	const { isCartChanging, setIsCartChanging, setIsAuthOpen, showCartNotification } = useAppContext();
 	const [copiedGtin, setCopiedGtin] = useState(false);
 	const [copiedSap, setCopiedSap] = useState(false);
-	const [showFullDescription, setShowFullDescription] = useState(false);
 	const [quantity, setQuantity] = useState(1);
 	const [calculatedPrice, setCalculatedPrice] = useState<number | null>(null);
+	// Unit price is cached separately so quantity changes don't briefly render
+	// `oldCalculatedPrice / newQuantity` while the refetch is in flight.
+	const [unitPrice, setUnitPrice] = useState<number | null>(null);
 	const [loadingPrice, setLoadingPrice] = useState(false);
 	const [adding, setAdding] = useState(false);
 
@@ -115,7 +118,6 @@ export function ProductInfo({
 		>;
 		const primary = locale === "no" ? pd.longDescNo : pd.longDescEn;
 		const fallback = locale === "no" ? pd.longDescEn : pd.longDescNo;
-		// Use current locale long desc; if empty, use other locale so "Les mer" / "Vis mindre" can still show
 		const desc =
 			primary !== undefined && primary.trim() !== ""
 				? primary
@@ -125,11 +127,9 @@ export function ProductInfo({
 		return desc !== undefined ? desc : undefined;
 	};
 
-	// Use columnAttributes productData first, fallback to props/variantData only if productData not available
 	const shortDescFromAttributes = getShortDescription();
 	const longDescFromAttributes = getLongDescription();
 
-	// Use productData descriptions if available (empty string = no description, undefined = fallback)
 	const shortDescriptionValue =
 		shortDescFromAttributes !== undefined
 			? shortDescFromAttributes || null
@@ -139,25 +139,12 @@ export function ProductInfo({
 			? longDescFromAttributes || null
 			: null;
 
-	// If no short description, use long description directly
-	// Otherwise, use show more/show less logic
-	const hasShortDescription =
-		shortDescriptionValue && shortDescriptionValue.trim() !== "";
-	const hasLongDescription = longDescription && longDescription.trim() !== "";
-	const shouldShowToggle =
-		hasShortDescription &&
-		hasLongDescription &&
-		shortDescriptionValue !== longDescription;
-
-	const displayDescription = () => {
-		if (!hasShortDescription && hasLongDescription) {
-			return longDescription;
-		}
-		if (shouldShowToggle) {
-			return showFullDescription ? longDescription : shortDescriptionValue;
-		}
-		return shortDescriptionValue || longDescription || "";
-	};
+	// Always prefer the long description; fall back to the short one if long is missing.
+	const description =
+		(longDescription && longDescription.trim() !== "" ? longDescription : null) ??
+		(shortDescriptionValue && shortDescriptionValue.trim() !== ""
+			? shortDescriptionValue
+			: null);
 
 	const getSapNumber = () => {
 		if (!selectedItemNumber || !columnAttributes) return null;
@@ -319,11 +306,14 @@ export function ProductInfo({
 				);
 
 				if (result?.[0]) {
-					setCalculatedPrice(result[0].bestPrice || 0);
+					const bestPrice = result[0].bestPrice || 0;
+					setCalculatedPrice(bestPrice);
+					setUnitPrice(bestPrice / Math.max(effectiveQuantity, 1));
 				}
 			} catch (err) {
 				console.error("Failed to load price", err);
 				setCalculatedPrice(null);
+				setUnitPrice(null);
 			} finally {
 				setLoadingPrice(false);
 			}
@@ -423,56 +413,73 @@ export function ProductInfo({
 					</div>
 				)}
 			</div>
-			{displayDescription() && (
-				<>
-					<div className="mt-2">
-						<p className="text-md font-light text-[#8A8F8C]">
-							{displayDescription()}
-						</p>
-						{shouldShowToggle && (
-							<button
-								type="button"
-								onClick={() => setShowFullDescription(!showFullDescription)}
-								className="mt-2 text-base font-light text-green-600 hover:underline">
-								{showFullDescription ? "Vis mindre" : "Les mer"} ›
-							</button>
-						)}
-					</div>
-					<hr className="my-4 border-gray-200" />
-				</>
+			{description && (
+				<div className="mt-2">
+					<p className="text-md font-light text-[#8A8F8C]">{description}</p>
+				</div>
 			)}
 
-			{/* Product action section: details card + Velg varianter, then price + quantity + add */}
+			{/* Product action section: details card (with buttons inside), then price + quantity + add card */}
 			{selectedItemNumber && columnAttributes && (
 				<div className="mt-4 space-y-4">
-					{/* Row 1: Product details card (70%) + Velg varianter button (30%) */}
-					<div className="flex flex-col gap-4 sm:flex-row sm:items-stretch sm:gap-4">
-						{/* Product details card */}
-						<div
-							className="min-w-0 flex-[0.7] rounded-lg border px-4 py-3"
-							style={{
-								borderColor: "#E8EAE9",
-								backgroundColor: "#F8F9F8",
-							}}>
-							<div className="space-y-2 text-sm">
-								<p>
+					{/* Green details card: labels+values on the left, action buttons on the right */}
+					<div
+						className="flex flex-col gap-4 rounded-lg border px-4 py-3 sm:flex-row sm:items-start"
+						style={{
+							borderColor: "#C1C4C2",
+							backgroundColor: "#F0FCF2",
+						}}>
+						<div className="min-w-0 flex-1">
+							<div className="grid grid-cols-[auto_1fr] items-start gap-x-3 gap-y-4 text-base">
+								<span className="font-semibold text-black">
+									{locale === "no" ? "Varenummer:" : "Item number:"}
+								</span>
+								<span className="font-light text-[#434B46]">
+									{selectedItemNumber}
+								</span>
+
+								<span className="font-semibold text-black">
+									{locale === "no" ? "Varenavn:" : "Item name:"}
+								</span>
+								<span className="font-light text-[#434B46] uppercase">
+									{columnAttributes?.[selectedItemNumber]?.itemName ?? name}
+								</span>
+
+								{profile && warehouseOptions.length === 0 && (
+									<>
+										<span className="pt-2 font-semibold text-black">
+											{locale === "no" ? "Lagerstatus:" : "Stock status:"}
+										</span>
+										<div className="flex min-w-[220px] flex-col gap-2">
+											<div
+												className="flex items-center justify-between rounded-lg border bg-white px-3 py-2"
+												style={{ borderColor: "#C1C4C2" }}>
+												<span className="text-sm text-gray-800">
+													{locale === "no" ? "Ikke på lager" : "Out of stock"}
+												</span>
+												<ChevronDown className="h-4 w-4 text-gray-400" />
+											</div>
+											<p className="text-sm text-gray-600">
+												{locale === "no" ? (
+													<>
+														Leveringstid bekreftes av TESS etter bestilling.
+														<br />
+														Ta kontakt med Kundeservice ved behov.
+													</>
+												) : (
+													<>
+														Delivery time confirmed by TESS after ordering.
+														<br />
+														Contact Customer Service if needed.
+													</>
+												)}
+											</p>
+										</div>
+									</>
+								)}
+
+								{profile && warehouseOptions.length > 0 && <>
 									<span className="font-semibold text-black">
-										{locale === "no" ? "Varenummer:" : "Item number:"}
-									</span>{" "}
-									<span className="font-light text-[#434B46]">
-										{selectedItemNumber}
-									</span>
-								</p>
-								<p>
-									<span className="font-semibold text-black">
-										{locale === "no" ? "Varenavn:" : "Item name:"}
-									</span>{" "}
-									<span className="font-light text-[#434B46] uppercase">
-										{columnAttributes?.[selectedItemNumber]?.itemName ?? name}
-									</span>
-								</p>
-								{profile && <div className="flex flex-wrap items-center gap-1.5">
-									<span className="shrink-0 font-semibold text-black">
 										{locale === "no" ? "Tilgjengelighet:" : "Availability:"}
 									</span>
 									<Select
@@ -502,7 +509,9 @@ export function ProductInfo({
 															nextCompanyNumber,
 														);
 														if (result?.[0]) {
-															setCalculatedPrice(result[0].bestPrice || 0);
+															const bestPrice = result[0].bestPrice || 0;
+															setCalculatedPrice(bestPrice);
+															setUnitPrice(bestPrice / Math.max(quantity, 1));
 														}
 													} catch (err) {
 														console.error("Failed to load price", err);
@@ -512,12 +521,17 @@ export function ProductInfo({
 												}
 											}
 										}}>
-										<SelectTrigger className="inline-flex h-auto w-auto min-w-0 border-0 bg-transparent p-0 shadow-none outline-none focus:ring-0">
+										<SelectTrigger
+											className="inline-flex h-auto min-w-[220px] items-center justify-between gap-2 rounded-lg px-3 py-2 shadow-none outline-none focus:ring-0"
+											style={{
+												backgroundColor: "#F8F9F8",
+												borderColor: "#8A8F8C",
+											}}>
 											<div className="flex items-center gap-1.5">
 												{selectedOption && selectedOption.balance > 0 && (
 													<CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
 												)}
-												<span className="text-green-700">
+												<span className="text-sm text-black">
 													{warehouseTriggerLabel}
 												</span>
 											</div>
@@ -547,17 +561,17 @@ export function ProductInfo({
 											)}
 										</SelectContent>
 									</Select>
-								</div>}
+								</>}
 							</div>
 						</div>
 
-						{/* Velg varianter button */}
-						{variants.length > 0 && (
-							<div className="flex flex-[0.3] items-start sm:justify-end">
+						{/* Velg varianter + Dokumentasjon buttons (right column inside green card) */}
+						<div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:min-w-[180px]">
+							{variants.length > 0 && (
 								<Button
 									type="button"
 									variant="outline"
-									className="h-auto w-full shrink-0 rounded-lg border-gray-200 bg-white px-4 py-2 text-sm font-normal text-black hover:bg-gray-50 sm:w-auto"
+									className="h-auto w-full rounded-lg border-gray-200 bg-white px-3 py-1.5 text-xs font-normal text-black hover:bg-gray-50"
 									onClick={() => {
 										const el = document.getElementById("product-table-details");
 										el?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -566,82 +580,132 @@ export function ProductInfo({
 										? `Velg varianter (${variants.length})`
 										: `Select variants (${variants.length})`}
 								</Button>
+							)}
+							<ProductDocumentsDrawer
+								columnAttributes={columnAttributes}
+								selectedItemNumber={selectedItemNumber}
+								firstItemNumber={firstItemNumber}
+								locale={locale}
+								name={name}
+								productNumber={productNumber}
+								imageUrl={imageUrl}
+								application={application}
+								gtin={gtin}
+								variants={variants}
+								profile={profile}
+								isSapCustomer={isSapCustomer}
+							/>
+						</div>
+					</div>
+
+					{/* Price + quantity + total + buy card (4 equal columns, divider between price and qty) */}
+					<div
+						className="flex flex-col gap-4 overflow-hidden rounded-lg border bg-white sm:flex-row sm:items-stretch sm:gap-0"
+						style={{ borderColor: "#C1C4C2" }}>
+						{/* Unit price */}
+						<div className="flex flex-1 flex-col justify-center px-4 py-3">
+							{profile ? (
+								<>
+									<span className="text-xl leading-none font-semibold text-black">
+										{unitPrice !== null
+											? `${formatNorwegianCurrency(unitPrice)}/${unit.toLowerCase()}`
+											: loadingPrice
+												? t("loadingPrice")
+												: "-"}
+									</span>
+									<span className="mt-2 text-sm font-normal text-gray-500">
+										{locale === "no" ? "Pris eks. mva" : t("excludingVat")}
+									</span>
+								</>
+							) : (
+								<p className="text-sm text-gray-500">
+									<button
+										type="button"
+										className="text-[#009640] underline hover:text-[#005522]"
+										onClick={() => setIsAuthOpen(true)}>
+										Logg inn
+									</button>{" "}
+									for pris
+								</p>
+							)}
+						</div>
+
+						{/* Quantity selector (only for logged-in users) */}
+						{profile && (
+							<div
+								className="flex flex-1 items-center justify-center border-l px-4 py-3"
+								style={{ borderColor: "#C1C4C2" }}>
+								<QuantityButtons
+									quantity={effectiveQuantity}
+									allowInput
+									step={multiple}
+									min={multiple}
+									unit={unit}
+									onQuantityChange={(next) => {
+										setQuantity(next);
+										if (selectedItemNumber && onQuantityChange) {
+											onQuantityChange(selectedItemNumber, next);
+										}
+									}}
+									onIncrease={() => {
+										const next = effectiveQuantity + multiple;
+										setQuantity(next);
+										if (selectedItemNumber && onQuantityChange) {
+											onQuantityChange(selectedItemNumber, next);
+										}
+									}}
+									onDecrease={() => {
+										const next = Math.max(
+											multiple,
+											effectiveQuantity - multiple,
+										);
+										setQuantity(next);
+										if (selectedItemNumber && onQuantityChange) {
+											onQuantityChange(selectedItemNumber, next);
+										}
+									}}
+								/>
+							</div>
+						)}
+
+						{/* Total price + Legg til (grouped, tinted background) */}
+						{profile && (
+							<div
+								className="flex flex-[1.5] items-center justify-between gap-3 border-l px-4 py-3"
+								style={{ borderColor: "#C1C4C2", backgroundColor: "#F8F9F8" }}>
+								<div className="flex flex-col">
+									<span className="text-xl leading-none font-semibold text-black">
+										{loadingPrice
+											? t("loadingPrice")
+											: calculatedPrice !== null
+												? formatNorwegianCurrency(calculatedPrice)
+												: "-"}
+									</span>
+									<span className="mt-2 text-sm font-normal text-gray-500">
+										{locale === "no"
+											? "Totalpris eks. mva"
+											: "Total excl. VAT"}
+									</span>
+								</div>
+								<Button
+									disabled={adding || !selectedItemNumber}
+									className="min-w-0 rounded-lg border-0 px-4 font-light hover:opacity-90 disabled:opacity-60"
+									onClick={handleAddToCart}>
+									{adding ? (
+										<>
+											<Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+											{t("adding")}
+										</>
+									) : (
+										<>
+											<ShoppingCart className="mr-1.5 h-4 w-4" />
+											{t("addToCart")}
+										</>
+									)}
+								</Button>
 							</div>
 						)}
 					</div>
-
-					{/* Price */}
-					{profile ? (
-						<div className="flex items-baseline gap-1">
-							<span className="text-xl leading-none font-semibold text-black">
-								{loadingPrice
-									? t("loadingPrice")
-									: calculatedPrice !== null
-										? formatNorwegianCurrency(calculatedPrice)
-										: "-"}
-							</span>
-							<span className="text-sm font-normal text-gray-500">
-								({locale === "no" ? "eks mva" : t("excludingVat")})
-							</span>
-						</div>
-					) : (
-						<p className="text-sm text-gray-500">
-							<button
-								type="button"
-								className="text-[#009640] underline hover:text-[#005522]"
-								onClick={() => setIsAuthOpen(true)}>
-								Logg inn
-							</button>{" "}
-							for pris
-						</p>
-					)}
-
-					{/* Quantity selector + Legg til (only for logged-in users) */}
-					{profile && <div className="flex items-center justify-between gap-4">
-						<QuantityButtons
-							quantity={effectiveQuantity}
-							allowInput
-							step={multiple}
-							min={multiple}
-							onQuantityChange={(next) => {
-								setQuantity(next);
-								if (selectedItemNumber && onQuantityChange) {
-									onQuantityChange(selectedItemNumber, next);
-								}
-							}}
-							onIncrease={() => {
-								const next = effectiveQuantity + multiple;
-								setQuantity(next);
-								if (selectedItemNumber && onQuantityChange) {
-									onQuantityChange(selectedItemNumber, next);
-								}
-							}}
-							onDecrease={() => {
-								const next = Math.max(multiple, effectiveQuantity - multiple);
-								setQuantity(next);
-								if (selectedItemNumber && onQuantityChange) {
-									onQuantityChange(selectedItemNumber, next);
-								}
-							}}
-						/>
-
-						<Button
-							disabled={adding || !selectedItemNumber}
-							className="min-w-0 shrink rounded-lg border-0 px-4 font-light hover:opacity-90 disabled:opacity-60 md:w-[172px]"
-							onClick={handleAddToCart}>
-							{adding ? (
-								<>
-									<Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-									{t("adding")}
-								</>
-							) : (
-								<>
-									<ShoppingCart className="mr-1.5 h-4 w-4" />
-									{t("addToCart")}
-								</>
-							)}
-						</Button>
-					</div>}
 				</div>
 			)}
 		</div>
