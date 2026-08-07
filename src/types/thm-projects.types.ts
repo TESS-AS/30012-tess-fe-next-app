@@ -85,6 +85,7 @@ export interface ThmDashboardParams {
 export type ThmHoseSyncStatus = "NotTouched" | "UpdatedFromMobile";
 
 export interface ThmHoseListItem {
+	hexagonId: string;
 	posId: string;
 	s2: string;
 	status: ThmHoseSyncStatus;

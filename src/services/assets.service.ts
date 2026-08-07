@@ -1,6 +1,7 @@
 import {
 	GetAssetsResponse,
 	GetHoseHistory,
+	HoseMediaDrawerResponse,
 	S1Codes,
 } from "@/types/assets.types";
 
@@ -181,5 +182,15 @@ export const getHoseHistory = async (
 	const response = await axiosClient.get(`/asset/getHoseHistory`, {
 		params: { hexagonId },
 	});
+	return response.data;
+};
+
+export const getHoseMediaDrawer = async (
+	hexagonId: string,
+): Promise<HoseMediaDrawerResponse> => {
+	const response = await axiosClient.get<HoseMediaDrawerResponse>(
+		`/asset/getHoseMediaDrawer`,
+		{ params: { hexagonId } },
+	);
 	return response.data;
 };

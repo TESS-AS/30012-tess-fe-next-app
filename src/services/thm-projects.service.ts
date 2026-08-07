@@ -11,6 +11,7 @@
  */
 
 import axiosClient from "@/services/axiosClient";
+import type { GetAssetsResponse } from "@/types/assets.types";
 import type {
 	ThmDashboardParams,
 	ThmDashboardTag,
@@ -67,6 +68,34 @@ function isoFromBeDate(raw: string | undefined): string {
 	if (!raw) return "";
 	if (raw.includes("T")) return raw.slice(0, 10);
 	return raw;
+}
+
+const MONTHS_UPPER = [
+	"JAN",
+	"FEB",
+	"MAR",
+	"APR",
+	"MAY",
+	"JUN",
+	"JUL",
+	"AUG",
+	"SEP",
+	"OCT",
+	"NOV",
+	"DEC",
+];
+
+// Matches the Figma display like "13-APR-2026". Input may be ISO with a
+// zone (e.g. "2026-06-20T00:00:00.000Z") or already-formatted; treat as
+// UTC so timezones don't shift the day.
+function formatDdMmmYyyy(raw: string | undefined): string {
+	if (!raw) return "";
+	const d = new Date(raw);
+	if (Number.isNaN(d.getTime())) return "";
+	const day = String(d.getUTCDate()).padStart(2, "0");
+	const month = MONTHS_UPPER[d.getUTCMonth()];
+	const year = d.getUTCFullYear();
+	return `${day}-${month}-${year}`;
 }
 
 // ---------- Public service API --------------------------------------------
@@ -179,47 +208,76 @@ export async function getThmDashboard({
 
 // ---------- List view (hoses in survey WO) --------------------------------
 
-// BE endpoint TBD — currently returning a mock so the FE can render.
-// Swap for `axiosClient.get("/asset/getHose", { params: ... })` (or similar)
-// once BE ships the per-hose list for a work order.
+// `/asset/getHose` supports `workOrderNumber`, `searchTerm`, `page`,
+// `pageSize` upstream (see assetSwagger.ts line 1226-1345 in the BE repo).
+// We pass all of them through and trust BE's meta — no client-side
+// pagination or filtering here, otherwise a big WO forces a full
+// page-1000 fetch on every keystroke.
+interface BeGetHoseResponse {
+	data: GetAssetsResponse[];
+	meta: BeListMeta;
+}
+
 export async function getThmWorkOrderHoses({
 	workOrderNumber,
 	page = 1,
-	pageSize = 50,
+	pageSize = 25,
 	search,
 }: ThmWorkOrderListViewParams): Promise<ThmWorkOrderListViewResponse> {
+	// TEMP DEBUG: force-fetch hoses for customerNumber 184200 (Equinor)
+	// regardless of the clicked work order so we can eyeball real rows +
+	// open the drawer. REVERT ME — restore workOrderNumber/searchTerm below.
 	void workOrderNumber;
+	void search;
+	const { data: beList } = await axiosClient.get<BeGetHoseResponse>(
+		"/asset/getHose",
+		{
+			params: {
+				customerNumber: "184200",
+				page,
+				pageSize,
+			},
+		},
+	);
 
-	const mockRows: ThmHoseListItem[] = Array.from({ length: 12 }, (_, i) => ({
-		posId: "2211879",
-		s2: "Kran A",
-		status: i === 0 ? "NotTouched" : "UpdatedFromMobile",
-		uploaded: "2026-04-13",
-		synced: "2026-04-15",
-		imageCount: [12, 35, 4, 9, null, 42, 42, 42, 9, 4, 12, 42][i] ?? null,
-		hasImages: i === 1,
-		hoseStd: "2SN",
-		hoseDim: '-16 (1")',
-	}));
+	const rows: ThmHoseListItem[] = (beList.data ?? []).map((hose) => {
+		const hoseFitting1 = hose.hoseFitting1 as
+			| { genericDimensionEnd?: { genericDimensionName?: string } }
+			| undefined;
+		return {
+			hexagonId: String(hose.hoseLine?.hexagonId ?? ""),
+			// BE gap: customerData.posNumber currently returns "" for every row.
+			posId: hose.customerData?.posNumber ?? "",
+			s2: hose.hoseLine?.s2?.s2Name ?? "",
+			// BE gap: no mobile-sync status field yet. Placeholder until BE ships it.
+			status: "NotTouched",
+			// BE gap: no true "uploaded-from-mobile" timestamp. Using registration
+			// date as the closest proxy so the column isn't blank.
+			uploaded: formatDdMmmYyyy(hose.hoseHeader?.requestDate),
+			// BE gap: no sync timestamp at all.
+			synced: "",
+			// BE gap: no media count on this endpoint — fanning out per row would
+			// be N extra calls. Waiting on inline `mediaCount` from BE.
+			imageCount: null,
+			hasImages: false,
+			hoseStd: hose.hoseData?.hoseType?.hoseTypeName ?? "",
+			hoseDim:
+				hoseFitting1?.genericDimensionEnd?.genericDimensionName ?? "",
+		};
+	});
 
-	const q = search?.trim().toLowerCase();
-	const filtered = q
-		? mockRows.filter((r) =>
-				[r.posId, r.s2, r.hoseStd, r.hoseDim]
-					.map((v) => v.toLowerCase())
-					.some((v) => v.includes(q)),
-			)
-		: mockRows;
-
-	const totalItems = filtered.length;
-	const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-	const start = (page - 1) * pageSize;
-	const slice = filtered.slice(start, start + pageSize);
+	const firstHose = beList.data?.[0];
+	const title = firstHose?.hoseLine?.s1?.s1Name ?? undefined;
 
 	return {
-		data: slice,
-		meta: { page, pageSize, totalItems, totalPages },
-		title: undefined,
+		data: rows,
+		meta: beList.meta ?? {
+			page,
+			pageSize,
+			totalItems: rows.length,
+			totalPages: 1,
+		},
+		title,
 	};
 }
 

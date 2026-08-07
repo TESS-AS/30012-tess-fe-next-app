@@ -240,3 +240,97 @@ export interface HoseHistoryItem {
 }
 
 export type GetHoseHistory = HoseHistoryItem[];
+
+// ---------- Hose media drawer (/asset/getHoseMediaDrawer) -----------------
+
+export type HoseMediaCategoryKey =
+	| "s2"
+	| "hose"
+	| "end1"
+	| "end2"
+	| "inspection";
+
+export interface HoseMediaImage {
+	imageId: string;
+	originalFileName: string;
+	imageUrl: string;
+	fileSize: string;
+	createdAt: string;
+}
+
+export interface HoseMediaS2Metadata {
+	s2Name: string | null;
+	s2Code: string | null;
+}
+
+export interface HoseMediaHoseMetadata {
+	hoseStandard: string | null;
+	hoseLengthMm: number | null;
+	hoseDimension: string | null;
+	outerCover: string | null;
+	wpBar: number | null;
+	wpPsi: number | null;
+}
+
+export interface HoseMediaEnd1Metadata {
+	typeFittingEnd1: string | null;
+	genderEnd1: string | null;
+	typeSubCategoryEnd1: string | null;
+	angleEnd1: string | null;
+	genericDimensionName1: string | null;
+	materialQualityEnd1: string | null;
+}
+
+export interface HoseMediaEnd2Metadata {
+	typeFittingEnd2: string | null;
+	genderEnd2: string | null;
+	typeSubCategoryEnd2: string | null;
+	angleEnd2: string | null;
+	genericDimensionName2: string | null;
+	materialQualityEnd2: string | null;
+}
+
+export interface HoseMediaInspectionMetadata {
+	hoseCondition: string | null;
+	approved: boolean | null;
+	inspectionComment: string | null;
+}
+
+export type HoseMediaCategory =
+	| {
+			key: "s2";
+			count: number;
+			metadata: HoseMediaS2Metadata;
+			images: HoseMediaImage[];
+	  }
+	| {
+			key: "hose";
+			count: number;
+			metadata: HoseMediaHoseMetadata;
+			images: HoseMediaImage[];
+	  }
+	| {
+			key: "end1";
+			count: number;
+			metadata: HoseMediaEnd1Metadata;
+			images: HoseMediaImage[];
+	  }
+	| {
+			key: "end2";
+			count: number;
+			metadata: HoseMediaEnd2Metadata;
+			images: HoseMediaImage[];
+	  }
+	| {
+			key: "inspection";
+			count: number;
+			metadata: HoseMediaInspectionMetadata;
+			images: HoseMediaImage[];
+	  };
+
+export interface HoseMediaDrawerResponse {
+	s1Code: string;
+	s1Name: string;
+	totalCount: number;
+	categories: HoseMediaCategory[];
+}

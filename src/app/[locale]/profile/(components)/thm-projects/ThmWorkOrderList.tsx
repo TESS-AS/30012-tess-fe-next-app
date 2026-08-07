@@ -5,6 +5,14 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+	Pagination,
+	PaginationContent,
+	PaginationItem,
+	PaginationLink,
+	PaginationNext,
+	PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
 	Select,
 	SelectContent,
 	SelectItem,
@@ -27,6 +35,7 @@ import {
 	preferencesToViewColumns,
 	viewColumnsToPreferences,
 } from "@/lib/thm-column-views";
+import { cn } from "@/lib/utils";
 import type { ThmHoseListItem } from "@/types/thm-projects.types";
 import {
 	Calendar,
@@ -42,6 +51,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-toastify";
 
+import { HoseMediaDrawer } from "./HoseMediaDrawer";
 import { ThmCustomizeColumnsModal } from "./ThmCustomizeColumnsModal";
 
 interface ThmWorkOrderListProps {
@@ -82,6 +92,9 @@ const DEFAULT_PREFS: ColumnPreferences<ColumnKey> = {
 // Shown as the "View Name:" label when the user hasn't created a view yet.
 const FALLBACK_VIEW_NAME = "Default View";
 
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
+const SEARCH_DEBOUNCE_MS = 300;
+
 function StatusBadge({ status }: { status: ThmHoseListItem["status"] }) {
 	if (status === "NotTouched") {
 		return (
@@ -111,24 +124,24 @@ function StatusBadge({ status }: { status: ThmHoseListItem["status"] }) {
 function BildestatusCell({
 	imageCount,
 	hasImages,
+	onOpen,
 }: {
 	imageCount: number | null;
 	hasImages: boolean;
+	onOpen: () => void;
 }) {
 	const label = imageCount == null ? "(-)" : `(${imageCount})`;
-	if (hasImages) {
-		return (
-			<span className="inline-flex items-center gap-2 text-[#1C6D2C]">
-				<ImageIcon className="h-4 w-4" />
-				<span className="text-sm underline">{label}</span>
-			</span>
-		);
-	}
 	return (
-		<span className="inline-flex items-center gap-2 text-[#5A615D]">
+		<button
+			type="button"
+			onClick={onOpen}
+			className={cn(
+				"-mx-1 inline-flex items-center gap-2 rounded-sm px-1 hover:bg-[#F3F4F3]",
+				hasImages ? "text-[#1C6D2C]" : "text-[#5A615D]",
+			)}>
 			<ImageIcon className="h-4 w-4" />
-			<span className="text-sm">{label}</span>
-		</span>
+			<span className={cn("text-sm", hasImages && "underline")}>{label}</span>
+		</button>
 	);
 }
 
@@ -169,7 +182,11 @@ function FilterCell({ isDate }: { isDate?: boolean }) {
 	);
 }
 
-function renderCell(key: ColumnKey, row: ThmHoseListItem) {
+function renderCell(
+	key: ColumnKey,
+	row: ThmHoseListItem,
+	onOpenMedia: (row: ThmHoseListItem) => void,
+) {
 	switch (key) {
 		case "posId":
 			return row.posId;
@@ -186,6 +203,7 @@ function renderCell(key: ColumnKey, row: ThmHoseListItem) {
 				<BildestatusCell
 					imageCount={row.imageCount}
 					hasImages={row.hasImages}
+					onOpen={() => onOpenMedia(row)}
 				/>
 			);
 		case "hoseStd":
@@ -200,8 +218,30 @@ const DATE_COLUMNS = new Set<ColumnKey>(["uploaded", "synced"]);
 export function ThmWorkOrderList({ workOrderNumber }: ThmWorkOrderListProps) {
 	const router = useRouter();
 	const [search, setSearch] = useState("");
+	const [debouncedSearch, setDebouncedSearch] = useState("");
+	const [page, setPage] = useState(1);
+	const [pageSize, setPageSize] = useState(25);
 	const [customizeOpen, setCustomizeOpen] = useState(false);
 	const [activeViewId, setActiveViewId] = useState<number | null>(null);
+	const [mediaDrawerRow, setMediaDrawerRow] = useState<ThmHoseListItem | null>(
+		null,
+	);
+
+	// Debounce the search input — a keystroke shouldn't refire the request
+	// mid-typing, which on a large WO means a slow BE round-trip per letter.
+	useEffect(() => {
+		const t = setTimeout(
+			() => setDebouncedSearch(search.trim()),
+			SEARCH_DEBOUNCE_MS,
+		);
+		return () => clearTimeout(t);
+	}, [search]);
+
+	// Reset to page 1 whenever the filter set changes — otherwise we could
+	// land on a page number that no longer exists in the filtered result.
+	useEffect(() => {
+		setPage(1);
+	}, [debouncedSearch, pageSize, workOrderNumber]);
 
 	const { data: views = [], isLoading: viewsLoading } = useThmViews();
 	const createView = useCreateThmView();
@@ -237,11 +277,19 @@ export function ThmWorkOrderList({ workOrderNumber }: ThmWorkOrderListProps) {
 	);
 
 	const { data, isLoading } = useThmWorkOrderHoses(
-		workOrderNumber ? { workOrderNumber, page: 1, pageSize: 50 } : null,
+		workOrderNumber
+			? {
+					workOrderNumber,
+					page,
+					pageSize,
+					search: debouncedSearch || undefined,
+				}
+			: null,
 	);
 
 	const rows = data?.data ?? [];
 	const total = data?.meta.totalItems ?? 0;
+	const totalPages = data?.meta.totalPages ?? 1;
 
 	const title = data?.title ?? workOrderNumber;
 
@@ -251,7 +299,11 @@ export function ThmWorkOrderList({ workOrderNumber }: ThmWorkOrderListProps) {
 		);
 	};
 
-	const handleResetFilters = () => setSearch("");
+	const handleResetFilters = () => {
+		setSearch("");
+		setDebouncedSearch("");
+		setPage(1);
+	};
 
 	const currentViewName = activeView?.viewName ?? FALLBACK_VIEW_NAME;
 
@@ -459,7 +511,7 @@ export function ThmWorkOrderList({ workOrderNumber }: ThmWorkOrderListProps) {
 										<td
 											key={key}
 											className="px-4 py-4 text-[#0F1912]">
-											{renderCell(key, row)}
+											{renderCell(key, row, setMediaDrawerRow)}
 										</td>
 									))}
 									<td className="px-4 py-4 text-right">
@@ -478,6 +530,15 @@ export function ThmWorkOrderList({ workOrderNumber }: ThmWorkOrderListProps) {
 				</table>
 			</div>
 
+			<PaginationFooter
+				page={page}
+				pageSize={pageSize}
+				totalItems={total}
+				totalPages={totalPages}
+				onPageChange={setPage}
+				onPageSizeChange={setPageSize}
+			/>
+
 			<ThmCustomizeColumnsModal<ColumnKey>
 				open={customizeOpen}
 				onOpenChange={setCustomizeOpen}
@@ -489,6 +550,140 @@ export function ThmWorkOrderList({ workOrderNumber }: ThmWorkOrderListProps) {
 				onCopyView={handleCopyView}
 				onDeleteView={handleDeleteView}
 			/>
+
+			<HoseMediaDrawer
+				open={mediaDrawerRow != null}
+				onOpenChange={(o) => {
+					if (!o) setMediaDrawerRow(null);
+				}}
+				hexagonId={mediaDrawerRow?.hexagonId ?? null}
+				seq={mediaDrawerRow?.posId ?? null}
+				equipmentName={mediaDrawerRow?.s2 ?? null}
+			/>
 		</div>
 	);
+}
+
+function PaginationFooter({
+	page,
+	pageSize,
+	totalItems,
+	totalPages,
+	onPageChange,
+	onPageSizeChange,
+}: {
+	page: number;
+	pageSize: number;
+	totalItems: number;
+	totalPages: number;
+	onPageChange: (p: number) => void;
+	onPageSizeChange: (s: number) => void;
+}) {
+	if (totalItems === 0) return null;
+
+	const clamp = (n: number) => Math.min(Math.max(n, 1), totalPages);
+	const rangeStart = (page - 1) * pageSize + 1;
+	const rangeEnd = Math.min(page * pageSize, totalItems);
+
+	// Compact window: current ±2, plus first/last with ellipses.
+	const pages = pageWindow(page, totalPages);
+
+	return (
+		<div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-[#C1C4C2] bg-white px-4 py-3 text-sm">
+			<div className="flex items-center gap-2 text-[#5A615D]">
+				<span>
+					Showing{" "}
+					<span className="font-semibold text-[#0F1912]">{rangeStart}</span>–
+					<span className="font-semibold text-[#0F1912]">{rangeEnd}</span> of{" "}
+					<span className="font-semibold text-[#0F1912]">{totalItems}</span>
+				</span>
+				<span className="mx-2 h-4 w-px bg-[#E5E7E6]" />
+				<span>Per page:</span>
+				<Select
+					value={String(pageSize)}
+					onValueChange={(v) => onPageSizeChange(Number(v))}>
+					<SelectTrigger className="h-8 w-[80px] bg-white">
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
+						{PAGE_SIZE_OPTIONS.map((s) => (
+							<SelectItem
+								key={s}
+								value={String(s)}>
+								{s}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			</div>
+
+			<Pagination className="mx-0 w-auto justify-end">
+				<PaginationContent>
+					<PaginationItem>
+						<PaginationPrevious
+							href="#"
+							aria-disabled={page <= 1}
+							className={cn(page <= 1 && "pointer-events-none opacity-50")}
+							onClick={(e) => {
+								e.preventDefault();
+								if (page > 1) onPageChange(clamp(page - 1));
+							}}
+						/>
+					</PaginationItem>
+					{pages.map((p, i) =>
+						p === "…" ? (
+							<PaginationItem key={`ellipsis-${i}`}>
+								<span className="px-2 text-[#5A615D]">…</span>
+							</PaginationItem>
+						) : (
+							<PaginationItem key={p}>
+								<PaginationLink
+									href="#"
+									isActive={p === page}
+									onClick={(e) => {
+										e.preventDefault();
+										onPageChange(p);
+									}}>
+									{p}
+								</PaginationLink>
+							</PaginationItem>
+						),
+					)}
+					<PaginationItem>
+						<PaginationNext
+							href="#"
+							aria-disabled={page >= totalPages}
+							className={cn(
+								page >= totalPages && "pointer-events-none opacity-50",
+							)}
+							onClick={(e) => {
+								e.preventDefault();
+								if (page < totalPages) onPageChange(clamp(page + 1));
+							}}
+						/>
+					</PaginationItem>
+				</PaginationContent>
+			</Pagination>
+		</div>
+	);
+}
+
+function pageWindow(current: number, total: number): Array<number | "…"> {
+	if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+	const out: Array<number | "…"> = [];
+	const add = (n: number | "…") => {
+		if (out[out.length - 1] !== n) out.push(n);
+	};
+	add(1);
+	if (current > 3) add("…");
+	for (
+		let p = Math.max(2, current - 1);
+		p <= Math.min(total - 1, current + 1);
+		p++
+	) {
+		add(p);
+	}
+	if (current < total - 2) add("…");
+	add(total);
+	return out;
 }
