@@ -8,6 +8,11 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+	Dialog,
+	DialogContent,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetHoseMediaDrawer } from "@/hooks/useGetHoseMediaDrawer";
@@ -62,10 +67,15 @@ export function HoseMediaDrawer({
 	const { data, isLoading, error } = useGetHoseMediaDrawer(hexagonId, open);
 
 	const [activeTab, setActiveTab] = useState<TabKey>("all");
-
-	useEffect(() => {
-		if (open) setActiveTab("all");
-	}, [open, hexagonId]);
+	// Independent accordion state so users can freely expand/collapse each
+	// category. Tab clicks reset this (see handleTabSelect); accordion
+	// clicks bubble through onValueChange without touching the tab.
+	const [openAccordions, setOpenAccordions] = useState<HoseMediaCategoryKey[]>(
+		[],
+	);
+	const [lightboxImage, setLightboxImage] = useState<HoseMediaImage | null>(
+		null,
+	);
 
 	const orderedCategories = useMemo<HoseMediaCategory[]>(() => {
 		if (!data) return [];
@@ -75,8 +85,21 @@ export function HoseMediaDrawer({
 		);
 	}, [data]);
 
-	const openAccordions =
-		activeTab === "all" ? orderedCategories.map((c) => c.key) : [activeTab];
+	// Reset both tab and expansion when the drawer opens or the target hose
+	// changes. Also re-fills whenever fresh data arrives so "All" reflects
+	// the categories the server actually returned.
+	useEffect(() => {
+		if (!open) return;
+		setActiveTab("all");
+		setOpenAccordions(orderedCategories.map((c) => c.key));
+	}, [open, hexagonId, orderedCategories]);
+
+	const handleTabSelect = (tab: TabKey) => {
+		setActiveTab(tab);
+		setOpenAccordions(
+			tab === "all" ? orderedCategories.map((c) => c.key) : [tab],
+		);
+	};
 
 	return (
 		<Sheet
@@ -93,13 +116,13 @@ export function HoseMediaDrawer({
 
 				<Tabs
 					active={activeTab}
-					onSelect={setActiveTab}
+					onSelect={handleTabSelect}
 					totalCount={data?.totalCount ?? 0}
 					categories={orderedCategories}
 					disabled={isLoading || !data}
 				/>
 
-				<div className="flex-1 overflow-y-auto px-4 pb-6">
+				<div className="flex-1 overflow-y-auto px-4 pt-4 pb-6">
 					{isLoading ? (
 						<Loading />
 					) : error ? (
@@ -110,22 +133,26 @@ export function HoseMediaDrawer({
 						<Accordion
 							type="multiple"
 							value={openAccordions}
-							onValueChange={(vals) => {
-								if (activeTab !== "all" && !vals.includes(activeTab)) {
-									setActiveTab("all");
-								}
-							}}
+							onValueChange={(vals) =>
+								setOpenAccordions(vals as HoseMediaCategoryKey[])
+							}
 							className="space-y-2">
 							{orderedCategories.map((category) => (
 								<CategoryAccordion
 									key={category.key}
 									category={category}
+									onImageClick={setLightboxImage}
 								/>
 							))}
 						</Accordion>
 					)}
 				</div>
 			</SheetContent>
+
+			<Lightbox
+				image={lightboxImage}
+				onClose={() => setLightboxImage(null)}
+			/>
 		</Sheet>
 	);
 }
@@ -211,7 +238,13 @@ function Tabs({
 	);
 }
 
-function CategoryAccordion({ category }: { category: HoseMediaCategory }) {
+function CategoryAccordion({
+	category,
+	onImageClick,
+}: {
+	category: HoseMediaCategory;
+	onImageClick: (img: HoseMediaImage) => void;
+}) {
 	return (
 		<AccordionItem
 			value={category.key}
@@ -222,7 +255,10 @@ function CategoryAccordion({ category }: { category: HoseMediaCategory }) {
 			<AccordionContent className="bg-white px-4 pt-3 pb-4">
 				<Metadata category={category} />
 				{category.images.length > 0 ? (
-					<Gallery images={category.images} />
+					<Gallery
+						images={category.images}
+						onImageClick={onImageClick}
+					/>
 				) : (
 					<p className="mt-3 text-sm text-[#5A615D]">No images.</p>
 				)}
@@ -248,13 +284,22 @@ function Metadata({ category }: { category: HoseMediaCategory }) {
 	);
 }
 
-function Gallery({ images }: { images: HoseMediaImage[] }) {
+function Gallery({
+	images,
+	onImageClick,
+}: {
+	images: HoseMediaImage[];
+	onImageClick: (img: HoseMediaImage) => void;
+}) {
 	return (
 		<div className="mt-3 grid grid-cols-3 gap-2">
 			{images.map((img) => (
-				<figure
+				<button
 					key={img.imageId}
-					className="relative aspect-square overflow-hidden rounded-md bg-[#F3F4F3]">
+					type="button"
+					onClick={() => onImageClick(img)}
+					aria-label={`Open ${img.originalFileName} full screen`}
+					className="group relative aspect-square overflow-hidden rounded-md bg-[#F3F4F3] focus-visible:ring-2 focus-visible:ring-[#00873C] focus-visible:outline-none">
 					{/* eslint-disable-next-line @next/next/no-img-element */}
 					<img
 						src={img.imageUrl}
@@ -264,13 +309,75 @@ function Gallery({ images }: { images: HoseMediaImage[] }) {
 					/>
 					<span
 						aria-hidden="true"
-						className="absolute right-1.5 bottom-1.5 inline-flex h-6 w-6 items-center justify-center rounded-md bg-white/90 text-[#0F1912] shadow-sm">
+						className="absolute right-1.5 bottom-1.5 inline-flex h-6 w-6 items-center justify-center rounded-md bg-white/90 text-[#0F1912] shadow-sm transition-transform group-hover:scale-110">
 						<Maximize2 className="h-3.5 w-3.5" />
 					</span>
-				</figure>
+				</button>
 			))}
 		</div>
 	);
+}
+
+function Lightbox({
+	image,
+	onClose,
+}: {
+	image: HoseMediaImage | null;
+	onClose: () => void;
+}) {
+	const capturedLabel = image ? formatCaptureDate(image.createdAt) : "";
+	return (
+		<Dialog
+			open={image != null}
+			onOpenChange={(o) => {
+				if (!o) onClose();
+			}}>
+			<DialogContent className="max-w-4xl gap-0 border-none bg-black/95 p-0 shadow-none [&>button]:text-white [&>button]:hover:opacity-100">
+				<DialogTitle className="sr-only">
+					{image?.originalFileName ?? "Image"}
+				</DialogTitle>
+				{image && (
+					<div className="relative flex max-h-[90vh] items-center justify-center">
+						{/* eslint-disable-next-line @next/next/no-img-element */}
+						<img
+							src={image.imageUrl}
+							alt={image.originalFileName}
+							className="max-h-[90vh] w-auto object-contain"
+						/>
+						{capturedLabel && (
+							<span className="absolute right-4 bottom-4 rounded-md bg-white/90 px-2 py-1 text-xs font-medium text-[#0F1912] shadow">
+								{capturedLabel}
+							</span>
+						)}
+					</div>
+				)}
+			</DialogContent>
+		</Dialog>
+	);
+}
+
+// Figma pill format: "04.jul.2025".
+function formatCaptureDate(raw: string): string {
+	if (!raw) return "";
+	const d = new Date(raw);
+	if (Number.isNaN(d.getTime())) return "";
+	const day = String(d.getUTCDate()).padStart(2, "0");
+	const month = [
+		"jan",
+		"feb",
+		"mar",
+		"apr",
+		"may",
+		"jun",
+		"jul",
+		"aug",
+		"sep",
+		"oct",
+		"nov",
+		"dec",
+	][d.getUTCMonth()];
+	const year = d.getUTCFullYear();
+	return `${day}.${month}.${year}`;
 }
 
 function Loading() {

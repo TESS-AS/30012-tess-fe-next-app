@@ -45,7 +45,6 @@ import {
 	Filter,
 	Image as ImageIcon,
 	Info,
-	Plus,
 	Search,
 	SlidersHorizontal,
 } from "lucide-react";
@@ -56,6 +55,7 @@ import { ThmCustomizeColumnsModal } from "./ThmCustomizeColumnsModal";
 
 interface ThmWorkOrderListProps {
 	workOrderNumber: string;
+	onS1NameResolved?: (name: string | null) => void;
 }
 
 type ColumnKey =
@@ -215,7 +215,10 @@ function renderCell(
 
 const DATE_COLUMNS = new Set<ColumnKey>(["uploaded", "synced"]);
 
-export function ThmWorkOrderList({ workOrderNumber }: ThmWorkOrderListProps) {
+export function ThmWorkOrderList({
+	workOrderNumber,
+	onS1NameResolved,
+}: ThmWorkOrderListProps) {
 	const router = useRouter();
 	const [search, setSearch] = useState("");
 	const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -289,6 +292,10 @@ export function ThmWorkOrderList({ workOrderNumber }: ThmWorkOrderListProps) {
 
 	const rows = data?.data ?? [];
 	const total = data?.meta.totalItems ?? 0;
+
+	useEffect(() => {
+		if (data?.title) onS1NameResolved?.(data.title);
+	}, [data?.title, onS1NameResolved]);
 	const totalPages = data?.meta.totalPages ?? 1;
 
 	const title = data?.title ?? workOrderNumber;
@@ -459,11 +466,6 @@ export function ThmWorkOrderList({ workOrderNumber }: ThmWorkOrderListProps) {
 									<ColumnHeader label={columnLookup.get(key)?.label ?? key} />
 								</th>
 							))}
-							<th className="px-4 py-3 text-right">
-								<span className="text-sm font-semibold text-[#0F1912]">
-									Actions
-								</span>
-							</th>
 						</tr>
 						<tr className="border-b border-[#E5E7E6] bg-white">
 							{visibleColumns.map((key) => (
@@ -473,7 +475,6 @@ export function ThmWorkOrderList({ workOrderNumber }: ThmWorkOrderListProps) {
 									<FilterCell isDate={DATE_COLUMNS.has(key)} />
 								</th>
 							))}
-							<th className="px-4 py-2" />
 						</tr>
 					</thead>
 					<tbody>
@@ -489,15 +490,12 @@ export function ThmWorkOrderList({ workOrderNumber }: ThmWorkOrderListProps) {
 											<Skeleton className="h-4 w-full" />
 										</td>
 									))}
-									<td className="px-4 py-4">
-										<Skeleton className="h-4 w-full" />
-									</td>
 								</tr>
 							))
 						) : rows.length === 0 ? (
 							<tr>
 								<td
-									colSpan={visibleColumns.length + 1}
+									colSpan={visibleColumns.length}
 									className="px-4 py-10 text-center text-sm text-[#5A615D]">
 									Ingen slanger funnet.
 								</td>
@@ -514,15 +512,6 @@ export function ThmWorkOrderList({ workOrderNumber }: ThmWorkOrderListProps) {
 											{renderCell(key, row, setMediaDrawerRow)}
 										</td>
 									))}
-									<td className="px-4 py-4 text-right">
-										<Button
-											variant="outline"
-											size="sm"
-											className="gap-1 border-[#C1C4C2] bg-white text-[#0F1912]">
-											<Plus className="h-3.5 w-3.5" />
-											Add to cart
-										</Button>
-									</td>
 								</tr>
 							))
 						)}

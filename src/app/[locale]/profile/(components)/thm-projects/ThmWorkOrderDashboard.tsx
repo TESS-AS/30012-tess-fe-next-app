@@ -19,6 +19,7 @@ import { RefreshCw, Tag } from "lucide-react";
 
 interface ThmWorkOrderDashboardProps {
 	workOrderNumber: string;
+	onS1NameResolved?: (name: string | null) => void;
 }
 
 const DAY_KEYS: (keyof Omit<ThmDashboardDailyActivity, "total">)[] = [
@@ -54,6 +55,7 @@ function defaultRange() {
 
 export function ThmWorkOrderDashboard({
 	workOrderNumber,
+	onS1NameResolved,
 }: ThmWorkOrderDashboardProps) {
 	const router = useRouter();
 	const [range, setRange] = useState(defaultRange);
@@ -67,6 +69,10 @@ export function ThmWorkOrderDashboard({
 				}
 			: null,
 	);
+
+	useEffect(() => {
+		if (data?.s1Name) onS1NameResolved?.(data.s1Name);
+	}, [data?.s1Name, onS1NameResolved]);
 
 	const todayKey = DAY_KEYS[(new Date().getDay() + 6) % 7];
 

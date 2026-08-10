@@ -82,7 +82,7 @@ export function ThmProjectsTable({
 		},
 		{
 			key: "listView",
-			header: "",
+			header: "List view",
 			cell: (row) => (
 				<button
 					type="button"
@@ -98,7 +98,7 @@ export function ThmProjectsTable({
 		},
 		{
 			key: "dashboard",
-			header: "",
+			header: "Dashboard",
 			cell: (row) => (
 				<button
 					type="button"

@@ -173,6 +173,18 @@ export default function ProfilePage() {
 	const [selectedAvvikendeOrdreId, setSelectedAvvikendeOrdreId] = useState<
 		string | null
 	>(null);
+	// Populated by ThmWorkOrderList / ThmWorkOrderDashboard once BE returns
+	// the s1Name for the current WO. Used as the breadcrumb label instead of
+	// the raw tab id so users see "1765 Oseberg C" not "thm-dashboard".
+	const [workOrderS1Name, setWorkOrderS1Name] = useState<string | null>(null);
+
+	// Clear the S1-name breadcrumb label whenever the workOrder or tab
+	// changes; the child re-populates it via its own data fetch, so we don't
+	// want the previous WO's name flashing before the new one lands.
+	const currentWorkOrder = searchParams.get("workOrder");
+	useEffect(() => {
+		setWorkOrderS1Name(null);
+	}, [currentWorkOrder, activeTab]);
 	const [hasUnsavedSettingsChanges, setHasUnsavedSettingsChanges] =
 		useState(false);
 	const [isUnsavedDialogOpen, setIsUnsavedDialogOpen] = useState(false);
@@ -429,7 +441,11 @@ export default function ProfilePage() {
 		});
 
 		if (activeTab) {
-			const tabLabel = tabLabels[activeTab] || activeTab;
+			const isThmWorkOrderTab =
+				activeTab === "thm-dashboard" || activeTab === "thm-list";
+			const tabLabel = isThmWorkOrderTab
+				? (workOrderS1Name ?? currentWorkOrder ?? "Work order")
+				: (tabLabels[activeTab] || activeTab);
 			items.push({
 				href: `/profile?tab=${activeTab}`,
 				label: tabLabel,
@@ -717,6 +733,7 @@ export default function ProfilePage() {
 							{activeTab === "thm-dashboard" && (
 								<ThmWorkOrderDashboard
 									workOrderNumber={searchParams.get("workOrder") ?? ""}
+									onS1NameResolved={setWorkOrderS1Name}
 								/>
 							)}
 						</TabsContent>
@@ -727,6 +744,7 @@ export default function ProfilePage() {
 							{activeTab === "thm-list" && (
 								<ThmWorkOrderList
 									workOrderNumber={searchParams.get("workOrder") ?? ""}
+									onS1NameResolved={setWorkOrderS1Name}
 								/>
 							)}
 						</TabsContent>
