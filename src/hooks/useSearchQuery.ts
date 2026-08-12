@@ -12,7 +12,7 @@ export function useSearchQuery({ query, enabled = true }: UseSearchQueryProps) {
 		queryKey: ["search", query],
 		queryFn: async (): Promise<SearchResponse> => {
 			const response = await axiosClient.get<SearchResponse>(
-				`/search/${query}`,
+				`/proxy/search?st=${encodeURIComponent(query)}`,
 			);
 			return response.data;
 		},
