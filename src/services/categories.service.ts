@@ -14,31 +14,6 @@ export async function loadCategories(locale: string) {
 	}
 }
 
-export async function loadFilters({
-	categoryNumber,
-	searchTerm,
-	language,
-}: {
-	categoryNumber?: string | null;
-	searchTerm?: string | null;
-	language?: string | null;
-}) {
-	try {
-		const params = new URLSearchParams();
-		if (categoryNumber) params.append("categoryNumber", categoryNumber);
-		if (searchTerm) params.append("searchTerm", searchTerm);
-		if (language) params.append("language", language);
-
-		const url = `/attributeFilter/${params.toString() ? `?${params.toString()}` : ""}`;
-		const response = await axiosInstance.get(url);
-
-		return response.data;
-	} catch (error) {
-		console.error("Error loading filters", error);
-		return [];
-	}
-}
-
 export async function loadFilterFamily(params: {
 	categoryNumber?: string | null;
 	searchTerm?: string | null;
@@ -46,15 +21,12 @@ export async function loadFilterFamily(params: {
 	filters?: FilterValues[];
 }): Promise<any> {
 	const query = new URLSearchParams();
-	if (params.categoryNumber)
-		query.append("categoryNumber", params.categoryNumber);
-	if (params.searchTerm) query.append("searchTerm", params.searchTerm);
-	if (params.language) query.append("language", params.language);
+	if (params.categoryNumber) query.append("cat", params.categoryNumber);
+	if (params.searchTerm) query.append("st", params.searchTerm);
+	if (params.language) query.append("lang", params.language);
 
-	const url = `/filterFamily${query.toString() ? `?${query.toString()}` : ""}`;
-	const response = await axiosInstance.post(url, {
-		filters: params.filters ?? [],
-	});
+	const url = `/proxy/filter${query.toString() ? `?${query.toString()}` : ""}`;
+	const response = await axiosInstance.post(url, params.filters ?? []);
 
 	return response.data;
 }

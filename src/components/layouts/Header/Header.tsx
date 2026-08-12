@@ -217,7 +217,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 			return {
 				id: categoryNumber || searchCategory.name,
 				name: displayName,
-				count: parseInt(searchCategory.productVariantCount) || 0,
+				count: searchCategory.productVariantCount || 0,
 				slug: urlPath || searchCategory.slug || [], // Use path from category tree, fallback to API slug
 			};
 		});
@@ -281,7 +281,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 				queryKey: ["search", queryToSearch],
 				queryFn: async () => {
 					const response = await axiosClient.get<SearchResponse>(
-						`/search/${queryToSearch}`,
+						`/proxy/search?st=${encodeURIComponent(queryToSearch)}`,
 					);
 					return response.data;
 				},
@@ -502,10 +502,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 												<div className="animate-in fade-in-0 zoom-in-95 fixed top-34 left-1/2 z-[11] grid max-h-[80vh] w-[80vw] -translate-x-1/2 grid-cols-3 gap-4 overflow-y-auto bg-white p-4 shadow-lg duration-200">
 													<div className="col-span-1 space-y-4 pr-4">
 														<SearchAside
-															suggestions={
-																(searchData?.suggestions ??
-																	[]) as unknown as string[]
-															}
+															suggestions={searchData?.suggestions ?? []}
 															categories={searchCategories}
 															query={searchQuery}
 															onPick={handlePick}

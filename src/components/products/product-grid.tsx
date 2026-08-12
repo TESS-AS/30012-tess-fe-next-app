@@ -35,7 +35,7 @@ interface ProductGridProps {
 		assortmentNumber: string;
 		nameNo: string;
 		nameEn: string;
-		productCount: string;
+		productCount: number;
 	}[];
 }
 
