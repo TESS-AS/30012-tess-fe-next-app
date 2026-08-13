@@ -22,7 +22,7 @@ interface CategoryContentProps {
 		assortmentNumber: string;
 		nameNo: string;
 		nameEn: string;
-		productCount: number;
+		productCount: string;
 	}[];
 }
 

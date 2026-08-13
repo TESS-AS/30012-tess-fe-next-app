@@ -31,7 +31,7 @@ type CategoryFilterItem = {
 	assortmentNumber: string;
 	nameNo: string;
 	nameEn: string;
-	productCount: number;
+	productCount: string;
 };
 
 interface FilterProps

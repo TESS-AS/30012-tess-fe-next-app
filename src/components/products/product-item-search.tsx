@@ -10,7 +10,7 @@ import { setProductReturnTarget } from "@/lib/productReturnNavigation";
 import { categoryTreeToUrlPath, cn } from "@/lib/utils";
 import { loadCategoryTree } from "@/services/categories.service";
 import { IProductSearch } from "@/types/search.types";
-// import { BadgeCheck } from "lucide-react"; // re-enable when inStock block below is uncommented
+import { BadgeCheck } from "lucide-react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
@@ -147,8 +147,11 @@ export function ProductItem({
 
 		if (product.productName?.toLowerCase().includes(q)) set.add(trimmedQuery);
 
-		[product.attribute1, product.attribute2].forEach((value) => {
-			if (value && value.toLowerCase().includes(q)) set.add(value);
+		(product as any)?.attributes?.forEach?.((a: any) => {
+			const k = String(a?.key ?? "").toLowerCase();
+			const v = String(a?.value ?? "").toLowerCase();
+			if (k && k.includes(q) && a.key) set.add(a.key);
+			if (v && v.includes(q) && a.value) set.add(a.value);
 		});
 
 		return Array.from(set);
@@ -200,13 +203,16 @@ export function ProductItem({
 									{highlightParts(product.productName, matchedAttributes)}
 								</span>
 							</Link>
-							{(product.attribute1 || product.attribute2) && (
+							{["searchAttribute1", "searchAttribute2"].some(
+								(k) => (product as unknown as Record<string, any>)?.[k],
+							) && (
 								<div className="flex max-w-xs flex-col gap-1">
-									{[product.attribute1, product.attribute2].map((value, i) => {
+									{["searchAttribute1", "searchAttribute2"].map((k) => {
+										const value = (product as unknown as Record<string, any>)?.[k];
 										if (!value) return null;
 										return (
 											<div
-												key={i}
+												key={k}
 												className="flex items-center rounded-sm bg-white text-[12px] text-gray-800">
 												{value}
 											</div>
@@ -214,14 +220,12 @@ export function ProductItem({
 									})}
 								</div>
 							)}
-							{/* inStock not returned by /proxy/search today — re-enable if BE adds it back
 							{product.inStock && (
 								<div className="flex w-fit items-center gap-1 rounded bg-[#DCF7E0] px-2 py-1 text-xs font-medium text-emerald-800 sm:hidden">
 									<BadgeCheck className="h-4 w-4 fill-emerald-800 text-white" />
 									<span>{t("Search.inMainWarehouse")}</span>
 								</div>
 							)}
-							*/}
 							<Button
 								type="button"
 								variant="outlineGrey"
@@ -252,14 +256,13 @@ export function ProductItem({
 							</Button>
 						</div>
 						<div className="ml-auto hidden flex-col items-end gap-5 sm:flex">
-							{/* inStock not returned by /proxy/search today — re-enable if BE adds it back
 							{product.inStock && (
 								<div className="flex items-center gap-1 rounded bg-[#DCF7E0] px-2 py-1 text-xs font-medium text-emerald-800">
 									<BadgeCheck className="h-4 w-4 fill-emerald-800 text-white" />
 									<span>{t("Search.inMainWarehouse")}</span>
 								</div>
 							)}
-							*/}
+
 							<Button
 								type="button"
 								variant="outlineGrey"

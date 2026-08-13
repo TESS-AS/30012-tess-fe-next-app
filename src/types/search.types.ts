@@ -1,17 +1,24 @@
 export interface IProductSearch {
+	inStock: boolean;
 	itemVariantCount: number;
+	attributes: ProductAttributes;
 	productName: string;
 	productNumber: string;
 	thumbnail: string;
-	attribute1?: string | null;
-	attribute2?: string | null;
-	redirect?: string | null;
-	ranking?: number | null;
-	// Not returned by /proxy/search today — kept optional in case BE re-adds it.
-	inStock?: boolean;
+	searchAttribute1?: string | null;
+	searchAttribute2?: string | null;
+	redirect?: string;
 }
 
-export type ISuggestions = string;
+export interface ProductAttributes {
+	searchAttribute1?: string | null;
+	searchAttribute2?: string | null;
+	[k: string]: string | number | boolean | null | undefined;
+}
+
+export interface ISuggestions {
+	keyword: string;
+}
 
 export interface ISearchList {
 	product: SearchArray[];
@@ -30,7 +37,7 @@ export interface SearchCategory {
 	depth?: number;
 	slug?: string[];
 	name: string;
-	productVariantCount: number;
+	productVariantCount: string;
 }
 
 export interface SearchResponse {

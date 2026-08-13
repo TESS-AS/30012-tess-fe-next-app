@@ -27,6 +27,7 @@ interface SearchListResponse {
 	product: IProduct[];
 	page: number;
 	totalPages: number;
+	filters?: FilterValues[];
 }
 
 interface FilterValues {
@@ -56,12 +57,11 @@ export async function loadCategories(query: string) {
 	}
 }
 
-export async function loadItem(query?: string, language?: string | null) {
+export async function loadItem(query?: string) {
 	try {
 		const params = new URLSearchParams();
-		if (query) params.append("st", query);
-		if (language) params.append("lang", language);
-		const url = `/proxy/search${params.toString() ? `?${params.toString()}` : ""}`;
+		if (query) params.append("query", query);
+		const url = `/search${params.toString() ? `?${params.toString()}` : ""}`;
 
 		const response: AxiosResponse = await axiosInstance.get(url);
 		return response.data;
@@ -189,27 +189,26 @@ export async function searchProducts(
 	categoryNumber: string | null,
 	filters: FilterValues[] | null,
 	sort?: string | null,
-	language?: string | null,
 ): Promise<SearchListResponse> {
 	try {
+		// Build query parameters
 		const params = new URLSearchParams();
 		if (categoryNumber) {
-			params.append("cat", categoryNumber);
+			params.append("categoryNumber", categoryNumber);
 		}
 		if (searchTerm) {
-			params.append("st", searchTerm);
+			params.append("searchTerm", searchTerm);
 		}
 		if (sort) {
 			params.append("sort", sort === " " ? "" : sort);
 		}
-		if (language) {
-			params.append("lang", language);
-		}
 
-		const url = `/proxy/searchList/${page}/${pageSize}${params.toString() ? `?${params.toString()}` : ""}`;
+		// Construct URL with path parameters and query string
+		const url = `/searchList/${page}/${pageSize}/${params.toString() ? `?${params.toString()}` : ""}`;
+		// Make request with or without body based on filters
 		const response =
 			filters && filters.length > 0
-				? await axiosInstance.post(url, filters)
+				? await axiosInstance.post(url, { filters })
 				: await axiosInstance.post(url);
 
 		return response.data;
