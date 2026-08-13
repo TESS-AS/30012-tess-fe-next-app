@@ -42,6 +42,7 @@ import {
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
 import { priceItemsByCompany } from "@/lib/cart-pricing";
+import { resolveProductUnit } from "@/lib/product-unit";
 import {
 	buildWarehouseOptions,
 	resolveWarehouse,
@@ -1055,25 +1056,10 @@ export default function ProductVariantTable({
 														</TableCell>
 													);
 												case "contentUnit":
-													const contentUnitValue =
-														columnAttributes?.[
-															variant.itemNumber
-														]?.attributes?.find((attr: any) => attr.contentUnit)
-															?.contentUnit ||
-														columnAttributes?.[
-															variant.itemNumber
-														]?.attributes?.find(
-															(attr: any) =>
-																attr.attributeIdentifier === "contentUnit" ||
-																attr.name
-																	?.toLowerCase()
-																	.includes("contentunit") ||
-																attr.name
-																	?.toLowerCase()
-																	.includes("content unit"),
-														)?.valueDef ||
-														variant.contentUnit ||
-														"-";
+													const contentUnitValue = resolveProductUnit(
+														columnAttributes?.[variant.itemNumber]?.attributes,
+														variant.contentUnit || "-",
+													);
 													return (
 														<TableCell
 															key="contentUnit"
@@ -1263,41 +1249,10 @@ export default function ProductVariantTable({
 														getWarehouseOptions[variant.itemNumber] || [];
 													const hasManyOptions = warehouseOptions.length > 20;
 
-													// Get unit (enhet) for this variant
-													const getVariantUnit = () => {
-														const attrs =
-															columnAttributes?.[variant.itemNumber]
-																?.attributes || [];
-
-														// Try to find contentUnit from attributes
-														const contentUnitAttr = attrs.find(
-															(attr: any) => attr.contentUnit,
-														);
-														if (contentUnitAttr?.contentUnit) {
-															return contentUnitAttr.contentUnit;
-														}
-
-														// Try to find by attribute identifier or name
-														const unitAttr = attrs.find(
-															(attr: any) =>
-																attr.attributeIdentifier === "contentUnit" ||
-																attr.name
-																	?.toLowerCase()
-																	.includes("contentunit") ||
-																attr.name
-																	?.toLowerCase()
-																	.includes("content unit") ||
-																attr.name?.toLowerCase().includes("enhet"),
-														);
-														if (unitAttr?.valueDef) {
-															return unitAttr.valueDef;
-														}
-
-														// Fallback to variant.contentUnit or STK
-														return variant.contentUnit || "STK";
-													};
-
-													const variantUnit = getVariantUnit();
+													const variantUnit = resolveProductUnit(
+														columnAttributes?.[variant.itemNumber]?.attributes,
+														variant.contentUnit || "STK",
+													);
 
 													return (
 														<TableCell

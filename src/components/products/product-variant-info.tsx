@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { SAP_CUSTOMER } from "@/constants/checkout";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
+import { resolveProductUnit } from "@/lib/product-unit";
 import { addToCart, getCart } from "@/services/carts.service";
 import { calculateItemPrice } from "@/services/product.service";
 import { useProductTabs } from "@/stores/useProductTabs";
@@ -117,35 +118,11 @@ export function ProductVariantInfo({
 		? warehouseInfo.warehouseName
 		: "hovedlager";
 
-	// Get unit (enhet) for the selected item
-	const getUnit = () => {
-		if (!selectedItemNumber || !columnAttributes) return "STK";
-
-		const attrs = columnAttributes[selectedItemNumber]?.attributes || [];
-
-		// Try to find contentUnit from attributes
-		const contentUnitAttr = attrs.find((attr: any) => attr.contentUnit);
-		if (contentUnitAttr?.contentUnit) {
-			return contentUnitAttr.contentUnit;
-		}
-
-		// Try to find by attribute identifier or name
-		const unitAttr = attrs.find(
-			(attr: any) =>
-				attr.attributeIdentifier === "contentUnit" ||
-				attr.name?.toLowerCase().includes("contentunit") ||
-				attr.name?.toLowerCase().includes("content unit") ||
-				attr.name?.toLowerCase().includes("enhet"),
-		);
-		if (unitAttr?.valueDef) {
-			return unitAttr.valueDef;
-		}
-
-		// Fallback to STK
-		return "STK";
-	};
-
-	const unit = getUnit();
+	const unit = resolveProductUnit(
+		selectedItemNumber
+			? columnAttributes?.[selectedItemNumber]?.attributes
+			: undefined,
+	);
 
 	const handleCopyGtin = () => {
 		const gtin = variantData?.itemHeader?.GTIN;
