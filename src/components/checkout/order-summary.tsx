@@ -50,6 +50,7 @@ export default function OrderSummary({
 	const {
 		cartItems,
 		isLoading,
+		arePricesLoading,
 		handleClearCart,
 		handleArchiveCart,
 		unitPrices,
@@ -372,9 +373,9 @@ export default function OrderSummary({
 						<Button
 							variant="greenSolid"
 							className="w-full"
-							disabled={isCartEmpty || isCheckoutLoading}
+							disabled={isCartEmpty || isCheckoutLoading || arePricesLoading}
 							onClick={handleExcelExportButtonClick}>
-							{isCheckoutLoading || isLoading ? (
+							{isCheckoutLoading || isLoading || arePricesLoading ? (
 								<Loader2 className="h-4 w-4 animate-spin" />
 							) : (
 								"Last ned handlekurv som Excel-fil"
@@ -527,10 +528,11 @@ export default function OrderSummary({
 								disabled={
 									isCartEmpty ||
 									isCheckoutLoading ||
+									arePricesLoading ||
 									(!acceptedTerms && currentStep === 2)
 								}
 								onClick={openExcelExportView}>
-								{isCheckoutLoading || isLoading ? (
+								{isCheckoutLoading || isLoading || arePricesLoading ? (
 									<Loader2 className="h-4 w-4 animate-spin" />
 								) : (
 									"Last ned handlekurv som Excel-fil"
@@ -569,10 +571,11 @@ export default function OrderSummary({
 										disabled={
 											isCartEmpty ||
 											isCheckoutLoading ||
+											arePricesLoading ||
 											(!acceptedTerms && currentStep === 2)
 										}
 										onClick={handleCheckout}>
-										{isCheckoutLoading || isLoading ? (
+										{isCheckoutLoading || isLoading || arePricesLoading ? (
 											<Loader2 className="h-4 w-4 animate-spin" />
 										) : (
 											t(
@@ -590,12 +593,13 @@ export default function OrderSummary({
 									disabled={
 										isCartEmpty ||
 										isCheckoutLoading ||
+										arePricesLoading ||
 										(!acceptedTerms && currentStep === 2)
 									}
 									onClick={() => {
 										handleCheckout();
 									}}>
-									{isCheckoutLoading || isLoading ? (
+									{isCheckoutLoading || isLoading || arePricesLoading ? (
 										<Loader2 className="h-4 w-4 animate-spin" />
 									) : (
 										t("OrderSummary.punchoutCart")

@@ -64,6 +64,7 @@ interface AppContextType {
 	cartKitTotals: Record<string, number>;
 	getCalculatedPrice: (itemNumber: string, quantity: number) => number;
 	isLoading: boolean;
+	arePricesLoading: boolean;
 
 	updateQuantity: (
 		cartLine: number,
@@ -152,6 +153,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	>({});
 
 	const [isLoading, setIsLoading] = useState(false);
+	const [arePricesLoading, setArePricesLoading] = useState(false);
 	const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 	const [submittedOrder, setSubmittedOrder] = useState<Order | null>(null);
 	const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
@@ -232,6 +234,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	}, [profile, pathname, router]);
 
 	const loadCartData = async () => {
+		setArePricesLoading(true);
 		try {
 			const cart = await getCart();
 			if (!cart) return;
@@ -508,6 +511,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			}
 		} catch (error) {
 			console.error("Error fetching cart:", error);
+		} finally {
+			setArePricesLoading(false);
 		}
 	};
 
@@ -945,6 +950,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				cartKitTotals,
 				getCalculatedPrice,
 				isLoading,
+				arePricesLoading,
 
 				updateQuantity,
 				updateWarehouse,

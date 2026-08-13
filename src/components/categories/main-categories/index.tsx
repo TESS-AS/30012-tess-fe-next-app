@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { FeedbackDialog } from "@/components/ui/dialogs/feedback-dialog";
+import { HALLIBURTON_CUSTOMER_NUMBER } from "@/constants/checkout";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import Image from "next/image";
 
@@ -13,6 +14,9 @@ export default function MainCategorySection() {
 	if (!profile) {
 		return null;
 	}
+
+	const isHalliburton =
+		profile?.defaultCustomerNumber === HALLIBURTON_CUSTOMER_NUMBER;
 
 	return (
 		<>
@@ -57,6 +61,19 @@ export default function MainCategorySection() {
 										</a>
 									</p>
 								</div>
+								{isHalliburton && (
+									<div className="space-y-1 pt-2 md:pt-4">
+										<p className="text-base leading-relaxed text-gray-500 md:text-lg">
+											<a
+												href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=RXBln-HRt0W0_ecSik11LMbSVbjwTCVGi5jFYLgOQmRUMlhUVzkwNUY5NUVIUkxXM0hJQVNHOUlFVy4u"
+												target="_blank"
+												rel="noopener noreferrer"
+												className="text-green-700 hover:text-green-900">
+												PPE-tilbakemeldingsundersøkelse for Halliburton-ansatte
+											</a>
+										</p>
+									</div>
+								)}
 							</div>
 						</div>
 
