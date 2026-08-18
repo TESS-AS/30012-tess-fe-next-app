@@ -42,7 +42,7 @@ export function useSearch(query: string) {
 		try {
 			setIsLoading(true);
 			const response = await axiosClient.get<SearchResponse>(
-				`/search/${searchQuery}`,
+				`/proxy/search?st=${encodeURIComponent(searchQuery)}`,
 			);
 			const searchResults = response.data;
 			setData(searchResults);
