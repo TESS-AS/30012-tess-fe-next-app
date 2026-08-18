@@ -6,6 +6,10 @@ import { EditContactModal } from "@/components/checkout/edit-contact-modal";
 import { EditDeliveryModal } from "@/components/checkout/edit-delivery-modal";
 import { EditPaymentModal } from "@/components/checkout/edit-payment-modal";
 import { useAppContext } from "@/lib/appContext";
+import {
+	formatCartKitAdditionalLabel,
+	getCartKitPartEntries,
+} from "@/lib/cart-kit";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import {
 	ChevronDown,
@@ -150,6 +154,9 @@ export default function StepConfirmation({
 					{cartItems?.cartKit && cartItems.cartKit.length > 0 && (
 						<div className="space-y-4">
 							{cartItems.cartKit.map((item, idx) => {
+								const additionalItems = getCartKitPartEntries(
+									item.additionals,
+								);
 								return (
 									<div
 										key={idx}
@@ -348,6 +355,39 @@ export default function StepConfirmation({
 																				</p>
 																				<p className="text-xs text-[#5A615D]">
 																					{itemNumber}
+																				</p>
+																			</div>
+																			<p className="font-bold">
+																				{formatNorwegianCurrency(price)}
+																			</p>
+																		</div>
+																	);
+																})}
+														</div>
+													)}
+													{additionalItems.length > 0 && (
+														<div className="space-y-4 pl-8">
+															{additionalItems.map((additional) => {
+																	const price = getCalculatedPrice(
+																		additional.itemNumber,
+																		additional.quantity,
+																	);
+																	const label =
+																		additional.name ||
+																		formatCartKitAdditionalLabel(
+																			additional.key,
+																		);
+
+																	return (
+																		<div
+																			key={`${additional.key}-${additional.itemNumber}`}
+																			className="flex items-start justify-between gap-2">
+																			<div className="flex flex-col">
+																				<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
+																					{label}
+																				</p>
+																				<p className="text-xs text-[#5A615D]">
+																					{additional.itemNumber}
 																				</p>
 																			</div>
 																			<p className="font-bold">

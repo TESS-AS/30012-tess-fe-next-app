@@ -22,6 +22,7 @@ import { useOrderSummary } from "@/hooks/useOrderSummary";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
+import { getCartKitPartEntries } from "@/lib/cart-kit";
 import { excelOrderConfirmationForCart } from "@/services/orders.service";
 import { createRequisition } from "@/services/requisitions.service";
 import { Separator } from "@radix-ui/react-select";
@@ -225,6 +226,13 @@ export default function OrderSummary({
 					lines.push({
 						itemNumber: s.itemNumber,
 						quantity: s.quantity || 1,
+					});
+				}
+
+				for (const additional of getCartKitPartEntries(kit.additionals)) {
+					lines.push({
+						itemNumber: additional.itemNumber,
+						quantity: additional.quantity,
 					});
 				}
 				return lines;

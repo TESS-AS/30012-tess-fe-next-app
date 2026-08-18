@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { getCartKitPartEntries } from "@/lib/cart-kit";
 import { CartKitResponse } from "@/types/carts.types";
 import { Order, OrderLines } from "@/types/orders.types";
 
@@ -116,6 +117,8 @@ export function useCheckoutOrderData(
 					},
 				);
 
+				const additionalItems = getCartKitPartEntries(kitItem.additionals);
+
 				const kitLines = kitComponents.map((component) => ({
 					customerOrderLine: lineCounter++,
 					warehouseNumber: warehouseNumber,
@@ -144,7 +147,26 @@ export function useCheckoutOrderData(
 					text: `${kitItem.hexagonId};${kitItem.hose.itemDescription}`,
 				}));
 
-				salesOrderLines = [...salesOrderLines, ...kitLines, ...serviceLines];
+				const additionalLines = additionalItems.map((additional) => ({
+					customerOrderLine: lineCounter++,
+					warehouseNumber: warehouseNumber,
+					orderType: "S2",
+					itemCode: additional.itemNumber,
+					orderedQuantity: additional.quantity,
+					salesPrice: unitPrices[additional.itemNumber] || 0,
+					requestedDeliveryDate,
+					accountPart3: "",
+					accountPart4: String(userId || ""),
+					accountPart5: "",
+					text: `${kitItem.hexagonId};${kitItem.hose.itemDescription}`,
+				}));
+
+				salesOrderLines = [
+					...salesOrderLines,
+					...kitLines,
+					...serviceLines,
+					...additionalLines,
+				];
 			});
 		}
 

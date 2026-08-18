@@ -21,6 +21,7 @@ import {
 	EQUINOR_WELCOME_SEEN_THIS_SESSION_KEY,
 } from "@/constants/equinorWelcome";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { getCartKitPartEntries } from "@/lib/cart-kit";
 import { priceItemsByCompany } from "@/lib/cart-pricing";
 import {
 	getCart,
@@ -326,6 +327,12 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 							warehouseNumber: profile?.defaultWarehouseNumber || "",
 							companyNumber: String(companyNumber),
 						})),
+						...getCartKitPartEntries(item.additionals).map((additional) => ({
+							itemNumber: additional.itemNumber,
+							quantity: additional.quantity,
+							warehouseNumber: profile?.defaultWarehouseNumber || "",
+							companyNumber: String(companyNumber),
+						})),
 					];
 				}) ?? [];
 
@@ -434,6 +441,11 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 								quantity: service.quantity || 1,
 								warehouseNumber: profile?.defaultWarehouseNumber || "",
 							})),
+						...getCartKitPartEntries(k.additionals).map((additional) => ({
+							itemNumber: additional.itemNumber,
+							quantity: additional.quantity,
+							warehouseNumber: profile?.defaultWarehouseNumber || "",
+						})),
 					]),
 				];
 
@@ -575,8 +587,21 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 						acc + getCalculatedPrice(service.itemNumber, service.quantity || 1),
 					0,
 				);
+			const additionalsTotal = getCartKitPartEntries(kit.additionals).reduce(
+				(acc, additional) =>
+					acc +
+					getCalculatedPrice(additional.itemNumber, additional.quantity),
+				0,
+			);
 			return (
-				sum + hose + ferrule1 + ferrule2 + insert1 + insert2 + servicesTotal
+				sum +
+				hose +
+				ferrule1 +
+				ferrule2 +
+				insert1 +
+				insert2 +
+				servicesTotal +
+				additionalsTotal
 			);
 		}, 0);
 
@@ -655,6 +680,13 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					acc + getCalculatedPrice(service.itemNumber, service.quantity || 1),
 				0,
 			);
+			const additionalItems = getCartKitPartEntries(kit.additionals);
+			const additionalsTotal = additionalItems.reduce(
+				(acc, additional) =>
+					acc +
+					getCalculatedPrice(additional.itemNumber, additional.quantity),
+				0,
+			);
 
 			totals[kit.hexagonId] =
 				hosePrice +
@@ -662,7 +694,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				ferrule2Price +
 				insert1Price +
 				insert2Price +
-				servicesTotal;
+				servicesTotal +
+				additionalsTotal;
 
 			if (process.env.NODE_ENV !== "production") {
 				console.log("[cartKitTotals] kit", {
@@ -698,6 +731,13 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 						price: calculatedPrices[s.itemNumber] ?? 0,
 					})),
 					servicesTotal,
+					additionals: additionalItems.map((a) => ({
+						key: a.key,
+						itemNumber: a.itemNumber,
+						quantity: a.quantity,
+						price: getCalculatedPrice(a.itemNumber, a.quantity),
+					})),
+					additionalsTotal,
 					total: totals[kit.hexagonId],
 				});
 			}
@@ -786,6 +826,9 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 						},
 					)
 					.map((s) => s.itemNumber),
+				...getCartKitPartEntries(kitBackup.additionals).map(
+					(additional) => additional.itemNumber,
+				),
 			];
 
 			setCartItems((prev) => {

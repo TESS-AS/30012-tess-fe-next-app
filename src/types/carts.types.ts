@@ -45,6 +45,14 @@ export interface CartKitItem {
 	ferrule2: HoseComponent;
 	insert1: HoseComponent;
 	insert2: HoseComponent;
+	additionals?: Record<string, CartKitOptionalPart | string | null | undefined>;
+}
+
+export interface CartKitOptionalPart {
+	name?: string;
+	itemNumber?: string;
+	itemId?: number;
+	quantity?: number;
 }
 
 export interface CartKitResponse {
