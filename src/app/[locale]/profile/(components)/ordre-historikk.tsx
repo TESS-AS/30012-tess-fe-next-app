@@ -87,7 +87,7 @@ const getStatusParam = (
 		case "picked":
 			return 30;
 		case "delivered":
-			return [45, 60];
+			return 60;
 		case "cancelled":
 			return 0;
 		default:

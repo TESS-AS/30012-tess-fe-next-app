@@ -1,7 +1,7 @@
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import axiosClient from "@/services/axiosClient";
 import {
-	mapLineStatusToOrderStatus,
+	deriveOrderStatusFromOrderLines,
 	OrderItems,
 	OrderResponse,
 } from "@/types/orderHistory.types";
@@ -64,14 +64,11 @@ export function useGetOrders(
 			);
 
 			const mapped: OrderItems[] = response.data.data.map((order) => {
-				const maxStatus = Math.max(
-					...order.orderLines.map((line) => line.lineStatus),
-				);
 				return {
 					order_id: order.order_id,
 					orderNumber: order.orderNumber,
 					date: order.date,
-					status: mapLineStatusToOrderStatus(maxStatus),
+					status: deriveOrderStatusFromOrderLines(order.orderLines),
 					total: order.sum,
 					items: order.orderLines,
 				};

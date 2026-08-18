@@ -31,6 +31,10 @@ import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { Link } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
+import {
+	formatCartKitAdditionalLabel,
+	getCartKitPartEntries,
+} from "@/lib/cart-kit";
 import { getItemBalanceArray, postCartKit } from "@/services/carts.service";
 import { loadCategoryTree } from "@/services/categories.service";
 import {
@@ -92,6 +96,7 @@ const CartPage = () => {
 		setShowOrderConfirmation,
 		handleClearCart,
 		cartKitTotals,
+		getCalculatedPrice,
 	} = useAppContext();
 
 	const [orderData] = useCheckoutOrderData(
@@ -636,6 +641,9 @@ const CartPage = () => {
 							{cartItems?.cartKit && cartItems.cartKit.length > 0 && (
 								<div className="space-y-4">
 									{cartItems.cartKit.map((item, idx) => {
+										const additionalItems = getCartKitPartEntries(
+											item.additionals,
+										);
 										return (
 											<div
 												key={idx}
@@ -908,6 +916,35 @@ const CartPage = () => {
 																					</div>
 																				);
 																			})}
+																	</div>
+																)}
+																{additionalItems.length > 0 && (
+																	<div className="space-y-4">
+																		{additionalItems.map((additional) => (
+																			<div
+																				key={`${additional.key}-${additional.itemNumber}`}
+																				className="flex items-start justify-between gap-2">
+																				<div className="flex flex-col">
+																					<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
+																						{additional.name ||
+																							formatCartKitAdditionalLabel(
+																								additional.key,
+																							)}
+																					</p>
+																					<p className="text-xs text-[#5A615D]">
+																						{additional.itemNumber}
+																					</p>
+																				</div>
+																				<p className="font-bold">
+																					{formatNorwegianCurrency(
+																						getCalculatedPrice(
+																							additional.itemNumber,
+																							additional.quantity,
+																						),
+																					)}
+																				</p>
+																			</div>
+																		))}
 																	</div>
 																)}
 															</div>
