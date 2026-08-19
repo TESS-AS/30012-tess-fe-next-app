@@ -104,6 +104,11 @@ export function HosesAndEquipments({
 	const S1_CODE_1772_OSEBERG_FELTSENTER_ABDH = "1291633";
 	const S1_CODE_1219_AASTA_HANSTEEN = "1419515";
 	const S1_CODE_1821_NJORD_B = "1722691";
+	const S1_CODE_1766_OSEBERG_SOR = "1291631";
+	const S1_CODE_1767_OSEBERG_OST = "1291632";
+	const S1_CODE_1820_NJORD_A = "1292735";
+	const S1_CODE_1776_TROLL_C = "1291629";
+	const S1_CODE_1930_JOHAN_CASTBERG = "1958795";
 
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
 	const [supportOpen, setSupportOpen] = useState(false);
@@ -1019,7 +1024,12 @@ export function HosesAndEquipments({
 							s1.S1Code === S1_CODE_1765_OSEBERG_C ||
 							s1.S1Code === S1_CODE_1772_OSEBERG_FELTSENTER_ABDH ||
 							s1.S1Code === S1_CODE_1219_AASTA_HANSTEEN ||
-							s1.S1Code === S1_CODE_1821_NJORD_B,
+							s1.S1Code === S1_CODE_1821_NJORD_B ||
+							s1.S1Code === S1_CODE_1766_OSEBERG_SOR ||
+							s1.S1Code === S1_CODE_1767_OSEBERG_OST ||
+							s1.S1Code === S1_CODE_1820_NJORD_A ||
+							s1.S1Code === S1_CODE_1776_TROLL_C ||
+							s1.S1Code === S1_CODE_1930_JOHAN_CASTBERG,
 					)
 					.map((s1) => (
 						<SelectItem
