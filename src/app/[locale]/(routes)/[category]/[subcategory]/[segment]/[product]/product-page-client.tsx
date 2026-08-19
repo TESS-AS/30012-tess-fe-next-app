@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 
 import { ProductBreadcrumbs } from "@/components/products/product-breadcrumbs";
 import { ProductDetailTabs } from "@/components/products/product-detail-tabs";
@@ -108,8 +108,18 @@ export function ProductPageClient({
 		});
 	};
 
+	// Apply the URL-driven preselection once per unique target. Without this
+	// guard the effect re-fires on every user variant click (because
+	// selectedItemNumber/columnAttributes changed) and snaps the selection
+	// back to whatever the URL asked for, leaving the picker stuck.
+	const preselectionAppliedRef = useRef<string | null>(null);
+
 	useEffect(() => {
 		if (!productData?.items || productData.items.length === 0) return;
+
+		const preselectionKey =
+			preselectedSapNumber ?? preselectedItemNumber ?? "__first__";
+		if (preselectionAppliedRef.current === preselectionKey) return;
 
 		// Priority: SAP number first, then item number (strict, then SAP-attr
 		// fallback once attributes have loaded), then first item.
@@ -121,11 +131,18 @@ export function ProductPageClient({
 			);
 			if (itemBySap) {
 				setSelectedItemNumber(itemBySap.itemNumber);
+				preselectionAppliedRef.current = preselectionKey;
 				return;
 			}
-			const itemBySapAttr = findVariantBySapAttr(preselectedSapNumber);
-			if (itemBySapAttr) {
-				setSelectedItemNumber(itemBySapAttr.itemNumber);
+			if (columnAttributes) {
+				const itemBySapAttr = findVariantBySapAttr(preselectedSapNumber);
+				if (itemBySapAttr) {
+					setSelectedItemNumber(itemBySapAttr.itemNumber);
+					preselectionAppliedRef.current = preselectionKey;
+					return;
+				}
+			} else {
+				// Attributes not loaded yet — wait so the SAP-attr fallback can run
 				return;
 			}
 		}
@@ -135,29 +152,44 @@ export function ProductPageClient({
 			);
 			if (direct) {
 				setSelectedItemNumber(direct.itemNumber);
+				preselectionAppliedRef.current = preselectionKey;
 				return;
 			}
-			const itemBySapAttr = findVariantBySapAttr(preselectedItemNumber);
-			if (itemBySapAttr) {
-				setSelectedItemNumber(itemBySapAttr.itemNumber);
+			if (columnAttributes) {
+				const itemBySapAttr = findVariantBySapAttr(preselectedItemNumber);
+				if (itemBySapAttr) {
+					setSelectedItemNumber(itemBySapAttr.itemNumber);
+					preselectionAppliedRef.current = preselectionKey;
+					return;
+				}
+			} else {
 				return;
 			}
 		}
-		// If no preselection and no current selection, select the first item
-		if (!selectedItemNumber) {
-			setSelectedItemNumber(productData.items[0]?.itemNumber);
-		}
+		setSelectedItemNumber(productData.items[0]?.itemNumber);
+		preselectionAppliedRef.current = preselectionKey;
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
 		preselectedItemNumber,
 		preselectedSapNumber,
 		productData?.items,
-		selectedItemNumber,
 		columnAttributes,
 	]);
 
 	const handleSelectVariant = (itemNumber: string) => {
 		setSelectedItemNumber(itemNumber);
+
+		// Keep the URL in sync so a shared/refreshed link points to the visible
+		// variant. Uses history.replaceState (not router.replace) to avoid a
+		// server round-trip; the preselection ref guard prevents any effect loop
+		// from the resulting prop change.
+		if (typeof window !== "undefined") {
+			const params = new URLSearchParams(window.location.search);
+			params.set("itemNumber", itemNumber);
+			params.delete("sapNumber");
+			const next = `${window.location.pathname}?${params.toString()}${window.location.hash}`;
+			window.history.replaceState(window.history.state, "", next);
+		}
 
 		if (typeof document !== "undefined") {
 			const container = document.getElementById("app-scroll-container");
