@@ -49,6 +49,28 @@ function toOption(inv: InventoryRow, label: string): WarehouseOption {
 }
 
 /**
+ * From a set of warehouse options, pick the one the UI should preselect.
+ *
+ * Prefers the user's default warehouse when it's present in the options (even
+ * at zero balance — a user's mental model of "my warehouse" beats "first with
+ * stock"). Falls back to the first option (highest balance, per
+ * `buildWarehouseOptions` sort) so the picker isn't empty.
+ */
+export function pickPreferredWarehouse(
+	options: WarehouseOption[],
+	defaultWarehouseNumber: string | undefined,
+): WarehouseOption | undefined {
+	if (!options.length) return undefined;
+	if (defaultWarehouseNumber) {
+		const match = options.find(
+			(o) => o.warehouseNumber === defaultWarehouseNumber,
+		);
+		if (match) return match;
+	}
+	return options[0];
+}
+
+/**
  * Sort: in-stock first (descending balance), then zero-balance (by warehouseId).
  * Dedup: by (companyNumber, warehouseNumber) since the same warehouseNumber can
  * exist under multiple companies.

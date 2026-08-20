@@ -45,6 +45,7 @@ import { priceItemsByCompany } from "@/lib/cart-pricing";
 import { resolveProductUnit } from "@/lib/product-unit";
 import {
 	buildWarehouseOptions,
+	pickPreferredWarehouse,
 	resolveWarehouse,
 	WarehouseOption,
 } from "@/lib/warehouse";
@@ -457,11 +458,15 @@ export default function ProductVariantTable({
 			explicitCandidate ??
 			(warehouse as Record<string | number, string>)[variantItemNumber];
 		if (candidate) return resolveVariantWarehouse(variantItemNumber, candidate);
-		const firstInStock = buildWarehouseOptions(
+		const options = buildWarehouseOptions(
 			columnAttributes?.[variantItemNumber]?.inventory,
 			{ warehouseLabel: t("Product.warehouses") },
-		)[0]?.warehouseNumber;
-		return resolveVariantWarehouse(variantItemNumber, firstInStock);
+		);
+		const preferred = pickPreferredWarehouse(
+			options,
+			profile?.defaultWarehouseNumber,
+		)?.warehouseNumber;
+		return resolveVariantWarehouse(variantItemNumber, preferred);
 	};
 
 	const handleAddToCart = async (
@@ -646,7 +651,11 @@ export default function ProductVariantTable({
 						const variantKey = variant.itemNumber;
 
 						if (!initializedWarehousesRef.current.has(variantKey)) {
-							const warehouseToPreselect = warehouseOptions[0].warehouseNumber;
+							const warehouseToPreselect =
+								pickPreferredWarehouse(
+									warehouseOptions,
+									profile?.defaultWarehouseNumber,
+								)?.warehouseNumber ?? warehouseOptions[0].warehouseNumber;
 							initializedWarehousesRef.current.add(variantKey);
 							setWarehouse((prev) => {
 								if (prev[variantKey]) return prev;

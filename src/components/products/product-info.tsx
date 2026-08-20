@@ -15,7 +15,11 @@ import { SAP_CUSTOMER } from "@/constants/checkout";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useAppContext } from "@/lib/appContext";
 import { resolveProductUnit } from "@/lib/product-unit";
-import { buildWarehouseOptions, resolveWarehouse } from "@/lib/warehouse";
+import {
+	buildWarehouseOptions,
+	pickPreferredWarehouse,
+	resolveWarehouse,
+} from "@/lib/warehouse";
 import { addToCart, getCart } from "@/services/carts.service";
 import { calculateItemPrice } from "@/services/product.service";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
@@ -243,7 +247,13 @@ export function ProductInfo({
 			!selectedWarehouse &&
 			onWarehouseChange
 		) {
-			onWarehouseChange(selectedItemNumber, warehouseOptions[0].warehouseNumber);
+			const preferred = pickPreferredWarehouse(
+				warehouseOptions,
+				profile?.defaultWarehouseNumber,
+			);
+			if (preferred) {
+				onWarehouseChange(selectedItemNumber, preferred.warehouseNumber);
+			}
 		}
 	}, [
 		selectedItemNumber,

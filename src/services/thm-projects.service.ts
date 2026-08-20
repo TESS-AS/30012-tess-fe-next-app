@@ -246,8 +246,7 @@ export async function getThmWorkOrderHoses({
 			| undefined;
 		return {
 			hexagonId: String(hose.hoseLine?.hexagonId ?? ""),
-			// BE gap: customerData.posNumber currently returns "" for every row.
-			posId: hose.customerData?.posNumber ?? "",
+			posId: String(hose.hoseLine?.hexagonId ?? ""),
 			s2: hose.hoseLine?.s2?.s2Name ?? "",
 			// BE gap: no mobile-sync status field yet. Placeholder until BE ships it.
 			status: "NotTouched",
