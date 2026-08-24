@@ -1158,6 +1158,7 @@
 		"delivered": "Levert",
 		"cancelled": "Kansellert",
 		"orderNumber": "Ordrenummer",
+		"orderRef": "Ordrereferanse",
 		"orderDate": "Bestillingsdato",
 		"price": "Pris"
 	},

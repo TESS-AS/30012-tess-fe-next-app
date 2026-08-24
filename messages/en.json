@@ -1156,6 +1156,7 @@
 		"delivered": "Delivered",
 		"cancelled": "Cancelled",
 		"orderNumber": "Order Number",
+		"orderRef": "Order Reference",
 		"orderDate": "Order Date",
 		"price": "Price"
 	},

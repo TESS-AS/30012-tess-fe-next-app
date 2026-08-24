@@ -67,6 +67,7 @@ export function useGetOrders(
 				return {
 					order_id: order.order_id,
 					orderNumber: order.orderNumber,
+					customerOrderRef: order.customerOrderRef ?? "",
 					date: order.date,
 					status: deriveOrderStatusFromOrderLines(order.orderLines),
 					total: order.sum,

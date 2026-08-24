@@ -157,6 +157,14 @@ export function OrdreHistorikk({ customerNumber }: { customerNumber: string }) {
 			sortable: true,
 		},
 		{
+			key: "orderRef",
+			header: t("orderRef").toUpperCase(),
+			cell: (order: Order) => (
+				<span>{order.customerOrderRef?.trim() ? order.customerOrderRef : "—"}</span>
+			),
+			sortable: true,
+		},
+		{
 			key: "date",
 			header: t("orderDate").toUpperCase(),
 			cell: (order: Order) => <span>{formatDate(order.date)}</span>,

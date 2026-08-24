@@ -141,6 +141,7 @@ export async function getPostalCode(
 interface SearchOrderHistoryApiItem {
 	orderId: number;
 	orderNumber: string;
+	customerOrderRef?: string;
 	date: string;
 	sum: number;
 	orderLines: Array<{
@@ -221,6 +222,7 @@ export async function getOrderHistory(
 			return {
 				order_id: order.orderId,
 				orderNumber: order.orderNumber,
+				customerOrderRef: order.customerOrderRef ?? "",
 				date: order.date,
 				status: deriveOrderStatusFromOrderLines(order.orderLines),
 				total: order.sum,
