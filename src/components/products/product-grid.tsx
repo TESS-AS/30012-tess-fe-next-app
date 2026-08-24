@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useMemo, useRef, useCallback, useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
@@ -100,6 +100,23 @@ export function ProductGrid({
 		},
 		[handleFilterChange],
 	);
+
+	// Map attributeIdentifier → display name so filter chips can show the
+	// localized name while state/URL/payload stay keyed on the stable identifier.
+	const filterLabelByIdentifier = useMemo(() => {
+		const map: Record<string, string> = {};
+		filtersState.forEach((fc) => {
+			fc.filters.forEach((f) => {
+				if (f.attributeIdentifier) map[f.attributeIdentifier] = f.key;
+			});
+		});
+		return map;
+	}, [filtersState]);
+
+	const getFilterLabel = (key: string) => {
+		if (key === "category") return "Kategori";
+		return filterLabelByIdentifier[key] ?? key;
+	};
 
 	useEffect(() => {
 		if (filters.length > 0) {
@@ -269,6 +286,7 @@ export function ProductGrid({
 
 							if (isRangeFilter) {
 								const rangeValue = `${values[0]} - ${values[1]}`;
+								const label = getFilterLabel(key);
 								return (
 									<div
 										key={`${key}-range`}
@@ -278,7 +296,7 @@ export function ProductGrid({
 												<TooltipTrigger asChild>
 													<div className="flex items-center gap-1">
 														<span className="text-md max-w-[100px] truncate">
-															{key === "category" ? "Kategori" : key}:
+															{label}:
 														</span>
 														<span className="max-w-[100px] truncate">
 															{rangeValue}
@@ -287,7 +305,7 @@ export function ProductGrid({
 												</TooltipTrigger>
 												<TooltipContent>
 													<p>
-														{key}: {rangeValue}
+														{label}: {rangeValue}
 													</p>
 												</TooltipContent>
 											</Tooltip>
@@ -307,6 +325,7 @@ export function ProductGrid({
 							}
 
 							// Regular filter values
+							const label = getFilterLabel(key);
 							return values
 								.filter((value) => !!value)
 								.map((value) => (
@@ -318,7 +337,7 @@ export function ProductGrid({
 												<TooltipTrigger asChild>
 													<div className="flex items-center gap-1">
 														<span className="text-md max-w-[100px] truncate">
-															{key === "category" ? "Kategori" : key}:
+															{label}:
 														</span>
 														<span className="max-w-[100px] truncate">
 															{value}
@@ -327,7 +346,7 @@ export function ProductGrid({
 												</TooltipTrigger>
 												<TooltipContent>
 													<p>
-														{key}: {value}
+														{label}: {value}
 													</p>
 												</TooltipContent>
 											</Tooltip>

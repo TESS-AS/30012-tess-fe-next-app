@@ -33,8 +33,13 @@ export interface FilterChildrenResponse {
 
 // Definition of a single filter (attribute) including its possible values
 // and optional slider configuration when the filter is a numeric range.
+//
+// `attributeIdentifier` is the stable BE identifier (e.g. "FILT001322") and is
+// what we use everywhere for state, URLs, and the wire payload. `key` remains
+// the localized display name (e.g. "Merkenavn") shown in the UI.
 export interface FilterDefinition {
 	key: string;
+	attributeIdentifier: string;
 	values: FilterChildValue[];
 	slider?: SliderConfig;
 }

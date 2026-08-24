@@ -138,8 +138,8 @@ export const Filter = React.forwardRef<
 			const firstThreeKeys: string[] = [];
 			for (const fc of filters) {
 				for (const f of fc.filters) {
-					if (!firstThreeKeys.includes(f.key)) {
-						firstThreeKeys.push(f.key);
+					if (!firstThreeKeys.includes(f.attributeIdentifier)) {
+						firstThreeKeys.push(f.attributeIdentifier);
 					}
 					if (firstThreeKeys.length >= 3) break;
 				}
@@ -291,7 +291,7 @@ export const Filter = React.forwardRef<
 
 				if (isFullRange) {
 					const updatedFilters = { ...localSelectedFilters };
-					delete updatedFilters[filter.key];
+					delete updatedFilters[filter.attributeIdentifier];
 					setLocalSelectedFilters(updatedFilters);
 
 					const filterArray: FilterValues[] = Object.entries(updatedFilters)
@@ -304,7 +304,7 @@ export const Filter = React.forwardRef<
 
 				const updatedFilters = {
 					...localSelectedFilters,
-					[filter.key]: [
+					[filter.attributeIdentifier]: [
 						snappedValues[0].toString(),
 						snappedValues[1].toString(),
 					],
@@ -532,8 +532,8 @@ export const Filter = React.forwardRef<
 									className="w-full">
 									{filterCategory.filters.map((filter) => (
 										<AccordionItem
-											key={filter.key}
-											value={filter.key}
+											key={filter.attributeIdentifier}
+											value={filter.attributeIdentifier}
 											className="border-b">
 											<AccordionTrigger className="text-md font-semibold hover:no-underline">
 												{filter.key}
@@ -541,7 +541,7 @@ export const Filter = React.forwardRef<
 											<AccordionContent className="pt-2">
 												{filter.slider ? (
 													<SliderFilterInput
-														filterKey={filter.key}
+														filterKey={filter.attributeIdentifier}
 														sliderConfig={filter.slider}
 														rangeValues={rangeValues}
 														tempRangeValues={tempRangeValues}
@@ -556,7 +556,7 @@ export const Filter = React.forwardRef<
 													/>
 												) : filter.values.length > 0 ? (
 													<div className="space-y-2 pl-2">
-														{(expandedFilters[filter.key]
+														{(expandedFilters[filter.attributeIdentifier]
 															? filter.values
 															: filter.values.slice(0, 5)
 														).map((child) => (
@@ -565,18 +565,21 @@ export const Filter = React.forwardRef<
 																className="mb-5 flex items-center justify-between space-x-2 font-normal"
 																onClick={(e) => e.stopPropagation()}>
 																<Checkbox
-																	id={`${filter.key}-${child.value}`}
+																	id={`${filter.attributeIdentifier}-${child.value}`}
 																	checked={
-																		localSelectedFilters[filter.key]?.includes(
-																			child.value,
-																		) || false
+																		localSelectedFilters[
+																			filter.attributeIdentifier
+																		]?.includes(child.value) || false
 																	}
 																	onCheckedChange={() =>
-																		handleFilterChange(filter.key, child.value)
+																		handleFilterChange(
+																			filter.attributeIdentifier,
+																			child.value,
+																		)
 																	}
 																/>
 																<label
-																	htmlFor={`${filter.key}-${child.value}`}
+																	htmlFor={`${filter.attributeIdentifier}-${child.value}`}
 																	className="flex w-full cursor-pointer justify-between text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
 																	<span>{child.value}</span>
 																	<span className="text-muted-foreground">
@@ -592,11 +595,12 @@ export const Filter = React.forwardRef<
 																onClick={() =>
 																	setExpandedFilters((prev) => ({
 																		...prev,
-																		[filter.key]: !prev[filter.key],
+																		[filter.attributeIdentifier]:
+																			!prev[filter.attributeIdentifier],
 																	}))
 																}
 																className="text-primary px-0 text-sm hover:underline">
-																{expandedFilters[filter.key]
+																{expandedFilters[filter.attributeIdentifier]
 																	? "Vis mindre"
 																	: "Vis mer"}
 															</Button>

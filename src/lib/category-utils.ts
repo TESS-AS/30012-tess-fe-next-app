@@ -238,16 +238,18 @@ export function normalizeFilterResponse(
 
 				return {
 					key: f.key,
+					attributeIdentifier: f.attributeIdentifier ?? f.key,
 					values,
 					slider: f.slider,
 				};
 			});
 		};
 
-		// New /filterFamily "filters" shape: flat list of { key, attributeIdentifier, children: [{ val, count }] }
+		// New /proxy/filter "filters" shape: flat list of { key, attributeIdentifier, children: [{ val, count }] }
 		if ("key" in item && "children" in item && !("filters" in item)) {
 			const filters: FilterDefinition[] = filtersResponse.map((f: any) => ({
 				key: f.key,
+				attributeIdentifier: f.attributeIdentifier ?? f.key,
 				values: (f.children ?? []).map((c: any) => ({
 					value: c.val,
 					type: "",
