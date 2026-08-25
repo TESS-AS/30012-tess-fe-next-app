@@ -711,6 +711,22 @@
 		"errors": {
 			"selectItemsFirst": "Please select items to contact about"
 		},
+		"selection": {
+			"summary": "{selected} selected | {buyable} purchasable | {request} must be requested",
+			"tooltipTitle": "Some of the selected hoses cannot be purchased directly.",
+			"tooltipBody": "They may be missing data or require clarification. Send a request for a quote, or contact us for assistance.",
+			"singleBlockedTitle": "This hose cannot be purchased directly.",
+			"singleBlockedBody": "It may be missing data or require clarification. Send a request for a quote or contact us for assistance.",
+			"addToCart": "Add {count} to cart",
+			"requestHoses": "Request {count} hoses",
+			"contactSupport": "Contact TESS support",
+			"contactSupportHint": "Talk to a specialist about the hose",
+			"sendRfq": "Send RFQ",
+			"sendRfqHint": "Get an offer with price and delivery",
+			"moreActions": "More actions",
+			"clear": "Clear selection",
+			"nonePurchasable": "None of the selected hoses can be added to the cart"
+		},
 		"success": {
 			"supportMessageSent": "Message sent to TESS support",
 			"requestSent": "Request sent",

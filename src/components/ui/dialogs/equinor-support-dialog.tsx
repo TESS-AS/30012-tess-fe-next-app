@@ -311,10 +311,10 @@ function ConfirmationView({
 					<p>Vi kontakter deg snarest.</p>
 				</div>
 				<div className="space-y-1 text-sm text-[#5A615D]">
-					<p>
+					{/* <p>
 						Saksnummer:{" "}
 						<span className="font-medium text-[#0F1912]">{caseId}</span>
-					</p>
+					</p> */}
 					<p>
 						Spørsmål i mellomtiden? Ring{" "}
 						<a

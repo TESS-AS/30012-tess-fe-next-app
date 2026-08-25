@@ -242,7 +242,7 @@ export function DataTable<
 															"group border-b border-[#C1C4C2] transition-colors duration-200",
 															disabled
 																? "bg-[#F8F9F8] opacity-60"
-																: isSelected(item.orderId)
+																: isSelected(item.hexagonId ?? item.orderId)
 																	? selectedRowBgClass
 																	: "hover:bg-[#F0FCF2]",
 															!disabled &&

@@ -713,6 +713,22 @@
 		"errors": {
 			"selectItemsFirst": "Vennligst velg elementer å kontakte om"
 		},
+		"selection": {
+			"summary": "{selected} valgt | {buyable} kjøpbare | {request} må forespørres",
+			"tooltipTitle": "Noen av de valgte slangene kan ikke kjøpes direkte.",
+			"tooltipBody": "De kan mangle data eller kreve avklaring. Send forespørsel for tilbud, eller kontakt oss for bistand.",
+			"singleBlockedTitle": "Denne slangen kan ikke kjøpes direkte.",
+			"singleBlockedBody": "Den kan mangle data eller kreve avklaring. Send forespørsel for tilbud eller kontakt oss for bistand.",
+			"addToCart": "Legg {count} i handlekurv",
+			"requestHoses": "Forespør {count} slanger",
+			"contactSupport": "Kontakt TESS support",
+			"contactSupportHint": "Snakk med en fagperson om slangen",
+			"sendRfq": "Send RFQ",
+			"sendRfqHint": "Få tilbud med pris og levering",
+			"moreActions": "Flere handlinger",
+			"clear": "Fjern valg",
+			"nonePurchasable": "Ingen av de valgte slangene kan legges i handlekurven"
+		},
 		"success": {
 			"supportMessageSent": "Meldingen ble sendt til TESS support",
 			"requestSent": "Forespørselen ble sendt",
