@@ -2,7 +2,7 @@ export const SUPPORT_EMAIL_RECIPIENT = "netthandel@tess.no";
 export const ORDER_TSS_EMAIL_RECIPIENT = "tess@tess.no";
 
 // TODO: confirm with stakeholder which inbox the THM hose team should receive these in
-export const THM_TEAM_EMAIL_RECIPIENT = "netthandel@tess.no";
+export const THM_TEAM_EMAIL_RECIPIENT = "thm@tess.no";
 
 export type HoseContactMethod = "phone" | "email";
 

@@ -39,7 +39,7 @@ import { useAppContext } from "@/lib/appContext";
 import { cn } from "@/lib/utils";
 import { postCartKit } from "@/services/carts.service";
 import { ProfileUser } from "@/types/user.types";
-import { Mail, MapPin, MoreHorizontal, ShoppingCart, X } from "lucide-react";
+import { Info, Mail, MapPin, MoreHorizontal, ShoppingCart, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
@@ -253,46 +253,95 @@ export function HosesAndEquipments({
 		return selectedRows.includes(hexagonId);
 	};
 
-	const isEcomBlocked = (row: HoseOrder) => Number(row.ecom) === 3;
+	const isEcomBlocked = (row: Pick<HoseOrder, "ecom">) =>
+		Number(row.ecom) === 3;
 
 	const selectedCount = allAcrossPages
 		? Math.max(0, (pagination?.totalItems ?? 0) - deselectedIds.size)
 		: selectedRows.length;
 
+	const selectedAssetMeta = useMemo(() => {
+		if (allAcrossPages) {
+			const known: Array<Pick<HoseOrder, "hexagonId" | "ecom" | "beskrivelse">> =
+				[];
+			for (const asset of transformedAssets) {
+				if (!deselectedIds.has(asset.hexagonId)) {
+					known.push({
+						hexagonId: asset.hexagonId,
+						ecom: asset.ecom,
+						beskrivelse: asset.beskrivelse,
+					});
+				}
+			}
+			for (const [hexagonId, meta] of assetsByHexagonIdRef.current) {
+				if (deselectedIds.has(hexagonId)) continue;
+				if (known.some((a) => a.hexagonId === hexagonId)) continue;
+				known.push({
+					hexagonId,
+					ecom: meta.ecom,
+					beskrivelse: "",
+				});
+			}
+			return known;
+		}
+
+		return selectedRows.map((hexagonId) => {
+			const fromPage = transformedAssets.find((a) => a.hexagonId === hexagonId);
+			const fromCache = assetsByHexagonIdRef.current.get(hexagonId);
+			return {
+				hexagonId,
+				ecom: fromPage?.ecom ?? fromCache?.ecom,
+				beskrivelse: fromPage?.beskrivelse ?? "",
+			};
+		});
+	}, [
+		allAcrossPages,
+		deselectedIds,
+		selectedRows,
+		transformedAssets,
+	]);
+
+	const selectedBuyableAssets = useMemo(
+		() => selectedAssetMeta.filter((a) => !isEcomBlocked(a)),
+		[selectedAssetMeta],
+	);
+	const selectedRequestAssets = useMemo(
+		() => selectedAssetMeta.filter((a) => isEcomBlocked(a)),
+		[selectedAssetMeta],
+	);
+
+	const selectedBuyableCount = selectedBuyableAssets.length;
+	const selectedRequestCount = selectedRequestAssets.length;
+
+	const selectedBuyableIds = selectedBuyableAssets.map((a) => a.hexagonId);
+	const selectedRequestIds = selectedRequestAssets.map((a) => a.hexagonId);
+
 	const allSelectedOnPage = useMemo(() => {
 		if (!transformedAssets.length) return false;
-		const purchasableAssets = transformedAssets.filter(
-			(a) => !isEcomBlocked(a),
-		);
-		if (purchasableAssets.length === 0) return false;
 		if (allAcrossPages) {
-			return purchasableAssets.every((a) => !deselectedIds.has(a.hexagonId));
+			return transformedAssets.every((a) => !deselectedIds.has(a.hexagonId));
 		}
 		const set = new Set(selectedRows);
-		return purchasableAssets.every((a) => set.has(a.hexagonId));
+		return transformedAssets.every((a) => set.has(a.hexagonId));
 	}, [transformedAssets, selectedRows, allAcrossPages, deselectedIds]);
 
 	const someSelectedOnPage = useMemo(() => {
 		if (!transformedAssets.length) return false;
-		const purchasableAssets = transformedAssets.filter(
-			(a) => !isEcomBlocked(a),
-		);
-		if (purchasableAssets.length === 0) return false;
 		if (allAcrossPages) {
-			const selectedOnPageCount = purchasableAssets.filter(
+			const selectedOnPageCount = transformedAssets.filter(
 				(a) => !deselectedIds.has(a.hexagonId),
 			).length;
 			return (
 				selectedOnPageCount > 0 &&
-				selectedOnPageCount < purchasableAssets.length
+				selectedOnPageCount < transformedAssets.length
 			);
 		}
 		const set = new Set(selectedRows);
-		const selectedOnPageCount = purchasableAssets.filter((a) =>
+		const selectedOnPageCount = transformedAssets.filter((a) =>
 			set.has(a.hexagonId),
 		).length;
 		return (
-			selectedOnPageCount > 0 && selectedOnPageCount < purchasableAssets.length
+			selectedOnPageCount > 0 && selectedOnPageCount < transformedAssets.length
 		);
 	}, [transformedAssets, selectedRows, allAcrossPages, deselectedIds]);
 
@@ -347,9 +396,7 @@ export function HosesAndEquipments({
 	);
 
 	const handleSelectAllOnPage = useCallback(() => {
-		const ids = transformedAssets
-			.filter((a) => !isEcomBlocked(a))
-			.map((a) => a.hexagonId);
+		const ids = transformedAssets.map((a) => a.hexagonId);
 
 		if (ids.length === 0) {
 			return;
@@ -449,71 +496,59 @@ export function HosesAndEquipments({
 
 	const handleBulkAction = async (action: string): Promise<void> => {
 		if (action === "cart") {
-			if (selectedCount === 0) {
-				toast.error("Vennligst velg elementer å legge til i handlekurven");
+			if (selectedBuyableCount === 0) {
+				toast.error(t("selection.nonePurchasable"));
 				return;
 			}
 
 			const handleAddToCart = async () => {
 				setIsAddingToCart(true);
 				try {
-					const currentAssets = transformedAssetsRef.current;
-					const selectedAssets: Array<
-						Pick<HoseOrder, "hexagonId" | "ecom" | "beskrivelse">
-					> = allAcrossPages
-						? currentAssets.filter((a) => !deselectedIds.has(a.hexagonId))
-						: selectedRows.map((hexagonId) => {
-								const full = currentAssets.find(
-									(a) => a.hexagonId === hexagonId,
-								);
-								return {
-									hexagonId,
-									ecom: full?.ecom,
-									beskrivelse: full?.beskrivelse ?? "",
-								};
-							});
+					const available = selectedBuyableAssets;
+					const cartItems = available.map((a) => ({
+						hexagonId: Number(a.hexagonId),
+						quantity: 1,
+						warehouseNumber: profile?.defaultWarehouseNumber,
+						companyNumber: profile?.defaultCompanyNumber,
+					}));
 
-					const unavailable = selectedAssets.filter(
-						(a) => Number(a.ecom) === 3,
-					);
-					const available = selectedAssets.filter((a) => Number(a.ecom) !== 3);
+					await postCartKit(cartItems);
+					setIsCartChanging(!isCartChanging);
 
-					if (available.length > 0) {
-						const cartItems = available.map((a) => ({
-							hexagonId: Number(a.hexagonId),
-							quantity: 1,
-							warehouseNumber: profile?.defaultWarehouseNumber,
-							companyNumber: profile?.defaultCompanyNumber,
-						}));
+					const grouped = new Map<string, number>();
+					available.forEach((a) => {
+						const name = a.beskrivelse || a.hexagonId;
+						grouped.set(name, (grouped.get(name) || 0) + 1);
+					});
+					const items = Array.from(grouped, ([name, quantity]) => ({
+						name,
+						quantity,
+					}));
 
-						await postCartKit(cartItems);
-						setIsCartChanging(!isCartChanging);
+					showCartNotification({
+						itemName:
+							available.length === 1
+								? available[0].beskrivelse || available[0].hexagonId
+								: `${available.length} varer`,
+						itemNumber: available.length === 1 ? available[0].hexagonId : "",
+						quantity: available.length,
+						unavailableCount: selectedRequestCount,
+						items,
+					});
 
-						// Group by description for the notification item list
-						const grouped = new Map<string, number>();
-						available.forEach((a) => {
-							const name = a.beskrivelse || a.hexagonId;
-							grouped.set(name, (grouped.get(name) || 0) + 1);
+					const addedIds = new Set(available.map((a) => a.hexagonId));
+					if (allAcrossPages) {
+						setDeselectedIds((prev) => {
+							const next = new Set(prev);
+							addedIds.forEach((id) => next.add(id));
+							return next;
 						});
-						const items = Array.from(grouped, ([name, quantity]) => ({
-							name,
-							quantity,
-						}));
-
-						showCartNotification({
-							itemName:
-								available.length === 1
-									? available[0].beskrivelse || available[0].hexagonId
-									: `${available.length} varer`,
-							itemNumber: available.length === 1 ? available[0].hexagonId : "",
-							quantity: available.length,
-							unavailableCount: unavailable.length,
-							items,
+					} else {
+						setSelectedRows((prev) => {
+							const next = prev.filter((id) => !addedIds.has(id));
+							localStorage.setItem("selectedHoseRows", JSON.stringify(next));
+							return next;
 						});
-					} else if (unavailable.length > 0) {
-						toast.error(
-							`${unavailable.length} vare${unavailable.length === 1 ? "" : "r"} ikke tilgjengelig for salg`,
-						);
 					}
 				} catch (error) {
 					toast.error("Kunne ikke legge til elementer i handlekurven");
@@ -692,18 +727,9 @@ export function HosesAndEquipments({
 							<TooltipTrigger asChild>
 								<button
 									type="button"
-									disabled={isEcomBlocked(o)}
-									className={cn(
-										"w-full text-left underline-offset-2",
-										!isEcomBlocked(o) &&
-											"cursor-pointer text-[#003D1A] decoration-[#003D1A]",
-										!isEcomBlocked(o) &&
-											"hover:underline focus-visible:underline",
-										isEcomBlocked(o) && "cursor-not-allowed",
-									)}
+									className="w-full cursor-pointer text-left text-[#003D1A] underline-offset-2 decoration-[#003D1A] hover:underline focus-visible:underline"
 									onClick={(e) => {
 										e.stopPropagation();
-										if (isEcomBlocked(o)) return;
 										handleHoseClick(o.hexagonId);
 									}}>
 									{o.beskrivelse}
@@ -778,9 +804,6 @@ export function HosesAndEquipments({
 		actions: {
 			key: "handling",
 			header: () => {
-				const selectableCount = transformedAssets.filter(
-					(a) => !isEcomBlocked(a),
-				).length;
 				const checked: boolean | "indeterminate" = allSelectedOnPage
 					? true
 					: someSelectedOnPage
@@ -789,7 +812,7 @@ export function HosesAndEquipments({
 				return (
 					<Checkbox
 						onClick={(e) => e.stopPropagation()}
-						disabled={selectableCount === 0}
+						disabled={transformedAssets.length === 0}
 						checked={checked}
 						aria-label={tHoseActions("selectAllOnPage")}
 						onCheckedChange={() => {
@@ -801,10 +824,8 @@ export function HosesAndEquipments({
 			cell: (order: HoseOrder) => (
 				<Checkbox
 					onClick={(e) => e.stopPropagation()}
-					disabled={isEcomBlocked(order)}
 					checked={isRowSelected(order.hexagonId)}
 					onCheckedChange={(val) => {
-						if (isEcomBlocked(order)) return;
 						handleSelectRow(order.hexagonId, val);
 					}}
 				/>
@@ -857,20 +878,46 @@ export function HosesAndEquipments({
 				<div
 					className="flex items-center justify-center gap-2"
 					onClick={(e) => e.stopPropagation()}>
-					<Button
-						variant="ghost"
-						size="icon"
-						disabled={isEcomBlocked(order) || isAddingToCart}
-						className="h-10 w-10 rounded-full text-[#0F1912] hover:bg-[#E5E7E6] focus-visible:ring-4 focus-visible:ring-[#C1C4C2] focus-visible:outline-hidden"
-						onClick={() => void handleAddSingleToCart(order)}>
-						<ShoppingCart
-							className={
-								isEcomBlocked(order)
-									? "h-5 w-5 text-[#5A615D]"
-									: "h-5 w-5 text-[#0F1912]"
-							}
-						/>
-					</Button>
+					{isEcomBlocked(order) ? (
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<span className="inline-flex">
+										<Button
+											variant="ghost"
+											size="icon"
+											disabled
+											aria-label={t("selection.singleBlockedTitle")}
+											className="h-10 w-10 rounded-full text-[#0F1912] hover:bg-[#E5E7E6] focus-visible:ring-4 focus-visible:ring-[#C1C4C2] focus-visible:outline-hidden disabled:opacity-100">
+											<ShoppingCart className="h-5 w-5 text-[#8A8F8C]" />
+										</Button>
+									</span>
+								</TooltipTrigger>
+								<TooltipContent
+									side="top"
+									align="end"
+									sideOffset={8}
+									className="max-w-[280px] rounded-md border-none bg-[#1A211C] p-4 text-left text-white shadow-lg">
+									<p className="mb-2 text-sm font-semibold">
+										{t("selection.singleBlockedTitle")}
+									</p>
+									<p className="text-sm leading-5 font-normal">
+										{t("selection.singleBlockedBody")}
+									</p>
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
+					) : (
+						<Button
+							variant="ghost"
+							size="icon"
+							disabled={isAddingToCart}
+							aria-label={tHoseActions("addToCart")}
+							className="h-10 w-10 rounded-full text-[#0F1912] hover:bg-[#E5E7E6] focus-visible:ring-4 focus-visible:ring-[#C1C4C2] focus-visible:outline-hidden"
+							onClick={() => void handleAddSingleToCart(order)}>
+							<ShoppingCart className="h-5 w-5 text-[#0F1912]" />
+						</Button>
+					)}
 
 					{/* <DropdownMenu>
 						<DropdownMenuTrigger asChild>
@@ -1055,11 +1102,7 @@ export function HosesAndEquipments({
 				onOpenChange={setSupportOpen}
 				profile={profile}
 				selectedIds={
-					allAcrossPages
-						? transformedAssets
-								.filter((a) => !deselectedIds.has(a.hexagonId))
-								.map((a) => a.hexagonId)
-						: selectedRows
+					selectedRequestIds.length > 0 ? selectedRequestIds : selectedRows
 				}
 				onRemoveId={handleRemoveSelectedId}
 			/>
@@ -1069,11 +1112,7 @@ export function HosesAndEquipments({
 				onOpenChange={setRfqOpen}
 				profile={profile}
 				selectedIds={
-					allAcrossPages
-						? transformedAssets
-								.filter((a) => !deselectedIds.has(a.hexagonId))
-								.map((a) => a.hexagonId)
-						: selectedRows
+					selectedRequestIds.length > 0 ? selectedRequestIds : selectedRows
 				}
 				onRemoveId={handleRemoveSelectedId}
 			/>
@@ -1257,78 +1296,153 @@ export function HosesAndEquipments({
 
 					{selectedCount > 0 && (
 						<div className="flex items-center justify-between gap-4 bg-[#DCF7E0] px-6 py-3">
-							<div className="flex items-center gap-3">
-								<div className="text-sm font-medium text-[#0F1912]">
-									{selectedCount} enheter valgt
+							<div className="flex flex-wrap items-center gap-3">
+								<div className="flex items-center gap-2 text-sm font-medium text-[#0F1912]">
+									<span>
+										{t("selection.summary", {
+											selected: selectedCount,
+											buyable: selectedBuyableCount,
+											request: selectedRequestCount,
+										})}
+									</span>
+									{selectedRequestCount > 0 && (
+										<TooltipProvider>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<button
+														type="button"
+														className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[#0F1912] hover:bg-[#C8EBD0]"
+														aria-label={t("selection.tooltipTitle")}>
+														<Info className="h-4 w-4" />
+													</button>
+												</TooltipTrigger>
+												<TooltipContent
+													side="top"
+													align="start"
+													sideOffset={8}
+													className="max-w-[320px] rounded-md border-none bg-[#1A211C] p-4 text-left text-white shadow-lg">
+													<p className="mb-2 text-sm font-semibold">
+														{t("selection.tooltipTitle")}
+													</p>
+													<p className="text-sm leading-5 font-normal">
+														{t("selection.tooltipBody")}
+													</p>
+												</TooltipContent>
+											</Tooltip>
+										</TooltipProvider>
+									)}
 								</div>
 								<Button
 									onClick={async () => {
 										await handleBulkAction("cart");
-										localStorage.removeItem("selectedHoseRows");
 									}}
-									disabled={isAddingToCart}
+									disabled={isAddingToCart || selectedBuyableCount === 0}
 									className="h-9 px-4 text-sm font-medium">
 									<ShoppingCart className="mr-2 h-4 w-4" />
-									Legg til {selectedCount} enheter
+									{t("selection.addToCart", { count: selectedBuyableCount })}
 								</Button>
-								<HoseActionsDropdown
-									selectedCount={selectedCount}
-									isAddingToCart={isAddingToCart}
-									onAddToCart={async () => {
-										await handleBulkAction("cart");
-									}}
-									onContactSupport={() => {
-										if (selectedCount === 0) {
-											toast.error(t("errors.selectItemsFirst"));
-											return;
+								{selectedRequestCount > 0 ? (
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<Button
+												variant="outline"
+												className="h-9 border-[#C1C4C2] bg-white px-4 text-sm font-medium text-[#0F1912] hover:bg-[#F8F9F8]">
+												<MoreHorizontal className="h-4 w-4" />
+												{t("selection.requestHoses", {
+													count: selectedRequestCount,
+												})}
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent
+											align="start"
+											className="w-[320px]">
+											<DropdownMenuItem
+												className="flex flex-col items-start gap-0.5 py-2.5"
+												onClick={() => setSupportOpen(true)}>
+												<span className="flex items-center gap-2 font-medium">
+													<Mail className="h-4 w-4 text-[#005522]" />
+													{t("selection.contactSupport")}
+												</span>
+												<span className="pl-6 text-xs text-[#5A615D]">
+													{t("selection.contactSupportHint")}
+												</span>
+											</DropdownMenuItem>
+											<DropdownMenuItem
+												className="flex flex-col items-start gap-0.5 py-2.5"
+												onClick={() => setRfqOpen(true)}>
+												<span className="flex items-center gap-2 font-medium">
+													<Mail className="h-4 w-4 text-[#005522]" />
+													{t("selection.sendRfq")}
+												</span>
+												<span className="pl-6 text-xs text-[#5A615D]">
+													{t("selection.sendRfqHint")}
+												</span>
+											</DropdownMenuItem>
+										</DropdownMenuContent>
+									</DropdownMenu>
+								) : (
+									<HoseActionsDropdown
+										selectedCount={selectedCount}
+										isAddingToCart={isAddingToCart}
+										disableAddToCart={selectedBuyableCount === 0}
+										onAddToCart={async () => {
+											await handleBulkAction("cart");
+										}}
+										onContactSupport={() => {
+											if (selectedCount === 0) {
+												toast.error(t("errors.selectItemsFirst"));
+												return;
+											}
+											setSupportOpen(true);
+										}}
+										onSendRfq={() => {
+											if (selectedCount === 0) {
+												toast.error(t("errors.selectItemsFirst"));
+												return;
+											}
+											setRfqOpen(true);
+										}}
+										onReportReplacement={() => {
+											if (selectedCount === 0) return;
+										}}
+										onDiscardEquipment={() => {
+											if (selectedCount === 0) return;
+											setDiscardOpen(true);
+										}}
+										onPrintCertificate={() => handleBulkAction("print-cert")}
+										onPrintTags={() => {
+											if (selectedCount === 0) return;
+											setPrintTagsOpen(true);
+										}}
+										onPrintTestCertificates={() => {
+											if (selectedCount === 0) return;
+											setPrintOpen(true);
+										}}
+										onExport={() => handleBulkAction("export")}
+										onSelectAll={() =>
+											handleSelectAllGlobally(!allAcrossPages)
 										}
-										setSupportOpen(true);
-									}}
-									onSendRfq={() => {
-										if (selectedCount === 0) {
-											toast.error(t("errors.selectItemsFirst"));
-											return;
+										onSelectAllOnPage={handleSelectAllOnPage}
+										allSelected={allSelectedGlobally}
+										allSelectedOnPage={allSelectedOnPage}
+										align="start"
+										triggerButton={
+											<Button
+												variant="outline"
+												className="h-9 border-[#C1C4C2] bg-white px-4 text-sm font-medium text-[#0F1912] hover:bg-[#F8F9F8]">
+												<MoreHorizontal className="h-4 w-4" />
+												{t("selection.moreActions")}
+											</Button>
 										}
-										setRfqOpen(true);
-									}}
-									onReportReplacement={() => {
-										if (selectedCount === 0) return;
-									}}
-									onDiscardEquipment={() => {
-										if (selectedCount === 0) return;
-										setDiscardOpen(true);
-									}}
-									onPrintCertificate={() => handleBulkAction("print-cert")}
-									onPrintTags={() => {
-										if (selectedCount === 0) return;
-										setPrintTagsOpen(true);
-									}}
-									onPrintTestCertificates={() => {
-										if (selectedCount === 0) return;
-										setPrintOpen(true);
-									}}
-									onExport={() => handleBulkAction("export")}
-									onSelectAll={() => handleSelectAllGlobally(!allAcrossPages)}
-									onSelectAllOnPage={handleSelectAllOnPage}
-									allSelected={allSelectedGlobally}
-									allSelectedOnPage={allSelectedOnPage}
-									align="start"
-									triggerButton={
-										<Button
-											variant="outline"
-											className="h-9 border-[#C1C4C2] bg-white px-4 text-sm font-medium text-[#0F1912] hover:bg-[#F8F9F8]">
-											<MoreHorizontal className="h-4 w-4" />
-											Flere handlinger
-										</Button>
-									}
-								/>
+									/>
+								)}
 							</div>
 							<Button
 								variant="outlineGrey"
 								onClick={clearSelection}
 								className="h-9 gap-2 border-[#C1C4C2] bg-white px-3 text-sm font-medium text-[#0F1912] hover:border-[#C1C4C2] hover:bg-white">
 								<X className="h-4 w-4" />
-								Fjern valg
+								{t("selection.clear")}
 							</Button>
 						</div>
 					)}
@@ -1350,7 +1464,6 @@ export function HosesAndEquipments({
 						isLoading={loading}
 						selectedIds={selectedRows}
 						selectedRowBgClass="bg-[#DCF7E0]"
-						isRowDisabled={(row) => Number(row.ecom) === 3}
 						onHoseClick={(hoseId) => handleHoseClick(hoseId)}
 					/>
 				</div>
