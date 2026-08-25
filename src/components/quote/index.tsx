@@ -2,16 +2,31 @@
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useCategories } from "@/lib/CategoriesProvider";
 import { getCategoryImage, getSubcategoryCount } from "@/lib/category-utils";
 import { cn } from "@/lib/utils";
+import { useNavMenuStore } from "@/stores/useNavMenuStore";
+import type { Category } from "@/types/categories.types";
 import { ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export function Quote() {
 	const { categories, loading, error } = useCategories();
 	const t = useTranslations();
+	const router = useRouter();
+	const requestOpen = useNavMenuStore((s) => s.requestOpen);
+
+	// Mirror the top-level nav behavior: tiles with subcategories open the
+	// megamenu (via the shared nav-menu store); leaf tiles navigate directly.
+	// Same pattern as /alle-kategorier.
+	const handleTileClick = (category: Category) => {
+		if (category.subcategories && category.subcategories.length > 0) {
+			requestOpen(category.slug);
+		} else {
+			router.push(`/${category.slug}`);
+		}
+	};
 
 	return (
 		<section className="relative mt-8 mb-8 py-8 before:absolute before:inset-0 before:-mx-[9999px] before:bg-[#E8EAE9] before:content-[''] md:mt-[-65px] md:mb-0 md:py-8">
@@ -45,10 +60,11 @@ export function Quote() {
 							const hasGreenHover = Boolean(category.imageGreen);
 
 							return (
-								<Link
-									href={`/${category.slug}`}
+								<button
+									type="button"
+									onClick={() => handleTileClick(category)}
 									key={category.groupId || category.slug}
-									className="group relative flex min-h-[240px] cursor-pointer flex-col items-center justify-center rounded-lg border bg-white p-6 text-center transition-shadow hover:shadow-md sm:min-h-[296px]">
+									className="group relative flex min-h-[240px] w-full cursor-pointer flex-col items-center justify-center rounded-lg border bg-white p-6 text-center transition-shadow hover:shadow-md sm:min-h-[296px]">
 									<div className="flex flex-col items-center space-y-4">
 										{/* Fixed pixel box so every icon scales the same (object-contain inside identical dimensions). */}
 										<div className="relative mx-auto flex h-[88px] w-[88px] shrink-0 items-center justify-center sm:h-[104px] sm:w-[104px]">
@@ -91,7 +107,7 @@ export function Quote() {
 									</div>
 
 									<ChevronRight className="text-muted-foreground absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 transform opacity-0 transition-opacity group-hover:opacity-100" />
-								</Link>
+								</button>
 							);
 						})}
 					</div>
