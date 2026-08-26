@@ -294,6 +294,8 @@ export default function CheckoutPage() {
 						placerAddress: placerAddressForCard,
 						updatedAddress,
 						selectedAddress,
+						warehouseNumber: profile?.defaultWarehouseNumber,
+						companyNumber: profile?.defaultCompanyNumber,
 					});
 				}
 			} catch (error) {

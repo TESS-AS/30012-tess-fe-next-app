@@ -1,4 +1,7 @@
-import { SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER } from "@/constants/checkout";
+import {
+	SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER,
+	SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER,
+} from "@/constants/checkout";
 import { salesOrder, excelOrderConfirmation } from "@/services/orders.service";
 import { Order } from "@/types/orders.types";
 import { ProfileUser, SalesOrderAddress } from "@/types/user.types";
@@ -21,7 +24,10 @@ export const useSubmitOrder = (
 		options?: { archiveCartAfterExcelExport?: boolean },
 	): Promise<Order | null> => {
 		const baseDispatchDate = new Date();
-		if (String(profile?.defaultCustomerNumber ?? "") === "184200") {
+		if (
+			String(profile?.defaultCustomerNumber ?? "") ===
+			SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+		) {
 			baseDispatchDate.setDate(baseDispatchDate.getDate() + 14);
 		}
 		const dispatchDate = formatDate(baseDispatchDate);
@@ -55,8 +61,9 @@ export const useSubmitOrder = (
 
 		try {
 			const customerNumber = profile?.defaultCustomerNumber;
-			const isExcelCustomer =
-			 SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER.includes(profile?.defaultCustomerNumber ?? "");
+			const isExcelCustomer = SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER.includes(
+				profile?.defaultCustomerNumber ?? "",
+			);
 
 			if (isExcelCustomer) {
 				const { blob, filename } = await excelOrderConfirmation(payload);

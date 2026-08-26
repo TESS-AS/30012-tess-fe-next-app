@@ -43,6 +43,33 @@ interface SendOrderConfirmationEmailParams {
 	placerAddress: PlacerAddressShape | null;
 	updatedAddress?: AddressFormState | null;
 	selectedAddress?: DefaultAddress;
+	/** Used to look up the fulfilling warehouse's email so it can be CC'd. */
+	warehouseNumber?: string;
+	companyNumber?: string | number;
+}
+
+/**
+ * Look up the fulfilling warehouse's email so we can CC it on the order
+ * confirmation. BE narrows to the exact (warehouseNumber, companyNumber) row
+ * server-side and returns it inside `data`.
+ */
+async function fetchWarehouseEmail(
+	warehouseNumber: string,
+	companyNumber: string | number,
+): Promise<string | null> {
+	try {
+		const response = await axiosClient.get<
+			Array<{ email?: string | null }>
+		>("/warehouse/getAllCustomerWarehouse", {
+			params: { warehouseNumber, companyNumber },
+		});
+
+		const email = response.data?.[0]?.email?.trim();
+		return email ? email : null;
+	} catch (err) {
+		console.warn("Failed to look up warehouse email for CC", err);
+		return null;
+	}
 }
 
 function buildFallbackAddressLines(
@@ -90,9 +117,16 @@ export async function sendOrderConfirmationEmail({
 	placerAddress,
 	updatedAddress,
 	selectedAddress,
+	warehouseNumber,
+	companyNumber,
 }: SendOrderConfirmationEmailParams): Promise<void> {
 	const recipient = contactPerson.email?.trim();
 	if (!recipient) return;
+
+	const warehouseEmail =
+		warehouseNumber && companyNumber != null
+			? await fetchWarehouseEmail(warehouseNumber, companyNumber)
+			: null;
 
 	const confirmation = orderResponse.order?.Ordrebekreftelse;
 	const orderNumber = confirmation?.Ordrenummer || "";
@@ -175,6 +209,9 @@ export async function sendOrderConfirmationEmail({
 		formData.append("subject", buildOrderConfirmationEmailSubject(orderNumber));
 		formData.append("htmlBody", htmlBody);
 		formData.append("cc[]", ORDER_TSS_EMAIL_RECIPIENT);
+		if (warehouseEmail && warehouseEmail !== ORDER_TSS_EMAIL_RECIPIENT) {
+			formData.append("cc[]", warehouseEmail);
+		}
 		formData.append("category", "OrderConfirmation");
 
 		await axiosClient.post("/sendgrid/sendEmail", formData);
