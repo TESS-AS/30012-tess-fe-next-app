@@ -108,6 +108,7 @@ export function HosesAndEquipments({
 	const S1_CODE_1767_OSEBERG_OST = "1291632";
 	const S1_CODE_1820_NJORD_A = "1292735";
 	const S1_CODE_1776_TROLL_C = "1291629";
+	const S1_CODE_1775_TROLL_B = "1294144";
 	const S1_CODE_1930_JOHAN_CASTBERG = "1958795";
 
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -1076,6 +1077,7 @@ export function HosesAndEquipments({
 							s1.S1Code === S1_CODE_1767_OSEBERG_OST ||
 							s1.S1Code === S1_CODE_1820_NJORD_A ||
 							s1.S1Code === S1_CODE_1776_TROLL_C ||
+							s1.S1Code === S1_CODE_1775_TROLL_B ||
 							s1.S1Code === S1_CODE_1930_JOHAN_CASTBERG,
 					)
 					.map((s1) => (
