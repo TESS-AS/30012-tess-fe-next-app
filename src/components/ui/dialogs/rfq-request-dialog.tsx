@@ -156,9 +156,7 @@ export function RFQRequestDialog({
 		formData.append("category", "HoseRFQ");
 
 		try {
-			await axiosClient.post("/sendgrid/sendEmail", formData, {
-				params: { replyToCustomer: true },
-			});
+			await axiosClient.post("/sendgrid/sendEmail", formData,);
 			setCaseId(generatedCaseId);
 		} finally {
 			setSubmitting(false);
