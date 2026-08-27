@@ -112,9 +112,7 @@ export function EquinorSupportDialog({
 		formData.append("category", "HoseContact");
 
 		try {
-			await axiosClient.post("/sendgrid/sendEmail", formData, {
-				params: { replyToCustomer: true },
-			});
+			await axiosClient.post("/sendgrid/sendEmail", formData);
 			setCaseId(generatedCaseId);
 		} finally {
 			setSubmitting(false);
