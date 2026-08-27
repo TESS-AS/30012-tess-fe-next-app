@@ -12,9 +12,19 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
+import { useGetWarehouses } from "@/hooks/useGetWarehouse";
 import {
+	HoseContactMethod,
 	THM_TEAM_EMAIL_RECIPIENT,
 	buildHoseRfqEmailHtml,
 	buildHoseRfqEmailSubject,
@@ -45,7 +55,11 @@ export function RFQRequestDialog({
 		profile?.defaultCustomerNumber ===
 		SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
 
+	const [contactMethod, setContactMethod] =
+		React.useState<HoseContactMethod | "">("");
+	const [contactValue, setContactValue] = React.useState("");
 	const [deliveryAddress, setDeliveryAddress] = React.useState("");
+	const [warehouseNumber, setWarehouseNumber] = React.useState("");
 	const [comment, setComment] = React.useState("");
 	const [includePressureTest, setIncludePressureTest] = React.useState(false);
 	const [urgent, setUrgent] = React.useState(false);
@@ -53,16 +67,44 @@ export function RFQRequestDialog({
 	const [caseId, setCaseId] = React.useState<string | null>(null);
 	const [infoOpen, setInfoOpen] = React.useState(false);
 
+	const { warehouses, isLoading: isLoadingWarehouses } = useGetWarehouses(
+		open && !!profile,
+		profile?.defaultCompanyNumber,
+	);
+
 	// Equinor customers default the pressure-test checkbox to checked.
 	// Re-sync each time the dialog opens so the rule is enforced fresh.
 	React.useEffect(() => {
 		if (open) {
 			setIncludePressureTest(isEquinor);
+			setWarehouseNumber(profile?.defaultWarehouseNumber ?? "");
 		}
-	}, [open, isEquinor]);
+	}, [open, isEquinor, profile?.defaultWarehouseNumber]);
+
+	React.useEffect(() => {
+		if (!open || warehouseNumber || warehouses.length === 0) return;
+		const defaultWarehouse = profile?.defaultWarehouseNumber;
+		const match = warehouses.find((w) => w.id === defaultWarehouse);
+		setWarehouseNumber(match?.id ?? warehouses[0].id);
+	}, [open, warehouses, warehouseNumber, profile?.defaultWarehouseNumber]);
+
+	// Prefill contact value when method changes
+	React.useEffect(() => {
+		if (!profile) return;
+		if (contactMethod === "phone") {
+			setContactValue(profile.phoneNumber ?? "");
+		} else if (contactMethod === "email") {
+			setContactValue(profile.email ?? "");
+		}
+	}, [contactMethod, profile]);
+
+	const selectedWarehouse = warehouses.find((w) => w.id === warehouseNumber);
 
 	const resetForm = () => {
+		setContactMethod("");
+		setContactValue("");
 		setDeliveryAddress("");
+		setWarehouseNumber("");
 		setComment("");
 		setUrgent(false);
 		setCaseId(null);
@@ -76,7 +118,7 @@ export function RFQRequestDialog({
 	};
 
 	const handleSubmit = async () => {
-		if (!profile || selectedIds.length === 0) return;
+		if (!contactMethod || !contactValue.trim() || !profile || selectedIds.length === 0) return;
 
 		setSubmitting(true);
 		const generatedCaseId = generateCaseId("RFQ");
@@ -93,7 +135,11 @@ export function RFQRequestDialog({
 			userPhone: profile.phoneNumber,
 			customerNumber,
 			companyName,
+			contactMethod,
+			contactValue: contactValue.trim(),
 			deliveryAddress: deliveryAddress.trim(),
+			warehouseNumber: selectedWarehouse?.id ?? warehouseNumber,
+			warehouseName: selectedWarehouse?.name ?? "",
 			comment: comment.trim(),
 			includePressureTest,
 			urgent,
@@ -110,7 +156,9 @@ export function RFQRequestDialog({
 		formData.append("category", "HoseRFQ");
 
 		try {
-			await axiosClient.post("/sendgrid/sendEmail", formData);
+			await axiosClient.post("/sendgrid/sendEmail", formData, {
+				params: { replyToCustomer: true },
+			});
 			setCaseId(generatedCaseId);
 		} finally {
 			setSubmitting(false);
@@ -193,6 +241,82 @@ export function RFQRequestDialog({
 								/>
 							</div>
 
+							<div className="space-y-1">
+								<label className="text-sm font-medium text-[#0F1912]">
+									Lager
+								</label>
+								<Select
+									value={warehouseNumber}
+									onValueChange={setWarehouseNumber}
+									disabled={isLoadingWarehouses || warehouses.length === 0}>
+									<SelectTrigger className="w-full border-[#8A8F8C] bg-[#F8F9F8] text-[#0F1912]">
+										<SelectValue
+											placeholder={
+												isLoadingWarehouses
+													? "Laster lagre..."
+													: "Velg lager"
+											}
+										/>
+									</SelectTrigger>
+									<SelectContent className="max-h-[280px]">
+										{warehouses.map((warehouse) => (
+											<SelectItem
+												key={warehouse.id}
+												value={warehouse.id}>
+												{warehouse.name} ({warehouse.id})
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+
+							<div className="space-y-2">
+								<p className="text-sm font-medium text-[#0F1912]">
+									Hvordan vil du at vi kontakter deg?
+								</p>
+								<RadioGroup
+									value={contactMethod}
+									onValueChange={(value) =>
+										setContactMethod(value as HoseContactMethod)
+									}>
+									<label className="flex cursor-pointer items-center gap-2 text-sm text-[#0F1912]">
+										<RadioGroupItem value="phone" />
+										Ring meg
+									</label>
+									<label className="flex cursor-pointer items-center gap-2 text-sm text-[#0F1912]">
+										<RadioGroupItem value="email" />
+										Send meg en e-post
+									</label>
+								</RadioGroup>
+							</div>
+
+							{contactMethod === "phone" && (
+								<div className="space-y-1">
+									<label className="text-sm font-medium text-[#0F1912]">
+										Telefonnummer
+									</label>
+									<Input
+										placeholder="+47 000 00 000 (forhåndsutfylt, redigerbart)"
+										value={contactValue}
+										onChange={(e) => setContactValue(e.target.value)}
+										inputMode="tel"
+									/>
+								</div>
+							)}
+
+							{contactMethod === "email" && (
+								<div className="space-y-1">
+									<label className="text-sm font-medium text-[#0F1912]">
+										E-postadresse
+									</label>
+									<Input
+										placeholder="navn@firma.no (forhåndsutfylt, redigerbart)"
+										value={contactValue}
+										onChange={(e) => setContactValue(e.target.value)}
+										inputMode="email"
+									/>
+								</div>
+							)}
 							<div className="space-y-1">
 								<label className="text-sm font-medium text-[#0F1912]">
 									Kommentar

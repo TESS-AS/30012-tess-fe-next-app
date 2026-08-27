@@ -141,7 +141,7 @@ export function EquinorSupportDialog({
 					<>
 						<DialogHeader className="px-6 pt-5">
 							<DialogTitle className="text-lg font-semibold text-[#0F1912]">
-								Snakk med en fagperson
+							Kontakt en fagperson
 							</DialogTitle>
 							<DialogClose className="text-muted-foreground" />
 						</DialogHeader>
@@ -290,7 +290,7 @@ function ConfirmationView({
 		<>
 			<DialogHeader className="px-6 pt-5">
 				<DialogTitle className="text-lg font-semibold text-[#0F1912]">
-					Snakk med en fagperson
+				Kontakt en fagperson
 				</DialogTitle>
 				<DialogClose className="text-muted-foreground" />
 			</DialogHeader>

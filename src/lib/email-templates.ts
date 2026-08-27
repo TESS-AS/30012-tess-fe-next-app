@@ -27,7 +27,11 @@ interface HoseRfqEmailParams {
 	userPhone: string | null;
 	customerNumber: string;
 	companyName: string;
+	contactMethod: HoseContactMethod;
+	contactValue: string;
 	deliveryAddress: string;
+	warehouseNumber?: string;
+	warehouseName?: string;
 	comment: string;
 	includePressureTest: boolean;
 	urgent: boolean;
@@ -399,7 +403,7 @@ export function buildHoseContactEmailHtml({
 		infoRow("Bruker", userName),
 		infoRow("E-post", userEmail),
 		...(userPhone ? [infoRow("Telefon", userPhone)] : []),
-		infoRow("Bedrift", `${companyName} (${customerNumber})`),
+		infoRow("Kunde", `${companyName} (${customerNumber})`),
 		infoRow(
 			"Ønsket kontaktmåte",
 			contactMethod === "phone" ? "Ring meg" : "Send meg en e-post",
@@ -424,14 +428,14 @@ export function buildHoseContactEmailHtml({
 		</table>
 	`;
 
-	return wrapEmailLayout("Snakk med en fagperson — ny henvendelse", content);
+	return wrapEmailLayout("Kontakt en fagperson — ny henvendelse", content);
 }
 
 export function buildHoseContactEmailSubject(
 	urgent: boolean,
 	customerNumber: string,
 ): string {
-	const base = `Snakk med en fagperson — kunde ${customerNumber}`;
+	const base = `Kontakt en fagperson — kunde ${customerNumber}`;
 	return urgent ? `URGENT: ${base}` : base;
 }
 
@@ -442,22 +446,42 @@ export function buildHoseRfqEmailHtml({
 	userPhone,
 	customerNumber,
 	companyName,
+	contactMethod,
+	contactValue,
 	deliveryAddress,
+	warehouseNumber,
+	warehouseName,
 	comment,
 	includePressureTest,
 	urgent,
 	hexagonIds,
 }: HoseRfqEmailParams): string {
+	const warehouseLabel =
+		warehouseName && warehouseNumber
+			? `${warehouseName} (${warehouseNumber})`
+			: warehouseNumber || warehouseName || "";
+
 	const rows = [
 		// infoRow("Saksnummer", caseId),
 		infoRow("Bruker", userName),
 		infoRow("E-post", userEmail),
 		...(userPhone ? [infoRow("Telefon", userPhone)] : []),
-		infoRow("Bedrift", `${companyName} (${customerNumber})`),
+		infoRow("Kunde", `${companyName} (${customerNumber})`),
+		infoRow(
+			"Ønsket kontaktmåte",
+			contactMethod === "phone" ? "Ring meg" : "Send meg en e-post",
+		),
+		infoRow(
+			contactMethod === "phone" ? "Telefonnummer" : "E-postadresse",
+			escapeHtml(contactValue),
+		),
 		infoRow(
 			"Leveringsadresse",
 			deliveryAddress ? escapeHtml(deliveryAddress) : "—",
 		),
+		...(warehouseLabel
+			? [infoRow("Lager", escapeHtml(warehouseLabel))]
+			: []),
 		infoRow(
 			"Inkluder trykktest og sertifikat",
 			includePressureTest ? "Ja" : "Nei",
