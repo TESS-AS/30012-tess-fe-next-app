@@ -110,7 +110,9 @@ export function RFQRequestDialog({
 		formData.append("category", "HoseRFQ");
 
 		try {
-			await axiosClient.post("/sendgrid/sendEmail", formData);
+			await axiosClient.post("/sendgrid/sendEmail", formData, {
+				params: { replyToCustomer: true },
+			});
 			setCaseId(generatedCaseId);
 		} finally {
 			setSubmitting(false);
@@ -332,10 +334,10 @@ function ConfirmationView({
 					<p>Takk for forespørselen.</p>
 					<p>Vi gjennomgår slangene og sender tilbud med pris snarest.</p>
 				</div>
-				<p className="text-sm text-[#5A615D]">
+				{/* <p className="text-sm text-[#5A615D]">
 					Saksnummer:{" "}
 					<span className="font-medium text-[#0F1912]">{caseId}</span>
-				</p>
+				</p> */}
 				<Button
 					className="w-full"
 					variant="greenSolid"

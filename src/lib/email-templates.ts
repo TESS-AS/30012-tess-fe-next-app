@@ -395,7 +395,7 @@ export function buildHoseContactEmailHtml({
 	hexagonIds,
 }: HoseContactEmailParams): string {
 	const rows = [
-		infoRow("Saksnummer", caseId),
+		// infoRow("Saksnummer", caseId),
 		infoRow("Bruker", userName),
 		infoRow("E-post", userEmail),
 		...(userPhone ? [infoRow("Telefon", userPhone)] : []),
@@ -449,7 +449,7 @@ export function buildHoseRfqEmailHtml({
 	hexagonIds,
 }: HoseRfqEmailParams): string {
 	const rows = [
-		infoRow("Saksnummer", caseId),
+		// infoRow("Saksnummer", caseId),
 		infoRow("Bruker", userName),
 		infoRow("E-post", userEmail),
 		...(userPhone ? [infoRow("Telefon", userPhone)] : []),
