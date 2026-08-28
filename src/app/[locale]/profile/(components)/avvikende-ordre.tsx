@@ -14,9 +14,12 @@ import { Check, X } from "lucide-react";
 import { Search } from "lucide-react";
 
 export function AvvikendeOrdre({
-	onOrderClick,
+	onOrderSelect,
 }: {
-	onOrderClick?: (orderId: string) => void;
+	onOrderSelect?: (order: {
+		orderId: string;
+		openConfirmationId: number;
+	}) => void;
 }) {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedStatus, setSelectedStatus] = useState<string>("Alle");
@@ -286,7 +289,12 @@ export function AvvikendeOrdre({
 						window.scrollTo({ top: 0, behavior: "smooth" });
 					}}
 					isLoading={isLoading}
-					onOrderClick={onOrderClick}
+					onRowClick={(row) => {
+						onOrderSelect?.({
+							orderId: row.orderId,
+							openConfirmationId: row.openConfirmationId,
+						});
+					}}
 					sortColumn={sortColumn}
 					sortDirection={sortDirection}
 					onSort={handleSort}

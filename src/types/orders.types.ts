@@ -160,6 +160,7 @@ export interface OrderInput {
 }
 
 export interface OpenOrderConfirmationRaw {
+	openConfirmationId: number;
 	orderId: number;
 	timestamp: string;
 	message: string;
@@ -188,6 +189,7 @@ export interface OpenOrderConfirmationRaw {
 
 export interface OpenOrderConfirmation {
 	orderId: string;
+	openConfirmationId: number;
 	supplier: string;
 	date: string;
 	deviation: number;

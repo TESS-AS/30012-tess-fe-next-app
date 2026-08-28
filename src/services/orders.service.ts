@@ -274,7 +274,10 @@ export async function getOpenConfirmations(
 }
 
 /** Single order lines with mismatches for the Avvikende ordre detail view. Returns lines plus optional supplier/date from API. */
-export async function getOpenOrderLines(orderNumber: string): Promise<{
+export async function getOpenOrderLines(
+	orderNumber: string,
+	openConfirmationId: number,
+): Promise<{
 	lines: OpenOrderLineItemResponse[];
 	supplier?: string;
 	date?: string;
@@ -284,7 +287,9 @@ export async function getOpenOrderLines(orderNumber: string): Promise<{
 			| OpenOrderLineItemResponse[]
 			| OpenOrderLineItemResponse
 			| OpenOrderLinesDetailResponse
-		>(`/edi/order/openOrders/lines/${encodeURIComponent(orderNumber)}`);
+		>(
+			`/edi/order/openOrders/lines/${encodeURIComponent(orderNumber)}/${openConfirmationId}`,
+		);
 		const data = response.data;
 
 		if (Array.isArray(data)) {
@@ -323,11 +328,12 @@ export async function getOpenOrderLines(orderNumber: string): Promise<{
 
 export async function updateOpenOrderStatus(
 	orderNumber: string,
+	openConfirmationId: number,
 	approve: boolean,
 ): Promise<void> {
 	try {
 		await axiosInstance.patch(
-			`/edi/order/openOrders/status/${encodeURIComponent(orderNumber)}`,
+			`/edi/order/openOrders/status/${encodeURIComponent(orderNumber)}/${openConfirmationId}`,
 			{ approve },
 		);
 	} catch (error) {

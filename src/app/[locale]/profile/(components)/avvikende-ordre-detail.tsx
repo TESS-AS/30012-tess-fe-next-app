@@ -23,16 +23,21 @@ import { toast } from "react-toastify";
 
 export function AvvikendeOrdreDetail({
 	orderId,
+	openConfirmationId,
 	onBack,
 }: {
 	orderId: string;
+	openConfirmationId: number;
 	onBack: () => void;
 }) {
 	const [expandedLines, setExpandedLines] = useState<number[]>([]);
 	const [rejectModalOpen, setRejectModalOpen] = useState(false);
 	const [approveModalOpen, setApproveModalOpen] = useState(false);
 	const queryClient = useQueryClient();
-	const { data: order, isLoading, error } = useGetOpenOrderLines(orderId);
+	const { data: order, isLoading, error } = useGetOpenOrderLines(
+		orderId,
+		openConfirmationId,
+	);
 	const { refetch: refetchOpenConfirmations } = useGetOpenConfirmations(1, 25, false);
 
 	const toggleLine = (lineNumber: number) => {
@@ -45,10 +50,10 @@ export function AvvikendeOrdreDetail({
 
 	const handleReject = async () => {
 		try {
-			await updateOpenOrderStatus(orderId, false);
+			await updateOpenOrderStatus(orderId, openConfirmationId, false);
 			await Promise.all([
 				queryClient.invalidateQueries({
-					queryKey: openOrderLinesKeys.detail(orderId),
+					queryKey: openOrderLinesKeys.detail(orderId, openConfirmationId),
 				}),
 				queryClient.invalidateQueries({
 					queryKey: openConfirmationsKeys.all,
@@ -65,10 +70,10 @@ export function AvvikendeOrdreDetail({
 
 	const handleApprove = async () => {
 		try {
-			await updateOpenOrderStatus(orderId, true);
+			await updateOpenOrderStatus(orderId, openConfirmationId, true);
 			await Promise.all([
 				queryClient.invalidateQueries({
-					queryKey: openOrderLinesKeys.detail(orderId),
+					queryKey: openOrderLinesKeys.detail(orderId, openConfirmationId),
 				}),
 				queryClient.invalidateQueries({
 					queryKey: openConfirmationsKeys.all,

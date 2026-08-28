@@ -50,6 +50,7 @@ function transformOrderData(
 
 	return {
 		orderId: String(rawOrder.orderNumber),
+		openConfirmationId: rawOrder.openConfirmationId,
 		supplier,
 		date,
 		deviation: totalDifferences,

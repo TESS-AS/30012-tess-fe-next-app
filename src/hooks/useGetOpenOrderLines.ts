@@ -6,12 +6,18 @@ export type { OrderDetailView } from "@/lib/open-order-lines";
 
 export const openOrderLinesKeys = {
 	all: ["openOrderLines"] as const,
-	detail: (orderNumber: string) =>
-		[...openOrderLinesKeys.all, "detail", orderNumber] as const,
+	detail: (orderNumber: string, openConfirmationId: number) =>
+		[
+			...openOrderLinesKeys.all,
+			"detail",
+			orderNumber,
+			openConfirmationId,
+		] as const,
 };
 
 export function useGetOpenOrderLines(
 	orderNumber: string | undefined,
+	openConfirmationId: number | undefined,
 	enabled = true,
 ) {
 	const {
@@ -19,9 +25,9 @@ export function useGetOpenOrderLines(
 		isLoading,
 		error,
 	} = useQuery({
-		queryKey: openOrderLinesKeys.detail(orderNumber ?? ""),
-		queryFn: () => getOpenOrderLines(orderNumber!),
-		enabled: !!orderNumber && enabled,
+		queryKey: openOrderLinesKeys.detail(orderNumber ?? "", openConfirmationId ?? 0),
+		queryFn: () => getOpenOrderLines(orderNumber!, openConfirmationId!),
+		enabled: !!orderNumber && openConfirmationId !== undefined && enabled,
 		staleTime: 1000 * 60 * 2,
 	});
 

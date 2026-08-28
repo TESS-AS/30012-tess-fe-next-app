@@ -42,6 +42,11 @@ type SortDirection = "asc" | "desc" | null;
 
 interface DataTableProps<T> {
 	onOrderClick?: (orderId: string) => void;
+	/** Row-level click that receives the full item. Takes precedence over
+	 *  `onOrderClick` when set — use when rows aren't uniquely identified by
+	 *  `orderId` alone (e.g. EDI rows that share an order number across
+	 *  multiple open confirmations). */
+	onRowClick?: (item: T) => void;
 	expandableContent?: (item: T) => React.ReactNode;
 	isExpandable?: boolean;
 	data: T[];
@@ -77,6 +82,7 @@ export function DataTable<
 	},
 >({
 	onOrderClick,
+	onRowClick,
 	expandableContent,
 	isExpandable = false,
 	data,
@@ -234,6 +240,8 @@ export function DataTable<
 															if (disabled) return;
 															if (onHoseClick && item.hexagonId) {
 																onHoseClick(item.hexagonId);
+															} else if (onRowClick) {
+																onRowClick(item);
 															} else if (onOrderClick) {
 																onOrderClick(item.orderId);
 															}
@@ -246,7 +254,7 @@ export function DataTable<
 																	? selectedRowBgClass
 																	: "hover:bg-[#F0FCF2]",
 															!disabled &&
-																(onHoseClick || onOrderClick) &&
+																(onHoseClick || onOrderClick || onRowClick) &&
 																"cursor-pointer",
 															disabled && "cursor-not-allowed",
 														)}>

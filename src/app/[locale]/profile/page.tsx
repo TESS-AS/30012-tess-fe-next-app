@@ -170,9 +170,10 @@ export default function ProfilePage() {
 	const [selectedHexagonId, setSelectedHexagonId] = useState<string | null>(
 		null,
 	);
-	const [selectedAvvikendeOrdreId, setSelectedAvvikendeOrdreId] = useState<
-		string | null
-	>(null);
+	const [selectedAvvikendeOrdre, setSelectedAvvikendeOrdre] = useState<{
+		orderId: string;
+		openConfirmationId: number;
+	} | null>(null);
 	// Populated by ThmWorkOrderList / ThmWorkOrderDashboard once BE returns
 	// the s1Name for the current WO. Used as the breadcrumb label instead of
 	// the raw tab id so users see "1765 Oseberg C" not "thm-dashboard".
@@ -263,7 +264,7 @@ export default function ProfilePage() {
 		) {
 			setActiveMode("tess-edi");
 			// Reset selected order when navigating to tess-edi tab
-			setSelectedAvvikendeOrdreId(null);
+			setSelectedAvvikendeOrdre(null);
 		} else if (tabParam === "tess-edi" && profile?.role !== "admin") {
 			// Redirect non-admins away from tess-edi
 			setActiveTab("rekvisisjoner");
@@ -273,7 +274,7 @@ export default function ProfilePage() {
 	// Reset selected order when activeTab changes away from tess-edi or when switching to tess-edi
 	useEffect(() => {
 		if (activeTab !== "tess-edi") {
-			setSelectedAvvikendeOrdreId(null);
+			setSelectedAvvikendeOrdre(null);
 		}
 	}, [activeTab]);
 
@@ -313,7 +314,7 @@ export default function ProfilePage() {
 			setActiveTab("tess-edi");
 			router.replace("/profile?tab=tess-edi", { scroll: false });
 			// Reset selected order when switching to tess-edi mode
-			setSelectedAvvikendeOrdreId(null);
+			setSelectedAvvikendeOrdre(null);
 		} else if (mode === "thm") {
 			setActiveTab("thm-active-projects");
 			router.replace("/profile?tab=thm-active-projects", { scroll: false });
@@ -344,7 +345,7 @@ export default function ProfilePage() {
 		setActiveTab(tab);
 		router.replace(`/profile?tab=${tab}`, { scroll: false });
 		if (tab === "tess-edi") {
-			setSelectedAvvikendeOrdreId(null);
+			setSelectedAvvikendeOrdre(null);
 		}
 	};
 
@@ -536,7 +537,7 @@ export default function ProfilePage() {
 								router.replace(`/profile?tab=${tab}`, { scroll: false });
 								// Reset selected order when switching tabs
 								if (tab === "tess-edi") {
-									setSelectedAvvikendeOrdreId(null);
+									setSelectedAvvikendeOrdre(null);
 								}
 							}}
 							onCollapse={setIsSidebarCollapsed}
@@ -710,13 +711,14 @@ export default function ProfilePage() {
 							<TabsContent
 								value="tess-edi"
 								className="mt-0">
-								{selectedAvvikendeOrdreId ? (
+								{selectedAvvikendeOrdre ? (
 									<AvvikendeOrdreDetail
-										orderId={selectedAvvikendeOrdreId}
-										onBack={() => setSelectedAvvikendeOrdreId(null)}
+										orderId={selectedAvvikendeOrdre.orderId}
+										openConfirmationId={selectedAvvikendeOrdre.openConfirmationId}
+										onBack={() => setSelectedAvvikendeOrdre(null)}
 									/>
 								) : (
-									<AvvikendeOrdre onOrderClick={setSelectedAvvikendeOrdreId} />
+									<AvvikendeOrdre onOrderSelect={setSelectedAvvikendeOrdre} />
 								)}
 							</TabsContent>
 						)}
