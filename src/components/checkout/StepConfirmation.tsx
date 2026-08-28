@@ -5,7 +5,6 @@ import { EditAddressModal } from "@/components/checkout/edit-address-modal";
 import { EditContactModal } from "@/components/checkout/edit-contact-modal";
 import { EditDeliveryModal } from "@/components/checkout/edit-delivery-modal";
 import { EditPaymentModal } from "@/components/checkout/edit-payment-modal";
-import { useDimensionLabels } from "@/hooks/useDimensionLabels";
 import { useAppContext } from "@/lib/appContext";
 import {
 	formatCartKitAdditionalLabel,
@@ -33,13 +32,12 @@ export default function StepConfirmation({
 	paymentMethod,
 	setPaymentMethod,
 	setOrderData,
+	dimensionInputMode,
+	setDimensionInputMode,
 	handleContactPersonSave,
 }: any) {
 	const t = useTranslations("Checkout.confirmation");
 	const tContact = useTranslations("Checkout.contactPerson");
-	const { levels: dimensionLevels } = useDimensionLabels({
-		fallback: [t("project"), t("department"), t("category")],
-	});
 	const phoneMissing = !contactPerson.phone?.trim();
 	const {
 		cartItems,
@@ -99,16 +97,16 @@ export default function StepConfirmation({
 				onEdit={() => modals.setPaymentOpen(true)}>
 				<p>{paymentMethod === "faktura" ? t("invoice") : t("cardPayment")}</p>
 				<p>
-					{dimensionLevels[0].label}:{" "}
+					{t("project")}:{" "}
 					{orderData.salesOrderHeader.customersOrderReference ||
 						t("notSpecified")}
 				</p>
 				<p>
-					{dimensionLevels[1].label}:{" "}
+					{t("department")}:{" "}
 					{orderData.salesOrderHeader.customerReference || t("notSpecified")}
 				</p>
 				<p>
-					{dimensionLevels[2].label}:{" "}
+					{t("category")}:{" "}
 					{orderData.salesOrderLines[0]?.accountPart3 || t("notSpecified")}
 				</p>
 			</ConfirmationCard>
@@ -146,6 +144,8 @@ export default function StepConfirmation({
 				setPaymentMethod={setPaymentMethod}
 				orderData={orderData}
 				setOrderData={setOrderData}
+				dimensionInputMode={dimensionInputMode}
+				setDimensionInputMode={setDimensionInputMode}
 			/>
 
 			<div className="col-span-1 flex flex-col md:col-span-2 lg:col-span-4">

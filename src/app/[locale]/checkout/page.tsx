@@ -113,6 +113,7 @@ export default function CheckoutPage() {
 	const { currentStep, setCurrentStep, goToNext } = useOrderStepper();
 
 	const [paymentMethod, setPaymentMethod] = useState("faktura");
+	const [dimensionInputMode, setDimensionInputMode] = useState("manual");
 	const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 	const [showTrackingModal, setShowTrackingModal] = useState(false);
 	const [showOrderConfirmation, setShowOrderConfirmation] = useState(false);
@@ -201,6 +202,8 @@ export default function CheckoutPage() {
 						setPaymentMethod={setPaymentMethod}
 						orderData={orderData}
 						setOrderData={setOrderData}
+						dimensionInputMode={dimensionInputMode}
+						setDimensionInputMode={setDimensionInputMode}
 					/>
 				);
 			case 2:
@@ -215,6 +218,8 @@ export default function CheckoutPage() {
 						paymentMethod={paymentMethod}
 						setPaymentMethod={setPaymentMethod}
 						setOrderData={setOrderData}
+						dimensionInputMode={dimensionInputMode}
+						setDimensionInputMode={setDimensionInputMode}
 						handleContactPersonSave={handleContactPersonSave}
 					/>
 				);
