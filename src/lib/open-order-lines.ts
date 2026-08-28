@@ -6,6 +6,10 @@ import type {
 } from "@/types/orders.types";
 
 export type OrderDetailLine = {
+	/** Unique per row. Same `lineNumber` may appear multiple times when the
+	 *  incoming EDI splits one PO line across multiple shipments — each carries
+	 *  its own differences entry and must render as its own card. */
+	id: string;
 	lineNumber: number;
 	deviationCount: number;
 	fields: OrderLineField[];
@@ -66,10 +70,12 @@ const isIncomingLine = (val: unknown): val is IncomingLineItem =>
 /**
  * Build a per-line view from raw EDI open-order response items.
  *
- * Why: the API may return either one entry per dbOrderLine, or a single object
- * whose `differences` array spans every orderLineNumber for the order. Either
- * way the source of truth for which line a mismatch belongs to is the
- * mismatch's own `orderLineNumber` — group by it.
+ * The API may emit multiple `differences[]` entries for the same
+ * `orderLineNumber` when the supplier splits one PO line across several
+ * shipments — each carries its own mismatches (e.g. two different
+ * `shipmentDate` values). Emit one row per differences entry so they render
+ * as separate cards; merging them by lineNumber would silently drop the
+ * second shipment's data.
  *
  * A line can be flagged as an "extra line" (present in the incoming EDI but
  * not in the original PO) when the mismatch payload carries an `incomingLine`
@@ -80,23 +86,39 @@ export function buildOrderDetailView(
 	rawLines: OpenOrderLineItemResponse[],
 	options?: { supplier?: string; date?: string },
 ): OrderDetailView {
-	const mismatchesByLine = new Map<number, Record<string, OrderLineMismatch>>();
-	const extraLineByLine = new Map<number, Record<string, unknown>>();
-	const lineNumbers = new Set<number>();
+	const emitted: OrderDetailLine[] = [];
+	const dbLineNumbers = new Set<number>();
+	const seenLineNumbers = new Set<number>();
+	const counters = new Map<number, number>();
+
+	const nextId = (lineNumber: number) => {
+		const n = (counters.get(lineNumber) ?? 0) + 1;
+		counters.set(lineNumber, n);
+		return `${lineNumber}-${n}`;
+	};
 
 	for (const item of rawLines) {
 		const dbLineNum = Number(item.dbOrderLine?.orderLineNumber);
-		if (Number.isFinite(dbLineNum)) lineNumbers.add(dbLineNum);
+		if (Number.isFinite(dbLineNum)) dbLineNumbers.add(dbLineNum);
 
 		for (const diff of item.differences ?? []) {
-			const num = Number(diff?.orderLineNumber);
-			if (!Number.isFinite(num)) continue;
+			const lineNumber = Number(diff?.orderLineNumber);
+			if (!Number.isFinite(lineNumber)) continue;
 			if (!diff.mismatches || typeof diff.mismatches !== "object") continue;
-			lineNumbers.add(num);
 
 			const incoming = (diff.mismatches as Record<string, unknown>).incomingLine;
 			if (isIncomingLine(incoming)) {
-				extraLineByLine.set(num, incoming as unknown as Record<string, unknown>);
+				const fieldList = incomingLineToFields(
+					incoming as unknown as Record<string, unknown>,
+				);
+				emitted.push({
+					id: nextId(lineNumber),
+					lineNumber,
+					deviationCount: fieldList.length,
+					fields: fieldList,
+					kind: "extraLine",
+				});
+				seenLineNumbers.add(lineNumber);
 				continue;
 			}
 
@@ -105,32 +127,34 @@ export function buildOrderDetailView(
 				if (isFieldMismatch(val)) fieldMismatches[key] = val;
 			}
 			if (Object.keys(fieldMismatches).length === 0) continue;
-			const existing = mismatchesByLine.get(num) ?? {};
-			mismatchesByLine.set(num, { ...existing, ...fieldMismatches });
-		}
-	}
 
-	const lines: OrderDetailLine[] = Array.from(lineNumbers)
-		.sort((a, b) => a - b)
-		.map((lineNumber) => {
-			const extra = extraLineByLine.get(lineNumber);
-			if (extra) {
-				const fieldList = incomingLineToFields(extra);
-				return {
-					lineNumber,
-					deviationCount: fieldList.length,
-					fields: fieldList,
-					kind: "extraLine" as const,
-				};
-			}
-			const fieldList = mismatchesToFields(mismatchesByLine.get(lineNumber) ?? {});
-			return {
+			const fieldList = mismatchesToFields(fieldMismatches);
+			emitted.push({
+				id: nextId(lineNumber),
 				lineNumber,
 				deviationCount: fieldList.length,
 				fields: fieldList,
-				kind: "fieldMismatch" as const,
-			};
+				kind: "fieldMismatch",
+			});
+			seenLineNumbers.add(lineNumber);
+		}
+	}
+
+	for (const lineNumber of dbLineNumbers) {
+		if (seenLineNumbers.has(lineNumber)) continue;
+		emitted.push({
+			id: nextId(lineNumber),
+			lineNumber,
+			deviationCount: 0,
+			fields: [],
+			kind: "fieldMismatch",
 		});
+	}
+
+	emitted.sort((a, b) => {
+		if (a.lineNumber !== b.lineNumber) return a.lineNumber - b.lineNumber;
+		return a.id.localeCompare(b.id);
+	});
 
 	const firstDb = rawLines[0]?.dbOrderLine;
 	const dateFallback = firstDb?.shipmentDate || firstDb?.arrivalDate || "—";
@@ -139,6 +163,6 @@ export function buildOrderDetailView(
 		orderId: orderNumber,
 		supplier: options?.supplier ?? "—",
 		date: options?.date ?? dateFallback,
-		lines,
+		lines: emitted,
 	};
 }

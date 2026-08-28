@@ -30,7 +30,7 @@ export function AvvikendeOrdreDetail({
 	openConfirmationId: number;
 	onBack: () => void;
 }) {
-	const [expandedLines, setExpandedLines] = useState<number[]>([]);
+	const [expandedLines, setExpandedLines] = useState<string[]>([]);
 	const [rejectModalOpen, setRejectModalOpen] = useState(false);
 	const [approveModalOpen, setApproveModalOpen] = useState(false);
 	const queryClient = useQueryClient();
@@ -40,11 +40,9 @@ export function AvvikendeOrdreDetail({
 	);
 	const { refetch: refetchOpenConfirmations } = useGetOpenConfirmations(1, 25, false);
 
-	const toggleLine = (lineNumber: number) => {
+	const toggleLine = (id: string) => {
 		setExpandedLines((prev) =>
-			prev.includes(lineNumber)
-				? prev.filter((num) => num !== lineNumber)
-				: [...prev, lineNumber],
+			prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id],
 		);
 	};
 
@@ -171,16 +169,16 @@ export function AvvikendeOrdreDetail({
 				{/* Order Lines */}
 				<div className="space-y-3">
 					{order.lines.map((line) => {
-						const isExpanded = expandedLines.includes(line.lineNumber);
+						const isExpanded = expandedLines.includes(line.id);
 						return (
 							<OrderLineTable
-								key={line.lineNumber}
+								key={line.id}
 								lineNumber={line.lineNumber}
 								deviationCount={line.deviationCount}
 								fields={line.fields}
 								kind={line.kind}
 								isExpanded={isExpanded}
-								onToggle={() => toggleLine(line.lineNumber)}
+								onToggle={() => toggleLine(line.id)}
 							/>
 						);
 					})}
