@@ -6,8 +6,6 @@ export default function StepPayment({
 	setPaymentMethod,
 	orderData,
 	setOrderData,
-	dimensionInputMode,
-	setDimensionInputMode,
 }: any) {
 	return (
 		<div className="flex flex-col gap-4">
@@ -18,8 +16,6 @@ export default function StepPayment({
 			<InvoiceInfoCard
 				orderData={orderData}
 				setOrderData={setOrderData}
-				dimensionInputMode={dimensionInputMode}
-				setDimensionInputMode={setDimensionInputMode}
 			/>
 		</div>
 	);

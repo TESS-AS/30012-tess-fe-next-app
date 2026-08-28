@@ -4,7 +4,7 @@ import { Order } from "@/types/orders.types";
 import { Wallet } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { UserDimensionsInput } from "./user-dimensions";
+import { InvoiceDimensions } from "./invoice-dimensions";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Modal, ModalTitle } from "../ui/modal";
@@ -23,9 +23,7 @@ interface EditPaymentModalProps {
 	paymentMethod: string;
 	setPaymentMethod: (method: string) => void;
 	orderData: Order;
-	setOrderData: (data: any) => void;
-	dimensionInputMode: "select" | "search" | "manual";
-	setDimensionInputMode: (mode: "select" | "search" | "manual") => void;
+	setOrderData: (updater: (prev: Order) => Order) => void;
 }
 
 export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
@@ -37,8 +35,6 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
 	setPaymentMethod,
 	orderData,
 	setOrderData,
-	dimensionInputMode,
-	setDimensionInputMode,
 }) => {
 	const t = useTranslations("Checkout.modals.payment");
 	return (
@@ -63,11 +59,9 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
 					</div>
 				</RadioGroup>
 
-				<UserDimensionsInput
+				<InvoiceDimensions
 					orderData={orderData}
 					setOrderData={setOrderData}
-					dimensionInputMode={dimensionInputMode}
-					setDimensionInputMode={setDimensionInputMode}
 				/>
 			</div>
 
