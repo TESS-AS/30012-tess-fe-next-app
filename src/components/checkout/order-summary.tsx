@@ -595,6 +595,33 @@ export default function OrderSummary({
 											? "Gå til rekvisisjon"
 											: "Lagre som rekvisisjon"}
 									</Button>
+								) : // BE hard-blocks direct (non-requisition) orders that exceed the
+								// user's remaining budget with a 409. Instead of a dead-end,
+								// surface the same requisition flow that TESS employees use so
+								// the buyer can hand the purchase off to an approver.
+								!requisitionPlacerInfo &&
+								  cartEvaluation?.hasBudget === true &&
+								  cartEvaluation.withinBudget === false ? (
+									<Button
+										variant="greenSolid"
+										className="mt-6 w-full"
+										disabled={
+											isCartEmpty ||
+											isCheckoutLoading ||
+											(!acceptedTerms && currentStep === 2)
+										}
+										onClick={() => {
+											if (requisitionSaved) {
+												router.push("/profile?tab=rekvisisjoner");
+												return;
+											}
+											setRequisitionSaved(false);
+											setIsRequisitionViewOpen(true);
+										}}>
+										{requisitionSaved
+											? "Gå til rekvisisjon"
+											: "Lagre som rekvisisjon"}
+									</Button>
 								) : (
 									<Button
 										variant="greenSolid"
@@ -603,14 +630,7 @@ export default function OrderSummary({
 											isCartEmpty ||
 											isCheckoutLoading ||
 											arePricesLoading ||
-											(!acceptedTerms && currentStep === 2) ||
-											// BE hard-blocks direct (non-requisition) orders that
-											// exceed the user's remaining budget with a 409. Disable
-											// upfront so the user isn't surprised. Requisition-driven
-											// orders skip this check on BE, so we skip it here too.
-											(!requisitionPlacerInfo &&
-												cartEvaluation?.hasBudget === true &&
-												cartEvaluation.withinBudget === false)
+											(!acceptedTerms && currentStep === 2)
 										}
 										onClick={handleCheckout}>
 										{isCheckoutLoading || isLoading || arePricesLoading ? (
