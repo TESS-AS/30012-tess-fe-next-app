@@ -78,16 +78,20 @@ export function useRequisitionActions({
 							companyNumber,
 						});
 					}
-					if (rekvisisjon.placerAddresses.length > 0) {
-						setRequisitionPlacerInfo({
-							requisitionId: rowId,
-							placerUserId: rekvisisjon.placerUserId,
-							placerAddresses: rekvisisjon.placerAddresses,
-							selectedPlacerAddressId:
-								rekvisisjon.placerAddresses[0].addressId,
-							placerName: rekvisisjon.bestiller,
-						});
-					}
+					// Always set placer info on approve so BE can attribute the
+					// budget_transaction to the placer via `salesOrderHeader
+					// .requisitionId`. The addresses are optional — a placer without
+					// address entries still needs the requisitionId propagated, or the
+					// order will be charged against the approver's budget by
+					// consumeDirectOrder instead of consumeForRequisition.
+					setRequisitionPlacerInfo({
+						requisitionId: rowId,
+						placerUserId: rekvisisjon.placerUserId,
+						placerAddresses: rekvisisjon.placerAddresses ?? [],
+						selectedPlacerAddressId:
+							rekvisisjon.placerAddresses?.[0]?.addressId ?? null,
+						placerName: rekvisisjon.bestiller,
+					});
 					onApproveSuccess(rekvisisjon);
 				} finally {
 					setIsCartChanging(false);
