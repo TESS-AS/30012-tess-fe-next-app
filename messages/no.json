@@ -1032,10 +1032,12 @@
 			"catalog": "KATALOG",
 			"warehouse": "LAGER",
 			"company": "TESS FIRMA",
+			"budget": "BUDSJETT KR",
 			"action": "HANDLING"
 		},
 		"actions": {
 			"viewDetails": "Vis detaljer",
+			"setBudget": "Sett budsjett",
 			"editUser": "Rediger bruker",
 			"deleteUser": "Slett bruker"
 		},

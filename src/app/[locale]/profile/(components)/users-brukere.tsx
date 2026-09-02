@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { BudgetProgress } from "@/components/ui/budget-progress";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, type Column } from "@/components/ui/data-table";
@@ -17,6 +18,7 @@ import {
 	HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { Input } from "@/components/ui/input";
+import { useActiveBudgetsByUser } from "@/hooks/useBudget";
 import {
 	useGetEditableUsers,
 	useSearchEditableUsers,
@@ -33,12 +35,14 @@ import {
 	Trash2,
 	LockKeyhole,
 	UserPen,
+	Wallet,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
 import { BulkEditConfirmationModal } from "./bulk-edit-confirmation-modal";
 import { ConfirmChangesModal } from "./confirm-changes-modal";
+import { SetBudgetModal } from "./set-budget-modal";
 import { ViewUserModal } from "./view-user-modal";
 
 type UserRow = {
@@ -64,6 +68,8 @@ const UsersBrukere = () => {
 		useState(false);
 	const [pendingBulkChanges, setPendingBulkChanges] =
 		useState<BulkEditChanges | null>(null);
+	const [isSetBudgetModalOpen, setIsSetBudgetModalOpen] = useState(false);
+	const [userForBudget, setUserForBudget] = useState<User | null>(null);
 	const [currentPage, setCurrentPage] = useState(1);
 	const pageSize = 10;
 
@@ -117,6 +123,12 @@ const UsersBrukere = () => {
 		[users],
 	);
 
+	const visibleUserIds = useMemo(
+		() => users.map((u) => u.userId).filter((id): id is number => id != null),
+		[users],
+	);
+	const { byUserId: budgetsByUserId } = useActiveBudgetsByUser(visibleUserIds);
+
 	useEffect(() => {
 		setCurrentPage(1);
 	}, [debouncedSearch]);
@@ -159,6 +171,14 @@ const UsersBrukere = () => {
 		setUserToView(user);
 		setIsViewModalOpen(true);
 	};
+
+	const handleSetBudgetClick = (user: User) => {
+		setUserForBudget(user);
+		setIsSetBudgetModalOpen(true);
+	};
+
+	const canSetBudget =
+		profile?.role === "superuser" || profile?.role === "admin";
 
 	const handleEditClick = (user: User) => {};
 
@@ -351,6 +371,19 @@ const UsersBrukere = () => {
 					renderTruncatedList(row.user.company, "companies", row.user),
 			},
 			{
+				key: "budget",
+				header: t("columns.budget"),
+				cell: (row) => {
+					const budget = budgetsByUserId.get(row.user.userId);
+					return (
+						<BudgetProgress
+							annualAmount={budget?.annualAmount}
+							used={budget?.used}
+						/>
+					);
+				},
+			},
+			{
 				key: "action",
 				header: t("columns.action"),
 				cell: (row) => (
@@ -368,6 +401,12 @@ const UsersBrukere = () => {
 								<Eye className="mr-2 h-4 w-4" />
 								{t("actions.viewDetails")}
 							</DropdownMenuItem>
+							{canSetBudget && (
+								<DropdownMenuItem onClick={() => handleSetBudgetClick(row.user)}>
+									<Wallet className="mr-2 h-4 w-4" />
+									{t("actions.setBudget")}
+								</DropdownMenuItem>
+							)}
 							<DropdownMenuItem onClick={() => handleBulkEditClick(row.user)}>
 								<Edit className="mr-2 h-4 w-4" />
 								{t("actions.editUser")}
@@ -387,8 +426,11 @@ const UsersBrukere = () => {
 			handleBulkEditClick,
 			handleDeleteClick,
 			handleViewClick,
+			handleSetBudgetClick,
+			canSetBudget,
 			users,
 			selectedUsers,
+			budgetsByUserId,
 			t,
 		],
 	);
@@ -463,6 +505,12 @@ const UsersBrukere = () => {
 				onConfirm={handleFinalConfirm}
 				userCount={selectedUsers.length}
 				bulkChanges={pendingBulkChanges}
+			/>
+
+			<SetBudgetModal
+				open={isSetBudgetModalOpen}
+				onOpenChange={setIsSetBudgetModalOpen}
+				user={userForBudget}
 			/>
 		</div>
 	);

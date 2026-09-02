@@ -1030,10 +1030,12 @@
 			"catalog": "CATALOG",
 			"warehouse": "WAREHOUSE",
 			"company": "TESS COMPANY",
+			"budget": "BUDGET KR",
 			"action": "ACTION"
 		},
 		"actions": {
 			"viewDetails": "View details",
+			"setBudget": "Set budget",
 			"editUser": "Edit user",
 			"deleteUser": "Delete user"
 		},
