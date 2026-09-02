@@ -50,3 +50,20 @@ export interface PostBudgetPayload {
 	status: BudgetStatus;
 	approvers: number[];
 }
+
+/** Shape of GET /budget/cartEvaluation. `hasBudget: false` is returned for
+ *  users without an active budget and skips all downstream fields. */
+export interface CartEvaluation {
+	hasBudget: boolean;
+	budgetId?: number;
+	period?: { from: string; to: string };
+	annualAmount?: number;
+	consumed?: number;
+	reserved?: number;
+	used?: number;
+	available?: number;
+	cartTotal?: number;
+	remainingAfter?: number;
+	withinBudget?: boolean;
+	blockedBy?: "budget" | null;
+}

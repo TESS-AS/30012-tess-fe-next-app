@@ -4,12 +4,14 @@ import {
 	getActiveBudgetForUser,
 	getActiveBudgetsForUsers,
 	getAvailableApproverCandidates,
+	getCartEvaluation,
 	postBudget,
 } from "@/services/budgets.service";
 import {
 	ApproverCandidate,
 	BudgetDetail,
 	BudgetSummary,
+	CartEvaluation,
 	PostBudgetPayload,
 } from "@/types/budget.types";
 import {
@@ -27,6 +29,8 @@ export const budgetKeys = {
 		[...budgetKeys.all, "forUsers", [...userIds].sort((a, b) => a - b)] as const,
 	approverCandidates: (search: string) =>
 		[...budgetKeys.all, "approverCandidates", search] as const,
+	cartEvaluation: (signature: string) =>
+		[...budgetKeys.all, "cartEvaluation", signature] as const,
 };
 
 /** Fetches the currently-active budget for a user, if any. Used to prefill the
@@ -72,6 +76,23 @@ export function useApproverCandidates(searchInput: string) {
 		queryKey: budgetKeys.approverCandidates(debounced),
 		queryFn: () => getAvailableApproverCandidates(debounced),
 		staleTime: 60_000,
+		placeholderData: keepPreviousData,
+	});
+}
+
+/** Evaluates the authenticated user's current cart against their budget.
+ *  `cartSignature` should be a stable string that changes whenever the cart
+ *  contents change — passing it in the query key lets react-query auto-refetch
+ *  when the user adds/removes/updates lines without needing to invalidate from
+ *  every cart mutation site. Pass `enabled: false` to opt out (e.g. when a
+ *  requisition placer is active — BE has no on-behalf-of param yet, so the
+ *  card would show the wrong user's budget). */
+export function useCartEvaluation(cartSignature: string, enabled: boolean) {
+	return useQuery<CartEvaluation>({
+		queryKey: budgetKeys.cartEvaluation(cartSignature),
+		queryFn: getCartEvaluation,
+		enabled,
+		staleTime: 15_000,
 		placeholderData: keepPreviousData,
 	});
 }

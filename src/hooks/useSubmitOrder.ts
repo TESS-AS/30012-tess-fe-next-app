@@ -2,9 +2,11 @@ import {
 	SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER,
 	SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER,
 } from "@/constants/checkout";
+import { useAppContext } from "@/lib/appContext";
 import { salesOrder, excelOrderConfirmation } from "@/services/orders.service";
 import { Order } from "@/types/orders.types";
 import { ProfileUser, SalesOrderAddress } from "@/types/user.types";
+import axios from "axios";
 
 export interface SubmitOrderContact {
 	phone?: string;
@@ -18,6 +20,7 @@ export const useSubmitOrder = (
 	handleArchiveCart: () => Promise<void>,
 	contact?: SubmitOrderContact,
 ) => {
+	const { requisitionPlacerInfo } = useAppContext();
 	const formatDate = (d: Date) => d.toISOString().split("T")[0];
 	const submitOrder = async (
 		orderData: Order,
@@ -46,6 +49,12 @@ export const useSubmitOrder = (
 				termsOfDelivery: "DAP",
 				// termsOfPayment: "NET",
 				dispatchDate,
+				// Attribute the budget_transaction to the placer, not the
+				// approver. BE reads this via `orderBody.salesOrderHeader
+				// ?.requisitionId` in `consumeForRequisition`.
+				...(requisitionPlacerInfo
+					? { requisitionId: requisitionPlacerInfo.requisitionId }
+					: {}),
 			},
 			salesOrderAddresses: [selectedAddress],
 			...(deliveryPhone || deliveryEmail
@@ -132,6 +141,33 @@ export const useSubmitOrder = (
 				}
 			}
 		} catch (err) {
+			// BE returns 409 with { annualAmount, used, available, orderTotal }
+			// when a direct (non-requisition) order exceeds the user's remaining
+			// budget. Re-throw a friendlier Error so callers can toast with the
+			// actual numbers.
+			if (
+				axios.isAxiosError(err) &&
+				err.response?.status === 409 &&
+				err.response?.data?.error === "Order exceeds available budget"
+			) {
+				const { available, orderTotal } = err.response.data as {
+					available?: number;
+					orderTotal?: number;
+				};
+				const nf = new Intl.NumberFormat("nb-NO");
+				const availableStr =
+					typeof available === "number" ? `${nf.format(Math.round(available))} kr` : "—";
+				const orderTotalStr =
+					typeof orderTotal === "number"
+						? `${nf.format(Math.round(orderTotal))} kr`
+						: "—";
+				const budgetError = new Error(
+					`Ordren overskrider tilgjengelig budsjett. Tilgjengelig: ${availableStr}, ordretotal: ${orderTotalStr}.`,
+				);
+				(budgetError as Error & { code?: string }).code = "BUDGET_EXCEEDED";
+				console.error("Order submission blocked by budget:", err.response.data);
+				throw budgetError;
+			}
 			console.error("Order submission failed:", err);
 			throw err;
 		}

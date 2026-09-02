@@ -3,6 +3,7 @@ import {
 	ApproverCandidate,
 	BudgetDetail,
 	BudgetSummary,
+	CartEvaluation,
 	PostBudgetPayload,
 } from "@/types/budget.types";
 
@@ -66,4 +67,11 @@ export async function postBudget(
 ): Promise<BudgetDetail> {
 	const res = await axiosClient.post<PostBudgetResponse>("/budget", payload);
 	return res.data.budget;
+}
+
+export async function getCartEvaluation(): Promise<CartEvaluation> {
+	const res = await axiosClient.get<{ success: boolean } & CartEvaluation>(
+		"/budget/cartEvaluation",
+	);
+	return res.data;
 }

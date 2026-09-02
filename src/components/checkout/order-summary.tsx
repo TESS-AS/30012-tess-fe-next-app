@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { BudgetCheckoutSummary } from "@/components/checkout/budget-checkout-summary";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,7 @@ import {
 	SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER,
 	SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER,
 } from "@/constants/checkout";
+import { useCartEvaluation } from "@/hooks/useBudget";
 import { useOrderSummary } from "@/hooks/useOrderSummary";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useRouter } from "@/i18n/navigation";
@@ -55,7 +57,26 @@ export default function OrderSummary({
 		handleClearCart,
 		handleArchiveCart,
 		unitPrices,
+		requisitionPlacerInfo,
 	} = useAppContext();
+
+	// Fingerprint the cart so react-query re-runs cartEvaluation whenever
+	// lines/quantities change without needing to invalidate from every mutation
+	// site. Skip the query entirely when a placer is present — BE has no
+	// on-behalf-of param on this endpoint yet, so it'd show the approver's
+	// budget instead of the placer's. Revisit once BE ships `?onBehalfOfUserId=`.
+	const cartSignature = [
+		...(cartItems?.cart ?? []).map((l) => `${l.itemNumber}:${l.quantity}`),
+		...(cartItems?.cartKit ?? []).map(
+			(k) => `k:${k.hexagonId}:${k.hose?.quantity ?? 0}`,
+		),
+	]
+		.sort()
+		.join(",");
+	const { data: cartEvaluation } = useCartEvaluation(
+		cartSignature,
+		!requisitionPlacerInfo,
+	);
 	const isCartEmpty =
 		(!cartItems?.cart || cartItems.cart.length === 0) &&
 		(!cartItems?.cartKit || cartItems.cartKit.length === 0);
@@ -503,6 +524,8 @@ export default function OrderSummary({
 								/>
 							</div>
 
+							<BudgetCheckoutSummary evaluation={cartEvaluation} />
+
 							{currentStep === 2 && (
 								<div className="mt-3 flex items-start gap-2">
 									<Checkbox
@@ -580,7 +603,14 @@ export default function OrderSummary({
 											isCartEmpty ||
 											isCheckoutLoading ||
 											arePricesLoading ||
-											(!acceptedTerms && currentStep === 2)
+											(!acceptedTerms && currentStep === 2) ||
+											// BE hard-blocks direct (non-requisition) orders that
+											// exceed the user's remaining budget with a 409. Disable
+											// upfront so the user isn't surprised. Requisition-driven
+											// orders skip this check on BE, so we skip it here too.
+											(!requisitionPlacerInfo &&
+												cartEvaluation?.hasBudget === true &&
+												cartEvaluation.withinBudget === false)
 										}
 										onClick={handleCheckout}>
 										{isCheckoutLoading || isLoading || arePricesLoading ? (

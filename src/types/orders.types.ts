@@ -23,6 +23,10 @@ export interface SalesOrderHeader {
 	paidAmount: number;
 	cashRegister: string;
 	text: string;
+	/** Set when an approver is checking out on behalf of a placer via a
+	 *  requisition. BE (`salesOrder.ts`) reads this to record the
+	 *  budget_transaction against the placer via `consumeForRequisition`. */
+	requisitionId?: number;
 }
 
 export interface OrderLines {
