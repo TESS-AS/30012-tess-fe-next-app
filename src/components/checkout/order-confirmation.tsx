@@ -37,11 +37,6 @@ export const OrderConfirmation: React.FC<OrderConfirmationProps> = ({
 
 			<div className="mb-8 flex gap-4">
 				<Button
-					onClick={onTrackOrder}
-					variant="greenSolid">
-					{t("trackOrder")}
-				</Button>
-				<Button
 					variant="outline"
 					asChild
 					className="font-medium">
