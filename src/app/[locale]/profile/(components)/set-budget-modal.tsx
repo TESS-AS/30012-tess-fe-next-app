@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -77,23 +77,36 @@ export function SetBudgetModal({ open, onOpenChange, user }: Props) {
 		? `${user.firstName} ${user.lastName}`.trim()
 		: "";
 
-	// Prefill from existing budget when the modal opens (or the user changes).
+	// Reset wizard state on the false→true open transition only. Must NOT depend
+	// on `existingBudget` — otherwise the post-save cache invalidation
+	// (`budgetKeys.all`) refreshes the budget query, which flips this effect and
+	// would clobber the success step + reset the form back to period. Prefill
+	// happens in the separate one-shot effect below.
+	const hasPrefilledRef = useRef(false);
 	useEffect(() => {
-		if (!open) return;
-		if (existingBudget) {
-			setValidFrom(existingBudget.validFrom);
-			setValidTo(existingBudget.validTo);
-			setAnnualAmountInput(String(existingBudget.annualAmount));
-		} else {
-			setValidFrom("");
-			setValidTo("");
-			setAnnualAmountInput("");
+		if (!open) {
+			hasPrefilledRef.current = false;
+			return;
 		}
+		setValidFrom("");
+		setValidTo("");
+		setAnnualAmountInput("");
 		setApprovers([]);
 		setApproverSearch("");
 		setSendConfirmationEmail(true);
 		setStep("period");
-	}, [open, existingBudget, user?.userId]);
+	}, [open, user?.userId]);
+
+	// One-shot prefill from existing budget after it loads. Guarded by ref so
+	// later changes to `existingBudget` (e.g. our own onSuccess invalidation)
+	// don't overwrite user input.
+	useEffect(() => {
+		if (!open || !existingBudget || hasPrefilledRef.current) return;
+		hasPrefilledRef.current = true;
+		setValidFrom(existingBudget.validFrom);
+		setValidTo(existingBudget.validTo);
+		setAnnualAmountInput(String(existingBudget.annualAmount));
+	}, [open, existingBudget]);
 
 	const annualAmountNum = useMemo(() => {
 		const parsed = Number(annualAmountInput.replace(/\s/g, "").replace(",", "."));
@@ -641,7 +654,9 @@ function SuccessStep({
 			<div className="flex items-start gap-3 rounded-md bg-[#F0FCF2] p-4">
 				<Check className="mt-0.5 h-5 w-5 text-[#005522]" />
 				<div>
-					<p className="text-base font-[600] text-[#005522]">Budsjett og mail</p>
+					<p className="text-base font-[600] text-[#005522]">
+						{sentEmail && email ? "Budsjett og mail" : "Budsjett"}
+					</p>
 					<p className="text-sm font-[400] text-[#005522]">
 						Budsjett opprettet for {displayName}
 					</p>

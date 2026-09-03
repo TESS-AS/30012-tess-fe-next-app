@@ -579,7 +579,8 @@ export default function ProfilePage() {
 											// 	label: t("ProfilePage.sidebar.usage"),
 											// 	icon: "/icons/profile/navbar/lock-time-outline.svg",
 											// },
-											...(profile.role === "admin"
+											...(profile.role === "admin" ||
+											profile.role === "superuser"
 												? [
 														{
 															href: "users",
