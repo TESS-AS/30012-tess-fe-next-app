@@ -29,7 +29,7 @@ export function BudgetProgress({
 		<div className={cn("flex flex-col items-center gap-1.5", className)}>
 			<span className="text-sm text-[#0F1912]">
 				{hasBudget
-					? `${formatAmount(annualAmount)} / ${formatAmount(used)}`
+					? `${formatAmount(used)} / ${formatAmount(annualAmount)}`
 					: notSetLabel}
 			</span>
 			<div
