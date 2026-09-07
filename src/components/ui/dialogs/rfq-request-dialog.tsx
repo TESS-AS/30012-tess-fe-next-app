@@ -58,6 +58,7 @@ export function RFQRequestDialog({
 	const [contactMethod, setContactMethod] =
 		React.useState<HoseContactMethod | "">("");
 	const [contactValue, setContactValue] = React.useState("");
+	// Non-Equinor: delivery address. Equinor: user email (same form slot).
 	const [deliveryAddress, setDeliveryAddress] = React.useState("");
 	const [warehouseNumber, setWarehouseNumber] = React.useState("");
 	const [comment, setComment] = React.useState("");
@@ -66,20 +67,28 @@ export function RFQRequestDialog({
 	const [submitting, setSubmitting] = React.useState(false);
 	const [caseId, setCaseId] = React.useState<string | null>(null);
 	const [infoOpen, setInfoOpen] = React.useState(false);
+	const [errors, setErrors] = React.useState<{
+		selectedIds?: string;
+		deliveryAddress?: string;
+		warehouseNumber?: string;
+		contactMethod?: string;
+		contactValue?: string;
+	}>({});
 
 	const { warehouses, isLoading: isLoadingWarehouses } = useGetWarehouses(
 		open && !!profile,
 		profile?.defaultCompanyNumber,
 	);
 
-	// Equinor customers default the pressure-test checkbox to checked.
-	// Re-sync each time the dialog opens so the rule is enforced fresh.
+	// Equinor customers default the pressure-test checkbox to checked and
+	// prefill the email field. Re-sync each time the dialog opens.
 	React.useEffect(() => {
 		if (open) {
 			setIncludePressureTest(isEquinor);
 			setWarehouseNumber(profile?.defaultWarehouseNumber ?? "");
+			setDeliveryAddress(isEquinor ? (profile?.email ?? "") : "");
 		}
-	}, [open, isEquinor, profile?.defaultWarehouseNumber]);
+	}, [open, isEquinor, profile?.defaultWarehouseNumber, profile?.email]);
 
 	React.useEffect(() => {
 		if (!open || warehouseNumber || warehouses.length === 0) return;
@@ -110,6 +119,7 @@ export function RFQRequestDialog({
 		setCaseId(null);
 		setSubmitting(false);
 		setIncludePressureTest(isEquinor);
+		setErrors({});
 	};
 
 	const handleOpenChange = (next: boolean) => {
@@ -117,8 +127,50 @@ export function RFQRequestDialog({
 		onOpenChange(next);
 	};
 
+	const clearError = (field: keyof typeof errors) => {
+		setErrors((prev) => {
+			if (!prev[field]) return prev;
+			const next = { ...prev };
+			delete next[field];
+			return next;
+		});
+	};
+
+	const validateForm = () => {
+		const nextErrors: typeof errors = {};
+
+		if (selectedIds.length === 0) {
+			nextErrors.selectedIds = "Velg minst én slange.";
+		}
+		if (!deliveryAddress.trim()) {
+			nextErrors.deliveryAddress = isEquinor
+				? "Fyll inn e-postadresse."
+				: "Fyll inn leveringsadresse.";
+		} else if (
+			isEquinor &&
+			!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(deliveryAddress.trim())
+		) {
+			nextErrors.deliveryAddress = "Skriv inn en gyldig e-postadresse.";
+		}
+		if (!warehouseNumber) {
+			nextErrors.warehouseNumber = "Velg lager.";
+		}
+		if (!contactMethod) {
+			nextErrors.contactMethod = "Velg hvordan vi skal kontakte deg.";
+		} else if (!contactValue.trim()) {
+			nextErrors.contactValue =
+				contactMethod === "phone"
+					? "Fyll inn telefonnummer."
+					: "Fyll inn e-postadresse.";
+		}
+
+		setErrors(nextErrors);
+		return Object.keys(nextErrors).length === 0;
+	};
+
 	const handleSubmit = async () => {
-		if (!contactMethod || !contactValue.trim() || !profile || selectedIds.length === 0) return;
+		if (!profile) return;
+		if (!validateForm()) return;
 
 		setSubmitting(true);
 		const generatedCaseId = generateCaseId("RFQ");
@@ -135,9 +187,10 @@ export function RFQRequestDialog({
 			userPhone: profile.phoneNumber,
 			customerNumber,
 			companyName,
-			contactMethod,
+			contactMethod: contactMethod as HoseContactMethod,
 			contactValue: contactValue.trim(),
 			deliveryAddress: deliveryAddress.trim(),
+			deliveryAddressLabel: isEquinor ? "E-post" : "Leveringsadresse",
 			warehouseNumber: selectedWarehouse?.id ?? warehouseNumber,
 			warehouseName: selectedWarehouse?.name ?? "",
 			comment: comment.trim(),
@@ -226,17 +279,39 @@ export function RFQRequestDialog({
 										))
 									)}
 								</div>
+								{errors.selectedIds && (
+									<p className="mt-2 text-sm text-[#B42318]">
+										{errors.selectedIds}
+									</p>
+								)}
 							</div>
 
 							<div className="space-y-1">
 								<label className="text-sm font-medium text-[#0F1912]">
-									Leveringsadresse
+									{isEquinor ? "E-post" : "Leveringsadresse"}
 								</label>
 								<Input
-									placeholder="Leveringsadresse"
+									placeholder={
+										isEquinor ? "navn@firma.no" : "Leveringsadresse"
+									}
 									value={deliveryAddress}
-									onChange={(e) => setDeliveryAddress(e.target.value)}
+									onChange={(e) => {
+										setDeliveryAddress(e.target.value);
+										clearError("deliveryAddress");
+									}}
+									inputMode={isEquinor ? "email" : undefined}
+									type={isEquinor ? "email" : "text"}
+									aria-invalid={!!errors.deliveryAddress}
+									className={cn(
+										errors.deliveryAddress &&
+											"border-[#B42318] focus-visible:ring-[#B42318]",
+									)}
 								/>
+								{errors.deliveryAddress && (
+									<p className="text-sm text-[#B42318]">
+										{errors.deliveryAddress}
+									</p>
+								)}
 							</div>
 
 							<div className="space-y-1">
@@ -245,9 +320,16 @@ export function RFQRequestDialog({
 								</label>
 								<Select
 									value={warehouseNumber}
-									onValueChange={setWarehouseNumber}
+									onValueChange={(value) => {
+										setWarehouseNumber(value);
+										clearError("warehouseNumber");
+									}}
 									disabled={isLoadingWarehouses || warehouses.length === 0}>
-									<SelectTrigger className="w-full border-[#8A8F8C] bg-[#F8F9F8] text-[#0F1912]">
+									<SelectTrigger
+										className={cn(
+											"w-full border-[#8A8F8C] bg-[#F8F9F8] text-[#0F1912]",
+											errors.warehouseNumber && "border-[#B42318]",
+										)}>
 										<SelectValue
 											placeholder={
 												isLoadingWarehouses
@@ -266,6 +348,11 @@ export function RFQRequestDialog({
 										))}
 									</SelectContent>
 								</Select>
+								{errors.warehouseNumber && (
+									<p className="text-sm text-[#B42318]">
+										{errors.warehouseNumber}
+									</p>
+								)}
 							</div>
 
 							<div className="space-y-2">
@@ -274,9 +361,11 @@ export function RFQRequestDialog({
 								</p>
 								<RadioGroup
 									value={contactMethod}
-									onValueChange={(value) =>
-										setContactMethod(value as HoseContactMethod)
-									}>
+									onValueChange={(value) => {
+										setContactMethod(value as HoseContactMethod);
+										clearError("contactMethod");
+										clearError("contactValue");
+									}}>
 									<label className="flex cursor-pointer items-center gap-2 text-sm text-[#0F1912]">
 										<RadioGroupItem value="phone" />
 										Ring meg
@@ -286,6 +375,11 @@ export function RFQRequestDialog({
 										Send meg en e-post
 									</label>
 								</RadioGroup>
+								{errors.contactMethod && (
+									<p className="text-sm text-[#B42318]">
+										{errors.contactMethod}
+									</p>
+								)}
 							</div>
 
 							{contactMethod === "phone" && (
@@ -296,9 +390,22 @@ export function RFQRequestDialog({
 									<Input
 										placeholder="+47 000 00 000 (forhåndsutfylt, redigerbart)"
 										value={contactValue}
-										onChange={(e) => setContactValue(e.target.value)}
+										onChange={(e) => {
+											setContactValue(e.target.value);
+											clearError("contactValue");
+										}}
 										inputMode="tel"
+										aria-invalid={!!errors.contactValue}
+										className={cn(
+											errors.contactValue &&
+												"border-[#B42318] focus-visible:ring-[#B42318]",
+										)}
 									/>
+									{errors.contactValue && (
+										<p className="text-sm text-[#B42318]">
+											{errors.contactValue}
+										</p>
+									)}
 								</div>
 							)}
 
@@ -310,9 +417,22 @@ export function RFQRequestDialog({
 									<Input
 										placeholder="navn@firma.no (forhåndsutfylt, redigerbart)"
 										value={contactValue}
-										onChange={(e) => setContactValue(e.target.value)}
+										onChange={(e) => {
+											setContactValue(e.target.value);
+											clearError("contactValue");
+										}}
 										inputMode="email"
+										aria-invalid={!!errors.contactValue}
+										className={cn(
+											errors.contactValue &&
+												"border-[#B42318] focus-visible:ring-[#B42318]",
+										)}
 									/>
+									{errors.contactValue && (
+										<p className="text-sm text-[#B42318]">
+											{errors.contactValue}
+										</p>
+									)}
 								</div>
 							)}
 							<div className="space-y-1">
@@ -369,6 +489,7 @@ export function RFQRequestDialog({
 			<RfqInfoModal
 				open={infoOpen}
 				onOpenChange={setInfoOpen}
+				isEquinor={isEquinor}
 			/>
 		</Dialog>
 	);
@@ -377,9 +498,11 @@ export function RFQRequestDialog({
 function RfqInfoModal({
 	open,
 	onOpenChange,
+	isEquinor,
 }: {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
+	isEquinor: boolean;
 }) {
 	return (
 		<Dialog
@@ -404,8 +527,9 @@ function RfqInfoModal({
 							eksempel om slangene skal trykktestes med tilhørende sertifikat.
 						</li>
 						<li>
-							Legg inn leveringsadresse og kontaktinformasjon: navn, e-post og
-							telefonnummer.
+							{isEquinor
+								? "Legg inn e-postadresse og kontaktinformasjon: navn, e-post og telefonnummer."
+								: "Legg inn leveringsadresse og kontaktinformasjon: navn, e-post og telefonnummer."}
 						</li>
 					</ul>
 					<div className="space-y-1">

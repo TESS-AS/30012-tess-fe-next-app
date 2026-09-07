@@ -30,6 +30,8 @@ interface HoseRfqEmailParams {
 	contactMethod: HoseContactMethod;
 	contactValue: string;
 	deliveryAddress: string;
+	/** When set, replaces the "Leveringsadresse" row label (e.g. Equinor uses "E-post"). */
+	deliveryAddressLabel?: string;
 	warehouseNumber?: string;
 	warehouseName?: string;
 	comment: string;
@@ -449,6 +451,7 @@ export function buildHoseRfqEmailHtml({
 	contactMethod,
 	contactValue,
 	deliveryAddress,
+	deliveryAddressLabel = "Leveringsadresse",
 	warehouseNumber,
 	warehouseName,
 	comment,
@@ -476,7 +479,7 @@ export function buildHoseRfqEmailHtml({
 			escapeHtml(contactValue),
 		),
 		infoRow(
-			"Leveringsadresse",
+			deliveryAddressLabel,
 			deliveryAddress ? escapeHtml(deliveryAddress) : "—",
 		),
 		...(warehouseLabel

@@ -329,6 +329,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 			console.error("Logout API failed", error);
 		}
 		if (typeof window !== "undefined") {
+			window.sessionStorage.removeItem("hosesAndEquipments_pageSize");
 			window.localStorage.removeItem("hosesAndEquipments_pageSize");
 		}
 		queryClient.setQueryData(profileKeys.detail(), null);
