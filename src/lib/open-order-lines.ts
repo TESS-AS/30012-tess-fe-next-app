@@ -1,4 +1,5 @@
 import type { OrderLineField } from "@/app/[locale]/profile/(components)/order-line-table";
+import { EDI_FIELD_LABELS_NO } from "@/constants/ediLabels";
 import type {
 	IncomingLineItem,
 	OpenOrderLineItemResponse,
@@ -24,6 +25,7 @@ export type OrderDetailView = {
 };
 
 const humanizeKey = (key: string) =>
+	EDI_FIELD_LABELS_NO[key] ??
 	key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, " $1").trim();
 
 /** Convert a mismatches map (field -> {database, incoming}) into UI fields. */
