@@ -121,29 +121,48 @@ export function HosesAndEquipments({
 	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
 		() => {
 			if (typeof window !== "undefined") {
-				return localStorage.getItem("selectedS1Code") ||
-					profile?.defaultCustomerNumber ===
-						SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+				const stored = localStorage.getItem("selectedS1Code");
+				if (stored) return stored;
+				return profile?.defaultCustomerNumber ===
+					SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
 					? S1_CODE_TROLL_A
 					: "";
 			}
 			return undefined;
 		},
 	);
+	const previousCustomerNumberRef = useRef<string | undefined>(undefined);
 
+	// When customer context changes, reset location: Equinor → Troll A, others → empty
+	// so the trigger shows "Velg S1 anlegg" instead of a blank/stale value.
 	useEffect(() => {
-		if (typeof window === "undefined") return;
-		const stored = localStorage.getItem("selectedS1Code");
-		if (!stored) {
-			localStorage.setItem(
-				"selectedS1Code",
-				profile?.defaultCustomerNumber ===
-					SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
-					? S1_CODE_TROLL_A
-					: "",
-			);
+		const currentCustomer = profile?.defaultCustomerNumber;
+		if (!currentCustomer) return;
+
+		const previousCustomer = previousCustomerNumberRef.current;
+		previousCustomerNumberRef.current = currentCustomer;
+
+		if (previousCustomer === undefined) {
+			if (
+				!localStorage.getItem("selectedS1Code") &&
+				currentCustomer === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+			) {
+				setSelectedS1Code(S1_CODE_TROLL_A);
+				localStorage.setItem("selectedS1Code", S1_CODE_TROLL_A);
+			}
+			return;
 		}
-	}, []);
+
+		if (previousCustomer === currentCustomer) return;
+
+		if (currentCustomer === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER) {
+			setSelectedS1Code(S1_CODE_TROLL_A);
+			localStorage.setItem("selectedS1Code", S1_CODE_TROLL_A);
+		} else {
+			setSelectedS1Code("");
+			localStorage.removeItem("selectedS1Code");
+		}
+	}, [profile?.defaultCustomerNumber]);
 
 	const effectiveCustomerNumber =
 		profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
@@ -190,14 +209,20 @@ export function HosesAndEquipments({
 	const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 	const [selectedAgeRanges, setSelectedAgeRanges] = useState<string[]>([]);
 	const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
+	const DEFAULT_ITEMS_PER_PAGE = 25;
 	const HOSE_TABLE_PAGE_KEY = "hosesAndEquipments_page";
 	const HOSE_TABLE_PAGE_SIZE_KEY = "hosesAndEquipments_pageSize";
 	const [itemsPerPage, setItemsPerPage] = useState<number>(() => {
-		if (typeof window === "undefined") return 10;
+		if (typeof window === "undefined") return DEFAULT_ITEMS_PER_PAGE;
+		// Session-only: resets to 25 when the browser tab/session ends.
+		// Clear any legacy localStorage value so old choices do not stick.
+		window.localStorage.removeItem(HOSE_TABLE_PAGE_SIZE_KEY);
 		const stored = Number(
-			window.localStorage.getItem(HOSE_TABLE_PAGE_SIZE_KEY),
+			window.sessionStorage.getItem(HOSE_TABLE_PAGE_SIZE_KEY),
 		);
-		return ITEMS_PER_PAGE_OPTIONS.includes(stored) ? stored : 10;
+		return ITEMS_PER_PAGE_OPTIONS.includes(stored)
+			? stored
+			: DEFAULT_ITEMS_PER_PAGE;
 	});
 	const didInitAssetsRef = useRef(false);
 	const currentPageRef = useRef<number>(1);
@@ -599,7 +624,7 @@ export function HosesAndEquipments({
 		setItemsPerPage(size);
 		currentPageRef.current = 1;
 		if (typeof window !== "undefined") {
-			window.localStorage.setItem(HOSE_TABLE_PAGE_SIZE_KEY, String(size));
+			window.sessionStorage.setItem(HOSE_TABLE_PAGE_SIZE_KEY, String(size));
 			window.localStorage.setItem(HOSE_TABLE_PAGE_KEY, "1");
 		}
 		fetchAssets({
@@ -1080,22 +1105,34 @@ export function HosesAndEquipments({
 							s1.S1Code === S1_CODE_1775_TROLL_B ||
 							s1.S1Code === S1_CODE_1930_JOHAN_CASTBERG,
 					)
-					.map((s1) => (
-						<SelectItem
-							key={s1.S1Code}
-							value={s1.S1Code}>
-							{s1.S1Name}
-						</SelectItem>
-					))
-			: (s1Codes || [])
-					.filter((s1) => s1.S1Code && s1.S1Name)
-					.map((s1) => (
-						<SelectItem
-							key={s1.S1Code}
-							value={s1.S1Code}>
-							{s1.S1Name}
-						</SelectItem>
-					));
+			: (s1Codes || []).filter((s1) => s1.S1Code && s1.S1Name);
+
+	const selectedS1Name = filteredS1Codes.find(
+		(s1) => s1.S1Code === selectedS1Code,
+	)?.S1Name;
+	const hasValidS1Selection = !!selectedS1Code && !!selectedS1Name;
+
+	// Drop stale S1 values that are not in the current customer's list
+	useEffect(() => {
+		if (!selectedS1Code || filteredS1Codes.length === 0) return;
+		if (selectedS1Name) return;
+
+		const isEquinorCustomer =
+			profile?.defaultCustomerNumber ===
+			SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
+		if (isEquinorCustomer) {
+			setSelectedS1Code(S1_CODE_TROLL_A);
+			localStorage.setItem("selectedS1Code", S1_CODE_TROLL_A);
+			return;
+		}
+		setSelectedS1Code("");
+		localStorage.removeItem("selectedS1Code");
+	}, [
+		selectedS1Code,
+		selectedS1Name,
+		filteredS1Codes.length,
+		profile?.defaultCustomerNumber,
+	]);
 
 	return (
 		<>
@@ -1169,72 +1206,58 @@ export function HosesAndEquipments({
 						<h1 className="text-2xl font-semibold">{t("title")}</h1>
 					</div>
 
-					<div className="flex w-[280px] items-center gap-3">
-						<p className="text-base font-normal text-[#5A615D]">
+					<div className="flex items-center gap-3">
+						<p className="shrink-0 text-base font-normal text-[#5A615D]">
 							{t("location")}:
 						</p>
-						<div className="relative">
-							<Select
-								value={selectedS1Code || ""}
-								onValueChange={(value) => {
-									if (!value) {
-										setSelectedS1Code("");
-										localStorage.removeItem("selectedS1Code");
-									} else {
-										setSelectedS1Code(value);
-										localStorage.setItem("selectedS1Code", value);
+						<Select
+							value={hasValidS1Selection ? selectedS1Code : undefined}
+							onValueChange={(value) => {
+								if (!value) return;
+								setSelectedS1Code(value);
+								localStorage.setItem("selectedS1Code", value);
+							}}>
+							<SelectTrigger className="w-[260px] border-[#C1C4C2] bg-white font-medium text-[#0F1912]">
+								<div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
+									<MapPin className="h-4 w-4 shrink-0 text-[#0F1912]" />
+									<SelectValue
+										className="truncate"
+										placeholder={t("selectS1Location")}
+									/>
+								</div>
+							</SelectTrigger>
+							<SelectContent
+								className="max-h-[300px] overflow-y-auto"
+								onScroll={(e) => {
+									const target = e.target as HTMLDivElement;
+									if (
+										target.scrollTop + target.clientHeight >=
+											target.scrollHeight - 20 &&
+										!loading &&
+										s1CodesPagination.currentPage <
+											s1CodesPagination.totalPages
+									) {
+										fetchS1Codes(
+											s1CodesPagination.currentPage + 1,
+											s1CodesPagination.pageSize,
+											false,
+										);
 									}
 								}}>
-								<SelectTrigger className="relative w-[200px] border-[#C1C4C2] bg-white pr-8 font-medium text-[#0F1912]">
-									<div className="flex items-center gap-2 overflow-hidden">
-										<MapPin className="h-4 w-4 shrink-0 text-[#0F1912]" />
-										<SelectValue
-											className="truncate"
-											placeholder={t("selectS1Location")}
-										/>
+								{filteredS1Codes.map((s1) => (
+									<SelectItem
+										key={s1.S1Code}
+										value={s1.S1Code}>
+										{s1.S1Name}
+									</SelectItem>
+								))}
+								{loading && s1CodesPagination.currentPage > 1 && (
+									<div className="py-2 text-center text-sm text-gray-500">
+										{t("loadingMore")}
 									</div>
-								</SelectTrigger>
-								<SelectContent
-									className="max-h-[300px] overflow-y-auto"
-									onScroll={(e) => {
-										const target = e.target as HTMLDivElement;
-										if (
-											target.scrollTop + target.clientHeight >=
-												target.scrollHeight - 20 &&
-											!loading &&
-											s1CodesPagination.currentPage <
-												s1CodesPagination.totalPages
-										) {
-											fetchS1Codes(
-												s1CodesPagination.currentPage + 1,
-												s1CodesPagination.pageSize,
-												false,
-											);
-										}
-									}}>
-									{filteredS1Codes}
-									{loading && s1CodesPagination.currentPage > 1 && (
-										<div className="py-2 text-center text-sm text-gray-500">
-											{t("loadingMore")}
-										</div>
-									)}
-								</SelectContent>
-							</Select>
-							{selectedS1Code && (
-								<button
-									type="button"
-									onClick={(e) => {
-										e.stopPropagation();
-										e.preventDefault();
-										setSelectedS1Code("");
-										localStorage.removeItem("selectedS1Code");
-									}}
-									className="absolute top-1/2 right-2 z-10 -translate-y-1/2 rounded-sm p-1 opacity-50 ring-offset-white transition-all hover:bg-[#F8F9F8] hover:opacity-100 focus:ring-2 focus:ring-[#1C6D2C] focus:ring-offset-2 focus:outline-none">
-									<X className="h-4 w-4 text-[#5A615D]" />
-									<span className="sr-only">{t("removeLocation")}</span>
-								</button>
-							)}
-						</div>
+								)}
+							</SelectContent>
+						</Select>
 					</div>
 				</div>
 
