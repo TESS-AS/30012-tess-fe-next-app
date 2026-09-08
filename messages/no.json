@@ -186,7 +186,7 @@
 		},
 		"sort": "Sorter",
 		"search": "Søk",
-		"searchProducts": "Søk etter slanger, utstyr, diameter, trykklasse...",
+		"searchProducts": "Beskriv hva du trenger ...",
 		"searchAttributes": "Søk etter attributter",
 		"attributes": "Attributter",
 		"showMore": "Vis mer",
@@ -737,7 +737,9 @@
 		"pagination": {
 			"itemsPerPage": "antall oppføringer per side",
 			"perPageOption": "{size} per side"
-		}
+		},
+		"activeFilters": "Aktive filter",
+		"removeFilter": "Fjern filter"
 	},
 	"HoseOverview": {
 		"title": "Min oversikt",
@@ -1050,10 +1052,11 @@
 		"andMore": "og {count} flere"
 	},
 	"HoseColumnsDropdown": {
-		"addColumn": "Endre tabell"
+		"addColumn": "Tilpass kolonner"
 	},
 	"HoseFiltersDropdown": {
 		"filter": "Filter",
+		"clearAll": "Fjern alle filter",
 		"inspection": "Inspeksjon",
 		"rejectedInspections": "Underkjente inspeksjoner",
 		"withRemarks": "Med merknader",

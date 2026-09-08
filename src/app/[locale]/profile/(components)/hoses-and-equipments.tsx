@@ -46,7 +46,13 @@ import { toast } from "react-toastify";
 
 import { HoseActionsDropdown } from "./hose-actions-dropdown";
 import { HoseColumnsDropdown } from "./hose-columns-dropdown";
-import { HoseFiltersDropdown } from "./hose-filters-dropdown";
+import {
+	HOSE_AGE_LABEL_KEYS,
+	HOSE_FILTER_LABEL_KEYS,
+	HoseFiltersDropdown,
+	type HoseAgeRangeKey,
+	type HoseFilterKey,
+} from "./hose-filters-dropdown";
 import { HoseSearchBar } from "./hose-search-bar";
 
 export interface HoseOrder {
@@ -1078,6 +1084,34 @@ export function HosesAndEquipments({
 		});
 	};
 
+	const handleAgeRangeChange = async (value: string) => {
+		const newRanges = selectedAgeRanges.includes(value)
+			? selectedAgeRanges.filter((r) => r !== value)
+			: [...selectedAgeRanges, value];
+		setSelectedAgeRanges(newRanges);
+		await fetchAssets({
+			page: 1,
+			pageSize: pagination.pageSize,
+			...getActiveFilters({ selectedAgeRanges: newRanges }),
+			...(searchQuery ? { search: searchQuery } : {}),
+		});
+	};
+
+	const handleClearAllFilters = async () => {
+		setSelectedFilters([]);
+		setSelectedAgeRanges([]);
+		await fetchAssets({
+			page: 1,
+			pageSize: pagination.pageSize,
+			...getActiveFilters({ selectedFilters: [], selectedAgeRanges: [] }),
+			...(searchQuery ? { search: searchQuery } : {}),
+		});
+	};
+
+	const tFilters = useTranslations("HoseFiltersDropdown");
+	const hasActiveTableFilters =
+		selectedFilters.length > 0 || selectedAgeRanges.length > 0;
+
 	const filteredS1Codes =
 		profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
 			? (s1Codes || [])
@@ -1301,23 +1335,58 @@ export function HosesAndEquipments({
 								selectedFilters={selectedFilters}
 								selectedAgeRanges={selectedAgeRanges}
 								onToggleFilter={(value) => handleFilterChange(value)}
-								onToggleAgeRange={async (value) => {
-									const newRanges = selectedAgeRanges.includes(value)
-										? selectedAgeRanges.filter((r) => r !== value)
-										: [...selectedAgeRanges, value];
-									setSelectedAgeRanges(newRanges);
-									await fetchAssets({
-										page: 1,
-										pageSize: pagination.pageSize,
-										ageSize: newRanges.join(","),
-										...getActiveFilters(),
-										...(searchQuery ? { search: searchQuery } : {}),
-									});
-								}}
+								onToggleAgeRange={handleAgeRangeChange}
+								onClearAll={handleClearAllFilters}
 								profile={profile}
 							/>
 						</div>
 					</div>
+
+					{hasActiveTableFilters && (
+						<div className="flex flex-wrap items-center gap-2 border-t border-[#E8EAE9] px-6 py-3">
+							<span className="text-sm text-[#5A615D]">
+								{t("activeFilters")}:
+							</span>
+							{selectedFilters.map((filterKey) => {
+								const labelKey =
+									HOSE_FILTER_LABEL_KEYS[filterKey as HoseFilterKey];
+								if (!labelKey) return null;
+								return (
+									<button
+										key={filterKey}
+										type="button"
+										onClick={() => handleFilterChange(filterKey, false)}
+										className="inline-flex items-center gap-1.5 rounded-full border border-[#C1C4C2] bg-[#F8F9F8] px-2.5 py-1 text-xs font-medium text-[#0F1912] hover:border-[#009640] hover:bg-[#DCF7E0]">
+										{tFilters(labelKey)}
+										<X className="h-3 w-3 text-[#5A615D]" />
+										<span className="sr-only">{t("removeFilter")}</span>
+									</button>
+								);
+							})}
+							{selectedAgeRanges.map((ageKey) => {
+								const labelKey =
+									HOSE_AGE_LABEL_KEYS[ageKey as HoseAgeRangeKey];
+								if (!labelKey) return null;
+								return (
+									<button
+										key={ageKey}
+										type="button"
+										onClick={() => handleAgeRangeChange(ageKey)}
+										className="inline-flex items-center gap-1.5 rounded-full border border-[#C1C4C2] bg-[#F8F9F8] px-2.5 py-1 text-xs font-medium text-[#0F1912] hover:border-[#009640] hover:bg-[#DCF7E0]">
+										{tFilters(labelKey)}
+										<X className="h-3 w-3 text-[#5A615D]" />
+										<span className="sr-only">{t("removeFilter")}</span>
+									</button>
+								);
+							})}
+							<button
+								type="button"
+								onClick={handleClearAllFilters}
+								className="ml-1 cursor-pointer text-sm font-medium text-[#005522] hover:underline">
+								{tFilters("clearAll")}
+							</button>
+						</div>
+					)}
 
 					{selectedCount > 0 && (
 						<div className="flex items-center justify-between gap-4 bg-[#DCF7E0] px-6 py-3">
