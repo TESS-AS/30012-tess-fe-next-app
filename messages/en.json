@@ -184,7 +184,7 @@
 		},
 		"sort": "Sorter",
 		"search": "Search",
-		"searchProducts": "Search products...",
+		"searchProducts": "Describe what you need ...",
 		"searchAttributes": "Search for attributes",
 		"showMore": "Show more",
 		"showLess": "Show less",
@@ -735,7 +735,9 @@
 		"pagination": {
 			"itemsPerPage": "items per page",
 			"perPageOption": "{size} per page"
-		}
+		},
+		"activeFilters": "Active filters",
+		"removeFilter": "Remove filter"
 	},
 	"HoseOverview": {
 		"title": "My Overview",
@@ -1048,10 +1050,11 @@
 		"andMore": "and {count} more"
 	},
 	"HoseColumnsDropdown": {
-		"addColumn": "Add column"
+		"addColumn": "Customize columns"
 	},
 	"HoseFiltersDropdown": {
 		"filter": "Filter",
+		"clearAll": "Clear all filters",
 		"inspection": "Inspection",
 		"rejectedInspections": "Rejected inspections",
 		"withRemarks": "With remarks",

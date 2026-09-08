@@ -14,11 +14,29 @@ import { ProfileUser } from "@/types/user.types";
 import { Funnel, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+export const HOSE_FILTER_LABEL_KEYS = {
+	rejected: "rejectedInspections",
+	approved: "withRemarks",
+	overdue: "overdue",
+	aktive_midlertidige: "activeTemporary",
+	replacementDue: "dueInSixMonths",
+} as const;
+
+export type HoseFilterKey = keyof typeof HOSE_FILTER_LABEL_KEYS;
+
+export const HOSE_AGE_LABEL_KEYS = {
+	"5-6": "age5to6",
+	"7-8": "age7to8",
+} as const;
+
+export type HoseAgeRangeKey = keyof typeof HOSE_AGE_LABEL_KEYS;
+
 export interface HoseFiltersDropdownProps {
 	selectedFilters: string[];
 	selectedAgeRanges: string[];
 	onToggleFilter: (value: string) => void;
 	onToggleAgeRange: (value: string) => Promise<void> | void;
+	onClearAll?: () => void;
 	profile: ProfileUser;
 }
 
@@ -27,6 +45,7 @@ export function HoseFiltersDropdown({
 	selectedAgeRanges,
 	onToggleFilter,
 	onToggleAgeRange,
+	onClearAll,
 	profile,
 }: HoseFiltersDropdownProps) {
 	const t = useTranslations("HoseFiltersDropdown");
@@ -81,6 +100,21 @@ export function HoseFiltersDropdown({
 
 					<DropdownMenuContent className="w-[300px] rounded-2xl bg-white p-4 shadow-lg">
 						<div className="space-y-5 text-sm">
+							{hasActiveFilters && onClearAll && (
+								<div className="flex items-center justify-end border-b border-[#E8EAE9] pb-3">
+									<button
+										type="button"
+										className="cursor-pointer text-sm font-medium text-[#005522] hover:underline"
+										onClick={(e) => {
+											e.preventDefault();
+											e.stopPropagation();
+											onClearAll();
+										}}>
+										{t("clearAll")}
+									</button>
+								</div>
+							)}
+
 							<div>
 								<div className="mb-2 flex items-center justify-between">
 									<h4 className="font-semibold text-[#0F1912]">
