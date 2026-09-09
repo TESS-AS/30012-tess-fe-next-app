@@ -271,17 +271,17 @@ export function ProductInfo({
 			setLoadingPrice(true);
 			const effectiveQuantity = selectedQuantity ?? quantity;
 			try {
-				const result = await calculateItemPrice(
-					[
-						{
-							itemNumber: selectedItemNumber,
-							quantity: effectiveQuantity,
-							warehouseNumber: activeWarehouseNumber,
-						},
-					],
-					profile.defaultCustomerNumber,
-					activeCompanyNumber,
-				);
+					const result = await calculateItemPrice(
+						[
+							{
+								itemNumber: selectedItemNumber,
+								quantity: effectiveQuantity,
+								warehouseNumber: profile.defaultWarehouseNumber,
+							},
+						],
+						profile.defaultCustomerNumber,
+						String(profile.defaultCompanyNumber ?? ""),
+					);
 
 				if (result?.[0]) {
 					const bestPrice = result[0].bestPrice || 0;
@@ -449,24 +449,21 @@ export function ProductInfo({
 												if (profile) {
 													setLoadingPrice(true);
 													try {
-														const nextOption = warehouseOptions.find(
-															(w) => w.warehouseNumber === value,
-														);
-														const nextCompanyNumber =
-															nextOption?.companyNumber != null
-																? String(nextOption.companyNumber)
-																: activeCompanyNumber;
-														const result = await calculateItemPrice(
-															[
-																{
-																	itemNumber: selectedItemNumber,
-																	quantity,
-																	warehouseNumber: value,
-																},
-															],
-															profile.defaultCustomerNumber,
-															nextCompanyNumber,
-														);
+																// Always price against the user's default warehouse/company.
+																// ERP redirects L01 (central) orders to the user's own warehouse
+																// via MDC, so the displayed price must reflect the default warehouse
+																// regardless of what the picker shows.
+																const result = await calculateItemPrice(
+																	[
+																		{
+																			itemNumber: selectedItemNumber,
+																			quantity,
+																			warehouseNumber: profile.defaultWarehouseNumber,
+																		},
+																	],
+																	profile.defaultCustomerNumber,
+																	String(profile.defaultCompanyNumber ?? ""),
+																);
 														if (result?.[0]) {
 															const bestPrice = result[0].bestPrice || 0;
 															setCalculatedPrice(bestPrice);
