@@ -246,12 +246,20 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			const companyNumber = profile?.defaultCompanyNumber;
 			if (!customerNumber || !companyNumber) return;
 
+			// Always price cart lines against the user's default warehouse/
+			// company. Cart lines carry the warehouseNumber the user selected
+			// in the product picker (may be L01), but ERP redirects L01 orders
+			// to the user's own warehouse via MDC — so displayed prices must
+			// match what they'll actually pay, not the central discount tier.
+			const defaultCompanyStr = String(companyNumber);
+			const defaultWarehouse = profile?.defaultWarehouseNumber || "";
+
 			for (const item of cart.cart) {
 				const priceData = await getProductPrice(
 					customerNumber,
-					String(item.companyNumber ?? companyNumber),
+					defaultCompanyStr,
 					item.productNumber,
-					item.warehouseNumber,
+					defaultWarehouse,
 				);
 				setPrices((prev) => ({
 					...prev,
@@ -266,9 +274,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				cart.cart?.map((item) => ({
 					itemNumber: item.itemNumber,
 					quantity: item.quantity,
-					warehouseNumber:
-						item.warehouseNumber || profile?.defaultWarehouseNumber || "",
-					companyNumber: String(item.companyNumber ?? companyNumber),
+					warehouseNumber: defaultWarehouse,
+					companyNumber: defaultCompanyStr,
 				})) ?? [];
 
 			const cartKitPriceRequests =
@@ -391,8 +398,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 					...(cart.cart ?? []).map((i) => ({
 						itemNumber: i.itemNumber,
 						quantity: i.quantity,
-						warehouseNumber:
-							i.warehouseNumber || profile?.defaultWarehouseNumber || "",
+						warehouseNumber: defaultWarehouse,
 					})),
 					...(cart.cartKit ?? []).flatMap((k) => [
 						{

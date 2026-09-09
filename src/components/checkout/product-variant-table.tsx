@@ -535,11 +535,10 @@ export default function ProductVariantTable({
 		try {
 			setLoading((prev) => ({ ...prev, [variant.itemNumber]: true }));
 
-			const { warehouseNumber, companyNumber } = pickActiveWarehouseForVariant(
-				variant.itemNumber,
-				warehouseOverride,
-			);
-
+			// Note: `warehouseOverride` (from the picker) is intentionally
+			// ignored for pricing — ERP redirects L01 (central) orders back to
+			// the user's own warehouse via MDC, so the displayed price must
+			// reflect the default warehouse regardless of the picker selection.
 			const effectiveQuantity =
 				quantityOverride ?? quantities[variant.itemNumber] ?? multiple;
 
@@ -548,11 +547,11 @@ export default function ProductVariantTable({
 					{
 						itemNumber: variant.itemNumber.toString(),
 						quantity: effectiveQuantity,
-						warehouseNumber,
+						warehouseNumber: profile.defaultWarehouseNumber,
 					},
 				],
 				profile.defaultCustomerNumber,
-				companyNumber,
+				String(profile.defaultCompanyNumber ?? ""),
 			);
 
 			if (priceResult) {
@@ -574,30 +573,29 @@ export default function ProductVariantTable({
 
 	useEffect(() => {
 		const loadPrices = async () => {
-			// Wait for columnAttributes — pickActiveWarehouseForVariant reads
-			// inventory from there to pick first-in-stock; without it we'd
-			// fall back to profile.defaultWarehouseNumber, which may not be
-			// what the Select ends up showing, and prices would mismatch
-			// ProductInfo.
+			// All variants are priced against the user's default warehouse/
+			// company — the picker's selection (which may be L01) is ignored
+			// because ERP redirects central orders back to the user's own
+			// warehouse via MDC. Users must see the price they will actually
+			// pay, not the central discount tier.
 			if (!variants?.length || !profile || !columnAttributes) return;
 
+			const defaultCompany = profile.defaultCompanyNumber
+				? String(profile.defaultCompanyNumber)
+				: "1";
+			const defaultWarehouse = profile.defaultWarehouseNumber;
+
 			try {
-				const requests = variants.map((variant) => {
-					const { warehouseNumber, companyNumber } =
-						pickActiveWarehouseForVariant(variant.itemNumber);
-					return {
-						itemNumber: variant.itemNumber.toString(),
-						quantity: 1,
-						warehouseNumber,
-						companyNumber,
-					};
-				});
+				const requests = variants.map((variant) => ({
+					itemNumber: variant.itemNumber.toString(),
+					quantity: 1,
+					warehouseNumber: defaultWarehouse,
+					companyNumber: defaultCompany,
+				}));
 				const priceResults = await priceItemsByCompany(
 					requests,
 					profile.defaultCustomerNumber,
-					profile.defaultCompanyNumber
-						? String(profile.defaultCompanyNumber)
-						: "1",
+					defaultCompany,
 				);
 
 				const priceMap = new Map<string, number>();
