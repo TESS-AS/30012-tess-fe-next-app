@@ -236,6 +236,9 @@ export async function getThmWorkOrderHoses({
 				customerNumber: "184200",
 				page,
 				pageSize,
+				// MSL list view — BE returns only the columns from the user's saved
+				// view when this flag is set (see Mathias's `view` param on getHose).
+				view: true,
 			},
 		},
 	);

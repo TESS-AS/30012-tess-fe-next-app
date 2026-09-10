@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
@@ -22,6 +22,7 @@ export function AvvikendeOrdre({
 	}) => void;
 }) {
 	const [searchQuery, setSearchQuery] = useState("");
+	const [debouncedSearch, setDebouncedSearch] = useState("");
 	const [selectedStatus, setSelectedStatus] = useState<string>("Alle");
 	const [currentPage, setCurrentPage] = useState(1);
 	const [sortColumn, setSortColumn] = useState<string | null>(null);
@@ -30,9 +31,23 @@ export function AvvikendeOrdre({
 	);
 	const ITEMS_PER_PAGE = 25;
 
+	// Debounce so we don't refetch on every keystroke while typing.
+	useEffect(() => {
+		const handle = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+		return () => clearTimeout(handle);
+	}, [searchQuery]);
+
+	// Reset to page 1 when the search term changes — new result set is
+	// paginated independently, so lingering on page 3 would show "no results".
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [debouncedSearch]);
+
 	const { data: orders, totalCount, isLoading } = useGetOpenConfirmations(
 		currentPage,
 		ITEMS_PER_PAGE,
+		true,
+		debouncedSearch,
 	);
 
 	const statuses = ["Alle", "Venter godkjenning", "Godkjent", "Avvist"];
@@ -78,16 +93,11 @@ export function AvvikendeOrdre({
 		setCurrentPage(1); // Reset to first page when sorting
 	};
 
-	// Filter orders based on search and status
-	const filteredOrders = (orders || []).filter((order: OpenOrderConfirmation) => {
-		const matchesSearch =
-			!searchQuery ||
-			order.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			order.supplier.toLowerCase().includes(searchQuery.toLowerCase());
-		const matchesStatus =
-			selectedStatus === "Alle" || order.status === selectedStatus;
-		return matchesSearch && matchesStatus;
-	});
+	// Search is handled server-side (BE `/edi/order/openOrders?search=`);
+	// only the status filter runs client-side against the current page.
+	const filteredOrders = (orders || []).filter((order: OpenOrderConfirmation) =>
+		selectedStatus === "Alle" || order.status === selectedStatus,
+	);
 
 	// Sort filtered orders
 	const sortedOrders = [...filteredOrders].sort((a, b) => {

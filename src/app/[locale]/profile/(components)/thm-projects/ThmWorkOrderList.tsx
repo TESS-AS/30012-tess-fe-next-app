@@ -81,6 +81,20 @@ const COLUMNS: ColumnDef<ColumnKey>[] = [
 
 const ALL_COLUMN_KEYS = COLUMNS.map((c) => c.key);
 
+/** FE ColumnKey → BE nested-path key (matches `getHose` response shape).
+ *  BE stores views keyed on these strings — must match exactly.
+ *  Confirm with Mathias if any of these don't align with `getHose` output. */
+const COLUMN_KEY_TO_BE: Record<ColumnKey, string> = {
+	posId: "hoseLine.hoseLineId",
+	s2: "hoseLine.s2",
+	status: "hoseData.registrationComment",
+	uploaded: "hoseData.uploadedAt",
+	synced: "hoseData.syncedAt",
+	bildestatus: "hoseHeader.mediaCount",
+	hoseStd: "hoseLine.hoseStandard",
+	hoseDim: "hoseData.hoseDimension",
+};
+
 const DEFAULT_PREFS: ColumnPreferences<ColumnKey> = {
 	order: ALL_COLUMN_KEYS,
 	visible: Object.fromEntries(ALL_COLUMN_KEYS.map((k) => [k, true])) as Record<
@@ -269,7 +283,11 @@ export function ThmWorkOrderList({
 	const prefs = useMemo<ColumnPreferences<ColumnKey>>(
 		() =>
 			activeView
-				? viewColumnsToPreferences(activeView.columns, ALL_COLUMN_KEYS)
+				? viewColumnsToPreferences(
+						activeView.columns,
+						ALL_COLUMN_KEYS,
+						COLUMN_KEY_TO_BE,
+					)
 				: DEFAULT_PREFS,
 		[activeView],
 	);
@@ -324,7 +342,7 @@ export function ThmWorkOrderList({
 			// Preserve the existing default flag when updating; the first view a
 			// user creates becomes the default automatically.
 			isDefault: activeView?.isDefault ?? views.length === 0,
-			columns: preferencesToViewColumns(next),
+			columns: preferencesToViewColumns(next, COLUMN_KEY_TO_BE),
 		};
 		try {
 			if (activeView) {
@@ -348,7 +366,7 @@ export function ThmWorkOrderList({
 		const payload = {
 			viewName: nextName,
 			isDefault: false,
-			columns: preferencesToViewColumns(prefs),
+			columns: preferencesToViewColumns(prefs, COLUMN_KEY_TO_BE),
 		};
 		try {
 			const created = await createView.mutateAsync(payload);

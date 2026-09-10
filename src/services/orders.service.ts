@@ -260,11 +260,20 @@ export async function getUserOrders(
 export async function getOpenConfirmations(
 	page: number = 1,
 	limit: number = 25,
+	search?: string,
 ): Promise<OpenConfirmationsResponse> {
 	try {
 		const response = await axiosInstance.get<OpenConfirmationsResponse>(
 			"/edi/order/openOrders",
-			{ params: { page, limit } },
+			{
+				params: {
+					page,
+					limit,
+					...(search && search.trim().length > 0
+						? { search: search.trim() }
+						: {}),
+				},
+			},
 		);
 		return response.data;
 	} catch (error) {

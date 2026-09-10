@@ -1,11 +1,15 @@
 /**
  * Column-view helpers for the THM work-order hose list.
  *
- * The BE stores views as a flat list of visible-only, ordered column keys.
+ * The BE stores views as a flat list of visible-only, ordered column keys
+ * that match the nested-object paths in the `getHose` response (e.g.
+ * `hoseLine.s2`, `hoseData.uploadedAt`, `hoseHeader.mediaCount`). The FE uses
+ * short internal `ColumnKey` values for rendering, so each caller supplies a
+ * `ColumnKeyMapping` translating between the two.
+ *
  * The FE uses `{ order, visible }` internally so the "Customize columns"
- * modal can show hidden columns separately. These helpers translate between
- * the two shapes and namespace FE keys with a `hoseList.` prefix so the
- * per-user view bag never collides with keys from other tables.
+ * modal can show hidden columns separately, while the BE stores only
+ * ordered-visible.
  */
 
 import type { ThmView } from "@/types/thm-projects.types";
@@ -20,14 +24,18 @@ export interface ColumnPreferences<K extends string> {
 	visible: Record<K, boolean>;
 }
 
-const THM_LIST_COLUMN_PREFIX = "hoseList.";
+/** FE ColumnKey → BE nested-path key (e.g. "s2" → "hoseLine.s2"). */
+export type ColumnKeyMapping<K extends string> = Record<K, string>;
 
-const toBeColumnKey = (key: string) => `${THM_LIST_COLUMN_PREFIX}${key}`;
-
-const fromBeColumnKey = (col: string) =>
-	col.startsWith(THM_LIST_COLUMN_PREFIX)
-		? col.slice(THM_LIST_COLUMN_PREFIX.length)
-		: col;
+const reverseMapping = <K extends string>(
+	mapping: ColumnKeyMapping<K>,
+): Record<string, K> => {
+	const out: Record<string, K> = {};
+	(Object.keys(mapping) as K[]).forEach((k) => {
+		out[mapping[k]] = k;
+	});
+	return out;
+};
 
 /** Hydrate FE preferences from a BE view. Unknown BE keys are dropped
  * (schema drift) and locally-known but missing keys are appended so newly
@@ -35,12 +43,14 @@ const fromBeColumnKey = (col: string) =>
 export function viewColumnsToPreferences<K extends string>(
 	beColumns: string[],
 	allKeys: readonly K[],
+	mapping: ColumnKeyMapping<K>,
 ): ColumnPreferences<K> {
+	const reverse = reverseMapping(mapping);
 	const known = new Set<string>(allKeys);
 	const orderedVisible: K[] = [];
 	for (const c of beColumns) {
-		const fe = fromBeColumnKey(c) as K;
-		if (known.has(fe) && !orderedVisible.includes(fe)) {
+		const fe = reverse[c];
+		if (fe && known.has(fe) && !orderedVisible.includes(fe)) {
 			orderedVisible.push(fe);
 		}
 	}
@@ -55,8 +65,11 @@ export function viewColumnsToPreferences<K extends string>(
 /** Serialise FE preferences into the BE-shape visible-only ordered array. */
 export function preferencesToViewColumns<K extends string>(
 	prefs: ColumnPreferences<K>,
+	mapping: ColumnKeyMapping<K>,
 ): string[] {
-	return prefs.order.filter((k) => prefs.visible[k]).map(toBeColumnKey);
+	return prefs.order
+		.filter((k) => prefs.visible[k])
+		.map((k) => mapping[k]);
 }
 
 /** Pick the view to activate on first load: default > first > none. */

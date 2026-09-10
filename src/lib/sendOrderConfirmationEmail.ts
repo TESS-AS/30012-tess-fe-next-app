@@ -1,5 +1,4 @@
 import {
-	ORDER_TSS_EMAIL_RECIPIENT,
 	buildOrderConfirmationEmailHtml,
 	buildOrderConfirmationEmailSubject,
 } from "@/lib/email-templates";
@@ -208,8 +207,7 @@ export async function sendOrderConfirmationEmail({
 		formData.append("toEmail", recipient);
 		formData.append("subject", buildOrderConfirmationEmailSubject(orderNumber));
 		formData.append("htmlBody", htmlBody);
-		formData.append("cc[]", ORDER_TSS_EMAIL_RECIPIENT);
-		if (warehouseEmail && warehouseEmail !== ORDER_TSS_EMAIL_RECIPIENT) {
+		if (warehouseEmail) {
 			formData.append("cc[]", warehouseEmail);
 		}
 		formData.append("category", "OrderConfirmation");

@@ -255,18 +255,22 @@ export default function ProfilePage() {
 
 		setActiveTab(tabParam);
 
-		// If navigating to tess-edi, switch to tess-edi mode (only for admins)
+		// If navigating to tess-edi, switch to tess-edi mode (admin + employee).
 		if (
 			tabParam === "tess-edi" &&
 			profile?.defaultCustomerNumber !==
 				SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER &&
-			profile?.role === "admin"
+			(profile?.role === "admin" || profile?.role === "employee")
 		) {
 			setActiveMode("tess-edi");
 			// Reset selected order when navigating to tess-edi tab
 			setSelectedAvvikendeOrdre(null);
-		} else if (tabParam === "tess-edi" && profile?.role !== "admin") {
-			// Redirect non-admins away from tess-edi
+		} else if (
+			tabParam === "tess-edi" &&
+			profile?.role !== "admin" &&
+			profile?.role !== "employee"
+		) {
+			// Redirect non-admin/non-employee users away from tess-edi
 			setActiveTab("rekvisisjoner");
 		}
 	}, [searchParams, profile, hasUnsavedSettingsChanges, router]);
@@ -291,8 +295,12 @@ export default function ProfilePage() {
 	};
 
 	const handleModeChange = (mode: "hose" | "ehandel" | "tess-edi" | "thm") => {
-		// Only allow tess-edi mode for admins
-		if (mode === "tess-edi" && profile?.role !== "admin") {
+		// Only allow tess-edi mode for admins and employees.
+		if (
+			mode === "tess-edi" &&
+			profile?.role !== "admin" &&
+			profile?.role !== "employee"
+		) {
 			return;
 		}
 		// Only allow thm mode for admin / thmAdmin
@@ -338,7 +346,11 @@ export default function ProfilePage() {
 			return;
 		}
 
-		if (tab === "tess-edi" && profile?.role !== "admin") {
+		if (
+			tab === "tess-edi" &&
+			profile?.role !== "admin" &&
+			profile?.role !== "employee"
+		) {
 			return;
 		}
 
@@ -529,8 +541,12 @@ export default function ProfilePage() {
 									handleLogout();
 									return;
 								}
-								// Only allow tess-edi tab for admins
-								if (tab === "tess-edi" && profile?.role !== "admin") {
+								// Only allow tess-edi tab for admins and employees.
+								if (
+									tab === "tess-edi" &&
+									profile?.role !== "admin" &&
+									profile?.role !== "employee"
+								) {
 									return;
 								}
 								setActiveTab(tab);
@@ -708,7 +724,8 @@ export default function ProfilePage() {
 							<UsersBrukere />
 						</TabsContent>
 
-						{profile.role === "admin" && (
+						{(profile.role === "admin" ||
+							profile.role === "employee") && (
 							<TabsContent
 								value="tess-edi"
 								className="mt-0">
