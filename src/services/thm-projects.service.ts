@@ -255,15 +255,18 @@ export async function getThmWorkOrderHoses({
 				: rawMediaCount != null
 					? Number(rawMediaCount)
 					: null;
+		const rawUploadedAt = (
+			hose.hoseData as { uploadedAt?: unknown } | undefined
+		)?.uploadedAt;
+		const uploadedAt =
+			typeof rawUploadedAt === "string" ? rawUploadedAt : undefined;
 		return {
 			hexagonId: String(hose.hoseLine?.hexagonId ?? ""),
 			posId: String(hose.hoseLine?.hexagonId ?? ""),
 			s2: hose.hoseLine?.s2?.s2Name ?? "",
 			// BE gap: no mobile-sync status field yet. Placeholder until BE ships it.
 			status: "NotTouched",
-			// BE gap: no true "uploaded-from-mobile" timestamp. Using registration
-			// date as the closest proxy so the column isn't blank.
-			uploaded: formatDdMmmYyyy(hose.hoseHeader?.requestDate),
+			uploaded: formatDdMmmYyyy(uploadedAt),
 			// BE gap: no sync timestamp at all.
 			synced: "",
 			imageCount: mediaCount !== null && Number.isFinite(mediaCount)
