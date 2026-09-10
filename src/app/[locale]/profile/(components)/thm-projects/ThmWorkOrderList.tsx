@@ -85,7 +85,7 @@ const ALL_COLUMN_KEYS = COLUMNS.map((c) => c.key);
  *  BE stores views keyed on these strings — must match exactly.
  *  Confirm with Mathias if any of these don't align with `getHose` output. */
 const COLUMN_KEY_TO_BE: Record<ColumnKey, string> = {
-	posId: "hoseLine.hoseLineId",
+	posId: "hoseLine.hexagonId",
 	s2: "hoseLine.s2",
 	status: "hoseData.registrationComment",
 	uploaded: "hoseData.uploadedAt",

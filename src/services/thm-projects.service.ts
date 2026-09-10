@@ -247,6 +247,14 @@ export async function getThmWorkOrderHoses({
 		const hoseFitting1 = hose.hoseFitting1 as
 			| { genericDimensionEnd?: { genericDimensionName?: string } }
 			| undefined;
+		const rawMediaCount = (hose.hoseHeader as { mediaCount?: unknown } | undefined)
+			?.mediaCount;
+		const mediaCount =
+			typeof rawMediaCount === "number"
+				? rawMediaCount
+				: rawMediaCount != null
+					? Number(rawMediaCount)
+					: null;
 		return {
 			hexagonId: String(hose.hoseLine?.hexagonId ?? ""),
 			posId: String(hose.hoseLine?.hexagonId ?? ""),
@@ -258,10 +266,12 @@ export async function getThmWorkOrderHoses({
 			uploaded: formatDdMmmYyyy(hose.hoseHeader?.requestDate),
 			// BE gap: no sync timestamp at all.
 			synced: "",
-			// BE gap: no media count on this endpoint — fanning out per row would
-			// be N extra calls. Waiting on inline `mediaCount` from BE.
-			imageCount: null,
-			hasImages: false,
+			imageCount: mediaCount !== null && Number.isFinite(mediaCount)
+				? mediaCount
+				: null,
+			hasImages: mediaCount !== null && Number.isFinite(mediaCount)
+				? mediaCount > 0
+				: false,
 			hoseStd: hose.hoseData?.hoseType?.hoseTypeName ?? "",
 			hoseDim:
 				hoseFitting1?.genericDimensionEnd?.genericDimensionName ?? "",
