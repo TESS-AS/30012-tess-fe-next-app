@@ -28,15 +28,16 @@ export const mapLineStatusToOrderStatus = (status: number): OrderStatus => {
 
 export const deriveOrderStatusFromOrderLines = (
 	orderLines: Pick<OrderLine, "lineStatus">[],
-): OrderStatus => {
-	if (orderLines.length === 0) {
-		return "Kansellert";
+): OrderStatus | null => {
+	const visibleLineStatuses = orderLines
+		.map((line) => line.lineStatus)
+		.filter((status) => status !== 0);
+
+	if (visibleLineStatuses.length === 0) {
+		return null;
 	}
 
-	const minLineStatus = Math.min(
-		...orderLines.map((line) => line.lineStatus),
-	);
-
+	const minLineStatus = Math.min(...visibleLineStatuses);
 	return mapLineStatusToOrderStatus(minLineStatus);
 };
 
@@ -90,7 +91,7 @@ export interface OrderItems {
 	orderNumber: string;
 	customerOrderRef: string;
 	date: string;
-	status: OrderStatus;
+	status: OrderStatus | null;
 	total: number;
 	items: OrderLine[];
 }

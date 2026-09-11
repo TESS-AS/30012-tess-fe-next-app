@@ -7,25 +7,29 @@ import { DataTable } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useUserOrders } from "@/hooks/useUserOrders";
+import { useOrderHistory } from "@/hooks/useOrderHistory";
 import { cn, formatDate } from "@/lib/utils";
-import { UserOrderResponse } from "@/types/orders.types";
+import {
+	deriveOrderStatusFromOrderLines,
+	OrderItems,
+} from "@/types/orderHistory.types";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import { Search } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
-type Order = UserOrderResponse & {
-	orderId: string;
-};
+import { OrderExpandedRow } from "./order-expanded-row";
+
+type Order = OrderItems & { orderId: string };
 
 interface MineBestillingerProps {
+	customerNumber: string;
 	onOrderClick: (orderId: string) => void;
 }
 
 export const getStatusIcons = (status: string) => {
 	switch (status) {
-		case "Mottatt": // Written
+		case "Mottatt":
 			return (
 				<Image
 					src="/icons/profile/table/like.svg"
@@ -35,7 +39,8 @@ export const getStatusIcons = (status: string) => {
 					loading="eager"
 				/>
 			);
-		case "Bekreftet": // Confirmed
+		case "Bekreftet":
+		case "Plukket":
 			return (
 				<Image
 					src="/icons/profile/table/tick.svg"
@@ -45,17 +50,7 @@ export const getStatusIcons = (status: string) => {
 					loading="eager"
 				/>
 			);
-		case "Plukket": // Picked
-			return (
-				<Image
-					src="/icons/profile/table/tick.svg"
-					alt="Tick"
-					width={12}
-					height={12}
-					loading="eager"
-				/>
-			);
-		case "Under transport": // Shipped
+		case "Under transport":
 			return (
 				<Image
 					src="/icons/profile/table/truck.svg"
@@ -65,7 +60,7 @@ export const getStatusIcons = (status: string) => {
 					loading="eager"
 				/>
 			);
-		case "Levert": // Invoiced
+		case "Levert":
 			return (
 				<Image
 					src="/icons/profile/table/tick.svg"
@@ -76,7 +71,7 @@ export const getStatusIcons = (status: string) => {
 					loading="eager"
 				/>
 			);
-		case "Kansellert": // Something Wrong
+		case "Kansellert":
 			return (
 				<Image
 					src="/icons/profile/table/x.svg"
@@ -90,78 +85,86 @@ export const getStatusIcons = (status: string) => {
 			return null;
 	}
 };
-export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
+
+type StatusFilterKey = "all" | "received" | "confirmed" | "picked" | "delivered";
+
+const getStatusParam = (
+	key: StatusFilterKey,
+): number | number[] | undefined => {
+	switch (key) {
+		case "all":
+			return undefined;
+		case "received":
+			return 10;
+		case "confirmed":
+			return 20;
+		case "picked":
+			return 30;
+		case "delivered":
+			return 60;
+		default:
+			return undefined;
+	}
+};
+
+export function MineBestillinger({
+	customerNumber,
+	onOrderClick,
+}: MineBestillingerProps) {
 	const t = useTranslations("MineBestillinger");
 	const [searchQuery, setSearchQuery] = useState("");
-	const [selectedStatus, setSelectedStatus] = useState<string>(t("all"));
+	const [selectedStatusKey, setSelectedStatusKey] =
+		useState<StatusFilterKey>("all");
 	const [currentPage, setCurrentPage] = useState(1);
-
 	const ITEMS_PER_PAGE = 10;
 
-	const { orders, isLoading } = useUserOrders(currentPage, ITEMS_PER_PAGE);
-
-	// Client-side filtering and mapping
-	const filteredOrders = orders
-		.filter((order) => {
-			const matchesSearch = searchQuery
-				? order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase())
-				: true;
-			const matchesStatus =
-				selectedStatus === t("all") || order.status === selectedStatus;
-			return matchesSearch && matchesStatus;
-		})
-		.map((order) => ({
-			...order,
-			orderId: order.order_id.toString(),
-		}));
-
-	const statuses = [
-		t("all"),
-		t("received"),
-		t("confirmed"),
-		t("picked"),
-		t("inTransit"),
-		t("delivered"),
-		t("cancelled"),
+	const statusOptions: { key: StatusFilterKey; label: string }[] = [
+		{ key: "all", label: t("all") },
+		{ key: "received", label: t("received") },
+		{ key: "confirmed", label: t("confirmed") },
+		{ key: "picked", label: t("picked") },
+		{ key: "delivered", label: t("delivered") },
 	];
 
-	const getStatusNumber = (status: string): number | undefined => {
-		switch (status) {
-			case "Mottatt":
-				return 10; // Written
-			case "Bekreftet":
-				return 20; // Confirmed
-			case "Plukket":
-				return 30; // Picked
-			case "Under transport":
-				return 45; // Shipped
-			case "Levert":
-				return 60; // Invoiced
-			case "Kansellert":
-				return 0; // Something Wrong
-			default:
-				return undefined;
-		}
-	};
+	const statusFilter = getStatusParam(selectedStatusKey);
+
+	const { orders, isLoading, totalPages, totalItems } = useOrderHistory(
+		customerNumber,
+		searchQuery,
+		currentPage,
+		ITEMS_PER_PAGE,
+		statusFilter,
+		!!customerNumber,
+		true, // myOrders=true → Mine Bestillinger
+	);
+
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [searchQuery]);
 
 	const getStatusColor = (status: string) => {
 		switch (status) {
-			case "Mottatt": // Written
+			case "Mottatt":
+			case "Bekreftet":
 				return "bg-[#DCF7E0] text-[#005522]";
-			case "Bekreftet": // Confirmed
-				return "bg-[#DCF7E0] text-[#005522]";
-			case "Plukket": // Picked
+			case "Plukket":
 				return "bg-[#E5EDFF] text-[#42389D]";
-			case "Under transport": // Shipped
+			case "Under transport":
 				return "bg-[#FDF6B2] text-[#723B13]";
-			case "Levert": // Invoiced
+			case "Levert":
 				return "bg-[#009640] text-white";
-			case "Kansellert": // Something Wrong
+			case "Kansellert":
 				return "bg-[#FDE8E8] text-[#9B1C1C]";
 			default:
 				return "bg-gray-100 text-gray-600";
 		}
 	};
+
+	const tableData = (orders || []).map((order) => ({
+		...order,
+		orderId: String(order.order_id),
+		status: deriveOrderStatusFromOrderLines(order.items),
+	}));
 
 	const columns = [
 		{
@@ -171,48 +174,41 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
 			sortable: true,
 		},
 		{
+			key: "orderRef",
+			header: t("orderRef").toUpperCase(),
+			cell: (order: Order) => (
+				<span>
+					{order.customerOrderRef?.trim() ? order.customerOrderRef : "—"}
+				</span>
+			),
+			sortable: true,
+		},
+		{
 			key: "date",
 			header: t("orderDate").toUpperCase(),
-			cell: (order: Order) => {
-				const dateTime = `${order.requestDate}T${order.requestTime}`;
-				const date = new Date(dateTime);
-				const formattedDate = date.toLocaleDateString("no-NO", {
-					day: "2-digit",
-					month: "2-digit",
-					year: "numeric",
-				});
-				const formattedTime = date.toLocaleTimeString("no-NO", {
-					hour: "2-digit",
-					minute: "2-digit",
-				});
-				return (
-					<span>
-						{formattedDate} {formattedTime}
-					</span>
-				);
-			},
+			cell: (order: Order) => <span>{formatDate(order.date)}</span>,
 			sortable: true,
 		},
 		{
 			key: "total",
 			header: t("price").toUpperCase(),
-			cell: (order: Order) =>
-				formatNorwegianCurrency(order.totalOrderPrice ?? 0),
+			cell: (order: Order) => formatNorwegianCurrency(order.total ?? 0),
 			sortable: true,
 		},
 		{
 			key: "status",
 			header: t("status").toUpperCase(),
-			cell: (order: Order) => (
-				<span
-					className={cn(
-						"inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs",
-						getStatusColor(order.status),
-					)}>
-					{getStatusIcons(order.status)}
-					{order.status}
-				</span>
-			),
+			cell: (order: Order) =>
+				order.status && order.status !== "Kansellert" ? (
+					<span
+						className={cn(
+							"inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs",
+							getStatusColor(order.status),
+						)}>
+						{getStatusIcons(order.status)}
+						{order.status}
+					</span>
+				) : null,
 			sortable: true,
 		},
 	];
@@ -237,35 +233,39 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
 							className="font-sm h-10 flex-1 rounded-md border border-[#8A8F8C] bg-[#F8F9F8] pr-24 pl-12 text-base text-[#5A615D]"
 						/>
 						<Button
-							type="submit"
+							type="button"
 							className="absolute top-1/2 right-0 h-10 -translate-y-1/2 rounded-none rounded-r-md border-1 border-l-2 border-[#8A8F8C] bg-white px-4 font-medium text-[#0F1912] hover:bg-white">
 							{t("search")}
 						</Button>
 					</div>
+
 					<div className="flex items-center gap-3 border-t border-[#C1C4C2] pt-6">
 						<p className="text-sm font-bold text-[#0F1912]">{t("status")}:</p>
 						<RadioGroup
-							value={selectedStatus}
-							onValueChange={setSelectedStatus}
+							value={selectedStatusKey}
+							onValueChange={(value) => {
+								setSelectedStatusKey(value as StatusFilterKey);
+								setCurrentPage(1);
+							}}
 							className="flex flex-wrap gap-3">
-							{statuses.map((status) => (
+							{statusOptions.map(({ key, label }) => (
 								<div
-									key={status}
+									key={key}
 									className="flex items-center space-x-2">
 									<RadioGroupItem
-										value={status}
-										id={status}
+										value={key}
+										id={`mine-${key}`}
 										className={cn(
 											"h-5 w-5",
-											selectedStatus === status
+											selectedStatusKey === key
 												? "border-[#1C6D2C] text-[#1C6D2C]"
 												: "border-[#C1C4C2]",
 										)}
 									/>
 									<Label
-										htmlFor={status}
-										className={cn("text-sm font-medium text-[#0F1912]")}>
-										{status}
+										htmlFor={`mine-${key}`}
+										className="text-sm font-medium text-[#0F1912]">
+										{label}
 									</Label>
 								</div>
 							))}
@@ -273,23 +273,34 @@ export function MineBestillinger({ onOrderClick }: MineBestillingerProps) {
 					</div>
 				</div>
 
-				<div className="">
-					<DataTable
-						data={filteredOrders}
-						columns={columns}
-						currentPage={currentPage}
-						totalPages={Math.ceil(filteredOrders.length / ITEMS_PER_PAGE)}
-						totalItems={filteredOrders.length}
-						itemsPerPage={ITEMS_PER_PAGE}
-						onPageChange={(page) => {
-							setCurrentPage(page);
-							window.scrollTo({ top: 0, behavior: "smooth" });
-						}}
-						isLoading={isLoading}
-						isDropdownColumn
-						onOrderClick={onOrderClick}
-					/>
-				</div>
+				<DataTable
+					key={`${selectedStatusKey}-${currentPage}-${searchQuery}`}
+					data={tableData}
+					columns={columns}
+					currentPage={currentPage}
+					totalPages={totalPages}
+					totalItems={totalItems}
+					itemsPerPage={ITEMS_PER_PAGE}
+					onPageChange={(page) => {
+						setCurrentPage(page);
+						window.scrollTo({ top: 0, behavior: "smooth" });
+					}}
+					isLoading={isLoading}
+					isExpandable
+					expandableContent={(order) => (
+						<OrderExpandedRow
+							order={order}
+							labels={{
+								units: t("units").toUpperCase(),
+								quantity: t("quantity").toUpperCase(),
+								price: t("price").toUpperCase(),
+								status: t("status").toUpperCase(),
+							}}
+						/>
+					)}
+					isDropdownColumn
+					onOrderClick={onOrderClick}
+				/>
 			</div>
 		</div>
 	);

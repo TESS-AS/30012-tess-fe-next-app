@@ -183,9 +183,10 @@ export async function getOrderHistory(
 	page: number,
 	pageSize: number,
 	status?: number | number[],
+	myOrders: boolean = false,
 ): Promise<OrderHistoryResponse> {
 	try {
-		const params: Record<string, string | number | number[]> = {
+		const params: Record<string, string | number | number[] | boolean> = {
 			page,
 			pageSize,
 		};
@@ -197,6 +198,9 @@ export async function getOrderHistory(
 			(!Array.isArray(status) || status.length > 0);
 		if (hasStatus) {
 			params.status = status;
+		}
+		if (myOrders) {
+			params.myOrders = true;
 		}
 
 		const response = await axiosInstance.get<SearchOrderHistoryApiResponse>(
