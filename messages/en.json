@@ -978,8 +978,11 @@
 		"delivered": "Delivered",
 		"cancelled": "Cancelled",
 		"orderNumber": "Order Number",
+		"orderRef": "Order Reference",
 		"orderDate": "Order Date",
-		"price": "Price"
+		"price": "Price",
+		"units": "Items",
+		"quantity": "Quantity"
 	},
 	"AddUserModal": {
 		"title": "Add New User",
@@ -1179,7 +1182,9 @@
 		"orderNumber": "Order Number",
 		"orderRef": "Order Reference",
 		"orderDate": "Order Date",
-		"price": "Price"
+		"price": "Price",
+		"units": "Items",
+		"quantity": "Quantity"
 	},
 	"ProductDetailsModal": {
 		"title": "Product Details",

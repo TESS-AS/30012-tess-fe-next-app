@@ -238,6 +238,14 @@ export function DataTable<
 													<tr
 														onClick={() => {
 															if (disabled) return;
+															if (isExpandable) {
+																setExpandedRows((prev) =>
+																	prev.includes(index)
+																		? prev.filter((i) => i !== index)
+																		: [...prev, index],
+																);
+																return;
+															}
 															if (onHoseClick && item.hexagonId) {
 																onHoseClick(item.hexagonId);
 															} else if (onRowClick) {
@@ -254,7 +262,10 @@ export function DataTable<
 																	? selectedRowBgClass
 																	: "hover:bg-[#F0FCF2]",
 															!disabled &&
-																(onHoseClick || onOrderClick || onRowClick) &&
+																(isExpandable ||
+																	onHoseClick ||
+																	onOrderClick ||
+																	onRowClick) &&
 																"cursor-pointer",
 															disabled && "cursor-not-allowed",
 														)}>
@@ -264,7 +275,8 @@ export function DataTable<
 																	variant="ghost"
 																	size="sm"
 																	className="h-6 w-6 p-0 transition-all duration-200"
-																	onClick={() => {
+																	onClick={(e) => {
+																		e.stopPropagation();
 																		setExpandedRows((prev) =>
 																			prev.includes(index)
 																				? prev.filter((i) => i !== index)
@@ -297,7 +309,9 @@ export function DataTable<
 														))}
 
 														{isDropdownColumn && (
-															<td className="sticky right-0 bg-white px-4 py-4 text-right group-hover:bg-[#F8F9F8]">
+															<td
+																className="sticky right-0 bg-white px-4 py-4 text-right group-hover:bg-[#F8F9F8]"
+																onClick={(e) => e.stopPropagation()}>
 																<DropdownMenu>
 																	<DropdownMenuTrigger asChild>
 																		<Button
@@ -342,7 +356,7 @@ export function DataTable<
 														expandableContent && (
 															<tr className="animate-in fade-in-0 zoom-in-95 border-b-2 border-[#C1C4C2] duration-200">
 																<td
-																	colSpan={safeColumns.length + 2}
+																	colSpan={emptyColSpan}
 																	className="border-t border-[#E5E7E6] py-6 pl-20">
 																	{expandableContent(item)}
 																</td>

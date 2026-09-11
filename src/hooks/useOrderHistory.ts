@@ -19,6 +19,7 @@ export const orderHistoryKeys = {
 		page: number,
 		pageSize: number,
 		status?: number | number[],
+		myOrders?: boolean,
 	) =>
 		[
 			...orderHistoryKeys.lists(),
@@ -27,6 +28,7 @@ export const orderHistoryKeys = {
 			page,
 			pageSize,
 			getStatusQueryKey(status),
+			myOrders ? "myOrders" : "allOrders",
 		] as const,
 };
 
@@ -37,6 +39,7 @@ export const useOrderHistory = (
 	pageSize: number = 10,
 	status?: number | number[],
 	enabled: boolean = true,
+	myOrders: boolean = false,
 ) => {
 	const [debouncedSearch, setDebouncedSearch] = useState(search);
 
@@ -55,6 +58,7 @@ export const useOrderHistory = (
 			page,
 			pageSize,
 			status,
+			myOrders,
 		),
 		queryFn: async () => {
 			const response = await getOrderHistory(
@@ -63,6 +67,7 @@ export const useOrderHistory = (
 				page,
 				pageSize,
 				status,
+				myOrders,
 			);
 			return response;
 		},
