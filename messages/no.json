@@ -980,8 +980,11 @@
 		"delivered": "Levert",
 		"cancelled": "Kansellert",
 		"orderNumber": "Ordrenummer",
+		"orderRef": "Ordrereferanse",
 		"orderDate": "Bestillingsdato",
-		"price": "Pris"
+		"price": "Pris",
+		"units": "Enheter",
+		"quantity": "Antall"
 	},
 	"AddUserModal": {
 		"title": "Legg til ny bruker",
@@ -1181,7 +1184,9 @@
 		"orderNumber": "Ordrenummer",
 		"orderRef": "Ordrereferanse",
 		"orderDate": "Bestillingsdato",
-		"price": "Pris"
+		"price": "Pris",
+		"units": "Enheter",
+		"quantity": "Antall"
 	},
 	"ProductDetailsModal": {
 		"title": "Produktdetaljer",

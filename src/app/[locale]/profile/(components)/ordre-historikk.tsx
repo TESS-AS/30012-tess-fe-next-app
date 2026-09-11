@@ -15,6 +15,8 @@ import { Search } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
+import { OrderExpandedRow } from "./order-expanded-row";
+
 type Order = OrderItems & { orderId: string };
 
 export const getStatusIcons = (status: string) => {
@@ -66,13 +68,7 @@ export const getStatusIcons = (status: string) => {
 	}
 };
 
-type StatusFilterKey =
-	| "all"
-	| "received"
-	| "confirmed"
-	| "picked"
-	| "delivered"
-	| "cancelled";
+type StatusFilterKey = "all" | "received" | "confirmed" | "picked" | "delivered";
 
 const getStatusParam = (
 	key: StatusFilterKey,
@@ -88,8 +84,6 @@ const getStatusParam = (
 			return 30;
 		case "delivered":
 			return 60;
-		case "cancelled":
-			return 0;
 		default:
 			return undefined;
 	}
@@ -109,7 +103,6 @@ export function OrdreHistorikk({ customerNumber }: { customerNumber: string }) {
 		{ key: "confirmed", label: t("confirmed") },
 		{ key: "picked", label: t("picked") },
 		{ key: "delivered", label: t("delivered") },
-		{ key: "cancelled", label: t("cancelled") },
 	];
 
 	const statusFilter = getStatusParam(selectedStatusKey);
@@ -179,16 +172,17 @@ export function OrdreHistorikk({ customerNumber }: { customerNumber: string }) {
 		{
 			key: "status",
 			header: t("status").toUpperCase(),
-			cell: (order: Order) => (
-				<span
-					className={cn(
-						"inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs",
-						getStatusColor(order.status),
-					)}>
-					{getStatusIcons(order.status)}
-					{order.status}
-				</span>
-			),
+			cell: (order: Order) =>
+				order.status && order.status !== "Kansellert" ? (
+					<span
+						className={cn(
+							"inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs",
+							getStatusColor(order.status),
+						)}>
+						{getStatusIcons(order.status)}
+						{order.status}
+					</span>
+				) : null,
 			sortable: true,
 		},
 	];
@@ -265,7 +259,18 @@ export function OrdreHistorikk({ customerNumber }: { customerNumber: string }) {
 						window.scrollTo({ top: 0, behavior: "smooth" });
 					}}
 					isLoading={isLoading}
-					// isDropdownColumn
+					isExpandable
+					expandableContent={(order) => (
+						<OrderExpandedRow
+							order={order}
+							labels={{
+								units: t("units").toUpperCase(),
+								quantity: t("quantity").toUpperCase(),
+								price: t("price").toUpperCase(),
+								status: t("status").toUpperCase(),
+							}}
+						/>
+					)}
 				/>
 			</div>
 		</div>

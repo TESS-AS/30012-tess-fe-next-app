@@ -570,10 +570,10 @@ export default function ProfilePage() {
 															label: t("ProfilePage.sidebar.orders"),
 															icon: ShoppingCart,
 															subitems: [
-																// {
-																// 	href: "mine-bestillinger",
-																// 	label: t("ProfilePage.sidebar.myOrders"),
-																// },
+																{
+																	href: "mine-bestillinger",
+																	label: t("ProfilePage.sidebar.myOrders"),
+																},
 																{
 																	href: "rekvisisjoner",
 																	label: t("ProfilePage.sidebar.requisitions"),
@@ -706,7 +706,9 @@ export default function ProfilePage() {
 									onBack={() => setSelectedOrderId(null)}
 								/>
 							) : (
-								<MineBestillinger onOrderClick={setSelectedOrderId} />
+								<MineBestillinger
+									customerNumber={profile.defaultCustomerNumber}
+								/>
 							)}
 						</TabsContent>
 						<TabsContent
