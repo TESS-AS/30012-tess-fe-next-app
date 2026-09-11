@@ -24,7 +24,6 @@ type Order = OrderItems & { orderId: string };
 
 interface MineBestillingerProps {
 	customerNumber: string;
-	onOrderClick: (orderId: string) => void;
 }
 
 export const getStatusIcons = (status: string) => {
@@ -109,7 +108,6 @@ const getStatusParam = (
 
 export function MineBestillinger({
 	customerNumber,
-	onOrderClick,
 }: MineBestillingerProps) {
 	const t = useTranslations("MineBestillinger");
 	const [searchQuery, setSearchQuery] = useState("");
@@ -298,8 +296,6 @@ export function MineBestillinger({
 							}}
 						/>
 					)}
-					isDropdownColumn
-					onOrderClick={onOrderClick}
 				/>
 			</div>
 		</div>

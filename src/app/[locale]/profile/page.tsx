@@ -707,7 +707,6 @@ export default function ProfilePage() {
 							) : (
 								<MineBestillinger
 									customerNumber={profile.defaultCustomerNumber}
-									onOrderClick={setSelectedOrderId}
 								/>
 							)}
 						</TabsContent>
