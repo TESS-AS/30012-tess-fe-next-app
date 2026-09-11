@@ -102,7 +102,8 @@ export function SidebarNav({
 								</div>
 								<span>{t("eCommerce")}</span>
 							</button>
-							{profile?.role === USER_ROLES.ADMIN && (
+							{(profile?.role === USER_ROLES.ADMIN ||
+								profile?.role === USER_ROLES.EMPLOYEE) && (
 								<button
 									onClick={() => onModeChange("tess-edi")}
 									className={cn(
