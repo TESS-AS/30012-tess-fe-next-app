@@ -81,9 +81,11 @@ export default function OrdersTab() {
 						</div>
 						<div className="flex items-center justify-between">
 							<Button variant="outline">View Details →</Button>
-							<Badge {...getStatusBadgeProps(order.status)}>
-								{order.status}
-							</Badge>
+							{order.status ? (
+								<Badge {...getStatusBadgeProps(order.status)}>
+									{order.status}
+								</Badge>
+							) : null}
 						</div>
 					</Card>
 				))
