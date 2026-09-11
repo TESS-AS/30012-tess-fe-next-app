@@ -18,6 +18,7 @@ import {
 	HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { Input } from "@/components/ui/input";
+import { USER_ROLES } from "@/constants/userRoles";
 import { useActiveBudgetsByUser } from "@/hooks/useBudget";
 import {
 	useGetEditableUsers,
@@ -178,7 +179,7 @@ const UsersBrukere = () => {
 	};
 
 	const canSetBudget =
-		profile?.role === "superuser" || profile?.role === "admin";
+		profile?.role === USER_ROLES.SUPERUSER || profile?.role === USER_ROLES.ADMIN;
 
 	const handleEditClick = (user: User) => {};
 
@@ -339,9 +340,9 @@ const UsersBrukere = () => {
 				cell: (row) => (
 					<span
 						className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium ${getRoleBadgeClass(row.user.role)}`}>
-						{row.user.role === "admin" && <LockKeyhole size={12} />}
-						{row.user.role === "superuser" && <UserPen size={12} />}
-						{row.user.role === "user" && <Eye size={12} />}
+						{row.user.role === USER_ROLES.ADMIN && <LockKeyhole size={12} />}
+						{row.user.role === USER_ROLES.SUPERUSER && <UserPen size={12} />}
+						{row.user.role === USER_ROLES.USER && <Eye size={12} />}
 						{row.user.role}
 					</span>
 				),

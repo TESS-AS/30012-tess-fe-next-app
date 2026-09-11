@@ -13,6 +13,7 @@ import { SupportDialog } from "@/components/ui/dialogs/support-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
+import { USER_ROLES } from "@/constants/userRoles";
 import { useGetHoseSystems } from "@/hooks/useGetHoseSystems";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { profileKeys } from "@/hooks/useGetProfileData";
@@ -160,7 +161,7 @@ export default function ProfilePage() {
 		"hose" | "ehandel" | "tess-edi" | "thm"
 	>("ehandel");
 	const [activeTab, setActiveTab] = useState(
-		profile?.role === "admin" || profile?.role === "superuser"
+		profile?.role === USER_ROLES.ADMIN || profile?.role === USER_ROLES.SUPERUSER
 			? "rekvisisjoner"
 			: "settings",
 	);
@@ -206,7 +207,7 @@ export default function ProfilePage() {
 		} else {
 			setActiveMode("ehandel");
 			setActiveTab(
-				profile?.role === "admin" || profile?.role === "superuser"
+				profile?.role === USER_ROLES.ADMIN || profile?.role === USER_ROLES.SUPERUSER
 					? "rekvisisjoner"
 					: "settings",
 			);
@@ -245,7 +246,7 @@ export default function ProfilePage() {
 			setActiveMode("ehandel");
 		}
 		if (tabParam?.startsWith("thm-")) {
-			if (profile?.role === "admin" || profile?.role === "thmAdmin") {
+			if (profile?.role === USER_ROLES.ADMIN || profile?.role === USER_ROLES.THM_ADMIN) {
 				setActiveMode("thm");
 			} else {
 				setActiveTab("rekvisisjoner");
@@ -260,15 +261,15 @@ export default function ProfilePage() {
 			tabParam === "tess-edi" &&
 			profile?.defaultCustomerNumber !==
 				SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER &&
-			(profile?.role === "admin" || profile?.role === "employee")
+			(profile?.role === USER_ROLES.ADMIN || profile?.role === USER_ROLES.EMPLOYEE)
 		) {
 			setActiveMode("tess-edi");
 			// Reset selected order when navigating to tess-edi tab
 			setSelectedAvvikendeOrdre(null);
 		} else if (
 			tabParam === "tess-edi" &&
-			profile?.role !== "admin" &&
-			profile?.role !== "employee"
+			profile?.role !== USER_ROLES.ADMIN &&
+			profile?.role !== USER_ROLES.EMPLOYEE
 		) {
 			// Redirect non-admin/non-employee users away from tess-edi
 			setActiveTab("rekvisisjoner");
@@ -298,16 +299,16 @@ export default function ProfilePage() {
 		// Only allow tess-edi mode for admins and employees.
 		if (
 			mode === "tess-edi" &&
-			profile?.role !== "admin" &&
-			profile?.role !== "employee"
+			profile?.role !== USER_ROLES.ADMIN &&
+			profile?.role !== USER_ROLES.EMPLOYEE
 		) {
 			return;
 		}
 		// Only allow thm mode for admin / thmAdmin
 		if (
 			mode === "thm" &&
-			profile?.role !== "admin" &&
-			profile?.role !== "thmAdmin"
+			profile?.role !== USER_ROLES.ADMIN &&
+			profile?.role !== USER_ROLES.THM_ADMIN
 		) {
 			return;
 		}
@@ -348,8 +349,8 @@ export default function ProfilePage() {
 
 		if (
 			tab === "tess-edi" &&
-			profile?.role !== "admin" &&
-			profile?.role !== "employee"
+			profile?.role !== USER_ROLES.ADMIN &&
+			profile?.role !== USER_ROLES.EMPLOYEE
 		) {
 			return;
 		}
@@ -544,8 +545,8 @@ export default function ProfilePage() {
 								// Only allow tess-edi tab for admins and employees.
 								if (
 									tab === "tess-edi" &&
-									profile?.role !== "admin" &&
-									profile?.role !== "employee"
+									profile?.role !== USER_ROLES.ADMIN &&
+									profile?.role !== USER_ROLES.EMPLOYEE
 								) {
 									return;
 								}
@@ -561,8 +562,8 @@ export default function ProfilePage() {
 							items={
 								activeMode === "ehandel"
 									? [
-											...(profile.role === "admin" ||
-											profile.role === "superuser"
+											...(profile.role === USER_ROLES.ADMIN ||
+											profile.role === USER_ROLES.SUPERUSER
 												? [
 														{
 															href: "#",
@@ -595,8 +596,8 @@ export default function ProfilePage() {
 											// 	label: t("ProfilePage.sidebar.usage"),
 											// 	icon: "/icons/profile/navbar/lock-time-outline.svg",
 											// },
-											...(profile.role === "admin" ||
-											profile.role === "superuser"
+											...(profile.role === USER_ROLES.ADMIN ||
+											profile.role === USER_ROLES.SUPERUSER
 												? [
 														{
 															href: "users",
@@ -724,8 +725,8 @@ export default function ProfilePage() {
 							<UsersBrukere />
 						</TabsContent>
 
-						{(profile.role === "admin" ||
-							profile.role === "employee") && (
+						{(profile.role === USER_ROLES.ADMIN ||
+							profile.role === USER_ROLES.EMPLOYEE) && (
 							<TabsContent
 								value="tess-edi"
 								className="mt-0">

@@ -29,6 +29,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
+import { USER_ROLES } from "@/constants/userRoles";
 import { useProfile } from "@/contexts/ProfileContext";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useClickOutsideRef } from "@/hooks/useClickOutsideRef";
@@ -418,10 +419,10 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 	const hasHoseManagementAccess = !!profile;
 	const hasTessEdiAccess =
 		!!profile &&
-		profile.role === "admin" &&
+		(profile.role === USER_ROLES.ADMIN || profile.role === USER_ROLES.EMPLOYEE) &&
 		profile.defaultCustomerNumber !== SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
 	const hasThmProjectsAccess =
-		!!profile && (profile.role === "admin" || profile.role === "thmAdmin");
+		!!profile && (profile.role === USER_ROLES.ADMIN || profile.role === USER_ROLES.THM_ADMIN);
 
 	return (
 		<header

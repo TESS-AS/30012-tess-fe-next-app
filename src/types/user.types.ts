@@ -1,3 +1,5 @@
+import type { UserRole } from "@/constants/userRoles";
+
 export interface ProfileUser {
 	defaultCompanyName: string;
 	userId: number;
@@ -17,7 +19,7 @@ export interface ProfileUser {
 	defaultCompanyNumber: string;
 	defaultWarehouseNumber: string;
 	punchout: boolean;
-	role: string;
+	role: UserRole;
 	thmUserId?: string | null;
 	thmRole?: string | null;
 	/**
@@ -76,7 +78,7 @@ export interface User {
 	firstName: string;
 	lastName: string;
 	email: string;
-	role: string;
+	role: UserRole;
 	accessLevel: string;
 	customerAccess: {
 		name: string;

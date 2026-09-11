@@ -1,6 +1,7 @@
 import { ComponentType, SVGProps, useState } from "react";
 
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
+import { USER_ROLES } from "@/constants/userRoles";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { cn, isImageSource } from "@/lib/utils";
 import { SidebarNavProps } from "@/types/sidebar.types";
@@ -101,7 +102,7 @@ export function SidebarNav({
 								</div>
 								<span>{t("eCommerce")}</span>
 							</button>
-							{profile?.role === "admin" && (
+							{profile?.role === USER_ROLES.ADMIN && (
 								<button
 									onClick={() => onModeChange("tess-edi")}
 									className={cn(
@@ -123,7 +124,7 @@ export function SidebarNav({
 									<span>TESS EDI</span>
 								</button>
 							)}
-							{(profile?.role === "admin" || profile?.role === "thmAdmin") && (
+							{(profile?.role === USER_ROLES.ADMIN || profile?.role === USER_ROLES.THM_ADMIN) && (
 								<button
 									onClick={() => onModeChange("thm")}
 									className={cn(

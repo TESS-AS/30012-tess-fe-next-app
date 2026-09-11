@@ -13,6 +13,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { USER_ROLES } from "@/constants/userRoles";
 import { useGetCompanies } from "@/hooks/useGetCompanies";
 import { useGetCustomers } from "@/hooks/useGetCustomers";
 import { profileKeys } from "@/hooks/useGetProfileData";
@@ -85,7 +86,7 @@ export default function CustomerNumberSwitcher({
 	);
 	const { companies } = useGetCompanies(true);
 
-	const isAdmin = profile.role === "admin";
+	const isAdmin = profile.role === USER_ROLES.ADMIN;
 	const warehouseDisplay =
 		warehouses.find((w) => String(w.id) === String(selectedWarehouse)) ||
 		warehouses.find(

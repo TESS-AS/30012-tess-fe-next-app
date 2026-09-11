@@ -19,6 +19,7 @@ import {
 	SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER,
 	SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER,
 } from "@/constants/checkout";
+import { USER_ROLES } from "@/constants/userRoles";
 import { useCartEvaluation } from "@/hooks/useBudget";
 import { useOrderSummary } from "@/hooks/useOrderSummary";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
@@ -94,7 +95,7 @@ export default function OrderSummary({
 	);
 	const [excelArchivePromptOpen, setExcelArchivePromptOpen] = useState(false);
 
-	const isTessEmployee = profile?.role === "employee";
+	const isTessEmployee = profile?.role === USER_ROLES.EMPLOYEE;
 	const isExcelExportCustomer =
 		 SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER.includes(profile?.defaultCustomerNumber || "");
 
