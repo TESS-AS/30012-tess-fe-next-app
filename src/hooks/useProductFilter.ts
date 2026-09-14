@@ -38,6 +38,7 @@ export function useProductFilter({
 
 	const {
 		products,
+		categories: inferredCategories,
 		isLoading,
 		isFetchingNextPage,
 		hasNextPage,
@@ -50,6 +51,17 @@ export function useProductFilter({
 		sort,
 		enabled: !!categoryNumber || !!query,
 	});
+
+	// PBI2940: forward BE-inferred categories from /searchList to consumers via
+	// the existing `onCategoriesUpdate` callback. The Filter component accepts
+	// both shapes ({assortmentNumber, ...} from /filter and {categoryNumber,
+	// ..., flag} from /searchList) so no shape adapter is needed here — the
+	// downstream renderer reads whichever id field is present.
+	useEffect(() => {
+		if (!onCategoriesUpdate) return;
+		if (!inferredCategories.length) return;
+		onCategoriesUpdate(inferredCategories);
+	}, [inferredCategories, onCategoriesUpdate]);
 
 	const loadMore = useCallback(async () => {
 		if (!hasNextPage || isFetchingNextPage) return;
@@ -304,6 +316,7 @@ export function useProductFilter({
 
 	return {
 		products,
+		inferredCategories,
 		isLoading,
 		isFetchingNextPage,
 		hasMore: hasNextPage ?? false,

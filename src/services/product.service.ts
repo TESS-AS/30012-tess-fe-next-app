@@ -23,10 +23,23 @@ export interface WarehouseBatch {
 	}>;
 }
 
-interface SearchListResponse {
+/** BE category-hit hint added in PBI2940 (2026-09-10, `2fa7e88` in the
+ *  20002 search-engine repo). `flag: true` = category was pre-filtered/active
+ *  for this search based on hits in its assortments; `false` = category has
+ *  hits but isn't part of the currently-active set. */
+export interface InferredCategory {
+	categoryNumber: string;
+	nameNo: string;
+	nameEn: string;
+	productCount: number;
+	flag: boolean;
+}
+
+export interface SearchListResponse {
 	product: IProduct[];
 	page: number;
 	totalPages: number;
+	categories?: InferredCategory[];
 }
 
 interface FilterValues {
@@ -186,15 +199,21 @@ export async function searchProducts(
 	page: number = 1,
 	pageSize: number = 9,
 	searchTerm: string | null,
-	categoryNumber: string | null,
+	// BE (PBI2940) now accepts comma-separated `categoryNumber` — a string is
+	// passed through unchanged, an array is joined so multi-category selections
+	// work end-to-end.
+	categoryNumber: string | string[] | null,
 	filters: FilterValues[] | null,
 	sort?: string | null,
 	language?: string | null,
 ): Promise<SearchListResponse> {
 	try {
 		const params = new URLSearchParams();
-		if (categoryNumber) {
-			params.append("cat", categoryNumber);
+		const catValue = Array.isArray(categoryNumber)
+			? categoryNumber.filter(Boolean).join(",")
+			: categoryNumber;
+		if (catValue) {
+			params.append("cat", catValue);
 		}
 		if (searchTerm) {
 			params.append("st", searchTerm);

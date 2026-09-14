@@ -27,12 +27,26 @@ import { Button } from "./button";
 import { Checkbox } from "./checkbox";
 import { SliderFilterInput } from "./slider-filter-input";
 
-type CategoryFilterItem = {
-	assortmentNumber: string;
+/** Union of the two category shapes the FE receives:
+ *  - `assortmentNumber` — legacy from `/filter` (loadFilterFamily)
+ *  - `categoryNumber` + `flag` — new from `/searchList` (PBI2940, 2026-09-10)
+ *  The two IDs refer to the same conceptual "category" — BE just uses
+ *  different names historically. Use `getCategoryId()` below to read the id
+ *  without caring which source produced the row. */
+export type CategoryFilterItem = {
+	assortmentNumber?: string;
+	categoryNumber?: string;
 	nameNo: string;
 	nameEn: string;
 	productCount: number;
+	/** true = BE pre-filtered this category into the current search result set
+	 *  (auto-active); false / undefined = category has hits but isn't part of
+	 *  the current selection. Only present on `/searchList` responses. */
+	flag?: boolean;
 };
+
+const getCategoryId = (cf: CategoryFilterItem): string =>
+	cf.categoryNumber ?? cf.assortmentNumber ?? "";
 
 interface FilterProps
 	extends React.HTMLAttributes<HTMLDivElement>,
@@ -161,13 +175,14 @@ export const Filter = React.forwardRef<
 
 		const handleCategorySelect = (cf: CategoryFilterItem) => {
 			setOpenAccordions([]);
+			const id = getCategoryId(cf);
 
-			if (selectedCategory === cf.assortmentNumber) {
+			if (selectedCategory === id) {
 				setSelectedCategory(null);
 				handleCategoryChange?.("", "");
 			} else {
-				setSelectedCategory(cf.assortmentNumber);
-				handleCategoryChange?.(cf.assortmentNumber, cf.nameNo);
+				setSelectedCategory(id);
+				handleCategoryChange?.(id, cf.nameNo);
 			}
 		};
 
@@ -400,7 +415,7 @@ export const Filter = React.forwardRef<
 					categoryFilters.length > 0 &&
 					(!selectedCategory ||
 						categoryFilters.some(
-							(cf) => cf.assortmentNumber === selectedCategory,
+							(cf) => getCategoryId(cf) === selectedCategory,
 						)) && (
 						<div className="space-y-2">
 							<h3 className="text-md font-semibold">Kategori</h3>
@@ -413,24 +428,37 @@ export const Filter = React.forwardRef<
 										.filter(
 											(cf) =>
 												!selectedCategory ||
-												selectedCategory === cf.assortmentNumber,
+												selectedCategory === getCategoryId(cf),
 										)
 										.map((cf) => {
-											const isChecked =
-												selectedCategory === cf.assortmentNumber;
+											const id = getCategoryId(cf);
+											const isChecked = selectedCategory === id;
+											// PBI2940: `flag: true` = BE pre-filtered this category
+											// into the current search result set. Highlight so the
+											// user sees which categories the search hit.
+											const isBePreFiltered = cf.flag === true;
 											return (
 												<li
-													key={cf.assortmentNumber}
-													className="mb-4 flex items-center space-x-2">
+													key={id}
+													className={cn(
+														"mb-4 flex items-center space-x-2 rounded-md px-1 py-0.5",
+														isBePreFiltered &&
+															!isChecked &&
+															"bg-[#F0FCF2]",
+													)}>
 													<Checkbox
-														id={`category-${cf.assortmentNumber}`}
+														id={`category-${id}`}
 														checked={isChecked}
 														onCheckedChange={() => handleCategorySelect(cf)}
 													/>
 													<label
-														htmlFor={`category-${cf.assortmentNumber}`}
+														htmlFor={`category-${id}`}
 														className="cursor-pointer text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-														<span className="text-green-600 hover:underline">
+														<span
+															className={cn(
+																"text-green-600 hover:underline",
+																isBePreFiltered && "font-semibold",
+															)}>
 															{cf.nameNo}
 														</span>{" "}
 														<span className="text-muted-foreground">
