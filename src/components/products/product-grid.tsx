@@ -32,12 +32,10 @@ interface ProductGridProps {
 	categoryName?: string;
 	query: string | null;
 	categoryFilters?: {
-		assortmentNumber?: string;
-		categoryNumber?: string;
+		assortmentNumber: string;
 		nameNo: string;
 		nameEn: string;
 		productCount: number;
-		flag?: boolean;
 	}[];
 }
 

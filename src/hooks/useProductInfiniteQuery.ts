@@ -1,13 +1,10 @@
-import {
-	searchProducts,
-	type InferredCategory,
-} from "@/services/product.service";
+import { searchProducts } from "@/services/product.service";
 import { FilterValues } from "@/types/filter.types";
 import { IProduct } from "@/types/product.types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 interface UseProductInfiniteQueryProps {
-	categoryNumber: string | string[] | null;
+	categoryNumber: string | null;
 	query: string | null;
 	filters: FilterValues[] | null;
 	sort: string | null;
@@ -19,10 +16,6 @@ interface ProductPage {
 	products: IProduct[];
 	hasMore: boolean;
 	page: number;
-	/** PBI2940: BE-inferred categories with a `flag` marking the ones that
-	 *  are pre-filtered/active for the current search. Only populated on the
-	 *  first page since categories are query-scoped, not page-scoped. */
-	categories?: InferredCategory[];
 }
 
 export function useProductInfiniteQuery({
@@ -49,7 +42,6 @@ export function useProductInfiniteQuery({
 				products: response.product || [],
 				hasMore: (response.product?.length || 0) === pageSize,
 				page: pageParam,
-				categories: response.categories,
 			};
 		},
 		getNextPageParam: (lastPage, allPages) => {
@@ -73,15 +65,8 @@ export function useProductInfiniteQuery({
 			self.findIndex((p) => p.productNumber === product.productNumber),
 	);
 
-	// Categories are query-scoped, so we take them from the first loaded page.
-	// Empty array (not undefined) once data has arrived, to distinguish
-	// "loaded with no categories" from "still loading".
-	const categories: InferredCategory[] =
-		infiniteQuery.data?.pages[0]?.categories ?? [];
-
 	return {
 		products: uniqueProducts,
-		categories,
 		isLoading: infiniteQuery.isLoading && !infiniteQuery.data,
 		isFetching: infiniteQuery.isFetching,
 		isFetchingNextPage: infiniteQuery.isFetchingNextPage,
