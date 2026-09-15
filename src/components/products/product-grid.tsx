@@ -15,15 +15,10 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import { FilterChip } from "./filter-chip";
 import { ProductCard } from "./product-card";
 import { Button } from "../ui/button";
 import { Filter } from "../ui/filter";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-	TooltipProvider,
-} from "../ui/tooltip";
 
 interface ProductGridProps {
 	variant?: "default" | "compact";
@@ -73,6 +68,10 @@ export function ProductGrid({
 		selectedFilters,
 		removeFilter,
 		handleCategoryChange,
+		selectedCategoryIds,
+		selectedCategoryChips,
+		toggleCategory,
+		removeCategory,
 	} = useProductFilter({
 		categoryNumber,
 		categoryName,
@@ -227,6 +226,8 @@ export function ProductGrid({
 							setFiltersState,
 						)
 					}
+					selectedCategoryIds={selectedCategoryIds}
+					onToggleCategory={toggleCategory}
 				/>
 			</aside>
 
@@ -279,90 +280,55 @@ export function ProductGrid({
 
 				<div className="mb-4 flex items-center justify-between align-middle">
 					<div className="flex flex-wrap gap-2">
+						{/* PBI2940 multi-select category chips — driven by
+						 * `selectedCategoryChips` from the Set-based selection.
+						 * Rendered first so they appear ahead of attribute
+						 * filters. Removal calls `removeCategory(id)` which
+						 * updates the Set and URL in one shot. */}
+						{selectedCategoryChips.map((chip) => (
+							<FilterChip
+								key={`category-${chip.id}`}
+								label="Kategori"
+								value={chip.name}
+								onRemove={() => removeCategory(chip.id)}
+							/>
+						))}
 						{Object.entries(selectedFilters).map(([key, values]) => {
-							// Check if this is a range filter (has exactly 2 numeric values)
+							// Range filter: two distinct numeric bounds → one chip.
 							const isRangeFilter =
 								values.length === 2 &&
 								values.every((val) => !isNaN(Number(val))) &&
 								values[0] !== values[1];
 
 							if (isRangeFilter) {
-								const rangeValue = `${values[0]} - ${values[1]}`;
-								const label = getFilterLabel(key);
 								return (
-									<div
+									<FilterChip
 										key={`${key}-range`}
-										className="bg-primary/10 flex items-center gap-1 rounded-md px-3 py-1 text-sm">
-										<TooltipProvider>
-											<Tooltip>
-												<TooltipTrigger asChild>
-													<div className="flex items-center gap-1">
-														<span className="text-md max-w-[100px] truncate">
-															{label}:
-														</span>
-														<span className="max-w-[100px] truncate">
-															{rangeValue}
-														</span>
-													</div>
-												</TooltipTrigger>
-												<TooltipContent>
-													<p>
-														{label}: {rangeValue}
-													</p>
-												</TooltipContent>
-											</Tooltip>
-										</TooltipProvider>
-										<button
-											onClick={() => {
-												// Show filter + kategori skeletons while updating and remove range
-												setFiltersState([]);
-												setCategoryFiltersState([]);
-												values.forEach((value) => removeFilter(key, value));
-											}}
-											className="hover:bg-primary/20 ml-1 rounded-md p-0.5">
-											<X className="h-3 w-3" />
-										</button>
-									</div>
+										label={getFilterLabel(key)}
+										value={`${values[0]} - ${values[1]}`}
+										onRemove={() => {
+											setFiltersState([]);
+											setCategoryFiltersState([]);
+											values.forEach((value) => removeFilter(key, value));
+										}}
+									/>
 								);
 							}
 
-							// Regular filter values
 							const label = getFilterLabel(key);
 							return values
 								.filter((value) => !!value)
 								.map((value) => (
-									<div
+									<FilterChip
 										key={`${key}-${value}`}
-										className="bg-primary/10 flex items-center gap-1 rounded-md px-3 py-1 text-sm">
-										<TooltipProvider>
-											<Tooltip>
-												<TooltipTrigger asChild>
-													<div className="flex items-center gap-1">
-														<span className="text-md max-w-[100px] truncate">
-															{label}:
-														</span>
-														<span className="max-w-[100px] truncate">
-															{value}
-														</span>
-													</div>
-												</TooltipTrigger>
-												<TooltipContent>
-													<p>
-														{label}: {value}
-													</p>
-												</TooltipContent>
-											</Tooltip>
-										</TooltipProvider>
-										<button
-											onClick={() => {
-												setFiltersState([]);
-												setCategoryFiltersState([]);
-												removeFilter(key, value);
-											}}
-											className="hover:bg-primary/20 ml-1 rounded-md p-0.5">
-											<X className="h-3 w-3" />
-										</button>
-									</div>
+										label={label}
+										value={value}
+										onRemove={() => {
+											setFiltersState([]);
+											setCategoryFiltersState([]);
+											removeFilter(key, value);
+										}}
+									/>
 								));
 						})}
 					</div>

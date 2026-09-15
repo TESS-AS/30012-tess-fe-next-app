@@ -63,6 +63,11 @@ interface FilterProps
 		newCategoryNumber: string,
 		categoryName: string,
 	) => void;
+	/** PBI2940 multi-select category state. When provided, checkboxes are
+	 *  driven by set membership and clicks call `onToggleCategory`. Falls back
+	 *  to the legacy single-select `handleCategoryChange` path if omitted. */
+	selectedCategoryIds?: Set<string>;
+	onToggleCategory?: (id: string) => void;
 }
 
 const filterVariants = cva(
@@ -106,6 +111,8 @@ export const Filter = React.forwardRef<
 			language,
 			categoryFilters,
 			handleCategoryChange,
+			selectedCategoryIds,
+			onToggleCategory,
 			query,
 			...props
 		},
@@ -176,6 +183,13 @@ export const Filter = React.forwardRef<
 		const handleCategorySelect = (cf: CategoryFilterItem) => {
 			setOpenAccordions([]);
 			const id = getCategoryId(cf);
+
+			// PBI2940 multi-select path: hand off to parent's Set toggler and
+			// skip the legacy single-select state entirely.
+			if (onToggleCategory) {
+				onToggleCategory(id);
+				return;
+			}
 
 			if (selectedCategory === id) {
 				setSelectedCategory(null);
@@ -413,7 +427,11 @@ export const Filter = React.forwardRef<
 				{...props}>
 				{Array.isArray(categoryFilters) &&
 					categoryFilters.length > 0 &&
-					(!selectedCategory ||
+					// Multi-select (Set-based) shows the full list always; legacy
+					// single-select hides the picker when a category is already
+					// chosen and not in the current list.
+					(onToggleCategory ||
+						!selectedCategory ||
 						categoryFilters.some(
 							(cf) => getCategoryId(cf) === selectedCategory,
 						)) && (
@@ -427,25 +445,25 @@ export const Filter = React.forwardRef<
 									)
 										.filter(
 											(cf) =>
+												// Legacy single-select: hide non-selected rows
+												// once a pick is made. Multi-select: show all.
+												onToggleCategory ||
 												!selectedCategory ||
 												selectedCategory === getCategoryId(cf),
 										)
 										.map((cf) => {
 											const id = getCategoryId(cf);
-											const isChecked = selectedCategory === id;
-											// PBI2940: `flag: true` = BE pre-filtered this category
-											// into the current search result set. Highlight so the
-											// user sees which categories the search hit.
-											const isBePreFiltered = cf.flag === true;
+											// PBI2940 multi-select: checkbox reads from the Set
+											// prop. Legacy single-select falls back to the local
+											// `selectedCategory` state seeded from `flag: true`.
+											const isChecked = selectedCategoryIds
+												? selectedCategoryIds.has(id)
+												: selectedCategory === id ||
+													(!selectedCategory && cf.flag === true);
 											return (
 												<li
 													key={id}
-													className={cn(
-														"mb-4 flex items-center space-x-2 rounded-md px-1 py-0.5",
-														isBePreFiltered &&
-															!isChecked &&
-															"bg-[#F0FCF2]",
-													)}>
+													className="mb-4 flex items-center space-x-2">
 													<Checkbox
 														id={`category-${id}`}
 														checked={isChecked}
@@ -454,11 +472,7 @@ export const Filter = React.forwardRef<
 													<label
 														htmlFor={`category-${id}`}
 														className="cursor-pointer text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-														<span
-															className={cn(
-																"text-green-600 hover:underline",
-																isBePreFiltered && "font-semibold",
-															)}>
+														<span className="text-green-600 hover:underline">
 															{cf.nameNo}
 														</span>{" "}
 														<span className="text-muted-foreground">
@@ -470,15 +484,16 @@ export const Filter = React.forwardRef<
 										})}
 								</ul>
 
-								{categoryFilters.length > 5 && !selectedCategory && (
-									<Button
-										variant="link"
-										size="sm"
-										onClick={() => setShowAllCategories((prev) => !prev)}
-										className="text-primary px-0 text-sm hover:underline">
-										{showAllCategories ? "Vis mindre" : "Vis mer"}
-									</Button>
-								)}
+								{categoryFilters.length > 5 &&
+									(onToggleCategory || !selectedCategory) && (
+										<Button
+											variant="link"
+											size="sm"
+											onClick={() => setShowAllCategories((prev) => !prev)}
+											className="text-primary px-0 text-sm hover:underline">
+											{showAllCategories ? "Vis mindre" : "Vis mer"}
+										</Button>
+									)}
 							</div>
 						</div>
 					)}
