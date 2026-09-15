@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 
 import { normalizeFilterResponse } from "@/lib/category-utils";
 import { deserializeFilters, serializeFilters } from "@/lib/utils";
@@ -6,14 +6,7 @@ import { loadFilterFamily } from "@/services/categories.service";
 import { FilterCategory, FilterValues } from "@/types/filter.types";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 
-import { useCategoryMultiSelect } from "./useCategoryMultiSelect";
 import { useProductInfiniteQuery } from "./useProductInfiniteQuery";
-
-/** Display-ready category pill used by product-grid's removable-chip UI. */
-export interface CategoryChipData {
-	id: string;
-	name: string;
-}
 
 interface UseProductFilterProps {
 	categoryNumber: string;
@@ -43,19 +36,6 @@ export function useProductFilter({
 	>({});
 	const [sort, setSort] = useState<string | null>(null);
 
-	// PBI2940: multi-select category selection is delegated to a dedicated
-	// hook that owns the `Set<string>` + URL sync. This module orchestrates
-	// the seeding (from `/searchList`'s `flag: true` rows) and the chip data
-	// (which needs `inferredCategories` for display names) — both live here
-	// because the composing hook has both concerns in scope.
-	const {
-		selectedIds: selectedCategoryIds,
-		selectedIdsArray: selectedCategoryIdsArray,
-		toggle: toggleCategory,
-		remove: removeCategory,
-		setAll: setAllCategories,
-	} = useCategoryMultiSelect();
-
 	const {
 		products,
 		categories: inferredCategories,
@@ -65,145 +45,23 @@ export function useProductFilter({
 		fetchNextPage,
 		refetch,
 	} = useProductInfiniteQuery({
-		// When the user has an explicit multi-selection, send it. Otherwise
-		// fall back to the single-category context from the page's URL slug.
-		categoryNumber:
-			selectedCategoryIdsArray.length > 0
-				? selectedCategoryIdsArray
-				: categoryNumber,
+		categoryNumber,
 		query,
 		filters: currentFilters,
 		sort,
 		enabled: !!categoryNumber || !!query,
 	});
 
-	// Memoized chip data joining `selectedCategoryIds` with the latest
-	// `inferredCategories` for display names. Rebuilds only when either the
-	// set or the name catalogue changes — untouched between unrelated
-	// renders. Falls back to id-as-name if BE hasn't returned a match yet.
-	const selectedCategoryChips = useMemo<CategoryChipData[]>(() => {
-		if (selectedCategoryIds.size === 0) return [];
-		const byId = new Map<string, string>();
-		for (const c of inferredCategories) {
-			if (c.categoryNumber) byId.set(c.categoryNumber, c.nameNo);
-		}
-		return selectedCategoryIdsArray.map((id) => ({
-			id,
-			name: byId.get(id) ?? id,
-		}));
-	}, [inferredCategories, selectedCategoryIds.size, selectedCategoryIdsArray]);
-
-	// One-shot seed per query: adopt BE's `flag: true` rows as the initial FE
-	// selection, but only if the user hasn't already made a choice (URL
-	// param) and we haven't already seeded for this query. Once the user
-	// interacts, explicit choices win — BE never re-scopes their selection.
-	const seededForQueryRef = useRef<string | null>(null);
-	useEffect(() => {
-		if (seededForQueryRef.current === query) return;
-		if (!inferredCategories.length) return;
-		const hasFlagData = inferredCategories.some(
-			(c) => c.flag !== undefined,
-		);
-		if (!hasFlagData) return;
-
-		seededForQueryRef.current = query;
-
-		if (selectedCategoryIds.size > 0) return; // URL already told us
-
-		const flaggedIds = inferredCategories
-			.filter((c) => c.flag === true && !!c.categoryNumber)
-			.map((c) => c.categoryNumber);
-		if (flaggedIds.length === 0) return;
-
-		setAllCategories(flaggedIds);
-	}, [
-		inferredCategories,
-		query,
-		selectedCategoryIds,
-		setAllCategories,
-	]);
-
-	// PBI2940: forward BE-inferred categories from /searchList to consumers
-	// via the existing `onCategoriesUpdate` callback so the sidebar receives
-	// the full list (both flag=true and flag=false). Only fires when the
-	// response actually carries `flag` info — otherwise `loadFilterFamily`-
-	// style (flagless) payloads would silently strip the checked highlighting.
+	// PBI2940: forward BE-inferred categories from /searchList to consumers via
+	// the existing `onCategoriesUpdate` callback. The Filter component accepts
+	// both shapes ({assortmentNumber, ...} from /filter and {categoryNumber,
+	// ..., flag} from /searchList) so no shape adapter is needed here — the
+	// downstream renderer reads whichever id field is present.
 	useEffect(() => {
 		if (!onCategoriesUpdate) return;
 		if (!inferredCategories.length) return;
-		const hasFlagData = inferredCategories.some(
-			(c) => c.flag !== undefined,
-		);
-		if (!hasFlagData) return;
 		onCategoriesUpdate(inferredCategories);
 	}, [inferredCategories, onCategoriesUpdate]);
-
-	// PBI2940: narrow the attribute-filter sidebar when the category selection
-	// changes (either from BE-flag seeding or from a user checkbox toggle).
-	// Fires `loadFilterFamily` with the currently-selected category IDs so BE
-	// returns only the attribute filter options that produce hits within those
-	// categories — removing the "select filter → blank page" dead-end for
-	// options that only exist in unselected categories.
-	//
-	// Deduplication via a canonical-key ref: identical consecutive fires are
-	// skipped, which also elides the first mount when the URL had no
-	// pre-selection (both current and last-fired keys are ""). Aborted with
-	// a cancelled-flag on unmount / dep change to prevent stale results
-	// overwriting a newer response.
-	const lastCategoryFilterKeyRef = useRef<string | null>(null);
-	useEffect(() => {
-		if (!onFiltersUpdate) return;
-		if (!query && !categoryNumber) return;
-
-		const catKey = selectedCategoryIdsArray.join(",");
-		if (lastCategoryFilterKeyRef.current === catKey) return;
-		lastCategoryFilterKeyRef.current = catKey;
-
-		let cancelled = false;
-		void (async () => {
-			try {
-				const result = await loadFilterFamily({
-					categoryNumber: catKey || categoryNumber || undefined,
-					searchTerm: query || undefined,
-					language: "no",
-					filters: currentFilters ?? [],
-				});
-				if (cancelled) return;
-				// BE (`/proxy/filter`) returns EITHER a bare filters array OR a
-				// wrapped `{ filters: [...], categories: [...] }` object depending
-				// on the code path. Read both shapes so the sidebar narrows
-				// regardless of which one BE ships on any given request.
-				const filtersArray = Array.isArray(result)
-					? result
-					: Array.isArray(result?.filters)
-						? result.filters
-						: null;
-				if (filtersArray) {
-					onFiltersUpdate(normalizeFilterResponse(filtersArray));
-				}
-			} catch (err) {
-				if (cancelled) return;
-				console.error(
-					"Failed to reload attribute filters after category change",
-					err,
-				);
-			}
-		})();
-
-		return () => {
-			cancelled = true;
-		};
-		// Deliberately excluding `currentFilters` — filter changes have their
-		// own reload path via `handleFilterChange` and shouldn't double-fetch
-		// here. Same for `onFiltersUpdate` (stable setState from parent).
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [selectedCategoryIdsArray, query, categoryNumber]);
-
-	// Reset the dedup key when the query changes so a fresh search always
-	// triggers one filter reload once its categories have been seeded.
-	useEffect(() => {
-		lastCategoryFilterKeyRef.current = null;
-	}, [query]);
 
 	const loadMore = useCallback(async () => {
 		if (!hasNextPage || isFetchingNextPage) return;
@@ -235,13 +93,9 @@ export function useProductFilter({
 			const newUrl = `${pathname}${params.toString() ? `?${params.toString()}` : ""}`;
 			router.replace(newUrl, { scroll: false });
 
-			// Fire-and-forget: refresh filterFamily + products in background.
-			// Categories deliberately NOT updated from `loadFilterFamily` — the
-			// /searchList refetch below returns fresh categories with `flag`,
-			// and overwriting them with the flagless /filter shape would strip
-			// the pre-filtered highlighting mid-interaction.
+			// Fire-and-forget: refresh filterFamily + products in background
 			(async () => {
-				if (onFiltersUpdate) {
+				if (onFiltersUpdate || onCategoriesUpdate) {
 					try {
 						const result = await loadFilterFamily({
 							categoryNumber: effectiveCategoryNumber || undefined,
@@ -250,12 +104,16 @@ export function useProductFilter({
 							filters,
 						});
 
-						if (Array.isArray(result?.filters)) {
+						if (Array.isArray(result?.filters) && onFiltersUpdate) {
 							const normalized = normalizeFilterResponse(result.filters);
 							onFiltersUpdate(normalized);
 						}
+
+						if (Array.isArray(result?.categories) && onCategoriesUpdate) {
+							onCategoriesUpdate(result.categories);
+						}
 					} catch (err) {
-						console.error("Failed to reload filters", err);
+						console.error("Failed to reload filters/categories", err);
 					}
 				}
 
@@ -303,10 +161,9 @@ export function useProductFilter({
 					const normalized = normalizeFilterResponse(result?.filters ?? []);
 					setFiltersFn(normalized);
 
-					// Categories intentionally NOT forwarded from /filter — the
-					// authoritative source is /searchList's response (with `flag`),
-					// forwarded via the useEffect below. Overwriting here would drop
-					// the pre-filtered highlighting.
+					if (Array.isArray(result?.categories) && onCategoriesUpdate) {
+						onCategoriesUpdate(result.categories);
+					}
 				} catch (err) {
 					console.error("Failed to load filters for category", err);
 				}
@@ -340,16 +197,14 @@ export function useProductFilter({
 				const normalized = normalizeFilterResponse(result?.filters ?? []);
 				setFiltersFn(normalized);
 
-				// Categories intentionally NOT forwarded from /filter — the
-				// authoritative source is /searchList's response (with `flag`),
-				// forwarded via the useEffect at the top of this hook. Firing
-				// onCategoriesUpdate with the flagless /filter shape here would
-				// silently strip `flag: true` from the sidebar checkboxes.
+				if (Array.isArray(result?.categories) && onCategoriesUpdate) {
+					onCategoriesUpdate(result.categories);
+				}
 			} catch (err) {
 				console.error("Failed to reload filters for fallback category", err);
 			}
 		},
-		[query, categoryNumber, initialCategoryNumber],
+		[query, categoryNumber, initialCategoryNumber, onCategoriesUpdate],
 	);
 
 	const handleSortChange = useCallback(
@@ -462,12 +317,6 @@ export function useProductFilter({
 	return {
 		products,
 		inferredCategories,
-		// PBI2940 category multi-select surface — consumers use these to
-		// drive the sidebar checkboxes and the top-of-page removable chips.
-		selectedCategoryIds,
-		selectedCategoryChips,
-		toggleCategory,
-		removeCategory,
 		isLoading,
 		isFetchingNextPage,
 		hasMore: hasNextPage ?? false,
