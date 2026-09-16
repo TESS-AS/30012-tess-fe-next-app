@@ -31,15 +31,15 @@ export function Quote() {
 	return (
 		<section className="relative mt-8 mb-8 py-8 before:absolute before:inset-0 before:-mx-[9999px] before:bg-[#E8EAE9] before:content-[''] md:mt-[-65px] md:mb-0 md:py-8">
 			<div className="relative px-4 lg:px-0">
-				<div className="mb-6 flex flex-col gap-4 border-b pb-6 md:mb-8 md:flex-row md:items-center md:justify-between md:pb-10">
+				<div className="mb-10 flex flex-col gap-4 border-b pb-0 md:flex-row md:items-center md:justify-between">
 					<h2 className="text-xl font-medium md:text-2xl">
-						Bla gjennom våre toppkategorier
+						{t("Home.browseOurTopCategories")}
 					</h2>
 					<Button
 						asChild
 						variant="outline"
 						className="w-full bg-white text-sm text-black md:w-auto">
-						<Link href="/alle-kategorier">Se alle kategorier</Link>
+						<Link href="/alle-kategorier">{t("Category.viewAll")}</Link>
 					</Button>
 				</div>
 

@@ -1255,7 +1255,7 @@ export function HosesAndEquipments({
 								setSelectedS1Code(value);
 								localStorage.setItem("selectedS1Code", value);
 							}}>
-							<SelectTrigger className="w-[260px] border-[#C1C4C2] bg-white font-medium text-[#0F1912]">
+							<SelectTrigger className="h-9 w-[260px] border-[#C1C4C2] bg-white text-sm font-medium text-[#0F1912]">
 								<div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
 									<MapPin className="h-4 w-4 shrink-0 text-[#0F1912]" />
 									<SelectValue
@@ -1300,7 +1300,7 @@ export function HosesAndEquipments({
 				</div>
 
 				<div className="min-w-0 overflow-hidden rounded-lg border border-[#C1C4C2] bg-white">
-					<div className="flex items-start justify-between space-y-6 p-6">
+					<div className="flex items-start justify-between space-y-4 p-4">
 						<HoseSearchBar
 							value={searchQuery}
 							onChange={setSearchQuery}

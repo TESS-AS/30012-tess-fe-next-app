@@ -440,18 +440,18 @@ const UsersBrukere = () => {
 		<div className="space-y-6">
 			<div className="flex items-center">
 				<h1 className="text-2xl font-semibold">{t("title")}</h1>
-				<p className="ml-4 text-[#5A615D]">{t("subtitle")}</p>
+				<p className="ml-4 text-base text-[#5A615D]">{t("subtitle")}</p>
 			</div>
 			<div className="rounded-lg border border-[#C1C4C2] bg-white">
-				<div className="space-y-6 p-6">
+				<div className="space-y-4 p-4">
 					<div className="flex justify-between">
 						<div className="relative flex w-full max-w-[480px]">
-							<Search className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-[#5A615D]" />
+							<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#5A615D]" />
 							<Input
 								placeholder={t("searchPlaceholder")}
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
-								className="font-sm h-10 flex-1 rounded-md border border-[#8A8F8C] bg-[#F8F9F8] pr-24 pl-12 text-base text-[#5A615D]"
+								className="font-sm h-9 flex-1 rounded-md border border-[#8A8F8C] bg-[#F8F9F8] pr-24 pl-10 text-sm text-[#5A615D]"
 							/>
 						</div>
 

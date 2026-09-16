@@ -49,7 +49,7 @@ export function HoseSearchBar({
 	}, [value]);
 	return (
 		<div className={cn("relative flex w-full max-w-[530px]", className)}>
-			<Search className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-[#5A615D]" />
+			<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#5A615D]" />
 			<Input
 				placeholder={t("placeholder")}
 				value={value}
@@ -57,7 +57,7 @@ export function HoseSearchBar({
 				onKeyDown={(e) => {
 					if (e.key === "Enter") onSearch();
 				}}
-				className="font-sm h-10 flex-1 rounded-md border border-[#8A8F8C] bg-[#F8F9F8] pr-20 pl-12 text-base text-[#5A615D]"
+				className="font-sm h-9 flex-1 rounded-md border border-[#8A8F8C] bg-[#F8F9F8] pr-20 pl-10 text-sm text-[#5A615D]"
 			/>
 			{value && (
 				<button
@@ -71,7 +71,7 @@ export function HoseSearchBar({
 			<Button
 				type="button"
 				onClick={onSearch}
-				className="absolute top-1/2 right-0 h-10 -translate-y-1/2 rounded-none rounded-r-md border-1 border-l-2 border-[#8A8F8C] bg-white px-4 font-medium text-[#0F1912] hover:bg-white">
+				className="absolute top-1/2 right-0 h-9 -translate-y-1/2 rounded-none rounded-r-md border-1 border-l-2 border-[#8A8F8C] bg-white px-4 text-sm font-medium text-[#0F1912] hover:bg-white">
 				{t("search")}
 			</Button>
 		</div>

@@ -90,7 +90,7 @@ export function Rekvisisjoner() {
 			<div className="flex items-baseline justify-between gap-4">
 				<div className="flex items-center">
 					<h1 className="text-2xl font-semibold">{t("title")}</h1>
-					<p className="ml-4 text-[#5A615D]">{t("subtitle")}</p>
+					<p className="ml-4 text-base text-[#5A615D]">{t("subtitle")}</p>
 				</div>
 			</div>
 

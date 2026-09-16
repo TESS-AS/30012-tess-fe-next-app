@@ -12,7 +12,7 @@ import type {
 } from "@/types/thm-projects.types";
 
 const STORAGE_KEY = "tess.thm.recentlyVisited";
-const MAX_ITEMS = 5;
+const MAX_ITEMS = 10;
 
 export const THM_RECENTLY_VISITED_EVENT = "thm:recently-visited-changed";
 export const THM_RECENTLY_VISITED_STORAGE_KEY = STORAGE_KEY;

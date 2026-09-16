@@ -298,16 +298,20 @@ export function ProductPageClient({
 	return (
 		<div className="container mx-auto space-y-8 px-4 pt-8 pb-0">
 			<FeedbackSideTab />
-			<ProductReturnButton />
-			<ProductBreadcrumbs
-				categories={columnAttributes?.categories}
-				locale={locale}
-				segment={segment}
-				isLoading={loadingAttributes}
-				productName={
-					locale === "en" ? productData.productNameEn : productData.productName
-				}
-			/>
+			<div className="sticky top-0 z-20 -mx-4 space-y-2 border-b border-[#E8EAE9] bg-background/95 px-4 py-3 backdrop-blur-sm">
+				<ProductReturnButton />
+				<ProductBreadcrumbs
+					categories={columnAttributes?.categories}
+					locale={locale}
+					segment={segment}
+					isLoading={loadingAttributes}
+					productName={
+						locale === "en"
+							? productData.productNameEn
+							: productData.productName
+					}
+				/>
+			</div>
 
 			<div className="mb-0 grid grid-cols-12 items-start gap-x-0 gap-y-2 md:gap-x-4">
 				<div className="col-span-12 md:col-span-5">

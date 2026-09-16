@@ -180,6 +180,28 @@ export function MultiSelectWithTags({
 		onSearchChange,
 	});
 
+	const pageScrollTopRef = React.useRef(0);
+
+	const handleOpenChange = React.useCallback((next: boolean) => {
+		const container = document.getElementById("app-scroll-container");
+		if (container) {
+			pageScrollTopRef.current = container.scrollTop;
+		}
+		setOpen(next);
+		// Radix modal/focus handling can reset the app scroll container; restore it.
+		requestAnimationFrame(() => {
+			const el = document.getElementById("app-scroll-container");
+			if (el) el.scrollTop = pageScrollTopRef.current;
+		});
+	}, [setOpen]);
+
+	const stopScrollPropagation = React.useCallback(
+		(e: React.WheelEvent | React.TouchEvent) => {
+			e.stopPropagation();
+		},
+		[],
+	);
+
 	const [expanded, setExpanded] = React.useState(false);
 	const maxCollapsedTags = 2;
 	const shouldCollapse = selected.length > 3;
@@ -232,6 +254,28 @@ export function MultiSelectWithTags({
 		};
 	}, []);
 
+	// Keep #app-scroll-container stable while the menu is open. Option loads /
+	// focus updates from Radix can otherwise jump the page back to the top.
+	React.useEffect(() => {
+		if (!open) return;
+		const container = document.getElementById("app-scroll-container");
+		if (!container) return;
+
+		const onScroll = () => {
+			pageScrollTopRef.current = container.scrollTop;
+		};
+		container.addEventListener("scroll", onScroll, { passive: true });
+
+		const frame = window.requestAnimationFrame(() => {
+			container.scrollTop = pageScrollTopRef.current;
+		});
+
+		return () => {
+			container.removeEventListener("scroll", onScroll);
+			window.cancelAnimationFrame(frame);
+		};
+	}, [open, filteredOptions.length, isLoading]);
+
 	const visibleValues =
 		expanded || !shouldCollapse
 			? selected
@@ -241,7 +285,8 @@ export function MultiSelectWithTags({
 		<div className="space-y-2">
 			<DropdownMenu
 				open={open}
-				onOpenChange={setOpen}>
+				onOpenChange={handleOpenChange}
+				modal={false}>
 				<DropdownMenuTrigger asChild>
 					<Button
 						variant="outline"
@@ -261,8 +306,10 @@ export function MultiSelectWithTags({
 
 				<DropdownMenuContent
 					align="start"
-					className="w-[var(--radix-dropdown-menu-trigger-width)] p-0"
-					onCloseAutoFocus={(e) => e.preventDefault()}>
+					className="w-[var(--radix-dropdown-menu-trigger-width)] overflow-hidden p-0"
+					onCloseAutoFocus={(e) => e.preventDefault()}
+					onWheel={stopScrollPropagation}
+					onTouchMove={stopScrollPropagation}>
 					<div className="border-b border-[#E8EAE9] p-3">
 						<div className="relative">
 							<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#5A615D]" />
@@ -284,8 +331,10 @@ export function MultiSelectWithTags({
 					</div>
 
 					<div
-						className="max-h-[200px] overflow-y-auto p-2"
-						onScroll={handleScroll}>
+						className="max-h-[200px] overflow-y-auto overscroll-contain p-2"
+						onScroll={handleScroll}
+						onWheel={stopScrollPropagation}
+						onTouchMove={stopScrollPropagation}>
 						{filteredOptions.length === 0 && isLoading ? (
 							<div className="space-y-2 py-1">
 								{[0, 1, 2, 3, 4].map((i) => (
