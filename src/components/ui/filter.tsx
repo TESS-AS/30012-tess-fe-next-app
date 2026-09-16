@@ -27,12 +27,26 @@ import { Button } from "./button";
 import { Checkbox } from "./checkbox";
 import { SliderFilterInput } from "./slider-filter-input";
 
-type CategoryFilterItem = {
-	assortmentNumber: string;
+/** Union of the two category shapes the FE receives:
+ *  - `assortmentNumber` — legacy from `/filter` (loadFilterFamily)
+ *  - `categoryNumber` + `flag` — new from `/searchList` (PBI2940, 2026-09-10)
+ *  The two IDs refer to the same conceptual "category" — BE just uses
+ *  different names historically. Use `getCategoryId()` below to read the id
+ *  without caring which source produced the row. */
+export type CategoryFilterItem = {
+	assortmentNumber?: string;
+	categoryNumber?: string;
 	nameNo: string;
 	nameEn: string;
 	productCount: number;
+	/** true = BE pre-filtered this category into the current search result set
+	 *  (auto-active); false / undefined = category has hits but isn't part of
+	 *  the current selection. Only present on `/searchList` responses. */
+	flag?: boolean;
 };
+
+const getCategoryId = (cf: CategoryFilterItem): string =>
+	cf.categoryNumber ?? cf.assortmentNumber ?? "";
 
 interface FilterProps
 	extends React.HTMLAttributes<HTMLDivElement>,
@@ -49,6 +63,11 @@ interface FilterProps
 		newCategoryNumber: string,
 		categoryName: string,
 	) => void;
+	/** PBI2940 multi-select category state. When provided, checkboxes are
+	 *  driven by set membership and clicks call `onToggleCategory`. Falls back
+	 *  to the legacy single-select `handleCategoryChange` path if omitted. */
+	selectedCategoryIds?: Set<string>;
+	onToggleCategory?: (id: string) => void;
 }
 
 const filterVariants = cva(
@@ -92,6 +111,8 @@ export const Filter = React.forwardRef<
 			language,
 			categoryFilters,
 			handleCategoryChange,
+			selectedCategoryIds,
+			onToggleCategory,
 			query,
 			...props
 		},
@@ -161,13 +182,21 @@ export const Filter = React.forwardRef<
 
 		const handleCategorySelect = (cf: CategoryFilterItem) => {
 			setOpenAccordions([]);
+			const id = getCategoryId(cf);
 
-			if (selectedCategory === cf.assortmentNumber) {
+			// PBI2940 multi-select path: hand off to parent's Set toggler and
+			// skip the legacy single-select state entirely.
+			if (onToggleCategory) {
+				onToggleCategory(id);
+				return;
+			}
+
+			if (selectedCategory === id) {
 				setSelectedCategory(null);
 				handleCategoryChange?.("", "");
 			} else {
-				setSelectedCategory(cf.assortmentNumber);
-				handleCategoryChange?.(cf.assortmentNumber, cf.nameNo);
+				setSelectedCategory(id);
+				handleCategoryChange?.(id, cf.nameNo);
 			}
 		};
 
@@ -398,9 +427,13 @@ export const Filter = React.forwardRef<
 				{...props}>
 				{Array.isArray(categoryFilters) &&
 					categoryFilters.length > 0 &&
-					(!selectedCategory ||
+					// Multi-select (Set-based) shows the full list always; legacy
+					// single-select hides the picker when a category is already
+					// chosen and not in the current list.
+					(onToggleCategory ||
+						!selectedCategory ||
 						categoryFilters.some(
-							(cf) => cf.assortmentNumber === selectedCategory,
+							(cf) => getCategoryId(cf) === selectedCategory,
 						)) && (
 						<div className="space-y-2">
 							<h3 className="text-md font-semibold">Kategori</h3>
@@ -412,23 +445,32 @@ export const Filter = React.forwardRef<
 									)
 										.filter(
 											(cf) =>
+												// Legacy single-select: hide non-selected rows
+												// once a pick is made. Multi-select: show all.
+												onToggleCategory ||
 												!selectedCategory ||
-												selectedCategory === cf.assortmentNumber,
+												selectedCategory === getCategoryId(cf),
 										)
 										.map((cf) => {
-											const isChecked =
-												selectedCategory === cf.assortmentNumber;
+											const id = getCategoryId(cf);
+											// PBI2940 multi-select: checkbox reads from the Set
+											// prop. Legacy single-select falls back to the local
+											// `selectedCategory` state seeded from `flag: true`.
+											const isChecked = selectedCategoryIds
+												? selectedCategoryIds.has(id)
+												: selectedCategory === id ||
+													(!selectedCategory && cf.flag === true);
 											return (
 												<li
-													key={cf.assortmentNumber}
+													key={id}
 													className="mb-4 flex items-center space-x-2">
 													<Checkbox
-														id={`category-${cf.assortmentNumber}`}
+														id={`category-${id}`}
 														checked={isChecked}
 														onCheckedChange={() => handleCategorySelect(cf)}
 													/>
 													<label
-														htmlFor={`category-${cf.assortmentNumber}`}
+														htmlFor={`category-${id}`}
 														className="cursor-pointer text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
 														<span className="text-green-600 hover:underline">
 															{cf.nameNo}
@@ -442,15 +484,16 @@ export const Filter = React.forwardRef<
 										})}
 								</ul>
 
-								{categoryFilters.length > 5 && !selectedCategory && (
-									<Button
-										variant="link"
-										size="sm"
-										onClick={() => setShowAllCategories((prev) => !prev)}
-										className="text-primary px-0 text-sm hover:underline">
-										{showAllCategories ? "Vis mindre" : "Vis mer"}
-									</Button>
-								)}
+								{categoryFilters.length > 5 &&
+									(onToggleCategory || !selectedCategory) && (
+										<Button
+											variant="link"
+											size="sm"
+											onClick={() => setShowAllCategories((prev) => !prev)}
+											className="text-primary px-0 text-sm hover:underline">
+											{showAllCategories ? "Vis mindre" : "Vis mer"}
+										</Button>
+									)}
 							</div>
 						</div>
 					)}

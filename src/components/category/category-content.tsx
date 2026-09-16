@@ -7,7 +7,6 @@ import { useBreadcrumbs } from "@/hooks/useBreadcrumbs";
 import { useIsBaneNorKatalog } from "@/hooks/useIsBaneNorKatalog";
 import { getCategoryImage } from "@/lib/category-utils";
 import { Category } from "@/types/categories.types";
-import { FilterCategory } from "@/types/filter.types";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
@@ -15,23 +14,14 @@ import { Breadcrumb } from "../ui/breadcrumb";
 
 interface CategoryContentProps {
 	categoryData?: Category;
-	filters: FilterCategory[];
 	query?: string;
 	segment?: string;
-	categoryFilters?: {
-		assortmentNumber: string;
-		nameNo: string;
-		nameEn: string;
-		productCount: number;
-	}[];
 }
 
 export default function CategoryContent({
 	categoryData,
-	filters,
 	query,
 	segment,
-	categoryFilters,
 }: CategoryContentProps) {
 	const t = useTranslations();
 	const breadcrumbs = useBreadcrumbs(segment);
@@ -155,8 +145,6 @@ export default function CategoryContent({
 				<Breadcrumb items={categoryBreadcrumbs} />
 			</div>
 			<ProductGrid
-				filters={filters}
-				categoryFilters={categoryFilters}
 				categoryNumber={categoryData?.groupId || ""}
 				query={query || null}
 			/>
