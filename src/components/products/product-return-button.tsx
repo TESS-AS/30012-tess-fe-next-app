@@ -24,7 +24,7 @@ export function ProductReturnButton() {
 	}, [router]);
 
 	return (
-		<div className="mb-4">
+		<div className="mb-0">
 			<Button
 				type="button"
 				variant="ghost"

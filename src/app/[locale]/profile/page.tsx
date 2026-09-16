@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import OrdersTab from "@/app/[locale]/profile/(components)/tabs/OrdersTab/OrdersTab";
 import PersonalInfoTab from "@/app/[locale]/profile/(components)/tabs/PersonalInfoTab";
@@ -189,6 +189,8 @@ export default function ProfilePage() {
 	}, [currentWorkOrder, activeTab]);
 	const [hasUnsavedSettingsChanges, setHasUnsavedSettingsChanges] =
 		useState(false);
+	const hasUnsavedSettingsChangesRef = useRef(false);
+	hasUnsavedSettingsChangesRef.current = hasUnsavedSettingsChanges;
 	const [isUnsavedDialogOpen, setIsUnsavedDialogOpen] = useState(false);
 	const [pendingTab, setPendingTab] = useState<string | null>(null);
 
@@ -220,7 +222,7 @@ export default function ProfilePage() {
 		if (!tabParam) return;
 
 		// If we're on settings with unsaved changes and URL says another tab, show modal and keep URL on settings
-		if (hasUnsavedSettingsChanges && tabParam !== "settings") {
+		if (hasUnsavedSettingsChangesRef.current && tabParam !== "settings") {
 			setPendingTab(tabParam);
 			setIsUnsavedDialogOpen(true);
 			router.replace(`/profile?tab=settings`, { scroll: false });
@@ -274,7 +276,7 @@ export default function ProfilePage() {
 			// Redirect non-admin/non-employee users away from tess-edi
 			setActiveTab("rekvisisjoner");
 		}
-	}, [searchParams, profile, hasUnsavedSettingsChanges, router]);
+	}, [searchParams, profile, router]);
 
 	// Reset selected order when activeTab changes away from tess-edi or when switching to tess-edi
 	useEffect(() => {
