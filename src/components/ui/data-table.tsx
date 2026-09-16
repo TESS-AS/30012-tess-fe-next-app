@@ -138,19 +138,19 @@ export function DataTable<
 										key={index}
 										className="animate-pulse">
 										{isExpandable && (
-											<td className="w-10 min-w-[40px] border-b border-[#C1C4C2] px-4 py-4">
+											<td className="w-10 min-w-[40px] border-b border-[#C1C4C2] px-3 py-3">
 												<div className="h-4 w-4 rounded bg-gray-200" />
 											</td>
 										)}
 										{safeColumns.map((col) => (
 											<td
 												key={col.key}
-												className="border-b border-[#C1C4C2] px-4 py-4">
+												className="border-b border-[#C1C4C2] px-3 py-3">
 												<div className="h-4 w-full rounded bg-gray-200" />
 											</td>
 										))}
 										{isDropdownColumn && (
-											<td className="sticky right-0 w-20 min-w-[80px] border-b border-[#C1C4C2] px-4 py-4">
+											<td className="sticky right-0 w-20 min-w-[80px] border-b border-[#C1C4C2] px-3 py-3">
 												<div className="ml-auto h-4 w-4 rounded bg-gray-200" />
 											</td>
 										)}
@@ -162,13 +162,13 @@ export function DataTable<
 								<thead className="border-b">
 									<tr>
 										{isExpandable && (
-											<th className="w-10 min-w-[40px] border-b border-[#C1C4C2] bg-[#F8F9F8] px-4 py-4"></th>
+											<th className="w-10 min-w-[40px] border-b border-[#C1C4C2] bg-[#F8F9F8] px-3 py-3"></th>
 										)}
 										{safeColumns.map((column) => (
 											<th
 												key={column.key}
 												className={cn(
-													"border-b border-[#C1C4C2] bg-[#F8F9F8] px-4 py-4 text-left text-sm font-medium text-[#5A615D]",
+													"border-b border-[#C1C4C2] bg-[#F8F9F8] px-3 py-3 text-left text-[13px] font-medium text-[#5A615D]",
 													noWrap && "whitespace-nowrap",
 													{
 														"min-w-[160px]": column.key === "orderId",
@@ -216,7 +216,7 @@ export function DataTable<
 											</th>
 										))}
 										{isDropdownColumn && (
-											<th className="sticky right-0 w-20 min-w-[80px] border-b border-[#C1C4C2] bg-[#F8F9F8] px-4 py-4"></th>
+											<th className="sticky right-0 w-20 min-w-[80px] border-b border-[#C1C4C2] bg-[#F8F9F8] px-3 py-3"></th>
 										)}
 									</tr>
 								</thead>
@@ -226,7 +226,7 @@ export function DataTable<
 										<tr>
 											<td
 												colSpan={emptyColSpan}
-												className="px-4 py-10 text-center text-sm text-[#5A615D]">
+												className="px-3 py-8 text-center text-[14px] text-[#5A615D]">
 												{emptyMessage}
 											</td>
 										</tr>
@@ -270,7 +270,7 @@ export function DataTable<
 															disabled && "cursor-not-allowed",
 														)}>
 														{isExpandable && (
-															<td className="w-10 px-4 py-4">
+															<td className="w-10 px-3 py-3">
 																<Button
 																	variant="ghost"
 																	size="sm"
@@ -299,7 +299,7 @@ export function DataTable<
 															<td
 																key={column.key}
 																className={cn(
-																	"px-4 py-4 font-medium text-[#0F1912]",
+																	"px-3 py-3 text-[14px] font-medium text-[#0F1912]",
 																	noWrap && "whitespace-nowrap",
 																	// column.key === "action" &&
 																	// 	"sticky right-0",
@@ -310,7 +310,7 @@ export function DataTable<
 
 														{isDropdownColumn && (
 															<td
-																className="sticky right-0 bg-white px-4 py-4 text-right group-hover:bg-[#F8F9F8]"
+																className="sticky right-0 bg-white px-3 py-3 text-right group-hover:bg-[#F8F9F8]"
 																onClick={(e) => e.stopPropagation()}>
 																<DropdownMenu>
 																	<DropdownMenuTrigger asChild>
@@ -374,8 +374,8 @@ export function DataTable<
 			</div>
 
 			{showPaginationRow && (
-				<div className="flex items-center justify-between gap-4 px-2 py-4">
-					<div className="flex items-center gap-3 text-sm text-gray-700">
+				<div className="flex items-center justify-between gap-4 px-2 py-3">
+					<div className="flex items-center gap-3 text-[14px] text-gray-700">
 						{showItemsPerPageSelector ? (
 							<>
 								<span>

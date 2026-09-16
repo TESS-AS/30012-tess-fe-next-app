@@ -373,12 +373,12 @@ export default function ProfilePage() {
 				<Skeleton className="mb-4 h-6 w-64" />
 
 				<div className="mx-auto flex gap-6 pt-4">
-					<div className="h-full w-[350px] space-y-4">
+					<div className="h-full w-[260px] space-y-4">
 						<Skeleton className="h-24 w-full rounded-lg" />
 						<Skeleton className="h-[600px] w-full rounded-lg" />
 					</div>
 
-					<div className="w-[calc(100%-350px)] space-y-4">
+					<div className="w-[calc(100%-260px)] space-y-4">
 						<Skeleton className="h-16 w-full rounded-lg" />
 						<Skeleton className="h-[200px] w-full rounded-lg" />
 						<Skeleton className="h-[400px] w-full rounded-lg" />
@@ -514,10 +514,10 @@ export default function ProfilePage() {
 				items={getBreadcrumbItems()}
 				showHome
 			/>
-			<div className="mx-auto flex gap-6 pt-4">
+			<div className="mx-auto flex gap-3 pt-4">
 				<Tabs
 					value={activeTab}
-					className="flex w-full gap-5">
+					className="flex w-full gap-3">
 					<div className="h-full">
 						<SidebarNav
 							activeMode={activeMode}
@@ -686,10 +686,10 @@ export default function ProfilePage() {
 
 					<div
 						className={cn(
-							"min-w-0",
+							"profile-content-panel min-w-0 flex-1",
 							isSidebarCollapsed
-								? "w-[calc(100%-80px)]"
-								: "w-[calc(100%-350px)]",
+								? "w-[calc(100%-68px)]"
+								: "w-[calc(100%-260px)]",
 						)}>
 						<TabsContent
 							value="personal-info"
@@ -723,7 +723,9 @@ export default function ProfilePage() {
 							<OrdreHistorikk customerNumber={profile.defaultCustomerNumber} />
 						</TabsContent>
 
-						<TabsContent value="users">
+						<TabsContent
+							value="users"
+							className="mt-0">
 							<UsersBrukere />
 						</TabsContent>
 
@@ -772,15 +774,21 @@ export default function ProfilePage() {
 							)}
 						</TabsContent>
 
-						<TabsContent value="settings">
+						<TabsContent
+							value="settings"
+							className="mt-0">
 							<InnstillingerTab onDirtyChange={setHasUnsavedSettingsChanges} />
 						</TabsContent>
 
-						<TabsContent value="addresses">
+						<TabsContent
+							value="addresses"
+							className="mt-0">
 							<UserAddressesTab />
 						</TabsContent>
 
-						<TabsContent value="dimensions">
+						<TabsContent
+							value="dimensions"
+							className="mt-0">
 							<Dimensions />
 						</TabsContent>
 
@@ -808,11 +816,15 @@ export default function ProfilePage() {
 							{activeTab === "hose-inspections" && <HoseInspections />}
 						</TabsContent>
 
-						<TabsContent value="orders">
+						<TabsContent
+							value="orders"
+							className="mt-0">
 							<OrdersTab />
 						</TabsContent>
 
-						<TabsContent value="hose-oversikt">
+						<TabsContent
+							value="hose-oversikt"
+							className="mt-0">
 							{activeTab === "hose-oversikt" && (
 								<HoseOverview hoseSystems={hoseSystems} />
 							)}
@@ -824,23 +836,33 @@ export default function ProfilePage() {
 							{activeTab === "hose-replacement" && <HoseReplacement />}
 						</TabsContent>
 
-						<TabsContent value="hose-risk-class">
+						<TabsContent
+							value="hose-risk-class"
+							className="mt-0">
 							<HoseRiskClass />
 						</TabsContent>
 
-						<TabsContent value="hose-requests">
+						<TabsContent
+							value="hose-requests"
+							className="mt-0">
 							<HoseRequests />
 						</TabsContent>
 
-						<TabsContent value="wishlist">
+						<TabsContent
+							value="wishlist"
+							className="mt-0">
 							<p className="text-muted-foreground">My wishlist coming soon.</p>
 						</TabsContent>
 
-						<TabsContent value="password">
+						<TabsContent
+							value="password"
+							className="mt-0">
 							<p className="text-muted-foreground">Change your password.</p>
 						</TabsContent>
 
-						<TabsContent value="ratings">
+						<TabsContent
+							value="ratings"
+							className="mt-0">
 							<p className="text-muted-foreground">Your reviews and ratings.</p>
 						</TabsContent>
 					</div>

@@ -36,22 +36,22 @@ export function RequisitionFilters({
 		allRequisitionsCache.length > 0 ? allRequisitionsCache : requisitions;
 
 	return (
-		<div className="space-y-6 p-6">
+		<div className="space-y-4 p-4">
 			<div className="relative flex w-full max-w-[480px]">
-				<Search className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-[#5A615D]" />
+				<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#5A615D]" />
 				<Input
 					placeholder={labels.searchPlaceholder}
 					value={searchQuery}
 					onChange={(e) => onSearchQueryChange(e.target.value)}
-					className="font-sm h-10 flex-1 rounded-md border border-[#8A8F8C] bg-[#F8F9F8] pr-24 pl-12 text-base text-[#5A615D]"
+					className="font-sm h-9 flex-1 rounded-md border border-[#8A8F8C] bg-[#F8F9F8] pr-24 pl-10 text-sm text-[#5A615D]"
 				/>
 				<Button
 					type="submit"
-					className="absolute top-1/2 right-0 h-10 -translate-y-1/2 rounded-none rounded-r-md border-1 border-l-2 border-[#8A8F8C] bg-white px-4 font-medium text-[#0F1912] hover:bg-white">
+					className="absolute top-1/2 right-0 h-9 -translate-y-1/2 rounded-none rounded-r-md border-1 border-l-2 border-[#8A8F8C] bg-white px-4 text-sm font-medium text-[#0F1912] hover:bg-white">
 					{labels.search}
 				</Button>
 			</div>
-			<div className="flex items-center gap-3 border-t border-[#C1C4C2] pt-6">
+			<div className="flex items-center gap-3 border-t border-[#C1C4C2] pt-4">
 				<p className="text-sm font-bold text-[#0F1912]">{labels.status}:</p>
 				<RadioGroup
 					value={selectedStatus}

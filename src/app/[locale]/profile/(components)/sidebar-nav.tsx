@@ -55,29 +55,30 @@ export function SidebarNav({
 		<nav
 			className={cn(
 				"flex h-[650px] flex-col rounded-lg bg-white transition-all duration-300",
-				isCollapsed ? "w-20" : "min-w-[350px]",
+				isCollapsed ? "w-[68px]" : "w-[260px]",
 			)}>
 			<div className="flex h-full gap-1">
-				<div className="flex flex-col gap-4 py-4 pr-2 pb-30 pl-2">
+				<div className="flex shrink-0 flex-col gap-3 py-3.5 pr-1.5 pb-30 pl-1.5">
 					<button
 						onClick={() => onModeChange("hose")}
 						className={cn(
-							"flex w-16 cursor-pointer flex-col items-center gap-1 rounded-md p-1 text-[10px] font-medium transition-colors",
+							"flex w-[58px] cursor-pointer flex-col items-center gap-1 rounded-md p-0.5 text-[9px] leading-tight font-medium transition-colors",
 						)}>
 						<div
 							className={cn(
-								"flex h-[40px] w-[40px] items-center justify-center rounded",
+								"flex h-9 w-9 items-center justify-center rounded",
 								activeMode === "hose" && "bg-[#DCF7E0]",
 							)}>
 							<Image
 								src={ClipboardSvg}
 								alt="Hose Management"
-								width={24}
-								height={24}
+								width={20}
+								height={20}
 								loading="eager"
+								className="h-5 w-5"
 							/>
 						</div>
-						<span>{t("hoseManagement")}</span>
+						<span className="text-center">{t("hoseManagement")}</span>
 					</button>
 					{profile?.defaultCustomerNumber !==
 						SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
@@ -85,76 +86,79 @@ export function SidebarNav({
 							<button
 								onClick={() => onModeChange("ehandel")}
 								className={cn(
-									"flex w-16 cursor-pointer flex-col items-center gap-1 rounded-md p-1 text-[10px] font-medium transition-colors",
+									"flex w-[58px] cursor-pointer flex-col items-center gap-1 rounded-md p-0.5 text-[9px] leading-tight font-medium transition-colors",
 								)}>
 								<div
 									className={cn(
-										"flex h-[40px] w-[40px] items-center justify-center rounded",
+										"flex h-9 w-9 items-center justify-center rounded",
 										activeMode === "ehandel" && "bg-[#DCF7E0]",
 									)}>
 									<Image
 										src={CartSvg}
 										alt="E-handel"
-										width={24}
-										height={24}
+										width={20}
+										height={20}
 										loading="eager"
+										className="h-5 w-5"
 									/>
 								</div>
-								<span>{t("eCommerce")}</span>
+								<span className="text-center">{t("eCommerce")}</span>
 							</button>
 							{(profile?.role === USER_ROLES.ADMIN ||
 								profile?.role === USER_ROLES.EMPLOYEE) && (
 								<button
 									onClick={() => onModeChange("tess-edi")}
 									className={cn(
-										"flex w-16 cursor-pointer flex-col items-center gap-1 rounded-md p-1 text-[10px] font-medium transition-colors",
+										"flex w-[58px] cursor-pointer flex-col items-center gap-1 rounded-md p-0.5 text-[9px] leading-tight font-medium transition-colors",
 									)}>
 									<div
 										className={cn(
-											"flex h-[40px] w-[40px] items-center justify-center rounded",
+											"flex h-9 w-9 items-center justify-center rounded",
 											activeMode === "tess-edi" && "bg-[#DCF7E0]",
 										)}>
 										<Image
 											src={TessEdiSvg}
 											alt="TESS EDI"
-											width={24}
-											height={24}
+											width={20}
+											height={20}
 											loading="eager"
+											className="h-5 w-5"
 										/>
 									</div>
-									<span>TESS EDI</span>
+									<span className="text-center">TESS EDI</span>
 								</button>
 							)}
 							{(profile?.role === USER_ROLES.ADMIN || profile?.role === USER_ROLES.THM_ADMIN) && (
 								<button
 									onClick={() => onModeChange("thm")}
 									className={cn(
-										"flex w-16 cursor-pointer flex-col items-center gap-1 rounded-md p-1 text-[10px] font-medium transition-colors",
+										"flex w-[58px] cursor-pointer flex-col items-center gap-1 rounded-md p-0.5 text-[9px] leading-tight font-medium transition-colors",
 									)}>
 									<div
 										className={cn(
-											"flex h-[40px] w-[40px] items-center justify-center rounded",
+											"flex h-9 w-9 items-center justify-center rounded",
 											activeMode === "thm" && "bg-[#DCF7E0]",
 										)}>
 										<Image
 											src={ThmProjectsSvg}
 											alt="THM Projects (MSL)"
-											width={24}
-											height={24}
+											width={20}
+											height={20}
 											loading="eager"
+											className="h-5 w-5"
 										/>
 									</div>
-									<span>THM Projects (MSL)</span>
+									<span className="text-center">THM Projects (MSL)</span>
 								</button>
 							)}
 						</>
 					)}
 				</div>
 				<div
-					className={`relative flex w-full flex-col items-end border-l pb-30 ${!isCollapsed ? "pr-4" : ""}`}>
+					className={`relative flex min-w-0 flex-1 flex-col items-end border-l pb-30 ${!isCollapsed ? "pr-2" : ""}`}>
 					{!isCollapsed && (
 						<div className="flex w-full flex-col">
-							<p className="mt-4 ml-6 text-[14px] font-medium uppercase">
+							<p className="mt-3.5 ml-3 text-[12px] font-medium tracking-wide uppercase text-[#5A615D]">
 								{activeMode === "ehandel"
 									? t("eCommerce")
 									: activeMode === "tess-edi"
@@ -163,7 +167,7 @@ export function SidebarNav({
 											? "THM Projects (MSL)"
 											: t("hoseManagement")}
 							</p>
-							<div className="flex w-full flex-col py-2 pl-4">
+							<div className="flex w-full flex-col py-2 pl-2">
 								{items.map((item, index) => {
 									const isActive =
 										pathname === item.href ||
@@ -179,7 +183,7 @@ export function SidebarNav({
 											className={cn(
 												"flex flex-col",
 												item.href === "settings" &&
-													"mt-4 border-t border-gray-200 pt-4",
+													"mt-3.5 border-t border-gray-200 pt-3.5",
 											)}>
 											<button
 												onClick={() => {
@@ -190,32 +194,33 @@ export function SidebarNav({
 													}
 												}}
 												className={cn(
-													"mb-2 flex w-full cursor-pointer items-center justify-between rounded-md p-2 text-base font-medium transition-colors",
+													"mb-1.5 flex w-full cursor-pointer items-center justify-between rounded-md px-2 py-1.5 text-[14px] font-medium transition-colors",
 													isActive &&
 														!item.subitems &&
 														"bg-[#DCF7E0] text-[#1C6D2C]",
 													item.variant === "logout" &&
-														"mt-4 text-red-600 hover:text-red-700",
+														"mt-3.5 text-red-600 hover:text-red-700",
 												)}>
 												<div
 													className={cn(
-														"flex items-center gap-3",
+														"flex items-center gap-2.5",
 														isCollapsed && "justify-center",
 													)}>
 													{isImageSource(item.icon) ? (
 														<Image
 															src={item.icon}
 															alt=""
-															width={20}
-															height={20}
+															width={18}
+															height={18}
 															loading="eager"
+															className="h-[18px] w-[18px]"
 														/>
 													) : (
 														(() => {
 															const IconComp = item.icon as
 																| LucideIcon
 																| ComponentType<SVGProps<SVGSVGElement>>;
-															return <IconComp className="h-5 w-5" />;
+															return <IconComp className="h-[18px] w-[18px]" />;
 														})()
 													)}
 													{!isCollapsed && <span>{item.label}</span>}
@@ -226,7 +231,7 @@ export function SidebarNav({
 												{item.subitems && (
 													<ChevronRight
 														className={cn(
-															"h-5 w-5 shrink-0 text-gray-400 transition-transform",
+															"h-4 w-4 shrink-0 text-gray-400 transition-transform",
 															expandedItems.includes(item.href) && "rotate-90",
 														)}
 													/>
@@ -234,7 +239,7 @@ export function SidebarNav({
 											</button>
 
 											{item.subitems && expandedItems.includes(item.href) && (
-												<div className="flex flex-col gap-1">
+												<div className="flex flex-col gap-0.5">
 													{item.subitems.map((subitem) => (
 														<Link
 															key={subitem.href}
@@ -244,13 +249,13 @@ export function SidebarNav({
 																onTabChange?.(subitem.href);
 															}}
 															className={cn(
-																"mb-1 flex cursor-pointer items-center rounded-md px-3 py-1.5 text-sm transition-colors",
+																"mb-0.5 flex cursor-pointer items-center rounded-md px-2.5 py-1 text-[13px] transition-colors",
 																subitem.href === activeTab
 																	? "bg-[#DCF7E0] text-[#1C6D2C]"
-																	: "ml-7 text-[#5A615D]",
+																	: "ml-6 text-[#5A615D]",
 															)}>
 															{subitem.href === activeTab && (
-																<ArrowRight className="me-2 h-4 w-4 text-[#1C6D2C]" />
+																<ArrowRight className="me-1.5 h-3.5 w-3.5 text-[#1C6D2C]" />
 															)}
 															{!isCollapsed && <span>{subitem.label}</span>}
 														</Link>
@@ -265,10 +270,10 @@ export function SidebarNav({
 					)}
 					<button
 						onClick={toggleCollapse}
-						className="absolute right-2 bottom-4 flex w-16 cursor-pointer items-center justify-center rounded-md">
+						className="absolute right-1 bottom-4 flex w-10 cursor-pointer items-center justify-center rounded-md">
 						<ChevronLeft
 							className={cn(
-								"h-5 w-5 transition-transform",
+								"h-4 w-4 transition-transform",
 								isCollapsed && "rotate-180",
 							)}
 						/>

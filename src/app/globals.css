@@ -204,3 +204,44 @@
 		}
 	}
 }
+
+/* Mid-density profile content — aligns right panel with sidebar (14px items / 18px icons) */
+.profile-content-panel {
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+.profile-content-panel .text-2xl {
+	font-size: 1.375rem !important; /* 22px — between original 24px and compact 20px */
+	line-height: 1.875rem !important;
+}
+
+.profile-content-panel .text-xl {
+	font-size: 1.25rem !important; /* 20px */
+	line-height: 1.75rem !important;
+}
+
+.profile-content-panel .text-lg {
+	font-size: 1.0625rem !important; /* 17px */
+	line-height: 1.5rem !important;
+}
+
+.profile-content-panel .text-base {
+	font-size: 0.9375rem !important; /* 15px — subtitles / body */
+	line-height: 1.4rem !important;
+}
+
+.profile-content-panel .text-sm {
+	font-size: 0.875rem !important; /* 14px */
+	line-height: 1.3rem !important;
+}
+
+.profile-content-panel .text-xs {
+	font-size: 0.75rem !important; /* 12px */
+	line-height: 1.1rem !important;
+}
+
+.profile-content-panel h1 {
+	font-size: 1.375rem;
+	line-height: 1.875rem;
+}
