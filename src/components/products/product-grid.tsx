@@ -22,27 +22,16 @@ import { Filter } from "../ui/filter";
 
 interface ProductGridProps {
 	variant?: "default" | "compact";
-	filters: FilterCategory[];
 	categoryNumber: string;
 	categoryName?: string;
 	query: string | null;
-	categoryFilters?: {
-		assortmentNumber?: string;
-		categoryNumber?: string;
-		nameNo: string;
-		nameEn: string;
-		productCount: number;
-		flag?: boolean;
-	}[];
 }
 
 export function ProductGrid({
 	variant = "default",
-	filters,
 	categoryNumber,
 	categoryName,
 	query,
-	categoryFilters,
 }: ProductGridProps) {
 	const t = useTranslations();
 	const pathname = usePathname();
@@ -51,10 +40,12 @@ export function ProductGrid({
 	const [isFiltering, setIsFiltering] = useState(false);
 	const [viewLayout, setViewLayout] = useState<string>("grid");
 	const observerTarget = useRef<HTMLDivElement>(null);
-	const [filtersState, setFiltersState] = useState(filters);
-	const [categoryFiltersState, setCategoryFiltersState] = useState(
-		categoryFilters ?? [],
-	);
+	// `filtersState` and `categoryFiltersState` are populated by
+	// `useProductFilter` via `onFiltersUpdate` / `onCategoriesUpdate`. No
+	// prop-sync path here — that previously raced against the narrow /filter
+	// response and clobbered it back to the broad set.
+	const [filtersState, setFiltersState] = useState<FilterCategory[]>([]);
+	const [categoryFiltersState, setCategoryFiltersState] = useState<any[]>([]);
 	const isLoadingMoreRef = useRef(false);
 	const loadMoreTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const {
@@ -119,20 +110,15 @@ export function ProductGrid({
 		return filterLabelByIdentifier[key] ?? key;
 	};
 
+	// Reset the load-more machinery when the query changes so a stale
+	// timeout can't dispatch a fetchNextPage against the previous result set.
 	useEffect(() => {
-		if (filters.length > 0) {
-			setFiltersState(filters);
-		}
-		if (categoryFilters && categoryFilters.length > 0) {
-			setCategoryFiltersState(categoryFilters);
-		}
-		// Reset loading state when filters or query change
 		isLoadingMoreRef.current = false;
 		if (loadMoreTimeoutRef.current) {
 			clearTimeout(loadMoreTimeoutRef.current);
 			loadMoreTimeoutRef.current = null;
 		}
-	}, [filters, query]);
+	}, [query]);
 
 	useEffect(() => {
 		if (!isLoading) {

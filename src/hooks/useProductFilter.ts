@@ -124,17 +124,14 @@ export function useProductFilter({
 	]);
 
 	// PBI2940: forward BE-inferred categories from /searchList to consumers
-	// via the existing `onCategoriesUpdate` callback so the sidebar receives
-	// the full list (both flag=true and flag=false). Only fires when the
-	// response actually carries `flag` info — otherwise `loadFilterFamily`-
-	// style (flagless) payloads would silently strip the checked highlighting.
+	// via the `onCategoriesUpdate` callback. This is now the single source for
+	// the sidebar category list (parent pages no longer preload it), so we
+	// forward whenever categories are present — with or without `flag` data.
+	// The seed effect above still short-circuits when no flags are set, so
+	// flagless browse responses correctly leave `selectedCategoryIds` empty.
 	useEffect(() => {
 		if (!onCategoriesUpdate) return;
 		if (!inferredCategories.length) return;
-		const hasFlagData = inferredCategories.some(
-			(c) => c.flag !== undefined,
-		);
-		if (!hasFlagData) return;
 		onCategoriesUpdate(inferredCategories);
 	}, [inferredCategories, onCategoriesUpdate]);
 
