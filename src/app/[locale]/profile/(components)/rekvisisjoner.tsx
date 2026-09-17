@@ -70,6 +70,7 @@ export function Rekvisisjoner() {
 	} = useRequisitionActions({
 		customerNumber,
 		companyNumber,
+		warehouseNumber: profile?.defaultWarehouseNumber?.toString() ?? "",
 		isCustomerRole,
 		getRequisitions,
 		onApproveSuccess: handleApproveSuccess,

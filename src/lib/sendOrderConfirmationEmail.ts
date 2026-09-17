@@ -45,6 +45,11 @@ interface SendOrderConfirmationEmailParams {
 	/** Used to look up the fulfilling warehouse's email so it can be CC'd. */
 	warehouseNumber?: string;
 	companyNumber?: string | number;
+	/** When present, BE overrides `toEmail` with the placer's address instead
+	 *  of the approver's. Only set for requisition checkouts — direct orders
+	 *  leave this undefined so the approver (buyer) receives the confirmation
+	 *  as usual. */
+	requisitionId?: number;
 }
 
 /**
@@ -118,6 +123,7 @@ export async function sendOrderConfirmationEmail({
 	selectedAddress,
 	warehouseNumber,
 	companyNumber,
+	requisitionId,
 }: SendOrderConfirmationEmailParams): Promise<void> {
 	const recipient = contactPerson.email?.trim();
 	if (!recipient) return;
@@ -212,7 +218,14 @@ export async function sendOrderConfirmationEmail({
 		}
 		formData.append("category", "OrderConfirmation");
 
-		await axiosClient.post("/sendgrid/sendEmail", formData);
+		// Attach `?requisitionId=` only when this is a requisition checkout —
+		// BE reads it from `req.query` to reroute `toEmail` from the approver
+		// to the placer (`sendGrid/controller/postToSendGridController.ts`).
+		const endpoint =
+			requisitionId != null
+				? `/sendgrid/sendEmail?requisitionId=${encodeURIComponent(requisitionId)}`
+				: "/sendgrid/sendEmail";
+		await axiosClient.post(endpoint, formData);
 	} catch (err) {
 		console.error("Failed to send order confirmation email", err);
 	}

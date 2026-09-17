@@ -15,6 +15,7 @@ type PendingRequisitionAction = {
 interface UseRequisitionActionsParams {
 	customerNumber: string;
 	companyNumber: string;
+	warehouseNumber: string;
 	isCustomerRole: boolean;
 	getRequisitions: () => void;
 	onApproveSuccess: (rekvisisjon: Rekvisisjon) => void;
@@ -23,6 +24,7 @@ interface UseRequisitionActionsParams {
 export function useRequisitionActions({
 	customerNumber,
 	companyNumber,
+	warehouseNumber,
 	isCustomerRole,
 	getRequisitions,
 	onApproveSuccess,
@@ -74,7 +76,7 @@ export function useRequisitionActions({
 							productNumber: item.productNumber,
 							itemNumber: item.itemNumber,
 							quantity: item.quantity,
-							warehouseNumber: "1",
+							warehouseNumber,
 							companyNumber,
 						});
 					}
@@ -101,6 +103,7 @@ export function useRequisitionActions({
 		[
 			customerNumber,
 			companyNumber,
+			warehouseNumber,
 			runRequisitionAction,
 			setIsCartChanging,
 			setRequisitionPlacerInfo,

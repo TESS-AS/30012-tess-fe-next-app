@@ -54,6 +54,7 @@ export function useProductFilter({
 		toggle: toggleCategory,
 		remove: removeCategory,
 		setAll: setAllCategories,
+		clear: clearCategories,
 	} = useCategoryMultiSelect();
 
 	const {
@@ -209,7 +210,16 @@ export function useProductFilter({
 
 	const handleFilterChange = useCallback(
 		(filters: FilterValues[], categoryOverride?: string) => {
-			const effectiveCategoryNumber = categoryOverride ?? categoryNumber;
+			// Prefer an explicit override, then the current multi-select set,
+			// then the page's URL-slug category. Without the multi-select
+			// fallback, toggling an attribute filter on a search page with
+			// categories selected would fire /filter without any `cat=` param
+			// and BE would return the broad (non-narrowed) attribute set.
+			const effectiveCategoryNumber =
+				categoryOverride ??
+				(selectedCategoryIdsArray.length > 0
+					? selectedCategoryIdsArray.join(",")
+					: categoryNumber);
 
 			// Optimistic local updates so chips + sidebar react immediately
 			setCurrentFilters(filters?.length > 0 ? filters : null);
@@ -271,6 +281,7 @@ export function useProductFilter({
 			onFiltersUpdate,
 			onCategoriesUpdate,
 			categoryNumber,
+			selectedCategoryIdsArray,
 			query,
 		],
 	);
@@ -449,12 +460,28 @@ export function useProductFilter({
 		}
 	}, [initialCategoryNumber]);
 
+	// Reset per-query state when the user searches for something new. Guarded
+	// with a ref-tracked previous value so this only fires on actual query
+	// CHANGES — not on the initial mount, which would otherwise wipe a shared
+	// link that arrives with `?cats=` pre-populated.
+	const previousQueryRef = useRef<string | null | undefined>(undefined);
 	useEffect(() => {
-		if (query) {
-			setCategoryNumber("");
-			setCurrentFilters(null);
-		}
-	}, [query]);
+		const prev = previousQueryRef.current;
+		previousQueryRef.current = query;
+		if (prev === undefined) return;
+		if (prev === query) return;
+
+		setCategoryNumber("");
+		setCurrentFilters(null);
+		// Drop the previous search's multi-select and its `?cats=` URL param so
+		// the new query's `flag: true` rows can seed unopposed.
+		clearCategories();
+		// Force the seed guard to re-run against the fresh query.
+		seededForQueryRef.current = null;
+		// Blank the sidebar category list optimistically — it repopulates from
+		// the incoming /searchList response instead of showing stale items.
+		onCategoriesUpdate?.([]);
+	}, [query, clearCategories, onCategoriesUpdate]);
 
 	return {
 		products,

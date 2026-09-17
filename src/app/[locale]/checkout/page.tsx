@@ -296,6 +296,7 @@ export default function CheckoutPage() {
 						selectedAddress,
 						warehouseNumber: profile?.defaultWarehouseNumber,
 						companyNumber: profile?.defaultCompanyNumber,
+						requisitionId: requisitionPlacerInfo?.requisitionId,
 					});
 				}
 			} catch (error) {
