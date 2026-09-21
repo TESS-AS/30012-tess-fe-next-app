@@ -244,7 +244,9 @@ export default function ProfilePage() {
 		if (hoseTabs.has(tabParam)) {
 			setActiveMode("hose");
 		}
-		if (tabParam === "settings") {
+		if (tabParam === "ordrehistorikk") {
+			setActiveMode("ehandel");
+		} else if (tabParam === "settings") {
 			setActiveMode("ehandel");
 		}
 		if (tabParam?.startsWith("thm-")) {
@@ -316,8 +318,12 @@ export default function ProfilePage() {
 		}
 		setActiveMode(mode);
 		if (mode === "ehandel") {
-			setActiveTab("rekvisisjoner");
-			router.replace("/profile?tab=rekvisisjoner", { scroll: false });
+			const isEquinor =
+				profile?.defaultCustomerNumber ===
+				SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
+			const ehandelTab = isEquinor ? "ordrehistorikk" : "rekvisisjoner";
+			setActiveTab(ehandelTab);
+			router.replace(`/profile?tab=${ehandelTab}`, { scroll: false });
 		} else if (mode === "hose") {
 			setActiveTab("hose-orders");
 			router.replace("/profile?tab=hose-orders", { scroll: false });
@@ -443,7 +449,10 @@ export default function ProfilePage() {
 				? "hose-orders"
 				: activeMode === "tess-edi"
 					? "tess-edi"
-					: "mine-bestillinger";
+					: profile.defaultCustomerNumber ===
+						  SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+						? "ordrehistorikk"
+						: "mine-bestillinger";
 
 		items.push({
 			href: "/profile",
@@ -563,7 +572,17 @@ export default function ProfilePage() {
 							profile={profile}
 							items={
 								activeMode === "ehandel"
-									? [
+									? profile.defaultCustomerNumber ===
+										SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+										? [
+												{
+													href: "ordrehistorikk",
+													label: t("ProfilePage.sidebar.orderHistory"),
+													icon: ShoppingCart,
+												},
+												...commonBottomItems,
+											]
+										: [
 											...(profile.role === USER_ROLES.ADMIN ||
 											profile.role === USER_ROLES.SUPERUSER
 												? [

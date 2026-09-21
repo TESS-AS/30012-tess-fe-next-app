@@ -9,6 +9,10 @@ import {
 	triggerProfileRefetch,
 } from "@/hooks/usePunchoutProfile";
 import { useCategories } from "@/lib/CategoriesProvider";
+import {
+	extractS1FromUnknownPayload,
+	rememberPunchoutS1,
+} from "@/lib/equinor-s1-storage";
 import axiosClient from "@/services/axiosClient";
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
@@ -59,6 +63,20 @@ export default function PunchoutSessionPage() {
 				await new Promise((resolve) => setTimeout(resolve, 200));
 
 				const { data: user } = await axiosClient.get("/user");
+				const userProfile = Array.isArray(user) ? user[0] : user;
+
+				// PBI 2584: remember S1/Lokasjon from punchout login payload
+				const punchoutS1 =
+					extractS1FromUnknownPayload(response.data) ??
+					extractS1FromUnknownPayload(userProfile) ??
+					extractS1FromUnknownPayload(user);
+				if (
+					userProfile?.defaultCustomerNumber ===
+						SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER &&
+					punchoutS1
+				) {
+					rememberPunchoutS1(punchoutS1);
+				}
 
 				triggerProfileRefetch();
 
@@ -71,7 +89,7 @@ export default function PunchoutSessionPage() {
 				await new Promise((resolve) => setTimeout(resolve, 200));
 
 				if (
-					user[0]?.defaultCustomerNumber ===
+					userProfile?.defaultCustomerNumber ===
 					SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
 				) {
 					router.push("/profile");

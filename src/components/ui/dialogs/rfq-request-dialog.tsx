@@ -12,7 +12,6 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
 	Select,
 	SelectContent,
@@ -55,8 +54,7 @@ export function RFQRequestDialog({
 		profile?.defaultCustomerNumber ===
 		SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
 
-	const [contactMethod, setContactMethod] =
-		React.useState<HoseContactMethod | "">("");
+	const [preferPhone, setPreferPhone] = React.useState(false);
 	const [contactValue, setContactValue] = React.useState("");
 	// Non-Equinor: delivery address. Equinor: user email (same form slot).
 	const [deliveryAddress, setDeliveryAddress] = React.useState("");
@@ -71,12 +69,11 @@ export function RFQRequestDialog({
 		selectedIds?: string;
 		deliveryAddress?: string;
 		warehouseNumber?: string;
-		contactMethod?: string;
 		contactValue?: string;
 	}>({});
 
 	const { warehouses, isLoading: isLoadingWarehouses } = useGetWarehouses(
-		open && !!profile,
+		open && !!profile && !isEquinor,
 		profile?.defaultCompanyNumber,
 	);
 
@@ -87,30 +84,40 @@ export function RFQRequestDialog({
 			setIncludePressureTest(isEquinor);
 			setWarehouseNumber(profile?.defaultWarehouseNumber ?? "");
 			setDeliveryAddress(isEquinor ? (profile?.email ?? "") : "");
+			setPreferPhone(false);
+			setContactValue("");
 		}
 	}, [open, isEquinor, profile?.defaultWarehouseNumber, profile?.email]);
 
 	React.useEffect(() => {
+		if (isEquinor) return;
 		if (!open || warehouseNumber || warehouses.length === 0) return;
 		const defaultWarehouse = profile?.defaultWarehouseNumber;
 		const match = warehouses.find((w) => w.id === defaultWarehouse);
 		setWarehouseNumber(match?.id ?? warehouses[0].id);
-	}, [open, warehouses, warehouseNumber, profile?.defaultWarehouseNumber]);
+	}, [
+		open,
+		isEquinor,
+		warehouses,
+		warehouseNumber,
+		profile?.defaultWarehouseNumber,
+	]);
 
-	// Prefill contact value when method changes
+	// Prefill phone when "Ring meg" is enabled
 	React.useEffect(() => {
 		if (!profile) return;
-		if (contactMethod === "phone") {
+		if (preferPhone) {
 			setContactValue(profile.phoneNumber ?? "");
-		} else if (contactMethod === "email") {
-			setContactValue(profile.email ?? "");
+		} else {
+			setContactValue("");
 		}
-	}, [contactMethod, profile]);
+	}, [preferPhone, profile]);
 
 	const selectedWarehouse = warehouses.find((w) => w.id === warehouseNumber);
+	const contactMethod: HoseContactMethod = preferPhone ? "phone" : "email";
 
 	const resetForm = () => {
-		setContactMethod("");
+		setPreferPhone(false);
 		setContactValue("");
 		setDeliveryAddress("");
 		setWarehouseNumber("");
@@ -153,15 +160,15 @@ export function RFQRequestDialog({
 			nextErrors.deliveryAddress = "Skriv inn en gyldig e-postadresse.";
 		}
 		if (!warehouseNumber) {
-			nextErrors.warehouseNumber = "Velg lager.";
+			// Equinor punchout users can't pick a warehouse — use profile default.
+			if (!(isEquinor && profile?.defaultWarehouseNumber)) {
+				nextErrors.warehouseNumber = "Velg lager.";
+			}
 		}
-		if (!contactMethod) {
-			nextErrors.contactMethod = "Velg hvordan vi skal kontakte deg.";
-		} else if (!contactValue.trim()) {
-			nextErrors.contactValue =
-				contactMethod === "phone"
-					? "Fyll inn telefonnummer."
-					: "Fyll inn e-postadresse.";
+		if (preferPhone && !contactValue.trim()) {
+			nextErrors.contactValue = "Fyll inn telefonnummer.";
+		} else if (!preferPhone && !isEquinor && !(profile?.email ?? "").trim()) {
+			nextErrors.contactValue = "Fyll inn e-postadresse.";
 		}
 
 		setErrors(nextErrors);
@@ -180,6 +187,19 @@ export function RFQRequestDialog({
 			`${profile.firstName ?? ""} ${profile.lastName ?? ""}`.trim() ||
 			"Ukjent bruker";
 
+		const resolvedContactValue = preferPhone
+			? contactValue.trim()
+			: isEquinor
+				? deliveryAddress.trim()
+				: (profile.email ?? "").trim();
+
+		const resolvedWarehouseNumber = isEquinor
+			? (profile.defaultWarehouseNumber ?? warehouseNumber)
+			: (selectedWarehouse?.id ?? warehouseNumber);
+		const resolvedWarehouseName = isEquinor
+			? ""
+			: (selectedWarehouse?.name ?? "");
+
 		const htmlBody = buildHoseRfqEmailHtml({
 			caseId: generatedCaseId,
 			userName,
@@ -187,12 +207,12 @@ export function RFQRequestDialog({
 			userPhone: profile.phoneNumber,
 			customerNumber,
 			companyName,
-			contactMethod: contactMethod as HoseContactMethod,
-			contactValue: contactValue.trim(),
+			contactMethod,
+			contactValue: resolvedContactValue,
 			deliveryAddress: deliveryAddress.trim(),
 			deliveryAddressLabel: isEquinor ? "E-post" : "Leveringsadresse",
-			warehouseNumber: selectedWarehouse?.id ?? warehouseNumber,
-			warehouseName: selectedWarehouse?.name ?? "",
+			warehouseNumber: resolvedWarehouseNumber,
+			warehouseName: resolvedWarehouseName,
 			comment: comment.trim(),
 			includePressureTest,
 			urgent,
@@ -314,75 +334,71 @@ export function RFQRequestDialog({
 								)}
 							</div>
 
-							<div className="space-y-1">
-								<label className="text-sm font-medium text-[#0F1912]">
-									Lager
-								</label>
-								<Select
-									value={warehouseNumber}
-									onValueChange={(value) => {
-										setWarehouseNumber(value);
-										clearError("warehouseNumber");
-									}}
-									disabled={isLoadingWarehouses || warehouses.length === 0}>
-									<SelectTrigger
-										className={cn(
-											"w-full border-[#8A8F8C] bg-[#F8F9F8] text-[#0F1912]",
-											errors.warehouseNumber && "border-[#B42318]",
-										)}>
-										<SelectValue
-											placeholder={
-												isLoadingWarehouses
-													? "Laster lagre..."
-													: "Velg lager"
-											}
-										/>
-									</SelectTrigger>
-									<SelectContent className="max-h-[280px]">
-										{warehouses.map((warehouse) => (
-											<SelectItem
-												key={warehouse.id}
-												value={warehouse.id}>
-												{warehouse.name} ({warehouse.id})
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-								{errors.warehouseNumber && (
-									<p className="text-sm text-[#B42318]">
-										{errors.warehouseNumber}
-									</p>
-								)}
-							</div>
+							{!isEquinor && (
+								<div className="space-y-1">
+									<label className="text-sm font-medium text-[#0F1912]">
+										Lager
+									</label>
+									<Select
+										value={warehouseNumber}
+										onValueChange={(value) => {
+											setWarehouseNumber(value);
+											clearError("warehouseNumber");
+										}}
+										disabled={isLoadingWarehouses || warehouses.length === 0}>
+										<SelectTrigger
+											className={cn(
+												"w-full border-[#8A8F8C] bg-[#F8F9F8] text-[#0F1912]",
+												errors.warehouseNumber && "border-[#B42318]",
+											)}>
+											<SelectValue
+												placeholder={
+													isLoadingWarehouses
+														? "Laster lagre..."
+														: "Velg lager"
+												}
+											/>
+										</SelectTrigger>
+										<SelectContent className="max-h-[280px]">
+											{warehouses.map((warehouse) => (
+												<SelectItem
+													key={warehouse.id}
+													value={warehouse.id}>
+													{warehouse.name} ({warehouse.id})
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+									{errors.warehouseNumber && (
+										<p className="text-sm text-[#B42318]">
+											{errors.warehouseNumber}
+										</p>
+									)}
+								</div>
+							)}
 
 							<div className="space-y-2">
 								<p className="text-sm font-medium text-[#0F1912]">
 									Hvordan vil du at vi kontakter deg?
 								</p>
-								<RadioGroup
-									value={contactMethod}
-									onValueChange={(value) => {
-										setContactMethod(value as HoseContactMethod);
-										clearError("contactMethod");
-										clearError("contactValue");
-									}}>
-									<label className="flex cursor-pointer items-center gap-2 text-sm text-[#0F1912]">
-										<RadioGroupItem value="phone" />
-										Ring meg
-									</label>
-									<label className="flex cursor-pointer items-center gap-2 text-sm text-[#0F1912]">
-										<RadioGroupItem value="email" />
-										Send meg en e-post
-									</label>
-								</RadioGroup>
-								{errors.contactMethod && (
-									<p className="text-sm text-[#B42318]">
-										{errors.contactMethod}
-									</p>
-								)}
+								<p className="text-xs text-[#5A615D]">
+									{isEquinor
+										? "Vi sender svar til e-postadressen over. Velg «Ring meg» hvis du heller vil bli oppringt."
+										: "Vi sender svar til e-postadressen på profilen din. Velg «Ring meg» hvis du heller vil bli oppringt."}
+								</p>
+								<label className="flex cursor-pointer items-center gap-2 text-sm text-[#0F1912]">
+									<Checkbox
+										checked={preferPhone}
+										onCheckedChange={(checked) => {
+											setPreferPhone(checked === true);
+											clearError("contactValue");
+										}}
+									/>
+									Ring meg
+								</label>
 							</div>
 
-							{contactMethod === "phone" && (
+							{preferPhone && (
 								<div className="space-y-1">
 									<label className="text-sm font-medium text-[#0F1912]">
 										Telefonnummer
@@ -395,33 +411,6 @@ export function RFQRequestDialog({
 											clearError("contactValue");
 										}}
 										inputMode="tel"
-										aria-invalid={!!errors.contactValue}
-										className={cn(
-											errors.contactValue &&
-												"border-[#B42318] focus-visible:ring-[#B42318]",
-										)}
-									/>
-									{errors.contactValue && (
-										<p className="text-sm text-[#B42318]">
-											{errors.contactValue}
-										</p>
-									)}
-								</div>
-							)}
-
-							{contactMethod === "email" && (
-								<div className="space-y-1">
-									<label className="text-sm font-medium text-[#0F1912]">
-										E-postadresse
-									</label>
-									<Input
-										placeholder="navn@firma.no (forhåndsutfylt, redigerbart)"
-										value={contactValue}
-										onChange={(e) => {
-											setContactValue(e.target.value);
-											clearError("contactValue");
-										}}
-										inputMode="email"
 										aria-invalid={!!errors.contactValue}
 										className={cn(
 											errors.contactValue &&
