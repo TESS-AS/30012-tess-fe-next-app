@@ -3,7 +3,11 @@
 import { useState } from "react";
 
 import { FeedbackDialog } from "@/components/ui/dialogs/feedback-dialog";
-import { HALLIBURTON_CUSTOMER_NUMBER } from "@/constants/checkout";
+import {
+	HALLIBURTON_CUSTOMER_NUMBERS,
+	HALLIBURTON_GLOVES_GUIDE_URL,
+	HALLIBURTON_PPE_CATALOG_URL,
+} from "@/constants/checkout";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import Image from "next/image";
 
@@ -15,8 +19,9 @@ export default function MainCategorySection() {
 		return null;
 	}
 
-	const isHalliburton =
-		profile?.defaultCustomerNumber === HALLIBURTON_CUSTOMER_NUMBER;
+	const isHalliburton = HALLIBURTON_CUSTOMER_NUMBERS.includes(
+		profile?.defaultCustomerNumber ?? "",
+	);
 
 	return (
 		<>
@@ -28,10 +33,44 @@ export default function MainCategorySection() {
 								Velkommen til TESSIX Netthandel
 							</h2>
 							<div className="space-y-4 md:space-y-6">
+								<p className="mb-0 text-lg leading-relaxed font-medium text-gray-900 md:text-xl">
+									Vi utvikler stadig løsningen
+								</p>
+								{isHalliburton && (
+									<div className="pt-2 md:pt-4">
+										<p className="text-sm leading-relaxed text-gray-900 md:text-base">
+											Welcome to Halliburton&rsquo;s Contract Products
+											Catalog. Here you will find all approved contract
+											products within hoses, tools, and PPE.
+										</p>
+										<p className="text-sm leading-relaxed text-gray-900 md:text-base">
+											For PPE, you can filter by &ldquo;Offshore&rdquo;,
+											&ldquo;Workshop&rdquo;, or &ldquo;Base&rdquo; to view
+											products approved for each location.
+										</p>
+										<p className="text-sm leading-relaxed text-gray-900 md:text-base">
+											Products within the PPE and Tools categories can be
+											purchased against a cost center, subject to the
+											required approval. Your shopping cart will be submitted
+											to your manager for approval before processing.
+										</p>
+										<p className="text-sm leading-relaxed text-gray-900 md:text-base">
+											For stocked items, no requisition is required. These
+											products can be collected as usual through TESSGate or
+											PartnerShop.
+										</p>
+										<p className="text-sm leading-relaxed text-gray-900 md:text-base">
+											For other inquiries, please contact{" "}
+											<a
+												href="mailto:Halliburton@tess.no"
+												className="text-green-700 hover:text-green-900">
+												Halliburton@tess.no
+											</a>{" "}
+											&ndash; Phone 955 04 040
+										</p>
+									</div>
+								)}
 								<div className="space-y-1">
-									<p className="mb-0 text-base leading-relaxed font-semibold text-gray-500 md:text-lg">
-										Vi utvikler stadig løsningen
-									</p>
 									<p className="mb-0 text-base leading-relaxed text-gray-500 md:text-lg">
 										Har du forslag som gjør arbeidsdagen din enklere?
 									</p>
@@ -72,13 +111,31 @@ export default function MainCategorySection() {
 												PPE-tilbakemeldingsundersøkelse for Halliburton-ansatte
 											</a>
 										</p>
+										<p className="text-base leading-relaxed text-gray-500 md:text-lg">
+											<a
+												href={HALLIBURTON_GLOVES_GUIDE_URL}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="text-green-700 hover:text-green-900">
+												Working Gloves Guide
+											</a>
+										</p>
+										<p className="text-base leading-relaxed text-gray-500 md:text-lg">
+											<a
+												href={HALLIBURTON_PPE_CATALOG_URL}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="text-green-700 hover:text-green-900">
+												PPE Product Catalog
+											</a>
+										</p>
 									</div>
 								)}
 							</div>
 						</div>
 
 						<div className="flex justify-center md:justify-end">
-							<figure className="w-full max-w-[640px] text-center">
+							<figure className="w-full max-w-[640px] text-center md:max-w-none">
 								<Image
 									src="/images/presentation.svg"
 									alt="Woman presenting at TESS conference"

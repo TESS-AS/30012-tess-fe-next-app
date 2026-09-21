@@ -65,8 +65,21 @@ export const shippingFields: Omit<FormFieldProps, "value" | "onChange">[] = [
 export const HIDE_CHECKOUT_FOR_SPECIFIC_CUSTOMER_NUMBER = "169999";
 //this is Equinor
 export const SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER = "184200";
-//this is Halliburton
-export const HALLIBURTON_CUSTOMER_NUMBER = "221443";
+// Halliburton has multiple customer accounts in `customer.customer` (per legal
+// entity / region / contract). Membership in this list is what gates the
+// Halliburton-specific welcome content on the homepage — add new numbers here
+// rather than duplicating the check.
+export const HALLIBURTON_CUSTOMER_NUMBERS: readonly string[] = [
+	"221443",
+	"297511",
+];
+
+// Halliburton-only downloads surfaced on the welcome page. Files live under
+// `public/halliburton/` so they ship with the app; swap either file in place
+// (same filename) and redeploy to publish a revision.
+export const HALLIBURTON_GLOVES_GUIDE_URL =
+	"/halliburton/working-gloves-guide.xlsx";
+export const HALLIBURTON_PPE_CATALOG_URL = "/halliburton/ppe-catalog.pdf";
 export const SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER = [
 	"116476",
 	"163269",
