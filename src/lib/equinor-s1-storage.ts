@@ -66,7 +66,7 @@ const S1_NAME_TO_CODE: Record<string, string> = {
 	"1170 heidrun a": EQUINOR_S1_CODES.HEIDRUN_A,
 };
 
-const KNOWN_CODES = new Set(Object.values(EQUINOR_S1_CODES));
+const KNOWN_CODES = new Set<string>(Object.values(EQUINOR_S1_CODES));
 
 function normalizeS1Key(value: string): string {
 	return value.trim().toLowerCase().replace(/\s+/g, " ");
