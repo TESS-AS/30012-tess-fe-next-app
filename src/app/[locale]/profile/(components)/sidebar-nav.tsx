@@ -153,6 +153,31 @@ export function SidebarNav({
 							)}
 						</>
 					)}
+					{/* Equinor punchout: e-handel rail with order history only */}
+					{profile?.defaultCustomerNumber ===
+						SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
+						<button
+							onClick={() => onModeChange("ehandel")}
+							className={cn(
+								"flex w-[58px] cursor-pointer flex-col items-center gap-1 rounded-md p-0.5 text-[9px] leading-tight font-medium transition-colors",
+							)}>
+							<div
+								className={cn(
+									"flex h-9 w-9 items-center justify-center rounded",
+									activeMode === "ehandel" && "bg-[#DCF7E0]",
+								)}>
+								<Image
+									src={CartSvg}
+									alt="E-handel"
+									width={20}
+									height={20}
+									loading="eager"
+									className="h-5 w-5"
+								/>
+							</div>
+							<span className="text-center">{t("eCommerce")}</span>
+						</button>
+					)}
 				</div>
 				<div
 					className={`relative flex min-w-0 flex-1 flex-col items-end border-l pb-30 ${!isCollapsed ? "pr-2" : ""}`}>

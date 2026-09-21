@@ -34,6 +34,12 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
+import {
+	EQUINOR_S1_CODES,
+	getEquinorDefaultS1Code,
+	matchS1FromList,
+	setSelectedS1Code as persistSelectedS1Code,
+} from "@/lib/equinor-s1-storage";
 import { FilterOptions, useGetAssets } from "@/hooks/useGetAssets";
 import { useAppContext } from "@/lib/appContext";
 import { cn } from "@/lib/utils";
@@ -129,20 +135,22 @@ export function HosesAndEquipments({
 	const [selectedS1Code, setSelectedS1Code] = useState<string | undefined>(
 		() => {
 			if (typeof window !== "undefined") {
-				const stored = localStorage.getItem("selectedS1Code");
-				if (stored) return stored;
-				return profile?.defaultCustomerNumber ===
+				if (
+					profile?.defaultCustomerNumber ===
 					SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
-					? S1_CODE_TROLL_A
-					: "";
+				) {
+					return getEquinorDefaultS1Code();
+				}
+				const stored = localStorage.getItem("selectedS1Code");
+				return stored ?? "";
 			}
 			return undefined;
 		},
 	);
 	const previousCustomerNumberRef = useRef<string | undefined>(undefined);
 
-	// When customer context changes, reset location: Equinor → Troll A, others → empty
-	// so the trigger shows "Velg S1 anlegg" instead of a blank/stale value.
+	// When customer context changes, reset location: Equinor → punchout/remembered S1
+	// (fallback Troll A), others → empty so the trigger shows "Velg S1 anlegg".
 	useEffect(() => {
 		const currentCustomer = profile?.defaultCustomerNumber;
 		if (!currentCustomer) return;
@@ -150,26 +158,44 @@ export function HosesAndEquipments({
 		const previousCustomer = previousCustomerNumberRef.current;
 		previousCustomerNumberRef.current = currentCustomer;
 
+		const isEquinor =
+			currentCustomer === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
+
 		if (previousCustomer === undefined) {
-			if (
-				!localStorage.getItem("selectedS1Code") &&
-				currentCustomer === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
-			) {
-				setSelectedS1Code(S1_CODE_TROLL_A);
-				localStorage.setItem("selectedS1Code", S1_CODE_TROLL_A);
+			if (isEquinor) {
+				const defaultS1 = getEquinorDefaultS1Code();
+				setSelectedS1Code(defaultS1);
+				persistSelectedS1Code(defaultS1);
 			}
 			return;
 		}
 
 		if (previousCustomer === currentCustomer) return;
 
-		if (currentCustomer === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER) {
-			setSelectedS1Code(S1_CODE_TROLL_A);
-			localStorage.setItem("selectedS1Code", S1_CODE_TROLL_A);
+		if (isEquinor) {
+			const defaultS1 = getEquinorDefaultS1Code();
+			setSelectedS1Code(defaultS1);
+			persistSelectedS1Code(defaultS1);
 		} else {
 			setSelectedS1Code("");
 			localStorage.removeItem("selectedS1Code");
 		}
+	}, [profile?.defaultCustomerNumber]);
+
+	// Keep selector in sync when punchout login stores a new S1.
+	useEffect(() => {
+		if (
+			profile?.defaultCustomerNumber !==
+			SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+		) {
+			return;
+		}
+		const sync = () => {
+			const next = getEquinorDefaultS1Code();
+			setSelectedS1Code((prev) => (prev === next ? prev : next));
+		};
+		window.addEventListener("equinor-s1-changed", sync);
+		return () => window.removeEventListener("equinor-s1-changed", sync);
 	}, [profile?.defaultCustomerNumber]);
 
 	const effectiveCustomerNumber =
@@ -1150,7 +1176,8 @@ export function HosesAndEquipments({
 	)?.S1Name;
 	const hasValidS1Selection = !!selectedS1Code && !!selectedS1Name;
 
-	// Drop stale S1 values that are not in the current customer's list
+	// Drop stale S1 values that are not in the current customer's list.
+	// For Equinor, try to resolve punchout plant name → code via the loaded list.
 	useEffect(() => {
 		if (!selectedS1Code || filteredS1Codes.length === 0) return;
 		if (selectedS1Name) return;
@@ -1159,8 +1186,12 @@ export function HosesAndEquipments({
 			profile?.defaultCustomerNumber ===
 			SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
 		if (isEquinorCustomer) {
-			setSelectedS1Code(S1_CODE_TROLL_A);
-			localStorage.setItem("selectedS1Code", S1_CODE_TROLL_A);
+			const matched =
+				matchS1FromList(selectedS1Code, filteredS1Codes) ??
+				matchS1FromList(getEquinorDefaultS1Code(), filteredS1Codes) ??
+				EQUINOR_S1_CODES.TROLL_A;
+			setSelectedS1Code(matched);
+			persistSelectedS1Code(matched);
 			return;
 		}
 		setSelectedS1Code("");
@@ -1168,7 +1199,7 @@ export function HosesAndEquipments({
 	}, [
 		selectedS1Code,
 		selectedS1Name,
-		filteredS1Codes.length,
+		filteredS1Codes,
 		profile?.defaultCustomerNumber,
 	]);
 
@@ -1253,7 +1284,7 @@ export function HosesAndEquipments({
 							onValueChange={(value) => {
 								if (!value) return;
 								setSelectedS1Code(value);
-								localStorage.setItem("selectedS1Code", value);
+								persistSelectedS1Code(value);
 							}}>
 							<SelectTrigger className="h-9 w-[260px] border-[#C1C4C2] bg-white text-sm font-medium text-[#0F1912]">
 								<div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
