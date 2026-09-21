@@ -34,14 +34,14 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
+import { FilterOptions, useGetAssets } from "@/hooks/useGetAssets";
+import { useAppContext } from "@/lib/appContext";
 import {
 	EQUINOR_S1_CODES,
 	getEquinorDefaultS1Code,
 	matchS1FromList,
 	setSelectedS1Code as persistSelectedS1Code,
 } from "@/lib/equinor-s1-storage";
-import { FilterOptions, useGetAssets } from "@/hooks/useGetAssets";
-import { useAppContext } from "@/lib/appContext";
 import { cn } from "@/lib/utils";
 import { postCartKit } from "@/services/carts.service";
 import { ProfileUser } from "@/types/user.types";
