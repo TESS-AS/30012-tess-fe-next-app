@@ -30,11 +30,15 @@ export default function MainCategorySection() {
 					<div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2 md:gap-12">
 						<div className="space-y-4 md:space-y-6">
 							<h2 className="text-4xl leading-tight font-light text-gray-900 md:text-4xl lg:text-6xl">
-								Velkommen til TESSIX Netthandel
+								{isHalliburton
+									? "Welcome to TESSIX Online Store"
+									: "Velkommen til TESSIX Netthandel"}
 							</h2>
 							<div className="space-y-4 md:space-y-6">
 								<p className="mb-0 text-lg leading-relaxed font-medium text-gray-900 md:text-xl">
-									Vi utvikler stadig løsningen
+									{isHalliburton
+										? "We continually develop new solutions"
+										: "Vi utvikler stadig løsningen"}
 								</p>
 								{isHalliburton && (
 									<div className="pt-2 md:pt-4">
@@ -72,27 +76,31 @@ export default function MainCategorySection() {
 								)}
 								<div className="space-y-1">
 									<p className="mb-0 text-base leading-relaxed text-gray-500 md:text-lg">
-										Har du forslag som gjør arbeidsdagen din enklere?
+										{isHalliburton
+											? "Do you have suggestions that make your workday easier?"
+											: "Har du forslag som gjør arbeidsdagen din enklere?"}
 									</p>
 									<button
 										type="button"
 										onClick={() => setIsFeedbackDialogOpen(true)}
 										className="cursor-pointer text-base text-green-700 hover:text-green-800 md:text-lg">
-										Gi tilbakemelding
+										{isHalliburton ? "Give feedback" : "Gi tilbakemelding"}
 									</button>
 								</div>
 								<div className="space-y-1 pt-2 md:pt-4">
 									<p className="mb-0 text-base leading-relaxed font-semibold text-gray-500 md:text-lg">
-										Trenger du hjelp?
+										{isHalliburton ? "Need help?" : "Trenger du hjelp?"}
 									</p>
 									<p className="text-base leading-relaxed text-gray-500 md:text-lg">
-										Se{" "}
+										{isHalliburton ? "See " : "Se "}
 										<a
 											href="/faq"
 											className="text-green-700 hover:text-green-900">
-											ofte stilte spørsmål
-										</a>{" "}
-										eller kontakt oss på{" "}
+											{isHalliburton
+												? "frequently asked questions"
+												: "ofte stilte spørsmål"}
+										</a>
+										{isHalliburton ? " or contact us at " : " eller kontakt oss på "}
 										<a
 											href="mailto:netthandel@tess.no"
 											className="text-green-700 hover:text-green-900">
@@ -108,7 +116,7 @@ export default function MainCategorySection() {
 												target="_blank"
 												rel="noopener noreferrer"
 												className="text-green-700 hover:text-green-900">
-												PPE-tilbakemeldingsundersøkelse for Halliburton-ansatte
+												PPE Feedback Survey for Halliburton Employees
 											</a>
 										</p>
 										<p className="text-base leading-relaxed text-gray-500 md:text-lg">
