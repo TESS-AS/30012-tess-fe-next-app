@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 
 import OrderSummary from "@/components/checkout/order-summary";
+import { CartKitPartRow } from "@/components/checkout/cart-kit-part-row";
 import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { VariantModalHeader } from "@/components/checkout/variant-modal-header";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
@@ -770,91 +771,64 @@ const CartPage = () => {
 													<div className="border-t p-4">
 														<div className="space-y-3">
 															<div className="space-y-4 pl-8">
-																<div className="flex items-start justify-between gap-2">
-																	<div className="flex flex-col">
-																		<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
-																			{item.hose.itemName}
-																		</p>
-																		<p className="text-xs text-[#5A615D]">
-																			{item.hose.itemNumber}
-																		</p>
-																	</div>
-																	<p className="font-bold">
-																		{formatNorwegianCurrency(
-																			calculatedPrices[item.hose.itemNumber] ??
-																				0,
-																		)}
-																	</p>
-																</div>
-																<div className="flex items-start justify-between gap-2">
-																	<div className="flex flex-col">
-																		<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
-																			{item.ferrule1.name}
-																		</p>
-																		<p className="text-xs text-[#5A615D]">
-																			{item.ferrule1.itemNumber}
-																		</p>
-																	</div>
-
-																	<p className="font-bold">
-																		{formatNorwegianCurrency(
-																			calculatedPrices[
-																				item.ferrule1.itemNumber
-																			] ?? 0,
-																		)}
-																	</p>
-																</div>
-																<div className="flex items-start justify-between gap-2">
-																	<div className="flex flex-col">
-																		<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
-																			{item.ferrule2.name}
-																		</p>
-																		<p className="text-xs text-[#5A615D]">
-																			{item.ferrule2.itemNumber}
-																		</p>
-																	</div>
-																	<p className="font-bold">
-																		{formatNorwegianCurrency(
-																			calculatedPrices[
-																				item.ferrule2.itemNumber
-																			] ?? 0,
-																		)}
-																	</p>
-																</div>
-																<div className="flex items-start justify-between gap-2">
-																	<div className="flex flex-col">
-																		<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
-																			{item.insert1.name}
-																		</p>
-																		<p className="text-xs text-[#5A615D]">
-																			{item.insert1.itemNumber}
-																		</p>
-																	</div>
-																	<p className="font-bold">
-																		{formatNorwegianCurrency(
-																			calculatedPrices[
-																				item.insert1.itemNumber
-																			] ?? 0,
-																		)}
-																	</p>
-																</div>
-																<div className="flex items-start justify-between gap-2">
-																	<div className="flex flex-col">
-																		<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
-																			{item.insert2.name}
-																		</p>
-																		<p className="text-xs text-[#5A615D]">
-																			{item.insert2.itemNumber}
-																		</p>
-																	</div>
-																	<p className="font-bold">
-																		{formatNorwegianCurrency(
-																			calculatedPrices[
-																				item.insert2.itemNumber
-																			] ?? 0,
-																		)}
-																	</p>
-																</div>
+																<CartKitPartRow
+																	name={item.hose.itemName}
+																	itemNumber={item.hose.itemNumber}
+																	meta={
+																		item.hose.lengthMm
+																			? `${item.hose.lengthMm} mm`
+																			: undefined
+																	}
+																	quantity={item.hose.quantity}
+																	price={
+																		calculatedPrices[item.hose.itemNumber] ?? 0
+																	}
+																	quantityLabel={t("Cart.quantity")}
+																/>
+																<CartKitPartRow
+																	name={item.ferrule1.name}
+																	itemNumber={item.ferrule1.itemNumber}
+																	quantity={item.ferrule1.quantity}
+																	price={
+																		calculatedPrices[
+																			item.ferrule1.itemNumber
+																		] ?? 0
+																	}
+																	quantityLabel={t("Cart.quantity")}
+																/>
+																<CartKitPartRow
+																	name={item.ferrule2.name}
+																	itemNumber={item.ferrule2.itemNumber}
+																	quantity={item.ferrule2.quantity}
+																	price={
+																		calculatedPrices[
+																			item.ferrule2.itemNumber
+																		] ?? 0
+																	}
+																	quantityLabel={t("Cart.quantity")}
+																/>
+																<CartKitPartRow
+																	name={item.insert1.name}
+																	itemNumber={item.insert1.itemNumber}
+																	quantity={item.insert1.quantity}
+																	price={
+																		calculatedPrices[
+																			item.insert1.itemNumber
+																		] ?? 0
+																	}
+																	quantityLabel={t("Cart.quantity")}
+																/>
+																<CartKitPartRow
+																	name={item.insert2.name}
+																	itemNumber={item.insert2.itemNumber}
+																	quantity={item.insert2.quantity}
+																	price={
+																		calculatedPrices[
+																			item.insert2.itemNumber
+																		] ?? 0
+																	}
+																	quantityLabel={t("Cart.quantity")}
+																/>
 																{Object.values(item.services ?? {}).some(
 																	(v) => {
 																		if (v == null || typeof v !== "object")
@@ -889,31 +863,26 @@ const CartPage = () => {
 																				const itemNumber =
 																					typedService.itemNumber ?? "";
 																				return (
-																					<div
+																					<CartKitPartRow
 																						key={`${key}-${itemNumber}`}
-																						className="flex items-start justify-between gap-2">
-																						<div className="flex flex-col">
-																							<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
-																								{key
-																									.replace(
-																										/([a-z])([A-Z])/g,
-																										"$1 $2",
-																									)
-																									.replace(/_/g, " ")
-																									.replace(/\s+/g, " ")
-																									.trim()}
-																							</p>
-																							<p className="text-xs text-[#5A615D]">
-																								{itemNumber}
-																							</p>
-																						</div>
-																						<p className="font-bold">
-																							{formatNorwegianCurrency(
-																								calculatedPrices[itemNumber] ??
-																									0,
-																							)}
-																						</p>
-																					</div>
+																						name={key
+																							.replace(
+																								/([a-z])([A-Z])/g,
+																								"$1 $2",
+																							)
+																							.replace(/_/g, " ")
+																							.replace(/\s+/g, " ")
+																							.trim()}
+																						itemNumber={itemNumber}
+																						quantity={
+																							typedService.quantity ?? 1
+																						}
+																						price={
+																							calculatedPrices[itemNumber] ??
+																							0
+																						}
+																						quantityLabel={t("Cart.quantity")}
+																					/>
 																				);
 																			})}
 																	</div>
@@ -921,29 +890,22 @@ const CartPage = () => {
 																{additionalItems.length > 0 && (
 																	<div className="space-y-4">
 																		{additionalItems.map((additional) => (
-																			<div
+																			<CartKitPartRow
 																				key={`${additional.key}-${additional.itemNumber}`}
-																				className="flex items-start justify-between gap-2">
-																				<div className="flex flex-col">
-																					<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
-																						{additional.name ||
-																							formatCartKitAdditionalLabel(
-																								additional.key,
-																							)}
-																					</p>
-																					<p className="text-xs text-[#5A615D]">
-																						{additional.itemNumber}
-																					</p>
-																				</div>
-																				<p className="font-bold">
-																					{formatNorwegianCurrency(
-																						getCalculatedPrice(
-																							additional.itemNumber,
-																							additional.quantity,
-																						),
-																					)}
-																				</p>
-																			</div>
+																				name={
+																					additional.name ||
+																					formatCartKitAdditionalLabel(
+																						additional.key,
+																					)
+																				}
+																				itemNumber={additional.itemNumber}
+																				quantity={additional.quantity}
+																				price={getCalculatedPrice(
+																					additional.itemNumber,
+																					additional.quantity,
+																				)}
+																				quantityLabel={t("Cart.quantity")}
+																			/>
 																		))}
 																	</div>
 																)}

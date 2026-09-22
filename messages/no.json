@@ -984,7 +984,14 @@
 		"orderDate": "Bestillingsdato",
 		"price": "Pris",
 		"units": "Enheter",
-		"quantity": "Antall"
+		"quantity": "Antall",
+		"actions": "Handlinger"
+	},
+	"ReorderOrder": {
+		"ariaLabel": "Legg ordre i handlekurv",
+		"success": "{count, plural, one {# vare lagt i handlekurven} other {# varer lagt i handlekurven}}",
+		"error": "Kunne ikke legge ordren i handlekurven",
+		"noItems": "Ingen varer å legge i handlekurven"
 	},
 	"AddUserModal": {
 		"title": "Legg til ny bruker",
@@ -1186,7 +1193,8 @@
 		"orderDate": "Bestillingsdato",
 		"price": "Pris",
 		"units": "Enheter",
-		"quantity": "Antall"
+		"quantity": "Antall",
+		"actions": "Handlinger"
 	},
 	"ProductDetailsModal": {
 		"title": "Produktdetaljer",

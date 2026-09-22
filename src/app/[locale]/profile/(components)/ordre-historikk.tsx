@@ -16,6 +16,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 import { OrderExpandedRow } from "./order-expanded-row";
+import { ReorderOrderToCartButton } from "./reorder-order-to-cart-button";
 
 type Order = OrderItems & { orderId: string };
 
@@ -184,6 +185,12 @@ export function OrdreHistorikk({ customerNumber }: { customerNumber: string }) {
 					</span>
 				) : null,
 			sortable: true,
+		},
+		{
+			key: "reorder",
+			header: "",
+			cell: (order: Order) => <ReorderOrderToCartButton order={order} />,
+			sortable: false,
 		},
 	];
 

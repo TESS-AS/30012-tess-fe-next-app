@@ -249,6 +249,12 @@ export default function CustomerNumberSwitcher({
 			});
 			setDefaultCustomerNumber(newCustomerNumber);
 
+			// Hose Management selections are customer-scoped — clear so a hose
+			// from the previous account cannot be added under the new one.
+			if (typeof window !== "undefined") {
+				window.localStorage.removeItem("selectedHoseRows");
+			}
+
 			// Invalidate and refetch all product and price queries since company/customer/warehouse context changed
 			// This ensures prices and products are immediately refetched with the new context
 			await Promise.all([
