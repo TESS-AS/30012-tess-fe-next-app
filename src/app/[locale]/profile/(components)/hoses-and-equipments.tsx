@@ -741,19 +741,38 @@ export function HosesAndEquipments({
 		fetchAssets(filters);
 	}, []);
 
-	const columnOptions = [
-		"id",
-		"customerId",
-		"description",
-		"s1Location",
-		"s2Equipment",
-		"orderNumber",
-		"actions",
-		"installationDate",
-		"productionDate",
-		"fillingDate",
-		"nextInspectionDate",
-	];
+	// Equinor's hose-management catalog hides the `customerId` column from
+	// both the table and the column picker — per product request the customer
+	// id isn't meaningful to their operators. Non-Equinor customers keep it.
+	const isEquinorHoseManagement =
+		profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
+
+	const columnOptions = isEquinorHoseManagement
+		? [
+				"id",
+				"description",
+				"s1Location",
+				"s2Equipment",
+				"orderNumber",
+				"actions",
+				"installationDate",
+				"productionDate",
+				"fillingDate",
+				"nextInspectionDate",
+			]
+		: [
+				"id",
+				"customerId",
+				"description",
+				"s1Location",
+				"s2Equipment",
+				"orderNumber",
+				"actions",
+				"installationDate",
+				"productionDate",
+				"fillingDate",
+				"nextInspectionDate",
+			];
 
 	const [selectedColumns, setSelectedColumns] = useState<string[]>([
 		"id",
@@ -764,6 +783,21 @@ export function HosesAndEquipments({
 		"orderNumber",
 		"actions",
 	]);
+
+	// Derived views that strip `customerId` for Equinor HM regardless of the
+	// stored state / localStorage-persisted order (handles both first-mount
+	// with profile still loading, and users who had customerId in a saved
+	// order before switching customer).
+	const hideCustomerId = (columns: string[]) =>
+		isEquinorHoseManagement
+			? columns.filter((k) => k !== "customerId")
+			: columns;
+
+	const visibleSelectedColumns = useMemo(
+		() => hideCustomerId(selectedColumns),
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[selectedColumns, isEquinorHoseManagement],
+	);
 
 	const [columnOrder, setColumnOrder] = useState<string[]>(() => {
 		if (typeof window === "undefined") return [...columnOptions];
@@ -783,6 +817,14 @@ export function HosesAndEquipments({
 			return [...columnOptions];
 		}
 	});
+
+	// columnOrder is persisted in localStorage — a saved order from a prior
+	// customer switch may still contain "customerId". Filter at read time.
+	const visibleColumnOrder = useMemo(
+		() => hideCustomerId(columnOrder),
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[columnOrder, isEquinorHoseManagement],
+	);
 
 	const allColumns: Record<string, Column<HoseOrder>> = {
 		id: {
@@ -1052,14 +1094,14 @@ export function HosesAndEquipments({
 	};
 
 	const activeColumns = useMemo(() => {
-		const selectedSet = new Set(selectedColumns);
+		const selectedSet = new Set(visibleSelectedColumns);
 		const cols: Column<HoseOrder>[] = [];
 
 		if (selectedSet.has("actions")) {
 			cols.push(allColumns["actions"]);
 		}
 
-		for (const key of columnOrder) {
+		for (const key of visibleColumnOrder) {
 			if (key === "actions") continue;
 			if (!selectedSet.has(key)) continue;
 			const col = allColumns[key];
@@ -1070,8 +1112,8 @@ export function HosesAndEquipments({
 		cols.push(allColumns["rowActions"]);
 		return cols;
 	}, [
-		selectedColumns,
-		columnOrder,
+		visibleSelectedColumns,
+		visibleColumnOrder,
 		transformedAssets,
 		allSelectedOnPage,
 		someSelectedOnPage,
@@ -1197,6 +1239,19 @@ export function HosesAndEquipments({
 							s1.S1Code === S1_CODE_1755_GRANE ||
 							s1.S1Code === S1_CODE_1170_HEIDRUN_A,
 					)
+					// Sort by the plant number embedded in S1Name (e.g. "1765 —
+					// OSEBERG C"). Falls back to alphabetical when no leading
+					// digit is present (some Equinor plants — Troll A, Gudrun,
+					// Draupner, etc. — are name-only). Numbered plants appear
+					// first in ascending order, then name-only alphabetically.
+					.sort((a, b) => {
+						const plantA = /^\s*(\d+)/.exec(a.S1Name)?.[1];
+						const plantB = /^\s*(\d+)/.exec(b.S1Name)?.[1];
+						if (plantA && plantB) return Number(plantA) - Number(plantB);
+						if (plantA) return -1;
+						if (plantB) return 1;
+						return a.S1Name.localeCompare(b.S1Name, "no");
+					})
 			: (s1Codes || []).filter((s1) => s1.S1Code && s1.S1Name);
 
 	const selectedS1Name = filteredS1Codes.find(
@@ -1387,21 +1442,26 @@ export function HosesAndEquipments({
 
 						<div className="flex items-center space-x-4">
 							<HoseColumnsDropdown
-								options={columnOrder}
-								selected={selectedColumns}
+								options={visibleColumnOrder}
+								selected={visibleSelectedColumns}
 								onToggle={handleColumnChange}
 								onReorder={handleReorderColumns}
 								labels={columnLabels}
 							/>
 
-							<HoseFiltersDropdown
-								selectedFilters={selectedFilters}
-								selectedAgeRanges={selectedAgeRanges}
-								onToggleFilter={(value) => handleFilterChange(value)}
-								onToggleAgeRange={handleAgeRangeChange}
-								onClearAll={handleClearAllFilters}
-								profile={profile}
-							/>
+							{/* Equinor's operators only want the location + column
+							 *  controls — the inspection/replacement/age filter set is
+							 *  hidden entirely for them. */}
+							{!isEquinorHoseManagement && (
+								<HoseFiltersDropdown
+									selectedFilters={selectedFilters}
+									selectedAgeRanges={selectedAgeRanges}
+									onToggleFilter={(value) => handleFilterChange(value)}
+									onToggleAgeRange={handleAgeRangeChange}
+									onClearAll={handleClearAllFilters}
+									profile={profile}
+								/>
+							)}
 						</div>
 					</div>
 
