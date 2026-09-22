@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { useAppContext } from "@/lib/appContext";
 import { getCartKitPartEntries } from "@/lib/cart-kit";
 import { CartKitResponse } from "@/types/carts.types";
 import { Order, OrderLines } from "@/types/orders.types";
@@ -9,6 +10,13 @@ export function useCheckoutOrderData(
 	profile: any,
 	unitPrices: Record<string, number>,
 ): [Order, React.Dispatch<React.SetStateAction<Order>>] {
+	const { overriddenUnitPrices } = useAppContext();
+	// Prefer an employee-set / requisition-derived override when computing the
+	// per-line `salesPrice` we send to BE, falling back to the price-engine
+	// value. Ensures the charged price mirrors what the cart / summary shows
+	// and what BE stored as `quoted_price` on the source requisition.
+	const resolvePrice = (itemNumber: string): number =>
+		overriddenUnitPrices[itemNumber] ?? unitPrices[itemNumber] ?? 0;
 	const formatDate = (d: Date) => d.toISOString().split("T")[0];
 	const cart = cartItems?.cart;
 	const cartKit = cartItems?.cartKit;
@@ -54,7 +62,7 @@ export function useCheckoutOrderData(
 		// Handle regular cart items
 		if (cart?.length) {
 			salesOrderLines = cart.map((item) => {
-				const unitPrice = unitPrices[item.itemNumber] || 0;
+				const unitPrice = resolvePrice(item.itemNumber);
 				return {
 					customerOrderLine: lineCounter++,
 					// Use the per-line warehouse the user picked in the variant table;
@@ -125,7 +133,7 @@ export function useCheckoutOrderData(
 					orderType: "S2",
 					itemCode: component.itemNumber,
 					orderedQuantity: component.quantity,
-					salesPrice: unitPrices[component.itemNumber] || 0,
+					salesPrice: resolvePrice(component.itemNumber),
 					requestedDeliveryDate,
 					accountPart3: "",
 					accountPart4: String(userId || ""),
@@ -139,7 +147,7 @@ export function useCheckoutOrderData(
 					orderType: "S2",
 					itemCode: service.itemNumber,
 					orderedQuantity: service.quantity || 1,
-					salesPrice: unitPrices[service.itemNumber] || 0,
+					salesPrice: resolvePrice(service.itemNumber),
 					requestedDeliveryDate,
 					accountPart3: "",
 					accountPart4: String(userId || ""),
@@ -153,7 +161,7 @@ export function useCheckoutOrderData(
 					orderType: "S2",
 					itemCode: additional.itemNumber,
 					orderedQuantity: additional.quantity,
-					salesPrice: unitPrices[additional.itemNumber] || 0,
+					salesPrice: resolvePrice(additional.itemNumber),
 					requestedDeliveryDate,
 					accountPart3: "",
 					accountPart4: String(userId || ""),
@@ -175,7 +183,15 @@ export function useCheckoutOrderData(
 			documentControl: { companyCode },
 			salesOrderLines,
 		}));
-	}, [cart, cartKit, companyNumber, warehouseNumber, userId, unitPrices]);
+	}, [
+		cart,
+		cartKit,
+		companyNumber,
+		warehouseNumber,
+		userId,
+		unitPrices,
+		overriddenUnitPrices,
+	]);
 
 	return [orderData, setOrderData] as const;
 }

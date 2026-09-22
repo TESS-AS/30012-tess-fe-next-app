@@ -21,6 +21,7 @@ import {
 	EQUINOR_WELCOME_SEEN_THIS_SESSION_KEY,
 } from "@/constants/equinorWelcome";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { usePriceResolver } from "@/hooks/usePriceResolver";
 import { getCartKitPartEntries } from "@/lib/cart-kit";
 import { priceItemsByCompany } from "@/lib/cart-pricing";
 import {
@@ -568,18 +569,37 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		if (profile) loadCartData();
 	}, [profile, isCartChanging]);
 
-	const getCalculatedPrice = (itemNumber: string, quantity: number) => {
-		return (
-			calculatedPricesByQuantity[`${itemNumber}:${quantity}`] ??
-			calculatedPrices[itemNumber] ??
-			0
-		);
-	};
+	// All price-resolution logic (override layering, effective maps, per-item
+	// lookup) is delegated to `usePriceResolver`. Read its docstring for the
+	// policy on how overrides interact with surcharge/discount, and for the
+	// known limitations. Keeping it in a dedicated hook means: one file to
+	// change if the policy shifts, unit-testable in isolation, and appContext
+	// stays focused on cart-mutation orchestration.
+	const {
+		calculatedPrices: effectiveCalculatedPrices,
+		unitPrices: effectiveUnitPrices,
+		orderSummaryTotalPrice: effectiveOrderSummaryTotalPrice,
+		surChargePrices: effectiveSurChargePrices,
+		rabatterPrices: effectiveRabatterPrices,
+		getEffectivePrice,
+	} = usePriceResolver({
+		cartItems,
+		calculatedPrices,
+		calculatedPricesByQuantity,
+		unitPrices,
+		orderSummaryTotalPrice,
+		surChargePrices,
+		rabatterPrices,
+		overriddenUnitPrices,
+	});
+
+	// Preserve the existing public name so consumers don't need to be
+	// touched — same behavior, override-aware body.
+	const getCalculatedPrice = getEffectivePrice;
 
 	const totalPrice = useMemo(() => {
 		const regularTotal = (cartItems?.cart ?? []).reduce((sum, line) => {
-			const unit = calculatedPrices[line.itemNumber] ?? 0;
-			return sum + unit * (line.quantity || 1);
+			return sum + getEffectivePrice(line.itemNumber, line.quantity || 1);
 		}, 0);
 
 		const kitsTotal = (cartItems?.cartKit ?? []).reduce((sum, kit) => {
@@ -647,21 +667,26 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		cartItems?.cartKit,
 		calculatedPrices,
 		calculatedPricesByQuantity,
+		overriddenUnitPrices,
 	]);
 
 	const surChargeTotalPrice = useMemo(
-		() => Object.values(surChargePrices).reduce((sum, v) => sum + v, 0),
-		[surChargePrices],
+		() => Object.values(effectiveSurChargePrices).reduce((sum, v) => sum + v, 0),
+		[effectiveSurChargePrices],
 	);
 
 	const rabatterTotalPrice = useMemo(
-		() => Object.values(rabatterPrices).reduce((sum, v) => sum + v, 0),
-		[rabatterPrices],
+		() => Object.values(effectiveRabatterPrices).reduce((sum, v) => sum + v, 0),
+		[effectiveRabatterPrices],
 	);
 
 	const orderSummaryTotalPriceFinal = useMemo(
-		() => Object.values(orderSummaryTotalPrice).reduce((sum, v) => sum + v, 0),
-		[orderSummaryTotalPrice],
+		() =>
+			Object.values(effectiveOrderSummaryTotalPrice).reduce(
+				(sum, v) => sum + v,
+				0,
+			),
+		[effectiveOrderSummaryTotalPrice],
 	);
 
 	const cartKitTotals = useMemo(() => {
@@ -780,7 +805,12 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		}
 
 		return totals;
-	}, [cartItems?.cartKit, calculatedPrices, calculatedPricesByQuantity]);
+	}, [
+		cartItems?.cartKit,
+		calculatedPrices,
+		calculatedPricesByQuantity,
+		overriddenUnitPrices,
+	]);
 
 	const updateQuantity = async (
 		cartLine: number,
@@ -1026,8 +1056,12 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 				setCartItems,
 
 				prices,
-				calculatedPrices,
-				unitPrices,
+				// Effective maps have any employee-set price overrides layered on
+				// top of the raw engine values. All downstream consumers (cart,
+				// StepConfirmation, email builder, order-summary totals) see the
+				// price the customer will actually be charged.
+				calculatedPrices: effectiveCalculatedPrices,
+				unitPrices: effectiveUnitPrices,
 				cartKitTotals,
 				getCalculatedPrice,
 				isLoading,

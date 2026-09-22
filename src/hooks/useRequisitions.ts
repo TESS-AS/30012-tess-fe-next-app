@@ -23,7 +23,14 @@ interface OrderItem {
 	productNumber: string;
 	sku: string;
 	quantity: number;
+	/** Human-readable formatted price for display in list/detail UIs. */
 	price: string;
+	/** Raw per-unit price returned by BE. When the requisition was created
+	 *  with a `quotedPrice`, BE derives `unitPrice = quotedPrice`; otherwise
+	 *  it's the price-engine value. Used by `handleApprove` to seed the
+	 *  approver's `overriddenUnitPrices` so the cart, checkout summary and
+	 *  salesOrder payload all reflect the quoted price end-to-end. */
+	unitPrice: number | null;
 }
 
 export interface Rekvisisjon {
@@ -154,6 +161,8 @@ export const useRequisitions = (
 							sku: line.itemId.toString(),
 							quantity: line.quantity,
 							price: formatNorwegianCurrency(line.unitPrice) || "N/A",
+							unitPrice:
+								typeof line.unitPrice === "number" ? line.unitPrice : null,
 						}),
 					),
 					requisitionId: req.requisitionId,

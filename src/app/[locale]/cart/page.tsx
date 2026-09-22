@@ -149,38 +149,30 @@ const CartPage = () => {
 	const renderUnitPriceInput = (itemNumber: string) => {
 		if (!canOverridePrice) return null;
 		return (
-			<div
-				className="flex flex-col items-end gap-0.5"
-				onClick={(e) => e.stopPropagation()}>
-				<label
-					htmlFor={`unit-price-${itemNumber}`}
-					className="text-xs text-[#5A615D]">
-					Enhetspris
-				</label>
-				<input
-					id={`unit-price-${itemNumber}`}
-					type="number"
-					min={0}
-					step="0.01"
-					inputMode="decimal"
-					defaultValue={
-						overriddenUnitPrices[itemNumber] ??
-						unitPrices[itemNumber] ??
-						""
+			<input
+				aria-label="Enhetspris"
+				title="Enhetspris"
+				placeholder="Enhetspris"
+				type="number"
+				min={0}
+				step="0.01"
+				inputMode="decimal"
+				defaultValue={
+					overriddenUnitPrices[itemNumber] ?? unitPrices[itemNumber] ?? ""
+				}
+				onClick={(e) => e.stopPropagation()}
+				onBlur={(e) => {
+					const raw = e.currentTarget.value.trim();
+					if (raw === "") {
+						setOverriddenUnitPrice(itemNumber, null);
+						return;
 					}
-					onBlur={(e) => {
-						const raw = e.currentTarget.value.trim();
-						if (raw === "") {
-							setOverriddenUnitPrice(itemNumber, null);
-							return;
-						}
-						const parsed = Number(raw);
-						if (!Number.isFinite(parsed) || parsed < 0) return;
-						setOverriddenUnitPrice(itemNumber, parsed);
-					}}
-					className="w-24 rounded border border-gray-300 px-2 py-1 text-right text-sm focus:border-[#009640] focus:outline-none"
-				/>
-			</div>
+					const parsed = Number(raw);
+					if (!Number.isFinite(parsed) || parsed < 0) return;
+					setOverriddenUnitPrice(itemNumber, parsed);
+				}}
+				className="h-8 w-24 rounded border border-gray-300 px-2 py-1 text-right text-sm focus:border-[#009640] focus:outline-none"
+			/>
 		);
 	};
 
