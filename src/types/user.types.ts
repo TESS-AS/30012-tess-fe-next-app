@@ -20,6 +20,11 @@ export interface ProfileUser {
 	defaultWarehouseNumber: string;
 	punchout: boolean;
 	role: UserRole;
+	/** BE-gated permission for employees to override the calculated unit price
+	 *  on a requisition line (used when writing offers to customers). Source:
+	 *  `customer.user.can_override_price`. Authoritative — BE re-checks this
+	 *  server-side on `createRequisition` and 403s if unset. */
+	canOverridePrice?: boolean;
 	thmUserId?: string | null;
 	thmRole?: string | null;
 	/**

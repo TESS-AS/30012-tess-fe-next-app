@@ -117,6 +117,15 @@ interface AppContextType {
 	handleClearCart: () => Promise<void>;
 
 	showCartNotification: (data: CartNotificationData) => void;
+
+	/** Per-itemNumber unit-price overrides set by an employee (with
+	 *  `canOverridePrice`) in the cart. Only consumed by `createRequisition`
+	 *  when saving the cart as a requisition; regular checkouts ignore these
+	 *  values (BE would 403 non-permitted users anyway). Cleared when the cart
+	 *  is cleared / archived / a requisition is saved. */
+	overriddenUnitPrices: Record<string, number>;
+	setOverriddenUnitPrice: (itemNumber: string, price: number | null) => void;
+	clearOverriddenUnitPrices: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -129,6 +138,27 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 	const [isCartChanging, setIsCartChanging] = useState(false);
 	const [cartNotification, setCartNotification] =
 		useState<CartNotificationData | null>(null);
+	const [overriddenUnitPrices, setOverriddenUnitPrices] = useState<
+		Record<string, number>
+	>({});
+
+	const setOverriddenUnitPrice = (
+		itemNumber: string,
+		price: number | null,
+	) => {
+		setOverriddenUnitPrices((prev) => {
+			if (price == null) {
+				if (!(itemNumber in prev)) return prev;
+				const next = { ...prev };
+				delete next[itemNumber];
+				return next;
+			}
+			if (prev[itemNumber] === price) return prev;
+			return { ...prev, [itemNumber]: price };
+		});
+	};
+
+	const clearOverriddenUnitPrices = () => setOverriddenUnitPrices({});
 
 	const showCartNotification = (data: CartNotificationData) => {
 		setCartNotification(data);
@@ -957,6 +987,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		try {
 			await svcArchiveCart();
 			setRequisitionPlacerInfo(null);
+			setOverriddenUnitPrices({});
 			setIsCartChanging((v) => !v);
 		} catch (error) {
 			console.error("Error archiving cart:", error);
@@ -977,6 +1008,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 			setRabatterPrices({});
 			setOrderSummaryTotalPrice({});
 			setRequisitionPlacerInfo(null);
+			setOverriddenUnitPrices({});
 			setIsCartChanging((v) => !v);
 		} catch (error) {
 			console.error("Error clearing cart:", error);
@@ -1031,6 +1063,10 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 
 				updatedAddress,
 				setUpdatedAddress,
+
+				overriddenUnitPrices,
+				setOverriddenUnitPrice,
+				clearOverriddenUnitPrices,
 
 				requisitionPlacerInfo,
 				setRequisitionPlacerInfo,

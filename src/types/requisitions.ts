@@ -66,6 +66,12 @@ export interface CreateRequisitionPayload {
 	items: Array<{
 		itemNumber: string;
 		quantity: number;
+		/** Employee-set unit price override (only sent when the user has
+		 *  `role === "employee"` AND `canOverridePrice === true`). BE stores it
+		 *  as `sales_order_requisition_line.quoted_price` and derives
+		 *  `unitPrice`/`lineTotalPrice` from it on read. Omitting the field
+		 *  keeps the default price-engine calculation. */
+		unitPrice?: number;
 	}>;
 }
 

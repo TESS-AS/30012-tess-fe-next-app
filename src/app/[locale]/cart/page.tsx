@@ -97,7 +97,92 @@ const CartPage = () => {
 		handleClearCart,
 		cartKitTotals,
 		getCalculatedPrice,
+		overriddenUnitPrices,
+		setOverriddenUnitPrice,
 	} = useAppContext();
+
+	// BE-gated permission for employees to override the calculated unit price
+	// on requisition lines (used when writing offers). Only requirement is the
+	// BE flag — BE re-checks server-side and 403s if unset.
+	const canOverridePrice = profile?.canOverridePrice === true;
+
+	const getDisplayLineTotal = (itemNumber: string, quantity: number) => {
+		const override = overriddenUnitPrices[itemNumber];
+		if (override != null) return override * quantity;
+		return calculatedPrices[itemNumber] ?? 0;
+	};
+
+	// Kit-level rollup that mirrors `cartKitTotals[hexagonId]` but substitutes
+	// any per-sub-item overrides so the collapsed accordion header agrees with
+	// the expanded rows. Enumerates the fixed sub-lines plus dynamic services
+	// and additionals.
+	const getDisplayKitTotal = (kit: CartKitItem) => {
+		let total = 0;
+		const addLine = (
+			itemNumber: string | undefined,
+			quantity: number | undefined,
+		) => {
+			if (!itemNumber) return;
+			total += getDisplayLineTotal(itemNumber, quantity ?? 1);
+		};
+		addLine(kit.hose?.itemNumber, kit.hose?.quantity);
+		addLine(kit.ferrule1?.itemNumber, kit.ferrule1?.quantity);
+		addLine(kit.ferrule2?.itemNumber, kit.ferrule2?.quantity);
+		addLine(kit.insert1?.itemNumber, kit.insert1?.quantity);
+		addLine(kit.insert2?.itemNumber, kit.insert2?.quantity);
+		for (const svc of Object.values(kit.services ?? {})) {
+			if (svc && typeof svc === "object" && "itemNumber" in svc) {
+				const s = svc as { itemNumber?: string; quantity?: number };
+				addLine(s.itemNumber, s.quantity);
+			}
+		}
+		for (const additional of getCartKitPartEntries(kit.additionals)) {
+			addLine(additional.itemNumber, additional.quantity);
+		}
+		return total;
+	};
+
+	// Shared render for the small unit-price input that appears next to a
+	// line-total in the cart. `quantity` is used so the caller-side display can
+	// derive `override × quantity` from the same source of truth. Guarded by
+	// `canOverridePrice` — non-employee users never see the input.
+	const renderUnitPriceInput = (itemNumber: string) => {
+		if (!canOverridePrice) return null;
+		return (
+			<div
+				className="flex flex-col items-end gap-0.5"
+				onClick={(e) => e.stopPropagation()}>
+				<label
+					htmlFor={`unit-price-${itemNumber}`}
+					className="text-xs text-[#5A615D]">
+					Enhetspris
+				</label>
+				<input
+					id={`unit-price-${itemNumber}`}
+					type="number"
+					min={0}
+					step="0.01"
+					inputMode="decimal"
+					defaultValue={
+						overriddenUnitPrices[itemNumber] ??
+						unitPrices[itemNumber] ??
+						""
+					}
+					onBlur={(e) => {
+						const raw = e.currentTarget.value.trim();
+						if (raw === "") {
+							setOverriddenUnitPrice(itemNumber, null);
+							return;
+						}
+						const parsed = Number(raw);
+						if (!Number.isFinite(parsed) || parsed < 0) return;
+						setOverriddenUnitPrice(itemNumber, parsed);
+					}}
+					className="w-24 rounded border border-gray-300 px-2 py-1 text-right text-sm focus:border-[#009640] focus:outline-none"
+				/>
+			</div>
+		);
+	};
 
 	const [orderData] = useCheckoutOrderData(
 		{
@@ -358,7 +443,9 @@ const CartPage = () => {
 						</div>
 
 						<p className="ml-auto font-bold md:hidden">
-							{formatNorwegianCurrency(calculatedPrices[item.itemNumber] ?? 0)}
+							{formatNorwegianCurrency(
+								getDisplayLineTotal(item.itemNumber, item.quantity),
+							)}
 						</p>
 					</div>
 
@@ -484,8 +571,14 @@ const CartPage = () => {
 							}}
 						/>
 
+						<div className="hidden md:block">
+							{renderUnitPriceInput(item.itemNumber)}
+						</div>
+
 						<p className="hidden font-bold md:block">
-							{formatNorwegianCurrency(calculatedPrices[item.itemNumber] ?? 0)}
+							{formatNorwegianCurrency(
+								getDisplayLineTotal(item.itemNumber, item.quantity),
+							)}
 						</p>
 
 						<Button
@@ -738,9 +831,7 @@ const CartPage = () => {
 														/>
 														<div className="flex items-center gap-6">
 															<span className="font-semibold">
-																{formatNorwegianCurrency(
-																	cartKitTotals[item.hexagonId],
-																)}
+																{formatNorwegianCurrency(getDisplayKitTotal(item))}
 															</span>
 
 															<Button
@@ -779,12 +870,17 @@ const CartPage = () => {
 																			{item.hose.itemNumber}
 																		</p>
 																	</div>
-																	<p className="font-bold">
-																		{formatNorwegianCurrency(
-																			calculatedPrices[item.hose.itemNumber] ??
-																				0,
-																		)}
-																	</p>
+																	<div className="flex items-center gap-3">
+																		{renderUnitPriceInput(item.hose.itemNumber)}
+																		<p className="font-bold">
+																			{formatNorwegianCurrency(
+																				getDisplayLineTotal(
+																					item.hose.itemNumber,
+																					item.hose.quantity ?? 1,
+																				),
+																			)}
+																		</p>
+																	</div>
 																</div>
 																<div className="flex items-start justify-between gap-2">
 																	<div className="flex flex-col">
@@ -795,14 +891,17 @@ const CartPage = () => {
 																			{item.ferrule1.itemNumber}
 																		</p>
 																	</div>
-
-																	<p className="font-bold">
-																		{formatNorwegianCurrency(
-																			calculatedPrices[
-																				item.ferrule1.itemNumber
-																			] ?? 0,
-																		)}
-																	</p>
+																	<div className="flex items-center gap-3">
+																		{renderUnitPriceInput(item.ferrule1.itemNumber)}
+																		<p className="font-bold">
+																			{formatNorwegianCurrency(
+																				getDisplayLineTotal(
+																					item.ferrule1.itemNumber,
+																					item.ferrule1.quantity ?? 1,
+																				),
+																			)}
+																		</p>
+																	</div>
 																</div>
 																<div className="flex items-start justify-between gap-2">
 																	<div className="flex flex-col">
@@ -813,13 +912,17 @@ const CartPage = () => {
 																			{item.ferrule2.itemNumber}
 																		</p>
 																	</div>
-																	<p className="font-bold">
-																		{formatNorwegianCurrency(
-																			calculatedPrices[
-																				item.ferrule2.itemNumber
-																			] ?? 0,
-																		)}
-																	</p>
+																	<div className="flex items-center gap-3">
+																		{renderUnitPriceInput(item.ferrule2.itemNumber)}
+																		<p className="font-bold">
+																			{formatNorwegianCurrency(
+																				getDisplayLineTotal(
+																					item.ferrule2.itemNumber,
+																					item.ferrule2.quantity ?? 1,
+																				),
+																			)}
+																		</p>
+																	</div>
 																</div>
 																<div className="flex items-start justify-between gap-2">
 																	<div className="flex flex-col">
@@ -830,13 +933,17 @@ const CartPage = () => {
 																			{item.insert1.itemNumber}
 																		</p>
 																	</div>
-																	<p className="font-bold">
-																		{formatNorwegianCurrency(
-																			calculatedPrices[
-																				item.insert1.itemNumber
-																			] ?? 0,
-																		)}
-																	</p>
+																	<div className="flex items-center gap-3">
+																		{renderUnitPriceInput(item.insert1.itemNumber)}
+																		<p className="font-bold">
+																			{formatNorwegianCurrency(
+																				getDisplayLineTotal(
+																					item.insert1.itemNumber,
+																					item.insert1.quantity ?? 1,
+																				),
+																			)}
+																		</p>
+																	</div>
 																</div>
 																<div className="flex items-start justify-between gap-2">
 																	<div className="flex flex-col">
@@ -847,13 +954,17 @@ const CartPage = () => {
 																			{item.insert2.itemNumber}
 																		</p>
 																	</div>
-																	<p className="font-bold">
-																		{formatNorwegianCurrency(
-																			calculatedPrices[
-																				item.insert2.itemNumber
-																			] ?? 0,
-																		)}
-																	</p>
+																	<div className="flex items-center gap-3">
+																		{renderUnitPriceInput(item.insert2.itemNumber)}
+																		<p className="font-bold">
+																			{formatNorwegianCurrency(
+																				getDisplayLineTotal(
+																					item.insert2.itemNumber,
+																					item.insert2.quantity ?? 1,
+																				),
+																			)}
+																		</p>
+																	</div>
 																</div>
 																{Object.values(item.services ?? {}).some(
 																	(v) => {
@@ -935,14 +1046,20 @@ const CartPage = () => {
 																						{additional.itemNumber}
 																					</p>
 																				</div>
-																				<p className="font-bold">
-																					{formatNorwegianCurrency(
-																						getCalculatedPrice(
-																							additional.itemNumber,
-																							additional.quantity,
-																						),
-																					)}
-																				</p>
+																				<div className="flex items-center gap-3">
+																					{renderUnitPriceInput(additional.itemNumber)}
+																					<p className="font-bold">
+																						{formatNorwegianCurrency(
+																							overriddenUnitPrices[additional.itemNumber] != null
+																								? overriddenUnitPrices[additional.itemNumber] *
+																									additional.quantity
+																								: getCalculatedPrice(
+																									additional.itemNumber,
+																									additional.quantity,
+																								),
+																						)}
+																					</p>
+																				</div>
 																			</div>
 																		))}
 																	</div>

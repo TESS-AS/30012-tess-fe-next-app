@@ -59,6 +59,7 @@ export default function OrderSummary({
 		handleArchiveCart,
 		unitPrices,
 		requisitionPlacerInfo,
+		overriddenUnitPrices,
 	} = useAppContext();
 
 	// Fingerprint the cart so react-query re-runs cartEvaluation whenever
@@ -207,23 +208,56 @@ export default function OrderSummary({
 
 			const itemsFromCart = (cartItems?.cart ?? [])
 				.filter((l) => l.itemNumber && l.quantity)
-				.map((l) => ({
-					itemNumber: l.itemNumber,
-					quantity: l.quantity,
-				}));
+				.map((l) => {
+					// Only attach `unitPrice` when the employee actually set an
+					// override — omitting the field keeps BE on its price-engine
+					// calculation and avoids the "Not permitted to set prices" 403
+					// for users without `canOverridePrice`.
+					const override = overriddenUnitPrices[l.itemNumber];
+					return override != null
+						? {
+								itemNumber: l.itemNumber,
+								quantity: l.quantity,
+								unitPrice: override,
+							}
+						: {
+								itemNumber: l.itemNumber,
+								quantity: l.quantity,
+							};
+				});
+
+			// Helper that attaches `unitPrice` only when the employee has an
+			// override set for that specific itemNumber. Same rule as the
+			// regular-cart path — omit the field otherwise so BE stays on its
+			// price-engine calc and non-permitted users don't hit 403.
+			const withOverride = (line: {
+				itemNumber: string;
+				quantity: number;
+			}) => {
+				const override = overriddenUnitPrices[line.itemNumber];
+				return override != null ? { ...line, unitPrice: override } : line;
+			};
 
 			const itemsFromCartKit = (cartItems?.cartKit ?? []).flatMap((kit) => {
-				const lines: Array<{ itemNumber: string; quantity: number }> = [];
+				const lines: Array<{
+					itemNumber: string;
+					quantity: number;
+					unitPrice?: number;
+				}> = [];
 				if (kit.hose?.itemNumber && kit.hose.quantity) {
-					lines.push({
-						itemNumber: kit.hose.itemNumber,
-						quantity: kit.hose.quantity,
-					});
+					lines.push(
+						withOverride({
+							itemNumber: kit.hose.itemNumber,
+							quantity: kit.hose.quantity,
+						}),
+					);
 				}
 				const comps = [kit.ferrule1, kit.ferrule2, kit.insert1, kit.insert2];
 				for (const c of comps) {
 					if (c?.itemNumber && c.quantity) {
-						lines.push({ itemNumber: c.itemNumber, quantity: c.quantity });
+						lines.push(
+							withOverride({ itemNumber: c.itemNumber, quantity: c.quantity }),
+						);
 					}
 				}
 
@@ -245,17 +279,21 @@ export default function OrderSummary({
 				);
 
 				for (const s of serviceItems) {
-					lines.push({
-						itemNumber: s.itemNumber,
-						quantity: s.quantity || 1,
-					});
+					lines.push(
+						withOverride({
+							itemNumber: s.itemNumber,
+							quantity: s.quantity || 1,
+						}),
+					);
 				}
 
 				for (const additional of getCartKitPartEntries(kit.additionals)) {
-					lines.push({
-						itemNumber: additional.itemNumber,
-						quantity: additional.quantity,
-					});
+					lines.push(
+						withOverride({
+							itemNumber: additional.itemNumber,
+							quantity: additional.quantity,
+						}),
+					);
 				}
 				return lines;
 			});
