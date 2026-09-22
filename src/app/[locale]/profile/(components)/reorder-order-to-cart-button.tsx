@@ -63,7 +63,7 @@ export function ReorderOrderToCartButton({
 
 			setIsCartChanging((v) => !v);
 
-			const first = lines[0];
+			const [first] = lines;
 			showCartNotification({
 				itemName: first.itemName || first.itemNumber,
 				itemNumber: first.itemNumber,

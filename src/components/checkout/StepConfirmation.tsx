@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-import { ConfirmationCard } from "@/components/checkout/confirmation-card";
 import { CartKitPartRow } from "@/components/checkout/cart-kit-part-row";
+import { ConfirmationCard } from "@/components/checkout/confirmation-card";
 import { EditAddressModal } from "@/components/checkout/edit-address-modal";
 import { EditContactModal } from "@/components/checkout/edit-contact-modal";
 import { EditDeliveryModal } from "@/components/checkout/edit-delivery-modal";
@@ -272,8 +272,9 @@ export default function StepConfirmation({
 													).some((v) => {
 														if (v == null || typeof v !== "object")
 															return false;
-														const itemNumber = (v as { itemNumber?: unknown })
-															.itemNumber;
+														const { itemNumber } = v as {
+															itemNumber?: unknown;
+														};
 														return (
 															typeof itemNumber === "string" &&
 															itemNumber.trim().length > 0
@@ -284,9 +285,9 @@ export default function StepConfirmation({
 																.filter(([, v]) => {
 																	if (v == null || typeof v !== "object")
 																		return false;
-																	const itemNumber = (
-																		v as { itemNumber?: unknown }
-																	).itemNumber;
+																	const { itemNumber } = v as {
+																		itemNumber?: unknown;
+																	};
 																	return (
 																		typeof itemNumber === "string" &&
 																		itemNumber.trim().length > 0
