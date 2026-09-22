@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 
-import OrderSummary from "@/components/checkout/order-summary";
 import { CartKitPartRow } from "@/components/checkout/cart-kit-part-row";
+import OrderSummary from "@/components/checkout/order-summary";
 import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { VariantModalHeader } from "@/components/checkout/variant-modal-header";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
