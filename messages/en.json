@@ -982,7 +982,14 @@
 		"orderDate": "Order Date",
 		"price": "Price",
 		"units": "Items",
-		"quantity": "Quantity"
+		"quantity": "Quantity",
+		"actions": "Actions"
+	},
+	"ReorderOrder": {
+		"ariaLabel": "Add order to cart",
+		"success": "{count, plural, one {# item added to cart} other {# items added to cart}}",
+		"error": "Could not add the order to cart",
+		"noItems": "No items to add to cart"
 	},
 	"AddUserModal": {
 		"title": "Add New User",
@@ -1184,7 +1191,8 @@
 		"orderDate": "Order Date",
 		"price": "Price",
 		"units": "Items",
-		"quantity": "Quantity"
+		"quantity": "Quantity",
+		"actions": "Actions"
 	},
 	"ProductDetailsModal": {
 		"title": "Product Details",

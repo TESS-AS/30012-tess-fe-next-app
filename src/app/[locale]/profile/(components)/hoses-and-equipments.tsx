@@ -511,14 +511,42 @@ export function HosesAndEquipments({
 		});
 	};
 
-	const clearSelection = () => {
+	const clearSelection = useCallback(() => {
 		setSelectedRows([]);
 		setAllAcrossPages(false);
 		setDeselectedIds(new Set());
+		assetsByHexagonIdRef.current = new Map();
 		if (typeof window !== "undefined") {
-			window.localStorage.setItem("selectedHoseRows", JSON.stringify([]));
+			window.localStorage.removeItem("selectedHoseRows");
 		}
-	};
+	}, []);
+
+	const selectionCustomerRef = useRef<string | undefined>(undefined);
+
+	// Drop hose selection when the trading account changes so client X
+	// selections cannot be added to client Y's cart.
+	useEffect(() => {
+		const currentCustomer = profile?.defaultCustomerNumber;
+		if (!currentCustomer) return;
+
+		const previousCustomer = selectionCustomerRef.current;
+		selectionCustomerRef.current = currentCustomer;
+
+		if (previousCustomer === undefined || previousCustomer === currentCustomer) {
+			return;
+		}
+
+		clearSelection();
+	}, [profile?.defaultCustomerNumber, clearSelection]);
+
+	// Drop selection when leaving Hose Management so it cannot follow elsewhere.
+	useEffect(() => {
+		return () => {
+			if (typeof window !== "undefined") {
+				window.localStorage.removeItem("selectedHoseRows");
+			}
+		};
+	}, []);
 
 	const selectSingleRow = (hexagonId: string) => {
 		setAllAcrossPages(false);
