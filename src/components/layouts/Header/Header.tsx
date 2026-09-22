@@ -720,18 +720,12 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 												</div>
 											)}
 										</div>
-										{/* Din Side — Equinor opens e-handel order history (S1-scoped) */}
+										{/* {!isHoseManagementCustomer && ( */}
 										<>
 											<DropdownMenuSeparator />
 											<DropdownMenuItem
 												className="text-gray-700"
-												onClick={() =>
-													router.push(
-														isHoseManagementCustomer
-															? "/profile?tab=ordrehistorikk"
-															: "/profile",
-													)
-												}>
+												onClick={() => router.push("/profile")}>
 												Gå til din side
 											</DropdownMenuItem>
 											<DropdownMenuItem
@@ -739,9 +733,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 												onClick={() => router.push("/profile?tab=settings")}>
 												Innstillinger
 											</DropdownMenuItem>
-											{!isHoseManagementCustomer && (
-												<CustomerNumberSwitcher profile={profile} />
-											)}
+											<CustomerNumberSwitcher profile={profile} />
 											{(hasHoseManagementAccess ||
 												hasTessEdiAccess ||
 												hasThmProjectsAccess) && (
@@ -971,32 +963,28 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								</div>
 							)}
 						</div>
-						<nav className="w-full bg-white">
-							<button
-								type="button"
-								onClick={() => {
-									router.push(
-										isHoseManagementCustomer
-											? "/profile?tab=ordrehistorikk"
-											: "/profile",
-									);
-									setIsMobileProfileOpen(false);
-								}}
-								className="flex min-h-[53px] w-full items-center justify-between border-t border-[#c1c4c2] px-4 text-left text-sm text-[#2D3530]">
-								Gå til din side
-								<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
-							</button>
-							<button
-								type="button"
-								onClick={() => {
-									router.push("/profile?tab=settings");
-									setIsMobileProfileOpen(false);
-								}}
-								className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]">
-								Innstillinger
-								<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
-							</button>
-							{!isHoseManagementCustomer && (
+						{!isHoseManagementCustomer && (
+							<nav className="w-full bg-white">
+								<button
+									type="button"
+									onClick={() => {
+										router.push("/profile");
+										setIsMobileProfileOpen(false);
+									}}
+									className="flex min-h-[53px] w-full items-center justify-between border-t border-[#c1c4c2] px-4 text-left text-sm text-[#2D3530]">
+									Gå til din side
+									<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
+								</button>
+								<button
+									type="button"
+									onClick={() => {
+										router.push("/profile?tab=settings");
+										setIsMobileProfileOpen(false);
+									}}
+									className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]">
+									Innstillinger
+									<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
+								</button>
 								<button
 									type="button"
 									onClick={() => {
@@ -1007,85 +995,85 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 									Bytt handlekonto
 									<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
 								</button>
-							)}
 
-							{(hasHoseManagementAccess ||
-								hasTessEdiAccess ||
-								hasThmProjectsAccess) && (
-								<>
-									<div className="border-t border-b border-[#c1c4c2] px-4 py-3 text-sm font-bold text-[#0F1912]">
-										Tjenester
-									</div>
-									{hasHoseManagementAccess && (
-										<button
-											type="button"
-											onClick={() => {
-												router.push("/profile?tab=hose-orders");
-												setIsMobileProfileOpen(false);
-											}}
-											className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]">
-											Hose management
-											<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
-										</button>
-									)}
-									{hasTessEdiAccess && (
-										<button
-											type="button"
-											onClick={() => {
-												router.push("/profile?tab=tess-edi");
-												setIsMobileProfileOpen(false);
-											}}
-											className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]">
-											TESS EDI
-											<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
-										</button>
-									)}
-									{hasThmProjectsAccess && (
-										<button
-											type="button"
-											onClick={() => {
-												router.push("/profile?tab=thm-active-projects");
-												setIsMobileProfileOpen(false);
-											}}
-											className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]">
-											THM projects (MSL)
-											<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
-										</button>
-									)}
-								</>
-							)}
-							{isTessEmployee && (
+								{(hasHoseManagementAccess ||
+									hasTessEdiAccess ||
+									hasThmProjectsAccess) && (
+									<>
+										<div className="border-t border-b border-[#c1c4c2] px-4 py-3 text-sm font-bold text-[#0F1912]">
+											Tjenester
+										</div>
+										{hasHoseManagementAccess && (
+											<button
+												type="button"
+												onClick={() => {
+													router.push("/profile?tab=hose-orders");
+													setIsMobileProfileOpen(false);
+												}}
+												className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]">
+												Hose management
+												<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
+											</button>
+										)}
+										{hasTessEdiAccess && (
+											<button
+												type="button"
+												onClick={() => {
+													router.push("/profile?tab=tess-edi");
+													setIsMobileProfileOpen(false);
+												}}
+												className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]">
+												TESS EDI
+												<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
+											</button>
+										)}
+										{hasThmProjectsAccess && (
+											<button
+												type="button"
+												onClick={() => {
+													router.push("/profile?tab=thm-active-projects");
+													setIsMobileProfileOpen(false);
+												}}
+												className="flex min-h-[53px] w-full items-center justify-between px-4 text-left text-sm text-[#2D3530]">
+												THM projects (MSL)
+												<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
+											</button>
+										)}
+									</>
+								)}
+								{isTessEmployee && (
+									<button
+										type="button"
+										onClick={() => {
+											window.open(
+												"https://app.ecoonline.com/public/search-configuration/search?companyID=1000435&prodType=er&descrLang=1",
+												"_blank",
+												"noopener,noreferrer",
+											);
+											setIsMobileProfileOpen(false);
+										}}
+										className="flex min-h-[53px] w-full items-center justify-between border-t border-[#c1c4c2] px-4 text-left text-sm text-[#2D3530]">
+										Søk på ecoonline
+										<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
+									</button>
+								)}
+
+								{/* Logg ut */}
 								<button
 									type="button"
 									onClick={() => {
-										window.open(
-											"https://app.ecoonline.com/public/search-configuration/search?companyID=1000435&prodType=er&descrLang=1",
-											"_blank",
-											"noopener,noreferrer",
-										);
+										handleLogout();
 										setIsMobileProfileOpen(false);
 									}}
-									className="flex min-h-[53px] w-full items-center justify-between border-t border-[#c1c4c2] px-4 text-left text-sm text-[#2D3530]">
-									Søk på ecoonline
-									<ChevronRight className="h-4 w-4 shrink-0 text-[#2D3530]" />
+									className="flex min-h-[53px] w-full items-center justify-between border-t border-[#c1c4c2] px-4 text-left text-sm text-red-700">
+									<span className="flex items-center gap-2">
+										<LogOut className="h-4 w-4" />
+										Logg ut
+									</span>
+									<ChevronRight className="h-4 w-4 shrink-0 text-red-700" />
 								</button>
-							)}
-
-							{/* Logg ut */}
-							<button
-								type="button"
-								onClick={() => {
-									handleLogout();
-									setIsMobileProfileOpen(false);
-								}}
-								className="flex min-h-[53px] w-full items-center justify-between border-t border-[#c1c4c2] px-4 text-left text-sm text-red-700">
-								<span className="flex items-center gap-2">
-									<LogOut className="h-4 w-4" />
-									Logg ut
-								</span>
-								<ChevronRight className="h-4 w-4 shrink-0 text-red-700" />
-							</button>
-						</nav>
+							</nav>
+						)}
 					</div>
 				</>
 			)}
