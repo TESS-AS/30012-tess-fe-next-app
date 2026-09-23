@@ -149,6 +149,7 @@ interface SearchOrderHistoryApiItem {
 		itemId: number;
 		itemName: string;
 		itemNumber: string;
+		productNumber: string;
 		quantity: number;
 		unit: string;
 		netPrice: number;
