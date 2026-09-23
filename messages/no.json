@@ -19,9 +19,11 @@
 		"seeCategories": "Se kategorier",
 		"learnMore": "Lær mer",
 		"welcome": {
-			"titlePart1": "Velkommen til",
-			"titlePart2": "TESSIX netthandel",
+			"title": "Velkommen til Tessix – digital plattform fra TESS",
 			"intro": "Du må være innlogget for å se priser, lagerstatus og handle.",
+			"developing": "Vi utvikler Tessix hele tiden.",
+			"haveSuggestion": "Har du forslag som gjør arbeidsdagen din enklere?",
+			"giveFeedback": "Gi tilbakemelding",
 			"haveUser": "Har du allerede bruker?",
 			"logIn": "Logg inn",
 			"missingAccess": "Mangler du tilgang?",
