@@ -97,6 +97,7 @@ export interface OrderItems {
 }
 export interface OrderLine {
 	orderLineNumber: number;
+	productNumber: string;
 	itemId: number;
 	itemName: string;
 	itemNumber: string;

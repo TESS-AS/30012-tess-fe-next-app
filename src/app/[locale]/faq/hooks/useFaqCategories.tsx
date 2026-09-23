@@ -76,7 +76,7 @@ export function useFaqCategories(onOpenLogin: () => void): FaqCategory[] {
 			titleKey: "4",
 			items: [
 				{ q: t("questions.addToOrder"), a: t("answers.addToOrder") },
-				// { q: t("questions.orderHistoryAndStatus"), a: t("answers.orderHistoryAndStatus") },
+				{ q: t("questions.orderHistoryAndStatus"), a: t("answers.orderHistoryAndStatus") },
 			],
 		},
 		{

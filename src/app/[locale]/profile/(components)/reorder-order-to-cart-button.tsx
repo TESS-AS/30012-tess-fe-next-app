@@ -43,7 +43,7 @@ export function ReorderOrderToCartButton({
 			let addedCount = 0;
 			for (const line of lines) {
 				const response = await addToCart({
-					productNumber: line.itemNumber,
+					productNumber: line.productNumber,
 					itemNumber: line.itemNumber,
 					quantity: line.quantity,
 					warehouseNumber,

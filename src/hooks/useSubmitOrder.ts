@@ -93,15 +93,22 @@ export const useSubmitOrder = (
 				}
 				return null;
 			} else {
-				const updatedPayload = payload.salesOrderHeader.customerReference
-					? payload
-					: {
-							...payload,
-							salesOrderHeader: {
-								...payload.salesOrderHeader,
-								customerReference: `${profile?.firstName} ${profile?.lastName}`,
-							},
-						};
+				const placerName = requisitionPlacerInfo?.placerName?.trim();
+				const profileName =
+					`${profile?.firstName ?? ""} ${profile?.lastName ?? ""}`.trim();
+				const existingReference =
+					payload.salesOrderHeader.customerReference?.trim();
+					
+				const customerReference =
+					placerName || existingReference || profileName;
+
+				const updatedPayload: Order = {
+					...payload,
+					salesOrderHeader: {
+						...payload.salesOrderHeader,
+						customerReference,
+					},
+				};
 				const response = await salesOrder(updatedPayload);
 
 				localStorage.removeItem("selectedHoseRows");

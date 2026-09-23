@@ -26,10 +26,11 @@ export function WelcomeSection() {
 						<div className="max-w-xl space-y-6 md:space-y-8">
 							<div className="space-y-3 md:space-y-4">
 								<h1 className="text-3xl font-normal tracking-tight text-gray-900 sm:text-4xl lg:text-5xl xl:text-6xl">
-									{t("titlePart1")}
-									<br />
-									{t("titlePart2")}
+									{t("title")}
 								</h1>
+								<p className="text-base leading-relaxed font-normal text-gray-900 md:text-xl">
+									{t("developing")}
+								</p>
 								<p className="text-base leading-relaxed font-normal text-gray-500 md:text-xl">
 									{t("intro")}
 								</p>

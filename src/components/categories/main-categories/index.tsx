@@ -9,9 +9,14 @@ import {
 	HALLIBURTON_PPE_CATALOG_URL,
 } from "@/constants/checkout";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { Link } from "@/i18n/navigation";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
+
+const SUPPORT_EMAIL = "netthandel@tess.no";
 
 export default function MainCategorySection() {
+	const t = useTranslations("Home.welcome");
 	const [isFeedbackDialogOpen, setIsFeedbackDialogOpen] = useState(false);
 	const { data: profile } = useGetProfileData();
 
@@ -32,13 +37,13 @@ export default function MainCategorySection() {
 							<h2 className="text-4xl leading-tight font-light text-gray-900 md:text-4xl lg:text-6xl">
 								{isHalliburton
 									? "Welcome to TESSIX Online Store"
-									: "Velkommen til TESSIX Netthandel"}
+									: t("title")}
 							</h2>
 							<div className="space-y-4 md:space-y-6">
 								<p className="mb-0 text-lg leading-relaxed font-medium text-gray-900 md:text-xl">
 									{isHalliburton
 										? "We continually develop new solutions"
-										: "Vi utvikler stadig løsningen"}
+										: t("developing")}
 								</p>
 								{isHalliburton && (
 									<div className="pt-2 md:pt-4">
@@ -78,34 +83,37 @@ export default function MainCategorySection() {
 									<p className="mb-0 text-base leading-relaxed text-gray-500 md:text-lg">
 										{isHalliburton
 											? "Do you have suggestions that make your workday easier?"
-											: "Har du forslag som gjør arbeidsdagen din enklere?"}
+											: t("haveSuggestion")}
 									</p>
 									<button
 										type="button"
 										onClick={() => setIsFeedbackDialogOpen(true)}
 										className="cursor-pointer text-base text-green-700 hover:text-green-800 md:text-lg">
-										{isHalliburton ? "Give feedback" : "Gi tilbakemelding"}
+										{isHalliburton ? "Give feedback" : t("giveFeedback")}
 									</button>
 								</div>
 								<div className="space-y-1 pt-2 md:pt-4">
 									<p className="mb-0 text-base leading-relaxed font-semibold text-gray-500 md:text-lg">
-										{isHalliburton ? "Need help?" : "Trenger du hjelp?"}
+										{isHalliburton ? "Need help?" : t("needHelp")}
 									</p>
 									<p className="text-base leading-relaxed text-gray-500 md:text-lg">
-										{isHalliburton ? "See " : "Se "}
-										<a
+										{t("see")}{" "}
+										<Link
 											href="/faq"
 											className="text-green-700 hover:text-green-900">
 											{isHalliburton
 												? "frequently asked questions"
-												: "ofte stilte spørsmål"}
-										</a>
-										{isHalliburton ? " or contact us at " : " eller kontakt oss på "}
+												: t("faq")}
+										</Link>
+										{isHalliburton
+											? ", or contact us at "
+											: `, ${t("orContactUs")} `}
 										<a
-											href="mailto:netthandel@tess.no"
+											href={`mailto:${SUPPORT_EMAIL}`}
 											className="text-green-700 hover:text-green-900">
-											netthandel@tess.no
+											{SUPPORT_EMAIL}
 										</a>
+										.
 									</p>
 								</div>
 								{isHalliburton && (
