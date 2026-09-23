@@ -385,6 +385,8 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 		return match?.nameNo || "";
 	};
 
+	const hasMultipleAssortments = assortments.length > 1;
+
 	const assortmentDropdownRef = useRef<HTMLDivElement>(null);
 	const mobileAssortmentRef = useRef<HTMLDivElement>(null);
 
@@ -566,21 +568,29 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 													onClick={(e) => {
 														e.preventDefault();
 														e.stopPropagation();
+														if (!hasMultipleAssortments) return;
 														setIsAssortmentDropdownOpen(
 															!isAssortmentDropdownOpen,
 														);
 													}}
-													disabled={isSaving}>
+													disabled={isSaving}
+													aria-haspopup={hasMultipleAssortments}
+													aria-expanded={
+														hasMultipleAssortments
+															? isAssortmentDropdownOpen
+															: undefined
+													}>
 													<BookOpen className="h-5 w-5 flex-shrink-0 text-[#003D1A]" />
 													<span className="truncate text-sm font-medium">
 														{getSelectedAssortmentName() ||
 															t("CustomerSwitcher.selectAssortmentPlaceholder")}
 													</span>
-													{isAssortmentDropdownOpen ? (
-														<ChevronUp className="h-4 w-4 flex-shrink-0" />
-													) : (
-														<ChevronDown className="h-4 w-4 flex-shrink-0" />
-													)}
+													{hasMultipleAssortments &&
+														(isAssortmentDropdownOpen ? (
+															<ChevronUp className="h-4 w-4 flex-shrink-0" />
+														) : (
+															<ChevronDown className="h-4 w-4 flex-shrink-0" />
+														))}
 												</Button>
 											</div>
 										)}
@@ -599,7 +609,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 									</form>
 								</div>
 								{profile &&
-									assortments.length > 0 &&
+									hasMultipleAssortments &&
 									isAssortmentDropdownOpen && (
 										<div className="absolute top-[50px] right-0 z-[9999] max-h-[260px] w-[300px] max-w-[400px] overflow-y-auto rounded-b-lg bg-white py-2 shadow-lg">
 											<TooltipProvider>
@@ -1138,19 +1148,27 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								onClick={(e) => {
 									e.preventDefault();
 									e.stopPropagation();
+									if (!hasMultipleAssortments) return;
 									setIsAssortmentDropdownOpen(!isAssortmentDropdownOpen);
 								}}
 								disabled={isSaving}
+								aria-haspopup={hasMultipleAssortments}
+								aria-expanded={
+									hasMultipleAssortments
+										? isAssortmentDropdownOpen
+										: undefined
+								}
 								className="flex h-[44px] w-full items-center justify-center gap-2 bg-[#E8EAE9] text-sm font-medium text-[#0F1912]">
 								{getSelectedAssortmentName() ||
 									t("CustomerSwitcher.selectAssortmentPlaceholder")}
-								{isAssortmentDropdownOpen ? (
-									<ChevronUp className="h-4 w-4" />
-								) : (
-									<ChevronDown className="h-4 w-4" />
-								)}
+								{hasMultipleAssortments &&
+									(isAssortmentDropdownOpen ? (
+										<ChevronUp className="h-4 w-4" />
+									) : (
+										<ChevronDown className="h-4 w-4" />
+									))}
 							</button>
-							{isAssortmentDropdownOpen && (
+							{hasMultipleAssortments && isAssortmentDropdownOpen && (
 								<div className="bg-white">
 									{assortments.map((a: any) => (
 										<button
