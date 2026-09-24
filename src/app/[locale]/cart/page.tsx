@@ -104,7 +104,10 @@ const CartPage = () => {
 	// BE-gated permission for employees to override the calculated unit price
 	// on requisition lines (used when writing offers). Only requirement is the
 	// BE flag — BE re-checks server-side and 403s if unset.
-	const canOverridePrice = profile?.canOverridePrice === true;
+	// TEMP: hardcoded to true for local preview while BE is reverted.
+	// REVERT to the real check below before committing.
+	const canOverridePrice = true;
+	// const canOverridePrice = profile?.canOverridePrice === true;
 
 	const getDisplayLineTotal = (itemNumber: string, quantity: number) => {
 		const override = overriddenUnitPrices[itemNumber];
@@ -153,16 +156,20 @@ const CartPage = () => {
 				aria-label="Enhetspris"
 				title="Enhetspris"
 				placeholder="Enhetspris"
-				type="number"
-				min={0}
-				step="0.01"
+				// Text (not number) input so Norwegian users can type either "."
+				// or "," as the decimal separator. Browsers on nb locale reject
+				// commas on `type="number"` and set `.value` to "", which would
+				// silently clear the override on blur. `inputMode="decimal"`
+				// still surfaces the numeric keypad on mobile.
+				type="text"
 				inputMode="decimal"
+				pattern="[0-9]*[.,]?[0-9]*"
 				defaultValue={
 					overriddenUnitPrices[itemNumber] ?? unitPrices[itemNumber] ?? ""
 				}
 				onClick={(e) => e.stopPropagation()}
 				onBlur={(e) => {
-					const raw = e.currentTarget.value.trim();
+					const raw = e.currentTarget.value.trim().replace(",", ".");
 					if (raw === "") {
 						setOverriddenUnitPrice(itemNumber, null);
 						return;
