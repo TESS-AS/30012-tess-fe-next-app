@@ -7,6 +7,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
 import { useGetOpenConfirmations } from "@/hooks/useGetOpenConfirmations";
 import { cn } from "@/lib/utils";
 import { OpenOrderConfirmation } from "@/types/orders.types";
@@ -24,6 +25,9 @@ export function AvvikendeOrdre({
 	const [searchQuery, setSearchQuery] = useState("");
 	const [debouncedSearch, setDebouncedSearch] = useState("");
 	const [selectedStatus, setSelectedStatus] = useState<string>("Alle");
+	// Purchaser-scope toggle: off (default) → BE returns only the caller's own
+	// orders; on → BE returns every open order for the customer.
+	const [showAllOrders, setShowAllOrders] = useState(false);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [sortColumn, setSortColumn] = useState<string | null>(null);
 	const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(
@@ -37,17 +41,18 @@ export function AvvikendeOrdre({
 		return () => clearTimeout(handle);
 	}, [searchQuery]);
 
-	// Reset to page 1 when the search term changes — new result set is
-	// paginated independently, so lingering on page 3 would show "no results".
+	// Reset to page 1 when the search term or scope changes — the result set
+	// is paginated server-side, so lingering on page 3 would show "no results".
 	useEffect(() => {
 		setCurrentPage(1);
-	}, [debouncedSearch]);
+	}, [debouncedSearch, showAllOrders]);
 
 	const { data: orders, totalCount, isLoading } = useGetOpenConfirmations(
 		currentPage,
 		ITEMS_PER_PAGE,
 		true,
 		debouncedSearch,
+		showAllOrders,
 	);
 
 	const statuses = ["Alle", "Venter godkjenning", "Godkjent", "Avvist"];
@@ -239,22 +244,37 @@ export function AvvikendeOrdre({
 
 			<div className="rounded-lg border border-[#C1C4C2] bg-white">
 				<div className="space-y-4 p-4">
-					<div className="relative flex w-full max-w-[480px]">
-						<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#5A615D]" />
-						<Input
-							placeholder="Søk på ordrenummer, leverandør eller vare..."
-							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
-							className="font-sm h-9 flex-1 rounded-md border border-[#8A8F8C] bg-[#F8F9F8] pr-24 pl-10 text-sm text-[#5A615D]"
-						/>
-						<Button
-							type="button"
-							onClick={() => {
-								/* optional manual trigger; filtering is instant */
-							}}
-							className="absolute top-1/2 right-0 h-9 -translate-y-1/2 rounded-none rounded-r-md border-1 border-l-2 border-[#8A8F8C] bg-white px-4 text-sm font-medium text-[#0F1912] hover:bg-white">
-							Søk
-						</Button>
+					<div className="flex items-center justify-between gap-4">
+						<div className="relative flex w-full max-w-[480px]">
+							<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#5A615D]" />
+							<Input
+								placeholder="Søk på ordrenummer, leverandør eller vare..."
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+								className="font-sm h-9 flex-1 rounded-md border border-[#8A8F8C] bg-[#F8F9F8] pr-24 pl-10 text-sm text-[#5A615D]"
+							/>
+							<Button
+								type="button"
+								onClick={() => {
+									/* optional manual trigger; filtering is instant */
+								}}
+								className="absolute top-1/2 right-0 h-9 -translate-y-1/2 rounded-none rounded-r-md border-1 border-l-2 border-[#8A8F8C] bg-white px-4 text-sm font-medium text-[#0F1912] hover:bg-white">
+								Søk
+							</Button>
+						</div>
+						<div className="flex shrink-0 items-center gap-2">
+							<Label
+								htmlFor="show-all-orders"
+								className="cursor-pointer text-sm font-medium text-[#0F1912]">
+								Vis alle ordrer
+							</Label>
+							<Switch
+								id="show-all-orders"
+								checked={showAllOrders}
+								onCheckedChange={setShowAllOrders}
+								className="data-[state=checked]:bg-[#009640] data-[state=unchecked]:bg-[#C1C4C2]"
+							/>
+						</div>
 					</div>
 
 					<div className="flex items-center gap-3 border-t border-[#C1C4C2] pt-4">

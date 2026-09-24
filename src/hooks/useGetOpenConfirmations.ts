@@ -8,8 +8,16 @@ import { useQuery } from "@tanstack/react-query";
 export const openConfirmationsKeys = {
 	all: ["openConfirmations"] as const,
 	lists: () => [...openConfirmationsKeys.all, "list"] as const,
-	list: (page: number, limit: number, search: string) =>
-		[...openConfirmationsKeys.lists(), { page, limit, search }] as const,
+	list: (
+		page: number,
+		limit: number,
+		search: string,
+		showAllOrders: boolean,
+	) =>
+		[
+			...openConfirmationsKeys.lists(),
+			{ page, limit, search, showAllOrders },
+		] as const,
 };
 
 /**
@@ -64,15 +72,22 @@ export function useGetOpenConfirmations(
 	limit: number = 25,
 	enabled: boolean = true,
 	search: string = "",
+	showAllOrders: boolean = false,
 ) {
 	const trimmedSearch = search.trim();
 	const { data, isLoading, error, refetch } = useQuery({
-		queryKey: openConfirmationsKeys.list(page, limit, trimmedSearch),
+		queryKey: openConfirmationsKeys.list(
+			page,
+			limit,
+			trimmedSearch,
+			showAllOrders,
+		),
 		queryFn: async () => {
 			const response = await getOpenConfirmations(
 				page,
 				limit,
 				trimmedSearch || undefined,
+				showAllOrders,
 			);
 			return {
 				orders: (response.data || []).map(transformOrderData),

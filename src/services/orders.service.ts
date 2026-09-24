@@ -266,6 +266,11 @@ export async function getOpenConfirmations(
 	page: number = 1,
 	limit: number = 25,
 	search?: string,
+	/** When true, BE returns every open order in the current customer's scope
+	 *  instead of just the caller's own (Jewel's Sept 22 change on
+	 *  `getOpenOrdersController`). Omit or pass false to keep the default
+	 *  "my orders only" behavior. */
+	showAllOrders?: boolean,
 ): Promise<OpenConfirmationsResponse> {
 	try {
 		const response = await axiosInstance.get<OpenConfirmationsResponse>(
@@ -277,6 +282,7 @@ export async function getOpenConfirmations(
 					...(search && search.trim().length > 0
 						? { search: search.trim() }
 						: {}),
+					...(showAllOrders ? { showAllOrders: true } : {}),
 				},
 			},
 		);
