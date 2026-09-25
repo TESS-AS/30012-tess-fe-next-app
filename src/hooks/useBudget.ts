@@ -86,11 +86,19 @@ export function useApproverCandidates(searchInput: string) {
  *  when the user adds/removes/updates lines without needing to invalidate from
  *  every cart mutation site. Pass `enabled: false` to opt out (e.g. when a
  *  requisition placer is active — BE has no on-behalf-of param yet, so the
- *  card would show the wrong user's budget). */
-export function useCartEvaluation(cartSignature: string, enabled: boolean) {
+ *  card would show the wrong user's budget).
+ *
+ *  `overriddenPrices` (optional) — employee-set per-item unit prices. When
+ *  present, BE re-computes `cartTotal` with them instead of the price engine
+ *  so the budget widget stays in sync with what the customer will be charged. */
+export function useCartEvaluation(
+	cartSignature: string,
+	enabled: boolean,
+	overriddenPrices?: Record<string, number>,
+) {
 	return useQuery<CartEvaluation>({
 		queryKey: budgetKeys.cartEvaluation(cartSignature),
-		queryFn: getCartEvaluation,
+		queryFn: () => getCartEvaluation(overriddenPrices),
 		enabled,
 		staleTime: 15_000,
 		placeholderData: keepPreviousData,

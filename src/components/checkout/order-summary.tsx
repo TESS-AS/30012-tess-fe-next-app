@@ -63,21 +63,27 @@ export default function OrderSummary({
 	} = useAppContext();
 
 	// Fingerprint the cart so react-query re-runs cartEvaluation whenever
-	// lines/quantities change without needing to invalidate from every mutation
-	// site. Skip the query entirely when a placer is present — BE has no
-	// on-behalf-of param on this endpoint yet, so it'd show the approver's
-	// budget instead of the placer's. Revisit once BE ships `?onBehalfOfUserId=`.
+	// lines/quantities OR employee price overrides change. Overrides are
+	// serialised into the same signature so /budget/cartEvaluation re-POSTs
+	// with the fresh body when a purchaser edits a unit price. Skip the query
+	// entirely when a placer is present — BE has no on-behalf-of param on
+	// this endpoint yet, so it'd show the approver's budget instead of the
+	// placer's. Revisit once BE ships `?onBehalfOfUserId=`.
 	const cartSignature = [
 		...(cartItems?.cart ?? []).map((l) => `${l.itemNumber}:${l.quantity}`),
 		...(cartItems?.cartKit ?? []).map(
 			(k) => `k:${k.hexagonId}:${k.hose?.quantity ?? 0}`,
 		),
+		...Object.entries(overriddenUnitPrices)
+			.sort(([a], [b]) => a.localeCompare(b))
+			.map(([itemNumber, price]) => `o:${itemNumber}:${price}`),
 	]
 		.sort()
 		.join(",");
 	const { data: cartEvaluation } = useCartEvaluation(
 		cartSignature,
 		!requisitionPlacerInfo,
+		overriddenUnitPrices,
 	);
 	const isCartEmpty =
 		(!cartItems?.cart || cartItems.cart.length === 0) &&
