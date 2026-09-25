@@ -105,10 +105,7 @@ const CartPage = () => {
 	// BE-gated permission for employees to override the calculated unit price
 	// on requisition lines (used when writing offers). Only requirement is the
 	// BE flag — BE re-checks server-side and 403s if unset.
-	// TEMP: hardcoded to true for local preview while BE is reverted.
-	// REVERT to the real check below before committing.
-	const canOverridePrice = true;
-	// const canOverridePrice = profile?.canOverridePrice === true;
+	const canOverridePrice = profile?.canOverridePrice === true;
 
 	const getDisplayLineTotal = (itemNumber: string, quantity: number) => {
 		const override = overriddenUnitPrices[itemNumber];
