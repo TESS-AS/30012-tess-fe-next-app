@@ -98,7 +98,91 @@ const CartPage = () => {
 		handleClearCart,
 		cartKitTotals,
 		getCalculatedPrice,
+		overriddenUnitPrices,
+		setOverriddenUnitPrice,
 	} = useAppContext();
+
+	// BE-gated permission for employees to override the calculated unit price
+	// on requisition lines (used when writing offers). Only requirement is the
+	// BE flag — BE re-checks server-side and 403s if unset.
+	// TEMP: hardcoded to true for local preview while BE is reverted.
+	// REVERT to the real check below before committing.
+	const canOverridePrice = true;
+	// const canOverridePrice = profile?.canOverridePrice === true;
+
+	const getDisplayLineTotal = (itemNumber: string, quantity: number) => {
+		const override = overriddenUnitPrices[itemNumber];
+		if (override != null) return override * quantity;
+		return calculatedPrices[itemNumber] ?? 0;
+	};
+
+	// Kit-level rollup that mirrors `cartKitTotals[hexagonId]` but substitutes
+	// any per-sub-item overrides so the collapsed accordion header agrees with
+	// the expanded rows. Enumerates the fixed sub-lines plus dynamic services
+	// and additionals.
+	const getDisplayKitTotal = (kit: CartKitItem) => {
+		let total = 0;
+		const addLine = (
+			itemNumber: string | undefined,
+			quantity: number | undefined,
+		) => {
+			if (!itemNumber) return;
+			total += getDisplayLineTotal(itemNumber, quantity ?? 1);
+		};
+		addLine(kit.hose?.itemNumber, kit.hose?.quantity);
+		addLine(kit.ferrule1?.itemNumber, kit.ferrule1?.quantity);
+		addLine(kit.ferrule2?.itemNumber, kit.ferrule2?.quantity);
+		addLine(kit.insert1?.itemNumber, kit.insert1?.quantity);
+		addLine(kit.insert2?.itemNumber, kit.insert2?.quantity);
+		for (const svc of Object.values(kit.services ?? {})) {
+			if (svc && typeof svc === "object" && "itemNumber" in svc) {
+				const s = svc as { itemNumber?: string; quantity?: number };
+				addLine(s.itemNumber, s.quantity);
+			}
+		}
+		for (const additional of getCartKitPartEntries(kit.additionals)) {
+			addLine(additional.itemNumber, additional.quantity);
+		}
+		return total;
+	};
+
+	// Shared render for the small unit-price input that appears next to a
+	// line-total in the cart. `quantity` is used so the caller-side display can
+	// derive `override × quantity` from the same source of truth. Guarded by
+	// `canOverridePrice` — non-employee users never see the input.
+	const renderUnitPriceInput = (itemNumber: string) => {
+		if (!canOverridePrice) return null;
+		return (
+			<input
+				aria-label="Enhetspris"
+				title="Enhetspris"
+				placeholder="Enhetspris"
+				// Text (not number) input so Norwegian users can type either "."
+				// or "," as the decimal separator. Browsers on nb locale reject
+				// commas on `type="number"` and set `.value` to "", which would
+				// silently clear the override on blur. `inputMode="decimal"`
+				// still surfaces the numeric keypad on mobile.
+				type="text"
+				inputMode="decimal"
+				pattern="[0-9]*[.,]?[0-9]*"
+				defaultValue={
+					overriddenUnitPrices[itemNumber] ?? unitPrices[itemNumber] ?? ""
+				}
+				onClick={(e) => e.stopPropagation()}
+				onBlur={(e) => {
+					const raw = e.currentTarget.value.trim().replace(",", ".");
+					if (raw === "") {
+						setOverriddenUnitPrice(itemNumber, null);
+						return;
+					}
+					const parsed = Number(raw);
+					if (!Number.isFinite(parsed) || parsed < 0) return;
+					setOverriddenUnitPrice(itemNumber, parsed);
+				}}
+				className="h-8 w-24 rounded border border-gray-300 px-2 py-1 text-right text-sm focus:border-[#009640] focus:outline-none"
+			/>
+		);
+	};
 
 	const [orderData] = useCheckoutOrderData(
 		{
@@ -359,7 +443,9 @@ const CartPage = () => {
 						</div>
 
 						<p className="ml-auto font-bold md:hidden">
-							{formatNorwegianCurrency(calculatedPrices[item.itemNumber] ?? 0)}
+							{formatNorwegianCurrency(
+								getDisplayLineTotal(item.itemNumber, item.quantity),
+							)}
 						</p>
 					</div>
 
@@ -485,8 +571,14 @@ const CartPage = () => {
 							}}
 						/>
 
+						<div className="hidden md:block">
+							{renderUnitPriceInput(item.itemNumber)}
+						</div>
+
 						<p className="hidden font-bold md:block">
-							{formatNorwegianCurrency(calculatedPrices[item.itemNumber] ?? 0)}
+							{formatNorwegianCurrency(
+								getDisplayLineTotal(item.itemNumber, item.quantity),
+							)}
 						</p>
 
 						<Button
@@ -739,9 +831,7 @@ const CartPage = () => {
 														/>
 														<div className="flex items-center gap-6">
 															<span className="font-semibold">
-																{formatNorwegianCurrency(
-																	cartKitTotals[item.hexagonId],
-																)}
+																{formatNorwegianCurrency(getDisplayKitTotal(item))}
 															</span>
 
 															<Button
@@ -771,6 +861,10 @@ const CartPage = () => {
 													<div className="border-t p-4">
 														<div className="space-y-3">
 															<div className="space-y-4 pl-8">
+																{/* Kit sub-lines — dev's `CartKitPartRow` component, extended
+																 * with the employee price-override slot and override-aware
+																 * line total. Non-employee users get `priceInputSlot=null` and
+																 * the raw engine price. */}
 																<CartKitPartRow
 																	name={item.hose.itemName}
 																	itemNumber={item.hose.itemNumber}
@@ -780,53 +874,65 @@ const CartPage = () => {
 																			: undefined
 																	}
 																	quantity={item.hose.quantity}
-																	price={
-																		calculatedPrices[item.hose.itemNumber] ?? 0
-																	}
+																	price={getDisplayLineTotal(
+																		item.hose.itemNumber,
+																		item.hose.quantity ?? 1,
+																	)}
+																	priceInputSlot={renderUnitPriceInput(
+																		item.hose.itemNumber,
+																	)}
 																	quantityLabel={t("Cart.quantity")}
 																/>
 																<CartKitPartRow
 																	name={item.ferrule1.name}
 																	itemNumber={item.ferrule1.itemNumber}
 																	quantity={item.ferrule1.quantity}
-																	price={
-																		calculatedPrices[
-																			item.ferrule1.itemNumber
-																		] ?? 0
-																	}
+																	price={getDisplayLineTotal(
+																		item.ferrule1.itemNumber,
+																		item.ferrule1.quantity ?? 1,
+																	)}
+																	priceInputSlot={renderUnitPriceInput(
+																		item.ferrule1.itemNumber,
+																	)}
 																	quantityLabel={t("Cart.quantity")}
 																/>
 																<CartKitPartRow
 																	name={item.ferrule2.name}
 																	itemNumber={item.ferrule2.itemNumber}
 																	quantity={item.ferrule2.quantity}
-																	price={
-																		calculatedPrices[
-																			item.ferrule2.itemNumber
-																		] ?? 0
-																	}
+																	price={getDisplayLineTotal(
+																		item.ferrule2.itemNumber,
+																		item.ferrule2.quantity ?? 1,
+																	)}
+																	priceInputSlot={renderUnitPriceInput(
+																		item.ferrule2.itemNumber,
+																	)}
 																	quantityLabel={t("Cart.quantity")}
 																/>
 																<CartKitPartRow
 																	name={item.insert1.name}
 																	itemNumber={item.insert1.itemNumber}
 																	quantity={item.insert1.quantity}
-																	price={
-																		calculatedPrices[
-																			item.insert1.itemNumber
-																		] ?? 0
-																	}
+																	price={getDisplayLineTotal(
+																		item.insert1.itemNumber,
+																		item.insert1.quantity ?? 1,
+																	)}
+																	priceInputSlot={renderUnitPriceInput(
+																		item.insert1.itemNumber,
+																	)}
 																	quantityLabel={t("Cart.quantity")}
 																/>
 																<CartKitPartRow
 																	name={item.insert2.name}
 																	itemNumber={item.insert2.itemNumber}
 																	quantity={item.insert2.quantity}
-																	price={
-																		calculatedPrices[
-																			item.insert2.itemNumber
-																		] ?? 0
-																	}
+																	price={getDisplayLineTotal(
+																		item.insert2.itemNumber,
+																		item.insert2.quantity ?? 1,
+																	)}
+																	priceInputSlot={renderUnitPriceInput(
+																		item.insert2.itemNumber,
+																	)}
 																	quantityLabel={t("Cart.quantity")}
 																/>
 																{Object.values(item.services ?? {}).some(
@@ -877,10 +983,11 @@ const CartPage = () => {
 																						quantity={
 																							typedService.quantity ?? 1
 																						}
-																						price={
-																							calculatedPrices[itemNumber] ??
-																							0
-																						}
+																						price={getDisplayLineTotal(
+																							itemNumber,
+																							typedService.quantity ?? 1,
+																						)}
+																						priceInputSlot={renderUnitPriceInput(itemNumber)}
 																						quantityLabel={t("Cart.quantity")}
 																					/>
 																				);
@@ -892,20 +999,28 @@ const CartPage = () => {
 																		{additionalItems.map((additional) => (
 																			<CartKitPartRow
 																				key={`${additional.key}-${additional.itemNumber}`}
-																				name={
-																					additional.name ||
-																					formatCartKitAdditionalLabel(
-																						additional.key,
+																			name={
+																				additional.name ||
+																				formatCartKitAdditionalLabel(
+																					additional.key,
+																				)
+																			}
+																			itemNumber={additional.itemNumber}
+																			quantity={additional.quantity}
+																			price={
+																				overriddenUnitPrices[additional.itemNumber] != null
+																					? overriddenUnitPrices[additional.itemNumber] *
+																						additional.quantity
+																				: getCalculatedPrice(
+																						additional.itemNumber,
+																						additional.quantity,
 																					)
-																				}
-																				itemNumber={additional.itemNumber}
-																				quantity={additional.quantity}
-																				price={getCalculatedPrice(
-																					additional.itemNumber,
-																					additional.quantity,
-																				)}
-																				quantityLabel={t("Cart.quantity")}
-																			/>
+																			}
+																			priceInputSlot={renderUnitPriceInput(
+																				additional.itemNumber,
+																			)}
+																			quantityLabel={t("Cart.quantity")}
+																		/>
 																		))}
 																	</div>
 																)}

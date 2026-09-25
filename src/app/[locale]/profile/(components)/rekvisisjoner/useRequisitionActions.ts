@@ -29,7 +29,11 @@ export function useRequisitionActions({
 	getRequisitions,
 	onApproveSuccess,
 }: UseRequisitionActionsParams) {
-	const { setIsCartChanging, setRequisitionPlacerInfo } = useAppContext();
+	const {
+		setIsCartChanging,
+		setRequisitionPlacerInfo,
+		setOverriddenUnitPrice,
+	} = useAppContext();
 	const [pendingAction, setPendingAction] =
 		useState<PendingRequisitionAction>(null);
 
@@ -79,6 +83,15 @@ export function useRequisitionActions({
 							warehouseNumber,
 							companyNumber,
 						});
+						// Carry any employee-set price forward from the requisition
+						// into the approver's cart. BE returns `unitPrice` derived
+						// from `quoted_price`; storing it in `overriddenUnitPrices`
+						// makes the cart display, checkout summary, and salesOrder
+						// payload all use the quoted price end-to-end (see
+						// `useCheckoutOrderData` for the payload wiring).
+						if (item.unitPrice != null) {
+							setOverriddenUnitPrice(item.itemNumber, item.unitPrice);
+						}
 					}
 					// Always set placer info on approve so BE can attribute the
 					// budget_transaction to the placer via `salesOrderHeader
@@ -107,6 +120,7 @@ export function useRequisitionActions({
 			runRequisitionAction,
 			setIsCartChanging,
 			setRequisitionPlacerInfo,
+			setOverriddenUnitPrice,
 			onApproveSuccess,
 		],
 	);

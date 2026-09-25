@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 
 type CartKitPartRowProps = {
@@ -9,6 +11,11 @@ type CartKitPartRowProps = {
 	quantityLabel?: string;
 	/** When set, shown as-is instead of quantity (e.g. hose length "10000 mm"). */
 	meta?: string;
+	/** Optional slot rendered between the quantity/meta and the price — used
+	 *  for the employee "Enhetspris" override input on cart page rows.
+	 *  Returns `null` when the caller has no reason to render (e.g. user
+	 *  lacks `canOverridePrice`). */
+	priceInputSlot?: ReactNode;
 };
 
 export function CartKitPartRow({
@@ -18,6 +25,7 @@ export function CartKitPartRow({
 	quantity,
 	quantityLabel,
 	meta,
+	priceInputSlot,
 }: CartKitPartRowProps) {
 	const qty = quantity && quantity > 0 ? quantity : 1;
 	const metaText =
@@ -36,6 +44,7 @@ export function CartKitPartRow({
 				<span className="text-sm whitespace-nowrap text-[#5A615D]">
 					{metaText}
 				</span>
+				{priceInputSlot}
 				<p className="font-bold">{formatNorwegianCurrency(price)}</p>
 			</div>
 		</div>

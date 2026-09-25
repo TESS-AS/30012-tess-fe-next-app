@@ -69,9 +69,22 @@ export async function postBudget(
 	return res.data.budget;
 }
 
-export async function getCartEvaluation(): Promise<CartEvaluation> {
-	const res = await axiosClient.get<{ success: boolean } & CartEvaluation>(
+/** POST /budget/cartEvaluation — accepts optional per-item unit-price
+ *  overrides (keyed by `itemNumber`, ex-VAT) so the returned `cartTotal` /
+ *  `remainingAfter` / `withinBudget` reflect what the employee will actually
+ *  charge. Omit the body when there are no overrides — BE falls back to the
+ *  price engine (same as the legacy GET). Endpoint added by Henrik on
+ *  2026-09-24 (`704c85c7 "Added a post for correct price on budget oversikt"`). */
+export async function getCartEvaluation(
+	overriddenPrices?: Record<string, number>,
+): Promise<CartEvaluation> {
+	const body =
+		overriddenPrices && Object.keys(overriddenPrices).length > 0
+			? { overriddenPrices }
+			: undefined;
+	const res = await axiosClient.post<{ success: boolean } & CartEvaluation>(
 		"/budget/cartEvaluation",
+		body,
 	);
 	return res.data;
 }
