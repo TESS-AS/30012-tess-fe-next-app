@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { CartKitPartRow } from "@/components/checkout/cart-kit-part-row";
 import { ConfirmationCard } from "@/components/checkout/confirmation-card";
 import { EditAddressModal } from "@/components/checkout/edit-address-modal";
 import { EditContactModal } from "@/components/checkout/edit-contact-modal";
@@ -37,6 +38,7 @@ export default function StepConfirmation({
 	handleContactPersonSave,
 }: any) {
 	const t = useTranslations("Checkout.confirmation");
+	const tCart = useTranslations("Cart");
 	const tContact = useTranslations("Checkout.contactPerson");
 	const phoneMissing = !contactPerson.phone?.trim();
 	const {
@@ -209,105 +211,70 @@ export default function StepConfirmation({
 											<div className="border-t p-4">
 												<div className="space-y-3">
 													<div className="space-y-4 pl-8">
-														<div className="flex items-start justify-between gap-2">
-															<div className="flex flex-col">
-																<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
-																	{item.hose.itemName}
-																</p>
-																<p className="text-xs text-[#5A615D]">
-																	{item.hose.itemNumber}
-																</p>
-															</div>
-															<p className="font-bold">
-																{formatNorwegianCurrency(
-																	getCalculatedPrice(
-																		item.hose.itemNumber,
-																		item.hose.quantity || 1,
-																	),
-																)}
-															</p>
-														</div>
-														<div className="flex items-start justify-between gap-2">
-															<div className="flex flex-col">
-																<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
-																	{item.ferrule1.name}
-																</p>
-																<p className="text-xs text-[#5A615D]">
-																	{item.ferrule1.itemNumber}
-																</p>
-															</div>
-
-															<p className="font-bold">
-																{formatNorwegianCurrency(
-																	getCalculatedPrice(
-																		item.ferrule1.itemNumber,
-																		item.ferrule1.quantity || 1,
-																	),
-																)}
-															</p>
-														</div>
-														<div className="flex items-start justify-between gap-2">
-															<div className="flex flex-col">
-																<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
-																	{item.ferrule2.name}
-																</p>
-																<p className="text-xs text-[#5A615D]">
-																	{item.ferrule2.itemNumber}
-																</p>
-															</div>
-															<p className="font-bold">
-																{formatNorwegianCurrency(
-																	getCalculatedPrice(
-																		item.ferrule2.itemNumber,
-																		item.ferrule2.quantity || 1,
-																	),
-																)}
-															</p>
-														</div>
-														<div className="flex items-start justify-between gap-2">
-															<div className="flex flex-col">
-																<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
-																	{item.insert1.name}
-																</p>
-																<p className="text-xs text-[#5A615D]">
-																	{item.insert1.itemNumber}
-																</p>
-															</div>
-															<p className="font-bold">
-																{formatNorwegianCurrency(
-																	getCalculatedPrice(
-																		item.insert1.itemNumber,
-																		item.insert1.quantity || 1,
-																	),
-																)}
-															</p>
-														</div>
-														<div className="flex items-start justify-between gap-2">
-															<div className="flex flex-col">
-																<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
-																	{item.insert2.name}
-																</p>
-																<p className="text-xs text-[#5A615D]">
-																	{item.insert2.itemNumber}
-																</p>
-															</div>
-															<p className="font-bold">
-																{formatNorwegianCurrency(
-																	getCalculatedPrice(
-																		item.insert2.itemNumber,
-																		item.insert2.quantity || 1,
-																	),
-																)}
-															</p>
-														</div>
+														<CartKitPartRow
+															name={item.hose.itemName}
+															itemNumber={item.hose.itemNumber}
+															meta={
+																item.hose.lengthMm
+																	? `${item.hose.lengthMm} mm`
+																	: undefined
+															}
+															quantity={item.hose.quantity}
+															price={getCalculatedPrice(
+																item.hose.itemNumber,
+																item.hose.quantity || 1,
+															)}
+															quantityLabel={tCart("quantity")}
+														/>
+														<CartKitPartRow
+															name={item.ferrule1.name}
+															itemNumber={item.ferrule1.itemNumber}
+															quantity={item.ferrule1.quantity}
+															price={getCalculatedPrice(
+																item.ferrule1.itemNumber,
+																item.ferrule1.quantity || 1,
+															)}
+															quantityLabel={tCart("quantity")}
+														/>
+														<CartKitPartRow
+															name={item.ferrule2.name}
+															itemNumber={item.ferrule2.itemNumber}
+															quantity={item.ferrule2.quantity}
+															price={getCalculatedPrice(
+																item.ferrule2.itemNumber,
+																item.ferrule2.quantity || 1,
+															)}
+															quantityLabel={tCart("quantity")}
+														/>
+														<CartKitPartRow
+															name={item.insert1.name}
+															itemNumber={item.insert1.itemNumber}
+															quantity={item.insert1.quantity}
+															price={getCalculatedPrice(
+																item.insert1.itemNumber,
+																item.insert1.quantity || 1,
+															)}
+															quantityLabel={tCart("quantity")}
+														/>
+														<CartKitPartRow
+															name={item.insert2.name}
+															itemNumber={item.insert2.itemNumber}
+															quantity={item.insert2.quantity}
+															price={getCalculatedPrice(
+																item.insert2.itemNumber,
+																item.insert2.quantity || 1,
+															)}
+															quantityLabel={tCart("quantity")}
+														/>
 													</div>
 													{(
 														Object.values(item.services ?? {}) as unknown[]
 													).some((v) => {
 														if (v == null || typeof v !== "object")
 															return false;
-														const itemNumber = (v as { itemNumber?: unknown })
-															.itemNumber;
+														const { itemNumber } = v as {
+															itemNumber?: unknown;
+														};
 														return (
 															typeof itemNumber === "string" &&
 															itemNumber.trim().length > 0
@@ -318,9 +285,9 @@ export default function StepConfirmation({
 																.filter(([, v]) => {
 																	if (v == null || typeof v !== "object")
 																		return false;
-																	const itemNumber = (
-																		v as { itemNumber?: unknown }
-																	).itemNumber;
+																	const { itemNumber } = v as {
+																		itemNumber?: unknown;
+																	};
 																	return (
 																		typeof itemNumber === "string" &&
 																		itemNumber.trim().length > 0
@@ -340,62 +307,42 @@ export default function StepConfirmation({
 																		.replace(/\s+/g, " ")
 																		.trim();
 
-																	const price = getCalculatedPrice(
-																		itemNumber,
-																		quantity,
-																	);
-
 																	return (
-																		<div
+																		<CartKitPartRow
 																			key={`${key}-${itemNumber}`}
-																			className="flex items-start justify-between gap-2">
-																			<div className="flex flex-col">
-																				<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
-																					{label}
-																				</p>
-																				<p className="text-xs text-[#5A615D]">
-																					{itemNumber}
-																				</p>
-																			</div>
-																			<p className="font-bold">
-																				{formatNorwegianCurrency(price)}
-																			</p>
-																		</div>
+																			name={label}
+																			itemNumber={itemNumber}
+																			quantity={quantity}
+																			price={getCalculatedPrice(
+																				itemNumber,
+																				quantity,
+																			)}
+																			quantityLabel={tCart("quantity")}
+																		/>
 																	);
 																})}
 														</div>
 													)}
 													{additionalItems.length > 0 && (
 														<div className="space-y-4 pl-8">
-															{additionalItems.map((additional) => {
-																	const price = getCalculatedPrice(
-																		additional.itemNumber,
-																		additional.quantity,
-																	);
-																	const label =
+															{additionalItems.map((additional) => (
+																<CartKitPartRow
+																	key={`${additional.key}-${additional.itemNumber}`}
+																	name={
 																		additional.name ||
 																		formatCartKitAdditionalLabel(
 																			additional.key,
-																		);
-
-																	return (
-																		<div
-																			key={`${additional.key}-${additional.itemNumber}`}
-																			className="flex items-start justify-between gap-2">
-																			<div className="flex flex-col">
-																				<p className="mb-2 font-semibold text-[#0F1912] uppercase underline">
-																					{label}
-																				</p>
-																				<p className="text-xs text-[#5A615D]">
-																					{additional.itemNumber}
-																				</p>
-																			</div>
-																			<p className="font-bold">
-																				{formatNorwegianCurrency(price)}
-																			</p>
-																		</div>
-																	);
-																})}
+																		)
+																	}
+																	itemNumber={additional.itemNumber}
+																	quantity={additional.quantity}
+																	price={getCalculatedPrice(
+																		additional.itemNumber,
+																		additional.quantity,
+																	)}
+																	quantityLabel={tCart("quantity")}
+																/>
+															))}
 														</div>
 													)}
 												</div>

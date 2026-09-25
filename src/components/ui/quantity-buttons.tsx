@@ -89,6 +89,7 @@ const QuantityButtons = ({
 					buttonClassName,
 				)}
 				onClick={(e) => {
+					if(quantity === 1) return;
 					e.stopPropagation();
 					onDecrease(e);
 				}}>

@@ -19,9 +19,11 @@
 		"seeCategories": "Se kategorier",
 		"learnMore": "Lær mer",
 		"welcome": {
-			"titlePart1": "Velkommen til",
-			"titlePart2": "TESSIX netthandel",
+			"title": "Velkommen til TESSIX – digital plattform fra TESS",
 			"intro": "Du må være innlogget for å se priser, lagerstatus og handle.",
+			"developing": "Vi utvikler TESSIX hele tiden.",
+			"haveSuggestion": "Har du forslag som gjør arbeidsdagen din enklere?",
+			"giveFeedback": "Gi tilbakemelding",
 			"haveUser": "Har du allerede bruker?",
 			"logIn": "Logg inn",
 			"missingAccess": "Mangler du tilgang?",
@@ -984,7 +986,14 @@
 		"orderDate": "Bestillingsdato",
 		"price": "Pris",
 		"units": "Enheter",
-		"quantity": "Antall"
+		"quantity": "Antall",
+		"actions": "Handlinger"
+	},
+	"ReorderOrder": {
+		"ariaLabel": "Legg ordre i handlekurv",
+		"success": "{count, plural, one {# vare lagt i handlekurven} other {# varer lagt i handlekurven}}",
+		"error": "Kunne ikke legge ordren i handlekurven",
+		"noItems": "Ingen varer å legge i handlekurven"
 	},
 	"AddUserModal": {
 		"title": "Legg til ny bruker",
@@ -1186,7 +1195,8 @@
 		"orderDate": "Bestillingsdato",
 		"price": "Pris",
 		"units": "Enheter",
-		"quantity": "Antall"
+		"quantity": "Antall",
+		"actions": "Handlinger"
 	},
 	"ProductDetailsModal": {
 		"title": "Produktdetaljer",

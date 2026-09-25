@@ -224,16 +224,12 @@ export async function getThmWorkOrderHoses({
 	pageSize = 25,
 	search,
 }: ThmWorkOrderListViewParams): Promise<ThmWorkOrderListViewResponse> {
-	// TEMP DEBUG: force-fetch hoses for customerNumber 184200 (Equinor)
-	// regardless of the clicked work order so we can eyeball real rows +
-	// open the drawer. REVERT ME — restore workOrderNumber/searchTerm below.
-	void workOrderNumber;
-	void search;
 	const { data: beList } = await axiosClient.get<BeGetHoseResponse>(
 		"/asset/getHose",
 		{
 			params: {
-				customerNumber: "184200",
+				workOrderNumber,
+				...(search ? { searchTerm: search } : {}),
 				page,
 				pageSize,
 				// MSL list view — BE returns only the columns from the user's saved
@@ -247,8 +243,9 @@ export async function getThmWorkOrderHoses({
 		const hoseFitting1 = hose.hoseFitting1 as
 			| { genericDimensionEnd?: { genericDimensionName?: string } }
 			| undefined;
-		const rawMediaCount = (hose.hoseHeader as { mediaCount?: unknown } | undefined)
-			?.mediaCount;
+		const rawMediaCount = (
+			hose.hoseHeader as { mediaCount?: unknown } | undefined
+		)?.mediaCount;
 		const mediaCount =
 			typeof rawMediaCount === "number"
 				? rawMediaCount
@@ -269,15 +266,14 @@ export async function getThmWorkOrderHoses({
 			uploaded: formatDdMmmYyyy(uploadedAt),
 			// BE gap: no sync timestamp at all.
 			synced: "",
-			imageCount: mediaCount !== null && Number.isFinite(mediaCount)
-				? mediaCount
-				: null,
-			hasImages: mediaCount !== null && Number.isFinite(mediaCount)
-				? mediaCount > 0
-				: false,
+			imageCount:
+				mediaCount !== null && Number.isFinite(mediaCount) ? mediaCount : null,
+			hasImages:
+				mediaCount !== null && Number.isFinite(mediaCount)
+					? mediaCount > 0
+					: false,
 			hoseStd: hose.hoseData?.hoseType?.hoseTypeName ?? "",
-			hoseDim:
-				hoseFitting1?.genericDimensionEnd?.genericDimensionName ?? "",
+			hoseDim: hoseFitting1?.genericDimensionEnd?.genericDimensionName ?? "",
 		};
 	});
 
@@ -304,10 +300,7 @@ export async function getThmViews(): Promise<ThmView[]> {
 }
 
 export async function createThmView(payload: ThmViewPayload): Promise<ThmView> {
-	const { data } = await axiosClient.post<ThmView>(
-		"/user/createView",
-		payload,
-	);
+	const { data } = await axiosClient.post<ThmView>("/user/createView", payload);
 	return data;
 }
 
@@ -325,4 +318,3 @@ export async function saveThmView(
 export async function deleteThmView(viewId: number): Promise<void> {
 	await axiosClient.delete(`/user/deleteView/${viewId}`);
 }
-

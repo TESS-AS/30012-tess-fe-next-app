@@ -583,30 +583,30 @@ export default function ProfilePage() {
 												...commonBottomItems,
 											]
 										: [
-											...(profile.role === USER_ROLES.ADMIN ||
-											profile.role === USER_ROLES.SUPERUSER
-												? [
-														{
-															href: "#",
-															label: t("ProfilePage.sidebar.orders"),
-															icon: ShoppingCart,
-															subitems: [
-																{
-																	href: "mine-bestillinger",
-																	label: t("ProfilePage.sidebar.myOrders"),
-																},
-																{
-																	href: "rekvisisjoner",
-																	label: t("ProfilePage.sidebar.requisitions"),
-																},
-																{
-																	href: "ordrehistorikk",
-																	label: t("ProfilePage.sidebar.orderHistory"),
-																},
-															],
-														},
-													]
-												: []),
+										{
+											href: "#",
+											label: t("ProfilePage.sidebar.orders"),
+											icon: ShoppingCart,
+											subitems: [
+												{
+													href: "mine-bestillinger",
+													label: t("ProfilePage.sidebar.myOrders"),
+												},
+												...(profile.role === USER_ROLES.ADMIN ||
+												profile.role === USER_ROLES.SUPERUSER
+													? [
+															{
+																href: "rekvisisjoner",
+																label: t("ProfilePage.sidebar.requisitions"),
+															},
+														]
+													: []),
+												{
+													href: "ordrehistorikk",
+													label: t("ProfilePage.sidebar.orderHistory"),
+												},
+											],
+										},
 											// {
 											// 	href: "dimensions",
 											// 	label: t("ProfilePage.sidebar.dimensions"),

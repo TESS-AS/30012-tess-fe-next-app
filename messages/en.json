@@ -19,9 +19,11 @@
 		"seeCategories": "See Categories",
 		"learnMore": "Learn More",
 		"welcome": {
-			"titlePart1": "Welcome to",
-			"titlePart2": "TESSIX online store",
+			"title": "Welcome to TESSIX – digital platform from TESS",
 			"intro": "You must be logged in to see prices, stock status and shop.",
+			"developing": "We develop TESSIX all the time.",
+			"haveSuggestion": "Do you have suggestions that make your workday easier?",
+			"giveFeedback": "Give feedback",
 			"haveUser": "Do you already have a user?",
 			"logIn": "Log in",
 			"missingAccess": "Missing access?",
@@ -982,7 +984,14 @@
 		"orderDate": "Order Date",
 		"price": "Price",
 		"units": "Items",
-		"quantity": "Quantity"
+		"quantity": "Quantity",
+		"actions": "Actions"
+	},
+	"ReorderOrder": {
+		"ariaLabel": "Add order to cart",
+		"success": "{count, plural, one {# item added to cart} other {# items added to cart}}",
+		"error": "Could not add the order to cart",
+		"noItems": "No items to add to cart"
 	},
 	"AddUserModal": {
 		"title": "Add New User",
@@ -1184,7 +1193,8 @@
 		"orderDate": "Order Date",
 		"price": "Price",
 		"units": "Items",
-		"quantity": "Quantity"
+		"quantity": "Quantity",
+		"actions": "Actions"
 	},
 	"ProductDetailsModal": {
 		"title": "Product Details",
