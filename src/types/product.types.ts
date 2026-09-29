@@ -8,6 +8,13 @@ export interface IProduct {
 	price?: number;
 	searchAttribute1?: string | null;
 	searchAttribute2?: string | null;
+	/** BE-supplied variant hint on /searchList results. When the user's
+	 *  search/filter narrows to a specific variant within a parent product,
+	 *  BE returns the variant's `itemNumber` here so the FE can navigate
+	 *  straight to that variant on the product detail page (via the
+	 *  `?itemNumber=` search param). `null` = no specific variant matched,
+	 *  land on the product's default variant. */
+	redirect?: string | null;
 }
 
 export interface IVariation {

@@ -354,14 +354,22 @@ export function ProductGrid({
 							const isPriceLoading =
 								isFetchingPrices && productPrice === undefined;
 
-							// Only preserve search params when on category pages (not search pages)
-							// This prevents 431 errors from overly long URLs when coming from search
+							// Only preserve search params when on category pages (not search
+							// pages) — prevents 431 errors from overly long URLs coming from
+							// search. When BE's `/searchList` supplies a `redirect`
+							// (variant itemNumber that matched the filter), attach it as
+							// `?itemNumber=` so the product page pre-selects that variant.
 							const encodedProductNumber = encodeURIComponent(product.productNumber);
-							const productHref = query
-								? `${pathname}/${encodedProductNumber}`
-								: searchParams.toString()
-									? `${pathname}/${encodedProductNumber}?${searchParams.toString()}`
-									: `${pathname}/${encodedProductNumber}`;
+							const linkParams = query
+								? new URLSearchParams()
+								: new URLSearchParams(searchParams.toString());
+							if (product.redirect) {
+								linkParams.set("itemNumber", product.redirect);
+							}
+							const linkQs = linkParams.toString();
+							const productHref = linkQs
+								? `${pathname}/${encodedProductNumber}?${linkQs}`
+								: `${pathname}/${encodedProductNumber}`;
 
 							return (
 								<Link
