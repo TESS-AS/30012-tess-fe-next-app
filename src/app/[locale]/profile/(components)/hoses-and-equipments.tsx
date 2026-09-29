@@ -124,6 +124,7 @@ export function HosesAndEquipments({
 	const S1_CODE_1930_JOHAN_CASTBERG = "1958795";
 	const S1_CODE_1755_GRANE = "2070299";
 	const S1_CODE_1170_HEIDRUN_A = "1292728";
+	const S1_CODE_1140_SLEIPNER = "1291571";
 
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
 	const [supportOpen, setSupportOpen] = useState(false);
@@ -1237,13 +1238,9 @@ export function HosesAndEquipments({
 							s1.S1Code === S1_CODE_1775_TROLL_B ||
 							s1.S1Code === S1_CODE_1930_JOHAN_CASTBERG ||
 							s1.S1Code === S1_CODE_1755_GRANE ||
-							s1.S1Code === S1_CODE_1170_HEIDRUN_A,
+							s1.S1Code === S1_CODE_1170_HEIDRUN_A ||
+							s1.S1Code === S1_CODE_1140_SLEIPNER,
 					)
-					// Sort by the plant number embedded in S1Name (e.g. "1765 —
-					// OSEBERG C"). Falls back to alphabetical when no leading
-					// digit is present (some Equinor plants — Troll A, Gudrun,
-					// Draupner, etc. — are name-only). Numbered plants appear
-					// first in ascending order, then name-only alphabetically.
 					.sort((a, b) => {
 						const plantA = /^\s*(\d+)/.exec(a.S1Name)?.[1];
 						const plantB = /^\s*(\d+)/.exec(b.S1Name)?.[1];
