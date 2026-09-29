@@ -356,15 +356,29 @@ export function ProductGrid({
 
 							// Only preserve search params when on category pages (not search
 							// pages) — prevents 431 errors from overly long URLs coming from
-							// search. When BE's `/searchList` supplies a `redirect`
-							// (variant itemNumber that matched the filter), attach it as
-							// `?itemNumber=` so the product page pre-selects that variant.
+							// search. When BE's `/searchList` supplies a `redirect` (a
+							// relative URL like "/P_1907361?itemNumber=AK7012205-L" pointing
+							// at a specific matching variant), pull its `itemNumber` param
+							// so the product detail page preselects that variant.
 							const encodedProductNumber = encodeURIComponent(product.productNumber);
 							const linkParams = query
 								? new URLSearchParams()
 								: new URLSearchParams(searchParams.toString());
 							if (product.redirect) {
-								linkParams.set("itemNumber", product.redirect);
+								try {
+									const redirectUrl = new URL(
+										product.redirect,
+										"http://placeholder.local",
+									);
+									const variantItemNumber =
+										redirectUrl.searchParams.get("itemNumber");
+									if (variantItemNumber) {
+										linkParams.set("itemNumber", variantItemNumber);
+									}
+								} catch {
+									// Malformed redirect — fall through to the parent product
+									// link rather than 404 on a bad URL.
+								}
 							}
 							const linkQs = linkParams.toString();
 							const productHref = linkQs

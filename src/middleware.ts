@@ -12,7 +12,13 @@ function redirectToLocale(request: NextRequest): NextResponse | null {
 
 	if (!hasLocale) {
 		const locale = "no";
-		return NextResponse.redirect(new URL(`/${locale}${pathname}`, request.url));
+		// Clone the incoming URL so we preserve `?…` and `#…`. Building via
+		// `new URL(path, base)` here would drop the query on the way through
+		// (path with no `?` overrides the base's search), which silently ate
+		// `?itemNumber=` from search-result variant redirects.
+		const redirectUrl = request.nextUrl.clone();
+		redirectUrl.pathname = `/${locale}${pathname}`;
+		return NextResponse.redirect(redirectUrl);
 	}
 
 	return null;
