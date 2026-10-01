@@ -106,6 +106,8 @@
 		"users": "Brukere",
 		"remarks": "Merknader",
 		"description": "Beskrivelse",
+		"readMore": "Les mer",
+		"readLess": "Les mindre",
 		"details": "Produktdetaljer",
 		"noVariants": "Ingen varianter funnet",
 		"addedToCart": "Vare lagt i handlekurv",
