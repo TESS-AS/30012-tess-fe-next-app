@@ -213,12 +213,29 @@ export async function fetchProducts(
 	}
 }
 
+/** Shape of each entry in BE's top-level `sliders` array (added to the
+ *  /proxy/filter response for numeric range attributes like
+ *  "Velg arbeidstrykk BAR" / "Velg temperatur"). BE doesn't ship a `unit`
+ *  field — the display name already carries it. */
+export interface BeSliderDefinition {
+	attributeIdentifier: string;
+	name: string;
+	min: number;
+	max: number;
+}
+
 /**
  * Normalizes the filter response from loadFilterParents into FilterCategory format
- * Handles both SearchFilterResponseItem and CategoryFilterResponseItem response types
+ * Handles both SearchFilterResponseItem and CategoryFilterResponseItem response types.
+ *
+ * `sliders` is optional and comes from BE's new top-level `sliders[]` array
+ * on /proxy/filter. Each entry becomes a FilterDefinition with `slider` set,
+ * appended into the same (last-built) FilterCategory group as regular
+ * attribute filters so the sidebar renders them inline.
  */
 export function normalizeFilterResponse(
 	filtersResponse: any[],
+	sliders?: BeSliderDefinition[],
 ): FilterCategory[] {
 	const result: FilterCategory[] = [];
 
@@ -286,6 +303,30 @@ export function normalizeFilterResponse(
 
 		// Unknown format, log warning and skip
 		console.warn("Unexpected item in filterFamily response", item);
+	}
+
+	// Fold top-level sliders into the attribute-filter group. If BE returned
+	// no regular filters (sliders-only response), spin up a single group so
+	// they still render in the sidebar.
+	if (sliders && sliders.length > 0) {
+		const sliderDefinitions: FilterDefinition[] = sliders.map((s) => ({
+			key: s.name,
+			attributeIdentifier: s.attributeIdentifier,
+			values: [],
+			slider: {
+				attributeKey: s.attributeIdentifier,
+				type: "slider" as const,
+				min: s.min,
+				max: s.max,
+				unit: "",
+			},
+		}));
+
+		if (result.length === 0) {
+			result.push({ category: "Attributes", filters: sliderDefinitions });
+		} else {
+			result[result.length - 1].filters.push(...sliderDefinitions);
+		}
 	}
 
 	return result;
