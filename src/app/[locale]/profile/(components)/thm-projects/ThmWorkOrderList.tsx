@@ -66,7 +66,58 @@ type ColumnKey =
 	| "synced"
 	| "bildestatus"
 	| "hoseStd"
-	| "hoseDim";
+	| "hoseDim"
+	// Extended columns — hidden by default, user opts in via Customize
+	// columns. BE returns these in /asset/getHose when the saved view
+	// includes the matching nested-path key (COLUMN_KEY_TO_BE below).
+	| "itemDescription"
+	| "s1Code"
+	| "s1Name"
+	| "s2Code"
+	| "s2Name"
+	| "equipmentSubunit"
+	| "customerEq"
+	| "customerNumber"
+	| "numberOfHoses"
+	| "genericHoseTypeName"
+	| "generalCommentPtc"
+	| "originalHoseComment"
+	| "outerCover"
+	| "gs1"
+	| "hoselengthMm"
+	| "wpBar"
+	| "hoseDimensionName"
+	| "hoseOtherInfo"
+	| "pinPricked"
+	| "hoseMediumTemperature"
+	| "hoseFunction"
+	| "registrationComment"
+	| "drawingNumber"
+	| "posNumber"
+	| "artNumber"
+	| "customerArtNumber"
+	| "criticalityName"
+	| "pollutionExposure"
+	| "uxExposure"
+	| "inspectedDate"
+	| "inspector"
+	| "hoseCondition"
+	| "approved"
+	| "replacementComplexity"
+	| "typeFittingEnd1"
+	| "genericDimensionEnd1"
+	| "genderEnd1"
+	| "angleEnd1"
+	| "materialQualityEnd1"
+	| "typeSubCategoryEnd1"
+	| "typeFittingEnd2"
+	| "genericDimensionEnd2"
+	| "genderEnd2"
+	| "angleEnd2"
+	| "materialQualityEnd2"
+	| "typeSubCategoryEnd2"
+	| "ptcWorkOrderNumber"
+	| "statusId";
 
 const COLUMNS: ColumnDef<ColumnKey>[] = [
 	{ key: "posId", label: "POS ID" },
@@ -77,6 +128,54 @@ const COLUMNS: ColumnDef<ColumnKey>[] = [
 	{ key: "bildestatus", label: "Bildestatus" },
 	{ key: "hoseStd", label: "Hose Std" },
 	{ key: "hoseDim", label: "Hose Dim" },
+	{ key: "itemDescription", label: "Item description" },
+	{ key: "s1Code", label: "S1 Code" },
+	{ key: "s1Name", label: "S1 Name" },
+	{ key: "s2Code", label: "S2 Code" },
+	{ key: "s2Name", label: "S2 Name" },
+	{ key: "equipmentSubunit", label: "Equipment subunit" },
+	{ key: "customerEq", label: "Customer eq" },
+	{ key: "customerNumber", label: "Customer no." },
+	{ key: "numberOfHoses", label: "No of hoses" },
+	{ key: "genericHoseTypeName", label: "Generic hose type" },
+	{ key: "generalCommentPtc", label: "General comment" },
+	{ key: "originalHoseComment", label: "Original hose comment" },
+	{ key: "outerCover", label: "Outer cover" },
+	{ key: "gs1", label: "GS1" },
+	{ key: "hoselengthMm", label: "Hose length (mm)" },
+	{ key: "wpBar", label: "WP (bar)" },
+	{ key: "hoseDimensionName", label: "Hose dimension" },
+	{ key: "hoseOtherInfo", label: "Hose other info" },
+	{ key: "pinPricked", label: "Pin pricked" },
+	{ key: "hoseMediumTemperature", label: "Hose medium temp" },
+	{ key: "hoseFunction", label: "Hose function" },
+	{ key: "registrationComment", label: "Registration comment" },
+	{ key: "drawingNumber", label: "Drawing no." },
+	{ key: "posNumber", label: "Pos no." },
+	{ key: "artNumber", label: "Art no." },
+	{ key: "customerArtNumber", label: "Customer art no." },
+	{ key: "criticalityName", label: "Criticality" },
+	{ key: "pollutionExposure", label: "Pollution exposure" },
+	{ key: "uxExposure", label: "UX exposure" },
+	{ key: "inspectedDate", label: "Inspected date" },
+	{ key: "inspector", label: "Inspector" },
+	{ key: "hoseCondition", label: "Hose condition" },
+	{ key: "approved", label: "Approved" },
+	{ key: "replacementComplexity", label: "Replacement complexity" },
+	{ key: "typeFittingEnd1", label: "Type fitting end 1" },
+	{ key: "genericDimensionEnd1", label: "Generic dim end 1" },
+	{ key: "genderEnd1", label: "Gender end 1" },
+	{ key: "angleEnd1", label: "Angle end 1" },
+	{ key: "materialQualityEnd1", label: "Material end 1" },
+	{ key: "typeSubCategoryEnd1", label: "Sub category end 1" },
+	{ key: "typeFittingEnd2", label: "Type fitting end 2" },
+	{ key: "genericDimensionEnd2", label: "Generic dim end 2" },
+	{ key: "genderEnd2", label: "Gender end 2" },
+	{ key: "angleEnd2", label: "Angle end 2" },
+	{ key: "materialQualityEnd2", label: "Material end 2" },
+	{ key: "typeSubCategoryEnd2", label: "Sub category end 2" },
+	{ key: "ptcWorkOrderNumber", label: "PTC work order no." },
+	{ key: "statusId", label: "Status ID" },
 ];
 
 const ALL_COLUMN_KEYS = COLUMNS.map((c) => c.key);
@@ -93,6 +192,54 @@ const COLUMN_KEY_TO_BE: Record<ColumnKey, string> = {
 	bildestatus: "hoseHeader.mediaCount",
 	hoseStd: "hoseLine.hoseStandard",
 	hoseDim: "hoseData.hoseDimension",
+	itemDescription: "hoseLine.itemDescription",
+	s1Code: "hoseLine.s1.s1Code",
+	s1Name: "hoseLine.s1.s1Name",
+	s2Code: "hoseLine.s2.s2Code",
+	s2Name: "hoseLine.s2.s2Name",
+	equipmentSubunit: "hoseLine.equipmentSubunit",
+	customerEq: "hoseLine.customerEq",
+	customerNumber: "hoseHeader.customerNumber",
+	numberOfHoses: "hoseLine.numberOfHoses",
+	genericHoseTypeName: "hoseLine.genericHoseType.genericHoseTypeName",
+	generalCommentPtc: "hoseLine.generalCommentPtc",
+	originalHoseComment: "hoseLine.originalHoseComment",
+	outerCover: "hoseLine.outerCover",
+	gs1: "hoseLine.gs1",
+	hoselengthMm: "hoseData.hoselengthMm",
+	wpBar: "hoseData.wpBar",
+	hoseDimensionName: "hoseData.hoseDimension.hoseDimension",
+	hoseOtherInfo: "hoseData.hoseOtherInfo",
+	pinPricked: "hoseData.pinPricked",
+	hoseMediumTemperature: "hoseData.hoseMediumTemperature",
+	hoseFunction: "hoseData.hoseFunction",
+	registrationComment: "hoseData.registrationComment",
+	drawingNumber: "customerData.drawingNumber",
+	posNumber: "customerData.posNumber",
+	artNumber: "customerData.artNumber",
+	customerArtNumber: "customerData.customerArtNumber",
+	criticalityName: "customerData.criticality.criticalityName",
+	pollutionExposure: "customerData.pollutionExposure",
+	uxExposure: "customerData.uxExposure",
+	inspectedDate: "maintenanceDetails.inspectedDate",
+	inspector: "maintenanceDetails.inspector",
+	hoseCondition: "maintenanceDetails.hoseCondition",
+	approved: "maintenanceDetails.approved",
+	replacementComplexity: "maintenanceDetails.replacementComplexity",
+	typeFittingEnd1: "hoseFitting1.typeFittingEnd.fittingEnd",
+	genericDimensionEnd1: "hoseFitting1.genericDimensionEnd.genericDimensionName",
+	genderEnd1: "hoseFitting1.genderEnd",
+	angleEnd1: "hoseFitting1.angleEnd",
+	materialQualityEnd1: "hoseFitting1.materialQualityEnd",
+	typeSubCategoryEnd1: "hoseFitting1.typeSubCategoryEnd",
+	typeFittingEnd2: "hoseFitting2.typeFittingEnd.fittingEnd",
+	genericDimensionEnd2: "hoseFitting2.genericDimensionEnd.genericDimensionName",
+	genderEnd2: "hoseFitting2.genderEnd",
+	angleEnd2: "hoseFitting2.angleEnd",
+	materialQualityEnd2: "hoseFitting2.materialQualityEnd",
+	typeSubCategoryEnd2: "hoseFitting2.typeSubCategoryEnd",
+	ptcWorkOrderNumber: "hoseLine.ptcWorkOrderNumber",
+	statusId: "hoseData.status.statusId",
 };
 
 const DEFAULT_PREFS: ColumnPreferences<ColumnKey> = {
@@ -196,6 +343,12 @@ function FilterCell({ isDate }: { isDate?: boolean }) {
 	);
 }
 
+const str = (v: string | undefined | null) => (v && v.trim() ? v : "—");
+const num = (v: number | undefined | null) =>
+	v == null || !Number.isFinite(v) ? "—" : v.toLocaleString();
+const bool = (v: boolean | undefined | null) =>
+	v == null ? "—" : v ? "Yes" : "No";
+
 function renderCell(
 	key: ColumnKey,
 	row: ThmHoseListItem,
@@ -224,10 +377,107 @@ function renderCell(
 			return row.hoseStd;
 		case "hoseDim":
 			return row.hoseDim;
+
+		case "itemDescription":
+			return str(row.itemDescription);
+		case "s1Code":
+			return str(row.s1Code);
+		case "s1Name":
+			return str(row.s1Name);
+		case "s2Code":
+			return str(row.s2Code);
+		case "s2Name":
+			return str(row.s2Name);
+		case "equipmentSubunit":
+			return str(row.equipmentSubunit);
+		case "customerEq":
+			return str(row.customerEq);
+		case "customerNumber":
+			return str(row.customerNumber);
+		case "numberOfHoses":
+			return num(row.numberOfHoses);
+		case "genericHoseTypeName":
+			return str(row.genericHoseTypeName);
+		case "generalCommentPtc":
+			return str(row.generalCommentPtc);
+		case "originalHoseComment":
+			return str(row.originalHoseComment);
+		case "outerCover":
+			return str(row.outerCover);
+		case "gs1":
+			return str(row.gs1);
+		case "hoselengthMm":
+			return num(row.hoselengthMm);
+		case "wpBar":
+			return num(row.wpBar);
+		case "hoseDimensionName":
+			return str(row.hoseDimensionName);
+		case "hoseOtherInfo":
+			return str(row.hoseOtherInfo);
+		case "pinPricked":
+			return bool(row.pinPricked);
+		case "hoseMediumTemperature":
+			return str(row.hoseMediumTemperature);
+		case "hoseFunction":
+			return str(row.hoseFunction);
+		case "registrationComment":
+			return str(row.registrationComment);
+		case "drawingNumber":
+			return str(row.drawingNumber);
+		case "posNumber":
+			return str(row.posNumber);
+		case "artNumber":
+			return str(row.artNumber);
+		case "customerArtNumber":
+			return str(row.customerArtNumber);
+		case "criticalityName":
+			return str(row.criticalityName);
+		case "pollutionExposure":
+			return str(row.pollutionExposure);
+		case "uxExposure":
+			return str(row.uxExposure);
+		case "inspectedDate":
+			return str(row.inspectedDate);
+		case "inspector":
+			return str(row.inspector);
+		case "hoseCondition":
+			return str(row.hoseCondition);
+		case "approved":
+			return bool(row.approved);
+		case "replacementComplexity":
+			return str(row.replacementComplexity);
+		case "typeFittingEnd1":
+			return str(row.typeFittingEnd1);
+		case "genericDimensionEnd1":
+			return str(row.genericDimensionEnd1);
+		case "genderEnd1":
+			return str(row.genderEnd1);
+		case "angleEnd1":
+			return str(row.angleEnd1);
+		case "materialQualityEnd1":
+			return str(row.materialQualityEnd1);
+		case "typeSubCategoryEnd1":
+			return str(row.typeSubCategoryEnd1);
+		case "typeFittingEnd2":
+			return str(row.typeFittingEnd2);
+		case "genericDimensionEnd2":
+			return str(row.genericDimensionEnd2);
+		case "genderEnd2":
+			return str(row.genderEnd2);
+		case "angleEnd2":
+			return str(row.angleEnd2);
+		case "materialQualityEnd2":
+			return str(row.materialQualityEnd2);
+		case "typeSubCategoryEnd2":
+			return str(row.typeSubCategoryEnd2);
+		case "ptcWorkOrderNumber":
+			return str(row.ptcWorkOrderNumber);
+		case "statusId":
+			return num(row.statusId);
 	}
 }
 
-const DATE_COLUMNS = new Set<ColumnKey>(["uploaded", "synced"]);
+const DATE_COLUMNS = new Set<ColumnKey>(["uploaded", "synced", "inspectedDate"]);
 
 export function ThmWorkOrderList({
 	workOrderNumber,

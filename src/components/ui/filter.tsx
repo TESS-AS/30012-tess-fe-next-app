@@ -154,8 +154,15 @@ export const Filter = React.forwardRef<
 			}
 		}, [externalSelectedFilters.category, categoryNumber]);
 
-		// Open the first 3 filters by default when filters change
+		// Open the first 3 filters by default on the *initial* filters load.
+		// Previously this fired on every `filters` reference change, which
+		// collapsed whatever the user had opened mid-interaction (slider
+		// drag → /filter refetch → new reference → accordions reset to
+		// "first 3 open"). The ref guard runs it exactly once per Filter
+		// mount, so subsequent BE refetches preserve the user's selection.
+		const defaultAccordionsAppliedRef = useRef(false);
 		React.useEffect(() => {
+			if (defaultAccordionsAppliedRef.current) return;
 			const firstThreeKeys: string[] = [];
 			for (const fc of filters) {
 				for (const f of fc.filters) {
@@ -168,6 +175,7 @@ export const Filter = React.forwardRef<
 			}
 			if (firstThreeKeys.length > 0) {
 				setOpenAccordions(firstThreeKeys);
+				defaultAccordionsAppliedRef.current = true;
 			}
 		}, [filters]);
 
@@ -176,6 +184,9 @@ export const Filter = React.forwardRef<
 			setLocalSelectedFilters({});
 			setSelectedCategory(null);
 			setOpenAccordions([]);
+			// Allow the "open first 3" effect to re-fire for the fresh filter
+			// set of the new query.
+			defaultAccordionsAppliedRef.current = false;
 			loadingInitiatedRef.current.clear();
 			// eslint-disable-next-line react-hooks/exhaustive-deps
 		}, [query]);
@@ -283,44 +294,84 @@ export const Filter = React.forwardRef<
 
 		const handleRangeChange = useCallback(
 			(filter: FilterDefinition, values: [number, number]) => {
-				if (!filter.values?.length || !filter.slider) return;
+				if (!filter.slider) return;
 
-				const availableValues = filter.values
-					.map((child) => {
-						const firstValue = child.value.split(",")[0].trim();
-						return parseFloat(firstValue);
-					})
-					.filter((val) => !isNaN(val))
-					.sort((a, b) => a - b);
+				// Reflect the drag immediately so the thumb visually tracks the
+				// user's input. Without this the <Slider> is controlled against a
+				// stale `tempRangeValues` entry and snaps back on every pointer-move.
+				setTempRangeValues((prev) => ({
+					...prev,
+					[filter.attributeIdentifier]: values,
+				}));
 
-				if (availableValues.length === 0) return;
-
-				// Find the closest available values
-				const findClosestValue = (target: number) => {
-					return availableValues.reduce((closest, current) => {
-						return Math.abs(current - target) < Math.abs(closest - target)
-							? current
-							: closest;
-					});
-				};
-
-				const snappedValues: [number, number] = [
-					findClosestValue(values[0]),
-					findClosestValue(values[1]),
-				];
-
-				if (snappedValues[0] > snappedValues[1]) {
-					snappedValues[0] = snappedValues[1];
+				// Snap-to-available-values is only meaningful when the filter
+				// carries a discrete value list (legacy BE shape where the slider
+				// was derived from a numeric attribute's observed values). BE's
+				// dedicated `sliders[]` payload ships `values: []` — those are
+				// continuous ranges and should keep whatever the user picked.
+				let finalValues: [number, number] = values;
+				if (filter.values?.length) {
+					const availableValues = filter.values
+						.map((child) => parseFloat(child.value.split(",")[0].trim()))
+						.filter((val) => !isNaN(val))
+						.sort((a, b) => a - b);
+					if (availableValues.length > 0) {
+						const findClosestValue = (target: number) =>
+							availableValues.reduce((closest, current) =>
+								Math.abs(current - target) < Math.abs(closest - target)
+									? current
+									: closest,
+							);
+						finalValues = [
+							findClosestValue(values[0]),
+							findClosestValue(values[1]),
+						];
+						if (finalValues[0] > finalValues[1]) {
+							finalValues[0] = finalValues[1];
+						}
+					}
 				}
 
-				// If full range, clear the filter
-				const isFullRange =
-					snappedValues[0] === filter.slider.min &&
-					snappedValues[1] === filter.slider.max;
+				// Debounce the commit (`setLocalSelectedFilters` + `onFilterChange`)
+				// so that dragging the slider doesn't re-fire the whole /filter +
+				// /searchList round-trip on every pointer-move — which was
+				// collapsing the accordion and nuking the user's drag mid-motion.
+				// We keep the visual update (above) immediate; only the
+				// side-effectful commit waits for a 700 ms pause after the last
+				// movement. The timer key is scoped per filter so dragging two
+				// sliders in parallel doesn't cancel each other.
+				const commitKey = `${filter.attributeIdentifier}-range-commit`;
+				if (debounceTimerRef.current[commitKey]) {
+					clearTimeout(debounceTimerRef.current[commitKey]);
+				}
+				debounceTimerRef.current[commitKey] = setTimeout(() => {
+					// If full range, clear the filter
+					const isFullRange =
+						filter.slider != null &&
+						finalValues[0] === filter.slider.min &&
+						finalValues[1] === filter.slider.max;
 
-				if (isFullRange) {
-					const updatedFilters = { ...localSelectedFilters };
-					delete updatedFilters[filter.attributeIdentifier];
+					if (isFullRange) {
+						const updatedFilters = { ...localSelectedFilters };
+						delete updatedFilters[filter.attributeIdentifier];
+						setLocalSelectedFilters(updatedFilters);
+
+						const filterArray: FilterValues[] = Object.entries(updatedFilters)
+							.filter(([key, values]) => key !== "category" && values.length > 0)
+							.map(([key, values]) => ({ key, values }));
+
+						onFilterChange(filterArray);
+						return;
+					}
+
+					const updatedFilters = {
+						...localSelectedFilters,
+						[filter.attributeIdentifier]: [
+							finalValues[0].toString(),
+							finalValues[1].toString(),
+						],
+					};
+
 					setLocalSelectedFilters(updatedFilters);
 
 					const filterArray: FilterValues[] = Object.entries(updatedFilters)
@@ -328,24 +379,7 @@ export const Filter = React.forwardRef<
 						.map(([key, values]) => ({ key, values }));
 
 					onFilterChange(filterArray);
-					return;
-				}
-
-				const updatedFilters = {
-					...localSelectedFilters,
-					[filter.attributeIdentifier]: [
-						snappedValues[0].toString(),
-						snappedValues[1].toString(),
-					],
-				};
-
-				setLocalSelectedFilters(updatedFilters);
-
-				const filterArray: FilterValues[] = Object.entries(updatedFilters)
-					.filter(([key, values]) => key !== "category" && values.length > 0)
-					.map(([key, values]) => ({ key, values }));
-
-				onFilterChange(filterArray);
+				}, 700);
 			},
 			[localSelectedFilters, onFilterChange],
 		);
@@ -370,6 +404,13 @@ export const Filter = React.forwardRef<
 			const filtersWithoutEmpty = filters
 				.map((filterCategory) => {
 					const validFilters = filterCategory.filters.filter((filter) => {
+						// Sliders are range inputs, not value lists — they always
+						// ship with empty `values[]` and a populated `slider`
+						// config. Keep them unconditionally so BE's `sliders[]`
+						// (arbeidstrykk BAR, temperatur, etc.) render in the
+						// sidebar instead of being stripped as "empty".
+						if (filter.slider) return true;
+
 						const firstValue = filter.values?.[0];
 						const initialProductCount =
 							firstValue && "productcount" in firstValue

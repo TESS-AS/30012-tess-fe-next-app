@@ -107,6 +107,15 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 
 	const missingDefaultVariables = useMemo(() => {
 		if (!profile) return false;
+		// Only force the "Bytt handlekonto" picker when the user actually has
+		// access to something they could pick. BE now creates accounts without
+		// a default warehouse, so a brand-new user whose delegation hasn't
+		// landed yet has an empty `customerNumbers` list. Showing the modal
+		// then would trap them — all dropdowns empty, Save disabled, X-close
+		// as the only exit. The onboarding banner / connected flow handles
+		// that user state instead.
+		const hasAnyAccess = (profile.customerNumbers?.length ?? 0) > 0;
+		if (!hasAnyAccess) return false;
 		return (
 			!profile.defaultWarehouseNumber ||
 			!profile.defaultCompanyNumber ||

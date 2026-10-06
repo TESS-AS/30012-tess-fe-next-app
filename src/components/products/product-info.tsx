@@ -74,6 +74,9 @@ export function ProductInfo({
 	const { data: profile } = useGetProfileData();
 	const { isCartChanging, setIsCartChanging, setIsAuthOpen, showCartNotification } = useAppContext();
 	const [copiedSap, setCopiedSap] = useState(false);
+	// Toggle for the "Les mer / Les mindre" collapse on long descriptions.
+	// Collapsed state line-clamps to 3 lines; expanded shows the full text.
+	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 	const [quantity, setQuantity] = useState(1);
 	const [calculatedPrice, setCalculatedPrice] = useState<number | null>(null);
 	// Unit price is cached separately so quantity changes don't briefly render
@@ -143,12 +146,22 @@ export function ProductInfo({
 			? longDescFromAttributes || null
 			: null;
 
-	// Always prefer the long description; fall back to the short one if long is missing.
-	const description =
-		(longDescription && longDescription.trim() !== "" ? longDescription : null) ??
-		(shortDescriptionValue && shortDescriptionValue.trim() !== ""
+	// Description collapse/expand: show the short description by default and
+	// swap to the long one on "Les mer". Falls back to whichever exists when
+	// only one is populated, so single-description products just render that
+	// text without a toggle.
+	const shortText =
+		shortDescriptionValue && shortDescriptionValue.trim() !== ""
 			? shortDescriptionValue
-			: null);
+			: null;
+	const longText =
+		longDescription && longDescription.trim() !== "" ? longDescription : null;
+	const previewDescription = shortText ?? longText;
+	const fullDescription = longText ?? shortText;
+	const hasMoreToReveal = Boolean(
+		previewDescription && fullDescription && previewDescription !== fullDescription,
+	);
+	const description = isDescriptionExpanded ? fullDescription : previewDescription;
 
 	const getSapNumber = () => {
 		if (!selectedItemNumber || !columnAttributes) return null;
@@ -375,6 +388,17 @@ export function ProductInfo({
 			{description && (
 				<div className="mt-2">
 					<p className="text-md font-light text-black">{description}</p>
+					{/* Toggle only when there's actually a longer version to show —
+					 *  products with only a short OR only a long description render
+					 *  the single available text without a dead button. */}
+					{hasMoreToReveal && (
+						<button
+							type="button"
+							onClick={() => setIsDescriptionExpanded((prev) => !prev)}
+							className="mt-1 cursor-pointer text-sm font-medium text-[#005522] hover:underline">
+							{isDescriptionExpanded ? t("readLess") : t("readMore")}
+						</button>
+					)}
 				</div>
 			)}
 

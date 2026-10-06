@@ -168,16 +168,22 @@ export function useProductFilter({
 				});
 				if (cancelled) return;
 				// BE (`/proxy/filter`) returns EITHER a bare filters array OR a
-				// wrapped `{ filters: [...], categories: [...] }` object depending
-				// on the code path. Read both shapes so the sidebar narrows
-				// regardless of which one BE ships on any given request.
+				// wrapped `{ filters: [...], categories: [...], sliders: [...] }`
+				// object depending on the code path. Read both shapes and
+				// forward the optional top-level `sliders` so numeric range
+				// attributes (BAR, temperatur) render inline in the sidebar.
 				const filtersArray = Array.isArray(result)
 					? result
 					: Array.isArray(result?.filters)
 						? result.filters
 						: null;
+				const slidersArray = Array.isArray(result)
+					? undefined
+					: Array.isArray(result?.sliders)
+						? result.sliders
+						: undefined;
 				if (filtersArray) {
-					onFiltersUpdate(normalizeFilterResponse(filtersArray));
+					onFiltersUpdate(normalizeFilterResponse(filtersArray, slidersArray));
 				}
 			} catch (err) {
 				if (cancelled) return;
@@ -258,7 +264,10 @@ export function useProductFilter({
 						});
 
 						if (Array.isArray(result?.filters)) {
-							const normalized = normalizeFilterResponse(result.filters);
+							const normalized = normalizeFilterResponse(
+								result.filters,
+								Array.isArray(result?.sliders) ? result.sliders : undefined,
+							);
 							onFiltersUpdate(normalized);
 						}
 					} catch (err) {
@@ -308,7 +317,10 @@ export function useProductFilter({
 						filters: [],
 					});
 
-					const normalized = normalizeFilterResponse(result?.filters ?? []);
+					const normalized = normalizeFilterResponse(
+						result?.filters ?? [],
+						Array.isArray(result?.sliders) ? result.sliders : undefined,
+					);
 					setFiltersFn(normalized);
 
 					// Categories intentionally NOT forwarded from /filter — the
@@ -345,7 +357,10 @@ export function useProductFilter({
 					filters: [],
 				});
 
-				const normalized = normalizeFilterResponse(result?.filters ?? []);
+				const normalized = normalizeFilterResponse(
+					result?.filters ?? [],
+					Array.isArray(result?.sliders) ? result.sliders : undefined,
+				);
 				setFiltersFn(normalized);
 
 				// Categories intentionally NOT forwarded from /filter — the

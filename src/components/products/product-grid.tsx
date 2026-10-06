@@ -83,10 +83,13 @@ export function ProductGrid({
 
 	const onFilterChange = useCallback(
 		(newFilters: FilterValues[]) => {
-			// Show skeletons in the filter panel while updated filters load
+			// Keep the sidebar painted with the current filter data while the
+			// refetch is in flight. Previously we wiped `filtersState` to `[]`
+			// here, which blanked the whole sidebar for ~400 ms until BE
+			// responded — reading as a "full re-render" to the user. The product
+			// grid still shows skeletons (via `isFiltering`), and the sidebar
+			// quietly reconciles when `onFiltersUpdate` fires with the new data.
 			setIsFiltering(true);
-			setFiltersState([]);
-			setCategoryFiltersState([]);
 			handleFilterChange(newFilters);
 			setIsFiltering(false);
 		},
@@ -293,8 +296,8 @@ export function ProductGrid({
 										label={getFilterLabel(key)}
 										value={`${values[0]} - ${values[1]}`}
 										onRemove={() => {
-											setFiltersState([]);
-											setCategoryFiltersState([]);
+											// Keep the sidebar painted with current data; it
+											// reconciles when the refetch completes.
 											values.forEach((value) => removeFilter(key, value));
 										}}
 									/>
@@ -309,11 +312,7 @@ export function ProductGrid({
 										key={`${key}-${value}`}
 										label={label}
 										value={value}
-										onRemove={() => {
-											setFiltersState([]);
-											setCategoryFiltersState([]);
-											removeFilter(key, value);
-										}}
+										onRemove={() => removeFilter(key, value)}
 									/>
 								));
 						})}
