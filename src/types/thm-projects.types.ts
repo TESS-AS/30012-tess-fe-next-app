@@ -95,6 +95,60 @@ export interface ThmHoseListItem {
 	hasImages: boolean; // controls the green icon variant
 	hoseStd: string;
 	hoseDim: string;
+
+	// --- Extended columns (all optional — BE only returns fields present
+	// in the user's saved view). Rendered via the Customize Columns modal.
+	itemDescription?: string;
+	s1Code?: string;
+	s1Name?: string;
+	s2Code?: string;
+	s2Name?: string;
+	equipmentSubunit?: string;
+	customerEq?: string;
+	customerNumber?: string;
+	numberOfHoses?: number;
+	genericHoseTypeName?: string;
+	generalCommentPtc?: string;
+	originalHoseComment?: string;
+	outerCover?: string;
+	gs1?: string;
+	hoselengthMm?: number;
+	wpBar?: number;
+	hoseDimensionName?: string;
+	hoseOtherInfo?: string;
+	pinPricked?: boolean;
+	hoseMediumTemperature?: string;
+	hoseFunction?: string;
+	registrationComment?: string;
+	drawingNumber?: string;
+	posNumber?: string;
+	artNumber?: string;
+	customerArtNumber?: string;
+	criticalityName?: string;
+	pollutionExposure?: string;
+	uxExposure?: string;
+	inspectedDate?: string;
+	inspector?: string;
+	hoseCondition?: string;
+	approved?: boolean;
+	// TODO BE: not currently returned by /asset/getHose — only accepted on
+	// update/register. Column renders as "—" until BE ships it in the response.
+	replacementComplexity?: string;
+	typeFittingEnd1?: string;
+	genericDimensionEnd1?: string;
+	genderEnd1?: string;
+	angleEnd1?: string;
+	materialQualityEnd1?: string;
+	typeSubCategoryEnd1?: string;
+	typeFittingEnd2?: string;
+	genericDimensionEnd2?: string;
+	genderEnd2?: string;
+	angleEnd2?: string;
+	materialQualityEnd2?: string;
+	typeSubCategoryEnd2?: string;
+	// TODO BE: write-only on update/register, not in /asset/getHose response yet.
+	ptcWorkOrderNumber?: string;
+	statusId?: number;
 }
 
 export interface ThmWorkOrderListViewParams {

@@ -13,7 +13,12 @@ import {
 	DialogContent,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import {
+	Sheet,
+	SheetContent,
+	SheetDescription,
+	SheetTitle,
+} from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetHoseMediaDrawer } from "@/hooks/useGetHoseMediaDrawer";
 import { cn } from "@/lib/utils";
@@ -169,7 +174,9 @@ function Header({
 	return (
 		<div className="border-b border-[#E5E7E6] px-4 pt-4 pb-3">
 			<div className="flex items-start justify-between">
-				<h2 className="text-base font-semibold text-[#0F1912]">Images</h2>
+				<SheetTitle className="text-base font-semibold text-[#0F1912]">
+					Images
+				</SheetTitle>
 				<button
 					type="button"
 					onClick={onClose}
@@ -178,6 +185,9 @@ function Header({
 					<X className="h-4 w-4" />
 				</button>
 			</div>
+			<SheetDescription className="sr-only">
+				Images captured for this hose, grouped by category.
+			</SheetDescription>
 			<div className="mt-2 flex gap-4 text-sm text-[#0F1912]">
 				<span>
 					<span className="text-[#5A615D]">SEQ:</span>{" "}
@@ -480,9 +490,11 @@ function inspectionRows(m: HoseMediaInspectionMetadata): Row[] {
 	];
 }
 
-function display(v: string | null | undefined): string {
+// BE occasionally ships numbers (e.g. `fittingEnd: 1`) where the schema
+// claims string, so coerce anything non-null to a string before trimming.
+function display(v: unknown): string {
 	if (v == null) return "—";
-	const trimmed = v.trim();
+	const trimmed = String(v).trim();
 	return trimmed.length > 0 ? trimmed : "—";
 }
 

@@ -69,6 +69,12 @@ export interface GetAssetsResponse {
 		breakaway: string;
 		currentStatus: "Processed" | "Pending" | "Failed";
 		ecom: number | boolean;
+		outerCover?: string;
+		gs1?: string;
+		constructionType?: {
+			constructionId: string;
+			constructionType: string;
+		};
 	};
 	hoseData: {
 		hoseLineId: number;
@@ -111,6 +117,9 @@ export interface GetAssetsResponse {
 		hoseFunction: string;
 		hoseWarranty: "YES" | "NO";
 		hoseWarrantyComment: string;
+		registrationComment?: string;
+		uploadedAt?: string;
+		syncedAt?: string;
 	};
 	customerData: {
 		hoseLineId: number;
@@ -179,6 +188,7 @@ export interface GetAssetsResponse {
 		angleEnd: string;
 		materialQualityEnd: string;
 		commentEndPtc: string;
+		typeSubCategoryEnd?: string;
 	};
 	hoseFitting2: {
 		hoseLineId: number;
@@ -197,6 +207,7 @@ export interface GetAssetsResponse {
 		angleEnd: string;
 		materialQualityEnd: string;
 		commentEndPtc: string;
+		typeSubCategoryEnd?: string;
 	};
 	additionals: {
 		hoseLineId: number;

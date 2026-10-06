@@ -240,9 +240,13 @@ export async function getThmWorkOrderHoses({
 	);
 
 	const rows: ThmHoseListItem[] = (beList.data ?? []).map((hose) => {
-		const hoseFitting1 = hose.hoseFitting1 as
-			| { genericDimensionEnd?: { genericDimensionName?: string } }
-			| undefined;
+		const hoseLine = hose.hoseLine;
+		const hoseData = hose.hoseData;
+		const hoseFitting1 = hose.hoseFitting1;
+		const hoseFitting2 = hose.hoseFitting2;
+		const customerData = hose.customerData;
+		const maintenanceDetails = hose.maintenanceDetails;
+
 		const rawMediaCount = (
 			hose.hoseHeader as { mediaCount?: unknown } | undefined
 		)?.mediaCount;
@@ -252,28 +256,77 @@ export async function getThmWorkOrderHoses({
 				: rawMediaCount != null
 					? Number(rawMediaCount)
 					: null;
-		const rawUploadedAt = (
-			hose.hoseData as { uploadedAt?: unknown } | undefined
-		)?.uploadedAt;
-		const uploadedAt =
-			typeof rawUploadedAt === "string" ? rawUploadedAt : undefined;
+		const uploadedAt = hoseData?.uploadedAt;
+		const syncedAt = hoseData?.syncedAt;
+
 		return {
-			hexagonId: String(hose.hoseLine?.hexagonId ?? ""),
-			posId: String(hose.hoseLine?.hexagonId ?? ""),
-			s2: hose.hoseLine?.s2?.s2Name ?? "",
+			hexagonId: String(hoseLine?.hexagonId ?? ""),
+			posId: String(hoseLine?.hexagonId ?? ""),
+			s2: hoseLine?.s2?.s2Name ?? "",
 			// BE gap: no mobile-sync status field yet. Placeholder until BE ships it.
 			status: "NotTouched",
 			uploaded: formatDdMmmYyyy(uploadedAt),
-			// BE gap: no sync timestamp at all.
-			synced: "",
+			synced: formatDdMmmYyyy(syncedAt),
 			imageCount:
 				mediaCount !== null && Number.isFinite(mediaCount) ? mediaCount : null,
 			hasImages:
 				mediaCount !== null && Number.isFinite(mediaCount)
 					? mediaCount > 0
 					: false,
-			hoseStd: hose.hoseData?.hoseType?.hoseTypeName ?? "",
+			hoseStd: hoseData?.hoseType?.hoseTypeName ?? "",
 			hoseDim: hoseFitting1?.genericDimensionEnd?.genericDimensionName ?? "",
+
+			// Extended columns — surface everything /asset/getHose can return
+			// when the user adds the matching column to their saved view.
+			itemDescription: hoseLine?.itemDescription,
+			s1Code: hoseLine?.s1?.s1Code,
+			s1Name: hoseLine?.s1?.s1Name,
+			s2Code: hoseLine?.s2?.s2Code,
+			s2Name: hoseLine?.s2?.s2Name,
+			equipmentSubunit: hoseLine?.equipmentSubunit,
+			customerEq: hoseLine?.customerEq,
+			customerNumber: hose.hoseHeader?.customerNumber,
+			numberOfHoses: hoseLine?.numberOfHoses,
+			genericHoseTypeName: hoseLine?.genericHoseTypeId?.genericHoseTypeName,
+			generalCommentPtc: hoseLine?.generalCommentPtc,
+			originalHoseComment: hoseLine?.originalHoseComment,
+			outerCover: hoseLine?.outerCover,
+			gs1: hoseLine?.gs1,
+			hoselengthMm: hoseData?.hoselengthMm,
+			wpBar: hoseData?.wpBar,
+			hoseDimensionName: hoseData?.hoseDimension?.hoseDimension,
+			hoseOtherInfo: hoseData?.hoseOtherInfo,
+			pinPricked: hoseData?.pinPricked,
+			hoseMediumTemperature: hoseData?.hoseMediumTemperature,
+			hoseFunction: hoseData?.hoseFunction,
+			registrationComment: hoseData?.registrationComment,
+			statusId: hoseData?.status?.statusId,
+			drawingNumber: customerData?.drawingNumber,
+			posNumber: customerData?.posNumber,
+			artNumber: customerData?.artNumber,
+			customerArtNumber: customerData?.customerArtNumber,
+			criticalityName: customerData?.criticality?.criticalityName,
+			pollutionExposure: customerData?.pollutionExposure,
+			uxExposure: customerData?.uxExposure,
+			inspectedDate: maintenanceDetails?.inspectedDate,
+			inspector: maintenanceDetails?.inspector,
+			hoseCondition: maintenanceDetails?.hoseCondition,
+			approved: maintenanceDetails?.approved,
+			typeFittingEnd1: hoseFitting1?.typeFittingEnd?.fittingEnd,
+			genericDimensionEnd1: hoseFitting1?.genericDimensionEnd?.genericDimensionName,
+			genderEnd1: hoseFitting1?.genderEnd,
+			angleEnd1: hoseFitting1?.angleEnd,
+			materialQualityEnd1: hoseFitting1?.materialQualityEnd,
+			typeSubCategoryEnd1: hoseFitting1?.typeSubCategoryEnd,
+			typeFittingEnd2: hoseFitting2?.typeFittingEnd?.fittingEnd,
+			genericDimensionEnd2: hoseFitting2?.genericDimensionEnd?.genericDimensionName,
+			genderEnd2: hoseFitting2?.genderEnd,
+			angleEnd2: hoseFitting2?.angleEnd,
+			materialQualityEnd2: hoseFitting2?.materialQualityEnd,
+			typeSubCategoryEnd2: hoseFitting2?.typeSubCategoryEnd,
+			// BE gap: replacementComplexity + ptcWorkOrderNumber are only accepted
+			// as write inputs today, not returned on getHose. Columns render "—"
+			// until BE adds them to the response.
 		};
 	});
 
