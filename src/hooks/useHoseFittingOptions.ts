@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import {
 	getHoseAngle,
 	getHoseGender,
@@ -7,7 +9,6 @@ import {
 } from "@/services/hose-fitting.service";
 import type { SelectOption } from "@/types/hose-fitting.types";
 import { useQueries } from "@tanstack/react-query";
-import { useMemo } from "react";
 
 export const hoseFittingKeys = {
 	all: ["hoseFitting"] as const,

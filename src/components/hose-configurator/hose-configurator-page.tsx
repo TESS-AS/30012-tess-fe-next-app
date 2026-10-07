@@ -188,7 +188,10 @@ export function HoseConfiguratorPage() {
 
 	const steps = [t("steps.usage"), t("steps.connections"), t("steps.summary")];
 
-	const selectionSource = hoseSelection.data ?? cachedResults ?? [];
+	const selectionSource = useMemo(
+		() => hoseSelection.data ?? cachedResults ?? [],
+		[hoseSelection.data, cachedResults],
+	);
 	const products = useMemo(
 		() => selectionSource.map((item) => mapSelectionToProduct(item, locale)),
 		[selectionSource, locale],
