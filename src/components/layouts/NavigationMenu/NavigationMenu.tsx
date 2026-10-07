@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { useChildrenOverflow } from "@/hooks/useChildrenOverflow";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useNavMenuStore } from "@/stores/useNavMenuStore";
 import type { Category } from "@/types/categories.types";
 import { useParams } from "next/navigation";
@@ -50,8 +51,10 @@ export default function CategoryNavigationMenu({
 }) {
 	const [openMenu, setOpenMenu] = useState<string | false>(false);
 	const { setIsOpen, requestedOpenSlug, requestOpen } = useNavMenuStore();
+	const { data: profile } = useGetProfileData();
 	const rootRef = useRef<HTMLElement | null>(null);
 	const ulRef = useRef<HTMLUListElement | null>(null);
+	const showPromoBanner = profile?.email === "mathias.heggestad@tess.no";
 
 	const closeMenu = useCallback(() => {
 		setOpenMenu(false);
@@ -176,7 +179,9 @@ export default function CategoryNavigationMenu({
 						}}
 					>
 						<div className="bg-popover text-popover-foreground flex max-h-[80vh] min-h-[560px] w-full flex-col overflow-y-auto animate-in fade-in zoom-in-90 duration-200">
-							<DropdownPromoBanner onClose={closeMenu} />
+							{showPromoBanner && (
+								<DropdownPromoBanner onClose={closeMenu} />
+							)}
 							<ul className="container mx-auto grid flex-1 grid-cols-1 items-start justify-items-start gap-x-6 gap-y-8 px-0 pt-6 pb-4 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
 								{activeCategory.subcategories.map((subcategory) => (
 									<SubcategoryItem
