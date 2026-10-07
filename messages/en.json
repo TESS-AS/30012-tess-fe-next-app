@@ -155,7 +155,217 @@
 		"profile": "Profile",
 		"ehandel": "E-commerce",
 		"hoseManagement": "Hose Management",
-		"faq": "FAQ"
+		"faq": "FAQ",
+		"hosesAndPipes": "Hoses & pipes",
+		"hoseConfigurator": "Hose configurator"
+	},
+	"HoseConfigurator": {
+		"steps": {
+			"usage": "Application area",
+			"connections": "Connections and lengths",
+			"summary": "Summary"
+		},
+		"step1": {
+			"formTitle": "Select usage data:",
+			"medium": "Medium",
+			"workingPressure": "Working pressure (bar)",
+			"temperature": "Temperature (°C)",
+			"hoseSize": "Hose size",
+			"customEndSize": "End 1 and 2 should have a different size than standard",
+			"moreRequirements": "More requirements",
+			"selectPlaceholder": "Select ...",
+			"noSelection": "No selection",
+			"loadingSizes": "Loading sizes...",
+			"loadingMediums": "Loading mediums...",
+			"rangeHint": "Valid range: {min} – {max}",
+			"findHose": "Find hose",
+			"searching": "Searching..."
+		},
+		"results": {
+			"recommendedTitle": "TESS recommends the following product",
+			"othersTitle": "Other products that meet your requirements",
+			"goToProduct": "Go to product",
+			"idleHint": "Enter usage data and click “Find hose” to see recommended products.",
+			"loading": "Fetching matching hoses...",
+			"noResults": "No hoses match the selected criteria.",
+			"error": "Could not fetch hoses. Please try again.",
+			"matches": {
+				"medium": "Fits selected medium",
+				"pressure": "Withstands selected working pressure",
+				"temperature": "Withstands selected temperature"
+			},
+			"products": {
+				"57435": {
+					"name": "HYDRAULIKKSLANGE 57435, 2 LAG",
+					"description": "Hydraulic hose for hydraulic systems. Inner black nitrile, reinforcement 2 layers steel braid, outer black nitrile/PVC. Couplings type G. Standard ISO 18752 B; exceeds EN 857 2C."
+				},
+				"533": {
+					"name": "HYDRAULIKKSLANGE 533, 2 LAG",
+					"description": "Hydraulic hose for hydraulic systems. Inner black nitrile, reinforcement 2 layers steel braid, outer black nitrile/PVC. Couplings type G. Standard ISO 18752 B; exceeds EN 857 2C."
+				},
+				"547": {
+					"name": "HYDRAULIKKSLANGE 547, 4 LAG",
+					"description": "Hydraulic hose for hydraulic systems. Inner black nitrile, reinforcement 4 layers steel braid, outer black nitrile/PVC. Couplings type G. Standard ISO 18752 C; exceeds EN 857 4SP."
+				},
+				"549": {
+					"name": "HYDRAULIKKSLANGE 549, 4 LAG",
+					"description": "Hydraulic hose for hydraulic systems. Inner black nitrile, reinforcement 4 layers steel braid, outer black nitrile/PVC. Couplings type G. Standard ISO 18752 C; exceeds EN 857 4SP."
+				},
+				"57434": {
+					"name": "HYDRAULIKKSLANGE 57434, 1 LAG",
+					"description": "Hydraulic hose for hydraulic systems. Inner black nitrile, reinforcement 1 layer steel braid, outer black nitrile/PVC. Couplings type G. Standard ISO 18752 A; exceeds EN 857 1SC."
+				}
+			}
+		},
+		"options": {
+			"medium": {
+				"hydraulicOil": "Hydraulic oil",
+				"water": "Water",
+				"air": "Air"
+			},
+			"more": {
+				"antistatic": "Antistatic",
+				"fireSafe": "Fire safe",
+				"foodGrade": "Food grade"
+			}
+		},
+		"step2": {
+			"yourHose": "Your hose",
+			"expandImage": "Expand image",
+			"itemNumber": "Item number",
+			"itemName": "Item name",
+			"documentation": "Documentation ({count})",
+			"stockStatus": "Stock status",
+			"noStock": "No stock",
+			"loadError": "Could not load product details. Please try again.",
+			"desiredLength": "Desired length MTR",
+			"fullLengths": "Number of full lengths",
+			"unit": "PCS",
+			"decreaseQuantity": "Decrease quantity",
+			"increaseQuantity": "Increase quantity",
+			"coilNote": "Sold in coils of up to {max} MTR",
+			"lengthInfoTitle": "Hose length",
+			"lengthInfoText": "Hose length is measured from sealing surface to sealing surface.",
+			"technicalSpecs": "Technical specifications",
+			"specifyEnds": "Specify end 1 and 2",
+			"end1": "End 1",
+			"end2": "End 2",
+			"endsEqual": "End 1 is the same as end 2",
+			"selectEnd": "Select end",
+			"selectOption": "Select",
+			"loadingOptions": "Loading options…",
+			"noRotationAngles": "No angles available.",
+			"angleHelp": "How do I choose the correct angle?",
+			"angleDrawer": {
+				"title": "How do I choose the correct angle?",
+				"expand": "Expand",
+				"close": "Close",
+				"rotationTitle": "Coupling rotation",
+				"exampleTitle": "Example",
+				"exampleText": "End 1 is furthest from the observer. End 2 is rotated clockwise.",
+				"cancel": "Cancel"
+			},
+			"selectOptions": "Select options",
+			"fields": {
+				"fittingType": "Fitting type",
+				"connection": "Connection",
+				"size": "Size",
+				"design": "Design",
+				"material": "Material"
+			},
+			"fittingOptions": {
+				"jic": "JIC",
+				"bsp": "BSP",
+				"orfs": "ORFS"
+			},
+			"connectionOptions": {
+				"female": "Female",
+				"male": "Male"
+			},
+			"designOptions": {
+				"straight": "Straight",
+				"angle45": "45°",
+				"angle90": "90°"
+			},
+			"materialOptions": {
+				"carbonSteel": "Carbon steel",
+				"stainless": "Stainless steel"
+			},
+			"options": {
+				"testCleaning": "Test and cleaning",
+				"innerCleaning": "Internal cleaning",
+				"flushing": "Flushing",
+				"testCertificate": "Test certificate",
+				"protection": "Protection",
+				"spiralProtection": "Spiral protection",
+				"protectionSleeve": "Protection sleeve",
+				"heatFireProtection": "Heat/fire protection",
+				"marking": "Marking",
+				"tessIdStandard": "TESS-ID/THM (standard)",
+				"rfid": "RFID",
+				"hoseTag": "Hose tag",
+				"extraMarking": "Extraordinary marking",
+				"customMarking": "Custom marking",
+				"customMarkingPlaceholder": "Custom marking ...."
+			},
+			"pressureTestTitle": "Pressure test",
+			"pressureTestText": "All hoses are pressure tested after assembly and before shipping.",
+			"back": "Back",
+			"toSummary": "To summary"
+		},
+		"step3": {
+			"titleSuffix": "Check the specifications before adding the configured hose to the shopping cart.",
+			"specifications": "Specifications",
+			"edit": "Edit",
+			"productBrand": "LU-VA®",
+			"specs": {
+				"itemNumber": "Item number",
+				"itemName": "Item name",
+				"medium": "Medium",
+				"mediumValue": "Hydraulic oil",
+				"size": "Size",
+				"pressure": "Working pressure",
+				"temperature": "Temperature",
+				"more": "More options"
+			},
+			"setup": {
+				"title": "Hose setup",
+				"subtitle": "3D images and drawings of the setup",
+				"quantity": "Number of full lengths: {count} PCS",
+				"fittingSummary": "JIC Female, 1/2\"",
+				"fittingMeta": "Straight 0° · Carbon steel",
+				"length": "Length: 15 MTR / 15 000 mm",
+				"lengthDynamic": "Length: {length} MTR",
+				"lengthNote": "Hose length is measured from sealing surface to sealing surface."
+			},
+			"optionsTitle": "Options",
+			"noOptions": "No options selected",
+			"options": {
+				"innerCleaning": "Internal cleaning",
+				"flushing": "Flushing",
+				"testCertificate": "Test certificate",
+				"spiralProtection": "Spiral protection",
+				"protectionSleeve": "Protection sleeve",
+				"heatFireProtection": "Heat/fire protection",
+				"rfid": "RFID",
+				"hoseTag": "Hose tag",
+				"extraMarking": "Extra marking"
+			},
+			"pricing": {
+				"title": "Total price",
+				"price": "Price",
+				"discount": "Discount",
+				"sumAfterDiscount": "Sum after discount (excl. VAT)",
+				"vat": "VAT (25%)",
+				"total": "Total incl. VAT"
+			},
+			"addToCart": "Add to cart",
+			"addingToCart": "Adding…",
+			"addToCartError": "Could not add to cart",
+			"addToCartMissingData": "Missing product or warehouse information",
+			"backToConfig": "Back to configuration",
+			"back": "Back"
+		}
 	},
 	"Profile": {
 		"tabs": {

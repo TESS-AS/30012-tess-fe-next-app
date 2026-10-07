@@ -34,7 +34,18 @@ export function DropdownFooter({
 	return (
 		<>
 			<div className="mb-6">
-				<div className="container mx-auto flex items-center justify-end px-0 pt-5 pb-10">
+				<div className="container mx-auto flex items-center justify-end px-0 pt-5 pb-10 space-x-4">
+					{/* <Button
+						variant="green"
+						asChild
+						className="px-5 py-2.5">
+						<Link
+							onClick={onClose}
+							href={`/hose-configurator`}>
+							Bygg din egen slange - Åpne slangekonfiguratoren
+							<ChevronRight className="h-4 w-4" />
+						</Link>
+					</Button> */}
 					<Button
 						variant="outlineGrey"
 						asChild

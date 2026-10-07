@@ -157,7 +157,217 @@
 		"profile": "Profil",
 		"ehandel": "E-handel",
 		"hoseManagement": "Slangestyring",
-		"faq": "FAQ"
+		"faq": "FAQ",
+		"hosesAndPipes": "Slanger & rør",
+		"hoseConfigurator": "Slangekonfigurator"
+	},
+	"HoseConfigurator": {
+		"steps": {
+			"usage": "Bruksområde",
+			"connections": "Koblinger og lengder",
+			"summary": "Oppsummering"
+		},
+		"step1": {
+			"formTitle": "Velg bruksdata:",
+			"medium": "Medium",
+			"workingPressure": "Arbeidstrykk (bar)",
+			"temperature": "Temperatur (°C)",
+			"hoseSize": "Slangestørrelse",
+			"customEndSize": "Ende 1 og 2 skal ha annen størrelse enn standard",
+			"moreRequirements": "Flere krav",
+			"selectPlaceholder": "Velg ...",
+			"noSelection": "Ingen valg",
+			"loadingSizes": "Laster størrelser...",
+			"loadingMediums": "Laster medium...",
+			"rangeHint": "Gyldig område: {min} – {max}",
+			"findHose": "Finn slange",
+			"searching": "Søker..."
+		},
+		"results": {
+			"recommendedTitle": "TESS anbefaler følgende produkt",
+			"othersTitle": "Andre produkter som oppfyller dine krav",
+			"goToProduct": "Gå til produkt",
+			"idleHint": "Fyll inn bruksdata og klikk «Finn slange» for å se anbefalte produkter.",
+			"loading": "Henter matching slanger...",
+			"noResults": "Ingen slanger matcher valgte kriterier.",
+			"error": "Kunne ikke hente slanger. Prøv igjen.",
+			"matches": {
+				"medium": "Passer valgt medium",
+				"pressure": "Tåler valgt arbeidstrykk",
+				"temperature": "Tåler valgt temperatur"
+			},
+			"products": {
+				"57435": {
+					"name": "HYDRAULIKKSLANGE 57435, 2 LAG",
+					"description": "Hydraulikkslange for hydraulikksystemer. Innvendig sort nitril, innlegg 2 lag stålfletting, utvendig sort nitril/PVC. Kuplinger type G. Standard ISO 18752 B; overgår EN 857 2C."
+				},
+				"533": {
+					"name": "HYDRAULIKKSLANGE 533, 2 LAG",
+					"description": "Hydraulikkslange for hydraulikksystemer. Innvendig sort nitril, innlegg 2 lag stålfletting, utvendig sort nitril/PVC. Kuplinger type G. Standard ISO 18752 B; overgår EN 857 2C."
+				},
+				"547": {
+					"name": "HYDRAULIKKSLANGE 547, 4 LAG",
+					"description": "Hydraulikkslange for hydraulikksystemer. Innvendig sort nitril, innlegg 4 lag stålfletting, utvendig sort nitril/PVC. Kuplinger type G. Standard ISO 18752 C; overgår EN 857 4SP."
+				},
+				"549": {
+					"name": "HYDRAULIKKSLANGE 549, 4 LAG",
+					"description": "Hydraulikkslange for hydraulikksystemer. Innvendig sort nitril, innlegg 4 lag stålfletting, utvendig sort nitril/PVC. Kuplinger type G. Standard ISO 18752 C; overgår EN 857 4SP."
+				},
+				"57434": {
+					"name": "HYDRAULIKKSLANGE 57434, 1 LAG",
+					"description": "Hydraulikkslange for hydraulikksystemer. Innvendig sort nitril, innlegg 1 lag stålfletting, utvendig sort nitril/PVC. Kuplinger type G. Standard ISO 18752 A; overgår EN 857 1SC."
+				}
+			}
+		},
+		"options": {
+			"medium": {
+				"hydraulicOil": "Hydraulikkolje",
+				"water": "Vann",
+				"air": "Luft"
+			},
+			"more": {
+				"antistatic": "Antistatisk",
+				"fireSafe": "Brannsikker",
+				"foodGrade": "Matvaregodkjent"
+			}
+		},
+		"step2": {
+			"yourHose": "Din slange",
+			"expandImage": "Forstørr bilde",
+			"itemNumber": "Varenummer",
+			"itemName": "Varenavn",
+			"documentation": "Dokumentasjon ({count})",
+			"stockStatus": "Lagerstatus",
+			"noStock": "Ingen lager",
+			"loadError": "Kunne ikke hente produktdetaljer. Prøv igjen.",
+			"desiredLength": "Ønsket lengde MTR",
+			"fullLengths": "Antall fulle lengder",
+			"unit": "STK",
+			"decreaseQuantity": "Reduser antall",
+			"increaseQuantity": "Øk antall",
+			"coilNote": "Selges i kveil à inntil {max} MTR",
+			"lengthInfoTitle": "Slangelengde",
+			"lengthInfoText": "Slangelengden måles fra pakningsflate til pakningsflate.",
+			"technicalSpecs": "Tekniske spesifikasjoner",
+			"specifyEnds": "Spesifiser ende 1 og 2",
+			"end1": "Ende 1",
+			"end2": "Ende 2",
+			"endsEqual": "Ende 1 er lik ende 2",
+			"selectEnd": "Velg ende",
+			"selectOption": "Velg",
+			"loadingOptions": "Laster alternativer…",
+			"noRotationAngles": "Ingen vinkler tilgjengelig.",
+			"angleHelp": "Hvordan velger jeg riktig vinkel?",
+			"angleDrawer": {
+				"title": "Hvordan velger jeg riktig vinkel?",
+				"expand": "Utvid",
+				"close": "Lukk",
+				"rotationTitle": "Vridning av kuplinger",
+				"exampleTitle": "Eksempel",
+				"exampleText": "Ende 1 er lengst fra observatøren. Ende 2 vris med klokken.",
+				"cancel": "Avbryt"
+			},
+			"selectOptions": "Velg tilvalg",
+			"fields": {
+				"fittingType": "Fittingtype",
+				"connection": "Tilkobling",
+				"size": "Størrelse",
+				"design": "Utførelse",
+				"material": "Materiale"
+			},
+			"fittingOptions": {
+				"jic": "JIC",
+				"bsp": "BSP",
+				"orfs": "ORFS"
+			},
+			"connectionOptions": {
+				"female": "Female",
+				"male": "Male"
+			},
+			"designOptions": {
+				"straight": "Rett",
+				"angle45": "45°",
+				"angle90": "90°"
+			},
+			"materialOptions": {
+				"carbonSteel": "Karbonstål",
+				"stainless": "Rustfritt stål"
+			},
+			"options": {
+				"testCleaning": "Test og rengjøring",
+				"innerCleaning": "Innvendig rengjøring",
+				"flushing": "Flushing",
+				"testCertificate": "Testsertifikat",
+				"protection": "Beskyttelse",
+				"spiralProtection": "Spiralbeskyttelse",
+				"protectionSleeve": "Beskyttelsesstrømpe",
+				"heatFireProtection": "Varme-/brannbeskyttelse",
+				"marking": "Merking",
+				"tessIdStandard": "TESS-ID/THM (standard)",
+				"rfid": "RFID",
+				"hoseTag": "Hose tag",
+				"extraMarking": "Ekstraordinær merking",
+				"customMarking": "Egen merking",
+				"customMarkingPlaceholder": "Egen merking..."
+			},
+			"pressureTestTitle": "Trykktest",
+			"pressureTestText": "Alle slanger trykktestes etter sammenkobling og før utsending.",
+			"back": "Tilbake",
+			"toSummary": "Til oppsummering"
+		},
+		"step3": {
+			"titleSuffix": "Kontroller spesifikasjonene før du legger den konfigurerte slangen i handlekurven.",
+			"specifications": "Spesifikasjoner",
+			"edit": "Endre",
+			"productBrand": "LU-VA®",
+			"specs": {
+				"itemNumber": "Varenummer",
+				"itemName": "Varenavn",
+				"medium": "Medium",
+				"mediumValue": "Hydraulikkolje",
+				"size": "Størrelse",
+				"pressure": "Arbeidstrykk",
+				"temperature": "Temperatur",
+				"more": "Flere valg"
+			},
+			"setup": {
+				"title": "Slangeoppsett",
+				"subtitle": "3D bilder og tegninger av oppsett",
+				"quantity": "Antall fulle lengder: {count} STK",
+				"fittingSummary": "JIC Female, 1/2\"",
+				"fittingMeta": "Rett 0° · Karbonstål",
+				"length": "Lengde: 15 MTR / 15 000 mm",
+				"lengthDynamic": "Lengde: {length} MTR",
+				"lengthNote": "Slangelengden måles fra pakningsflate til pakningsflate."
+			},
+			"optionsTitle": "Tilvalg",
+			"noOptions": "Ingen tilvalg valgt",
+			"options": {
+				"innerCleaning": "Innvendig rengjøring",
+				"flushing": "Flushing",
+				"testCertificate": "Testsertifikat",
+				"spiralProtection": "Spiralbeskyttelse",
+				"protectionSleeve": "Beskyttelsesstrømpe",
+				"heatFireProtection": "Varme-/brannbeskyttelse",
+				"rfid": "RFID",
+				"hoseTag": "Hose tag",
+				"extraMarking": "Ekstraordinær merking"
+			},
+			"pricing": {
+				"title": "Totalpris",
+				"price": "Pris",
+				"discount": "Rabatt",
+				"sumAfterDiscount": "Sum etter rabatt (eks. mva.)",
+				"vat": "MVA (25%)",
+				"total": "Total inkl. mva."
+			},
+			"addToCart": "Legg i handlekurven",
+			"addingToCart": "Legger til…",
+			"addToCartError": "Kunne ikke legge til i handlekurven",
+			"addToCartMissingData": "Mangler produkt- eller lagerinformasjon",
+			"backToConfig": "Tilbake til konfigurasjon",
+			"back": "Tilbake"
+		}
 	},
 	"Profile": {
 		"tabs": {
