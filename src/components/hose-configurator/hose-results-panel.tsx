@@ -14,6 +14,7 @@ export type ConfiguratorProduct = {
 	imageSrc: string;
 	href: string;
 	itemNumber?: string;
+	productNumber?: string;
 };
 
 type HoseResultsPanelProps = {

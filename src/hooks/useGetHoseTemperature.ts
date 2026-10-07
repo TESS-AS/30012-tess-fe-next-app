@@ -11,7 +11,8 @@ export const useGetHoseTemperature = (enabled = true) => {
 		queryKey: hoseTemperatureKeys.all,
 		queryFn: getHoseTemperature,
 		enabled,
-		staleTime: 10 * 60 * 1000,
+		staleTime: 30 * 60 * 1000,
+		gcTime: 60 * 60 * 1000,
 		refetchOnMount: false,
 		refetchOnWindowFocus: false,
 	});

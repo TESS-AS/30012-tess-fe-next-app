@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -34,6 +34,8 @@ export type BruksomradeFormValues = {
 type StepBruksomradeProps = {
 	onFindHose: (values: BruksomradeFormValues) => void;
 	isSearching?: boolean;
+	initialValues?: Partial<BruksomradeFormValues>;
+	onValuesChange?: (values: BruksomradeFormValues) => void;
 };
 
 const CLEAR_VALUE = "__none__";
@@ -52,6 +54,8 @@ function clampToRange(value: number, min: number, max: number) {
 export function StepBruksomrade({
 	onFindHose,
 	isSearching = false,
+	initialValues,
+	onValuesChange,
 }: StepBruksomradeProps) {
 	const t = useTranslations("HoseConfigurator");
 	const { diameters, isLoading: isLoadingDiameters } = useGetHoseDiameter();
@@ -81,26 +85,75 @@ export function StepBruksomrade({
 	const temperatureMin = Number(minTemperature ?? "-80");
 	const temperatureMax = Number(maxTemperature ?? "120");
 
-	const [medium, setMedium] = useState("");
-	const [workingPressure, setWorkingPressure] = useState("");
-	const [temperature, setTemperature] = useState("");
-	const [hoseSize, setHoseSize] = useState("");
-	const [customEndSize, setCustomEndSize] = useState(false);
-	const [moreRequirements, setMoreRequirements] = useState("");
+	const [medium, setMedium] = useState(initialValues?.medium ?? "");
+	const [workingPressure, setWorkingPressure] = useState(
+		initialValues?.workingPressure ?? "",
+	);
+	const [temperature, setTemperature] = useState(
+		initialValues?.temperature ?? "",
+	);
+	const [hoseSize, setHoseSize] = useState(initialValues?.hoseSize ?? "");
+	const [customEndSize, setCustomEndSize] = useState(
+		initialValues?.customEndSize ?? false,
+	);
+	const [moreRequirements, setMoreRequirements] = useState(
+		initialValues?.moreRequirements ?? "",
+	);
+
+	// Re-apply draft values if the parent restores them after mount (or when
+	// returning to step 1). Don't stomp in-progress edits unless the form is
+	// still empty / matches a previous sync.
+	const lastSyncedRef = useRef<string>("");
+	useEffect(() => {
+		if (!initialValues) return;
+		const syncKey = JSON.stringify(initialValues);
+		if (syncKey === lastSyncedRef.current) return;
+		lastSyncedRef.current = syncKey;
+		setMedium(initialValues.medium ?? "");
+		setWorkingPressure(initialValues.workingPressure ?? "");
+		setTemperature(initialValues.temperature ?? "");
+		setHoseSize(initialValues.hoseSize ?? "");
+		setCustomEndSize(initialValues.customEndSize ?? false);
+		setMoreRequirements(initialValues.moreRequirements ?? "");
+	}, [initialValues]);
 
 	useEffect(() => {
-		if (!medium || mediumOptions.length === 0) return;
-		if (!mediumOptions.includes(medium)) {
+		if (!onValuesChange) return;
+		onValuesChange({
+			medium,
+			workingPressure,
+			temperature,
+			hoseSize,
+			customEndSize,
+			moreRequirements,
+		});
+	}, [
+		medium,
+		workingPressure,
+		temperature,
+		hoseSize,
+		customEndSize,
+		moreRequirements,
+		onValuesChange,
+	]);
+
+	// Only validate against the real API lists — never against temporary
+	// FALLBACK options, or a restored draft value gets wiped before load.
+	useEffect(() => {
+		if (isLoadingMediums || mediums.length === 0) return;
+		if (!medium) return;
+		if (!mediums.includes(medium)) {
 			setMedium("");
 		}
-	}, [mediumOptions, medium]);
+	}, [isLoadingMediums, mediums, medium]);
 
 	useEffect(() => {
-		if (!hoseSize || hoseSizeOptions.length === 0) return;
-		if (!hoseSizeOptions.includes(hoseSize)) {
+		if (isLoadingDiameters || diameters.length === 0) return;
+		if (!hoseSize) return;
+		if (!diameters.includes(hoseSize)) {
 			setHoseSize("");
 		}
-	}, [hoseSizeOptions, hoseSize]);
+	}, [isLoadingDiameters, diameters, hoseSize]);
 
 	useEffect(() => {
 		if (minPressure == null || maxPressure == null) return;

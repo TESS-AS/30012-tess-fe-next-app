@@ -236,6 +236,8 @@
 			"itemName": "Item name",
 			"documentation": "Documentation ({count})",
 			"stockStatus": "Stock status",
+			"noStock": "No stock",
+			"loadError": "Could not load product details. Please try again.",
 			"desiredLength": "Desired length MTR",
 			"fullLengths": "Number of full lengths",
 			"unit": "PCS",
@@ -250,6 +252,9 @@
 			"end2": "End 2",
 			"endsEqual": "End 1 is the same as end 2",
 			"selectEnd": "Select end",
+			"selectOption": "Select",
+			"loadingOptions": "Loading options…",
+			"noRotationAngles": "No angles available.",
 			"angleHelp": "How do I choose the correct angle?",
 			"angleDrawer": {
 				"title": "How do I choose the correct angle?",
@@ -330,14 +335,21 @@
 				"fittingSummary": "JIC Female, 1/2\"",
 				"fittingMeta": "Straight 0° · Carbon steel",
 				"length": "Length: 15 MTR / 15 000 mm",
+				"lengthDynamic": "Length: {length} MTR",
 				"lengthNote": "Hose length is measured from sealing surface to sealing surface."
 			},
 			"optionsTitle": "Options",
+			"noOptions": "No options selected",
 			"options": {
 				"innerCleaning": "Internal cleaning",
+				"flushing": "Flushing",
+				"testCertificate": "Test certificate",
 				"spiralProtection": "Spiral protection",
 				"protectionSleeve": "Protection sleeve",
-				"rfid": "RFID"
+				"heatFireProtection": "Heat/fire protection",
+				"rfid": "RFID",
+				"hoseTag": "Hose tag",
+				"extraMarking": "Extra marking"
 			},
 			"pricing": {
 				"title": "Total price",
@@ -348,6 +360,9 @@
 				"total": "Total incl. VAT"
 			},
 			"addToCart": "Add to cart",
+			"addingToCart": "Adding…",
+			"addToCartError": "Could not add to cart",
+			"addToCartMissingData": "Missing product or warehouse information",
 			"backToConfig": "Back to configuration",
 			"back": "Back"
 		}

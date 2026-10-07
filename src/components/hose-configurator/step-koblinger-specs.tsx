@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -14,7 +14,14 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useHoseFittingOptions } from "@/hooks/useHoseFittingOptions";
+import {
+	loadHoseConfiguratorDraft,
+	patchHoseConfiguratorDraft,
+	type HoseSpecsDraft,
+} from "@/lib/hose-configurator-draft";
 import { cn } from "@/lib/utils";
+import type { SelectOption } from "@/types/hose-fitting.types";
 import {
 	ArrowLeft,
 	ChevronRight,
@@ -36,20 +43,39 @@ type EndConfig = {
 	material: string;
 };
 
-const DEFAULT_END: EndConfig = {
-	fittingType: "jic",
-	connection: "female",
+const EMPTY_END: EndConfig = {
+	fittingType: "",
+	connection: "",
 	size: "1/2",
-	design: "rett",
-	material: "karbonstal",
+	design: "",
+	material: "",
 };
 
-const ANGLE_OPTIONS = ["0", "90", "180", "270"] as const;
+/** No size API yet — keep local options until BE exposes one. */
+const SIZE_OPTIONS: SelectOption[] = [
+	{ value: "1/4", label: '1/4"' },
+	{ value: "3/8", label: '3/8"' },
+	{ value: "1/2", label: '1/2"' },
+	{ value: "3/4", label: '3/4"' },
+];
+
+const ROTATION_ICON_DEGREES = new Set(["0", "90", "180", "270"]);
 
 type StepKoblingerSpecsProps = {
 	onBack: () => void;
 	onContinue: () => void;
 };
+
+function firstOptionValue(options: SelectOption[]): string {
+	return options[0]?.value ?? "";
+}
+
+function pickValidValue(current: string, options: SelectOption[]): string {
+	if (current && options.some((option) => option.value === current)) {
+		return current;
+	}
+	return firstOptionValue(options);
+}
 
 function EndFieldSelect({
 	label,
@@ -57,13 +83,17 @@ function EndFieldSelect({
 	onChange,
 	options,
 	disabled,
+	placeholder,
 }: {
 	label: string;
 	value: string;
 	onChange: (value: string) => void;
-	options: { value: string; label: string }[];
+	options: SelectOption[];
 	disabled?: boolean;
+	placeholder?: string;
 }) {
+	const hasOptions = options.length > 0;
+
 	return (
 		<div className="flex items-center gap-1.5">
 			<ChevronRight
@@ -71,12 +101,12 @@ function EndFieldSelect({
 				aria-hidden
 			/>
 			<Select
-				value={value}
+				value={value || undefined}
 				onValueChange={onChange}
-				disabled={disabled}>
+				disabled={disabled || !hasOptions}>
 				<SelectTrigger className="h-11 w-full gap-2 bg-white px-3">
 					<span className="shrink-0 text-sm text-[#5A615D]">{label}</span>
-					<SelectValue />
+					<SelectValue placeholder={placeholder} />
 				</SelectTrigger>
 				<SelectContent>
 					{options.map((option) => (
@@ -117,24 +147,83 @@ export function StepKoblingerSpecs({
 	onContinue,
 }: StepKoblingerSpecsProps) {
 	const t = useTranslations("HoseConfigurator.step2");
+	const {
+		fittingTypeOptions,
+		connectionOptions,
+		designOptions,
+		materialOptions,
+		rotationAngles,
+		isLoading: isLoadingFittingOptions,
+	} = useHoseFittingOptions();
+
 	const [specsOpen, setSpecsOpen] = useState(true);
-	const [endsEqual, setEndsEqual] = useState(false);
-	const [end1, setEnd1] = useState<EndConfig>(DEFAULT_END);
-	const [end2, setEnd2] = useState<EndConfig>(DEFAULT_END);
-	const [angle, setAngle] = useState<(typeof ANGLE_OPTIONS)[number]>("90");
-	const [options, setOptions] = useState({
-		innerCleaning: true,
-		flushing: false,
-		testCertificate: false,
-		spiralProtection: true,
-		protectionSleeve: true,
-		heatFireProtection: false,
-		rfid: true,
-		hoseTag: false,
-		extraMarking: false,
-	});
-	const [customMarking, setCustomMarking] = useState("");
+	const [endsEqual, setEndsEqual] = useState(
+		() => loadHoseConfiguratorDraft()?.specs?.endsEqual ?? false,
+	);
+	const [end1, setEnd1] = useState<EndConfig>(
+		() => loadHoseConfiguratorDraft()?.specs?.end1 ?? EMPTY_END,
+	);
+	const [end2, setEnd2] = useState<EndConfig>(
+		() => loadHoseConfiguratorDraft()?.specs?.end2 ?? EMPTY_END,
+	);
+	const [angle, setAngle] = useState(
+		() => loadHoseConfiguratorDraft()?.specs?.angle ?? "",
+	);
+	const [options, setOptions] = useState(
+		() =>
+			loadHoseConfiguratorDraft()?.specs?.options ?? {
+				innerCleaning: false,
+				flushing: false,
+				testCertificate: false,
+				spiralProtection: false,
+				protectionSleeve: false,
+				heatFireProtection: false,
+				rfid: false,
+				hoseTag: false,
+				extraMarking: false,
+			},
+	);
+	const [customMarking, setCustomMarking] = useState(
+		() => loadHoseConfiguratorDraft()?.specs?.customMarking ?? "",
+	);
 	const [angleHelpOpen, setAngleHelpOpen] = useState(false);
+
+	const sizeOptions = useMemo(() => SIZE_OPTIONS, []);
+
+	useEffect(() => {
+		const specs: HoseSpecsDraft = {
+			endsEqual,
+			end1,
+			end2,
+			angle,
+			options,
+			customMarking,
+		};
+		patchHoseConfiguratorDraft({ specs });
+	}, [endsEqual, end1, end2, angle, options, customMarking]);
+
+	useEffect(() => {
+		const syncEnd = (prev: EndConfig): EndConfig => ({
+			...prev,
+			fittingType: pickValidValue(prev.fittingType, fittingTypeOptions),
+			connection: pickValidValue(prev.connection, connectionOptions),
+			design: pickValidValue(prev.design, designOptions),
+			material: pickValidValue(prev.material, materialOptions),
+			size: pickValidValue(prev.size, sizeOptions),
+		});
+
+		setEnd1(syncEnd);
+		if (!endsEqual) {
+			setEnd2(syncEnd);
+		}
+	}, [
+		connectionOptions,
+		designOptions,
+		endsEqual,
+		fittingTypeOptions,
+		materialOptions,
+		sizeOptions,
+	]);
 
 	useEffect(() => {
 		if (endsEqual) {
@@ -142,30 +231,15 @@ export function StepKoblingerSpecs({
 		}
 	}, [endsEqual, end1]);
 
-	const fittingOptions = [
-		{ value: "jic", label: t("fittingOptions.jic") },
-		{ value: "bsp", label: t("fittingOptions.bsp") },
-		{ value: "orfs", label: t("fittingOptions.orfs") },
-	];
-	const connectionOptions = [
-		{ value: "female", label: t("connectionOptions.female") },
-		{ value: "male", label: t("connectionOptions.male") },
-	];
-	const sizeOptions = [
-		{ value: "1/4", label: '1/4"' },
-		{ value: "3/8", label: '3/8"' },
-		{ value: "1/2", label: '1/2"' },
-		{ value: "3/4", label: '3/4"' },
-	];
-	const designOptions = [
-		{ value: "rett", label: t("designOptions.straight") },
-		{ value: "45", label: t("designOptions.angle45") },
-		{ value: "90", label: t("designOptions.angle90") },
-	];
-	const materialOptions = [
-		{ value: "karbonstal", label: t("materialOptions.carbonSteel") },
-		{ value: "rustfritt", label: t("materialOptions.stainless") },
-	];
+	useEffect(() => {
+		if (!rotationAngles.length) return;
+		setAngle((current) =>
+			current && rotationAngles.some((item) => item.value === current)
+				? current
+				: (rotationAngles.find((item) => item.degrees === "90")?.value ??
+					rotationAngles[0].value),
+		);
+	}, [rotationAngles]);
 
 	const updateEnd1 = (key: keyof EndConfig, value: string) => {
 		setEnd1((prev) => ({ ...prev, [key]: value }));
@@ -189,8 +263,11 @@ export function StepKoblingerSpecs({
 				label={t("fields.fittingType")}
 				value={config.fittingType}
 				onChange={(value) => onUpdate("fittingType", value)}
-				options={fittingOptions}
+				options={fittingTypeOptions}
 				disabled={disabled}
+				placeholder={
+					isLoadingFittingOptions ? t("loadingOptions") : t("selectOption")
+				}
 			/>
 			<EndFieldSelect
 				label={t("fields.connection")}
@@ -198,6 +275,9 @@ export function StepKoblingerSpecs({
 				onChange={(value) => onUpdate("connection", value)}
 				options={connectionOptions}
 				disabled={disabled}
+				placeholder={
+					isLoadingFittingOptions ? t("loadingOptions") : t("selectOption")
+				}
 			/>
 			<EndFieldSelect
 				label={t("fields.size")}
@@ -212,6 +292,9 @@ export function StepKoblingerSpecs({
 				onChange={(value) => onUpdate("design", value)}
 				options={designOptions}
 				disabled={disabled}
+				placeholder={
+					isLoadingFittingOptions ? t("loadingOptions") : t("selectOption")
+				}
 			/>
 			<EndFieldSelect
 				label={t("fields.material")}
@@ -219,6 +302,9 @@ export function StepKoblingerSpecs({
 				onChange={(value) => onUpdate("material", value)}
 				options={materialOptions}
 				disabled={disabled}
+				placeholder={
+					isLoadingFittingOptions ? t("loadingOptions") : t("selectOption")
+				}
 			/>
 		</div>
 	);
@@ -285,52 +371,69 @@ export function StepKoblingerSpecs({
 									{t("angleHelp")}
 								</Button>
 							</div>
-							<RadioGroup
-								value={angle}
-								onValueChange={(value) =>
-									setAngle(value as (typeof ANGLE_OPTIONS)[number])
-								}
-								className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-								{ANGLE_OPTIONS.map((value) => {
-									const selected = angle === value;
-									return (
-										<label
-											key={value}
-											className={cn(
-												"flex cursor-pointer flex-col rounded-lg border-2 p-4 transition-colors",
-												selected
-													? "border-[#009640] bg-[#E8F8EB]"
-													: "border-[#009640] bg-white hover:bg-[#F7FBF8]",
-											)}>
-											<div className="flex items-center gap-2.5 pb-3">
-												<RadioGroupItem
-													value={value}
-													id={`angle-${value}`}
-													className="border-[#009640] data-[state=checked]:border-[#009640]"
-												/>
-												<span className="text-sm font-bold text-[#003D1A]">
-													V = {value}°
-												</span>
-											</div>
-											<div className="border-t border-[#009640] pt-3">
-												<div className="mb-3 flex justify-between text-sm text-[#0F1912]">
-													<span>{t("end1")}</span>
-													<span>{t("end2")}</span>
-												</div>
-												<div className="flex min-h-[48px] items-center justify-center">
-													<Image
-														src={`/icons/angle/${value}.svg`}
-														alt={`V = ${value}°`}
-														width={164}
-														height={40}
-														className="h-auto w-full max-w-[180px]"
+							{rotationAngles.length === 0 ? (
+								<p className="text-sm text-[#5A615D]">
+									{isLoadingFittingOptions
+										? t("loadingOptions")
+										: t("noRotationAngles")}
+								</p>
+							) : (
+								<RadioGroup
+									value={angle || undefined}
+									onValueChange={setAngle}
+									className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+									{rotationAngles.map((option) => {
+										const selected = angle === option.value;
+										const iconDegrees = ROTATION_ICON_DEGREES.has(
+											option.degrees,
+										)
+											? option.degrees
+											: null;
+										return (
+											<label
+												key={option.value}
+												className={cn(
+													"flex cursor-pointer flex-col rounded-lg border-2 p-4 transition-colors",
+													selected
+														? "border-[#009640] bg-[#E8F8EB]"
+														: "border-[#009640] bg-white hover:bg-[#F7FBF8]",
+												)}>
+												<div className="flex items-center gap-2.5 pb-3">
+													<RadioGroupItem
+														value={option.value}
+														id={`angle-${option.value}`}
+														className="border-[#009640] data-[state=checked]:border-[#009640]"
 													/>
+													<span className="text-sm font-bold text-[#003D1A]">
+														V = {option.label.replace(/^V\s*=\s*/i, "")}
+													</span>
 												</div>
-											</div>
-										</label>
-									);
-								})}
-							</RadioGroup>
+												<div className="border-t border-[#009640] pt-3">
+													<div className="mb-3 flex justify-between text-sm text-[#0F1912]">
+														<span>{t("end1")}</span>
+														<span>{t("end2")}</span>
+													</div>
+													<div className="flex min-h-[48px] items-center justify-center">
+														{iconDegrees ? (
+															<Image
+																src={`/icons/angle/${iconDegrees}.svg`}
+																alt={`V = ${option.label}`}
+																width={164}
+																height={40}
+																className="h-auto w-full max-w-[180px]"
+															/>
+														) : (
+															<span className="text-sm font-medium text-[#5A615D]">
+																{option.label}
+															</span>
+														)}
+													</div>
+												</div>
+											</label>
+										);
+									})}
+								</RadioGroup>
+							)}
 						</section>
 
 						{/* Velg tilvalg */}

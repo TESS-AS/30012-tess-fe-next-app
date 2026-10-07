@@ -11,7 +11,8 @@ export const useGetHoseDiameter = (enabled = true) => {
 		queryKey: hoseDiameterKeys.all,
 		queryFn: getHoseDiameter,
 		enabled,
-		staleTime: 10 * 60 * 1000,
+		staleTime: 30 * 60 * 1000,
+		gcTime: 60 * 60 * 1000,
 		refetchOnMount: false,
 		refetchOnWindowFocus: false,
 	});

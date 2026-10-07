@@ -1,13 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { loadHoseConfiguratorDraft } from "@/lib/hose-configurator-draft";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Check, Pencil, ShoppingCart } from "lucide-react";
+import { ArrowLeft, Check, Loader2, Pencil, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
-import type { StepKoblingerProduct } from "./step-koblinger";
 import type { BruksomradeFormValues } from "./step-bruksomrade";
+import type { StepKoblingerProduct } from "./step-koblinger";
 
 type StepOppsummeringProps = {
 	product: StepKoblingerProduct;
@@ -15,14 +16,20 @@ type StepOppsummeringProps = {
 	onEditSpecs: () => void;
 	onEditSetup: () => void;
 	onBack: () => void;
-	onAddToCart: () => void;
+	onAddToCart: () => void | Promise<void>;
+	isAddingToCart?: boolean;
 };
 
-const MOCK_OPTIONS = [
+const OPTION_KEYS = [
 	"innerCleaning",
+	"flushing",
+	"testCertificate",
 	"spiralProtection",
 	"protectionSleeve",
+	"heatFireProtection",
 	"rfid",
+	"hoseTag",
+	"extraMarking",
 ] as const;
 
 const MOCK_PRICING = {
@@ -127,8 +134,15 @@ export function StepOppsummering({
 	onEditSetup,
 	onBack,
 	onAddToCart,
+	isAddingToCart = false,
 }: StepOppsummeringProps) {
 	const t = useTranslations("HoseConfigurator.step3");
+	const draft = loadHoseConfiguratorDraft();
+	const quantity = draft?.koblinger?.quantity ?? 1;
+	const lengthMtr = draft?.koblinger?.lengthMtr ?? "";
+	const selectedOptions = OPTION_KEYS.filter(
+		(key) => draft?.specs?.options?.[key],
+	);
 
 	const mediumLabel = bruksomrade?.medium || t("specs.mediumValue");
 
@@ -145,6 +159,9 @@ export function StepOppsummering({
 		: "-80 °C";
 
 	const fittingSummary = t("setup.fittingSummary");
+	const lengthLabel = lengthMtr
+		? t("setup.lengthDynamic", { length: lengthMtr })
+		: t("setup.length");
 
 	return (
 		<div className="pb-10">
@@ -254,7 +271,7 @@ export function StepOppsummering({
 									strokeWidth={3}
 								/>
 							</span>
-							{t("setup.quantity", { count: 2 })}
+							{t("setup.quantity", { count: quantity })}
 						</div>
 
 						<div className="grid grid-cols-1 gap-3 md:grid-cols-4">
@@ -265,7 +282,7 @@ export function StepOppsummering({
 								diagramSrc={PIPE_ASSETS.femaleBottom}
 							/>
 							<SetupColumn
-								title={t("setup.length")}
+								title={lengthLabel}
 								subtitle={t("setup.lengthNote")}
 								imageSrc={PIPE_ASSETS.pipeTop}
 								diagramSrc={PIPE_ASSETS.pipeBottom}
@@ -287,17 +304,21 @@ export function StepOppsummering({
 							{t("optionsTitle")}
 						</h2>
 						<div className="flex flex-wrap gap-2">
-							{MOCK_OPTIONS.map((key) => (
-								<span
-									key={key}
-									className="inline-flex items-center gap-1.5 rounded-full bg-[#E8F8EB] px-3 py-1.5 text-sm font-medium text-[#005522]">
-									<Check
-										className="h-3.5 w-3.5 text-[#009640]"
-										strokeWidth={3}
-									/>
-									{t(`options.${key}`)}
-								</span>
-							))}
+							{selectedOptions.length === 0 ? (
+								<p className="text-sm text-[#5A615D]">{t("noOptions")}</p>
+							) : (
+								selectedOptions.map((key) => (
+									<span
+										key={key}
+										className="inline-flex items-center gap-1.5 rounded-full bg-[#E8F8EB] px-3 py-1.5 text-sm font-medium text-[#005522]">
+										<Check
+											className="h-3.5 w-3.5 text-[#009640]"
+											strokeWidth={3}
+										/>
+										{t(`options.${key}`)}
+									</span>
+								))
+							)}
 						</div>
 					</section>
 				</div>
@@ -346,14 +367,20 @@ export function StepOppsummering({
 								type="button"
 								variant="greenSolid"
 								onClick={onAddToCart}
+								disabled={isAddingToCart}
 								className="h-11 w-full gap-2">
-								<ShoppingCart className="h-4 w-4" />
-								{t("addToCart")}
+								{isAddingToCart ? (
+									<Loader2 className="h-4 w-4 animate-spin" />
+								) : (
+									<ShoppingCart className="h-4 w-4" />
+								)}
+								{isAddingToCart ? t("addingToCart") : t("addToCart")}
 							</Button>
 							<Button
 								type="button"
 								variant="outlineGreen"
 								onClick={onBack}
+								disabled={isAddingToCart}
 								className="h-11 w-full gap-2 bg-white">
 								<ArrowLeft className="h-4 w-4" />
 								{t("backToConfig")}
@@ -369,6 +396,7 @@ export function StepOppsummering({
 					type="button"
 					variant="outlineGrey"
 					onClick={onBack}
+					disabled={isAddingToCart}
 					className="h-11 w-full gap-2 px-8 sm:w-auto">
 					<ArrowLeft className="h-4 w-4" />
 					{t("back")}
@@ -377,9 +405,14 @@ export function StepOppsummering({
 					type="button"
 					variant="greenSolid"
 					onClick={onAddToCart}
+					disabled={isAddingToCart}
 					className="h-11 w-full gap-2 px-8 sm:w-auto">
-					<ShoppingCart className="h-4 w-4" />
-					{t("addToCart")}
+					{isAddingToCart ? (
+						<Loader2 className="h-4 w-4 animate-spin" />
+					) : (
+						<ShoppingCart className="h-4 w-4" />
+					)}
+					{isAddingToCart ? t("addingToCart") : t("addToCart")}
 				</Button>
 			</div>
 		</div>

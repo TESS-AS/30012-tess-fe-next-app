@@ -238,6 +238,8 @@
 			"itemName": "Varenavn",
 			"documentation": "Dokumentasjon ({count})",
 			"stockStatus": "Lagerstatus",
+			"noStock": "Ingen lager",
+			"loadError": "Kunne ikke hente produktdetaljer. Prøv igjen.",
 			"desiredLength": "Ønsket lengde MTR",
 			"fullLengths": "Antall fulle lengder",
 			"unit": "STK",
@@ -252,6 +254,9 @@
 			"end2": "Ende 2",
 			"endsEqual": "Ende 1 er lik ende 2",
 			"selectEnd": "Velg ende",
+			"selectOption": "Velg",
+			"loadingOptions": "Laster alternativer…",
+			"noRotationAngles": "Ingen vinkler tilgjengelig.",
 			"angleHelp": "Hvordan velger jeg riktig vinkel?",
 			"angleDrawer": {
 				"title": "Hvordan velger jeg riktig vinkel?",
@@ -332,14 +337,21 @@
 				"fittingSummary": "JIC Female, 1/2\"",
 				"fittingMeta": "Rett 0° · Karbonstål",
 				"length": "Lengde: 15 MTR / 15 000 mm",
+				"lengthDynamic": "Lengde: {length} MTR",
 				"lengthNote": "Slangelengden måles fra pakningsflate til pakningsflate."
 			},
 			"optionsTitle": "Tilvalg",
+			"noOptions": "Ingen tilvalg valgt",
 			"options": {
 				"innerCleaning": "Innvendig rengjøring",
+				"flushing": "Flushing",
+				"testCertificate": "Testsertifikat",
 				"spiralProtection": "Spiralbeskyttelse",
 				"protectionSleeve": "Beskyttelsesstrømpe",
-				"rfid": "RFID"
+				"heatFireProtection": "Varme-/brannbeskyttelse",
+				"rfid": "RFID",
+				"hoseTag": "Hose tag",
+				"extraMarking": "Ekstraordinær merking"
 			},
 			"pricing": {
 				"title": "Totalpris",
@@ -350,6 +362,9 @@
 				"total": "Total inkl. mva."
 			},
 			"addToCart": "Legg i handlekurven",
+			"addingToCart": "Legger til…",
+			"addToCartError": "Kunne ikke legge til i handlekurven",
+			"addToCartMissingData": "Mangler produkt- eller lagerinformasjon",
 			"backToConfig": "Tilbake til konfigurasjon",
 			"back": "Tilbake"
 		}

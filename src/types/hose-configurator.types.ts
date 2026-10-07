@@ -28,10 +28,20 @@ export type HoseSelectionRequest = {
 	dimension?: string;
 };
 
+export type HoseSelectionMedia = {
+	url: string;
+	filename: string;
+	picture_type: string;
+	thumbnail_url: string;
+};
+
 export type HoseSelectionItem = {
 	itemNumber: string;
 	productNameNo: string;
 	productNameEn: string;
+	productNumber: string;
+	mediaId: HoseSelectionMedia[];
+	shortDescNo: string | null;
 };
 
 export type HoseSelectionResponse = HoseSelectionItem[];
