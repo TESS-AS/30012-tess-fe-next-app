@@ -1,11 +1,15 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Check } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 import { HoseResultsSkeleton } from "./hose-configurator-skeletons";
+
+const OTHERS_PAGE_SIZE = 4;
 
 export type ConfiguratorProduct = {
 	id: string;
@@ -99,6 +103,38 @@ export function HoseResultsPanel({
 	onSelectProduct,
 }: HoseResultsPanelProps) {
 	const t = useTranslations("HoseConfigurator.results");
+	const [visibleCount, setVisibleCount] = useState(OTHERS_PAGE_SIZE);
+	const observerTarget = useRef<HTMLDivElement>(null);
+	const resultKey = others.map((product) => product.id).join("|");
+
+	useEffect(() => {
+		setVisibleCount(OTHERS_PAGE_SIZE);
+	}, [resultKey]);
+
+	const hasMore = visibleCount < others.length;
+	const visibleOthers = others.slice(0, visibleCount);
+
+	useEffect(() => {
+		const target = observerTarget.current;
+		if (!target || !hasMore) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (!entries[0]?.isIntersecting) return;
+				setVisibleCount((count) =>
+					Math.min(count + OTHERS_PAGE_SIZE, others.length),
+				);
+			},
+			{
+				rootMargin: "300px",
+				threshold: 0.1,
+			},
+		);
+
+		observer.observe(target);
+
+		return () => observer.disconnect();
+	}, [hasMore, others.length, resultKey, visibleCount]);
 
 	if (isLoading) {
 		return <HoseResultsSkeleton />;
@@ -167,7 +203,7 @@ export function HoseResultsPanel({
 						{t("othersTitle")}
 					</h2>
 					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-						{others.map((product) => (
+						{visibleOthers.map((product) => (
 							<OtherProductCard
 								key={product.id}
 								product={product}
@@ -175,6 +211,13 @@ export function HoseResultsPanel({
 							/>
 						))}
 					</div>
+					{hasMore && (
+						<div
+							ref={observerTarget}
+							className="h-8"
+							aria-hidden
+						/>
+					)}
 				</section>
 			)}
 		</div>
