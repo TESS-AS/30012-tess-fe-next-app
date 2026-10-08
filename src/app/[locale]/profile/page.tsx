@@ -30,6 +30,7 @@ import {
 	Settings,
 	LogOut,
 	List,
+	BookOpen,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
@@ -145,6 +146,27 @@ const Rekvisisjoner = dynamic(
 	() =>
 		import("./(components)/rekvisisjoner").then((m) => ({
 			default: m.Rekvisisjoner,
+		})),
+	{ ssr: false },
+);
+const CreateKsuPage = dynamic(
+	() =>
+		import("./(components)/ksu/CreateKsuPage").then((m) => ({
+			default: m.CreateKsuPage,
+		})),
+	{ ssr: false },
+);
+const AdministrerKsuPage = dynamic(
+	() =>
+		import("./(components)/ksu/AdministrerKsuPage").then((m) => ({
+			default: m.AdministrerKsuPage,
+		})),
+	{ ssr: false },
+);
+const CreatedKsuSuccessPage = dynamic(
+	() =>
+		import("./(components)/ksu/CreatedKsuSuccessPage").then((m) => ({
+			default: m.CreatedKsuSuccessPage,
 		})),
 	{ ssr: false },
 );
@@ -625,6 +647,21 @@ export default function ProfilePage() {
 															label: t("ProfilePage.sidebar.users"),
 															icon: "/icons/profile/navbar/user-settings-outline.svg",
 														},
+														{
+															href: "#ksu",
+															label: "Kundespesifikke utvalg (KSU)",
+															icon: BookOpen,
+															subitems: [
+																{
+																	href: "ksu-create",
+																	label: "Opprett nytt KSU",
+																},
+																{
+																	href: "ksu-admin",
+																	label: "Administrer KSU",
+																},
+															],
+														},
 													]
 												: []),
 											...commonBottomItems,
@@ -748,6 +785,27 @@ export default function ProfilePage() {
 							value="users"
 							className="mt-0">
 							<UsersBrukere />
+						</TabsContent>
+
+						<TabsContent
+							value="ksu-create"
+							className="mt-0">
+							{activeTab === "ksu-create" &&
+								(searchParams.get("created") ? (
+									<CreatedKsuSuccessPage
+										assortmentNumber={
+											searchParams.get("created") as string
+										}
+									/>
+								) : (
+									<CreateKsuPage />
+								))}
+						</TabsContent>
+
+						<TabsContent
+							value="ksu-admin"
+							className="mt-0">
+							{activeTab === "ksu-admin" && <AdministrerKsuPage />}
 						</TabsContent>
 
 						{(profile.role === USER_ROLES.ADMIN ||
