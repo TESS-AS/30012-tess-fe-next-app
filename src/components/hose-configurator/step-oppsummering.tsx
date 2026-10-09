@@ -138,11 +138,11 @@ function SetupColumn({
 
 function localizedPartName(
 	item: {
-		productNameNo?: string;
-		productNameEn?: string;
-		product_name_no?: string;
-		product_name_en?: string;
-		itemName?: string;
+		productNameNo?: string | null;
+		productNameEn?: string | null;
+		product_name_no?: string | null;
+		product_name_en?: string | null;
+		itemName?: string | null;
 	},
 	locale: string,
 ) {
