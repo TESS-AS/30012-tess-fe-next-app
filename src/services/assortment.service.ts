@@ -151,3 +151,39 @@ export async function addProductsToAssortment(
 		payload,
 	);
 }
+
+export interface PatchAssortmentBody {
+	assortmentName?: string;
+	assortmentDescription?: string;
+	/** Replace the category tree. BE requires sourceAssortmentNumber +
+	 *  selectedCategoryNumbers to come together — enforced by caller. */
+	sourceAssortmentNumber?: string;
+	selectedCategoryNumbers?: string[];
+}
+
+/** PATCH /assortment/:number. BE rejects (400) when `sourceAssortmentNumber`
+ *  and `selectedCategoryNumbers` aren't both set together, when nothing is
+ *  being updated, or when `assortmentName` is an empty string. BE rejects
+ *  (403) when the user doesn't have `can_administer` on the KSU, or the
+ *  KSU is a Bluestone catalogue (`type === 'BS'`). (409) on duplicate name. */
+export async function patchAssortment(
+	assortmentNumber: string,
+	body: PatchAssortmentBody,
+): Promise<AssortmentDetail> {
+	const { data } = await axiosClient.patch<AssortmentDetail>(
+		`/assortment/${encodeURIComponent(assortmentNumber)}`,
+		body,
+	);
+	return data;
+}
+
+/** DELETE /assortment/:number. Irreversible. BE rejects (403) when the user
+ *  doesn't have `can_administer`, when the KSU is a Bluestone catalogue, or
+ *  (400) when the KSU is not a top-level root. BE rejects (409) with
+ *  `{ users: number }` when any user has this KSU as their
+ *  `default_assortment_id` — caller must surface that count to the user. */
+export async function deleteAssortment(assortmentNumber: string): Promise<void> {
+	await axiosClient.delete(
+		`/assortment/${encodeURIComponent(assortmentNumber)}`,
+	);
+}

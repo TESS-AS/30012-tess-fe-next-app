@@ -16,11 +16,14 @@ import {
 	checkAssortmentNameAvailable,
 	commitExcelImport,
 	createAssortmentFromSource,
+	deleteAssortment,
 	getAssortmentStructure,
 	getCatalogStructure,
+	patchAssortment,
 	searchUsers,
 	validateExcelImport,
 	type AddProductsToAssortmentPayload,
+	type PatchAssortmentBody,
 } from "@/services/assortment.service";
 import type { CreateAssortmentBody } from "@/types/assortment.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -159,6 +162,44 @@ export function useAddProductsToAssortment() {
 			// Only the wizard-local structure cache can go stale on add — the
 			// list of assortments itself doesn't change.
 			qc.invalidateQueries({ queryKey: assortmentWizardKeys.all });
+		},
+	});
+}
+
+/** Update KSU metadata (name/description) and/or replace the category
+ *  selection. Admin surface uses this for rename; the drawer edit path will
+ *  pass `sourceAssortmentNumber` + `selectedCategoryNumbers` together. */
+export function useUpdateAssortment() {
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn: ({
+			assortmentNumber,
+			body,
+		}: {
+			assortmentNumber: string;
+			body: PatchAssortmentBody;
+		}) => patchAssortment(assortmentNumber, body),
+		onSuccess: (_data, variables) => {
+			qc.invalidateQueries({ queryKey: assortmentWizardKeys.all });
+			qc.invalidateQueries({ queryKey: assortmentKeys.all });
+			// Also invalidate the per-KSU detail cache if callers hold one.
+			qc.invalidateQueries({
+				queryKey: ["assortment-detail", variables.assortmentNumber],
+			});
+		},
+	});
+}
+
+/** Delete a KSU. Irreversible. BE returns 409 `{ users: number }` when any
+ *  user has this KSU as their default_assortment_id — caller should toast
+ *  that count instead of a generic failure. */
+export function useDeleteAssortment() {
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn: (assortmentNumber: string) => deleteAssortment(assortmentNumber),
+		onSuccess: () => {
+			qc.invalidateQueries({ queryKey: assortmentWizardKeys.all });
+			qc.invalidateQueries({ queryKey: assortmentKeys.all });
 		},
 	});
 }

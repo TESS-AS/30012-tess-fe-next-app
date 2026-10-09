@@ -4,10 +4,10 @@
  * Admin surface for existing KSUs — accessed via sidebar sub-item
  * "Administrer KSU" (?tab=ksu-admin).
  *
- * Simple list of the user's assortments with per-row actions: Edit (opens
- * the TilpassKatalogDrawer with the KSU's own tree), Export to Excel
- * (direct link to BE), and a quick "Opprett nytt KSU" shortcut back to the
- * creation page.
+ * Row actions: Edit (opens the TilpassKatalogDrawer with the KSU's own tree
+ * — on confirm, PATCH with source=self so the picked set becomes the new
+ * category tree); Export to Excel (direct link to BE); Delete (confirm
+ * dialog, handles the 409 "KSU is set as default for N users" response).
  *
  * Per product spec, this surface deliberately omits "Hvem er kunden" and
  * "Kunder knyttet til KSU" — those UI blocks are out of scope.
@@ -17,10 +17,24 @@ import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import { type Column, DataTable } from "@/components/ui/data-table";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import {
+	useDeleteAssortment,
+	useUpdateAssortment,
+} from "@/hooks/useAssortmentQueries";
 import { useGetAssortments } from "@/hooks/useGetAssortments";
 import { useRouter } from "@/i18n/navigation";
 import { getExportAssortmentExcelUrl } from "@/services/assortment.service";
-import { Download, Pencil, Plus } from "lucide-react";
+import type { AxiosError } from "axios";
+import { Download, Pencil, Plus, Trash2 } from "lucide-react";
+import { toast } from "react-toastify";
 
 import { TilpassKatalogDrawer } from "./sections/TilpassKatalogDrawer";
 
@@ -35,10 +49,20 @@ interface AssortmentRow {
 	productCount?: number;
 }
 
+interface DeletePending {
+	assortmentNumber: string;
+	assortmentName: string;
+}
+
 export function AdministrerKsuPage() {
 	const router = useRouter();
 	const { assortments, isLoading } = useGetAssortments(true);
 	const [editing, setEditing] = React.useState<string | null>(null);
+	const [pendingDelete, setPendingDelete] =
+		React.useState<DeletePending | null>(null);
+
+	const updateMutation = useUpdateAssortment();
+	const deleteMutation = useDeleteAssortment();
 
 	const rows: AssortmentRow[] = React.useMemo(
 		() =>
@@ -56,6 +80,53 @@ export function AdministrerKsuPage() {
 			})),
 		[assortments],
 	);
+
+	const handleConfirmEdit = async (selectedCategoryNumbers: Set<string>) => {
+		if (!editing) return;
+		try {
+			await updateMutation.mutateAsync({
+				assortmentNumber: editing,
+				body: {
+					// Source = self so BE prunes the current tree down to the picked
+					// set. If the user wants to copy from another source, they go
+					// through the create wizard instead.
+					sourceAssortmentNumber: editing,
+					selectedCategoryNumbers: Array.from(selectedCategoryNumbers),
+				},
+			});
+			toast.success("KSU oppdatert.");
+			setEditing(null);
+		} catch (err) {
+			console.error("update KSU failed", err);
+			toast.error("Kunne ikke oppdatere KSU.");
+		}
+	};
+
+	const handleConfirmDelete = async () => {
+		if (!pendingDelete) return;
+		try {
+			await deleteMutation.mutateAsync(pendingDelete.assortmentNumber);
+			toast.success(`KSU «${pendingDelete.assortmentName}» slettet.`);
+			setPendingDelete(null);
+		} catch (err) {
+			const ax = err as AxiosError<{ error?: string; users?: number }>;
+			// BE returns 409 { users: N } when any user has this KSU as their
+			// default_assortment_id. Surface that count instead of a generic
+			// error so the user understands why it's blocked.
+			if (ax.response?.status === 409 && ax.response.data?.users != null) {
+				toast.error(
+					`KSU er satt som standard for ${ax.response.data.users} bruker(e) og kan ikke slettes.`,
+				);
+			} else if (ax.response?.status === 403) {
+				toast.error(
+					ax.response.data?.error ?? "Du har ikke tilgang til å slette denne KSUen.",
+				);
+			} else {
+				toast.error("Kunne ikke slette KSU.");
+			}
+			setPendingDelete(null);
+		}
+	};
 
 	const columns: Column<AssortmentRow>[] = [
 		{
@@ -94,19 +165,32 @@ export function AdministrerKsuPage() {
 						variant="outline"
 						size="sm"
 						onClick={() => setEditing(r.assortmentNumber)}
-						aria-label={`Edit ${r.assortmentName}`}>
+						aria-label={`Rediger ${r.assortmentName}`}>
 						<Pencil className="h-4 w-4" />
 					</Button>
 					<Button
 						variant="outline"
 						size="sm"
 						asChild
-						aria-label={`Export ${r.assortmentName}`}>
+						aria-label={`Eksporter ${r.assortmentName}`}>
 						<a
 							href={getExportAssortmentExcelUrl(r.assortmentNumber)}
 							download>
 							<Download className="h-4 w-4" />
 						</a>
+					</Button>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() =>
+							setPendingDelete({
+								assortmentNumber: r.assortmentNumber,
+								assortmentName: r.assortmentName,
+							})
+						}
+						aria-label={`Slett ${r.assortmentName}`}
+						className="text-[#B0261A] hover:bg-[#FDE7EA] hover:text-[#B0261A]">
+						<Trash2 className="h-4 w-4" />
 					</Button>
 				</div>
 			),
@@ -156,13 +240,38 @@ export function AdministrerKsuPage() {
 					mode="existing-ksu"
 					sourceAssortmentNumber={editing}
 					initialSelected={new Set()}
-					onConfirm={() => {
-						// Edit-in-place from the admin surface is a future scope item —
-						// for v1 the drawer is read/preview only. Close on confirm.
-						setEditing(null);
-					}}
+					onConfirm={handleConfirmEdit}
 				/>
 			)}
+
+			<Dialog
+				open={pendingDelete != null}
+				onOpenChange={(o) => !o && setPendingDelete(null)}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Slette KSU?</DialogTitle>
+						<DialogDescription>
+							Du er i ferd med å slette <b>{pendingDelete?.assortmentName}</b>.
+							Alle kategorier, produkttilknytninger og tilganger fjernes. Dette
+							kan ikke angres.
+						</DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<Button
+							variant="outline"
+							onClick={() => setPendingDelete(null)}
+							disabled={deleteMutation.isPending}>
+							Avbryt
+						</Button>
+						<Button
+							variant="destructive"
+							onClick={handleConfirmDelete}
+							disabled={deleteMutation.isPending}>
+							{deleteMutation.isPending ? "Sletter ..." : "Slett KSU"}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }
