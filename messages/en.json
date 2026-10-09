@@ -930,7 +930,7 @@
 			"tooltipTitle": "Some of the selected hoses cannot be purchased directly.",
 			"tooltipBody": "They may be missing data or require clarification. Send a request for a quote, or contact us for assistance.",
 			"singleBlockedTitle": "This hose cannot be purchased directly.",
-			"singleBlockedBody": "It may be missing data or require clarification. Send a request for a quote or contact us for assistance.",
+			"singleBlockedBody": "The hose may be a special variant that requires drawings or special assembly. Send a request for a quote or contact us for assistance.",
 			"addToCart": "Add {count} to cart",
 			"requestHoses": "Request {count} hoses",
 			"contactSupport": "Contact TESS support",

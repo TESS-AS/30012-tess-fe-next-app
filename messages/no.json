@@ -932,7 +932,7 @@
 			"tooltipTitle": "Noen av de valgte slangene kan ikke kjøpes direkte.",
 			"tooltipBody": "De kan mangle data eller kreve avklaring. Send forespørsel for tilbud, eller kontakt oss for bistand.",
 			"singleBlockedTitle": "Denne slangen kan ikke kjøpes direkte.",
-			"singleBlockedBody": "Den kan mangle data eller kreve avklaring. Send forespørsel for tilbud eller kontakt oss for bistand.",
+			"singleBlockedBody": "Slangen kan være en spesiell variant som krever tegninger eller spesialmontering. Send forespørsel for tilbud eller kontakt oss for bistand.",
 			"addToCart": "Legg {count} i handlekurv",
 			"requestHoses": "Forespør {count} slanger",
 			"contactSupport": "Kontakt TESS support",

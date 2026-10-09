@@ -314,8 +314,10 @@ export function HosesAndEquipments({
 		return selectedRows.includes(hexagonId);
 	};
 
-	const isEcomBlocked = (row: Pick<HoseOrder, "ecom">) =>
-		Number(row.ecom) === 3;
+	const isEcomBlocked = (row: Pick<HoseOrder, "ecom">) => {
+		const ecom = Number(row.ecom);
+		return ecom === 2 || ecom === 3;
+	};
 
 	const selectedCount = allAcrossPages
 		? Math.max(0, (pagination?.totalItems ?? 0) - deselectedIds.size)
