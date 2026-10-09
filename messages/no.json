@@ -172,6 +172,8 @@
 			"medium": "Medium",
 			"workingPressure": "Arbeidstrykk (bar)",
 			"temperature": "Temperatur (°C)",
+			"temperatureFrom": "Fra",
+			"temperatureTo": "Til",
 			"hoseSize": "Slangestørrelse",
 			"customEndSize": "Ende 1 og 2 skal ha annen størrelse enn standard",
 			"moreRequirements": "Flere krav",
@@ -313,7 +315,8 @@
 			"pressureTestTitle": "Trykktest",
 			"pressureTestText": "Alle slanger trykktestes etter sammenkobling og før utsending.",
 			"back": "Tilbake",
-			"toSummary": "Til oppsummering"
+			"toSummary": "Til oppsummering",
+			"loadingSummary": "Henter oppsett..."
 		},
 		"step3": {
 			"titleSuffix": "Kontroller spesifikasjonene før du legger den konfigurerte slangen i handlekurven.",
@@ -365,6 +368,14 @@
 			"addingToCart": "Legger til…",
 			"addToCartError": "Kunne ikke legge til i handlekurven",
 			"addToCartMissingData": "Mangler produkt- eller lagerinformasjon",
+			"assemblyError": "Kunne ikke hente slangeoppsettet. Prøv igjen.",
+			"assemblyLoading": "Henter slangeoppsett...",
+			"parts": {
+				"end1": "Ende 1",
+				"end2": "Ende 2",
+				"ferrule": "Hylse",
+				"insert": "Innsats"
+			},
 			"backToConfig": "Tilbake til konfigurasjon",
 			"back": "Tilbake"
 		}

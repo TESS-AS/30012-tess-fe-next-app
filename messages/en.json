@@ -170,6 +170,8 @@
 			"medium": "Medium",
 			"workingPressure": "Working pressure (bar)",
 			"temperature": "Temperature (°C)",
+			"temperatureFrom": "From",
+			"temperatureTo": "To",
 			"hoseSize": "Hose size",
 			"customEndSize": "End 1 and 2 should have a different size than standard",
 			"moreRequirements": "More requirements",
@@ -311,7 +313,8 @@
 			"pressureTestTitle": "Pressure test",
 			"pressureTestText": "All hoses are pressure tested after assembly and before shipping.",
 			"back": "Back",
-			"toSummary": "To summary"
+			"toSummary": "To summary",
+			"loadingSummary": "Loading assembly..."
 		},
 		"step3": {
 			"titleSuffix": "Check the specifications before adding the configured hose to the shopping cart.",
@@ -363,6 +366,14 @@
 			"addingToCart": "Adding…",
 			"addToCartError": "Could not add to cart",
 			"addToCartMissingData": "Missing product or warehouse information",
+			"assemblyError": "Could not load the hose assembly. Please try again.",
+			"assemblyLoading": "Loading hose assembly...",
+			"parts": {
+				"end1": "End 1",
+				"end2": "End 2",
+				"ferrule": "Ferrule",
+				"insert": "Insert"
+			},
 			"backToConfig": "Back to configuration",
 			"back": "Back"
 		}

@@ -27,6 +27,7 @@ import {
 	ChevronRight,
 	ImageIcon,
 	Info,
+	Loader2,
 	Plus,
 	ShoppingCart,
 } from "lucide-react";
@@ -64,6 +65,7 @@ const ROTATION_ICON_DEGREES = new Set(["0", "90", "180", "270"]);
 type StepKoblingerSpecsProps = {
 	onBack: () => void;
 	onContinue: () => void;
+	isContinuing?: boolean;
 };
 
 function firstOptionValue(options: SelectOption[]): string {
@@ -145,6 +147,7 @@ function OptionCheckbox({
 export function StepKoblingerSpecs({
 	onBack,
 	onContinue,
+	isContinuing = false,
 }: StepKoblingerSpecsProps) {
 	const t = useTranslations("HoseConfigurator.step2");
 	const {
@@ -566,9 +569,14 @@ export function StepKoblingerSpecs({
 					type="button"
 					variant="greenSolid"
 					onClick={onContinue}
+					disabled={isContinuing}
 					className="h-11 w-full gap-2 px-8 sm:w-auto">
-					<ShoppingCart className="h-4 w-4" />
-					{t("toSummary")}
+					{isContinuing ? (
+						<Loader2 className="h-4 w-4 animate-spin" />
+					) : (
+						<ShoppingCart className="h-4 w-4" />
+					)}
+					{isContinuing ? t("loadingSummary") : t("toSummary")}
 				</Button>
 			</div>
 

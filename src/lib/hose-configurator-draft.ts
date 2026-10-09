@@ -5,7 +5,10 @@ const STORAGE_KEY = "hoseConfigurator.draft.v2";
 export type HoseBruksomradeDraft = {
 	medium: string;
 	workingPressure: string;
-	temperature: string;
+	temperatureMin?: string;
+	temperatureMax?: string;
+	/** Older drafts stored a single temperature. */
+	temperature?: string;
 	hoseSize: string;
 	customEndSize: boolean;
 	moreRequirements: string;
