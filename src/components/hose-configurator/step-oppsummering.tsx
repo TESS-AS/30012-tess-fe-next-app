@@ -3,15 +3,24 @@
 import { Button } from "@/components/ui/button";
 import { loadHoseConfiguratorDraft } from "@/lib/hose-configurator-draft";
 import { cn } from "@/lib/utils";
+import type {
+	HoseAssemblyFerrule,
+	HoseAssemblyInsert,
+	HoseAssemblyInsertMatch,
+	HoseAssemblyResponse,
+	HoseAssemblyService,
+} from "@/types/hose-configurator.types";
 import { ArrowLeft, Check, Loader2, Pencil, ShoppingCart } from "lucide-react";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import type { BruksomradeFormValues } from "./step-bruksomrade";
 import type { StepKoblingerProduct } from "./step-koblinger";
 
 type StepOppsummeringProps = {
 	product: StepKoblingerProduct;
+	assembly?: HoseAssemblyResponse | null;
+	isLoadingAssembly?: boolean;
 	bruksomrade: BruksomradeFormValues | null;
 	onEditSpecs: () => void;
 	onEditSetup: () => void;
@@ -127,8 +136,109 @@ function SetupColumn({
 	);
 }
 
+function localizedPartName(
+	item: {
+		productNameNo?: string;
+		productNameEn?: string;
+		product_name_no?: string;
+		product_name_en?: string;
+		itemName?: string;
+	},
+	locale: string,
+) {
+	const norwegian = item.productNameNo || item.product_name_no || item.itemName;
+	const english = item.productNameEn || item.product_name_en || item.itemName;
+	return (locale === "en" ? english || norwegian : norwegian || english) || "—";
+}
+
+function isInsertMatch(value: HoseAssemblyInsert): value is HoseAssemblyInsertMatch {
+	return typeof value === "object" && value != null && "itemNumber" in value;
+}
+
+function matchedInserts(inserts: HoseAssemblyInsert[] | undefined) {
+	return (inserts ?? []).filter(isInsertMatch);
+}
+
+function insertMessage(inserts: HoseAssemblyInsert[] | undefined) {
+	return (inserts ?? []).find((insert) => typeof insert === "string") ?? null;
+}
+
+function hasFerrule(ferrule: HoseAssemblyFerrule | undefined) {
+	if (!ferrule) return false;
+	return Boolean(
+		ferrule.itemNumber || ferrule.productNameNo || ferrule.productNameEn,
+	);
+}
+
+function endTitle(insert: HoseAssemblyInsertMatch | undefined, message: string | null) {
+	if (insert) {
+		return [insert.fittingType, insert.gender].filter(Boolean).join(" ") || "—";
+	}
+	return message || "—";
+}
+
+function AssemblyPartList({
+	title,
+	ferruleLabel,
+	insertLabel,
+	ferrules,
+	inserts,
+	locale,
+}: {
+	title: string;
+	ferruleLabel: string;
+	insertLabel: string;
+	ferrules: HoseAssemblyFerrule[];
+	inserts: HoseAssemblyInsert[];
+	locale: string;
+}) {
+	const presentFerrules = ferrules.filter(hasFerrule);
+	const presentInserts = matchedInserts(inserts);
+	const message = insertMessage(inserts);
+	if (presentFerrules.length === 0 && presentInserts.length === 0 && !message) {
+		return null;
+	}
+
+	return (
+		<div>
+			<h3 className="text-sm font-bold text-[#0F1912]">{title}</h3>
+			<ul className="mt-2 space-y-1.5 text-sm text-[#5A615D]">
+				{presentFerrules.map((ferrule, index) => (
+					<li key={`ferrule-${ferrule.itemNumber}-${index}`}>
+						{ferruleLabel}: {localizedPartName(ferrule, locale)} ·{" "}
+						{ferrule.itemNumber}
+						{ferrule.quantity ? ` · ${ferrule.quantity}` : ""}
+					</li>
+				))}
+				{presentInserts.map((insert, index) => (
+					<li key={`insert-${insert.itemNumber}-${index}`}>
+						{insertLabel}: {localizedPartName(insert, locale)} ·{" "}
+						{insert.itemNumber}
+						{insert.quantity ? ` · ${insert.quantity}` : ""}
+					</li>
+				))}
+				{message && presentInserts.length === 0 && <li>{message}</li>}
+			</ul>
+		</div>
+	);
+}
+
+function endSubtitle(
+	insert: HoseAssemblyInsertMatch | undefined,
+	ferrule: HoseAssemblyFerrule | undefined,
+) {
+	const presentFerrule = hasFerrule(ferrule) ? ferrule : undefined;
+	return (
+		[insert?.angle, presentFerrule?.material, presentFerrule?.dimension]
+			.filter(Boolean)
+			.join(" · ") || "—"
+	);
+}
+
 export function StepOppsummering({
 	product,
+	assembly = null,
+	isLoadingAssembly = false,
 	bruksomrade,
 	onEditSpecs,
 	onEditSetup,
@@ -137,31 +247,82 @@ export function StepOppsummering({
 	isAddingToCart = false,
 }: StepOppsummeringProps) {
 	const t = useTranslations("HoseConfigurator.step3");
+	const locale = useLocale();
 	const draft = loadHoseConfiguratorDraft();
-	const quantity = draft?.koblinger?.quantity ?? 1;
-	const lengthMtr = draft?.koblinger?.lengthMtr ?? "";
+	const configuredHose = assembly?.hose[0];
+	const quantity = configuredHose?.quantity ?? draft?.koblinger?.quantity ?? 1;
+	const lengthMtr =
+		configuredHose?.lengthMeters != null
+			? String(configuredHose.lengthMeters)
+			: (draft?.koblinger?.lengthMtr ?? "");
 	const selectedOptions = OPTION_KEYS.filter(
 		(key) => draft?.specs?.options?.[key],
 	);
+	const services: HoseAssemblyService[] = assembly?.service ?? [];
 
-	const mediumLabel = bruksomrade?.medium || t("specs.mediumValue");
+	const mediumLabel = configuredHose
+		? configuredHose.medium || "—"
+		: bruksomrade?.medium || t("specs.mediumValue");
 
-	const sizeLabel = bruksomrade?.hoseSize
-		? `${bruksomrade.hoseSize}"`
-		: '1/2"';
+	const sizeLabel = configuredHose?.dimension
+		? `${configuredHose.dimension}"`
+		: bruksomrade?.hoseSize
+			? `${bruksomrade.hoseSize}"`
+			: '1/2"';
 
-	const pressureLabel = bruksomrade?.workingPressure
-		? `${bruksomrade.workingPressure} bar`
-		: "250 bar";
+	const pressureLabel =
+		configuredHose?.pressure != null
+			? `${configuredHose.pressure} bar`
+			: bruksomrade?.workingPressure
+				? `${bruksomrade.workingPressure} bar`
+				: "250 bar";
 
-	const temperatureLabel = bruksomrade?.temperature
-		? `${bruksomrade.temperature} °C`
-		: "-80 °C";
+	const temperatureFrom = bruksomrade?.temperatureMin ?? "";
+	const temperatureTo = bruksomrade?.temperatureMax ?? "";
+	const temperatureLabel =
+		configuredHose?.temperature != null
+			? `${configuredHose.temperature} °C`
+			: temperatureFrom && temperatureTo && temperatureFrom !== temperatureTo
+				? `${temperatureFrom} – ${temperatureTo} °C`
+				: temperatureFrom || temperatureTo
+					? `${temperatureFrom || temperatureTo} °C`
+					: "-80 °C";
 
-	const fittingSummary = t("setup.fittingSummary");
+	const moreLabel = configuredHose?.otherRequirments?.trim() || "—";
+	const productTitle = configuredHose
+		? locale === "en"
+			? configuredHose.productNameEn || configuredHose.productNameNo
+			: configuredHose.productNameNo || configuredHose.productNameEn
+		: t("productBrand");
+	const productDescription = configuredHose?.itemName || product.description;
+	const [end1Insert] = matchedInserts(assembly?.insert1);
+	const [end2Insert] = matchedInserts(assembly?.insert2);
+	const end1Ferrule = assembly?.ferrule1.find(hasFerrule);
+	const end2Ferrule = assembly?.ferrule2.find(hasFerrule);
+	const end1Title = assembly
+		? endTitle(end1Insert, insertMessage(assembly.insert1))
+		: t("setup.fittingSummary");
+	const end2Title = assembly
+		? endTitle(end2Insert, insertMessage(assembly.insert2))
+		: t("setup.fittingSummary");
+	const end1Subtitle = assembly
+		? endSubtitle(end1Insert, end1Ferrule)
+		: t("setup.fittingMeta");
+	const end2Subtitle = assembly
+		? endSubtitle(end2Insert, end2Ferrule)
+		: t("setup.fittingMeta");
 	const lengthLabel = lengthMtr
 		? t("setup.lengthDynamic", { length: lengthMtr })
 		: t("setup.length");
+
+	if (isLoadingAssembly) {
+		return (
+			<div className="flex items-center gap-2 py-16 text-sm text-[#5A615D]">
+				<Loader2 className="h-4 w-4 animate-spin text-[#009640]" />
+				{t("assemblyLoading")}
+			</div>
+		);
+	}
 
 	return (
 		<div className="pb-10">
@@ -193,20 +354,20 @@ export function StepOppsummering({
 						</div>
 
 						<h3 className="text-xl font-bold text-[#0F1912]">
-							{t("productBrand")}
+							{productTitle}
 						</h3>
 						<p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#5A615D]">
-							{product.description}
+							{productDescription}
 						</p>
 
 						<div className="mt-5 grid grid-cols-2 gap-y-4 sm:grid-cols-3 xl:grid-cols-7 xl:gap-0">
 							<SpecCell
 								label={t("specs.itemNumber")}
-								value={product.itemNumber}
+								value={configuredHose?.itemNumber || product.itemNumber}
 							/>
 							<SpecCell
 								label={t("specs.itemName")}
-								value={product.itemName}
+								value={configuredHose?.itemName || product.itemName}
 								showDivider
 							/>
 							<SpecCell
@@ -231,7 +392,7 @@ export function StepOppsummering({
 							/>
 							<SpecCell
 								label={t("specs.more")}
-								value="-"
+								value={moreLabel}
 								showDivider
 							/>
 						</div>
@@ -276,8 +437,8 @@ export function StepOppsummering({
 
 						<div className="grid grid-cols-1 gap-3 md:grid-cols-4">
 							<SetupColumn
-								title={fittingSummary}
-								subtitle={t("setup.fittingMeta")}
+								title={end1Title}
+								subtitle={end1Subtitle}
 								imageSrc={PIPE_ASSETS.femaleTop}
 								diagramSrc={PIPE_ASSETS.femaleBottom}
 							/>
@@ -289,13 +450,33 @@ export function StepOppsummering({
 								wide
 							/>
 							<SetupColumn
-								title={fittingSummary}
-								subtitle={t("setup.fittingMeta")}
+								title={end2Title}
+								subtitle={end2Subtitle}
 								imageSrc={PIPE_ASSETS.femaleTop}
 								diagramSrc={PIPE_ASSETS.femaleBottom}
 								mirrorImages
 							/>
 						</div>
+						{assembly && (
+							<div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+								<AssemblyPartList
+									title={t("parts.end1")}
+									ferruleLabel={t("parts.ferrule")}
+									insertLabel={t("parts.insert")}
+									ferrules={assembly.ferrule1}
+									inserts={assembly.insert1}
+									locale={locale}
+								/>
+								<AssemblyPartList
+									title={t("parts.end2")}
+									ferruleLabel={t("parts.ferrule")}
+									insertLabel={t("parts.insert")}
+									ferrules={assembly.ferrule2}
+									inserts={assembly.insert2}
+									locale={locale}
+								/>
+							</div>
+						)}
 					</section>
 
 					{/* Tilvalg */}
@@ -304,7 +485,20 @@ export function StepOppsummering({
 							{t("optionsTitle")}
 						</h2>
 						<div className="flex flex-wrap gap-2">
-							{selectedOptions.length === 0 ? (
+							{services.length > 0 ? (
+								services.map((service) => (
+									<span
+										key={`${service.serviceType}-${service.itemNumber}`}
+										className="inline-flex items-center gap-1.5 rounded-full bg-[#E8F8EB] px-3 py-1.5 text-sm font-medium text-[#005522]">
+										<Check
+											className="h-3.5 w-3.5 text-[#009640]"
+											strokeWidth={3}
+										/>
+										{service.itemName || service.description || service.serviceType}
+										{service.quantity ? ` · ${service.quantity}` : ""}
+									</span>
+								))
+							) : selectedOptions.length === 0 ? (
 								<p className="text-sm text-[#5A615D]">{t("noOptions")}</p>
 							) : (
 								selectedOptions.map((key) => (

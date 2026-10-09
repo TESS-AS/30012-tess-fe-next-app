@@ -1,15 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 import { HoseResultsSkeleton } from "./hose-configurator-skeletons";
-
-const OTHERS_PAGE_SIZE = 4;
 
 export type ConfiguratorProduct = {
 	id: string;
@@ -25,8 +23,11 @@ type HoseResultsPanelProps = {
 	recommended: ConfiguratorProduct | null;
 	others: ConfiguratorProduct[];
 	isLoading?: boolean;
+	isFetchingNextPage?: boolean;
+	hasMore?: boolean;
 	hasSearched?: boolean;
 	errorMessage?: string | null;
+	onLoadMore?: () => void;
 	onSelectProduct: (product: ConfiguratorProduct) => void;
 };
 
@@ -98,32 +99,24 @@ export function HoseResultsPanel({
 	recommended,
 	others,
 	isLoading = false,
+	isFetchingNextPage = false,
+	hasMore = false,
 	hasSearched = false,
 	errorMessage = null,
+	onLoadMore,
 	onSelectProduct,
 }: HoseResultsPanelProps) {
 	const t = useTranslations("HoseConfigurator.results");
-	const [visibleCount, setVisibleCount] = useState(OTHERS_PAGE_SIZE);
 	const observerTarget = useRef<HTMLDivElement>(null);
-	const resultKey = others.map((product) => product.id).join("|");
-
-	useEffect(() => {
-		setVisibleCount(OTHERS_PAGE_SIZE);
-	}, [resultKey]);
-
-	const hasMore = visibleCount < others.length;
-	const visibleOthers = others.slice(0, visibleCount);
 
 	useEffect(() => {
 		const target = observerTarget.current;
-		if (!target || !hasMore) return;
+		if (!target || !hasMore || isLoading || isFetchingNextPage) return;
 
 		const observer = new IntersectionObserver(
 			(entries) => {
 				if (!entries[0]?.isIntersecting) return;
-				setVisibleCount((count) =>
-					Math.min(count + OTHERS_PAGE_SIZE, others.length),
-				);
+				onLoadMore?.();
 			},
 			{
 				rootMargin: "300px",
@@ -134,7 +127,7 @@ export function HoseResultsPanel({
 		observer.observe(target);
 
 		return () => observer.disconnect();
-	}, [hasMore, others.length, resultKey, visibleCount]);
+	}, [hasMore, isFetchingNextPage, isLoading, onLoadMore]);
 
 	if (isLoading) {
 		return <HoseResultsSkeleton />;
@@ -197,13 +190,15 @@ export function HoseResultsPanel({
 				</div>
 			</section>
 
-			{others.length > 0 && (
+			{(others.length > 0 || hasMore || isFetchingNextPage) && (
 				<section className="space-y-3">
-					<h2 className="text-base font-bold text-[#0F1912]">
-						{t("othersTitle")}
-					</h2>
+					{others.length > 0 && (
+						<h2 className="text-base font-bold text-[#0F1912]">
+							{t("othersTitle")}
+						</h2>
+					)}
 					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-						{visibleOthers.map((product) => (
+						{others.map((product) => (
 							<OtherProductCard
 								key={product.id}
 								product={product}
@@ -211,12 +206,14 @@ export function HoseResultsPanel({
 							/>
 						))}
 					</div>
-					{hasMore && (
+					{(hasMore || isFetchingNextPage) && (
 						<div
 							ref={observerTarget}
-							className="h-8"
-							aria-hidden
-						/>
+							className="flex h-12 items-center justify-center">
+							{isFetchingNextPage && (
+								<Loader2 className="h-5 w-5 animate-spin text-[#009640]" />
+							)}
+						</div>
 					)}
 				</section>
 			)}

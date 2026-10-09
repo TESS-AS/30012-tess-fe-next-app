@@ -54,7 +54,7 @@ export default function CategoryNavigationMenu({
 	const { data: profile } = useGetProfileData();
 	const rootRef = useRef<HTMLElement | null>(null);
 	const ulRef = useRef<HTMLUListElement | null>(null);
-	const showPromoBanner = profile?.userId === 580 || profile?.userId === 12937;
+	const showPromoBanner = profile?.userId === 580 || profile?.userId === 558 || profile?.userId === 567 || profile?.userId === 12937;
 
 	const closeMenu = useCallback(() => {
 		setOpenMenu(false);

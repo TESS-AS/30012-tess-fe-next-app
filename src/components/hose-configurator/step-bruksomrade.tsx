@@ -25,7 +25,8 @@ import { HoseFormSkeleton } from "./hose-configurator-skeletons";
 export type BruksomradeFormValues = {
 	medium: string;
 	workingPressure: string;
-	temperature: string;
+	temperatureMin: string;
+	temperatureMax: string;
 	hoseSize: string;
 	customEndSize: boolean;
 	moreRequirements: string;
@@ -82,15 +83,18 @@ export function StepBruksomrade({
 
 	const pressureMin = minPressure ?? 0;
 	const pressureMax = maxPressure ?? 420;
-	const temperatureMin = Number(minTemperature ?? "-80");
-	const temperatureMax = Number(maxTemperature ?? "120");
+	const temperatureMinBound = Number(minTemperature ?? "-80");
+	const temperatureMaxBound = Number(maxTemperature ?? "120");
 
 	const [medium, setMedium] = useState(initialValues?.medium ?? "");
 	const [workingPressure, setWorkingPressure] = useState(
 		initialValues?.workingPressure ?? "",
 	);
-	const [temperature, setTemperature] = useState(
-		initialValues?.temperature ?? "",
+	const [temperatureMin, setTemperatureMin] = useState(
+		initialValues?.temperatureMin ?? "",
+	);
+	const [temperatureMax, setTemperatureMax] = useState(
+		initialValues?.temperatureMax ?? "",
 	);
 	const [hoseSize, setHoseSize] = useState(initialValues?.hoseSize ?? "");
 	const [customEndSize, setCustomEndSize] = useState(
@@ -111,7 +115,8 @@ export function StepBruksomrade({
 		lastSyncedRef.current = syncKey;
 		setMedium(initialValues.medium ?? "");
 		setWorkingPressure(initialValues.workingPressure ?? "");
-		setTemperature(initialValues.temperature ?? "");
+		setTemperatureMin(initialValues.temperatureMin ?? "");
+		setTemperatureMax(initialValues.temperatureMax ?? "");
 		setHoseSize(initialValues.hoseSize ?? "");
 		setCustomEndSize(initialValues.customEndSize ?? false);
 		setMoreRequirements(initialValues.moreRequirements ?? "");
@@ -122,7 +127,8 @@ export function StepBruksomrade({
 		onValuesChange({
 			medium,
 			workingPressure,
-			temperature,
+			temperatureMin,
+			temperatureMax,
 			hoseSize,
 			customEndSize,
 			moreRequirements,
@@ -130,7 +136,8 @@ export function StepBruksomrade({
 	}, [
 		medium,
 		workingPressure,
-		temperature,
+		temperatureMin,
+		temperatureMax,
 		hoseSize,
 		customEndSize,
 		moreRequirements,
@@ -168,22 +175,22 @@ export function StepBruksomrade({
 
 	useEffect(() => {
 		if (minTemperature == null || maxTemperature == null) return;
-		if (temperature === "") return;
-		const numeric = Number(temperature);
 		const min = Number(minTemperature);
 		const max = Number(maxTemperature);
-		if (
-			!Number.isFinite(numeric) ||
-			!Number.isFinite(min) ||
-			!Number.isFinite(max)
-		) {
-			return;
-		}
-		const clamped = clampToRange(numeric, min, max);
-		if (clamped !== numeric) {
-			setTemperature(String(clamped));
-		}
-	}, [minTemperature, maxTemperature, temperature]);
+		if (!Number.isFinite(min) || !Number.isFinite(max)) return;
+
+		const clampField = (value: string) => {
+			if (value === "") return value;
+			const numeric = Number(value);
+			if (!Number.isFinite(numeric)) return value;
+			return String(clampToRange(numeric, min, max));
+		};
+
+		const nextMin = clampField(temperatureMin);
+		const nextMax = clampField(temperatureMax);
+		if (nextMin !== temperatureMin) setTemperatureMin(nextMin);
+		if (nextMax !== temperatureMax) setTemperatureMax(nextMax);
+	}, [minTemperature, maxTemperature, temperatureMin, temperatureMax]);
 
 	const isFormLoading =
 		(isLoadingMediums && mediums.length === 0) ||
@@ -196,7 +203,8 @@ export function StepBruksomrade({
 		onFindHose({
 			medium,
 			workingPressure,
-			temperature,
+			temperatureMin,
+			temperatureMax,
 			hoseSize,
 			customEndSize,
 			moreRequirements,
@@ -275,23 +283,49 @@ export function StepBruksomrade({
 			</div>
 
 			<div className="space-y-1.5">
-				<Label
-					htmlFor="temperature"
-					className="text-sm font-medium text-[#0F1912]">
+				<Label className="text-sm font-medium text-[#0F1912]">
 					{t("step1.temperature")}
 				</Label>
-				<Input
-					id="temperature"
-					type="number"
-					inputMode="numeric"
-					min={temperatureMin}
-					max={temperatureMax}
-					step="1"
-					value={temperature}
-					placeholder={t("step1.selectPlaceholder")}
-					onChange={(event) => setTemperature(event.target.value)}
-					className="h-11 bg-white"
-				/>
+				<div className="grid grid-cols-2 gap-3">
+					<div className="space-y-1">
+						<Label
+							htmlFor="temperatureMin"
+							className="text-xs font-normal text-[#5A615D]">
+							{t("step1.temperatureFrom")}
+						</Label>
+						<Input
+							id="temperatureMin"
+							type="number"
+							inputMode="numeric"
+							min={temperatureMinBound}
+							max={temperatureMaxBound}
+							step="1"
+							value={temperatureMin}
+							placeholder={t("step1.selectPlaceholder")}
+							onChange={(event) => setTemperatureMin(event.target.value)}
+							className="h-11 bg-white"
+						/>
+					</div>
+					<div className="space-y-1">
+						<Label
+							htmlFor="temperatureMax"
+							className="text-xs font-normal text-[#5A615D]">
+							{t("step1.temperatureTo")}
+						</Label>
+						<Input
+							id="temperatureMax"
+							type="number"
+							inputMode="numeric"
+							min={temperatureMinBound}
+							max={temperatureMaxBound}
+							step="1"
+							value={temperatureMax}
+							placeholder={t("step1.selectPlaceholder")}
+							onChange={(event) => setTemperatureMax(event.target.value)}
+							className="h-11 bg-white"
+						/>
+					</div>
+				</div>
 				{minTemperature != null && maxTemperature != null && (
 					<p className="text-xs text-[#5A615D]">
 						{t("step1.rangeHint", {

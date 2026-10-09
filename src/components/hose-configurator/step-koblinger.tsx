@@ -44,6 +44,7 @@ type StepKoblingerProps = {
 	product: StepKoblingerProduct;
 	onBack: () => void;
 	onContinue: () => void;
+	isContinuing?: boolean;
 };
 
 type VariantRecord = {
@@ -149,6 +150,7 @@ export function StepKoblinger({
 	product,
 	onBack,
 	onContinue,
+	isContinuing = false,
 }: StepKoblingerProps) {
 	const t = useTranslations("HoseConfigurator.step2");
 	const locale = useLocale();
@@ -441,6 +443,7 @@ export function StepKoblinger({
 				<StepKoblingerSpecs
 					onBack={onBack}
 					onContinue={onContinue}
+					isContinuing={isContinuing}
 				/>
 			</div>
 		</div>
