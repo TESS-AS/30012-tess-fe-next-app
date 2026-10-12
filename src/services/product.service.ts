@@ -47,6 +47,12 @@ interface FilterValues {
 	values: string[];
 }
 
+interface SliderValues {
+	key: string;
+	min: number;
+	max: number;
+}
+
 export async function productFetch(productName: string) {
 	try {
 		const url = `/searchResult/${encodeURIComponent(productName)}`;
@@ -206,6 +212,7 @@ export async function searchProducts(
 	filters: FilterValues[] | null,
 	sort?: string | null,
 	language?: string | null,
+	sliders: SliderValues[] | null = null,
 ): Promise<SearchListResponse> {
 	try {
 		const params = new URLSearchParams();
@@ -226,9 +233,20 @@ export async function searchProducts(
 		}
 
 		const url = `/proxy/searchList/${page}/${pageSize}${params.toString() ? `?${params.toString()}` : ""}`;
+		// Current BE contract (SearchEngine `search_list_c` +
+		// APIproxy `searchListProxy`): the body MUST be
+		// `{ filters: [...], sliders: [...] }`. Posting a bare array makes
+		// both lanes resolve to `[]` on BE and the result set comes back
+		// unfiltered. Omit the body entirely when neither lane has entries
+		// to keep the no-op request compact.
+		const hasFilters = Boolean(filters && filters.length > 0);
+		const hasSliders = Boolean(sliders && sliders.length > 0);
 		const response =
-			filters && filters.length > 0
-				? await axiosInstance.post(url, filters)
+			hasFilters || hasSliders
+				? await axiosInstance.post(url, {
+						filters: filters ?? [],
+						sliders: sliders ?? [],
+					})
 				: await axiosInstance.post(url);
 
 		return response.data;

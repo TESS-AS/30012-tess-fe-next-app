@@ -17,6 +17,7 @@ import type {
 	FilterValues,
 	FilterChildrenResponse,
 	SliderConfig,
+	SliderValues,
 	FilterDefinition,
 } from "@/types/filter.types";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -52,7 +53,10 @@ interface FilterProps
 	extends React.HTMLAttributes<HTMLDivElement>,
 		VariantProps<typeof filterVariants> {
 	filters: FilterCategory[];
-	onFilterChange: (filters: FilterValues[]) => void;
+	/** Called every time the user commits a change. Sliders are passed as a
+	 *  SEPARATE second argument because BE expects them in a top-level
+	 *  `sliders[]` payload array, not mixed into the discrete filters. */
+	onFilterChange: (filters: FilterValues[], sliders: SliderValues[]) => void;
 	selectedFilters?: Record<string, string[]>;
 	categoryNumber?: string;
 	categoryName?: string;
@@ -130,6 +134,16 @@ export const Filter = React.forwardRef<
 		const [localSelectedFilters, setLocalSelectedFilters] = React.useState<
 			Record<string, string[]>
 		>(externalSelectedFilters);
+
+		// Sliders are tracked SEPARATELY from `localSelectedFilters` because
+		// BE expects them in a different top-level payload lane
+		// (`{ sliders: [{key, min, max}] }`). The display chips still render
+		// out of `localSelectedFilters` via the parent, which also records
+		// each slider's [min, max] under the same key — but the wire payload
+		// built in `handleRangeChange`/`handleFilterChange` splits them.
+		const [localSelectedSliders, setLocalSelectedSliders] = React.useState<
+			Record<string, { min: number; max: number }>
+		>({});
 
 		const [openAccordions, setOpenAccordions] = React.useState<string[]>([]);
 
@@ -231,15 +245,27 @@ export const Filter = React.forwardRef<
 
 				setLocalSelectedFilters(updatedFilters);
 
+				// Exclude slider keys from the filter array — their [min, max]
+				// also lives in `localSelectedFilters` for chip display, but
+				// the wire payload sends them in `localSelectedSliders` instead.
+				const sliderKeys = new Set(Object.keys(localSelectedSliders));
 				const filterArray: FilterValues[] = Object.entries(updatedFilters)
-					.filter(([key, values]) => key !== "category" && values.length > 0)
+					.filter(
+						([key, values]) =>
+							key !== "category" && !sliderKeys.has(key) && values.length > 0,
+					)
 					.map(([key, values]) => ({ key, values }));
 
-				onFilterChange(filterArray);
+				const sliderArray: SliderValues[] = Object.entries(
+					localSelectedSliders,
+				).map(([key, { min, max }]) => ({ key, min, max }));
+
+				onFilterChange(filterArray, sliderArray);
 			},
 			[
 				onFilterChange,
 				localSelectedFilters,
+				localSelectedSliders,
 				categoryNumber,
 				query,
 				selectedCategory,
@@ -345,49 +371,64 @@ export const Filter = React.forwardRef<
 					clearTimeout(debounceTimerRef.current[commitKey]);
 				}
 				debounceTimerRef.current[commitKey] = setTimeout(() => {
-					// If full range, clear the filter
+					// If full range, clear the slider entirely
 					const isFullRange =
 						filter.slider != null &&
 						finalValues[0] === filter.slider.min &&
 						finalValues[1] === filter.slider.max;
 
+					const key = filter.attributeIdentifier;
+
+					// Compute next slider map (shared by both branches below).
+					const nextSliders = { ...localSelectedSliders };
 					if (isFullRange) {
-						const updatedFilters = { ...localSelectedFilters };
-						delete updatedFilters[filter.attributeIdentifier];
-						setLocalSelectedFilters(updatedFilters);
-
-						const filterArray: FilterValues[] = Object.entries(updatedFilters)
-							.filter(([key, values]) => key !== "category" && values.length > 0)
-							.map(([key, values]) => ({ key, values }));
-
-						onFilterChange(filterArray);
-						return;
+						delete nextSliders[key];
+					} else {
+						nextSliders[key] = {
+							min: finalValues[0],
+							max: finalValues[1],
+						};
 					}
+					setLocalSelectedSliders(nextSliders);
 
-					const updatedFilters = {
-						...localSelectedFilters,
-						[filter.attributeIdentifier]: [
+					// Mirror the slider's [min, max] into the display map so the
+					// top-of-page chip ("WP: 10 - 25") continues to render out of
+					// the same `selectedFilters` source as everything else — but
+					// WIRE-wise we send them in the dedicated sliders[] lane.
+					const updatedFilters = { ...localSelectedFilters };
+					if (isFullRange) {
+						delete updatedFilters[key];
+					} else {
+						updatedFilters[key] = [
 							finalValues[0].toString(),
 							finalValues[1].toString(),
-						],
-					};
-
+						];
+					}
 					setLocalSelectedFilters(updatedFilters);
 
+					const sliderKeys = new Set(Object.keys(nextSliders));
 					const filterArray: FilterValues[] = Object.entries(updatedFilters)
-						.filter(([key, values]) => key !== "category" && values.length > 0)
-						.map(([key, values]) => ({ key, values }));
+						.filter(
+							([k, values]) =>
+								k !== "category" && !sliderKeys.has(k) && values.length > 0,
+						)
+						.map(([k, values]) => ({ key: k, values }));
 
-					onFilterChange(filterArray);
+					const sliderArray: SliderValues[] = Object.entries(nextSliders).map(
+						([k, { min, max }]) => ({ key: k, min, max }),
+					);
+
+					onFilterChange(filterArray, sliderArray);
 				}, 700);
 			},
-			[localSelectedFilters, onFilterChange],
+			[localSelectedFilters, localSelectedSliders, onFilterChange],
 		);
 
 		const resetFilters = useCallback(async () => {
 			setLocalSelectedFilters({});
+			setLocalSelectedSliders({});
 
-			onFilterChange([]);
+			onFilterChange([], []);
 		}, [onFilterChange]);
 
 		const selectedFilterCount = Object.values(selectedFilters).reduce(

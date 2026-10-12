@@ -9,7 +9,11 @@ import { useProductPrices } from "@/hooks/useProductPrices";
 import { usePathname } from "@/i18n/navigation";
 import { setProductReturnTarget } from "@/lib/productReturnNavigation";
 import { cn } from "@/lib/utils";
-import { FilterCategory, FilterValues } from "@/types/filter.types";
+import {
+	FilterCategory,
+	FilterValues,
+	SliderValues,
+} from "@/types/filter.types";
 import { LayoutGrid, AlignJustify, X } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -82,7 +86,7 @@ export function ProductGrid({
 		});
 
 	const onFilterChange = useCallback(
-		(newFilters: FilterValues[]) => {
+		(newFilters: FilterValues[], newSliders: SliderValues[]) => {
 			// Keep the sidebar painted with the current filter data while the
 			// refetch is in flight. Previously we wiped `filtersState` to `[]`
 			// here, which blanked the whole sidebar for ~400 ms until BE
@@ -90,7 +94,7 @@ export function ProductGrid({
 			// grid still shows skeletons (via `isFiltering`), and the sidebar
 			// quietly reconciles when `onFiltersUpdate` fires with the new data.
 			setIsFiltering(true);
-			handleFilterChange(newFilters);
+			handleFilterChange(newFilters, newSliders);
 			setIsFiltering(false);
 		},
 		[handleFilterChange],
@@ -200,8 +204,8 @@ export function ProductGrid({
 					filters={filtersState}
 					variant="default"
 					size="default"
-					onFilterChange={(newFilters) => {
-						onFilterChange(newFilters);
+					onFilterChange={(newFilters, newSliders) => {
+						onFilterChange(newFilters, newSliders);
 					}}
 					selectedFilters={selectedFilters}
 					categoryFilters={categoryFiltersState}
@@ -296,9 +300,10 @@ export function ProductGrid({
 										label={getFilterLabel(key)}
 										value={`${values[0]} - ${values[1]}`}
 										onRemove={() => {
-											// Keep the sidebar painted with current data; it
-											// reconciles when the refetch completes.
-											values.forEach((value) => removeFilter(key, value));
+											// Clear the slider in one shot — removeFilter's
+											// `isSlider` branch drops the key entirely from both
+											// the display map and the slider lane.
+											removeFilter(key, "", true);
 										}}
 									/>
 								);
