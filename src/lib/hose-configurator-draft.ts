@@ -10,7 +10,6 @@ export type HoseBruksomradeDraft = {
 	/** Older drafts stored a single temperature. */
 	temperature?: string;
 	hoseSize: string;
-	customEndSize: boolean;
 	moreRequirements: string;
 };
 
@@ -50,9 +49,7 @@ export type HoseSpecsDraft = {
 		heatFireProtection: boolean;
 		rfid: boolean;
 		hoseTag: boolean;
-		extraMarking: boolean;
 	};
-	customMarking: string;
 };
 
 export type HoseKoblingerDraft = {

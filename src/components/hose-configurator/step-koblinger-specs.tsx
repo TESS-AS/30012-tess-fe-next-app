@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
 	Select,
@@ -13,7 +12,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { useHoseFittingOptions } from "@/hooks/useHoseFittingOptions";
 import {
 	loadHoseConfiguratorDraft,
@@ -67,6 +65,13 @@ type StepKoblingerSpecsProps = {
 	onContinue: () => void;
 	isContinuing?: boolean;
 };
+
+function initialEndsEqual(): boolean {
+	const specs = loadHoseConfiguratorDraft()?.specs;
+	if (!specs) return true;
+	if (specs.endsEqual) return true;
+	return JSON.stringify(specs.end1) === JSON.stringify(specs.end2);
+}
 
 function firstOptionValue(options: SelectOption[]): string {
 	return options[0]?.value ?? "";
@@ -160,9 +165,7 @@ export function StepKoblingerSpecs({
 	} = useHoseFittingOptions();
 
 	const [specsOpen, setSpecsOpen] = useState(true);
-	const [endsEqual, setEndsEqual] = useState(
-		() => loadHoseConfiguratorDraft()?.specs?.endsEqual ?? false,
-	);
+	const [endsEqual, setEndsEqual] = useState(initialEndsEqual);
 	const [end1, setEnd1] = useState<EndConfig>(
 		() => loadHoseConfiguratorDraft()?.specs?.end1 ?? EMPTY_END,
 	);
@@ -183,11 +186,7 @@ export function StepKoblingerSpecs({
 				heatFireProtection: false,
 				rfid: false,
 				hoseTag: false,
-				extraMarking: false,
 			},
-	);
-	const [customMarking, setCustomMarking] = useState(
-		() => loadHoseConfiguratorDraft()?.specs?.customMarking ?? "",
 	);
 	const [angleHelpOpen, setAngleHelpOpen] = useState(false);
 
@@ -200,10 +199,9 @@ export function StepKoblingerSpecs({
 			end2,
 			angle,
 			options,
-			customMarking,
 		};
 		patchHoseConfiguratorDraft({ specs });
-	}, [endsEqual, end1, end2, angle, options, customMarking]);
+	}, [endsEqual, end1, end2, angle, options]);
 
 	useEffect(() => {
 		const syncEnd = (prev: EndConfig): EndConfig => ({
@@ -526,27 +524,6 @@ export function StepKoblingerSpecs({
 											checked={options.hoseTag}
 											onChange={() => toggleOption("hoseTag")}
 											label={t("options.hoseTag")}
-										/>
-										<OptionCheckbox
-											checked={options.extraMarking}
-											onChange={() => toggleOption("extraMarking")}
-											label={t("options.extraMarking")}
-										/>
-									</div>
-									<div className="pt-1">
-										<Label
-											htmlFor="custom-marking"
-											className="sr-only">
-											{t("options.customMarking")}
-										</Label>
-										<Textarea
-											id="custom-marking"
-											value={customMarking}
-											onChange={(event) =>
-												setCustomMarking(event.target.value)
-											}
-											placeholder={t("options.customMarkingPlaceholder")}
-											className="min-h-[100px] resize-none bg-white"
 										/>
 									</div>
 								</div>

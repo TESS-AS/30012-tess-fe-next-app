@@ -38,7 +38,6 @@ const OPTION_KEYS = [
 	"heatFireProtection",
 	"rfid",
 	"hoseTag",
-	"extraMarking",
 ] as const;
 
 const MOCK_PRICING = {

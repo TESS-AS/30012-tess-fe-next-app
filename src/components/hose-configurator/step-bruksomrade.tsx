@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -28,7 +27,6 @@ export type BruksomradeFormValues = {
 	temperatureMin: string;
 	temperatureMax: string;
 	hoseSize: string;
-	customEndSize: boolean;
 	moreRequirements: string;
 };
 
@@ -97,9 +95,6 @@ export function StepBruksomrade({
 		initialValues?.temperatureMax ?? "",
 	);
 	const [hoseSize, setHoseSize] = useState(initialValues?.hoseSize ?? "");
-	const [customEndSize, setCustomEndSize] = useState(
-		initialValues?.customEndSize ?? false,
-	);
 	const [moreRequirements, setMoreRequirements] = useState(
 		initialValues?.moreRequirements ?? "",
 	);
@@ -118,7 +113,6 @@ export function StepBruksomrade({
 		setTemperatureMin(initialValues.temperatureMin ?? "");
 		setTemperatureMax(initialValues.temperatureMax ?? "");
 		setHoseSize(initialValues.hoseSize ?? "");
-		setCustomEndSize(initialValues.customEndSize ?? false);
 		setMoreRequirements(initialValues.moreRequirements ?? "");
 	}, [initialValues]);
 
@@ -130,7 +124,6 @@ export function StepBruksomrade({
 			temperatureMin,
 			temperatureMax,
 			hoseSize,
-			customEndSize,
 			moreRequirements,
 		});
 	}, [
@@ -139,7 +132,6 @@ export function StepBruksomrade({
 		temperatureMin,
 		temperatureMax,
 		hoseSize,
-		customEndSize,
 		moreRequirements,
 		onValuesChange,
 	]);
@@ -206,7 +198,6 @@ export function StepBruksomrade({
 			temperatureMin,
 			temperatureMax,
 			hoseSize,
-			customEndSize,
 			moreRequirements,
 		});
 	};
@@ -365,20 +356,6 @@ export function StepBruksomrade({
 						))}
 					</SelectContent>
 				</Select>
-			</div>
-
-			<div className="flex items-start gap-2.5 pt-1">
-				<Checkbox
-					id="customEndSize"
-					checked={customEndSize}
-					onCheckedChange={(checked) => setCustomEndSize(checked === true)}
-					className="mt-0.5"
-				/>
-				<Label
-					htmlFor="customEndSize"
-					className="cursor-pointer text-sm leading-snug font-normal text-[#0F1912]">
-					{t("step1.customEndSize")}
-				</Label>
 			</div>
 
 			<Button

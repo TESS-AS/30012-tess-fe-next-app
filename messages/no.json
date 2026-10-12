@@ -175,7 +175,6 @@
 			"temperatureFrom": "Fra",
 			"temperatureTo": "Til",
 			"hoseSize": "Slangestørrelse",
-			"customEndSize": "Ende 1 og 2 skal ha annen størrelse enn standard",
 			"moreRequirements": "Flere krav",
 			"selectPlaceholder": "Velg ...",
 			"noSelection": "Ingen valg",
@@ -307,10 +306,7 @@
 				"marking": "Merking",
 				"tessIdStandard": "TESS-ID/THM (standard)",
 				"rfid": "RFID",
-				"hoseTag": "Hose tag",
-				"extraMarking": "Ekstraordinær merking",
-				"customMarking": "Egen merking",
-				"customMarkingPlaceholder": "Egen merking..."
+				"hoseTag": "Hose tag"
 			},
 			"pressureTestTitle": "Trykktest",
 			"pressureTestText": "Alle slanger trykktestes etter sammenkobling og før utsending.",
@@ -353,8 +349,7 @@
 				"protectionSleeve": "Beskyttelsesstrømpe",
 				"heatFireProtection": "Varme-/brannbeskyttelse",
 				"rfid": "RFID",
-				"hoseTag": "Hose tag",
-				"extraMarking": "Ekstraordinær merking"
+				"hoseTag": "Hose tag"
 			},
 			"pricing": {
 				"title": "Totalpris",
