@@ -3,7 +3,11 @@ import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { normalizeFilterResponse } from "@/lib/category-utils";
 import { deserializeFilters, serializeFilters } from "@/lib/utils";
 import { loadFilterFamily } from "@/services/categories.service";
-import { FilterCategory, FilterValues } from "@/types/filter.types";
+import {
+	FilterCategory,
+	FilterValues,
+	SliderValues,
+} from "@/types/filter.types";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 
 import { useCategoryMultiSelect } from "./useCategoryMultiSelect";
@@ -36,6 +40,13 @@ export function useProductFilter({
 
 	const [categoryNumber, setCategoryNumber] = useState(initialCategoryNumber);
 	const [currentFilters, setCurrentFilters] = useState<FilterValues[] | null>(
+		null,
+	);
+	// Separate from `currentFilters` because BE now expects sliders as a
+	// top-level `sliders[]` array of {key, min, max} numbers, not mixed in
+	// with the discrete-value filter array. See `searchProducts` for the
+	// wire shape.
+	const [currentSliders, setCurrentSliders] = useState<SliderValues[] | null>(
 		null,
 	);
 	const [selectedFilters, setSelectedFilters] = useState<
@@ -74,6 +85,7 @@ export function useProductFilter({
 				: categoryNumber,
 		query,
 		filters: currentFilters,
+		sliders: currentSliders,
 		sort,
 		enabled: !!categoryNumber || !!query,
 	});
@@ -215,7 +227,11 @@ export function useProductFilter({
 	}, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
 	const handleFilterChange = useCallback(
-		(filters: FilterValues[], categoryOverride?: string) => {
+		(
+			filters: FilterValues[],
+			sliders: SliderValues[] = [],
+			categoryOverride?: string,
+		) => {
 			// Prefer an explicit override, then the current multi-select set,
 			// then the page's URL-slug category. Without the multi-select
 			// fallback, toggling an attribute filter on a search page with
@@ -229,10 +245,18 @@ export function useProductFilter({
 
 			// Optimistic local updates so chips + sidebar react immediately
 			setCurrentFilters(filters?.length > 0 ? filters : null);
+			setCurrentSliders(sliders.length > 0 ? sliders : null);
 
 			const newSelectedFilters: Record<string, string[]> = {};
 			filters.forEach((filter) => {
 				newSelectedFilters[filter.key] = filter.values;
+			});
+			// Chip rendering + URL sync treat sliders uniformly with filters —
+			// serialize their [min, max] as the display shape so the chips UI
+			// (which already renders `min - max` for 2-value entries) keeps
+			// working without a parallel chip code path.
+			sliders.forEach((s) => {
+				newSelectedFilters[s.key] = [String(s.min), String(s.max)];
 			});
 			setSelectedFilters(newSelectedFilters);
 
@@ -308,6 +332,7 @@ export function useProductFilter({
 					category: [newCategoryName],
 				});
 				setCurrentFilters(null);
+				setCurrentSliders(null);
 
 				try {
 					const result = await loadFilterFamily({
@@ -396,7 +421,33 @@ export function useProductFilter({
 	);
 
 	const removeFilter = useCallback(
-		(key: string, value: string) => {
+		(key: string, value: string, isSlider: boolean = false) => {
+			// For sliders, the chip-removal UX is "clear the whole range"
+			// (there's no partial-range removal). We drop the slider key
+			// entirely from both the display map and the slider payload.
+			if (isSlider) {
+				const updatedSelectedFilters: Record<string, string[]> = {
+					...selectedFilters,
+				};
+				delete updatedSelectedFilters[key];
+
+				setSelectedFilters(updatedSelectedFilters);
+
+				const filterArray: FilterValues[] = Object.entries(
+					updatedSelectedFilters,
+				)
+					.filter(([k, vals]) => k !== "category" && vals.length > 0)
+					// Keep only genuine filters — any entry whose key is in
+					// `currentSliders` is a slider that we're not touching here.
+					.filter(([k]) => !(currentSliders ?? []).some((s) => s.key === k))
+					.map(([k, vals]) => ({ key: k, values: vals }));
+				const sliderArray: SliderValues[] = (currentSliders ?? []).filter(
+					(s) => s.key !== key,
+				);
+				handleFilterChange(filterArray, sliderArray, categoryNumber);
+				return;
+			}
+
 			const newFiltersForKey =
 				selectedFilters[key]?.filter((v) => v !== value) ?? [];
 
@@ -409,8 +460,12 @@ export function useProductFilter({
 				delete updatedSelectedFilters[key];
 			}
 
+			// Build the filter payload from the mixed display map, excluding
+			// anything that's currently living in the slider lane so sliders
+			// don't accidentally get submitted as discrete filters.
+			const sliderKeys = new Set((currentSliders ?? []).map((s) => s.key));
 			const filterArray: FilterValues[] = Object.entries(updatedSelectedFilters)
-				.filter(([, vals]) => vals.length > 0)
+				.filter(([k, vals]) => !sliderKeys.has(k) && vals.length > 0)
 				.map(([k, vals]) => ({
 					key: k,
 					values: vals,
@@ -427,11 +482,12 @@ export function useProductFilter({
 			}
 
 			// Delegate to the same optimistic handler used by sidebar
-			handleFilterChange(filterArray, nextCategoryNumber);
+			handleFilterChange(filterArray, currentSliders ?? [], nextCategoryNumber);
 		},
 		[
 			handleFilterChange,
 			selectedFilters,
+			currentSliders,
 			categoryNumber,
 			initialCategoryNumber,
 		],
@@ -453,9 +509,16 @@ export function useProductFilter({
 				}));
 
 			setCurrentFilters(filterArray.length > 0 ? filterArray : null);
+			// Sliders don't survive a refresh via the URL today — we don't
+			// know which keys were sliders at serialization time. Reset to
+			// null so a stale slider from the previous session doesn't
+			// linger. If deep-linking slider state becomes a requirement,
+			// serialize them as a separate `sliders=` URL param here.
+			setCurrentSliders(null);
 		} else if (hasInitialized.current) {
 			setSelectedFilters({});
 			setCurrentFilters(null);
+			setCurrentSliders(null);
 		}
 
 		if (sortParam) {
@@ -488,6 +551,7 @@ export function useProductFilter({
 
 		setCategoryNumber("");
 		setCurrentFilters(null);
+		setCurrentSliders(null);
 		// Drop the previous search's multi-select and its `?cats=` URL param so
 		// the new query's `flag: true` rows can seed unopposed.
 		clearCategories();

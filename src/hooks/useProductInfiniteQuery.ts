@@ -2,7 +2,7 @@ import {
 	searchProducts,
 	type InferredCategory,
 } from "@/services/product.service";
-import { FilterValues } from "@/types/filter.types";
+import { FilterValues, SliderValues } from "@/types/filter.types";
 import { IProduct } from "@/types/product.types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
@@ -10,6 +10,7 @@ interface UseProductInfiniteQueryProps {
 	categoryNumber: string | string[] | null;
 	query: string | null;
 	filters: FilterValues[] | null;
+	sliders?: SliderValues[] | null;
 	sort: string | null;
 	pageSize?: number;
 	enabled?: boolean;
@@ -29,12 +30,21 @@ export function useProductInfiniteQuery({
 	categoryNumber,
 	query,
 	filters,
+	sliders = null,
 	sort,
 	pageSize = 9,
 	enabled = true,
 }: UseProductInfiniteQueryProps) {
 	const infiniteQuery = useInfiniteQuery({
-		queryKey: ["products", categoryNumber, query, filters, sort, pageSize],
+		queryKey: [
+			"products",
+			categoryNumber,
+			query,
+			filters,
+			sliders,
+			sort,
+			pageSize,
+		],
 		queryFn: async ({ pageParam = 1 }): Promise<ProductPage> => {
 			const response = await searchProducts(
 				pageParam,
@@ -43,6 +53,8 @@ export function useProductInfiniteQuery({
 				categoryNumber,
 				filters,
 				sort,
+				undefined,
+				sliders,
 			);
 
 			return {
