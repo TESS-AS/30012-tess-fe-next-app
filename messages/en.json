@@ -173,7 +173,6 @@
 			"temperatureFrom": "From",
 			"temperatureTo": "To",
 			"hoseSize": "Hose size",
-			"customEndSize": "End 1 and 2 should have a different size than standard",
 			"moreRequirements": "More requirements",
 			"selectPlaceholder": "Select ...",
 			"noSelection": "No selection",
@@ -305,10 +304,7 @@
 				"marking": "Marking",
 				"tessIdStandard": "TESS-ID/THM (standard)",
 				"rfid": "RFID",
-				"hoseTag": "Hose tag",
-				"extraMarking": "Extraordinary marking",
-				"customMarking": "Custom marking",
-				"customMarkingPlaceholder": "Custom marking ...."
+				"hoseTag": "Hose tag"
 			},
 			"pressureTestTitle": "Pressure test",
 			"pressureTestText": "All hoses are pressure tested after assembly and before shipping.",
@@ -351,8 +347,7 @@
 				"protectionSleeve": "Protection sleeve",
 				"heatFireProtection": "Heat/fire protection",
 				"rfid": "RFID",
-				"hoseTag": "Hose tag",
-				"extraMarking": "Extra marking"
+				"hoseTag": "Hose tag"
 			},
 			"pricing": {
 				"title": "Total price",

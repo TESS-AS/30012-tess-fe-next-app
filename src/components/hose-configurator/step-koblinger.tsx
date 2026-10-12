@@ -162,10 +162,10 @@ export function StepKoblinger({
 	} = useGetColumnAttributes(product.itemNumber);
 
 	const [lengthMtr, setLengthMtr] = useState(
-		() => loadHoseConfiguratorDraft()?.koblinger?.lengthMtr ?? "12,12",
+		() => loadHoseConfiguratorDraft()?.koblinger?.lengthMtr ?? "1",
 	);
 	const [quantity, setQuantity] = useState(
-		() => loadHoseConfiguratorDraft()?.koblinger?.quantity ?? 2,
+		() => loadHoseConfiguratorDraft()?.koblinger?.quantity ?? 1,
 	);
 	const [warehouseNumber, setWarehouseNumber] = useState(
 		() => loadHoseConfiguratorDraft()?.koblinger?.warehouseNumber ?? "",
