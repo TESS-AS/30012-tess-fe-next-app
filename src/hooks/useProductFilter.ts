@@ -177,6 +177,7 @@ export function useProductFilter({
 					searchTerm: query || undefined,
 					language: "no",
 					filters: currentFilters ?? [],
+					sliders: currentSliders ?? [],
 				});
 				if (cancelled) return;
 				// BE (`/proxy/filter`) returns EITHER a bare filters array OR a
@@ -285,6 +286,7 @@ export function useProductFilter({
 							searchTerm: query || undefined,
 							language: "no",
 							filters,
+							sliders,
 						});
 
 						if (Array.isArray(result?.filters)) {
@@ -340,6 +342,7 @@ export function useProductFilter({
 						searchTerm: query,
 						language: "no",
 						filters: [],
+						sliders: [],
 					});
 
 					const normalized = normalizeFilterResponse(
@@ -380,6 +383,7 @@ export function useProductFilter({
 					searchTerm: query,
 					language: "no",
 					filters: [],
+					sliders: [],
 				});
 
 				const normalized = normalizeFilterResponse(
