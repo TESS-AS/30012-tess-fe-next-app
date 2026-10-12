@@ -13,18 +13,25 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { assortmentKeys } from "@/hooks/useGetAssortments";
 import {
 	addProductsToAssortment,
+	addUserToAssortment,
 	checkAssortmentNameAvailable,
 	commitExcelImport,
 	createAssortmentFromSource,
 	deleteAssortment,
+	getAssortmentByNumber,
 	getAssortmentStructure,
 	getCatalogStructure,
+	getCustomGroups,
+	getItemsForAssortment,
 	patchAssortment,
+	removeUserFromAssortment,
+	saveCustomGroups,
 	searchUsers,
 	validateExcelImport,
 	type AddProductsToAssortmentPayload,
 	type PatchAssortmentBody,
 } from "@/services/assortment.service";
+import type { CustomGroup } from "@/types/assortment.types";
 import type { CreateAssortmentBody } from "@/types/assortment.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -37,6 +44,12 @@ export const assortmentWizardKeys = {
 		[...assortmentWizardKeys.all, "nameAvailable", name] as const,
 	userSearch: (q: string) =>
 		[...assortmentWizardKeys.all, "userSearch", q] as const,
+	detail: (assortmentNumber: string | null) =>
+		[...assortmentWizardKeys.all, "detail", assortmentNumber ?? ""] as const,
+	items: (assortmentNumber: string | null) =>
+		[...assortmentWizardKeys.all, "items", assortmentNumber ?? ""] as const,
+	customGroups: (assortmentNumber: string | null) =>
+		[...assortmentWizardKeys.all, "customGroups", assortmentNumber ?? ""] as const,
 };
 
 /** TESS Katalog 2026 (DEFAULT_SALES_NEW) — static per deploy, cache aggressively. */
@@ -200,6 +213,95 @@ export function useDeleteAssortment() {
 		onSuccess: () => {
 			qc.invalidateQueries({ queryKey: assortmentWizardKeys.all });
 			qc.invalidateQueries({ queryKey: assortmentKeys.all });
+		},
+	});
+}
+
+/** Full KSU detail (admins, counts, timestamps) for the admin surface's
+ *  right-side detail panel. */
+export function useGetAssortmentDetail(assortmentNumber: string | null) {
+	return useQuery({
+		queryKey: assortmentWizardKeys.detail(assortmentNumber),
+		queryFn: () => getAssortmentByNumber(assortmentNumber as string),
+		enabled: Boolean(assortmentNumber),
+		staleTime: 60 * 1000,
+	});
+}
+
+/** Add one or more users as responsibles on an existing KSU. */
+export function useAddAssortmentUser() {
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn: ({
+			assortmentNumber,
+			grants,
+		}: {
+			assortmentNumber: string;
+			grants: Array<{ userId: number; canAdminister: boolean }>;
+		}) => addUserToAssortment(assortmentNumber, { assortmentUserIds: grants }),
+		onSuccess: (_data, variables) => {
+			qc.invalidateQueries({
+				queryKey: assortmentWizardKeys.detail(variables.assortmentNumber),
+			});
+			qc.invalidateQueries({ queryKey: assortmentKeys.all });
+		},
+	});
+}
+
+export function useRemoveAssortmentUser() {
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn: ({
+			assortmentNumber,
+			userId,
+		}: {
+			assortmentNumber: string;
+			userId: number;
+		}) => removeUserFromAssortment(assortmentNumber, userId),
+		onSuccess: (_data, variables) => {
+			qc.invalidateQueries({
+				queryKey: assortmentWizardKeys.detail(variables.assortmentNumber),
+			});
+			qc.invalidateQueries({ queryKey: assortmentKeys.all });
+		},
+	});
+}
+
+/** Items (products) under a specific catalog node — used by the admin
+ *  "Opprett og tilpass" drawer to render pickable items on the left. */
+export function useGetItemsForAssortment(assortmentNumber: string | null) {
+	return useQuery({
+		queryKey: assortmentWizardKeys.items(assortmentNumber),
+		queryFn: () => getItemsForAssortment(assortmentNumber as string),
+		enabled: Boolean(assortmentNumber),
+		staleTime: 5 * 60 * 1000,
+	});
+}
+
+/** User-authored custom group tree for a KSU. */
+export function useGetCustomGroups(assortmentNumber: string | null) {
+	return useQuery({
+		queryKey: assortmentWizardKeys.customGroups(assortmentNumber),
+		queryFn: () => getCustomGroups(assortmentNumber as string),
+		enabled: Boolean(assortmentNumber),
+		staleTime: 60 * 1000,
+	});
+}
+
+export function useSaveCustomGroups() {
+	const qc = useQueryClient();
+	return useMutation({
+		mutationFn: ({
+			assortmentNumber,
+			groups,
+		}: {
+			assortmentNumber: string;
+			groups: CustomGroup[];
+		}) => saveCustomGroups(assortmentNumber, groups),
+		onSuccess: (_data, variables) => {
+			qc.invalidateQueries({
+				queryKey: assortmentWizardKeys.customGroups(variables.assortmentNumber),
+			});
 		},
 	});
 }

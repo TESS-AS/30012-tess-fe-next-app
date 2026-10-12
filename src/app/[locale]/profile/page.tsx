@@ -31,6 +31,7 @@ import {
 	LogOut,
 	List,
 	BookOpen,
+	type LucideProps,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
@@ -38,6 +39,20 @@ import { useTranslations } from "next-intl";
 
 import { InnstillingerTab } from "./(components)/innstillinger-tab";
 import { SidebarNav } from "./(components)/sidebar-nav";
+
+// Local-only wrapper for the KSU sidebar entry. Lucide's BookOpen renders
+// thinner than the sibling custom SVG icons at the shared 18px slot. We
+// visually enlarge it with `scale` so it reads at a weight consistent with
+// the other icons, while keeping the icon's LAYOUT box at 18px — otherwise
+// a 25px icon would push the item's label to the right and break the
+// vertical alignment of the sidebar's text column.
+const KsuNavIcon = (props: LucideProps) => (
+	<BookOpen
+		{...props}
+		strokeWidth={1.75}
+		className={`scale-[1.4] ${props.className ?? ""}`.trim()}
+	/>
+);
 
 // Lazy load tab content to reduce profile page First Load JS (each tab in its own chunk)
 const AvvikendeOrdre = dynamic(
@@ -455,6 +470,9 @@ export default function ProfilePage() {
 			"hose-settings": t("ProfilePage.tabs.settings"),
 			// THM Projects (MSL) tabs
 			"thm-active-projects": "Active Projects",
+			// KSU (Kundespesifikke utvalg) tabs
+			"ksu-create": "Opprett nytt KSU",
+			"ksu-admin": "Administrer KSU",
 		};
 
 		const isThmTab = activeTab?.startsWith("thm-");
@@ -650,7 +668,7 @@ export default function ProfilePage() {
 														{
 															href: "#ksu",
 															label: "Kundespesifikke utvalg (KSU)",
-															icon: BookOpen,
+															icon: KsuNavIcon,
 															subitems: [
 																{
 																	href: "ksu-create",

@@ -28,6 +28,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
 import { ProductDocumentsDrawer } from "./product-documents-drawer";
+import { AddToKsuCard } from "../assortments/AddToKsuCard";
 import QuantityButtons from "../ui/quantity-buttons";
 
 interface ProductInfoProps {
@@ -686,6 +687,15 @@ export function ProductInfo({
 							</div>
 						)}
 					</div>
+
+					{/* KSU entry point for admin/superuser — add this product to
+						a chosen KSU without leaving the detail page. Card returns
+						null for non-privileged users. */}
+					<AddToKsuCard
+						productNumbers={productNumber ? [productNumber] : undefined}
+						itemNumbers={selectedItemNumber ? [selectedItemNumber] : undefined}
+						actionLabel="Legg vare i KSU"
+					/>
 				</div>
 			)}
 		</div>

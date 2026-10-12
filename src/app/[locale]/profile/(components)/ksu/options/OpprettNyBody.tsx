@@ -4,8 +4,13 @@
  * "Opprett ny KSU" option body.
  *
  * Spec constraint: the tree menu for this option is ALWAYS the TESS catalog
- * (DEFAULT_SALES_NEW) — hardcoded here, no source picker. Illustration
- * selection is intentionally OUT of scope for v1 per product requirement.
+ * (DEFAULT_SALES_NEW) — hardcoded here, no source picker.
+ *
+ * Illustration selector: UI slot per Figma. Clicking "Velg illustrasjon"
+ * surfaces a placeholder selection; the actual illustration library/picker
+ * isn't scoped for v1 so the button opens nothing yet. When illustrations
+ * land, swap the handler for a modal and persist the choice onto the
+ * wizard formData.
  */
 
 import * as React from "react";
@@ -14,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { AssortmentWizardController } from "@/hooks/useAssortmentWizard";
-import { Settings2 } from "lucide-react";
+import { Image as ImageIcon, Settings2 } from "lucide-react";
 
 import { NameAvailabilityHint } from "./NameAvailabilityHint";
 import { TilpassKatalogDrawer } from "../sections/TilpassKatalogDrawer";
@@ -43,6 +48,20 @@ export function OpprettNyBody({ wizard }: Props) {
 				/>
 			</div>
 
+			<div>
+				<Button
+					variant="outlineGreen"
+					size="sm"
+					className="gap-2"
+					onClick={() => {
+						// TODO: wire up illustration picker modal when the library
+						// ships. Placeholder keeps the UI slot per Figma.
+					}}>
+					<ImageIcon className="h-4 w-4" />
+					Velg illustrasjon
+				</Button>
+			</div>
+
 			<div className="space-y-1 max-w-md">
 				<label className="text-sm font-medium text-[#0F1912]">
 					Beskrivelse (valgfritt)
@@ -50,7 +69,7 @@ export function OpprettNyBody({ wizard }: Props) {
 				<Textarea
 					value={wizard.formData.description}
 					onChange={(e) => wizard.setMeta({ description: e.target.value })}
-					placeholder="Beskriv KSU ..."
+					placeholder="Beskriv utvalget ..."
 					rows={3}
 				/>
 			</div>
@@ -63,7 +82,7 @@ export function OpprettNyBody({ wizard }: Props) {
 					KSU-et opprettes med standard kategorier og underkategorier fra TESSIX.
 				</p>
 				<Button
-					variant="outline"
+					variant="outlineGreen"
 					size="sm"
 					onClick={() => setDrawerOpen(true)}
 					className="gap-2">

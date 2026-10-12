@@ -33,6 +33,7 @@ import { ArrowRight, ChevronLeft, Info, Loader2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
+import { AddToKsuCard } from "../assortments/AddToKsuCard";
 import { Textarea } from "../ui/textarea";
 
 interface OrderSummaryProps {
@@ -709,6 +710,32 @@ export default function OrderSummary({
 									)}
 								</Button>
 							))
+						)}
+
+						{/* KSU entry point — only on the cart page (currentStep===null);
+							hidden inside the multi-step checkout flow. Lets admins add
+							every line in the cart to a chosen KSU in one action. The
+							card returns null for non-privileged users. */}
+						{currentStep === null && !isCartEmpty && (
+							<div className="mt-4">
+								<AddToKsuCard
+									stacked
+									actionLabel="Legg alle varer fra handlekurven i KSU"
+									productNumbers={(cartItems?.cart ?? [])
+										.map((l) => l.productNumber)
+										.filter((p): p is string => Boolean(p))}
+									itemNumbers={[
+										...(cartItems?.cart ?? []).map((l) => l.itemNumber),
+										...(cartItems?.cartKit ?? []).flatMap((k) => [
+											k.hose?.itemNumber,
+											k.ferrule1?.itemNumber,
+											k.ferrule2?.itemNumber,
+											k.insert1?.itemNumber,
+											k.insert2?.itemNumber,
+										]),
+									].filter((n): n is string => Boolean(n))}
+								/>
+							</div>
 						)}
 
 						<Button

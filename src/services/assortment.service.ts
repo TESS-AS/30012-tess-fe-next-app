@@ -10,9 +10,11 @@
 import axiosClient from "@/services/axiosClient";
 import type {
 	AssortmentNode,
+	CatalogItem,
 	CatalogStructureResponse,
 	CreateAssortmentBody,
 	CreateAssortmentResponse,
+	CustomGroup,
 	ExcelCommitResult,
 	ExcelValidationResult,
 	NameAvailabilityResponse,
@@ -185,5 +187,65 @@ export async function patchAssortment(
 export async function deleteAssortment(assortmentNumber: string): Promise<void> {
 	await axiosClient.delete(
 		`/assortment/${encodeURIComponent(assortmentNumber)}`,
+	);
+}
+
+/** POST /assortment/postUser/:number. Grants one or more users access to
+ *  the KSU, each with their own `canAdminister` flag. Used from the admin
+ *  surface's "Legg til ansvarlig(e)" section. */
+export async function addUserToAssortment(
+	assortmentNumber: string,
+	payload: { assortmentUserIds: Array<{ userId: number; canAdminister: boolean }> },
+): Promise<void> {
+	await axiosClient.post(
+		`/assortment/postUser/${encodeURIComponent(assortmentNumber)}`,
+		payload,
+	);
+}
+
+/** DELETE /assortment/removeUser/:number. */
+export async function removeUserFromAssortment(
+	assortmentNumber: string,
+	userId: number,
+): Promise<void> {
+	await axiosClient.delete(
+		`/assortment/removeUser/${encodeURIComponent(assortmentNumber)}`,
+		{ data: { userId } },
+	);
+}
+
+/** TODO BE: list items under a catalog node (products in a category).
+ *  Proposed `GET /assortment/:number/items?page=&pageSize=`.
+ *  Used by the admin "Opprett og tilpass KSU" drawer left column. */
+export async function getItemsForAssortment(
+	assortmentNumber: string,
+): Promise<CatalogItem[]> {
+	const { data } = await axiosClient.get<CatalogItem[]>(
+		`/assortment/${encodeURIComponent(assortmentNumber)}/items`,
+	);
+	return data;
+}
+
+/** TODO BE: fetch the user-authored custom group structure for a KSU.
+ *  Proposed `GET /assortment/:number/customGroups`. */
+export async function getCustomGroups(
+	assortmentNumber: string,
+): Promise<CustomGroup[]> {
+	const { data } = await axiosClient.get<CustomGroup[]>(
+		`/assortment/${encodeURIComponent(assortmentNumber)}/customGroups`,
+	);
+	return data;
+}
+
+/** TODO BE: persist the user-authored custom group tree.
+ *  Proposed `PUT /assortment/:number/customGroups` with the entire tree
+ *  in the body (replace semantics — simpler than per-group diffs). */
+export async function saveCustomGroups(
+	assortmentNumber: string,
+	groups: CustomGroup[],
+): Promise<void> {
+	await axiosClient.put(
+		`/assortment/${encodeURIComponent(assortmentNumber)}/customGroups`,
+		{ groups },
 	);
 }

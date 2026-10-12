@@ -72,19 +72,21 @@ export function CreatedKsuSuccessPage({ assortmentNumber }: Props) {
 
 				<div className="mt-5 flex items-center gap-2">
 					<Button
-						variant="outline"
-						onClick={() => router.push("/profile?tab=ksu-create")}>
-						<ArrowLeft className="mr-2 h-4 w-4" />
+						variant="outlineGreen"
+						onClick={() => router.push("/profile?tab=ksu-create")}
+						className="gap-2">
+						<ArrowLeft className="h-4 w-4" />
 						Tilbake
 					</Button>
 					<Button
-						variant="outline"
-						asChild>
+						variant="ghost"
+						asChild
+						className="gap-2 text-[#1C6D2C] hover:bg-transparent hover:text-[#1C6D2C] hover:underline">
 						<a
 							href="https://tessix.no"
 							target="_blank"
 							rel="noopener noreferrer">
-							<ExternalLink className="mr-2 h-4 w-4" />
+							<ExternalLink className="h-4 w-4" />
 							Åpne i tessix.no
 						</a>
 					</Button>

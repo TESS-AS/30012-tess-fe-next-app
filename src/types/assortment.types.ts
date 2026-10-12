@@ -97,3 +97,28 @@ export interface ExcelCommitResult {
 	assortmentNumber: string;
 	rowsImported: number;
 }
+
+/** A product/item that lives inside a catalog category — surfaced in the
+ *  "Opprett og tilpass KSU" admin drawer so the user can pick individual
+ *  items (not just whole categories) when composing a custom structure.
+ *  BE needs an endpoint to list items within an assortment node. */
+export interface CatalogItem {
+	itemNumber: string;
+	productNumber: string;
+	productName: string;
+	/** The assortment node this item currently sits in (so left-column
+	 *  filter + drag source know where it came from). */
+	assortmentNumber: string;
+}
+
+/** User-authored custom group inside a KSU. Not a BS catalog node — this
+ *  is a container the user composes by dragging in items from the Tessix
+ *  catalog. BE needs to persist these per-KSU. */
+export interface CustomGroup {
+	id: string;
+	name: string;
+	/** Nested groups the user has created inside this one. */
+	children: CustomGroup[];
+	/** Items dragged into this group. */
+	items: CatalogItem[];
+}

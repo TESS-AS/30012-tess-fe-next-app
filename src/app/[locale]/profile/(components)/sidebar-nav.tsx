@@ -248,7 +248,9 @@ export function SidebarNav({
 															return <IconComp className="h-[18px] w-[18px]" />;
 														})()
 													)}
-													{!isCollapsed && <span>{item.label}</span>}
+													{!isCollapsed && (
+														<span className="text-left">{item.label}</span>
+													)}
 												</div>
 												{!item.subitems && isActive && (
 													<ArrowRight className="h-4 w-4 shrink-0 text-[#1C6D2C]" />

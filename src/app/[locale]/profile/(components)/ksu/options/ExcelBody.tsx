@@ -3,23 +3,37 @@
 /**
  * "Opprett KSU fra Excel-mal" option body.
  *
- * Flow:
- *   1. Select mode (new catalog vs update existing)
- *   2. Download template (link to BE)
- *   3. Upload file → POST /assortment/excel/validate for a dry run
- *   4. Show validation summary (errors + counts)
- *   5. On "Opprett KSU" (submit) → POST /assortment/excel/commit
+ * Figma flow (4 numbered sections):
  *
- * The parent CreateKsuPage renders the final "Opprett KSU" button; this body
- * surfaces `canSubmit` via a window-scoped flag? NO — we expose a sidecar
- * ref via the wizard controller. For v1, submit for Excel calls commit when
- * the user hits the global Opprett KSU button; the parent calls into this
- * component through an imperative handle set on mount.
+ *   1. Velg handling — radio: "Opprett ny katalog" vs
+ *      "Oppdater eksisterende katalog som du har tilgang til".
+ *      Picking the first surfaces a template download button.
  *
- * Design decision: keep the Excel branch entirely self-contained in state —
- * `useCommitExcelImport` is called from here on Enter/action. The main wizard
- * controller is paused for excel mode (`canSubmit=false`). The parent page
- * passes a "submit handler" slot that we populate.
+ *   2. Hent fil — a chip-style file field (paperclip icon + filename + X
+ *      clear) with a separate outline "Velg fil" button to the right,
+ *      THEN a green "Last opp KSU" button below that actually uploads
+ *      (POST /assortment/excel/validate). Confirmation line below:
+ *      "KSU lastet opp: <filename>".
+ *
+ *   3. Velg mål for opplastning — BOTH destination options are visible
+ *      with an "Eller" divider between them:
+ *        a) "Opprett som ny katalog med nytt unikt navn:" + name input +
+ *           inline "Lagre" button.
+ *        b) "Erstatt eksisterende katalog som du har tilgang til:" +
+ *           "Velg katalog ..." dropdown.
+ *      Whichever control the user fills in determines the destination.
+ *
+ *   4. Bekreftelse og resultat — when replacing an existing KSU, show an
+ *      orange "Overskriving" warning card with a "Ja, lag en
+ *      sikkerhetskopi" switch (default ON) + a backup filename chip.
+ *      Always show a green "Oppsummering av opplastning" card with
+ *      counts and, when productsMissing > 0, a
+ *      "Last ned liste over manglende produkter" button.
+ *
+ * BE gap flagged with TODO: `backupBeforeOverwrite` and
+ * `targetAssortmentNumber` aren't accepted by /assortment/excel/commit
+ * yet — currently only `assortmentName` is sent. Wire them in when the
+ * BE payload lands.
  */
 
 import * as React from "react";
@@ -34,6 +48,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
 	useCommitExcelImport,
 	useValidateExcelImport,
@@ -42,40 +57,79 @@ import type { AssortmentWizardController } from "@/hooks/useAssortmentWizard";
 import { useGetAssortments } from "@/hooks/useGetAssortments";
 import { getExcelTemplateUrl } from "@/services/assortment.service";
 import type { ExcelValidationResult } from "@/types/assortment.types";
-import { AlertTriangle, CheckCircle2, Download, Upload } from "lucide-react";
+import {
+	AlertTriangle,
+	CheckCircle2,
+	Download,
+	Paperclip,
+	Upload,
+	X,
+} from "lucide-react";
 import { toast } from "react-toastify";
 
 type ExcelMode = "new-catalog" | "update-existing";
 
+/** Shared handle the parent CreateKsuPage reads from so its global
+ *  "Opprett KSU" footer button can trigger the Excel commit. */
+export interface ExcelCommitHandle {
+	commit: () => Promise<void>;
+	canCommit: boolean;
+	isSubmitting: boolean;
+}
+
 interface Props {
 	wizard: AssortmentWizardController;
 	onCreated?: (assortmentNumber: string) => void;
+	onHandleChange?: (handle: ExcelCommitHandle | null) => void;
 }
 
-export function ExcelBody({ wizard, onCreated }: Props) {
+export function ExcelBody({ wizard, onCreated, onHandleChange }: Props) {
 	const [mode, setMode] = React.useState<ExcelMode>("new-catalog");
+
+	// File selection + upload state
 	const [file, setFile] = React.useState<File | null>(null);
+	const [uploadedFileName, setUploadedFileName] = React.useState<string | null>(
+		null,
+	);
 	const [validation, setValidation] =
 		React.useState<ExcelValidationResult | null>(null);
-	const [targetAssortmentNumber, setTargetAssortmentNumber] =
-		React.useState<string>("");
-	const [newCatalogName, setNewCatalogName] = React.useState<string>("");
-	const [confirmed, setConfirmed] = React.useState(false);
+	const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-	const { assortments, isLoading: isLoadingAssortments } = useGetAssortments(
-		mode === "update-existing",
-	);
+	// Destination (step 3) — independent fields so the user can fill one
+	// or the other. The active destination is whichever was filled last.
+	const [newCatalogName, setNewCatalogName] = React.useState("");
+	const [targetAssortmentNumber, setTargetAssortmentNumber] = React.useState("");
+	const [newCatalogSaved, setNewCatalogSaved] = React.useState(false);
+
+	// Step 4 — overskriving (only relevant when destination is "replace existing")
+	const [backupBeforeOverwrite, setBackupBeforeOverwrite] = React.useState(true);
+
+	const { assortments, isLoading: isLoadingAssortments } = useGetAssortments(true);
 	const validateMutation = useValidateExcelImport();
 	const commitMutation = useCommitExcelImport();
 
-	const handleFile = async (f: File) => {
+	const activeDestination: "new" | "replace" | null = targetAssortmentNumber
+		? "replace"
+		: newCatalogSaved && newCatalogName.trim().length > 0
+			? "new"
+			: null;
+
+	const handlePickFile = (f: File | null) => {
 		setFile(f);
+		setUploadedFileName(null);
 		setValidation(null);
+	};
+
+	const handleUpload = async () => {
+		if (!file) return;
 		try {
-			const res = await validateMutation.mutateAsync(f);
+			const res = await validateMutation.mutateAsync(file);
 			setValidation(res);
+			setUploadedFileName(file.name);
 			if (!res.ok) {
 				toast.error("Excel-filen inneholder feil. Se oppsummeringen under.");
+			} else {
+				toast.success("Fil opplastet og validert.");
 			}
 		} catch (e) {
 			console.error("validate failed", e);
@@ -86,16 +140,20 @@ export function ExcelBody({ wizard, onCreated }: Props) {
 	const canCommit =
 		file != null &&
 		validation?.ok === true &&
-		confirmed &&
-		(mode === "new-catalog" ? newCatalogName.trim().length > 0 : targetAssortmentNumber.length > 0);
+		activeDestination !== null &&
+		!commitMutation.isPending;
 
-	const handleCommit = async () => {
+	const handleCommit = React.useCallback(async () => {
 		if (!file || !canCommit) return;
 		try {
 			const res = await commitMutation.mutateAsync({
 				file,
+				// TODO BE: commit doesn't yet accept targetAssortmentNumber or
+				// backupBeforeOverwrite — only the new-catalog name path is wired.
+				// Pass whichever the user filled; the replace path will no-op
+				// until BE accepts it.
 				assortmentName:
-					mode === "new-catalog" ? newCatalogName.trim() : undefined,
+					activeDestination === "new" ? newCatalogName.trim() : undefined,
 			});
 			toast.success("KSU opprettet fra Excel-mal.");
 			onCreated?.(res.assortmentNumber);
@@ -104,125 +162,260 @@ export function ExcelBody({ wizard, onCreated }: Props) {
 			console.error("commit failed", e);
 			toast.error("Kunne ikke lagre Excel-import.");
 		}
-	};
+	}, [
+		activeDestination,
+		canCommit,
+		commitMutation,
+		file,
+		newCatalogName,
+		onCreated,
+		wizard,
+	]);
+
+	// Report the commit handle up to CreateKsuPage so the global footer's
+	// "Opprett KSU" button can route through it. Clear on unmount so when
+	// the user switches away from Excel, the footer stops thinking it has
+	// an Excel commit to drive.
+	React.useEffect(() => {
+		onHandleChange?.({
+			commit: handleCommit,
+			canCommit,
+			isSubmitting: commitMutation.isPending,
+		});
+		return () => onHandleChange?.(null);
+	}, [onHandleChange, handleCommit, canCommit, commitMutation.isPending]);
+
+	const assortmentsList = (assortments ?? []) as Array<Record<string, any>>;
+	const existingKatalogList = assortmentsList
+		.map((a) => ({
+			number: a.assortmentNumber as string | undefined,
+			label:
+				(a.nameNo as string | undefined) ??
+				(a.assortmentName as string | undefined) ??
+				(a.assortmentNumber as string | undefined),
+		}))
+		.filter((x): x is { number: string; label: string } => Boolean(x.number));
+
+	// Default backup filename shown in the Overskriving card. Derived from
+	// the uploaded filename with a `_(kopi)` suffix per Figma.
+	const backupFileName = React.useMemo(() => {
+		if (!uploadedFileName) return null;
+		const dot = uploadedFileName.lastIndexOf(".");
+		if (dot < 0) return `${uploadedFileName}_(kopi)`;
+		return `${uploadedFileName.slice(0, dot)}_(kopi)${uploadedFileName.slice(dot)}`;
+	}, [uploadedFileName]);
 
 	return (
-		<div className="space-y-5 pt-4">
+		<div className="space-y-6 pt-4">
 			<p className="text-sm text-[#5A615D]">
 				Bruk Excel-mal for å opprette eller oppdatere KSU. Last ned en standard
 				mal, fyll den ut i Excel og last den opp i denne veiviseren.
 			</p>
 
-			<div className="space-y-2">
+			{/* ---------------- 1. Velg handling ---------------- */}
+			<section className="space-y-3">
 				<h4 className="text-sm font-semibold text-[#0F1912]">
 					1. Velg handling
 				</h4>
 				<RadioGroup
 					value={mode}
 					onValueChange={(v) => setMode(v as ExcelMode)}
-					className="space-y-2">
-					<label className="flex cursor-pointer items-center gap-2 text-sm">
-						<RadioGroupItem value="new-catalog" />
-						Opprett ny katalog
+					className="space-y-3">
+					<label className="flex cursor-pointer items-start gap-2 text-sm">
+						<RadioGroupItem
+							value="new-catalog"
+							className="mt-0.5"
+						/>
+						<div className="space-y-2">
+							<span className="font-medium text-[#0F1912]">
+								Opprett ny katalog
+							</span>
+							{mode === "new-catalog" && (
+								<>
+									<p className="text-xs text-[#5A615D]">
+										Last ned en standard Excel-mal, fyll den ut i Excel og last
+										den opp for å opprette et nytt KSU.
+									</p>
+									<Button
+										variant="greenSolid"
+										size="sm"
+										asChild
+										className="gap-2">
+										<a
+											href={getExcelTemplateUrl()}
+											download>
+											<Download className="h-4 w-4" />
+											Last ned mal
+										</a>
+									</Button>
+								</>
+							)}
+						</div>
 					</label>
-					<label className="flex cursor-pointer items-center gap-2 text-sm">
-						<RadioGroupItem value="update-existing" />
-						Oppdater eksisterende katalog som du har tilgang til
+					<label className="flex cursor-pointer items-start gap-2 text-sm">
+						<RadioGroupItem
+							value="update-existing"
+							className="mt-0.5"
+						/>
+						<span className="font-medium text-[#0F1912]">
+							Oppdater eksisterende katalog som du har tilgang til
+						</span>
 					</label>
 				</RadioGroup>
+			</section>
 
-				{mode === "new-catalog" && (
-					<div className="pl-6 pt-2">
-						<Button
-							variant="greenSolid"
-							size="sm"
-							asChild>
-							<a
-								href={getExcelTemplateUrl()}
-								download>
-								<Download className="mr-2 h-4 w-4" />
-								Last ned mal
-							</a>
-						</Button>
+			{/* ---------------- 2. Hent fil ---------------- */}
+			<section className="space-y-3">
+				<h4 className="text-sm font-semibold text-[#0F1912]">2. Hent fil</h4>
+				<p className="text-xs text-[#5A615D]">Last opp utfylt Excel-mal:</p>
+				<div className="flex max-w-md items-center gap-2">
+					<div className="relative flex flex-1 items-center rounded-md border border-dashed border-[#8A8F8C] bg-white px-3 py-1.5">
+						<Paperclip className="h-4 w-4 shrink-0 text-[#5A615D]" />
+						<span className="ml-2 flex-1 truncate text-sm text-[#0F1912]">
+							{file ? file.name : "Velg fil ..."}
+						</span>
+						{file && (
+							<button
+								type="button"
+								onClick={() => handlePickFile(null)}
+								aria-label="Fjern valgt fil"
+								className="ml-1 shrink-0 text-[#5A615D] hover:text-[#0F1912]">
+								<X className="h-4 w-4" />
+							</button>
+						)}
 					</div>
-				)}
-
-				{mode === "update-existing" && (
-					<div className="pl-6 pt-2 space-y-2 max-w-md">
-						<Select
-							value={targetAssortmentNumber}
-							onValueChange={setTargetAssortmentNumber}>
-							<SelectTrigger
-								disabled={isLoadingAssortments}
-								className="bg-white">
-								<SelectValue placeholder="Velg KSU ..." />
-							</SelectTrigger>
-							<SelectContent>
-								{(assortments ?? []).map((a: Record<string, any>) => {
-									const num = a.assortmentNumber as string | undefined;
-									const label =
-										(a.nameNo as string | undefined) ??
-										(a.assortmentName as string | undefined) ??
-										num ??
-										"";
-									if (!num) return null;
-									return (
-										<SelectItem
-											key={num}
-											value={num}>
-											{label}
-										</SelectItem>
-									);
-								})}
-							</SelectContent>
-						</Select>
-					</div>
-				)}
-			</div>
-
-			<div className="space-y-2">
-				<h4 className="text-sm font-semibold text-[#0F1912]">
-					2. Last opp utfylt Excel-mal
-				</h4>
-				<label className="inline-flex max-w-md cursor-pointer items-center gap-2 rounded-md border border-dashed border-[#C1C4C2] bg-[#F8F9F8] px-3 py-2 text-sm hover:bg-white">
-					<Upload className="h-4 w-4 text-[#1C6D2C]" />
-					<span className="truncate">{file ? file.name : "Velg fil ..."}</span>
+					<Button
+						variant="outlineGreen"
+						size="sm"
+						onClick={() => fileInputRef.current?.click()}>
+						Velg fil
+					</Button>
 					<input
+						ref={fileInputRef}
 						type="file"
 						accept=".xls,.xlsx"
 						onChange={(e) => {
-							const f = e.target.files?.[0];
-							if (f) handleFile(f);
+							const f = e.target.files?.[0] ?? null;
+							handlePickFile(f);
 						}}
 						className="hidden"
 					/>
-				</label>
-				<p className="text-xs text-[#5A615D]">
-					Systemet gjør automatisk sjekk av struktur og format. Kun Excel-filer
-					er akseptert.
-				</p>
-			</div>
-
-			{mode === "new-catalog" && file && validation?.ok && (
-				<div className="space-y-1 max-w-md">
-					<h4 className="text-sm font-semibold text-[#0F1912]">
-						3. Velg navn for ny katalog
-					</h4>
-					<Input
-						value={newCatalogName}
-						onChange={(e) => setNewCatalogName(e.target.value)}
-						placeholder="Skriv nytt navn ..."
-					/>
 				</div>
-			)}
+				<p className="text-xs text-[#5A615D]">
+					Systemet gjør automatisk sjekk av struktur og filformat. Kun Excel
+					filer er akseptert.
+				</p>
+				<Button
+					variant="greenSolid"
+					size="sm"
+					className="gap-2"
+					disabled={!file || validateMutation.isPending}
+					onClick={handleUpload}>
+					<Upload className="h-4 w-4" />
+					{validateMutation.isPending ? "Laster opp ..." : "Last opp KSU"}
+				</Button>
+				{uploadedFileName && (
+					<p className="text-sm text-[#0F1912]">
+						<span className="text-[#5A615D]">KSU lastet opp:</span>{" "}
+						<span className="font-medium">{uploadedFileName}</span>
+					</p>
+				)}
+			</section>
 
-			{validation && (
-				<div className="space-y-3">
+			{/* ---------------- 3. Velg mål for opplastning ---------------- */}
+			<section className="space-y-4">
+				<h4 className="text-sm font-semibold text-[#0F1912]">
+					3. Velg mål for opplastning
+				</h4>
+
+				<div className="space-y-2 max-w-md">
+					<label className="text-sm text-[#0F1912]">
+						Opprett som ny katalog med nytt unikt navn:
+					</label>
+					<div className="flex items-center gap-2">
+						<div className="relative flex-1">
+							<Input
+								value={newCatalogName}
+								onChange={(e) => {
+									setNewCatalogName(e.target.value);
+									setNewCatalogSaved(false);
+									if (e.target.value.trim().length > 0) {
+										setTargetAssortmentNumber("");
+									}
+								}}
+								placeholder="Skriv nytt navn ..."
+							/>
+							{newCatalogName && (
+								<button
+									type="button"
+									onClick={() => {
+										setNewCatalogName("");
+										setNewCatalogSaved(false);
+									}}
+									aria-label="Fjern navn"
+									className="absolute top-1/2 right-2 -translate-y-1/2 text-[#5A615D] hover:text-[#0F1912]">
+									<X className="h-4 w-4" />
+								</button>
+							)}
+						</div>
+						<Button
+							variant="outlineGreen"
+							size="sm"
+							disabled={newCatalogName.trim().length === 0}
+							onClick={() => setNewCatalogSaved(true)}>
+							Lagre
+						</Button>
+					</div>
+				</div>
+
+				<p className="text-sm font-medium text-[#0F1912]">Eller</p>
+
+				<div className="space-y-2 max-w-md">
+					<label className="text-sm text-[#0F1912]">
+						Erstatt eksisterende katalog som du har tilgang til:
+					</label>
+					<Select
+						value={targetAssortmentNumber}
+						onValueChange={(v) => {
+							setTargetAssortmentNumber(v);
+							if (v) {
+								setNewCatalogName("");
+								setNewCatalogSaved(false);
+							}
+						}}>
+						<SelectTrigger
+							disabled={isLoadingAssortments}
+							className="bg-white">
+							<SelectValue placeholder="Velg katalog ..." />
+						</SelectTrigger>
+						<SelectContent>
+							{existingKatalogList.map((k) => (
+								<SelectItem
+									key={k.number}
+									value={k.number}>
+									{k.label}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
+			</section>
+
+			{/* ---------------- 4. Bekreftelse og resultat ----------------
+				Rendered as soon as the user has uploaded a file OR picked a
+				destination, so the section is visible as part of the Excel
+				flow structure (Figma shows it unconditionally). Individual
+				cards gate on their own data: Overskriving only when
+				replacing existing, Oppsummering fills in `—` placeholders
+				until BE validation populates the counts, and the "Validering
+				feilet" strip only surfaces when BE returns issues. */}
+			{(uploadedFileName || activeDestination) && (
+				<section className="space-y-4">
 					<h4 className="text-sm font-semibold text-[#0F1912]">
-						{mode === "new-catalog" ? "4" : "3"}. Bekreftelse og resultat
+						4. Bekreftelse og resultat
 					</h4>
 
-					{!validation.ok && (
+					{validation && !validation.ok && validation.issues.length > 0 && (
 						<div className="rounded-md border border-[#F0C9B8] bg-[#FDF0E7] px-3 py-2 text-sm">
 							<div className="flex items-center gap-2 font-medium text-[#B35C0B]">
 								<AlertTriangle className="h-4 w-4" />
@@ -238,44 +431,124 @@ export function ExcelBody({ wizard, onCreated }: Props) {
 						</div>
 					)}
 
-					{validation.ok && (
-						<div className="space-y-2">
-							<div className="rounded-md border border-[#C6E7CD] bg-[#EFF9F1] px-3 py-2 text-sm">
-								<div className="flex items-center gap-2 font-medium text-[#1C6D2C]">
-									<CheckCircle2 className="h-4 w-4" />
-									Oppsummering av opplasting
-								</div>
-								<dl className="mt-2 grid grid-cols-[180px_auto] gap-y-0.5 text-xs text-[#0F1912]">
-									<dt>Antall i fil:</dt>
-									<dd>{validation.rowCount ?? "—"}</dd>
-									<dt>Antall produkter funnet:</dt>
-									<dd>{validation.productsFound ?? "—"}</dd>
-									<dt>Antall produkter ikke funnet:</dt>
-									<dd>{validation.productsMissing ?? 0}</dd>
-								</dl>
-							</div>
-
-							<label className="flex cursor-pointer items-start gap-2 text-sm">
-								<input
-									type="checkbox"
-									checked={confirmed}
-									onChange={(e) => setConfirmed(e.target.checked)}
-									className="mt-0.5"
-								/>
-								<span>
-									Ja, jeg er sikker på at jeg vil kjøre denne opplastingen.
-								</span>
-							</label>
-
-							<Button
-								variant="greenSolid"
-								onClick={handleCommit}
-								disabled={!canCommit || commitMutation.isPending}>
-								{commitMutation.isPending ? "Lagrer ..." : "Bekreft og importer"}
-							</Button>
-						</div>
+					{activeDestination === "replace" && (
+						<OverskrivingCard
+							backupBeforeOverwrite={backupBeforeOverwrite}
+							onToggleBackup={setBackupBeforeOverwrite}
+							backupFileName={backupFileName}
+						/>
 					)}
-				</div>
+
+					<OppsummeringCard
+						rowCount={validation?.rowCount}
+						productsFound={validation?.productsFound}
+						productsMissing={validation?.productsMissing}
+					/>
+
+					<Button
+						variant="greenSolid"
+						onClick={handleCommit}
+						disabled={!canCommit}>
+						{commitMutation.isPending ? "Lagrer ..." : "Bekreft og importer"}
+					</Button>
+				</section>
+			)}
+		</div>
+	);
+}
+
+function OverskrivingCard({
+	backupBeforeOverwrite,
+	onToggleBackup,
+	backupFileName,
+}: {
+	backupBeforeOverwrite: boolean;
+	onToggleBackup: (next: boolean) => void;
+	backupFileName: string | null;
+}) {
+	return (
+		<div className="space-y-3 rounded-md border border-[#F0C9B8] bg-[#FDF0E7] px-4 py-3">
+			<div className="flex items-center gap-2 text-sm font-semibold text-[#B0261A]">
+				<CheckCircle2 className="h-4 w-4" />
+				Overskriving
+			</div>
+			<p className="text-xs text-[#B0261A]">
+				Denne filen blir overskrevet. Du kan ikke angre dette.
+			</p>
+			<label className="flex items-center gap-3 text-sm font-medium text-[#B0261A]">
+				<Switch
+					checked={backupBeforeOverwrite}
+					onCheckedChange={onToggleBackup}
+					className="data-[state=checked]:bg-[#B0261A]"
+				/>
+				Ja, lag en sikkerhetskopi
+			</label>
+			<p className="text-xs text-[#B0261A]">
+				Hvis bryteren er av, blir filen overskrevet uten sikkerhetskopi.
+			</p>
+			{backupBeforeOverwrite && backupFileName && (
+				<>
+					<p className="text-xs font-semibold text-[#B0261A]">
+						Sikkerhetskopi:
+					</p>
+					<button
+						type="button"
+						onClick={() => {
+							// TODO BE: endpoint to download the created backup file
+							// isn't exposed yet. The chip is visible so users can see
+							// the filename the backup will be stored under; wire the
+							// click to the download URL once BE adds it.
+							toast.info(
+								"Nedlasting av sikkerhetskopi er ikke klar enda.",
+							);
+						}}
+						className="inline-flex items-center gap-2 rounded-md border border-[#1C6D2C] bg-white px-3 py-1.5 text-xs text-[#1C6D2C] hover:bg-[#DCF7E0]">
+						<Download className="h-3.5 w-3.5" />
+						{backupFileName}
+					</button>
+				</>
+			)}
+		</div>
+	);
+}
+
+function OppsummeringCard({
+	rowCount,
+	productsFound,
+	productsMissing,
+}: {
+	rowCount?: number;
+	productsFound?: number;
+	productsMissing?: number;
+}) {
+	const missingCount = productsMissing ?? 0;
+	return (
+		<div className="space-y-3 rounded-md border border-[#C6E7CD] bg-[#EFF9F1] px-4 py-3">
+			<h5 className="text-sm font-semibold text-[#0F1912]">
+				Oppsummering av opplastning
+			</h5>
+			<dl className="grid max-w-sm grid-cols-[1fr_auto] gap-y-1 text-sm text-[#0F1912]">
+				<dt>Antall i fil</dt>
+				<dd className="font-semibold">{rowCount ?? "—"}</dd>
+				<dt>Antall produkter ikke funnet</dt>
+				<dd className="font-semibold">{missingCount}</dd>
+				<dt>Antall produkter lagt inn i katalog</dt>
+				<dd className="font-semibold">{productsFound ?? "—"}</dd>
+			</dl>
+			{missingCount > 0 && (
+				<Button
+					variant="outlineGreen"
+					size="sm"
+					className="gap-2"
+					onClick={() => {
+						// TODO BE: no endpoint yet for streaming the missing-products
+						// list. Wire this up when BE adds it (expected shape: GET
+						// returning CSV/XLSX of rows that didn't resolve).
+						toast.info("Nedlasting av manglende produkter er ikke klar enda.");
+					}}>
+					<Download className="h-4 w-4" />
+					Last ned liste over manglende produkter
+				</Button>
 			)}
 		</div>
 	);
