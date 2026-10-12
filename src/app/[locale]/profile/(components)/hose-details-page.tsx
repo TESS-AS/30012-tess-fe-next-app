@@ -83,7 +83,8 @@ export default function HoseDetailsPage({
 	const [supportOpen, setSupportOpen] = useState(false);
 	const [rfqOpen, setRfqOpen] = useState(false);
 
-	const isDirectPurchaseBlocked = Number(hoseDetails?.hoseLine?.ecom) === 3;
+	const hoseEcom = Number(hoseDetails?.hoseLine?.ecom);
+	const isDirectPurchaseBlocked = hoseEcom === 2 || hoseEcom === 3;
 	const directPurchaseTooltipText =
 		"Slangen er ikke tilgjengelig for direktekjøp. Send forespørsel for pris og levering.";
 

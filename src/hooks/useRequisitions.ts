@@ -160,7 +160,15 @@ export const useRequisitions = (
 							productNumber: line.productNumber,
 							sku: line.itemId.toString(),
 							quantity: line.quantity,
-							price: formatNorwegianCurrency(line.unitPrice) || "N/A",
+							// Display the line total (unit × qty) so the "Pris" column in
+							// the expanded row matches the cart UI's per-line price.
+							// `unitPrice` below is kept as the raw per-unit value — the
+							// approve flow seeds `overriddenUnitPrices` from it so the
+							// salesPrice sent to BE stays consistent.
+							price:
+								formatNorwegianCurrency(
+									(line.unitPrice ?? 0) * line.quantity,
+								) || "N/A",
 							unitPrice:
 								typeof line.unitPrice === "number" ? line.unitPrice : null,
 						}),

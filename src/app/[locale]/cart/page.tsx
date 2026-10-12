@@ -107,11 +107,10 @@ const CartPage = () => {
 	// BE flag — BE re-checks server-side and 403s if unset.
 	const canOverridePrice = profile?.canOverridePrice === true;
 
-	const getDisplayLineTotal = (itemNumber: string, quantity: number) => {
-		const override = overriddenUnitPrices[itemNumber];
-		if (override != null) return override * quantity;
-		return calculatedPrices[itemNumber] ?? 0;
-	};
+	// Prefer quantity-scoped lookup so duplicate itemNumbers with different
+	// quantities don't all share the last overwritten calculatedPrices entry.
+	const getDisplayLineTotal = (itemNumber: string, quantity: number) =>
+		getCalculatedPrice(itemNumber, quantity);
 
 	// Kit-level rollup that mirrors `cartKitTotals[hexagonId]` but substitutes
 	// any per-sub-item overrides so the collapsed accordion header agrees with

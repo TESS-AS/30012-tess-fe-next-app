@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import {
 	Sheet,
@@ -27,6 +27,8 @@ interface ProductDocumentsDrawerProps {
 	variants?: Array<{ itemNumber?: string }>;
 	profile?: { defaultCustomerNumber?: string; defaultCompanyNumber?: string; defaultWarehouseNumber?: string } | null;
 	isSapCustomer?: boolean;
+	/** Optional custom trigger; must accept click via asChild (e.g. Button). */
+	trigger?: ReactNode;
 }
 
 export function ProductDocumentsDrawer({
@@ -38,6 +40,7 @@ export function ProductDocumentsDrawer({
 	imageUrl,
 	application,
 	gtin,
+	trigger,
 	variants = [],
 	profile,
 	isSapCustomer,
@@ -193,13 +196,15 @@ export function ProductDocumentsDrawer({
 	return (
 		<Sheet open={open} onOpenChange={setOpen}>
 			<SheetTrigger asChild>
-				<button
-					type="button"
-					className="h-auto w-full rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-normal text-black hover:bg-gray-50">
-					{locale === "no"
-						? `Dokumentasjon (${docCount})`
-						: `Documentation (${docCount})`}
-				</button>
+				{trigger ?? (
+					<button
+						type="button"
+						className="h-auto w-full rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-normal text-black hover:bg-gray-50">
+						{locale === "no"
+							? `Dokumentasjon (${docCount})`
+							: `Documentation (${docCount})`}
+					</button>
+				)}
 			</SheetTrigger>
 			<SheetContent
 				side="right"
