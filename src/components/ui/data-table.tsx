@@ -295,9 +295,14 @@ export function DataTable<
 															</td>
 														)}
 
-														{safeColumns.map((column) => (
+														{safeColumns.map((column, columnIndex) => (
 															<td
 																key={column.key}
+																onClick={
+																	columnIndex === 0
+																		? (event) => event.stopPropagation()
+																		: undefined
+																}
 																className={cn(
 																	"px-3 py-3 text-[14px] font-medium text-[#0F1912]",
 																	noWrap && "whitespace-nowrap",

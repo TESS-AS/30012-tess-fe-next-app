@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 
 import { CartKitRow } from "@/components/checkout/cart-kit-row";
+import { HoseCartReview } from "@/components/checkout/hose-cart-review";
 import OrderSummary from "@/components/checkout/order-summary";
 import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { VariantModalHeader } from "@/components/checkout/variant-modal-header";
@@ -225,9 +226,10 @@ const CartPage = () => {
 	const [selectedWarehouse, setSelectedWarehouse] = useState<string | null>(
 		null,
 	);
-	const [expandedItems, setExpandedItems] = useState<{
-		[key: string]: boolean;
-	}>({});
+	const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(
+		{},
+	);
+	const [reviewComplete, setReviewComplete] = useState(false);
 	const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
 	const [excelArchiveModalOpen, setExcelArchiveModalOpen] = useState(false);
 	const [categoryPaths, setCategoryPaths] = useState<{
@@ -656,181 +658,201 @@ const CartPage = () => {
 		);
 	};
 
+	const cartHeader = (
+		<>
+			<Breadcrumb
+				items={[
+					{ href: "/", label: t("BreadCrumbs.home") },
+					{ href: "/cart", label: t("BreadCrumbs.cart") },
+				]}
+			/>
+
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+				<div className="flex flex-1 items-center gap-2">
+					<p className="shrink-0 text-sm font-normal sm:text-base">
+						{t("Cart.showStockStatus")}
+					</p>
+					<WarehouseCombobox
+						warehouseBalance={warehouseBalance}
+						value={selectedWarehouse}
+						onChange={handleWarehouseChange}
+					/>
+				</div>
+				<Button
+					onClick={handleClearCart}
+					variant="outline"
+					className="self-end border-[#C81E1E] text-[#C81E1E] sm:self-auto">
+					<Trash2 className="h-4 w-4" />
+				</Button>
+			</div>
+
+			{outOfStock && (
+				<NotificationCard
+					className="bg-[#FDFDEA]"
+					icon={<CircleAlert className="h-4 w-4" />}
+					title={t("Cart.outOfStock")}
+					message={t("Cart.outOfStockMessage")}
+					onClose={() => setOutOfStock(false)}
+				/>
+			)}
+		</>
+	);
+
+	const showReview =
+		!isLoading && (cartItems?.cartKit?.length ?? 0) > 0 && !reviewComplete;
+
 	return (
 		<main className="container min-h-screen px-4 py-6 md:px-0 md:py-10">
 			<FeedbackSideTab />
-			<div className="grid grid-cols-1 gap-6 md:gap-10 lg:grid-cols-3">
-				<div className="space-y-6 lg:col-span-2">
-					<Breadcrumb
-						items={[
-							{ href: "/", label: t("BreadCrumbs.home") },
-							{ href: "/cart", label: t("BreadCrumbs.cart") },
-						]}
-					/>
-
-					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-						<div className="flex flex-1 items-center gap-2">
-							<p className="shrink-0 text-sm font-normal sm:text-base">
-								{t("Cart.showStockStatus")}
-							</p>
-							<WarehouseCombobox
-								warehouseBalance={warehouseBalance}
-								value={selectedWarehouse}
-								onChange={handleWarehouseChange}
-							/>
+			{showReview && cartItems?.cartKit ? (
+				<HoseCartReview
+					kits={cartItems.cartKit}
+					kitTotal={getDisplayKitTotal}
+					lineTotal={getDisplayLineTotal}
+					removingId={
+						Object.keys(removingItems).find((id) => removingItems[id])
+					}
+					onRemove={async (kit) => {
+						try {
+							setRemovingItems((prev) => ({
+								...prev,
+								[kit.hexagonId]: true,
+							}));
+							await removeItemOptimistic(kit.cartLine);
+							toast.success(t("Cart.itemRemoved"));
+						} catch {
+							toast.error(t("Cart.itemRemoveError"));
+						} finally {
+							setRemovingItems((prev) => ({
+								...prev,
+								[kit.hexagonId]: false,
+							}));
+						}
+					}}
+					onSave={async (kit, quantity) => {
+						const current = kit.ferrule1?.quantity || 1;
+						const delta = quantity - current;
+						if (delta !== 0) {
+							await postCartKit([
+								{
+									hexagonId: Number(kit.hexagonId),
+									quantity: delta,
+									warehouseNumber: profile?.defaultWarehouseNumber,
+									companyNumber: profile?.defaultCompanyNumber,
+								},
+							]);
+							setIsCartChanging((value) => !value);
+						}
+						setReviewComplete(true);
+					}}>
+					{({ main, aside }) => (
+						<div className="grid grid-cols-1 gap-6 md:gap-10 lg:grid-cols-3">
+							<div className="space-y-6 lg:col-span-2">
+								{cartHeader}
+								{main}
+							</div>
+							{aside}
 						</div>
-						<Button
-							onClick={handleClearCart}
-							variant="outline"
-							className="self-end border-[#C81E1E] text-[#C81E1E] sm:self-auto">
-							<Trash2 className="h-4 w-4" />
-						</Button>
+					)}
+				</HoseCartReview>
+			) : (
+				<div className="grid grid-cols-1 gap-6 md:gap-10 lg:grid-cols-3">
+					<div className="space-y-6 lg:col-span-2">
+						{cartHeader}
+
+						{(cartItems?.cart?.length || cartItems?.cartKit?.length) ? (
+							<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+								<h1 className="text-xl font-semibold sm:text-2xl">
+									{t("Cart.yourCart")} (
+									{(cartItems?.cart?.length || 0) +
+										(cartItems?.cartKit?.length || 0)}
+									)
+								</h1>
+								<div className="flex items-center gap-2">
+									<Button
+										variant="outline"
+										onClick={() => handleArchiveCart()}
+										className="mr-2 text-sm">
+										{t("Cart.archiveCart")}
+									</Button>
+									<Button
+										variant="outline"
+										onClick={() => router.push("/cart/history")}
+										className="text-sm">
+										{t("Cart.viewCartHistory")}
+									</Button>
+								</div>
+							</div>
+						) : null}
+
+						{!isLoading && (
+							<>
+								{cartItems?.cartKit && cartItems.cartKit.length > 0 && (
+									<div className="space-y-4">
+										{cartItems.cartKit.map((item) => {
+											const hoseBalance = warehouseBalancePerItem.find(
+												(batch) =>
+													batch.itemNumber === item.hose?.itemNumber,
+											);
+											const warehouse =
+												hoseBalance?.warehouses.find(
+													(entry) =>
+														entry.warehouseNumber === item.warehouseNumber,
+												) ?? hoseBalance?.warehouses[0];
+											return (
+												<CartKitRow
+													key={item.cartLine}
+													kit={item}
+													expanded={!!expandedItems[item.hexagonId]}
+													onToggle={() =>
+														setExpandedItems((prev) => ({
+															...prev,
+															[item.hexagonId]: !prev[item.hexagonId],
+														}))
+													}
+													onRemove={async (e) => {
+														e.stopPropagation();
+														try {
+															setRemovingItems((prev) => ({
+																...prev,
+																[item.hexagonId]: true,
+															}));
+															await removeItemOptimistic(item.cartLine);
+															toast.success(t("Cart.itemRemoved"));
+														} catch {
+															toast.error(t("Cart.itemRemoveError"));
+														} finally {
+															setRemovingItems((prev) => ({
+																...prev,
+																[item.hexagonId]: false,
+															}));
+														}
+													}}
+													removing={!!removingItems[item.hexagonId]}
+													kitTotal={getDisplayKitTotal(item)}
+													lineTotal={getDisplayLineTotal}
+													priceInputSlot={renderUnitPriceInput}
+													warehouseName={warehouse?.warehouseName}
+													inStock={(warehouse?.balance ?? 0) > 0}
+												/>
+											);
+										})}
+									</div>
+								)}
+								{cartItems?.cart?.map((item: RegularCartItem) =>
+									renderRegularCartRow(item),
+								)}
+							</>
+						)}
 					</div>
 
-					{outOfStock && (
-						<NotificationCard
-							className="bg-[#FDFDEA]"
-							icon={<CircleAlert className="h-4 w-4" />}
-							title={t("Cart.outOfStock")}
-							message={t("Cart.outOfStockMessage")}
-							onClose={() => setOutOfStock(false)}
-						/>
-					)}
-
-					{cartItems?.cart && cartItems.cart.length > 0 && (
-						<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-							<h1 className="text-xl font-semibold sm:text-2xl">
-								{t("Cart.yourCart")} (
-								{(cartItems?.cart?.length || 0) +
-									(cartItems?.cartKit?.length || 0)}
-								)
-							</h1>
-							<div className="flex items-center gap-2">
-								<Button
-									variant="outline"
-									onClick={() => handleArchiveCart()}
-									className="mr-2 text-sm">
-									{t("Cart.archiveCart")}
-								</Button>
-								<Button
-									variant="outline"
-									onClick={() => router.push("/cart/history")}
-									className="text-sm">
-									{t("Cart.viewCartHistory")}
-								</Button>
-							</div>
-						</div>
-					)}
-
-					{!isLoading && (
-						<>
-							{cartItems?.cartKit && cartItems.cartKit.length > 0 && (
-								<div className="space-y-4">
-									{cartItems.cartKit.map((item) => {
-										const hoseBalance = warehouseBalancePerItem.find(
-											(batch) => batch.itemNumber === item.hose?.itemNumber,
-										);
-										const warehouse =
-											hoseBalance?.warehouses.find(
-												(entry) =>
-													entry.warehouseNumber === item.warehouseNumber,
-											) ?? hoseBalance?.warehouses[0];
-										return (
-											<CartKitRow
-												key={item.cartLine}
-												kit={item}
-												expanded={!!expandedItems[item.hexagonId]}
-												onToggle={() =>
-													setExpandedItems((prev) => ({
-														...prev,
-														[item.hexagonId]: !prev[item.hexagonId],
-													}))
-												}
-												quantity={item.ferrule1?.quantity || 1}
-												quantityLoading={!!loadingItems[item.hexagonId]}
-												onIncrease={async (e) => {
-													e.stopPropagation();
-													setLoadingItems((prev) => ({
-														...prev,
-														[item.hexagonId]: true,
-													}));
-													try {
-														await postCartKit([
-															{
-																hexagonId: Number(item.hexagonId),
-																quantity: 1,
-																warehouseNumber:
-																	profile?.defaultWarehouseNumber,
-																companyNumber:
-																	profile?.defaultCompanyNumber,
-															},
-														]);
-														setIsCartChanging((v) => !v);
-													} finally {
-														setLoadingItems((prev) => ({
-															...prev,
-															[item.hexagonId]: false,
-														}));
-													}
-												}}
-												onDecrease={async (e) => {
-													e.stopPropagation();
-													setLoadingItems((prev) => ({
-														...prev,
-														[item.hexagonId]: true,
-													}));
-													try {
-														await postCartKit([
-															{
-																hexagonId: Number(item.hexagonId),
-																quantity: -1,
-																warehouseNumber:
-																	profile?.defaultWarehouseNumber,
-																companyNumber:
-																	profile?.defaultCompanyNumber,
-															},
-														]);
-														setIsCartChanging((v) => !v);
-													} finally {
-														setLoadingItems((prev) => ({
-															...prev,
-															[item.hexagonId]: false,
-														}));
-													}
-												}}
-												onRemove={async (e) => {
-													e.stopPropagation();
-													try {
-														await removeItemOptimistic(item.cartLine);
-														toast.success(t("Cart.itemRemoved"));
-													} catch {
-														toast.error(t("Cart.itemRemoveError"));
-													}
-												}}
-												removing={!!removingItems[item.hexagonId]}
-												kitTotal={getDisplayKitTotal(item)}
-												lineTotal={getDisplayLineTotal}
-												priceInputSlot={renderUnitPriceInput}
-												warehouseName={warehouse?.warehouseName}
-												inStock={(warehouse?.balance ?? 0) > 0}
-											/>
-										);
-									})}
-								</div>
-							)}
-							{cartItems?.cart?.map((item: RegularCartItem) =>
-								renderRegularCartRow(item),
-							)}
-						</>
-					)}
+					<OrderSummary
+						handleCheckout={handleCheckout}
+						isCheckoutLoading={isCheckoutLoading}
+						currentStep={null}
+					/>
 				</div>
-
-				<OrderSummary
-					handleCheckout={handleCheckout}
-					isCheckoutLoading={isCheckoutLoading}
-					currentStep={null}
-				/>
-			</div>
+			)}
 
 			<Modal
 				open={excelArchiveModalOpen}

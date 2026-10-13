@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import QuantityButtons from "@/components/ui/quantity-buttons";
 import {
 	Select,
 	SelectContent,
@@ -14,12 +13,12 @@ import {
 import { Link } from "@/i18n/navigation";
 import { getCartKitPartEntries, readCartKitImageUrl } from "@/lib/cart-kit";
 import type { CartKitItem, HoseComponent } from "@/types/carts.types";
-import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import {
 	ChevronDown,
 	ChevronUp,
 	Copy,
 	Info,
+	Minus,
 	Plus,
 	Shield,
 	Trash2,
@@ -37,6 +36,10 @@ type HoseCartReviewProps = {
 	onSave: (kit: CartKitItem, quantity: number) => void | Promise<void>;
 	removingId?: string;
 	saving?: boolean;
+	children: (slots: {
+		main: React.ReactNode;
+		aside: React.ReactNode;
+	}) => React.ReactNode;
 };
 
 type PartLine = {
@@ -95,6 +98,13 @@ function formatQuantity(quantity: number) {
 	}).format(quantity);
 }
 
+function formatReviewAmount(amount: number) {
+	return new Intl.NumberFormat("nb-NO", {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+	}).format(amount);
+}
+
 function Accordion({
 	title,
 	open,
@@ -132,7 +142,7 @@ function PartCard({
 	nameLabel,
 	itemNumberLabel,
 }: {
-	label: string;
+	label?: string;
 	line: PartLine;
 	price: number;
 	seeDetails: string;
@@ -141,7 +151,7 @@ function PartCard({
 }) {
 	return (
 		<div className="space-y-2">
-			<p className="text-sm text-[#5A615D]">{label}</p>
+			{label ? <p className="text-sm text-[#5A615D]">{label}</p> : null}
 			<div className="flex flex-col gap-3 rounded-md border border-[#E8EAE9] bg-[#FAFBFA] p-3 sm:flex-row sm:items-center">
 				<div className="relative h-14 w-14 shrink-0 overflow-hidden rounded border border-[#E8EAE9] bg-white">
 					{line.imageUrl ? (
@@ -166,15 +176,15 @@ function PartCard({
 				<div className="flex shrink-0 items-center gap-3">
 					<Link
 						href={`/search?q=${encodeURIComponent(line.itemNumber)}`}
-						className="rounded-full border border-[#D5D9D7] bg-white px-3 py-1.5 text-xs text-[#0F1912]">
+						className="rounded-md border border-[#D5D9D7] bg-white px-3 py-1.5 text-xs text-[#0F1912]">
 						{seeDetails}
 					</Link>
 					<div className="flex items-center border-l border-[#E8EAE9] pl-3">
-						<span className="w-14 shrink-0 text-sm text-[#5A615D] tabular-nums">
+						<span className="w-10 shrink-0 text-sm text-[#5A615D] tabular-nums">
 							{formatQuantity(line.quantity)}x
 						</span>
-						<span className="w-28 shrink-0 text-sm font-semibold text-[#0F1912] tabular-nums">
-							{formatNorwegianCurrency(price)}
+						<span className="w-24 shrink-0 text-sm font-semibold text-[#0F1912] tabular-nums">
+							{formatReviewAmount(price)},-
 						</span>
 					</div>
 				</div>
@@ -191,6 +201,7 @@ export function HoseCartReview({
 	onSave,
 	removingId,
 	saving = false,
+	children,
 }: HoseCartReviewProps) {
 	const t = useTranslations("Cart.review");
 	const [index, setIndex] = useState(0);
@@ -199,7 +210,6 @@ export function HoseCartReview({
 	const [extrasOpen, setExtrasOpen] = useState(true);
 	const [quantities, setQuantities] = useState<Record<string, number>>({});
 	const [subunit, setSubunit] = useState("");
-	const [step, setStep] = useState(0);
 
 	const kit = kits[Math.min(index, kits.length - 1)];
 	const quantity = quantities[kit.hexagonId] ?? kit.ferrule1?.quantity ?? 1;
@@ -259,18 +269,15 @@ export function HoseCartReview({
 		}));
 	};
 
-	return (
+	const main = (
 		<div className="space-y-4">
 			<div className="flex flex-wrap items-center gap-3">
 				<h2 className="text-xl font-semibold text-[#0F1912]">{t("title")}</h2>
 				<Select
 					value={String(kit.cartLine)}
-					onValueChange={(id) => {
-						setIndex(
-							kits.findIndex((item) => String(item.cartLine) === id),
-						);
-						setStep(0);
-					}}>
+					onValueChange={(id) =>
+						setIndex(kits.findIndex((item) => String(item.cartLine) === id))
+					}>
 					<SelectTrigger className="h-10 w-auto min-w-[240px] rounded-full px-3">
 						<span className="mr-2 h-2 w-2 shrink-0 rounded-full bg-[#009640]" />
 						<SelectValue />
@@ -291,53 +298,37 @@ export function HoseCartReview({
 				</Select>
 			</div>
 
-			<div className="flex items-center border-b border-[#E8EAE9] pb-4">
-				<button
-					type="button"
-					onClick={() => setStep(0)}
-					className={`text-sm ${
-						step === 0 ? "font-semibold text-[#003D1A]" : "text-[#009640]"
-					}`}>
-					2. {t("stepReview")}
-				</button>
-				<div className="mx-4 h-px flex-1 bg-[#E5E7E5]" />
-				<button
-					type="button"
-					onClick={() => setStep(1)}
-					className={`text-sm ${
-						step === 1 ? "font-semibold text-[#003D1A]" : "text-[#8A8F8C]"
-					}`}>
-					3. {t("stepPosition")}
-				</button>
-			</div>
-
-			{step === 0 ? (
-				<div className="rounded-xl border border-[#E8EAE9] p-4 sm:p-5">
-					<div className="flex items-start gap-2 rounded-md bg-[#E7F8EE] px-3 py-2 text-sm text-[#0F1912]">
-						<Info className="mt-0.5 h-4 w-4 shrink-0 text-[#009640]" />
-						<p>
-							{quantity === 1
-								? t("newId", { id: kit.hexagonId })
-								: t("newIds", { count: quantity, id: kit.hexagonId })}
-						</p>
-					</div>
-
-					<div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+			<div className="space-y-4 rounded-xl border border-[#E8EAE9] p-4 sm:p-5">
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 						<p className="min-w-0 text-sm text-[#0F1912]">
-							<span className="font-semibold">ID: {kit.hexagonId}</span>
+							<span>ID: {kit.hexagonId}</span>
 							{title ? (
-								<span className="ml-2 text-[#5A615D]">{title}</span>
+								<span className="ml-2 font-semibold">{title}</span>
 							) : null}
 						</p>
-						<div className="flex items-center gap-4">
-							<QuantityButtons
-								quantity={quantity}
-								min={1}
-								onIncrease={() => setQuantity(quantity + 1)}
-								onDecrease={() => setQuantity(quantity - 1)}
-							/>
-							<span className="font-semibold whitespace-nowrap">
-								{formatNorwegianCurrency(kitTotal(kit))}
+						<div className="flex items-center gap-3">
+							<div className="flex items-center gap-1">
+								<button
+									type="button"
+									aria-label="-"
+									disabled={quantity <= 1}
+									onClick={() => setQuantity(quantity - 1)}
+									className="flex h-8 w-8 items-center justify-center rounded-md border border-[#D5D9D7] bg-white text-[#0F1912] disabled:opacity-40">
+									<Minus className="h-3.5 w-3.5" />
+								</button>
+								<span className="flex h-8 min-w-8 items-center justify-center rounded-md border border-[#D5D9D7] bg-white px-2 text-sm">
+									{quantity}
+								</span>
+								<button
+									type="button"
+									aria-label="+"
+									onClick={() => setQuantity(quantity + 1)}
+									className="flex h-8 w-8 items-center justify-center rounded-md border border-[#D5D9D7] bg-white text-[#0F1912]">
+									<Plus className="h-3.5 w-3.5" />
+								</button>
+							</div>
+							<span className="text-base font-semibold whitespace-nowrap">
+								{formatReviewAmount(kitTotal(kit))}
 							</span>
 							<Button
 								className="w-4 p-0"
@@ -347,10 +338,19 @@ export function HoseCartReview({
 								{removingId === kit.hexagonId ? (
 									<div className="border-t-primary h-4 w-4 animate-spin rounded-full border-2 border-gray-300" />
 								) : (
-									<Trash2 className="h-4 w-4 text-[#C81E1E]" />
+									<Trash2 className="h-4 w-4 text-[#5A615D]" />
 								)}
 							</Button>
 						</div>
+					</div>
+
+					<div className="flex items-start gap-2 rounded-md bg-[#E7F8EE] px-3 py-2 text-sm text-[#0F1912]">
+						<Info className="mt-0.5 h-4 w-4 shrink-0 text-[#009640]" />
+						<p>
+							{quantity === 1
+								? t("newId", { id: kit.hexagonId })
+								: t("newIds", { count: quantity, id: kit.hexagonId })}
+						</p>
 					</div>
 
 					<Accordion
@@ -367,62 +367,33 @@ export function HoseCartReview({
 								itemNumberLabel={t("itemNumber")}
 							/>
 						) : null}
-						{ferrules.map((line) => (
-							<PartCard
-								key={line.key}
-								label={t("ferrule")}
-								line={line}
-								price={lineTotal(line.itemNumber, line.quantity)}
-								seeDetails={t("seeDetails")}
-								nameLabel={t("name")}
-								itemNumberLabel={t("itemNumber")}
-							/>
-						))}
+						{ferrules.length > 0 ? (
+							<div className="space-y-2">
+								<p className="text-sm text-[#5A615D]">{t("ferrule")}</p>
+								{ferrules.map((line) => (
+									<PartCard
+										key={line.key}
+										line={line}
+										price={lineTotal(line.itemNumber, line.quantity)}
+										seeDetails={t("seeDetails")}
+										nameLabel={t("name")}
+										itemNumberLabel={t("itemNumber")}
+									/>
+								))}
+							</div>
+						) : null}
 						{inserts.length > 0 ? (
 							<div className="space-y-2">
 								<p className="text-sm text-[#5A615D]">{t("insert")}</p>
 								{inserts.map((line) => (
-									<div
+									<PartCard
 										key={line.key}
-										className="flex flex-col gap-3 rounded-md border border-[#E8EAE9] bg-[#FAFBFA] p-3 sm:flex-row sm:items-center">
-										<div className="relative h-14 w-14 shrink-0 overflow-hidden rounded border border-[#E8EAE9] bg-white">
-											{line.imageUrl ? (
-												<Image
-													src={line.imageUrl}
-													alt=""
-													fill
-													sizes="56px"
-													className="object-contain"
-												/>
-											) : null}
-										</div>
-										<div className="min-w-0 flex-1">
-											<p className="text-sm text-[#0F1912]">
-												<span className="text-[#5A615D]">{t("name")}: </span>
-												<span className="font-semibold">{line.name}</span>
-											</p>
-											<p className="mt-0.5 text-xs text-[#5A615D]">
-												{t("itemNumber")}: {line.itemNumber}
-											</p>
-										</div>
-										<div className="flex shrink-0 items-center gap-3">
-											<Link
-												href={`/search?q=${encodeURIComponent(line.itemNumber)}`}
-												className="rounded-full border border-[#D5D9D7] bg-white px-3 py-1.5 text-xs text-[#0F1912]">
-												{t("seeDetails")}
-											</Link>
-											<div className="flex items-center border-l border-[#E8EAE9] pl-3">
-												<span className="w-14 shrink-0 text-sm text-[#5A615D] tabular-nums">
-													{formatQuantity(line.quantity)}x
-												</span>
-												<span className="w-28 shrink-0 text-sm font-semibold text-[#0F1912] tabular-nums">
-													{formatNorwegianCurrency(
-														lineTotal(line.itemNumber, line.quantity),
-													)}
-												</span>
-											</div>
-										</div>
-									</div>
+										line={line}
+										price={lineTotal(line.itemNumber, line.quantity)}
+										seeDetails={t("seeDetails")}
+										nameLabel={t("name")}
+										itemNumberLabel={t("itemNumber")}
+									/>
 								))}
 							</div>
 						) : null}
@@ -494,16 +465,12 @@ export function HoseCartReview({
 							</div>
 						</div>
 					</Accordion>
-					<Button
-						type="button"
-						variant="greenSolid"
-						className="mt-5 h-11"
-						onClick={() => setStep(1)}>
-						{t("next")}
-					</Button>
 				</div>
-			) : (
-				<div className="rounded-xl border border-[#E8EAE9] p-4 sm:p-5">
+		</div>
+	);
+
+	const aside = (
+		<aside className="h-fit rounded-xl border border-[#E8EAE9] p-4 sm:p-5">
 					<div className="flex items-center justify-between">
 						<h3 className="text-sm font-semibold text-[#0F1912]">
 							{t("positionTitle")}
@@ -539,24 +506,15 @@ export function HoseCartReview({
 							</dd>
 						</div>
 					</dl>
-					<div className="mt-5 flex flex-col gap-2 sm:flex-row">
-						<Button
-							type="button"
-							variant="outline"
-							className="h-11 sm:w-40"
-							onClick={() => setStep(0)}>
-							{t("back")}
-						</Button>
-						<Button
-							variant="greenSolid"
-							className="h-11 sm:flex-1"
-							disabled={saving}
-							onClick={() => void onSave(kit, quantity)}>
-							{t("saveToCart")}
-						</Button>
-					</div>
-				</div>
-			)}
-		</div>
+					<Button
+						variant="greenSolid"
+						className="mt-5 h-11 w-full"
+						disabled={saving}
+						onClick={() => void onSave(kit, quantity)}>
+						{t("saveToCart")}
+					</Button>
+		</aside>
 	);
+
+	return children({ main, aside });
 }

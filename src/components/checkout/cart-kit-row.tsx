@@ -4,7 +4,6 @@ import { ReactNode, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import QuantityButtons from "@/components/ui/quantity-buttons";
 import { Link } from "@/i18n/navigation";
 import { getCartKitPartEntries, readCartKitImageUrl } from "@/lib/cart-kit";
 import type { CartKitItem, HoseComponent } from "@/types/carts.types";
@@ -30,10 +29,6 @@ type CartKitRowProps = {
 	kit: CartKitItem;
 	expanded: boolean;
 	onToggle: () => void;
-	quantity: number;
-	quantityLoading: boolean;
-	onIncrease: (event: React.MouseEvent) => void;
-	onDecrease: (event: React.MouseEvent) => void;
 	onRemove: (event: React.MouseEvent) => void;
 	removing: boolean;
 	kitTotal: number;
@@ -306,10 +301,6 @@ export function CartKitRow({
 	kit,
 	expanded,
 	onToggle,
-	quantity,
-	quantityLoading,
-	onIncrease,
-	onDecrease,
 	onRemove,
 	removing,
 	kitTotal,
@@ -443,12 +434,6 @@ export function CartKitRow({
 				</div>
 
 				<div className="flex items-center justify-between gap-4 px-4 py-3 md:justify-end md:py-0 md:pr-6 md:pl-4">
-					<QuantityButtons
-						isLoading={quantityLoading}
-						quantity={quantity}
-						onIncrease={onIncrease}
-						onDecrease={onDecrease}
-					/>
 					<span className="font-semibold whitespace-nowrap">
 						{formatNorwegianCurrency(kitTotal)}
 					</span>

@@ -657,6 +657,35 @@
 				"marking": "Marking",
 				"finalInspection": "Final inspection"
 			}
+		},
+		"review": {
+			"title": "Review and confirm",
+			"hoseOption": "Hose: {id} ({current} of {total})",
+			"newId": "1 new ID will be created from the specifications of ID: {id}",
+			"newIds": "{count} new IDs will be created from the specifications of ID: {id}",
+			"mainComponents": "Main components ({count})",
+			"hose": "Hose",
+			"ferrule": "Ferrule",
+			"insert": "Insert",
+			"seeDetails": "See details",
+			"name": "Name",
+			"itemNumber": "Item number",
+			"otherArticles": "Other articles on the hose ({count}/10)",
+			"additionSlot": "Addition {letter} end {end}",
+			"extraEquipment": "Extra equipment ({count})",
+			"protectTitle": "Protect the hose (optional)",
+			"protectBody": "Protection reduces wear at attachment points and exposed areas.",
+			"addProtection": "Add protection",
+			"copyPrevious": "Copy from previous",
+			"positionTitle": "Position and details",
+			"otherInfo": "Other info",
+			"equipmentSubunit": "Equipment subunit",
+			"subunitHint": "Physical location, if known.",
+			"saveToCart": "Save and go to cart",
+			"stepReview": "Review",
+			"stepPosition": "Position and details",
+			"next": "Next",
+			"back": "Back"
 		}
 	},
 	"Login": {
@@ -983,6 +1012,19 @@
 			"moreActions": "More actions",
 			"clear": "Clear selection",
 			"nonePurchasable": "None of the selected hoses can be added to the cart"
+		},
+		"review": {
+			"title": "Review and confirm",
+			"hoseOption": "Hose: {id} ({current} of {total})",
+			"newId": "1 new ID will be created from the specifications of ID: {id}",
+			"newIds": "{count} new IDs will be created from the specifications of ID: {id}",
+			"mainComponents": "Main components ({count})",
+			"hose": "Hose",
+			"ferrule": "Ferrule",
+			"insert": "Insert",
+			"positionTitle": "Position and details",
+			"saveToCart": "Save and go to cart",
+			"back": "Back"
 		},
 		"success": {
 			"supportMessageSent": "Message sent to TESS support",
