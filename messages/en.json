@@ -641,6 +641,10 @@
 			"extraEquipment": "Extra equipment ({count})",
 			"services": "Additional services ({count})",
 			"end": "End {end}",
+			"endYes": "End {end}: Yes",
+			"addProtection": "Add protection",
+			"editEquipment": "Edit",
+			"removeEquipment": "Remove",
 			"serviceNames": {
 				"pressingItem": "Pressing",
 				"jetCleanItem": "Jet cleaning",

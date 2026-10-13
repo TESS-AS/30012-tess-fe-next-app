@@ -643,6 +643,10 @@
 			"extraEquipment": "Ekstrautstyr ({count})",
 			"services": "Tilleggstjenester ({count})",
 			"end": "Ende {end}",
+			"endYes": "Ende {end}: Ja",
+			"addProtection": "Legg til beskyttelse",
+			"editEquipment": "Endre",
+			"removeEquipment": "Fjern",
 			"serviceNames": {
 				"pressingItem": "Pressing",
 				"jetCleanItem": "Spyling",

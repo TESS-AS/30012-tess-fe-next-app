@@ -16,6 +16,8 @@ import {
 	CircleCheck,
 	Info,
 	Link2,
+	Pencil,
+	Plus,
 	Trash2,
 	X,
 } from "lucide-react";
@@ -235,6 +237,71 @@ function PartCard({
 	);
 }
 
+function ExtraEquipmentCard({
+	line,
+	price,
+	seeDetailsLabel,
+	editLabel,
+	removeLabel,
+}: {
+	line: PartLine;
+	price: number;
+	seeDetailsLabel: string;
+	editLabel: string;
+	removeLabel: string;
+}) {
+	return (
+		<div className="flex flex-col gap-3 rounded-md border border-[#E8EAE9] bg-[#FAFBFA] p-3 sm:flex-row sm:items-center">
+			<div className="relative h-14 w-14 shrink-0 overflow-hidden rounded border border-[#E8EAE9] bg-white">
+				{line.imageUrl ? (
+					<Image
+						src={line.imageUrl}
+						alt=""
+						fill
+						sizes="56px"
+						className="object-contain"
+					/>
+				) : null}
+			</div>
+			<div className="min-w-0 flex-1">
+				<p className="text-sm font-semibold text-[#0F1912]">{line.name}</p>
+				{line.note ? (
+					<ul className="mt-1 list-disc pl-4 text-xs text-[#5A615D]">
+						<li>{line.note}</li>
+					</ul>
+				) : null}
+			</div>
+			<div className="flex shrink-0 items-center gap-2">
+				<Link
+					href={`/search?q=${encodeURIComponent(line.itemNumber)}`}
+					className="rounded-md border border-[#D5D9D7] bg-white px-3 py-1.5 text-xs text-[#0F1912] hover:border-[#009640]">
+					{seeDetailsLabel}
+				</Link>
+				<button
+					type="button"
+					aria-label={editLabel}
+					className="flex h-8 w-8 items-center justify-center rounded-md border border-[#D5D9D7] bg-white text-[#0F1912]">
+					<Pencil className="h-3.5 w-3.5" />
+				</button>
+				<button
+					type="button"
+					aria-label={removeLabel}
+					className="flex h-8 w-8 items-center justify-center rounded-md border border-[#D5D9D7] bg-white text-[#0F1912]">
+					<Trash2 className="h-3.5 w-3.5" />
+				</button>
+				<div className="flex items-center border-l border-[#E8EAE9] pl-3">
+					<span className="w-14 shrink-0 text-sm whitespace-nowrap text-[#5A615D] tabular-nums">
+						{formatQuantity(line.quantity)}x
+					</span>
+					<span className="w-28 shrink-0 text-sm font-semibold whitespace-nowrap text-[#0F1912] tabular-nums">
+						{formatNorwegianCurrency(price)}
+					</span>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 export function CartKitRow({
 	kit,
 	expanded,
@@ -283,7 +350,7 @@ export function CartKitRow({
 			itemNumber: entry.itemNumber,
 			quantity: entry.quantity,
 			imageUrl: entry.imageUrl,
-			note: endMatch ? t("end", { end: endMatch[1] }) : undefined,
+			note: endMatch ? t("endYes", { end: endMatch[1] }) : undefined,
 		} satisfies PartLine;
 	});
 	const services = getCartKitPartEntries(kit.services).map((entry) => ({
@@ -498,14 +565,22 @@ export function CartKitRow({
 						open={extrasOpen}
 						onToggle={() => setExtrasOpen((open) => !open)}>
 						{extras.map((line) => (
-							<PartCard
+							<ExtraEquipmentCard
 								key={line.key}
 								line={line}
 								price={lineTotal(line.itemNumber, line.quantity)}
-								priceInputSlot={priceInputSlot?.(line.itemNumber)}
-								{...partLabels}
+								seeDetailsLabel={t("seeDetails")}
+								editLabel={t("editEquipment")}
+								removeLabel={t("removeEquipment")}
 							/>
 						))}
+						<Button
+							type="button"
+							variant="outline"
+							className="h-9 bg-white">
+							<Plus className="mr-1 h-4 w-4" />
+							{t("addProtection")}
+						</Button>
 					</Section>
 
 					<Section
