@@ -620,7 +620,40 @@
 		"company": "Company",
 		"page": "Page",
 		"of": "of",
-		"itemRemoved": "Item removed from cart"
+		"itemRemoved": "Item removed from cart",
+		"kit": {
+			"length": "Length: {length} mm",
+			"inStock": "In stock ({warehouse})",
+			"outOfStock": "Out of stock ({warehouse})",
+			"seeDetails": "See details",
+			"name": "Name",
+			"itemNumber": "Item number",
+			"mainComponents": "Main components ({count})",
+			"hose": "Hose",
+			"ferrule": "Ferrule",
+			"insert": "Insert",
+			"lengthLabel": "Length",
+			"changeLength": "Change hose length",
+			"unitMm": "mm",
+			"lengthChanged": "Changed: {from}mm → {to}mm",
+			"lengthChangedCurrent": "Changed: {to}mm",
+			"dismissLengthChange": "Dismiss length change",
+			"extraEquipment": "Extra equipment ({count})",
+			"services": "Additional services ({count})",
+			"end": "End {end}",
+			"serviceNames": {
+				"pressingItem": "Pressing",
+				"jetCleanItem": "Jet cleaning",
+				"pressureTestItem": "Pressure test",
+				"electricControl": "Electrical control",
+				"pinPrickItem": "Pin prick",
+				"hoseProtection": "Hose protection",
+				"spiralGuard": "Spiral guard",
+				"welding": "Welding",
+				"marking": "Marking",
+				"finalInspection": "Final inspection"
+			}
+		}
 	},
 	"Login": {
 		"title": "Login",

@@ -622,7 +622,40 @@
 		"company": "Selskap",
 		"page": "Side",
 		"of": "av",
-		"itemRemoved": "Varen er fjernet fra handlekurven"
+		"itemRemoved": "Varen er fjernet fra handlekurven",
+		"kit": {
+			"length": "Lengde: {length} mm",
+			"inStock": "På lager ({warehouse})",
+			"outOfStock": "Ikke på lager ({warehouse})",
+			"seeDetails": "Se detaljer",
+			"name": "Navn",
+			"itemNumber": "Varenummer",
+			"mainComponents": "Hovedkomponenter ({count})",
+			"hose": "Slange",
+			"ferrule": "Hylse",
+			"insert": "Innsats",
+			"lengthLabel": "Lengde",
+			"changeLength": "Endre slangelengde",
+			"unitMm": "mm",
+			"lengthChanged": "Endret: {from}mm → {to}mm",
+			"lengthChangedCurrent": "Endret: {to}mm",
+			"dismissLengthChange": "Fjern lengdeendring",
+			"extraEquipment": "Ekstrautstyr ({count})",
+			"services": "Tilleggstjenester ({count})",
+			"end": "Ende {end}",
+			"serviceNames": {
+				"pressingItem": "Pressing",
+				"jetCleanItem": "Spyling",
+				"pressureTestItem": "Trykktest",
+				"electricControl": "El-kontroll",
+				"pinPrickItem": "Pin prick",
+				"hoseProtection": "Slangebeskyttelse",
+				"spiralGuard": "Spiralbeskyttelse",
+				"welding": "Sveising",
+				"marking": "Merking",
+				"finalInspection": "Sluttkontroll"
+			}
+		}
 	},
 	"Login": {
 		"title": "Login",

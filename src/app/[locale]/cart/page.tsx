@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 
-import { CartKitPartRow } from "@/components/checkout/cart-kit-part-row";
+import { CartKitRow } from "@/components/checkout/cart-kit-row";
 import OrderSummary from "@/components/checkout/order-summary";
 import ProductVariantTable from "@/components/checkout/product-variant-table";
 import { VariantModalHeader } from "@/components/checkout/variant-modal-header";
@@ -32,10 +32,7 @@ import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { Link } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
-import {
-	formatCartKitAdditionalLabel,
-	getCartKitPartEntries,
-} from "@/lib/cart-kit";
+import { getCartKitPartEntries } from "@/lib/cart-kit";
 import { getItemBalanceArray, postCartKit } from "@/services/carts.service";
 import { loadCategoryTree } from "@/services/categories.service";
 import {
@@ -50,9 +47,7 @@ import {
 import { RawCategory } from "@/types/categories.types";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
 import {
-	ChevronDown,
 	ChevronRight,
-	ChevronUp,
 	CircleAlert,
 	CircleCheck,
 	Trash2,
@@ -233,7 +228,6 @@ const CartPage = () => {
 	const [expandedItems, setExpandedItems] = useState<{
 		[key: string]: boolean;
 	}>({});
-
 	const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
 	const [excelArchiveModalOpen, setExcelArchiveModalOpen] = useState(false);
 	const [categoryPaths, setCategoryPaths] = useState<{
@@ -264,10 +258,13 @@ const CartPage = () => {
 
 	useEffect(() => {
 		async function loadWarehousesBalanceItemData() {
-			if (cartItems?.cart && cartItems.cart.length > 0) {
-				const itemNumbers = cartItems.cart.map((item) =>
-					item.itemNumber.toString(),
-				);
+			const itemNumbers = [
+				...(cartItems?.cart ?? []).map((item) => item.itemNumber.toString()),
+				...(cartItems?.cartKit ?? [])
+					.map((item) => item.hose?.itemNumber)
+					.filter((itemNumber): itemNumber is string => !!itemNumber),
+			];
+			if (itemNumbers.length > 0) {
 				const warehousesData = await loadItemBalanceBatch(itemNumbers);
 				setWarehouseBalancePerItem(
 					Array.isArray(warehousesData) ? warehousesData : [],
@@ -729,302 +726,94 @@ const CartPage = () => {
 						<>
 							{cartItems?.cartKit && cartItems.cartKit.length > 0 && (
 								<div className="space-y-4">
-									{cartItems.cartKit.map((item, idx) => {
-										const additionalItems = getCartKitPartEntries(
-											item.additionals,
+									{cartItems.cartKit.map((item) => {
+										const hoseBalance = warehouseBalancePerItem.find(
+											(batch) => batch.itemNumber === item.hose?.itemNumber,
 										);
+										const warehouse =
+											hoseBalance?.warehouses.find(
+												(entry) =>
+													entry.warehouseNumber === item.warehouseNumber,
+											) ?? hoseBalance?.warehouses[0];
 										return (
-											<div
-												key={idx}
-												className="border-lightGray rounded-md border py-6">
-												<div
-													role="button"
-													tabIndex={0}
-													aria-expanded={!!expandedItems[item.hexagonId]}
-													onClick={() =>
-														setExpandedItems((prev) => ({
+											<CartKitRow
+												key={item.cartLine}
+												kit={item}
+												expanded={!!expandedItems[item.hexagonId]}
+												onToggle={() =>
+													setExpandedItems((prev) => ({
+														...prev,
+														[item.hexagonId]: !prev[item.hexagonId],
+													}))
+												}
+												quantity={item.ferrule1?.quantity || 1}
+												quantityLoading={!!loadingItems[item.hexagonId]}
+												onIncrease={async (e) => {
+													e.stopPropagation();
+													setLoadingItems((prev) => ({
+														...prev,
+														[item.hexagonId]: true,
+													}));
+													try {
+														await postCartKit([
+															{
+																hexagonId: Number(item.hexagonId),
+																quantity: 1,
+																warehouseNumber:
+																	profile?.defaultWarehouseNumber,
+																companyNumber:
+																	profile?.defaultCompanyNumber,
+															},
+														]);
+														setIsCartChanging((v) => !v);
+													} finally {
+														setLoadingItems((prev) => ({
 															...prev,
-															[item.hexagonId]: !prev[item.hexagonId],
-														}))
+															[item.hexagonId]: false,
+														}));
 													}
-													onKeyDown={(e) => {
-														if (e.key === "Enter" || e.key === " ") {
-															e.preventDefault();
-															setExpandedItems((prev) => ({
-																...prev,
-																[item.hexagonId]: !prev[item.hexagonId],
-															}));
-														}
-													}}
-													className="flex w-full cursor-pointer flex-col gap-3 px-4 py-3 md:flex-row md:items-center md:justify-between">
-													<div className="flex items-center gap-3">
-														{expandedItems[item.hexagonId] ? (
-															<ChevronUp className="h-4 w-4 shrink-0 text-[#5A615D]" />
-														) : (
-															<ChevronDown className="h-4 w-4 shrink-0 text-[#5A615D]" />
-														)}
-														<span className="text-sm text-[#5A615D]">
-															ID: {item.hexagonId}
-														</span>
-														<span className="truncate font-medium text-[#0F1912]">
-															{item.hose.itemDescription}
-														</span>
-													</div>
-													<div className="flex items-center justify-between gap-4 pl-7 md:gap-6 md:pl-0">
-														<QuantityButtons
-															isLoading={!!loadingItems[item.hexagonId]}
-															quantity={item.ferrule1.quantity}
-															onIncrease={async (e) => {
-																e.stopPropagation();
-																setLoadingItems((prev) => ({
-																	...prev,
-																	[item.hexagonId]: true,
-																}));
-																try {
-																	await postCartKit([
-																		{
-																			hexagonId: Number(item.hexagonId),
-																			quantity: 1,
-																			warehouseNumber:
-																				profile?.defaultWarehouseNumber,
-																			companyNumber:
-																				profile?.defaultCompanyNumber,
-																		},
-																	]);
-																	setIsCartChanging((v) => !v);
-																} finally {
-																	setLoadingItems((prev) => ({
-																		...prev,
-																		[item.hexagonId]: false,
-																	}));
-																}
-															}}
-															onDecrease={async (e) => {
-																e.stopPropagation();
-																setLoadingItems((prev) => ({
-																	...prev,
-																	[item.hexagonId]: true,
-																}));
-																try {
-																	await postCartKit([
-																		{
-																			hexagonId: Number(item.hexagonId),
-																			quantity: -1,
-																			warehouseNumber:
-																				profile?.defaultWarehouseNumber,
-																			companyNumber:
-																				profile?.defaultCompanyNumber,
-																		},
-																	]);
-																	setIsCartChanging((v) => !v);
-																} finally {
-																	setLoadingItems((prev) => ({
-																		...prev,
-																		[item.hexagonId]: false,
-																	}));
-																}
-															}}
-														/>
-														<div className="flex items-center gap-6">
-															<span className="font-semibold">
-																{formatNorwegianCurrency(getDisplayKitTotal(item))}
-															</span>
-
-															<Button
-																className="w-4 p-0"
-																size="icon"
-																variant="ghost"
-																onClick={async (e) => {
-																	e.stopPropagation();
-																	try {
-																		await removeItemOptimistic(item.cartLine);
-																		toast.success(t("Cart.itemRemoved"));
-																	} catch {
-																		toast.error(t("Cart.itemRemoveError"));
-																	}
-																}}>
-																{removingItems[item.hexagonId] ? (
-																	<div className="border-t-primary h-4 w-4 animate-spin rounded-full border-2 border-gray-300" />
-																) : (
-																	<Trash2 className="h-4 w-4 text-[#C81E1E]" />
-																)}
-															</Button>
-														</div>
-													</div>
-												</div>
-
-												{expandedItems[item.hexagonId] && (
-													<div className="border-t p-4">
-														<div className="space-y-3">
-															<div className="space-y-4 pl-8">
-																{/* Kit sub-lines — dev's `CartKitPartRow` component, extended
-																 * with the employee price-override slot and override-aware
-																 * line total. Non-employee users get `priceInputSlot=null` and
-																 * the raw engine price. */}
-																<CartKitPartRow
-																	name={item.hose.itemName}
-																	itemNumber={item.hose.itemNumber}
-																	meta={
-																		item.hose.lengthMm
-																			? `${item.hose.lengthMm} mm`
-																			: undefined
-																	}
-																	quantity={item.hose.quantity}
-																	price={getDisplayLineTotal(
-																		item.hose.itemNumber,
-																		item.hose.quantity ?? 1,
-																	)}
-																	priceInputSlot={renderUnitPriceInput(
-																		item.hose.itemNumber,
-																	)}
-																	quantityLabel={t("Cart.quantity")}
-																/>
-																<CartKitPartRow
-																	name={item.ferrule1.name}
-																	itemNumber={item.ferrule1.itemNumber}
-																	quantity={item.ferrule1.quantity}
-																	price={getDisplayLineTotal(
-																		item.ferrule1.itemNumber,
-																		item.ferrule1.quantity ?? 1,
-																	)}
-																	priceInputSlot={renderUnitPriceInput(
-																		item.ferrule1.itemNumber,
-																	)}
-																	quantityLabel={t("Cart.quantity")}
-																/>
-																<CartKitPartRow
-																	name={item.ferrule2.name}
-																	itemNumber={item.ferrule2.itemNumber}
-																	quantity={item.ferrule2.quantity}
-																	price={getDisplayLineTotal(
-																		item.ferrule2.itemNumber,
-																		item.ferrule2.quantity ?? 1,
-																	)}
-																	priceInputSlot={renderUnitPriceInput(
-																		item.ferrule2.itemNumber,
-																	)}
-																	quantityLabel={t("Cart.quantity")}
-																/>
-																<CartKitPartRow
-																	name={item.insert1.name}
-																	itemNumber={item.insert1.itemNumber}
-																	quantity={item.insert1.quantity}
-																	price={getDisplayLineTotal(
-																		item.insert1.itemNumber,
-																		item.insert1.quantity ?? 1,
-																	)}
-																	priceInputSlot={renderUnitPriceInput(
-																		item.insert1.itemNumber,
-																	)}
-																	quantityLabel={t("Cart.quantity")}
-																/>
-																<CartKitPartRow
-																	name={item.insert2.name}
-																	itemNumber={item.insert2.itemNumber}
-																	quantity={item.insert2.quantity}
-																	price={getDisplayLineTotal(
-																		item.insert2.itemNumber,
-																		item.insert2.quantity ?? 1,
-																	)}
-																	priceInputSlot={renderUnitPriceInput(
-																		item.insert2.itemNumber,
-																	)}
-																	quantityLabel={t("Cart.quantity")}
-																/>
-																{Object.values(item.services ?? {}).some(
-																	(v) => {
-																		if (v == null || typeof v !== "object")
-																			return false;
-																		const maybeItemNumber = (
-																			v as { itemNumber?: unknown }
-																		).itemNumber;
-																		return (
-																			typeof maybeItemNumber === "string" &&
-																			maybeItemNumber.trim().length > 0
-																		);
-																	},
-																) && (
-																	<div className="space-y-4">
-																		{Object.entries(item.services ?? {})
-																			.filter(([, v]) => {
-																				if (v == null || typeof v !== "object")
-																					return false;
-																				const maybeItemNumber = (
-																					v as { itemNumber?: unknown }
-																				).itemNumber;
-																				return (
-																					typeof maybeItemNumber === "string" &&
-																					maybeItemNumber.trim().length > 0
-																				);
-																			})
-																			.map(([key, service]) => {
-																				const typedService = service as {
-																					itemNumber?: string;
-																					quantity?: number;
-																				};
-																				const itemNumber =
-																					typedService.itemNumber ?? "";
-																				return (
-																					<CartKitPartRow
-																						key={`${key}-${itemNumber}`}
-																						name={key
-																							.replace(
-																								/([a-z])([A-Z])/g,
-																								"$1 $2",
-																							)
-																							.replace(/_/g, " ")
-																							.replace(/\s+/g, " ")
-																							.trim()}
-																						itemNumber={itemNumber}
-																						quantity={
-																							typedService.quantity ?? 1
-																						}
-																						price={getDisplayLineTotal(
-																							itemNumber,
-																							typedService.quantity ?? 1,
-																						)}
-																						priceInputSlot={renderUnitPriceInput(itemNumber)}
-																						quantityLabel={t("Cart.quantity")}
-																					/>
-																				);
-																			})}
-																	</div>
-																)}
-																{additionalItems.length > 0 && (
-																	<div className="space-y-4">
-																		{additionalItems.map((additional) => (
-																			<CartKitPartRow
-																				key={`${additional.key}-${additional.itemNumber}`}
-																			name={
-																				additional.name ||
-																				formatCartKitAdditionalLabel(
-																					additional.key,
-																				)
-																			}
-																			itemNumber={additional.itemNumber}
-																			quantity={additional.quantity}
-																			price={
-																				overriddenUnitPrices[additional.itemNumber] != null
-																					? overriddenUnitPrices[additional.itemNumber] *
-																						additional.quantity
-																				: getCalculatedPrice(
-																						additional.itemNumber,
-																						additional.quantity,
-																					)
-																			}
-																			priceInputSlot={renderUnitPriceInput(
-																				additional.itemNumber,
-																			)}
-																			quantityLabel={t("Cart.quantity")}
-																		/>
-																		))}
-																	</div>
-																)}
-															</div>
-														</div>
-													</div>
-												)}
-											</div>
+												}}
+												onDecrease={async (e) => {
+													e.stopPropagation();
+													setLoadingItems((prev) => ({
+														...prev,
+														[item.hexagonId]: true,
+													}));
+													try {
+														await postCartKit([
+															{
+																hexagonId: Number(item.hexagonId),
+																quantity: -1,
+																warehouseNumber:
+																	profile?.defaultWarehouseNumber,
+																companyNumber:
+																	profile?.defaultCompanyNumber,
+															},
+														]);
+														setIsCartChanging((v) => !v);
+													} finally {
+														setLoadingItems((prev) => ({
+															...prev,
+															[item.hexagonId]: false,
+														}));
+													}
+												}}
+												onRemove={async (e) => {
+													e.stopPropagation();
+													try {
+														await removeItemOptimistic(item.cartLine);
+														toast.success(t("Cart.itemRemoved"));
+													} catch {
+														toast.error(t("Cart.itemRemoveError"));
+													}
+												}}
+												removing={!!removingItems[item.hexagonId]}
+												kitTotal={getDisplayKitTotal(item)}
+												lineTotal={getDisplayLineTotal}
+												priceInputSlot={renderUnitPriceInput}
+												warehouseName={warehouse?.warehouseName}
+												inStock={(warehouse?.balance ?? 0) > 0}
+											/>
 										);
 									})}
 								</div>

@@ -3,7 +3,36 @@ export type CartKitPartEntry = {
 	itemNumber: string;
 	quantity: number;
 	name?: string;
+	imageUrl?: string;
 };
+
+const IMAGE_KEYS = [
+	"imageUrl",
+	"thumbnailUrl",
+	"thumbnail_url",
+	"image",
+	"pictureUrl",
+] as const;
+
+export function readCartKitImageUrl(value: unknown): string | undefined {
+	if (value == null || typeof value !== "object") return undefined;
+	const record = value as Record<string, unknown>;
+	for (const key of IMAGE_KEYS) {
+		const candidate = record[key];
+		if (typeof candidate === "string" && candidate.trim()) {
+			return candidate.trim();
+		}
+	}
+	const media = record.media ?? record.mediaId;
+	if (!Array.isArray(media)) return undefined;
+	for (const item of media) {
+		if (item == null || typeof item !== "object") continue;
+		const mediaRecord = item as { thumbnail_url?: unknown; url?: unknown };
+		const url = mediaRecord.thumbnail_url ?? mediaRecord.url;
+		if (typeof url === "string" && url.trim()) return url.trim();
+	}
+	return undefined;
+}
 
 const hasItemNumber = (
 	value: unknown,
@@ -35,6 +64,7 @@ export function getCartKitPartEntries(
 				itemNumber: value.itemNumber.trim(),
 				quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
 				name: typeof value.name === "string" ? value.name : undefined,
+				imageUrl: readCartKitImageUrl(value),
 			},
 		];
 	});
