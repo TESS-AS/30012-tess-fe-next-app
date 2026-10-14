@@ -1,4 +1,4 @@
-import { FilterValues } from "@/types/filter.types";
+import { FilterValues, SliderValues } from "@/types/filter.types";
 import { AxiosResponse } from "axios";
 
 import axiosInstance from "./axiosClient";
@@ -19,6 +19,7 @@ export async function loadFilterFamily(params: {
 	searchTerm?: string | null;
 	language?: string | null;
 	filters?: FilterValues[];
+	sliders?: SliderValues[];
 }): Promise<any> {
 	const query = new URLSearchParams();
 	if (params.categoryNumber) query.append("cat", params.categoryNumber);
@@ -26,7 +27,14 @@ export async function loadFilterFamily(params: {
 	if (params.language) query.append("lang", params.language);
 
 	const url = `/proxy/filter${query.toString() ? `?${query.toString()}` : ""}`;
-	const response = await axiosInstance.post(url, params.filters ?? []);
+	// BE expects the SAME wrapped shape as `/proxy/searchList`:
+	// `{ filters: [...], sliders: [...] }`. Posting a bare array makes
+	// both lanes resolve to `[]` on BE and the family comes back
+	// un-narrowed by the user's current slider selection.
+	const response = await axiosInstance.post(url, {
+		filters: params.filters ?? [],
+		sliders: params.sliders ?? [],
+	});
 
 	return response.data;
 }

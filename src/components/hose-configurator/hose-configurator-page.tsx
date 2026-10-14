@@ -81,7 +81,6 @@ function normalizeBruksomrade(
 		temperatureMin: value.temperatureMin ?? legacy,
 		temperatureMax: value.temperatureMax ?? legacy,
 		hoseSize: value.hoseSize ?? "",
-		customEndSize: value.customEndSize ?? false,
 		moreRequirements: value.moreRequirements ?? "",
 	};
 }
@@ -193,6 +192,19 @@ export function HoseConfiguratorPage() {
 	}, []);
 
 	useEffect(() => {
+		const scrollToTop = () => {
+			document.getElementById("app-scroll-container")?.scrollTo({
+				top: 0,
+				behavior: "auto",
+			});
+			window.scrollTo({ top: 0, behavior: "auto" });
+		};
+		scrollToTop();
+		const frame = requestAnimationFrame(scrollToTop);
+		return () => cancelAnimationFrame(frame);
+	}, [currentStep]);
+
+	useEffect(() => {
 		if (!hydrated) return;
 		// Never overwrite a saved form with a null/empty shell from a brief
 		// remount — keep the previous draft bruksomrade when local state is empty.
@@ -204,8 +216,7 @@ export function HoseConfiguratorPage() {
 				bruksomrade.temperatureMin ||
 				bruksomrade.temperatureMax ||
 				bruksomrade.hoseSize ||
-				bruksomrade.moreRequirements ||
-				bruksomrade.customEndSize)
+				bruksomrade.moreRequirements)
 				? bruksomrade
 				: (existing?.bruksomrade ?? bruksomrade);
 

@@ -85,7 +85,6 @@ export function buildHoseAssemblyRequest(
 		toNumber(bruksomrade?.temperatureMin) ??
 		toNumber(bruksomrade?.temperature);
 	const otherRequirments = bruksomrade?.moreRequirements.trim() || null;
-	const marking = specs?.customMarking.trim() || null;
 
 	return {
 		hose: {
@@ -120,7 +119,7 @@ export function buildHoseAssemblyRequest(
 		service: {
 			pressureTesting: true,
 			dataSheet: specs?.options.testCertificate ?? false,
-			specialMarking: marking,
+			specialMarking: null,
 			spiralGuard: specs?.options.spiralProtection ?? false,
 		},
 	};

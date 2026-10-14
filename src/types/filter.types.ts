@@ -51,6 +51,16 @@ export interface FilterValues {
 	values: string[];
 }
 
+// Range filter (slider) wire payload. BE expects a separate `sliders[]`
+// array next to `filters[]` on /proxy/searchList, with `min`/`max` as
+// numbers (not stringified). See `search_list_controller.rs::Slider` in
+// 20002-TESS-SearchEngine-rs.
+export interface SliderValues {
+	key: string;
+	min: number;
+	max: number;
+}
+
 // Top-level filter group for a category, as used by the UI.
 export interface FilterCategory {
 	category: string;

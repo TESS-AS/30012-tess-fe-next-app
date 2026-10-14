@@ -54,7 +54,12 @@ export default function CategoryNavigationMenu({
 	const { data: profile } = useGetProfileData();
 	const rootRef = useRef<HTMLElement | null>(null);
 	const ulRef = useRef<HTMLUListElement | null>(null);
-	const showPromoBanner = profile?.userId === 580 || profile?.userId === 558 || profile?.userId === 567 || profile?.userId === 12937;
+	const showPromoBanner =
+		profile?.userId === 580 ||
+		profile?.userId === 558 ||
+		profile?.userId === 567 ||
+		profile?.userId === 12937
+		|| profile?.userId === 1790;
 
 	const closeMenu = useCallback(() => {
 		setOpenMenu(false);
@@ -103,6 +108,10 @@ export default function CategoryNavigationMenu({
 	}, [closeMenu]);
 
 	const activeCategory = categories?.find((c) => c.slug === openMenu);
+	const isHoseCategoryMenu =
+		activeCategory?.groupId === "01000000" ||
+		activeCategory?.slug === "slanger-og-ror" ||
+		activeCategory?.slug === "hoses-and-pipes";
 	const visibleCategories = categories?.slice(0, MAX_NAV_CATEGORIES);
 	const slugsKey = (visibleCategories ?? []).map((c) => c.slug).join("|");
 	const isTight = useChildrenOverflow(ulRef, slugsKey);
@@ -179,7 +188,7 @@ export default function CategoryNavigationMenu({
 						}}
 					>
 						<div className="bg-popover text-popover-foreground flex max-h-[80vh] min-h-[560px] w-full flex-col overflow-y-auto animate-in fade-in zoom-in-90 duration-200">
-							{showPromoBanner && (
+							{showPromoBanner && isHoseCategoryMenu && (
 								<DropdownPromoBanner onClose={closeMenu} />
 							)}
 							<ul className="container mx-auto grid flex-1 grid-cols-1 items-start justify-items-start gap-x-6 gap-y-8 px-0 pt-6 pb-4 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
