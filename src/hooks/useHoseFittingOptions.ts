@@ -12,10 +12,12 @@ import { useQueries } from "@tanstack/react-query";
 
 export const hoseFittingKeys = {
 	all: ["hoseFitting"] as const,
-	typeFitting: () => [...hoseFittingKeys.all, "typeFitting"] as const,
-	gender: () => [...hoseFittingKeys.all, "gender"] as const,
-	angle: () => [...hoseFittingKeys.all, "angle"] as const,
-	material: () => [...hoseFittingKeys.all, "material"] as const,
+	typeFitting: (ecom = false) =>
+		[...hoseFittingKeys.all, "typeFitting", ecom] as const,
+	gender: (ecom = false) => [...hoseFittingKeys.all, "gender", ecom] as const,
+	angle: (ecom = false) => [...hoseFittingKeys.all, "angle", ecom] as const,
+	material: (ecom = false) =>
+		[...hoseFittingKeys.all, "material", ecom] as const,
 	rotationAngle: () => [...hoseFittingKeys.all, "rotationAngle"] as const,
 };
 
@@ -34,8 +36,8 @@ export function useHoseFittingOptions(enabled = true) {
 	const results = useQueries({
 		queries: [
 			{
-				queryKey: hoseFittingKeys.typeFitting(),
-				queryFn: getTypeFitting,
+				queryKey: hoseFittingKeys.typeFitting(true),
+				queryFn: () => getTypeFitting(true),
 				enabled,
 				staleTime: 30 * 60 * 1000,
 				gcTime: 60 * 60 * 1000,
@@ -43,8 +45,8 @@ export function useHoseFittingOptions(enabled = true) {
 				refetchOnWindowFocus: false,
 			},
 			{
-				queryKey: hoseFittingKeys.gender(),
-				queryFn: getHoseGender,
+				queryKey: hoseFittingKeys.gender(true),
+				queryFn: () => getHoseGender(true),
 				enabled,
 				staleTime: 30 * 60 * 1000,
 				gcTime: 60 * 60 * 1000,
@@ -52,8 +54,8 @@ export function useHoseFittingOptions(enabled = true) {
 				refetchOnWindowFocus: false,
 			},
 			{
-				queryKey: hoseFittingKeys.angle(),
-				queryFn: getHoseAngle,
+				queryKey: hoseFittingKeys.angle(true),
+				queryFn: () => getHoseAngle(true),
 				enabled,
 				staleTime: 30 * 60 * 1000,
 				gcTime: 60 * 60 * 1000,
@@ -61,8 +63,8 @@ export function useHoseFittingOptions(enabled = true) {
 				refetchOnWindowFocus: false,
 			},
 			{
-				queryKey: hoseFittingKeys.material(),
-				queryFn: getHoseMaterial,
+				queryKey: hoseFittingKeys.material(true),
+				queryFn: () => getHoseMaterial(true),
 				enabled,
 				staleTime: 30 * 60 * 1000,
 				gcTime: 60 * 60 * 1000,

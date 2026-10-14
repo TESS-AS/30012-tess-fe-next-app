@@ -53,23 +53,23 @@ export function prefetchHoseConfiguratorLookups() {
 		...common,
 	});
 	void queryClient.prefetchQuery({
-		queryKey: hoseFittingKeys.typeFitting(),
-		queryFn: getTypeFitting,
+		queryKey: hoseFittingKeys.typeFitting(true),
+		queryFn: () => getTypeFitting(true),
 		...common,
 	});
 	void queryClient.prefetchQuery({
-		queryKey: hoseFittingKeys.gender(),
-		queryFn: getHoseGender,
+		queryKey: hoseFittingKeys.gender(true),
+		queryFn: () => getHoseGender(true),
 		...common,
 	});
 	void queryClient.prefetchQuery({
-		queryKey: hoseFittingKeys.angle(),
-		queryFn: getHoseAngle,
+		queryKey: hoseFittingKeys.angle(true),
+		queryFn: () => getHoseAngle(true),
 		...common,
 	});
 	void queryClient.prefetchQuery({
-		queryKey: hoseFittingKeys.material(),
-		queryFn: getHoseMaterial,
+		queryKey: hoseFittingKeys.material(true),
+		queryFn: () => getHoseMaterial(true),
 		...common,
 	});
 	void queryClient.prefetchQuery({
