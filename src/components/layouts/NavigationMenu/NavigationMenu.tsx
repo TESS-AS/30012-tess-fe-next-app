@@ -58,7 +58,8 @@ export default function CategoryNavigationMenu({
 		profile?.userId === 580 ||
 		profile?.userId === 558 ||
 		profile?.userId === 567 ||
-		profile?.userId === 12937;
+		profile?.userId === 12937
+		|| profile?.userId === 1790;
 
 	const closeMenu = useCallback(() => {
 		setOpenMenu(false);

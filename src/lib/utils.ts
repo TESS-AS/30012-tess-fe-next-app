@@ -85,16 +85,11 @@ export function formatDate(date: string | Date, time?: string) {
 export function formatUrlToDisplayName(urlString: string): string {
 	if (!urlString) return "";
 	const decodedString = decodeURIComponent(urlString);
-	// Replace hyphens with spaces, normalize Norwegian characters, and convert to lowercase
-	const normalizedString = decodedString
-		.replace(/-/g, " ")
-		.replace(/å/g, "a")
-		.replace(/ø/g, "o")
-		.replace(/æ/g, "ae")
-		.replace(/Å/g, "a")
-		.replace(/Ø/g, "o")
-		.replace(/Æ/g, "ae")
-		.toLowerCase();
+	// Hyphens → spaces, lowercase. Previously this also transliterated
+	// ø→o / æ→ae / å→a, which produced "Verktoy" in breadcrumb labels even
+	// when the source slug carried the real Norwegian characters. BE now
+	// preserves ø/æ/å in slugs so we keep them through to the display label.
+	const normalizedString = decodedString.replace(/-/g, " ").toLowerCase();
 
 	// Norwegian lowercase words that should remain lowercase (unless first word)
 	const norwegianLowercaseWords = new Set([

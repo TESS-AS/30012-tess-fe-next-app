@@ -81,7 +81,15 @@ export default function middleware(request: NextRequest) {
 	return NextResponse.next();
 }
 
-// Only apply to non-static, non-api, non-next routes
+// Only apply to non-static, non-api, non-next routes.
+//
+// NOTE: the previous `.*\\..*` alternative excluded ANY path containing a
+// dot anywhere, which 404'd legitimate product URLs whose IDs include a
+// decimal point (e.g. `/no/search/P_FS10443-1.6`). We now exclude only
+// paths ending in a known static-asset extension, so dotted product IDs
+// still reach `rewriteProductUrls` and get mapped to the dynamic route.
 export const config = {
-	matcher: ["/((?!_next|favicon.ico|api|auth|.*\\..*).*)"],
+	matcher: [
+		"/((?!_next|favicon.ico|api|auth|.*\\.(?:css|js|mjs|map|png|jpe?g|svg|gif|webp|avif|ico|woff2?|ttf|eot|txt|xml|json|pdf)$).*)",
+	],
 };
