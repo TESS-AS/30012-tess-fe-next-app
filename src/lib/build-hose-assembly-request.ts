@@ -40,6 +40,12 @@ function labelOf(value: string, options: LabeledOption[]): string | null {
 	return options.find((option) => option.value === trimmed)?.label ?? trimmed;
 }
 
+/** UI shows 1/4". The assembly request expects 1/4. */
+function sizeValue(value: string): string | null {
+	const trimmed = value.trim().replace(/["″”]$/u, "").trim();
+	return trimmed || null;
+}
+
 function mapEnd(
 	end: HoseSpecsDraft["end1"],
 	options: Pick<
@@ -53,7 +59,7 @@ function mapEnd(
 	return {
 		fittingType: labelOf(end.fittingType, options.fittingTypeOptions),
 		gender: labelOf(end.connection, options.connectionOptions),
-		fittingEndDimension: end.size.trim() || null,
+		fittingEndDimension: sizeValue(end.size),
 		angle: labelOf(end.design, options.designOptions),
 		material: labelOf(end.material, options.materialOptions),
 	};
