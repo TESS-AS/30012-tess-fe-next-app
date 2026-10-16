@@ -8,34 +8,44 @@ import type {
 
 import axiosClient from "./axiosClient";
 
+function ecomQuery(ecom: boolean) {
+	return ecom ? { params: { ecom: true } } : undefined;
+}
+
 /** Fittingtype dropdown (Ende 1 / 2). */
-export async function getTypeFitting(): Promise<HoseFittingType[]> {
+export async function getTypeFitting(ecom = false): Promise<HoseFittingType[]> {
 	const response = await axiosClient.get<HoseFittingType[]>(
 		"/hoseFitting/getTypeFitting",
+		ecomQuery(ecom),
 	);
 	return response.data;
 }
 
 /** Tilkobling dropdown (Female / Male). */
-export async function getHoseGender(): Promise<HoseFittingGender[]> {
+export async function getHoseGender(ecom = false): Promise<HoseFittingGender[]> {
 	const response = await axiosClient.get<HoseFittingGender[]>(
 		"/hoseFitting/getHoseGender",
+		ecomQuery(ecom),
 	);
 	return response.data;
 }
 
 /** Utførelse dropdown (Rett, 45°, 90°, …). */
-export async function getHoseAngle(): Promise<HoseFittingAngle[]> {
+export async function getHoseAngle(ecom = false): Promise<HoseFittingAngle[]> {
 	const response = await axiosClient.get<HoseFittingAngle[]>(
 		"/hoseFitting/getHoseAngle",
+		ecomQuery(ecom),
 	);
 	return response.data;
 }
 
 /** Materiale dropdown. */
-export async function getHoseMaterial(): Promise<HoseFittingMaterial[]> {
+export async function getHoseMaterial(
+	ecom = false,
+): Promise<HoseFittingMaterial[]> {
 	const response = await axiosClient.get<HoseFittingMaterial[]>(
 		"/hoseFitting/getHoseMaterial",
+		ecomQuery(ecom),
 	);
 	return response.data;
 }
