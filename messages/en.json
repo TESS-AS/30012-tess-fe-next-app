@@ -1182,7 +1182,8 @@
 	},
 	"SidebarNav": {
 		"hoseManagement": "Hose Management",
-		"eCommerce": "E-Commerce"
+		"eCommerce": "E-Commerce",
+		"myPage": "My page"
 	},
 	"MineBestillinger": {
 		"title": "My Orders",

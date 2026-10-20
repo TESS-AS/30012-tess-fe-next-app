@@ -1184,7 +1184,8 @@
 	},
 	"SidebarNav": {
 		"hoseManagement": "Hose Management",
-		"eCommerce": "E-handel"
+		"eCommerce": "E-handel",
+		"myPage": "Min side"
 	},
 	"MineBestillinger": {
 		"title": "Mine bestillinger",

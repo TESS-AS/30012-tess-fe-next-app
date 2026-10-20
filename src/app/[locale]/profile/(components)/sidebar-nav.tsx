@@ -31,6 +31,8 @@ export function SidebarNav({
 	profile,
 }: SidebarNavProps) {
 	const t = useTranslations("SidebarNav");
+	const isOrderHistoryOnly =
+		profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
 	const pathname = usePathname();
 	const [expandedItems, setExpandedItems] = useState<string[]>([]);
 	const [isCollapsed, setIsCollapsed] = useState(
@@ -166,16 +168,16 @@ export function SidebarNav({
 									"flex h-9 w-9 items-center justify-center rounded",
 									activeMode === "ehandel" && "bg-[#DCF7E0]",
 								)}>
-								<Image
-									src={CartSvg}
-									alt="E-handel"
-									width={20}
-									height={20}
-									loading="eager"
-									className="h-5 w-5"
-								/>
-							</div>
-							<span className="text-center">{t("eCommerce")}</span>
+									<Image
+										src={CartSvg}
+										alt={t("myPage")}
+										width={20}
+										height={20}
+										loading="eager"
+										className="h-5 w-5"
+									/>
+								</div>
+							<span className="text-center">{t("myPage")}</span>
 						</button>
 					)}
 				</div>
@@ -185,7 +187,9 @@ export function SidebarNav({
 						<div className="flex w-full flex-col">
 							<p className="mt-3.5 ml-3 text-[12px] font-medium tracking-wide uppercase text-[#5A615D]">
 								{activeMode === "ehandel"
-									? t("eCommerce")
+									? isOrderHistoryOnly
+										? t("myPage")
+										: t("eCommerce")
 									: activeMode === "tess-edi"
 										? "TESS EDI"
 										: activeMode === "thm"

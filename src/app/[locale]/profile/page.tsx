@@ -442,7 +442,10 @@ export default function ProfilePage() {
 				? t("BreadCrumbs.hoseManagement")
 				: activeMode === "tess-edi"
 					? "TESS EDI"
-					: t("BreadCrumbs.ehandel");
+					: profile.defaultCustomerNumber ===
+						  SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+						? t("SidebarNav.myPage")
+						: t("BreadCrumbs.ehandel");
 		const defaultTab = isThmTab
 			? "thm-active-projects"
 			: activeMode === "hose"
