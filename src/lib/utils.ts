@@ -337,12 +337,22 @@ export function deserializeFilters(
 
 	if (!filterString) return filters;
 
-	const params = new URLSearchParams(filterString);
-	params.forEach((value, key) => {
-		// Split comma-separated values
-		const values = value.split(",").map((v) => decodeURIComponent(v));
-		filters[decodeURIComponent(key)] = values;
-	});
+	// Parse the raw string manually instead of URLSearchParams. The latter
+	// auto-decodes %2C → "," before our code runs, collapsing escaped commas
+	// inside a value (e.g. the filter option "Steel, Carbon") into the
+	// separator and splitting one chip into two. We split on the raw-string
+	// comma BEFORE decoding so %2C stays intact until after the split.
+	for (const part of filterString.split("&")) {
+		if (!part) continue;
+		const eqIndex = part.indexOf("=");
+		const rawKey = eqIndex === -1 ? part : part.slice(0, eqIndex);
+		const rawValues = eqIndex === -1 ? "" : part.slice(eqIndex + 1);
+		const key = decodeURIComponent(rawKey);
+		const values = rawValues
+			? rawValues.split(",").map((v) => decodeURIComponent(v))
+			: [];
+		filters[key] = values;
+	}
 
 	return filters;
 }

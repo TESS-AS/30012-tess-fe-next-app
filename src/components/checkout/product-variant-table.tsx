@@ -1178,6 +1178,22 @@ export default function ProductVariantTable({
 																	quantity={qty}
 																	step={multiple}
 																	min={multiple}
+																	allowInput
+																	onQuantityChange={(nextQty) => {
+																		if (nextQty === qty) return;
+																		setQuantities((prev) => ({
+																			...prev,
+																			[variant.itemNumber]: nextQty,
+																		}));
+																		onQuantityChange?.(
+																			variant.itemNumber.toString(),
+																			nextQty,
+																		);
+																		void calculatePriceForVariant(
+																			variant,
+																			nextQty,
+																		);
+																	}}
 																	onIncrease={() => {
 																		const newQty = qty + multiple;
 																		setQuantities((prev) => ({

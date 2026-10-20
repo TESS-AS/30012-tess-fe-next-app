@@ -65,8 +65,12 @@ interface ProductData {
 	shortDescNo?: string;
 	longDescEn?: string;
 	longDescNo?: string;
-	uspEn?: Record<string, string>;
-	uspNo?: Record<string, string>;
+	// BE now returns an array of `{name, language, valueDef}` per locale (one
+	// entry per usp1..usp6). Previously declared as a Record<string,string>
+	// map but the actual shape has always been a list — see the sample in
+	// `/columnAttributes` for product 1025.
+	uspEn?: Array<{ name: string; language: string; valueDef: string }>;
+	uspNo?: Array<{ name: string; language: string; valueDef: string }>;
 	bvp?: string;
 	mediaId?: MediaItem;
 	defaultAttributes?: Array<{

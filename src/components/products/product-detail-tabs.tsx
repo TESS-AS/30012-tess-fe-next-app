@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { Copy, Minus, Plus } from "lucide-react";
+import { Check, Copy, Minus, Plus } from "lucide-react";
 
 interface ProductDetailTabsProps {
 	columnAttributes: Record<string, any> | null;
@@ -53,7 +53,29 @@ export function ProductDetailTabs({
 		return attr?.valueDef ?? null;
 	}, [selectedItemNumber, columnAttributes]);
 
-	if (allAttributes.length === 0 && filteredAttributes.length === 0) {
+	// USPs ("Fordeler") come from the product-level `uspNo`/`uspEn` arrays on
+	// /columnAttributes. Each entry is `{ name: "usp1".."usp6", language,
+	// valueDef }`. Filter out empties so the column collapses cleanly when BE
+	// returns no USPs for a product.
+	const uspList = useMemo(() => {
+		const raw = (
+			locale === "no"
+				? columnAttributes?.productData?.uspNo
+				: columnAttributes?.productData?.uspEn
+		) as
+			| Array<{ name?: string; language?: string; valueDef?: string }>
+			| undefined;
+		if (!Array.isArray(raw)) return [];
+		return raw
+			.map((entry) => (entry?.valueDef ?? "").trim())
+			.filter((v) => v.length > 0);
+	}, [columnAttributes?.productData?.uspNo, columnAttributes?.productData?.uspEn, locale]);
+
+	if (
+		allAttributes.length === 0 &&
+		filteredAttributes.length === 0 &&
+		uspList.length === 0
+	) {
 		return null;
 	}
 
@@ -63,6 +85,7 @@ export function ProductDetailTabs({
 		locale === "no" ? "Variantinformasjon" : "Variant information";
 	const productInfoTitle =
 		locale === "no" ? "Produktinformasjon" : "Product information";
+	const uspTitle = locale === "no" ? "Fordeler" : "Benefits";
 
 	const copy = (value: string) => {
 		if (typeof navigator !== "undefined" && navigator.clipboard) {
@@ -87,7 +110,7 @@ export function ProductDetailTabs({
 			</header>
 
 			{!collapsed && (
-				<div className="grid grid-cols-1 gap-6 px-6 pt-2 pb-6 lg:grid-cols-[minmax(240px,340px)_1fr]">
+				<div className="grid grid-cols-1 gap-6 px-6 pt-2 pb-6 md:grid-cols-[minmax(240px,340px)_1fr] lg:grid-cols-[minmax(240px,340px)_1fr_minmax(240px,340px)]">
 					{/* Left: Variantinformasjon (inner bordered box) */}
 					{allAttributes.length > 0 && (
 						<div
@@ -162,7 +185,7 @@ export function ProductDetailTabs({
 						</div>
 					)}
 
-					{/* Right: Produktinformasjon (no inner border, wider content) */}
+					{/* Middle: Produktinformasjon (no inner border, wider content) */}
 					{filteredAttributes.length > 0 && (
 						<div className="px-4">
 							<h3 className="mb-4 py-3 text-base font-semibold text-gray-900">
@@ -182,6 +205,32 @@ export function ProductDetailTabs({
 									</div>
 								))}
 							</dl>
+						</div>
+					)}
+
+					{/* Right: Fordeler / Benefits (USPs) — spans full width on md,
+					    sits as the 3rd column on lg+ */}
+					{uspList.length > 0 && (
+						<div
+							className="rounded-lg border md:col-span-2 lg:col-span-1"
+							style={{ borderColor: "#C1C4C2", backgroundColor: "#E8EAE9" }}>
+							<div className="px-4 py-3">
+								<h3 className="text-base font-semibold text-gray-900">
+									{uspTitle}
+								</h3>
+							</div>
+							<div className="px-4 pb-4">
+								<ul className="space-y-2">
+									{uspList.map((usp, index) => (
+										<li
+											key={index}
+											className="flex gap-2 text-sm text-black">
+											<Check className="mt-0.5 h-4 w-4 shrink-0 text-green-700" />
+											<span>{usp}</span>
+										</li>
+									))}
+								</ul>
+							</div>
 						</div>
 					)}
 				</div>
