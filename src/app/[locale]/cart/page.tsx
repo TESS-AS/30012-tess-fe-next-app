@@ -527,6 +527,26 @@ const CartPage = () => {
 							quantity={item.quantity}
 							step={multiple}
 							min={multiple}
+							allowInput
+							onQuantityChange={async (nextQty) => {
+								if (nextQty === item.quantity) return;
+								setLoadingItems((prev) => ({
+									...prev,
+									[item.itemNumber]: true,
+								}));
+								try {
+									await updateQuantity(
+										item.cartLine ?? 0,
+										item.itemNumber,
+										nextQty,
+									);
+								} finally {
+									setLoadingItems((prev) => ({
+										...prev,
+										[item.itemNumber]: false,
+									}));
+								}
+							}}
 							onIncrease={async (e) => {
 								e.stopPropagation();
 								setLoadingItems((prev) => ({
@@ -774,6 +794,33 @@ const CartPage = () => {
 														<QuantityButtons
 															isLoading={!!loadingItems[item.hexagonId]}
 															quantity={item.ferrule1.quantity}
+															allowInput
+															onQuantityChange={async (nextQty) => {
+																const delta = nextQty - item.ferrule1.quantity;
+																if (delta === 0) return;
+																setLoadingItems((prev) => ({
+																	...prev,
+																	[item.hexagonId]: true,
+																}));
+																try {
+																	await postCartKit([
+																		{
+																			hexagonId: Number(item.hexagonId),
+																			quantity: delta,
+																			warehouseNumber:
+																				profile?.defaultWarehouseNumber,
+																			companyNumber:
+																				profile?.defaultCompanyNumber,
+																		},
+																	]);
+																	setIsCartChanging((v) => !v);
+																} finally {
+																	setLoadingItems((prev) => ({
+																		...prev,
+																		[item.hexagonId]: false,
+																	}));
+																}
+															}}
 															onIncrease={async (e) => {
 																e.stopPropagation();
 																setLoadingItems((prev) => ({
