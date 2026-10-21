@@ -91,6 +91,10 @@ export function buildHoseAssemblyRequest(
 		toNumber(bruksomrade?.temperatureMin) ??
 		toNumber(bruksomrade?.temperature);
 	const otherRequirments = bruksomrade?.moreRequirements.trim() || null;
+	const selectedOrientation = orientationAngle(
+		specs?.angle ?? "",
+		input.rotationAngles,
+	);
 
 	return {
 		hose: {
@@ -121,7 +125,8 @@ export function buildHoseAssemblyRequest(
 					angle: null,
 					material: null,
 				},
-		orientationAngle: orientationAngle(specs?.angle ?? "", input.rotationAngles),
+		orientationAngle: selectedOrientation,
+		couplingOrientation: selectedOrientation,
 		service: {
 			pressureTesting: true,
 			dataSheet: specs?.options.testCertificate ?? false,

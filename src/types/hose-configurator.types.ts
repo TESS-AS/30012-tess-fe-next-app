@@ -73,6 +73,7 @@ export type HoseAssemblyRequest = {
 	end1: HoseAssemblyEnd;
 	end2: HoseAssemblyEnd;
 	orientationAngle: string | null;
+	couplingOrientation: string | null;
 	service: {
 		pressureTesting: boolean;
 		dataSheet: boolean;

@@ -562,23 +562,21 @@ export function HosesAndEquipments({
 		if (isEcomBlocked(order)) return;
 		setIsAddingToCart(true);
 		try {
-			const cartItems = [
+			await postCartKit([
 				{
 					hexagonId: Number(order.hexagonId),
 					quantity: 1,
 					warehouseNumber: profile?.defaultWarehouseNumber,
 					companyNumber: profile?.defaultCompanyNumber,
 				},
-			];
-
-			await postCartKit(cartItems);
+			]);
 			setIsCartChanging(!isCartChanging);
 			showCartNotification({
 				itemName: order.hexagonId,
 				itemNumber: order.hexagonId,
 				quantity: 1,
 			});
-		} catch (error) {
+		} catch {
 			toast.error("Kunne ikke legge til element i handlekurven");
 		} finally {
 			setIsAddingToCart(false);
@@ -596,26 +594,15 @@ export function HosesAndEquipments({
 				setIsAddingToCart(true);
 				try {
 					const available = selectedBuyableAssets;
-					const cartItems = available.map((a) => ({
-						hexagonId: Number(a.hexagonId),
-						quantity: 1,
-						warehouseNumber: profile?.defaultWarehouseNumber,
-						companyNumber: profile?.defaultCompanyNumber,
-					}));
-
-					await postCartKit(cartItems);
+					await postCartKit(
+						available.map((asset) => ({
+							hexagonId: Number(asset.hexagonId),
+							quantity: 1,
+							warehouseNumber: profile?.defaultWarehouseNumber,
+							companyNumber: profile?.defaultCompanyNumber,
+						})),
+					);
 					setIsCartChanging(!isCartChanging);
-
-					const grouped = new Map<string, number>();
-					available.forEach((a) => {
-						const name = a.beskrivelse || a.hexagonId;
-						grouped.set(name, (grouped.get(name) || 0) + 1);
-					});
-					const items = Array.from(grouped, ([name, quantity]) => ({
-						name,
-						quantity,
-					}));
-
 					showCartNotification({
 						itemName:
 							available.length === 1
@@ -623,11 +610,8 @@ export function HosesAndEquipments({
 								: `${available.length} varer`,
 						itemNumber: available.length === 1 ? available[0].hexagonId : "",
 						quantity: available.length,
-						unavailableCount: selectedRequestCount,
-						items,
 					});
-
-					const addedIds = new Set(available.map((a) => a.hexagonId));
+					const addedIds = new Set(available.map((asset) => asset.hexagonId));
 					if (allAcrossPages) {
 						setDeselectedIds((prev) => {
 							const next = new Set(prev);
@@ -641,14 +625,13 @@ export function HosesAndEquipments({
 							return next;
 						});
 					}
-				} catch (error) {
+				} catch {
 					toast.error("Kunne ikke legge til elementer i handlekurven");
 				} finally {
 					setIsAddingToCart(false);
 				}
 			};
-
-			handleAddToCart();
+			void handleAddToCart();
 		}
 	};
 

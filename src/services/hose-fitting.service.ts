@@ -40,9 +40,7 @@ export async function getHoseAngle(ecom = false): Promise<HoseFittingAngle[]> {
 }
 
 /** Materiale dropdown. */
-export async function getHoseMaterial(
-	ecom = false,
-): Promise<HoseFittingMaterial[]> {
+export async function getHoseMaterial(ecom = false): Promise<HoseFittingMaterial[]> {
 	const response = await axiosClient.get<HoseFittingMaterial[]>(
 		"/hoseFitting/getHoseMaterial",
 		ecomQuery(ecom),

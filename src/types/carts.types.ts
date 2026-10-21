@@ -24,11 +24,15 @@ export interface CartKitItem {
 	hexagonId: string;
 	assetId: number;
 	cartLine: number;
+	warehouseNumber?: string;
+	ecom?: number;
 	services?: Record<
 		string,
 		{
 			itemNumber?: string;
 			quantity?: number;
+			imageUrl?: string;
+			mediaId?: Media[];
 		}
 	>;
 	hose: {
@@ -36,10 +40,13 @@ export interface CartKitItem {
 		itemNumber: string;
 		dimension: string;
 		lengthMm: number;
+		originalLengthMm?: number;
 		lengthFtIn: string;
 		itemDescription: string;
 		genericHoseName: string;
 		quantity: number;
+		imageUrl?: string;
+		mediaId?: Media[];
 	};
 	ferrule1: HoseComponent;
 	ferrule2: HoseComponent;
@@ -53,6 +60,8 @@ export interface CartKitOptionalPart {
 	itemNumber?: string;
 	itemId?: number;
 	quantity?: number;
+	imageUrl?: string;
+	mediaId?: Media[];
 }
 
 export interface CartKitResponse {
@@ -65,6 +74,8 @@ export interface HoseComponent {
 	itemNumber: string;
 	itemId: number;
 	quantity: number;
+	imageUrl?: string;
+	mediaId?: Media[];
 }
 
 export interface Media {
