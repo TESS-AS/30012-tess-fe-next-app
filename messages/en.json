@@ -620,7 +620,9 @@
 		"company": "Company",
 		"page": "Page",
 		"of": "of",
-		"itemRemoved": "Item removed from cart"
+		"itemRemoved": "Item removed from cart",
+		"hoseNotOrderable": "This hose cannot be ordered. Remove it from the cart to continue.",
+		"hoseNotOrderableCheckout": "One or more hoses cannot be ordered. Remove them from the cart to continue."
 	},
 	"Login": {
 		"title": "Login",
