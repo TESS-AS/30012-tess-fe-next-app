@@ -622,7 +622,9 @@
 		"company": "Selskap",
 		"page": "Side",
 		"of": "av",
-		"itemRemoved": "Varen er fjernet fra handlekurven"
+		"itemRemoved": "Varen er fjernet fra handlekurven",
+		"hoseNotOrderable": "Denne slangen kan ikke bestilles. Fjern den fra handlekurven for å fortsette.",
+		"hoseNotOrderableCheckout": "En eller flere slanger kan ikke bestilles. Fjern dem fra handlekurven for å fortsette."
 	},
 	"Login": {
 		"title": "Login",
