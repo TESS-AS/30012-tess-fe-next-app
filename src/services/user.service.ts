@@ -51,6 +51,29 @@ export async function patchUserState(
 	}
 }
 
+/** Customer credit snapshot from GET /customerCredit (APIproxy commit
+ *  `9c893606`). `creditRemaining` is a Postgres generated column
+ *  (`credit_limit - credit_spent`) so it stays in sync automatically. */
+export interface CustomerCredit {
+	creditLimit: number;
+	creditSpent: number;
+	creditRemaining: number;
+}
+
+export async function getCustomerCredit(): Promise<CustomerCredit | null> {
+	try {
+		const response = await axiosInstance.get<{
+			message?: string;
+			credit?: CustomerCredit;
+			cat?: string;
+		}>("/customerCredit");
+		return response.data?.credit ?? null;
+	} catch (error) {
+		console.error("Error fetching customer credit:", error);
+		throw error;
+	}
+}
+
 export async function updateUserProfile(
 	firstName: string,
 	lastName: string,

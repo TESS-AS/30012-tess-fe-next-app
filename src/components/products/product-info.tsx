@@ -23,7 +23,14 @@ import {
 import { addToCart, getCart } from "@/services/carts.service";
 import { calculateItemPrice } from "@/services/product.service";
 import { formatNorwegianCurrency } from "@/utils/formatCurrency";
-import { Files, ShoppingCart, Loader2, CheckCircle, ChevronDown } from "lucide-react";
+import {
+	Files,
+	ShoppingCart,
+	Loader2,
+	CheckCircle,
+	ChevronDown,
+	Info,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
@@ -72,7 +79,12 @@ export function ProductInfo({
 	const firstItemNumber = variants?.[0]?.itemNumber;
 	const t = useTranslations("Product");
 	const { data: profile } = useGetProfileData();
-	const { isCartChanging, setIsCartChanging, setIsAuthOpen, showCartNotification } = useAppContext();
+	const {
+		isCartChanging,
+		setIsCartChanging,
+		setIsAuthOpen,
+		showCartNotification,
+	} = useAppContext();
 	const [copiedSap, setCopiedSap] = useState(false);
 	// Toggle for the "Les mer / Les mindre" collapse on long descriptions.
 	// Collapsed state line-clamps to 3 lines; expanded shows the full text.
@@ -85,7 +97,9 @@ export function ProductInfo({
 	const [loadingPrice, setLoadingPrice] = useState(false);
 	const [adding, setAdding] = useState(false);
 
-	const isSapCustomer = SAP_CUSTOMER.includes(profile?.defaultCustomerNumber || "");
+	const isSapCustomer = SAP_CUSTOMER.includes(
+		profile?.defaultCustomerNumber || "",
+	);
 
 	const multiple = useMemo(() => {
 		const multipleValue = columnAttributes?.productData?.multiple;
@@ -159,9 +173,13 @@ export function ProductInfo({
 	const previewDescription = shortText ?? longText;
 	const fullDescription = longText ?? shortText;
 	const hasMoreToReveal = Boolean(
-		previewDescription && fullDescription && previewDescription !== fullDescription,
+		previewDescription &&
+			fullDescription &&
+			previewDescription !== fullDescription,
 	);
-	const description = isDescriptionExpanded ? fullDescription : previewDescription;
+	const description = isDescriptionExpanded
+		? fullDescription
+		: previewDescription;
 
 	const getSapNumber = () => {
 		if (!selectedItemNumber || !columnAttributes) return null;
@@ -207,9 +225,7 @@ export function ProductInfo({
 	}, [selectedWarehouse, selectedItemNumber, columnAttributes, profile]);
 
 	const activeWarehouseNumber =
-		resolvedWarehouse?.warehouseNumber ??
-		profile?.defaultWarehouseNumber ??
-		"";
+		resolvedWarehouse?.warehouseNumber ?? profile?.defaultWarehouseNumber ?? "";
 	// The selected warehouse may belong to a different company than the user's
 	// default — pricing/discounts must be scoped to that warehouse's company so
 	// the cart matches (BE: "warehouse, company, customerNumber must be the same").
@@ -241,6 +257,25 @@ export function ProductInfo({
 			? columnAttributes?.[selectedItemNumber]?.attributes
 			: undefined,
 	);
+
+	// "Innholdsbeskrivelse" — package-contents description sourced from the
+	// Bluestone attribute UNIT000004. BE (APIproxy commit 2dfd603e) extracts
+	// this server-side and exposes it as `contentDescription` on
+	// VariantData.itemData, so FE reads the dedicated field rather than
+	// walking the attributes array. Hidden when empty.
+	const contentDescription = useMemo(() => {
+		if (!selectedItemNumber || !columnAttributes) return null;
+		const variantSlot = columnAttributes[selectedItemNumber];
+		if (!variantSlot || Array.isArray(variantSlot)) return null;
+		const raw = (variantSlot as { contentDescription?: string | null })
+			.contentDescription;
+		const value = String(raw ?? "").trim();
+		if (!value) return null;
+		return {
+			label: locale === "no" ? "Innholdsbeskrivelse" : "Content description",
+			value,
+		};
+	}, [selectedItemNumber, columnAttributes, locale]);
 
 	// Label for trigger: when we have a valid selection, show that option's label (never "Ingen lager")
 	const selectedOption = selectValue
@@ -284,17 +319,17 @@ export function ProductInfo({
 			setLoadingPrice(true);
 			const effectiveQuantity = selectedQuantity ?? quantity;
 			try {
-					const result = await calculateItemPrice(
-						[
-							{
-								itemNumber: selectedItemNumber,
-								quantity: effectiveQuantity,
-								warehouseNumber: profile.defaultWarehouseNumber,
-							},
-						],
-						profile.defaultCustomerNumber,
-						String(profile.defaultCompanyNumber ?? ""),
-					);
+				const result = await calculateItemPrice(
+					[
+						{
+							itemNumber: selectedItemNumber,
+							quantity: effectiveQuantity,
+							warehouseNumber: profile.defaultWarehouseNumber,
+						},
+					],
+					profile.defaultCustomerNumber,
+					String(profile.defaultCompanyNumber ?? ""),
+				);
 
 				if (result?.[0]) {
 					const bestPrice = result[0].bestPrice || 0;
@@ -445,15 +480,27 @@ export function ProductInfo({
 											<p className="text-sm text-gray-600">
 												{locale === "no" ? (
 													<>
-														Leveringstid bekreftes av TESS etter bestilling.
-														<br />
-														Ta kontakt med Kundeservice ved behov.
+														Dette produktet er ikke på lager.{" "}
+														<a
+															href="https://www.tess.no/kontakt-oss"
+															target="_blank"
+															rel="noopener noreferrer"
+															className="text-[#009640] underline hover:text-[#005522]">
+															Kontakt oss
+														</a>{" "}
+														for leveringstid.
 													</>
 												) : (
 													<>
-														Delivery time confirmed by TESS after ordering.
-														<br />
-														Contact Customer Service if needed.
+														This product is out of stock.{" "}
+														<a
+															href="https://www.tess.no/kontakt-oss"
+															target="_blank"
+															rel="noopener noreferrer"
+															className="text-[#009640] underline hover:text-[#005522]">
+															Contact us
+														</a>{" "}
+														for delivery time.
 													</>
 												)}
 											</p>
@@ -461,87 +508,90 @@ export function ProductInfo({
 									</>
 								)}
 
-								{profile && warehouseOptions.length > 0 && <>
-									<span className="font-semibold text-black">
-										{locale === "no" ? "Tilgjengelighet:" : "Availability:"}
-									</span>
-									<Select
-										value={selectValue}
-										onValueChange={async (value) => {
-											if (selectedItemNumber) {
-												onWarehouseChange?.(selectedItemNumber, value);
-												if (profile) {
-													setLoadingPrice(true);
-													try {
-																// Always price against the user's default warehouse/company.
-																// ERP redirects L01 (central) orders to the user's own warehouse
-																// via MDC, so the displayed price must reflect the default warehouse
-																// regardless of what the picker shows.
-																const result = await calculateItemPrice(
-																	[
-																		{
-																			itemNumber: selectedItemNumber,
-																			quantity,
-																			warehouseNumber: profile.defaultWarehouseNumber,
-																		},
-																	],
-																	profile.defaultCustomerNumber,
-																	String(profile.defaultCompanyNumber ?? ""),
-																);
-														if (result?.[0]) {
-															const bestPrice = result[0].bestPrice || 0;
-															setCalculatedPrice(bestPrice);
-															setUnitPrice(bestPrice / Math.max(quantity, 1));
+								{profile && warehouseOptions.length > 0 && (
+									<>
+										<span className="font-semibold text-black">
+											{locale === "no" ? "Tilgjengelighet:" : "Availability:"}
+										</span>
+										<Select
+											value={selectValue}
+											onValueChange={async (value) => {
+												if (selectedItemNumber) {
+													onWarehouseChange?.(selectedItemNumber, value);
+													if (profile) {
+														setLoadingPrice(true);
+														try {
+															// Always price against the user's default warehouse/company.
+															// ERP redirects L01 (central) orders to the user's own warehouse
+															// via MDC, so the displayed price must reflect the default warehouse
+															// regardless of what the picker shows.
+															const result = await calculateItemPrice(
+																[
+																	{
+																		itemNumber: selectedItemNumber,
+																		quantity,
+																		warehouseNumber:
+																			profile.defaultWarehouseNumber,
+																	},
+																],
+																profile.defaultCustomerNumber,
+																String(profile.defaultCompanyNumber ?? ""),
+															);
+															if (result?.[0]) {
+																const bestPrice = result[0].bestPrice || 0;
+																setCalculatedPrice(bestPrice);
+																setUnitPrice(bestPrice / Math.max(quantity, 1));
+															}
+														} catch (err) {
+															console.error("Failed to load price", err);
+														} finally {
+															setLoadingPrice(false);
 														}
-													} catch (err) {
-														console.error("Failed to load price", err);
-													} finally {
-														setLoadingPrice(false);
 													}
 												}
-											}
-										}}>
-										<SelectTrigger
-											className="inline-flex h-auto min-w-[220px] items-center justify-between gap-2 rounded-lg px-3 py-2 shadow-none outline-none focus:ring-0"
-											style={{
-												backgroundColor: "#F8F9F8",
-												borderColor: "#8A8F8C",
 											}}>
-											<div className="flex items-center gap-1.5">
-												{selectedOption && selectedOption.balance > 0 && (
-													<CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
-												)}
-												<span className="text-sm text-black">
-													{warehouseTriggerLabel}
-												</span>
-											</div>
-										</SelectTrigger>
-										<SelectContent className="max-h-[300px] overflow-y-auto">
-											{warehouseOptions.length === 0 ? (
-												<div className="px-2 py-1 text-sm text-gray-500">
-													{locale === "no"
-														? "Ingen lager tilgjengelig"
-														: "No warehouse available"}
+											<SelectTrigger
+												className="inline-flex h-auto min-w-[220px] items-center justify-between gap-2 rounded-lg px-3 py-2 shadow-none outline-none focus:ring-0"
+												style={{
+													backgroundColor: "#F8F9F8",
+													borderColor: "#8A8F8C",
+												}}>
+												<div className="flex items-center gap-1.5">
+													{selectedOption && selectedOption.balance > 0 && (
+														<CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
+													)}
+													<span className="text-sm text-black">
+														{warehouseTriggerLabel}
+													</span>
 												</div>
-											) : (
-												warehouseOptions.map((w, index: number) => (
-													<SelectItem
-														key={`${selectedItemNumber}-${w.warehouseNumber}-${index}`}
-														value={w.warehouseNumber}>
-														<div className="flex items-center gap-2">
-															<CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
-															<span className="truncate">
-																{w.balance} {unit}{" "}
-																{locale === "no" ? "på" : "at"}{" "}
-																{w.warehouseName}
-															</span>
-														</div>
-													</SelectItem>
-												))
-											)}
-										</SelectContent>
-									</Select>
-								</>}
+											</SelectTrigger>
+											<SelectContent className="max-h-[300px] overflow-y-auto">
+												{warehouseOptions.length === 0 ? (
+													<div className="px-2 py-1 text-sm text-gray-500">
+														{locale === "no"
+															? "Ingen lager tilgjengelig"
+															: "No warehouse available"}
+													</div>
+												) : (
+													warehouseOptions.map((w, index: number) => (
+														<SelectItem
+															key={`${selectedItemNumber}-${w.warehouseNumber}-${index}`}
+															value={w.warehouseNumber}>
+															<div className="flex items-center gap-2">
+																<CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
+																<span className="truncate">
+																	{w.balance} {unit}{" "}
+																	{locale === "no" ? "på" : "at"}{" "}
+																	{w.warehouseName}
+																</span>
+															</div>
+														</SelectItem>
+													))
+												)}
+											</SelectContent>
+										</Select>
+									</>
+								)}
 							</div>
 						</div>
 
@@ -662,9 +712,7 @@ export function ProductInfo({
 												: "-"}
 									</span>
 									<span className="mt-2 text-sm font-normal text-gray-500">
-										{locale === "no"
-											? "Totalpris eks. mva"
-											: "Total excl. VAT"}
+										{locale === "no" ? "Totalpris eks. mva" : "Total excl. VAT"}
 									</span>
 								</div>
 								<Button
@@ -686,6 +734,22 @@ export function ProductInfo({
 							</div>
 						)}
 					</div>
+
+					{/* Innholdsbeskrivelse / content description — sits directly
+					    under the price row. Hidden when the variant has no value. */}
+					{contentDescription && (
+						<div
+							className="flex items-start gap-2 rounded-lg border px-4 py-3"
+							style={{ borderColor: "#C1C4C2", backgroundColor: "#F8F9F8" }}>
+							<Info className="mt-0.5 h-4 w-4 shrink-0 text-gray-500" />
+							<p className="text-sm leading-snug text-black">
+								<span className="font-semibold">
+									{contentDescription.label}:
+								</span>{" "}
+								<span className="font-normal">{contentDescription.value}</span>
+							</p>
+						</div>
+					)}
 				</div>
 			)}
 		</div>

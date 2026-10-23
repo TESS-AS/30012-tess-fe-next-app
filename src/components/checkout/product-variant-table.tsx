@@ -1277,6 +1277,27 @@ export default function ProductVariantTable({
 														variant.contentUnit || "STK",
 													);
 
+													// Row has a fixed h-[52px]. Default Radix SelectValue
+													// pulls the full child tree of the matching SelectItem
+													// (CheckCircle + text in a flex div) into the trigger,
+													// which wraps and overflows the row for variants with
+													// 3+ warehouses. Lock the trigger to a single truncated
+													// line and surface additional stocked warehouses as a
+													// "+N" badge — the chevron still opens the full list.
+													const stockedCount = warehouseOptions.filter(
+														(w) => (w.balance ?? 0) > 0,
+													).length;
+													const selectedOption = selectedWarehouse
+														? warehouseOptions.find(
+																(w) => w.warehouseNumber === selectedWarehouse,
+															)
+														: undefined;
+													const extraStocked = Math.max(
+														0,
+														stockedCount -
+															((selectedOption?.balance ?? 0) > 0 ? 1 : 0),
+													);
+
 													return (
 														<TableCell
 															key="warehouse"
@@ -1300,14 +1321,30 @@ export default function ProductVariantTable({
 																	);
 																}}>
 																<SelectTrigger
-																	className={`overflow-hidden border-0 bg-transparent shadow-none [&>span]:truncate ${compact ? "w-[160px]" : "w-[180px]"}`}>
+																	className={`overflow-hidden border-0 bg-transparent shadow-none [&>span]:truncate [&>span]:whitespace-nowrap ${compact ? "w-[160px]" : "w-[180px]"}`}>
 																	<SelectValue
 																		placeholder={
 																			warehouseOptions.length === 0
 																				? t("Product.noWarehouses")
 																				: t("Product.selectWarehouse")
-																		}
-																	/>
+																		}>
+																		{selectedOption ? (
+																			<span className="flex items-center gap-2 whitespace-nowrap">
+																				{(selectedOption.balance ?? 0) > 0 && (
+																					<CheckCircle className="h-4 w-4 flex-shrink-0 text-green-600" />
+																				)}
+																				<span className="truncate">
+																					{selectedOption.balance} {variantUnit}{" "}
+																					på {selectedOption.warehouseName}
+																				</span>
+																				{extraStocked > 0 && (
+																					<span className="flex-shrink-0 rounded bg-[#E8EAE9] px-1.5 py-0.5 text-xs font-medium text-[#0F1912]">
+																						+{extraStocked}
+																					</span>
+																				)}
+																			</span>
+																		) : null}
+																	</SelectValue>
 																</SelectTrigger>
 																<SelectContent className="max-h-[300px] overflow-y-auto">
 																	{warehouseOptions.length === 0 ? (

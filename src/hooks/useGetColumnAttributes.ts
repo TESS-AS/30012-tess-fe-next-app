@@ -41,6 +41,10 @@ interface VariantItemData {
 	attributes: Attribute[];
 	mediaId: MediaItem[];
 	relatedProducts?: Array<Record<string, unknown>>;
+	// Bluestone "Innholdsbeskrivelse" (UNIT000004, group UoM) — BE extracts it
+	// from the variant attributes list server-side (see APIproxy commit
+	// 2dfd603e) so FE doesn't have to walk the attributes array.
+	contentDescription?: string | null;
 }
 
 interface VariantData {
@@ -111,6 +115,7 @@ export type ColumnAttributeResponse = {
 				attributes: Attribute[];
 				mediaId?: MediaItem[];
 				relatedProducts?: Array<Record<string, unknown>>;
+				contentDescription?: string | null;
 		  }
 		| Attribute[]
 		| undefined;
@@ -190,6 +195,7 @@ export function useGetColumnAttributes(variantNumber?: string) {
 							attributes: itemData.attributes || [],
 							mediaId: toMediaArray(itemData.mediaId),
 							relatedProducts: itemData.relatedProducts ?? [],
+							contentDescription: itemData.contentDescription ?? null,
 						};
 					});
 				}

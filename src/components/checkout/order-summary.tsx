@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { BudgetCheckoutSummary } from "@/components/checkout/budget-checkout-summary";
+import { CreditCheckoutSummary } from "@/components/checkout/credit-checkout-summary";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,7 @@ import {
 } from "@/constants/checkout";
 import { USER_ROLES } from "@/constants/userRoles";
 import { useCartEvaluation } from "@/hooks/useBudget";
+import { useCustomerCredit } from "@/hooks/useCustomerCredit";
 import { useOrderSummary } from "@/hooks/useOrderSummary";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useRouter } from "@/i18n/navigation";
@@ -51,6 +53,7 @@ export default function OrderSummary({
 	const t = useTranslations();
 
 	const { data: profile } = usePunchoutProfile();
+	const { credit } = useCustomerCredit(!!profile);
 	const {
 		cartItems,
 		isLoading,
@@ -570,6 +573,11 @@ export default function OrderSummary({
 							</div>
 
 							<BudgetCheckoutSummary evaluation={cartEvaluation} />
+
+							<CreditCheckoutSummary
+								credit={credit}
+								cartTotal={sumAfterDiscount}
+							/>
 
 							{currentStep === 2 && (
 								<div className="mt-3 flex items-start gap-2">
