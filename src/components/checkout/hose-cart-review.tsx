@@ -10,6 +10,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useGetHoseSystems } from "@/hooks/useGetHoseSystems";
 import { Link } from "@/i18n/navigation";
 import { getCartKitPartEntries, readCartKitImageUrl } from "@/lib/cart-kit";
 import type { CartKitItem, HoseComponent } from "@/types/carts.types";
@@ -33,7 +34,15 @@ type HoseCartReviewProps = {
 	kitTotal: (kit: CartKitItem) => number;
 	lineTotal: LineTotal;
 	onRemove: (kit: CartKitItem) => void;
-	onSave: (kit: CartKitItem, quantity: number) => void | Promise<void>;
+	onSave: (
+		kit: CartKitItem,
+		changes: {
+			quantity: number;
+			hoseLengthMm?: number;
+			s1Id?: number;
+			s2Id?: number;
+		},
+	) => void | Promise<void>;
 	removingId?: string;
 	saving?: boolean;
 	children: (slots: {
@@ -51,6 +60,57 @@ type PartLine = {
 };
 
 const ADDITION_LETTERS = ["a", "b", "c", "d", "e"] as const;
+
+const SERVICE_NAME_KEYS = {
+	pressingItem: "serviceNames.pressingItem",
+	jetCleanItem: "serviceNames.jetCleanItem",
+	pressureTestItem: "serviceNames.pressureTestItem",
+	electricControl: "serviceNames.electricControl",
+	pinPrickItem: "serviceNames.pinPrickItem",
+	hoseProtection: "serviceNames.hoseProtection",
+	spiralGuard: "serviceNames.spiralGuard",
+	welding: "serviceNames.welding",
+	marking: "serviceNames.marking",
+	finalInspection: "serviceNames.finalInspection",
+} as const;
+
+function serviceName(
+	t: (key: (typeof SERVICE_NAME_KEYS)[keyof typeof SERVICE_NAME_KEYS]) => string,
+	key: string,
+) {
+	const messageKey = SERVICE_NAME_KEYS[key as keyof typeof SERVICE_NAME_KEYS];
+	return messageKey ? t(messageKey) : "";
+}
+
+function placeLabel(name?: string | null, code?: string | null) {
+	const label = name?.trim() || code?.trim();
+	return label || "—";
+}
+
+type KitDraft = {
+	hoseLengthMm: string;
+	s1Id: string;
+	s2Id: string;
+};
+
+type PlaceOption = { id: string; name: string };
+
+function draftFor(kit: CartKitItem): KitDraft {
+	return {
+		hoseLengthMm:
+			kit.hose?.lengthMm != null && kit.hose.lengthMm > 0
+				? String(kit.hose.lengthMm)
+				: "",
+		s1Id: kit.s1?.s1Id != null ? String(kit.s1.s1Id) : "",
+		s2Id: kit.s2?.s2Id != null ? String(kit.s2.s2Id) : "",
+	};
+}
+
+function withCurrentOption(options: PlaceOption[], current?: PlaceOption) {
+	if (!current?.id) return options;
+	if (options.some((option) => option.id === current.id)) return options;
+	return [current, ...options];
+}
 
 function hasItemNumber(
 	part: Partial<HoseComponent> | null | undefined,
@@ -204,15 +264,50 @@ export function HoseCartReview({
 	children,
 }: HoseCartReviewProps) {
 	const t = useTranslations("Cart.review");
+	const tKit = useTranslations("Cart.kit");
 	const [index, setIndex] = useState(0);
 	const [mainOpen, setMainOpen] = useState(true);
+	const [servicesOpen, setServicesOpen] = useState(true);
 	const [articlesOpen, setArticlesOpen] = useState(true);
 	const [extrasOpen, setExtrasOpen] = useState(true);
 	const [quantities, setQuantities] = useState<Record<string, number>>({});
+	const [drafts, setDrafts] = useState<Record<number, KitDraft>>({});
 	const [subunit, setSubunit] = useState("");
+	const { locations } = useGetHoseSystems();
 
 	const kit = kits[Math.min(index, kits.length - 1)];
-	const quantity = quantities[kit.hexagonId] ?? kit.ferrule1?.quantity ?? 1;
+	// ferrule quantity is the number of assemblies already in the cart.
+	// One assembly uses both ends, so ferrule and insert show 2x at quantity 1.
+	const savedQuantity = Math.max(1, Number(kit.ferrule1?.quantity) || 1);
+	const quantity = quantities[kit.hexagonId] ?? savedQuantity;
+	const multiple = quantity / savedQuantity;
+	const draft = drafts[kit.cartLine] ?? draftFor(kit);
+	const s1Options = withCurrentOption(
+		locations.map((location) => ({ id: location.id, name: location.name })),
+		kit.s1?.s1Id != null
+			? {
+					id: String(kit.s1.s1Id),
+					name: placeLabel(kit.s1.s1Name, kit.s1.s1Code),
+				}
+			: undefined,
+	);
+	const s2Options = withCurrentOption(
+		(locations.find((location) => location.id === draft.s1Id)?.children ??
+			[]).map((child) => ({ id: child.id, name: child.name })),
+		draft.s2Id === String(kit.s2?.s2Id ?? "") && kit.s2?.s2Id != null
+			? {
+					id: String(kit.s2.s2Id),
+					name: placeLabel(kit.s2.s2Name, kit.s2.s2Code),
+				}
+			: undefined,
+	);
+
+	const setDraft = (patch: Partial<KitDraft>) => {
+		setDrafts((prev) => ({
+			...prev,
+			[kit.cartLine]: { ...(prev[kit.cartLine] ?? draftFor(kit)), ...patch },
+		}));
+	};
 
 	const ferrules = useMemo(
 		() => groupParts([kit.ferrule1, kit.ferrule2], "ferrule"),
@@ -232,6 +327,23 @@ export function HoseCartReview({
 				imageUrl: readCartKitImageUrl(kit.hose),
 			}
 		: null;
+
+	const scaleLine = (line: PartLine) => ({
+		line: { ...line, quantity: line.quantity * multiple },
+		price: lineTotal(line.itemNumber, line.quantity) * multiple,
+	});
+	const scaledHose = hoseLine ? scaleLine(hoseLine) : null;
+	const scaledFerrules = ferrules.map(scaleLine);
+	const scaledInserts = inserts.map(scaleLine);
+	const scaledServices = getCartKitPartEntries(kit.services).map((entry) =>
+		scaleLine({
+			key: entry.key,
+			name: serviceName(tKit, entry.key) || entry.name || entry.itemNumber,
+			itemNumber: entry.itemNumber,
+			quantity: entry.quantity,
+			imageUrl: entry.imageUrl,
+		}),
+	);
 	const mainCount = (hoseLine ? 1 : 0) + ferrules.length + inserts.length;
 
 	const additionals = getCartKitPartEntries(kit.additionals);
@@ -241,13 +353,20 @@ export function HoseCartReview({
 			const match = additionals.find(
 				(entry) => entry.key.toLowerCase() === key.toLowerCase(),
 			);
+			const baseQuantity = match?.quantity ?? 0;
+			const quantityLabel =
+				match && baseQuantity * multiple > 1
+					? ` × ${formatQuantity(baseQuantity * multiple)}`
+					: "";
 			return {
 				key,
 				label: t("additionSlot", {
 					letter: letter.toUpperCase(),
 					end: String(end),
 				}),
-				value: match?.name || match?.itemNumber || "—",
+				value: match
+					? `${match.name || match.itemNumber}${quantityLabel}`
+					: "—",
 			};
 		}),
 	);
@@ -328,7 +447,7 @@ export function HoseCartReview({
 								</button>
 							</div>
 							<span className="text-base font-semibold whitespace-nowrap">
-								{formatReviewAmount(kitTotal(kit))}
+								{formatReviewAmount(kitTotal(kit) * multiple)}
 							</span>
 							<Button
 								className="w-4 p-0"
@@ -357,24 +476,24 @@ export function HoseCartReview({
 						title={t("mainComponents", { count: mainCount })}
 						open={mainOpen}
 						onToggle={() => setMainOpen((open) => !open)}>
-						{hoseLine ? (
+						{scaledHose ? (
 							<PartCard
 								label={t("hose")}
-								line={hoseLine}
-								price={lineTotal(hoseLine.itemNumber, hoseLine.quantity)}
+								line={scaledHose.line}
+								price={scaledHose.price}
 								seeDetails={t("seeDetails")}
 								nameLabel={t("name")}
 								itemNumberLabel={t("itemNumber")}
 							/>
 						) : null}
-						{ferrules.length > 0 ? (
+						{scaledFerrules.length > 0 ? (
 							<div className="space-y-2">
 								<p className="text-sm text-[#5A615D]">{t("ferrule")}</p>
-								{ferrules.map((line) => (
+								{scaledFerrules.map(({ line, price }) => (
 									<PartCard
 										key={line.key}
 										line={line}
-										price={lineTotal(line.itemNumber, line.quantity)}
+										price={price}
 										seeDetails={t("seeDetails")}
 										nameLabel={t("name")}
 										itemNumberLabel={t("itemNumber")}
@@ -382,14 +501,14 @@ export function HoseCartReview({
 								))}
 							</div>
 						) : null}
-						{inserts.length > 0 ? (
+						{scaledInserts.length > 0 ? (
 							<div className="space-y-2">
 								<p className="text-sm text-[#5A615D]">{t("insert")}</p>
-								{inserts.map((line) => (
+								{scaledInserts.map(({ line, price }) => (
 									<PartCard
 										key={line.key}
 										line={line}
-										price={lineTotal(line.itemNumber, line.quantity)}
+										price={price}
 										seeDetails={t("seeDetails")}
 										nameLabel={t("name")}
 										itemNumberLabel={t("itemNumber")}
@@ -398,6 +517,24 @@ export function HoseCartReview({
 							</div>
 						) : null}
 					</Accordion>
+
+					{scaledServices.length > 0 ? (
+						<Accordion
+							title={tKit("services", { count: scaledServices.length })}
+							open={servicesOpen}
+							onToggle={() => setServicesOpen((open) => !open)}>
+							{scaledServices.map(({ line, price }) => (
+								<PartCard
+									key={line.key}
+									line={line}
+									price={price}
+									seeDetails={t("seeDetails")}
+									nameLabel={t("name")}
+									itemNumberLabel={t("itemNumber")}
+								/>
+							))}
+						</Accordion>
+					) : null}
 
 					<Accordion
 						title={t("otherArticles", { count: filledArticles })}
@@ -434,11 +571,27 @@ export function HoseCartReview({
 						{extraParts.map((part) => (
 							<div
 								key={part.key}
-								className="rounded-md border border-[#E8EAE9] bg-[#FAFBFA] px-3 py-2 text-sm">
-								<p className="font-medium text-[#0F1912]">
-									{part.name || part.itemNumber}
-								</p>
-								<p className="text-xs text-[#5A615D]">{part.itemNumber}</p>
+								className="flex items-center gap-3 rounded-md border border-[#E8EAE9] bg-[#FAFBFA] px-3 py-2 text-sm">
+								{part.imageUrl ? (
+									<div className="relative h-10 w-10 shrink-0 overflow-hidden rounded border border-[#E8EAE9] bg-white">
+										<Image
+											src={part.imageUrl}
+											alt=""
+											fill
+											sizes="40px"
+											className="object-contain"
+										/>
+									</div>
+								) : null}
+								<div className="min-w-0 flex-1">
+									<p className="font-medium text-[#0F1912]">
+										{part.name || part.itemNumber}
+									</p>
+									<p className="text-xs text-[#5A615D]">{part.itemNumber}</p>
+								</div>
+								<span className="shrink-0 text-[#5A615D] tabular-nums">
+									{formatQuantity(part.quantity * multiple)}x
+								</span>
 							</div>
 						))}
 						<div className="rounded-md bg-[#E7F8EE] p-4">
@@ -480,15 +633,84 @@ export function HoseCartReview({
 					<dl className="mt-4 space-y-3 text-sm">
 						<div>
 							<dt className="font-semibold text-[#0F1912]">S1</dt>
-							<dd className="text-[#5A615D]">—</dd>
+							<dd className="mt-1">
+								<Select
+									value={draft.s1Id || undefined}
+									onValueChange={(s1Id) => {
+										const s2StillValid = locations
+											.find((location) => location.id === s1Id)
+											?.children?.some((child) => child.id === draft.s2Id);
+										setDraft({
+											s1Id,
+											s2Id: s2StillValid ? draft.s2Id : "",
+										});
+									}}>
+									<SelectTrigger className="h-10 w-full">
+										<SelectValue
+											placeholder={placeLabel(kit.s1?.s1Name, kit.s1?.s1Code)}
+										/>
+									</SelectTrigger>
+									<SelectContent>
+										{s1Options.map((option) => (
+											<SelectItem
+												key={option.id}
+												value={option.id}>
+												{option.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</dd>
 						</div>
 						<div>
 							<dt className="font-semibold text-[#0F1912]">S2</dt>
-							<dd className="text-[#5A615D]">—</dd>
+							<dd className="mt-1">
+								<Select
+									value={draft.s2Id || undefined}
+									onValueChange={(s2Id) => setDraft({ s2Id })}>
+									<SelectTrigger className="h-10 w-full">
+										<SelectValue
+											placeholder={placeLabel(kit.s2?.s2Name, kit.s2?.s2Code)}
+										/>
+									</SelectTrigger>
+									<SelectContent>
+										{s2Options.map((option) => (
+											<SelectItem
+												key={option.id}
+												value={option.id}>
+												{option.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</dd>
+						</div>
+						<div>
+							<dt className="font-semibold text-[#0F1912]">
+								{tKit("changeLength")}
+							</dt>
+							<dd className="mt-1 flex items-center">
+								<input
+									inputMode="numeric"
+									value={draft.hoseLengthMm}
+									aria-label={tKit("changeLength")}
+									onChange={(event) =>
+										setDraft({
+											hoseLengthMm: event.target.value.replace(/[^\d]/g, ""),
+										})
+									}
+									className="h-10 w-full rounded-l-md border border-[#D5D9D7] px-3 text-sm"
+								/>
+								<span className="flex h-10 items-center rounded-r-md border border-l-0 border-[#D5D9D7] bg-[#F3F4F3] px-3 text-sm text-[#5A615D]">
+									{tKit("unitMm")}
+								</span>
+							</dd>
 						</div>
 						<div>
 							<dt className="font-semibold text-[#0F1912]">{t("otherInfo")}</dt>
-							<dd className="text-[#5A615D]">—</dd>
+							<dd className="text-[#5A615D]">
+								{placeLabel(kit.work?.workName, kit.work?.workCode)}
+							</dd>
 						</div>
 						<div>
 							<dt className="font-semibold text-[#0F1912]">
@@ -510,7 +732,18 @@ export function HoseCartReview({
 						variant="greenSolid"
 						className="mt-5 h-11 w-full"
 						disabled={saving}
-						onClick={() => void onSave(kit, quantity)}>
+						onClick={() => {
+							const hoseLengthMm = Number(draft.hoseLengthMm);
+							void onSave(kit, {
+								quantity,
+								hoseLengthMm:
+									Number.isFinite(hoseLengthMm) && hoseLengthMm > 0
+										? hoseLengthMm
+										: undefined,
+								s1Id: draft.s1Id ? Number(draft.s1Id) : undefined,
+								s2Id: draft.s2Id ? Number(draft.s2Id) : undefined,
+							});
+						}}>
 						{t("saveToCart")}
 					</Button>
 		</aside>

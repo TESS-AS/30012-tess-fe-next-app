@@ -682,6 +682,7 @@
 			"equipmentSubunit": "Equipment subunit",
 			"subunitHint": "Physical location, if known.",
 			"saveToCart": "Save and go to cart",
+			"updateFailed": "Could not update the hose.",
 			"stepReview": "Review",
 			"stepPosition": "Position and details",
 			"next": "Next",

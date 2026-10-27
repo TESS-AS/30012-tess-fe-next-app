@@ -684,6 +684,7 @@
 			"equipmentSubunit": "Equipment subunit",
 			"subunitHint": "Fysisk plassering, hvis kjent.",
 			"saveToCart": "Lagre og gå til handlekurv",
+			"updateFailed": "Kunne ikke oppdatere slangen.",
 			"stepReview": "Se over",
 			"stepPosition": "Posisjon og detaljer",
 			"next": "Neste",

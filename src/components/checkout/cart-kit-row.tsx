@@ -395,6 +395,11 @@ export function CartKitRow({
 									<span className="ml-2 text-[#5A615D]">{title}</span>
 								) : null}
 							</span>
+							{kit.s1?.s1Name || kit.s2?.s2Name ? (
+								<span className="mt-1 block text-xs text-[#5A615D]">
+									{[kit.s1?.s1Name, kit.s2?.s2Name].filter(Boolean).join(" · ")}
+								</span>
+							) : null}
 							{warehouseName ? (
 								<span
 									className={`mt-1 flex items-center gap-1 text-xs ${

@@ -53,6 +53,20 @@ export interface CartKitItem {
 	insert1: HoseComponent;
 	insert2: HoseComponent;
 	additionals?: Record<string, CartKitOptionalPart | string | null | undefined>;
+	s1?: {
+		s1Id?: number;
+		s1Code?: string;
+		s1Name?: string;
+	} | null;
+	s2?: {
+		s2Id?: number;
+		s2Code?: string;
+		s2Name?: string;
+	} | null;
+	work?: {
+		workName?: string;
+		workCode?: string;
+	} | null;
 }
 
 export interface CartKitOptionalPart {

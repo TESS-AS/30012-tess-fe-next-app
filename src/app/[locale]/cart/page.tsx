@@ -34,7 +34,11 @@ import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { Link } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import { getCartKitPartEntries } from "@/lib/cart-kit";
-import { getItemBalanceArray, postCartKit } from "@/services/carts.service";
+import {
+	getItemBalanceArray,
+	postCartKit,
+	updateCartLine,
+} from "@/services/carts.service";
 import { loadCategoryTree } from "@/services/categories.service";
 import {
 	getProductVariations,
@@ -749,21 +753,35 @@ const CartPage = () => {
 							}));
 						}
 					}}
-					onSave={async (kit, quantity) => {
-						const current = kit.ferrule1?.quantity || 1;
-						const delta = quantity - current;
-						if (delta !== 0) {
-							await postCartKit([
-								{
-									hexagonId: Number(kit.hexagonId),
-									quantity: delta,
-									warehouseNumber: profile?.defaultWarehouseNumber,
-									companyNumber: profile?.defaultCompanyNumber,
-								},
-							]);
+					onSave={async (kit, changes) => {
+						try {
+							await updateCartLine(kit.cartLine, {
+								itemNumber: kit.hose.itemNumber,
+								hoseItemNumber: kit.hose.itemNumber,
+								warehouseNumber: kit.warehouseNumber,
+								...(changes.hoseLengthMm != null
+									? { hoseLengthMm: changes.hoseLengthMm }
+									: {}),
+								...(changes.s1Id != null ? { s1Id: changes.s1Id } : {}),
+								...(changes.s2Id != null ? { s2Id: changes.s2Id } : {}),
+							});
+							const current = kit.ferrule1?.quantity || 1;
+							const delta = changes.quantity - current;
+							if (delta !== 0) {
+								await postCartKit([
+									{
+										hexagonId: Number(kit.hexagonId),
+										quantity: delta,
+										warehouseNumber: profile?.defaultWarehouseNumber,
+										companyNumber: profile?.defaultCompanyNumber,
+									},
+								]);
+							}
 							setIsCartChanging((value) => !value);
+							setReviewComplete(true);
+						} catch {
+							toast.error(t("Cart.review.updateFailed"));
 						}
-						setReviewComplete(true);
 					}}>
 					{({ main, aside }) => (
 						<div className="grid grid-cols-1 gap-6 md:gap-10 lg:grid-cols-3">

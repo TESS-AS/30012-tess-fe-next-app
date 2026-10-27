@@ -56,26 +56,46 @@ export async function removeFromCart(
 	}
 }
 
+export type UpdateCartLineBody = {
+	itemNumber: string;
+	quantity?: number;
+	warehouseNumber?: string;
+	companyNumber?: string;
+	s1Id?: number;
+	s2Id?: number;
+	hoseLengthMm?: number;
+	hoseItemNumber?: string;
+};
+
 export async function updateCart(
 	cartLineId: number,
-	payload: {
-		itemNumber: string;
-		quantity?: number;
-		warehouseNumber?: string;
-		companyNumber?: string;
-	},
+	payload: UpdateCartLineBody,
 ): Promise<CartLine[]> {
 	try {
-		const url = `/cart/updateLine/${cartLineId}`;
-		const response: AxiosResponse<CartLine[]> = await axiosClient.patch(
-			url,
-			payload,
-		);
-		return response.data;
+		return await patchCartLine(cartLineId, payload);
 	} catch (error) {
 		console.error("Error updating cart", error);
 		return [];
 	}
+}
+
+export async function updateCartLine(
+	cartLineId: number,
+	payload: UpdateCartLineBody,
+): Promise<CartLine[]> {
+	return patchCartLine(cartLineId, payload);
+}
+
+async function patchCartLine(
+	cartLineId: number,
+	payload: UpdateCartLineBody,
+): Promise<CartLine[]> {
+	const url = `/cart/updateLine/${cartLineId}`;
+	const response: AxiosResponse<CartLine[]> = await axiosClient.patch(
+		url,
+		payload,
+	);
+	return response.data;
 }
 
 export async function archiveCart(): Promise<{ message: string }> {
