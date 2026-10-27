@@ -7,9 +7,13 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { useDeleteUserContact } from "@/hooks/useDeleteUserContact";
+import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { isTessEmployeeEmail } from "@/lib/user";
 import { User } from "@/types/user.types";
-import { SquarePen, Trash2 } from "lucide-react";
+import { Loader2, SquarePen, Trash2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "react-toastify";
 
 interface ViewUserModalProps {
 	open: boolean;
@@ -27,6 +31,9 @@ export function ViewUserModal({
 	onDelete,
 }: ViewUserModalProps) {
 	const t = useTranslations("ViewUserModal");
+	const { data: profile } = useGetProfileData();
+	const { mutateAsync: deleteContact, isPending: isRemovingContact } =
+		useDeleteUserContact();
 
 	if (!user) return null;
 
@@ -148,6 +155,50 @@ export function ViewUserModal({
 								</p>
 							</div>
 						</div>
+					</div>
+
+					<div>
+						<h3 className="mb-4 text-base font-semibold text-[#0F1912]">
+							{isTessEmployeeEmail(profile?.email)
+								? t("taggedBy")
+								: t("contacts")}
+						</h3>
+						{(user.contacts ?? []).length === 0 ? (
+							<p className="text-sm text-[#5A615D]">{t("noContacts")}</p>
+						) : (
+							<div className="flex flex-wrap gap-2">
+								{(user.contacts ?? []).map((c) => (
+									<span
+										key={c.userId}
+										className="inline-flex items-center gap-1 rounded-full bg-[#E8F5E9] px-3 py-1 text-sm text-[#0F1912]">
+										{c.name || c.email}
+										<button
+											type="button"
+											aria-label={t("removeContact")}
+											disabled={isRemovingContact}
+											className="text-[#5A615D] hover:text-[#0F1912] disabled:opacity-50"
+											onClick={async () => {
+												try {
+													await deleteContact({
+														userId: user.userId,
+														contactUserId: c.userId,
+													});
+													toast(t("contactRemoved"), { type: "success" });
+												} catch (err) {
+													console.error("Failed to remove contact", err);
+													toast(t("contactRemoveError"), { type: "error" });
+												}
+											}}>
+											{isRemovingContact ? (
+												<Loader2 className="h-3.5 w-3.5 animate-spin" />
+											) : (
+												<X className="h-3.5 w-3.5" />
+											)}
+										</button>
+									</span>
+								))}
+							</div>
+						)}
 					</div>
 
 					<div>

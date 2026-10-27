@@ -1241,7 +1241,15 @@
 		"employee": "Employee",
 		"employeeDesc": "Purchase products (within assigned budget), view order history, contact customer service",
 		"addUser": "Add User",
-		"close": "Close"
+		"close": "Close",
+		"contactsSection": "Contacts (TESS employees)",
+		"contactsHint": "Tag TESS employees who can administer this user. Max 20.",
+		"contactsSearchPlaceholder": "Search TESS employee (name or email)...",
+		"contactsNoResults": "No matches",
+		"contactsSearching": "Searching...",
+		"contactsMaxReached": "Max 20 contacts selected",
+		"contactsSuccess": "Contacts saved",
+		"contactsError": "Could not save contacts"
 	},
 	"DeleteUserModal": {
 		"title": "Delete user?",
@@ -1265,7 +1273,20 @@
 			"warehouse": "WAREHOUSE",
 			"company": "TESS COMPANY",
 			"budget": "BUDGET KR",
+			"contacts": "CONTACTS",
+			"taggedBy": "TAGGED BY",
 			"action": "ACTION"
+		},
+		"deleteDialog": {
+			"title": "Delete user",
+			"description": "Are you sure you want to delete {name}? This cannot be undone.",
+			"cancel": "Cancel",
+			"confirm": "Delete user",
+			"deleting": "Deleting...",
+			"success": "User deleted",
+			"error": "Could not delete the user",
+			"blockedTitle": "User cannot be deleted",
+			"blockedIntro": "Clean up the following before trying again:"
 		},
 		"actions": {
 			"viewDetails": "View details",
@@ -1277,7 +1298,8 @@
 			"customers": "{count} customers",
 			"catalogs": "{count} catalogs",
 			"warehouses": "{count} warehouses",
-			"companies": "{count} companies"
+			"companies": "{count} companies",
+			"contacts": "{count} contacts"
 		},
 		"andMore": "and {count} more"
 	},
@@ -1518,7 +1540,13 @@
 			"ansatt": "Can only shop on behalf of themselves"
 		},
 		"edit": "Edit",
-		"delete": "Delete User"
+		"delete": "Delete User",
+		"contacts": "Contacts",
+		"taggedBy": "Tagged by",
+		"noContacts": "No contacts",
+		"removeContact": "Remove contact",
+		"contactRemoved": "Contact removed",
+		"contactRemoveError": "Could not remove contact"
 	},
 	"BulkEditConfirmationModal": {
 		"title": "Change Settings",

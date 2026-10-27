@@ -16,8 +16,18 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { CheckCircle, X } from "lucide-react";
+import { useSearchTessEmployees } from "@/hooks/useSearchTessEmployees";
+import { postUserContacts } from "@/services/user.service";
+import { CheckCircle, Loader2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "react-toastify";
+
+const MAX_CONTACTS = 20;
+
+interface SelectedContact {
+	userId: number;
+	label: string;
+}
 
 interface AddUserModalProps {
 	open: boolean;
@@ -38,6 +48,17 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 		tessFirma: "",
 		role: "superbruker",
 	});
+
+	const [contacts, setContacts] = useState<SelectedContact[]>([]);
+	const [contactsSearch, setContactsSearch] = useState("");
+	const [isSubmittingContacts, setIsSubmittingContacts] = useState(false);
+	const { results: tessEmployeeResults, isFetching: isSearchingContacts } =
+		useSearchTessEmployees(contactsSearch);
+	const atContactCap = contacts.length >= MAX_CONTACTS;
+	const selectedContactIds = new Set(contacts.map((c) => c.userId));
+	const unselectedResults = tessEmployeeResults.filter(
+		(r) => !selectedContactIds.has(r.userId),
+	);
 
 	const customerOptions = [
 		{ label: "Kunde 1", value: "kunde1" },
@@ -65,14 +86,36 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 		{ label: "TESS Øst", value: "ost" },
 	];
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		// Handle form submission
+		if (contacts.length > 0) {
+			setIsSubmittingContacts(true);
+			try {
+				await postUserContacts(contacts.map((c) => c.userId));
+				toast(t("contactsSuccess"), { type: "success" });
+			} catch (err) {
+				console.error("Failed to save user contacts", err);
+				toast(t("contactsError"), { type: "error" });
+				setIsSubmittingContacts(false);
+				return;
+			} finally {
+				setIsSubmittingContacts(false);
+			}
+		}
 		onOpenChange(false);
 	};
 
 	const handleClose = () => {
 		onOpenChange(false);
+	};
+
+	const contactLabel = (
+		firstName: string | null,
+		lastName: string | null,
+		email: string,
+	) => {
+		const name = `${firstName ?? ""} ${lastName ?? ""}`.trim();
+		return name ? `${name} (${email})` : email;
 	};
 
 	return (
@@ -239,7 +282,7 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 							</div>
 						</div>
 					)}
-					{formData.role === "admin" && (
+					{formData.role === "ansatt" && (
 						<>
 							<div className="grid grid-cols-2 gap-4">
 								<div className="space-y-2">
@@ -315,7 +358,7 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 							className="mt-4 grid grid-cols-2 gap-4">
 							<div className="flex items-start space-x-3">
 								<RadioGroupItem
-									value="Superbruker"
+									value="superbruker"
 									id="superbruker"
 									className="mt-1 shrink-0"
 								/>
@@ -330,7 +373,7 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 							</div>
 							<div className="flex items-start space-x-3">
 								<RadioGroupItem
-									value="Ansatt"
+									value="ansatt"
 									id="ansatt"
 									className="mt-1 shrink-0"
 								/>
@@ -347,17 +390,110 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
 					</div>
 				</div>
 
+				<div className="space-y-4 border-t border-[#E8EAE9] pt-4">
+					<div>
+						<h3 className="text-lg font-semibold">{t("contactsSection")}</h3>
+						<p className="mt-1 text-sm text-[#5A615D]">{t("contactsHint")}</p>
+					</div>
+
+					{contacts.length > 0 && (
+						<div className="flex flex-wrap gap-2">
+							{contacts.map((c) => (
+								<span
+									key={c.userId}
+									className="inline-flex items-center gap-1 rounded-full bg-[#E8F5E9] px-3 py-1 text-sm text-[#0F1912]">
+									{c.label}
+									<button
+										type="button"
+										aria-label="Fjern"
+										className="text-[#5A615D] hover:text-[#0F1912]"
+										onClick={() =>
+											setContacts((prev) =>
+												prev.filter((p) => p.userId !== c.userId),
+											)
+										}>
+										<X className="h-3.5 w-3.5" />
+									</button>
+								</span>
+							))}
+						</div>
+					)}
+
+					<div className="relative">
+						<Input
+							value={contactsSearch}
+							onChange={(e) => setContactsSearch(e.target.value)}
+							placeholder={t("contactsSearchPlaceholder")}
+							disabled={atContactCap}
+							className="border-[#C1C4C2]"
+						/>
+						{atContactCap && (
+							<p className="mt-1 text-xs text-[#5A615D]">
+								{t("contactsMaxReached")}
+							</p>
+						)}
+						{!atContactCap && contactsSearch.trim().length > 0 && (
+							<div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-y-auto rounded-md border border-[#C1C4C2] bg-white shadow-lg">
+								{isSearchingContacts && (
+									<div className="flex items-center gap-2 px-3 py-2 text-sm text-[#5A615D]">
+										<Loader2 className="h-3.5 w-3.5 animate-spin" />
+										{t("contactsSearching")}
+									</div>
+								)}
+								{!isSearchingContacts &&
+									unselectedResults.length === 0 && (
+										<div className="px-3 py-2 text-sm text-[#5A615D]">
+											{t("contactsNoResults")}
+										</div>
+									)}
+								{!isSearchingContacts &&
+									unselectedResults.map((emp) => {
+										const label = contactLabel(
+											emp.firstName,
+											emp.lastName,
+											emp.email,
+										);
+										return (
+											<button
+												key={emp.userId}
+												type="button"
+												className="block w-full px-3 py-2 text-left text-sm hover:bg-[#F0FCF2]"
+												onClick={() => {
+													setContacts((prev) => [
+														...prev,
+														{ userId: emp.userId, label },
+													]);
+													setContactsSearch("");
+												}}>
+												{label}
+											</button>
+										);
+									})}
+							</div>
+						)}
+					</div>
+				</div>
+
 				<div className="flex justify-between gap-4 border-t border-[#E8EAE9] pt-6">
 					<Button
 						type="submit"
 						variant="greenSolid"
-						className="flex-1">
-						+ {t("addUser")}
+						className="flex-1"
+						disabled={isSubmittingContacts}>
+						{isSubmittingContacts ? (
+							<>
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								{t("contactsSearching")}
+							</>
+						) : (
+							<>+ {t("addUser")}</>
+						)}
 					</Button>
 					<Button
 						type="button"
 						variant="outline"
 						onClick={handleClose}
+						disabled={isSubmittingContacts}
 						className="flex-1 border-[#C1C4C2]">
 						{t("close")}
 					</Button>

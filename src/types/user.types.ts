@@ -102,6 +102,11 @@ export interface User {
 		name: string;
 		number: string;
 	}[];
+	contacts?: {
+		userId: number;
+		name: string;
+		email: string;
+	}[];
 	phone?: string;
 	firma?: string[];
 }

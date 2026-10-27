@@ -7,9 +7,6 @@ import { CheckCircle2, AlertCircle } from "lucide-react";
 
 interface Props {
 	credit: CustomerCredit | null;
-	/** Pre-VAT cart total so we can show "etter kjøp". BE's authoritative
-	 *  check (APIproxy commit `ea2e0142` once un-commented) runs against the
-	 *  summed `salesOrderLines[*].salesPrice` — this is the FE equivalent. */
 	cartTotal: number | undefined;
 }
 
@@ -17,8 +14,6 @@ const formatKr = (n: number | undefined) =>
 	n == null ? "—" : formatNorwegianCurrency(n);
 
 export function CreditCheckoutSummary({ credit, cartTotal }: Props) {
-	// Hide entirely for customers without a credit arrangement — BE returns
-	// zeros in that case and the box would otherwise read "0 kr / 0 kr".
 	if (!credit || credit.creditLimit <= 0) return null;
 
 	const remainingAfter =

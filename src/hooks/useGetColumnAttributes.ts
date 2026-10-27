@@ -41,9 +41,6 @@ interface VariantItemData {
 	attributes: Attribute[];
 	mediaId: MediaItem[];
 	relatedProducts?: Array<Record<string, unknown>>;
-	// Bluestone "Innholdsbeskrivelse" (UNIT000004, group UoM) — BE extracts it
-	// from the variant attributes list server-side (see APIproxy commit
-	// 2dfd603e) so FE doesn't have to walk the attributes array.
 	contentDescription?: string | null;
 }
 
@@ -69,10 +66,6 @@ interface ProductData {
 	shortDescNo?: string;
 	longDescEn?: string;
 	longDescNo?: string;
-	// BE now returns an array of `{name, language, valueDef}` per locale (one
-	// entry per usp1..usp6). Previously declared as a Record<string,string>
-	// map but the actual shape has always been a list — see the sample in
-	// `/columnAttributes` for product 1025.
 	uspEn?: Array<{ name: string; language: string; valueDef: string }>;
 	uspNo?: Array<{ name: string; language: string; valueDef: string }>;
 	bvp?: string;

@@ -258,11 +258,6 @@ export function ProductInfo({
 			: undefined,
 	);
 
-	// "Innholdsbeskrivelse" — package-contents description sourced from the
-	// Bluestone attribute UNIT000004. BE (APIproxy commit 2dfd603e) extracts
-	// this server-side and exposes it as `contentDescription` on
-	// VariantData.itemData, so FE reads the dedicated field rather than
-	// walking the attributes array. Hidden when empty.
 	const contentDescription = useMemo(() => {
 		if (!selectedItemNumber || !columnAttributes) return null;
 		const variantSlot = columnAttributes[selectedItemNumber];
@@ -735,8 +730,6 @@ export function ProductInfo({
 						)}
 					</div>
 
-					{/* Innholdsbeskrivelse / content description — sits directly
-					    under the price row. Hidden when the variant has no value. */}
 					{contentDescription && (
 						<div
 							className="flex items-start gap-2 rounded-lg border px-4 py-3"

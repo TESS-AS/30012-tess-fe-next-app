@@ -1243,7 +1243,15 @@
 		"employee": "Ansatt",
 		"employeeDesc": "Handle produkter (etter fastsatt budsjett), se ordrehistorikk, kontakte kundeservice",
 		"addUser": "Legg til bruker",
-		"close": "Lukk"
+		"close": "Lukk",
+		"contactsSection": "Kontakter (TESS-ansatte)",
+		"contactsHint": "Tag TESS-ansatte som kan administrere denne brukeren. Maks 20.",
+		"contactsSearchPlaceholder": "Søk etter TESS-ansatt (navn eller e-post)...",
+		"contactsNoResults": "Ingen treff",
+		"contactsSearching": "Søker...",
+		"contactsMaxReached": "Maks 20 kontakter er valgt",
+		"contactsSuccess": "Kontakter lagret",
+		"contactsError": "Kunne ikke lagre kontakter"
 	},
 	"DeleteUserModal": {
 		"title": "Slett bruker?",
@@ -1267,7 +1275,20 @@
 			"warehouse": "LAGER",
 			"company": "TESS FIRMA",
 			"budget": "BUDSJETT KR",
+			"contacts": "KONTAKTER",
+			"taggedBy": "TAGGET AV",
 			"action": "HANDLING"
+		},
+		"deleteDialog": {
+			"title": "Slett bruker",
+			"description": "Er du sikker på at du vil slette {name}? Dette kan ikke angres.",
+			"cancel": "Avbryt",
+			"confirm": "Slett bruker",
+			"deleting": "Sletter...",
+			"success": "Bruker slettet",
+			"error": "Kunne ikke slette brukeren",
+			"blockedTitle": "Brukeren kan ikke slettes",
+			"blockedIntro": "Rydd opp i følgende før du prøver igjen:"
 		},
 		"actions": {
 			"viewDetails": "Vis detaljer",
@@ -1279,7 +1300,8 @@
 			"customers": "{count} kunder",
 			"catalogs": "{count} kataloger",
 			"warehouses": "{count} lager",
-			"companies": "{count} firmaer"
+			"companies": "{count} firmaer",
+			"contacts": "{count} kontakter"
 		},
 		"andMore": "og {count} flere"
 	},
@@ -1520,7 +1542,13 @@
 			"ansatt": "Kan kun handle på vegne av seg selv"
 		},
 		"edit": "Rediger",
-		"delete": "Slett bruker"
+		"delete": "Slett bruker",
+		"contacts": "Kontakter",
+		"taggedBy": "Tagget av",
+		"noContacts": "Ingen kontakter",
+		"removeContact": "Fjern kontakt",
+		"contactRemoved": "Kontakt fjernet",
+		"contactRemoveError": "Kunne ikke fjerne kontakten"
 	},
 	"BulkEditConfirmationModal": {
 		"title": "Endre innstillinger",
