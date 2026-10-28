@@ -1317,8 +1317,11 @@
 		"activeTemporary": "Active temporary hose replacements",
 		"dueInSixMonths": "Due in less than 6 months",
 		"byAge": "By age",
-		"age5to6": "5-6 years old",
-		"age7to8": "7-8 years old"
+		"age5to6": "Hoses 5-6 years old",
+		"age7to8": "Hoses 7-8 years old",
+		"age8to10": "Hoses 8-10 years old",
+		"age10plus": "Hoses older than 10 years",
+		"spareHoses": "Spare hoses"
 	},
 	"Dimensions": {
 		"title": "Accounting Dimensions",
