@@ -1458,19 +1458,13 @@ export function HosesAndEquipments({
 								labels={columnLabels}
 							/>
 
-							{/* Equinor's operators only want the location + column
-							 *  controls — the inspection/replacement/age filter set is
-							 *  hidden entirely for them. */}
-							{!isEquinorHoseManagement && (
-								<HoseFiltersDropdown
-									selectedFilters={selectedFilters}
-									selectedAgeRanges={selectedAgeRanges}
-									onToggleFilter={(value) => handleFilterChange(value)}
-									onToggleAgeRange={handleAgeRangeChange}
-									onClearAll={handleClearAllFilters}
-									profile={profile}
-								/>
-							)}
+							<HoseFiltersDropdown
+								selectedFilters={selectedFilters}
+								selectedAgeRanges={selectedAgeRanges}
+								onToggleFilter={(value) => handleFilterChange(value)}
+								onToggleAgeRange={handleAgeRangeChange}
+								onClearAll={handleClearAllFilters}
+							/>
 						</div>
 					</div>
 

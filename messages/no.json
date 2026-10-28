@@ -1319,8 +1319,11 @@
 		"activeTemporary": "Aktive midlertidige slangebytter",
 		"dueInSixMonths": "Forfaller om mindre enn 6 måneder",
 		"byAge": "Etter alder",
-		"age5to6": "5-6 år gamle",
-		"age7to8": "7-8 år gamle"
+		"age5to6": "Slanger 5-6 år gamle",
+		"age7to8": "Slanger 7-8 år gamle",
+		"age8to10": "Slanger 8-10 år gamle",
+		"age10plus": "Slanger eldre enn 10 år",
+		"spareHoses": "Nødslanger"
 	},
 	"Dimensions": {
 		"title": "Konteringsdimensjoner",
