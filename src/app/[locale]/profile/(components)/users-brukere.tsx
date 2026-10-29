@@ -18,14 +18,23 @@ import {
 	HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { Input } from "@/components/ui/input";
+import {
+	Modal,
+	ModalDescription,
+	ModalFooter,
+	ModalHeader,
+	ModalTitle,
+} from "@/components/ui/modal";
 import { USER_ROLES } from "@/constants/userRoles";
 import { useActiveBudgetsByUser } from "@/hooks/useBudget";
+import { useDeleteUser } from "@/hooks/useDeleteUser";
 import {
 	useGetEditableUsers,
 	useSearchEditableUsers,
 } from "@/hooks/useGetEditableUsers";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useUpdateUserRelations } from "@/hooks/useUpdateUserRelations";
+import { isTessEmployeeEmail } from "@/lib/user";
 import { User, BulkEditChanges } from "@/types/user.types";
 import type { AxiosError } from "axios";
 import {
@@ -37,10 +46,12 @@ import {
 	LockKeyhole,
 	UserPen,
 	Wallet,
+	Loader2,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
+import { AddUserModal } from "./add-user-modal";
 import { BulkEditConfirmationModal } from "./bulk-edit-confirmation-modal";
 import { ConfirmChangesModal } from "./confirm-changes-modal";
 import { SetBudgetModal } from "./set-budget-modal";
@@ -55,6 +66,8 @@ const UsersBrukere = () => {
 	const t = useTranslations("UsersBrukere");
 	const tBulk = useTranslations("BulkEditConfirmationModal");
 	const { mutateAsync: updateUserRelations } = useUpdateUserRelations();
+	const { mutateAsync: deleteUserMutate, isPending: isDeletingUser } =
+		useDeleteUser();
 
 	const { data: profile } = usePunchoutProfile();
 	const [searchQuery, setSearchQuery] = useState("");
@@ -62,6 +75,8 @@ const UsersBrukere = () => {
 	const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [userToDelete, setUserToDelete] = useState<User | null>(null);
+	const [deleteBlockers, setDeleteBlockers] = useState<string[] | null>(null);
+	const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
 	const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 	const [userToView, setUserToView] = useState<User | null>(null);
 	const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
@@ -159,12 +174,31 @@ const UsersBrukere = () => {
 
 	const handleDeleteClick = (user: User) => {
 		setUserToDelete(user);
+		setDeleteBlockers(null);
 		setIsDeleteModalOpen(true);
 	};
 
-	const handleDeleteConfirm = () => {
-		if (userToDelete) {
+	const tDelete = useTranslations("UsersBrukere.deleteDialog");
+
+	const handleDeleteConfirm = async () => {
+		if (!userToDelete) return;
+		try {
+			await deleteUserMutate(userToDelete.userId);
+			toast(tDelete("success"), { type: "success" });
+			setIsDeleteModalOpen(false);
 			setUserToDelete(null);
+			setDeleteBlockers(null);
+		} catch (error) {
+			const err = error as AxiosError<{
+				error?: string;
+				blockers?: string[];
+			}>;
+			const data = err.response?.data;
+			if (err.response?.status === 409 && data?.blockers?.length) {
+				setDeleteBlockers(data.blockers);
+				return;
+			}
+			toast(data?.error ?? tDelete("error"), { type: "error" });
 		}
 	};
 
@@ -372,6 +406,18 @@ const UsersBrukere = () => {
 					renderTruncatedList(row.user.company, "companies", row.user),
 			},
 			{
+				key: "contacts",
+				header: isTessEmployeeEmail(profile?.email)
+					? t("columns.taggedBy")
+					: t("columns.contacts"),
+				cell: (row) =>
+					renderTruncatedList(
+						row.user.contacts?.map((c) => ({ name: c.name, number: c.email })),
+						"contacts",
+						row.user,
+					),
+			},
+			{
 				key: "budget",
 				header: t("columns.budget"),
 				cell: (row) => {
@@ -432,6 +478,7 @@ const UsersBrukere = () => {
 			users,
 			selectedUsers,
 			budgetsByUserId,
+			profile?.email,
 			t,
 		],
 	);
@@ -455,7 +502,14 @@ const UsersBrukere = () => {
 							/>
 						</div>
 
-						<div className="flex gap-3" />
+						<div className="flex gap-3">
+							<Button
+								variant="greenSolid"
+								className="h-9"
+								onClick={() => setIsAddUserModalOpen(true)}>
+								+ {t("addUser")}
+							</Button>
+						</div>
 					</div>
 				</div>
 
@@ -513,6 +567,74 @@ const UsersBrukere = () => {
 				onOpenChange={setIsSetBudgetModalOpen}
 				user={userForBudget}
 			/>
+
+			<AddUserModal
+				open={isAddUserModalOpen}
+				onOpenChange={setIsAddUserModalOpen}
+			/>
+
+			<Modal
+				open={isDeleteModalOpen}
+				onOpenChange={(open) => {
+					if (isDeletingUser) return;
+					setIsDeleteModalOpen(open);
+					if (!open) {
+						setUserToDelete(null);
+						setDeleteBlockers(null);
+					}
+				}}>
+				<ModalHeader>
+					<ModalTitle>
+						{deleteBlockers ? tDelete("blockedTitle") : tDelete("title")}
+					</ModalTitle>
+					{!deleteBlockers && userToDelete && (
+						<ModalDescription>
+							{tDelete("description", {
+								name:
+									`${userToDelete.firstName ?? ""} ${userToDelete.lastName ?? ""}`.trim() ||
+									userToDelete.email,
+							})}
+						</ModalDescription>
+					)}
+				</ModalHeader>
+				{deleteBlockers && deleteBlockers.length > 0 && (
+					<div className="text-sm text-[#0F1912]">
+						<p className="mb-2">{tDelete("blockedIntro")}</p>
+						<ul className="list-disc pl-5 space-y-1">
+							{deleteBlockers.map((b) => (
+								<li key={b}>{b}</li>
+							))}
+						</ul>
+					</div>
+				)}
+				<ModalFooter className="gap-2 pt-2">
+					<Button
+						variant="outline"
+						disabled={isDeletingUser}
+						onClick={() => {
+							setIsDeleteModalOpen(false);
+							setUserToDelete(null);
+							setDeleteBlockers(null);
+						}}>
+						{tDelete("cancel")}
+					</Button>
+					{!deleteBlockers && (
+						<Button
+							className="bg-red-600 text-white hover:bg-red-700"
+							disabled={isDeletingUser}
+							onClick={handleDeleteConfirm}>
+							{isDeletingUser ? (
+								<>
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+									{tDelete("deleting")}
+								</>
+							) : (
+								tDelete("confirm")
+							)}
+						</Button>
+					)}
+				</ModalFooter>
+			</Modal>
 		</div>
 	);
 };

@@ -82,7 +82,7 @@ export function ThmProjectsTable({
 		},
 		{
 			key: "listView",
-			header: "List view",
+			header: "Hose list in WO",
 			cell: (row) => (
 				<button
 					type="button"
@@ -90,7 +90,7 @@ export function ThmProjectsTable({
 						e.stopPropagation();
 						handleOpen(row, "list");
 					}}
-					aria-label={`Open list view for ${row.workOrderNumber}`}
+					aria-label={`Open hose list in WO ${row.workOrderNumber}`}
 					className="rounded p-1 text-[#1C6D2C] hover:bg-[#DCF7E0]">
 					<List className="h-4 w-4" />
 				</button>

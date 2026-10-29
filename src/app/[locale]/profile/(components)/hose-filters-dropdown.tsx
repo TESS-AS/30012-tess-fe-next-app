@@ -9,8 +9,6 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER } from "@/constants/checkout";
-import { ProfileUser } from "@/types/user.types";
 import { Funnel, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -20,6 +18,7 @@ export const HOSE_FILTER_LABEL_KEYS = {
 	overdue: "overdue",
 	aktive_midlertidige: "activeTemporary",
 	replacementDue: "dueInSixMonths",
+	spareSet: "spareHoses",
 } as const;
 
 export type HoseFilterKey = keyof typeof HOSE_FILTER_LABEL_KEYS;
@@ -27,6 +26,8 @@ export type HoseFilterKey = keyof typeof HOSE_FILTER_LABEL_KEYS;
 export const HOSE_AGE_LABEL_KEYS = {
 	"5-6": "age5to6",
 	"7-8": "age7to8",
+	"8-10": "age8to10",
+	"10+": "age10plus",
 } as const;
 
 export type HoseAgeRangeKey = keyof typeof HOSE_AGE_LABEL_KEYS;
@@ -37,7 +38,6 @@ export interface HoseFiltersDropdownProps {
 	onToggleFilter: (value: string) => void;
 	onToggleAgeRange: (value: string) => Promise<void> | void;
 	onClearAll?: () => void;
-	profile: ProfileUser;
 }
 
 export function HoseFiltersDropdown({
@@ -46,7 +46,6 @@ export function HoseFiltersDropdown({
 	onToggleFilter,
 	onToggleAgeRange,
 	onClearAll,
-	profile,
 }: HoseFiltersDropdownProps) {
 	const t = useTranslations("HoseFiltersDropdown");
 	const selectedCount = selectedFilters.length + selectedAgeRanges.length;
@@ -168,96 +167,106 @@ export function HoseFiltersDropdown({
 									</DropdownMenuItem>
 								</div>
 							</div>
-							{profile?.defaultCustomerNumber !==
-								SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
-								<>
-									<div>
-										<div className="mb-2 flex items-center justify-between">
-											<h4 className="font-semibold text-[#0F1912]">
-												{t("hoseReplacement")}
-											</h4>
-											{hasReplacementFilters && (
-												<span className="rounded-full bg-[#DCF7E0] px-2 py-0.5 text-xs font-medium text-[#005522]">
-													{t("hoseReplacement")}
-												</span>
-											)}
+							<div>
+								<div className="mb-2 flex items-center justify-between">
+									<h4 className="font-semibold text-[#0F1912]">
+										{t("hoseReplacement")}
+									</h4>
+									{hasReplacementFilters && (
+										<span className="rounded-full bg-[#DCF7E0] px-2 py-0.5 text-xs font-medium text-[#005522]">
+											{t("hoseReplacement")}
+										</span>
+									)}
+								</div>
+								<div className="space-y-2">
+									<DropdownMenuItem
+										className="rounded-md p-0 focus:bg-gray-50"
+										onClick={(e) => {
+											e.stopPropagation();
+											onToggleFilter("aktive_midlertidige");
+										}}>
+										<div className="flex items-center gap-2">
+											<Checkbox
+												checked={selectedFilters.includes(
+													"aktive_midlertidige",
+												)}
+											/>
+											<span>{t("activeTemporary")}</span>
 										</div>
-										<div className="space-y-2">
-											<DropdownMenuItem
-												className="rounded-md p-0 focus:bg-gray-50"
-												onClick={(e) => {
-													e.stopPropagation();
-													onToggleFilter("aktive_midlertidige");
-												}}>
-												<div className="flex items-center gap-2">
-													<Checkbox
-														checked={selectedFilters.includes(
-															"aktive_midlertidige",
-														)}
-													/>
-													<span>{t("activeTemporary")}</span>
-												</div>
-											</DropdownMenuItem>
+									</DropdownMenuItem>
 
-											<DropdownMenuItem
-												className="rounded-md p-0 focus:bg-gray-50"
-												onClick={(e) => {
-													e.stopPropagation();
-													onToggleFilter("replacementDue");
-												}}>
-												<div className="flex items-center gap-2">
-													<Checkbox
-														checked={selectedFilters.includes("replacementDue")}
-													/>
-													<span>{t("dueInSixMonths")}</span>
-												</div>
-											</DropdownMenuItem>
+									<DropdownMenuItem
+										className="rounded-md p-0 focus:bg-gray-50"
+										onClick={(e) => {
+											e.stopPropagation();
+											onToggleFilter("replacementDue");
+										}}>
+										<div className="flex items-center gap-2">
+											<Checkbox
+												checked={selectedFilters.includes("replacementDue")}
+											/>
+											<span>{t("dueInSixMonths")}</span>
 										</div>
+									</DropdownMenuItem>
+								</div>
+							</div>
+
+							<div>
+								<div className="mb-2 flex items-center justify-between">
+									<h4 className="font-semibold text-[#0F1912]">
+										{t("byAge")}
+									</h4>
+									{hasAgeFilters && (
+										<span className="rounded-full bg-[#DCF7E0] px-2 py-0.5 text-xs font-medium text-[#005522]">
+											{t("byAge")}
+										</span>
+									)}
+								</div>
+								<div className="space-y-2">
+									{(
+										[
+											["5-6", "age5to6"],
+											["7-8", "age7to8"],
+											["8-10", "age8to10"],
+											["10+", "age10plus"],
+										] as const
+									).map(([value, labelKey]) => (
+										<DropdownMenuItem
+											key={value}
+											className="rounded-md p-0 focus:bg-gray-50"
+											onClick={async (e) => {
+												e.stopPropagation();
+												await onToggleAgeRange(value);
+											}}>
+											<div className="flex items-center gap-2">
+												<Checkbox
+													checked={selectedAgeRanges.includes(value)}
+												/>
+												<span>{t(labelKey)}</span>
+											</div>
+										</DropdownMenuItem>
+									))}
+								</div>
+							</div>
+
+							<div>
+								<h4 className="mb-2 font-semibold text-[#0F1912]">
+									{t("spareHoses")}
+								</h4>
+								<DropdownMenuItem
+									className="rounded-md p-0 focus:bg-gray-50"
+									onClick={(e) => {
+										e.stopPropagation();
+										onToggleFilter("spareSet");
+									}}>
+									<div className="flex items-center gap-2">
+										<Checkbox
+											checked={selectedFilters.includes("spareSet")}
+										/>
+										<span>{t("spareHoses")}</span>
 									</div>
-
-									<div>
-										<div className="mb-2 flex items-center justify-between">
-											<h4 className="font-semibold text-[#0F1912]">
-												{t("byAge")}
-											</h4>
-											{hasAgeFilters && (
-												<span className="rounded-full bg-[#DCF7E0] px-2 py-0.5 text-xs font-medium text-[#005522]">
-													{t("byAge")}
-												</span>
-											)}
-										</div>
-										<div className="space-y-2">
-											<DropdownMenuItem
-												className="rounded-md p-0 focus:bg-gray-50"
-												onClick={async (e) => {
-													e.stopPropagation();
-													await onToggleAgeRange("5-6");
-												}}>
-												<div className="flex items-center gap-2">
-													<Checkbox
-														checked={selectedAgeRanges.includes("5-6")}
-													/>
-													<span>{t("age5to6")}</span>
-												</div>
-											</DropdownMenuItem>
-
-											<DropdownMenuItem
-												className="rounded-md p-0 focus:bg-gray-50"
-												onClick={async (e) => {
-													e.stopPropagation();
-													await onToggleAgeRange("7-8");
-												}}>
-												<div className="flex items-center gap-2">
-													<Checkbox
-														checked={selectedAgeRanges.includes("7-8")}
-													/>
-													<span>{t("age7to8")}</span>
-												</div>
-											</DropdownMenuItem>
-										</div>
-									</div>
-								</>
-							)}
+								</DropdownMenuItem>
+							</div>
 						</div>
 					</DropdownMenuContent>
 				</DropdownMenu>

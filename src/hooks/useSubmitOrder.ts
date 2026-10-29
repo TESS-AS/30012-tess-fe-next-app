@@ -175,6 +175,29 @@ export const useSubmitOrder = (
 				console.error("Order submission blocked by budget:", err.response.data);
 				throw budgetError;
 			}
+			// BE returns 403 with { data: "Ordre går over gjenstående kreditt
+			// (X) med Y", order: ... } when the order sum exceeds the
+			// customer's remaining credit. Mirrors the budget path above —
+			// surface a typed Error so callers can toast with the BE message.
+			// See APIproxy commit `ea2e0142` (block currently commented until
+			// FE handles the response — this is that FE handler).
+			if (
+				axios.isAxiosError(err) &&
+				err.response?.status === 403 &&
+				typeof err.response?.data?.data === "string" &&
+				err.response.data.data
+					.toLowerCase()
+					.includes("gjenstående kreditt")
+			) {
+				const message = String(err.response.data.data);
+				const creditError = new Error(message);
+				(creditError as Error & { code?: string }).code = "CREDIT_EXCEEDED";
+				console.error(
+					"Order submission blocked by credit:",
+					err.response.data,
+				);
+				throw creditError;
+			}
 			console.error("Order submission failed:", err);
 			throw err;
 		}

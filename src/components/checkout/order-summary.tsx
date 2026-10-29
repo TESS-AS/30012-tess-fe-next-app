@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { BudgetCheckoutSummary } from "@/components/checkout/budget-checkout-summary";
+import { CreditCheckoutSummary } from "@/components/checkout/credit-checkout-summary";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -21,11 +22,13 @@ import {
 } from "@/constants/checkout";
 import { USER_ROLES } from "@/constants/userRoles";
 import { useCartEvaluation } from "@/hooks/useBudget";
+import { useCustomerCredit } from "@/hooks/useCustomerCredit";
 import { useOrderSummary } from "@/hooks/useOrderSummary";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import { getCartKitPartEntries } from "@/lib/cart-kit";
+import { isDirectPurchaseBlocked } from "@/lib/hose-purchase";
 import { excelOrderConfirmationForCart } from "@/services/orders.service";
 import { createRequisition } from "@/services/requisitions.service";
 import { Separator } from "@radix-ui/react-select";
@@ -51,6 +54,7 @@ export default function OrderSummary({
 	const t = useTranslations();
 
 	const { data: profile } = usePunchoutProfile();
+	const { credit } = useCustomerCredit(!!profile);
 	const {
 		cartItems,
 		isLoading,
@@ -69,6 +73,10 @@ export default function OrderSummary({
 	// entirely when a placer is present — BE has no on-behalf-of param on
 	// this endpoint yet, so it'd show the approver's budget instead of the
 	// placer's. Revisit once BE ships `?onBehalfOfUserId=`.
+	const hasUnorderableHose = (cartItems?.cartKit ?? []).some((kit) =>
+		isDirectPurchaseBlocked(kit, kit.hose),
+	);
+
 	const cartSignature = [
 		...(cartItems?.cart ?? []).map((l) => `${l.itemNumber}:${l.quantity}`),
 		...(cartItems?.cartKit ?? []).map(
@@ -447,7 +455,12 @@ export default function OrderSummary({
 						<Button
 							variant="greenSolid"
 							className="w-full"
-							disabled={isCartEmpty || isCheckoutLoading || arePricesLoading}
+							disabled={
+								isCartEmpty ||
+								isCheckoutLoading ||
+								arePricesLoading ||
+								hasUnorderableHose
+							}
 							onClick={handleExcelExportButtonClick}>
 							{isCheckoutLoading || isLoading || arePricesLoading ? (
 								<Loader2 className="h-4 w-4 animate-spin" />
@@ -508,6 +521,7 @@ export default function OrderSummary({
 							disabled={
 								isSavingRequisition ||
 								isCartEmpty ||
+								hasUnorderableHose ||
 								requisitionDescription.trim().length === 0
 							}
 							onClick={handleSaveRequisition}>
@@ -571,6 +585,11 @@ export default function OrderSummary({
 
 							<BudgetCheckoutSummary evaluation={cartEvaluation} />
 
+							<CreditCheckoutSummary
+								credit={credit}
+								cartTotal={sumAfterDiscount}
+							/>
+
 							{currentStep === 2 && (
 								<div className="mt-3 flex items-start gap-2">
 									<Checkbox
@@ -597,6 +616,12 @@ export default function OrderSummary({
 							)}
 						</div>
 
+						{hasUnorderableHose && (
+							<p className="mt-4 text-sm text-[#5A615D]">
+								{t("Cart.hoseNotOrderableCheckout")}
+							</p>
+						)}
+
 						{isExcelExportCustomer ? (
 							<Button
 								variant="greenSolid"
@@ -605,6 +630,7 @@ export default function OrderSummary({
 									isCartEmpty ||
 									isCheckoutLoading ||
 									arePricesLoading ||
+									hasUnorderableHose ||
 									(!acceptedTerms && currentStep === 2)
 								}
 								onClick={openExcelExportView}>
@@ -626,6 +652,7 @@ export default function OrderSummary({
 										disabled={
 											isCartEmpty ||
 											isCheckoutLoading ||
+											hasUnorderableHose ||
 											(!acceptedTerms && currentStep === 2)
 										}
 										onClick={() => {
@@ -653,6 +680,7 @@ export default function OrderSummary({
 										disabled={
 											isCartEmpty ||
 											isCheckoutLoading ||
+											hasUnorderableHose ||
 											(!acceptedTerms && currentStep === 2)
 										}
 										onClick={() => {
@@ -675,6 +703,7 @@ export default function OrderSummary({
 											isCartEmpty ||
 											isCheckoutLoading ||
 											arePricesLoading ||
+											hasUnorderableHose ||
 											(!acceptedTerms && currentStep === 2)
 										}
 										onClick={handleCheckout}>
@@ -697,6 +726,7 @@ export default function OrderSummary({
 										isCartEmpty ||
 										isCheckoutLoading ||
 										arePricesLoading ||
+										hasUnorderableHose ||
 										(!acceptedTerms && currentStep === 2)
 									}
 									onClick={() => {

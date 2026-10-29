@@ -19,6 +19,7 @@ import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { profileKeys } from "@/hooks/useGetProfileData";
 import { useRouter } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
+import { canSeeUsersTab } from "@/lib/user";
 import { cn } from "@/lib/utils";
 import axiosClient from "@/services/axiosClient";
 import type { SidebarNavItem } from "@/types/sidebar.types";
@@ -617,8 +618,7 @@ export default function ProfilePage() {
 											// 	label: t("ProfilePage.sidebar.usage"),
 											// 	icon: "/icons/profile/navbar/lock-time-outline.svg",
 											// },
-											...(profile.role === USER_ROLES.ADMIN ||
-											profile.role === USER_ROLES.SUPERUSER
+											...(canSeeUsersTab(profile)
 												? [
 														{
 															href: "users",
