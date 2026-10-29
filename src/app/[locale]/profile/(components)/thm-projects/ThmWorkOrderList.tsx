@@ -36,6 +36,7 @@ import {
 	viewColumnsToPreferences,
 } from "@/lib/thm-column-views";
 import { cn } from "@/lib/utils";
+import { getThmWorkOrderHoses } from "@/services/thm-projects.service";
 import type { ThmHoseListItem } from "@/types/thm-projects.types";
 import {
 	Calendar,
@@ -349,35 +350,26 @@ const num = (v: number | undefined | null) =>
 const bool = (v: boolean | undefined | null) =>
 	v == null ? "—" : v ? "Yes" : "No";
 
-function renderCell(
-	key: ColumnKey,
-	row: ThmHoseListItem,
-	onOpenMedia: (row: ThmHoseListItem) => void,
-) {
+function cellText(key: ColumnKey, row: ThmHoseListItem): string {
 	switch (key) {
 		case "posId":
 			return row.posId;
 		case "s2":
 			return row.s2;
 		case "status":
-			return <StatusBadge status={row.status} />;
+			return row.status === "NotTouched"
+				? "Not touched"
+				: "Updated from mobile";
 		case "uploaded":
 			return row.uploaded.toUpperCase();
 		case "synced":
 			return row.synced.toUpperCase();
 		case "bildestatus":
-			return (
-				<BildestatusCell
-					imageCount={row.imageCount}
-					hasImages={row.hasImages}
-					onOpen={() => onOpenMedia(row)}
-				/>
-			);
+			return row.imageCount == null ? "(-)" : `(${row.imageCount})`;
 		case "hoseStd":
 			return row.hoseStd;
 		case "hoseDim":
 			return row.hoseDim;
-
 		case "itemDescription":
 			return str(row.itemDescription);
 		case "s1Code":
@@ -477,6 +469,198 @@ function renderCell(
 	}
 }
 
+function renderCell(
+	key: ColumnKey,
+	row: ThmHoseListItem,
+	onOpenMedia: (row: ThmHoseListItem) => void,
+) {
+	if (key === "status") return <StatusBadge status={row.status} />;
+	if (key === "bildestatus") {
+		return (
+			<BildestatusCell
+				imageCount={row.imageCount}
+				hasImages={row.hasImages}
+				onOpen={() => onOpenMedia(row)}
+			/>
+		);
+	}
+	return cellText(key, row);
+}
+
+function xmlEscape(value: string) {
+	return value
+		.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "")
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;");
+}
+
+function columnLetter(index: number) {
+	let n = index + 1;
+	let letters = "";
+	while (n > 0) {
+		const remainder = (n - 1) % 26;
+		letters = String.fromCharCode(65 + remainder) + letters;
+		n = Math.floor((n - 1) / 26);
+	}
+	return letters;
+}
+
+const CRC_TABLE = (() => {
+	const table = new Uint32Array(256);
+	for (let i = 0; i < 256; i++) {
+		let crc = i;
+		for (let bit = 0; bit < 8; bit++) {
+			crc = crc & 1 ? 0xedb88320 ^ (crc >>> 1) : crc >>> 1;
+		}
+		table[i] = crc >>> 0;
+	}
+	return table;
+})();
+
+function crc32(data: Uint8Array) {
+	let crc = 0xffffffff;
+	for (let i = 0; i < data.length; i++) {
+		crc = CRC_TABLE[(crc ^ data[i]) & 0xff] ^ (crc >>> 8);
+	}
+	return (crc ^ 0xffffffff) >>> 0;
+}
+
+function zipStore(files: Array<{ name: string; data: Uint8Array }>) {
+	const encoder = new TextEncoder();
+	const locals: Uint8Array[] = [];
+	const central: Uint8Array[] = [];
+	let offset = 0;
+
+	for (const file of files) {
+		const name = encoder.encode(file.name);
+		const crc = crc32(file.data);
+		const local = new DataView(new ArrayBuffer(30));
+		local.setUint32(0, 0x04034b50, true);
+		local.setUint16(4, 20, true);
+		local.setUint16(8, 0, true);
+		local.setUint32(14, crc, true);
+		local.setUint32(18, file.data.length, true);
+		local.setUint32(22, file.data.length, true);
+		local.setUint16(26, name.length, true);
+		locals.push(new Uint8Array(local.buffer), name, file.data);
+
+		const directory = new DataView(new ArrayBuffer(46));
+		directory.setUint32(0, 0x02014b50, true);
+		directory.setUint16(4, 20, true);
+		directory.setUint16(6, 20, true);
+		directory.setUint32(16, crc, true);
+		directory.setUint32(20, file.data.length, true);
+		directory.setUint32(24, file.data.length, true);
+		directory.setUint16(28, name.length, true);
+		directory.setUint32(42, offset, true);
+		central.push(new Uint8Array(directory.buffer), name);
+		offset += 30 + name.length + file.data.length;
+	}
+
+	const centralSize = central.reduce((sum, part) => sum + part.length, 0);
+	const end = new DataView(new ArrayBuffer(22));
+	end.setUint32(0, 0x06054b50, true);
+	end.setUint16(8, files.length, true);
+	end.setUint16(10, files.length, true);
+	end.setUint32(12, centralSize, true);
+	end.setUint32(16, offset, true);
+
+	return new Blob([...locals, ...central, new Uint8Array(end.buffer)], {
+		type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+	});
+}
+
+function inlineCell(ref: string, value: string) {
+	return `<c r="${ref}" t="inlineStr"><is><t xml:space="preserve">${xmlEscape(value)}</t></is></c>`;
+}
+
+function downloadWorkOrderExcel(
+	filename: string,
+	columns: Array<{ key: ColumnKey; label: string }>,
+	rows: ThmHoseListItem[],
+) {
+	const encode = (xml: string) => new TextEncoder().encode(xml);
+	const sheetRows = [
+		`<row r="1">${columns
+			.map((column, index) => inlineCell(`${columnLetter(index)}1`, column.label))
+			.join("")}</row>`,
+		...rows.map((row, rowIndex) => {
+			const excelRow = rowIndex + 2;
+			const cells = columns
+				.map((column, index) =>
+					inlineCell(
+						`${columnLetter(index)}${excelRow}`,
+						cellText(column.key, row),
+					),
+				)
+				.join("");
+			return `<row r="${excelRow}">${cells}</row>`;
+		}),
+	].join("");
+
+	const blob = zipStore([
+		{
+			name: "[Content_Types].xml",
+			data: encode(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+</Types>`),
+		},
+		{
+			name: "_rels/.rels",
+			data: encode(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`),
+		},
+		{
+			name: "xl/workbook.xml",
+			data: encode(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+<sheets><sheet name="Hoses" sheetId="1" r:id="rId1"/></sheets>
+</workbook>`),
+		},
+		{
+			name: "xl/_rels/workbook.xml.rels",
+			data: encode(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`),
+		},
+		{
+			name: "xl/styles.xml",
+			data: encode(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts>
+<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>
+<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>
+<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+<cellXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/></cellXfs>
+</styleSheet>`),
+		},
+		{
+			name: "xl/worksheets/sheet1.xml",
+			data: encode(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<sheetData>${sheetRows}</sheetData>
+</worksheet>`),
+		},
+	]);
+
+	const url = URL.createObjectURL(blob);
+	const link = document.createElement("a");
+	link.href = url;
+	link.download = filename;
+	link.click();
+	URL.revokeObjectURL(url);
+}
+
 const DATE_COLUMNS = new Set<ColumnKey>(["uploaded", "synced", "inspectedDate"]);
 
 export function ThmWorkOrderList({
@@ -493,6 +677,7 @@ export function ThmWorkOrderList({
 	const [mediaDrawerRow, setMediaDrawerRow] = useState<ThmHoseListItem | null>(
 		null,
 	);
+	const [downloading, setDownloading] = useState(false);
 
 	// Debounce the search input — a keystroke shouldn't refire the request
 	// mid-typing, which on a large WO means a slow BE round-trip per letter.
@@ -578,6 +763,48 @@ export function ThmWorkOrderList({
 		setSearch("");
 		setDebouncedSearch("");
 		setPage(1);
+	};
+
+	const handleDownload = async () => {
+		if (!workOrderNumber || downloading) return;
+		setDownloading(true);
+		try {
+			const pageSizeFetch = 100;
+			const first = await getThmWorkOrderHoses({
+				workOrderNumber,
+				page: 1,
+				pageSize: pageSizeFetch,
+				search: debouncedSearch || undefined,
+			});
+			const allRows = [...first.data];
+			for (let nextPage = 2; nextPage <= first.meta.totalPages; nextPage++) {
+				const next = await getThmWorkOrderHoses({
+					workOrderNumber,
+					page: nextPage,
+					pageSize: pageSizeFetch,
+					search: debouncedSearch || undefined,
+				});
+				allRows.push(...next.data);
+			}
+			if (allRows.length === 0) {
+				toast.error("Ingen data å laste ned.");
+				return;
+			}
+			const columns = visibleColumns.map((key) => ({
+				key,
+				label: COLUMNS.find((column) => column.key === key)?.label ?? key,
+			}));
+			downloadWorkOrderExcel(
+				`work-order-${workOrderNumber}.xlsx`,
+				columns,
+				allRows,
+			);
+		} catch (error) {
+			console.error("Excel download failed", error);
+			toast.error("Kunne ikke laste ned Excel.");
+		} finally {
+			setDownloading(false);
+		}
 	};
 
 	const currentViewName = activeView?.viewName ?? FALLBACK_VIEW_NAME;
@@ -717,9 +944,11 @@ export function ThmWorkOrderList({
 				<Button
 					variant="outline"
 					size="sm"
+					onClick={() => void handleDownload()}
+					disabled={downloading || isLoading}
 					className="gap-2 border-[#C1C4C2] bg-white text-[#0F1912]">
 					<Download className="h-4 w-4" />
-					Download
+					{downloading ? "Downloading..." : "Download"}
 				</Button>
 			</div>
 
