@@ -45,13 +45,13 @@ import {
 	SheetDescription,
 	SheetTitle,
 } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	useGetAssortmentStructure,
 	useGetCatalogStructure,
 } from "@/hooks/useAssortmentQueries";
 import { useCategoryTreeSelection } from "@/hooks/useCategoryTreeSelection";
+import { cn } from "@/lib/utils";
 import type { AssortmentNode } from "@/types/assortment.types";
 import {
 	BookOpen,
@@ -86,7 +86,7 @@ export function TilpassKatalogDrawer({
 }: TilpassKatalogDrawerProps) {
 	const catalogQuery = useGetCatalogStructure(open && mode === "catalog");
 	const existingQuery = useGetAssortmentStructure(
-		open && mode === "existing-ksu" ? sourceAssortmentNumber ?? null : null,
+		open && mode === "existing-ksu" ? (sourceAssortmentNumber ?? null) : null,
 	);
 
 	const rootNodes = React.useMemo<AssortmentNode[]>(() => {
@@ -175,8 +175,7 @@ export function TilpassKatalogDrawer({
 		onOpenChange(false);
 	};
 
-	const handleResetToInitial = () =>
-		setDraftSelected(new Set(initialSelected));
+	const handleResetToInitial = () => setDraftSelected(new Set(initialSelected));
 
 	const handleCommit = () => {
 		commit(new Set(draftSelected));
