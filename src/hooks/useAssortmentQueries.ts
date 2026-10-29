@@ -238,7 +238,7 @@ export function useAddAssortmentUser() {
 		}: {
 			assortmentNumber: string;
 			grants: Array<{ userId: number; canAdminister: boolean }>;
-		}) => addUserToAssortment(assortmentNumber, { assortmentUserIds: grants }),
+		}) => addUserToAssortment(assortmentNumber, { users: grants }),
 		onSuccess: (_data, variables) => {
 			qc.invalidateQueries({
 				queryKey: assortmentWizardKeys.detail(variables.assortmentNumber),

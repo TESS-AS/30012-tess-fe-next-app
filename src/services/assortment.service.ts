@@ -10,7 +10,6 @@
 import axiosClient from "@/services/axiosClient";
 import type {
 	AssortmentNode,
-	CatalogItem,
 	CatalogStructureResponse,
 	CreateAssortmentBody,
 	CreateAssortmentResponse,
@@ -30,14 +29,19 @@ export async function getCatalogStructure(): Promise<CatalogStructureResponse> {
 }
 
 export interface AssortmentDetail {
-	assortmentId: number;
 	assortmentNumber: string;
 	assortmentName: string;
 	assortmentDescription?: string | null;
-	categoryCount?: number;
-	productCount?: number;
+	nameNo?: string | null;
+	nameEn?: string | null;
+	depth?: number | null;
+	type?: string | null;
+	parentNumber?: string | null;
 	sourceAssortmentNumber?: string | null;
 	sourceAssortmentName?: string | null;
+	categoryCount?: number;
+	productCount?: number;
+	itemCount?: number;
 	administrators?: Array<{ userId: number; name: string; email?: string }>;
 	createdByName?: string;
 	createdAt?: string;
@@ -97,16 +101,46 @@ export async function searchUsers(
 	return data;
 }
 
-/** Returns a URL/blob the browser can download. BE serves the file directly;
- *  use `window.location.href = ...` or an <a download> for the user flow. */
-export function getExcelTemplateUrl(): string {
-	// BE route is a GET that streams the file — the browser's native download
-	// handling works best when hit directly rather than via XHR.
-	return "/assortment/excel/template";
+async function fetchAssortmentExcel(
+	path: string,
+	fallbackFilename: string,
+): Promise<{ blob: Blob; filename: string }> {
+	const response = await axiosClient.get<Blob>(path, { responseType: "blob" });
+	const disposition = String(response.headers?.["content-disposition"] ?? "");
+	const match =
+		/filename\*=UTF-8''([^;]+)/i.exec(disposition) ??
+		/filename="?([^";]+)"?/i.exec(disposition);
+	const filename = match ? decodeURIComponent(match[1]) : fallbackFilename;
+	return { blob: response.data, filename };
 }
 
-export function getExportAssortmentExcelUrl(assortmentNumber: string): string {
-	return `/assortment/${encodeURIComponent(assortmentNumber)}/excel`;
+function triggerBlobDownload(blob: Blob, filename: string): void {
+	const url = window.URL.createObjectURL(blob);
+	const link = document.createElement("a");
+	link.href = url;
+	link.download = filename;
+	document.body.appendChild(link);
+	link.click();
+	document.body.removeChild(link);
+	window.URL.revokeObjectURL(url);
+}
+
+export async function downloadExcelTemplate(): Promise<void> {
+	const { blob, filename } = await fetchAssortmentExcel(
+		"/assortment/excel/template",
+		"ksu-import-mal.xlsx",
+	);
+	triggerBlobDownload(blob, filename);
+}
+
+export async function downloadAssortmentExcel(
+	assortmentNumber: string,
+): Promise<void> {
+	const { blob, filename } = await fetchAssortmentExcel(
+		`/assortment/${encodeURIComponent(assortmentNumber)}/excel`,
+		`${assortmentNumber}.xlsx`,
+	);
+	triggerBlobDownload(blob, filename);
 }
 
 export async function validateExcelImport(
@@ -168,11 +202,17 @@ export interface PatchAssortmentBody {
  *  being updated, or when `assortmentName` is an empty string. BE rejects
  *  (403) when the user doesn't have `can_administer` on the KSU, or the
  *  KSU is a Bluestone catalogue (`type === 'BS'`). (409) on duplicate name. */
+export interface PatchAssortmentResponse {
+	assortmentNumber: string;
+	categoriesAdded: number;
+	categoriesRemoved: number;
+}
+
 export async function patchAssortment(
 	assortmentNumber: string,
 	body: PatchAssortmentBody,
-): Promise<AssortmentDetail> {
-	const { data } = await axiosClient.patch<AssortmentDetail>(
+): Promise<PatchAssortmentResponse> {
+	const { data } = await axiosClient.patch<PatchAssortmentResponse>(
 		`/assortment/${encodeURIComponent(assortmentNumber)}`,
 		body,
 	);
@@ -195,7 +235,7 @@ export async function deleteAssortment(assortmentNumber: string): Promise<void> 
  *  surface's "Legg til ansvarlig(e)" section. */
 export async function addUserToAssortment(
 	assortmentNumber: string,
-	payload: { assortmentUserIds: Array<{ userId: number; canAdminister: boolean }> },
+	payload: { users: Array<{ userId: number; canAdminister: boolean }> },
 ): Promise<void> {
 	await axiosClient.post(
 		`/assortment/postUser/${encodeURIComponent(assortmentNumber)}`,
@@ -214,14 +254,28 @@ export async function removeUserFromAssortment(
 	);
 }
 
-/** TODO BE: list items under a catalog node (products in a category).
- *  Proposed `GET /assortment/:number/items?page=&pageSize=`.
- *  Used by the admin "Opprett og tilpass KSU" drawer left column. */
+export interface AssortmentItemRow {
+	itemNumber: string;
+	categoryNumber: string;
+	categoryName: string | null;
+}
+
+export interface AssortmentItemsResponse {
+	items: AssortmentItemRow[];
+	page: number;
+	pageSize: number;
+	total: number;
+}
+
 export async function getItemsForAssortment(
 	assortmentNumber: string,
-): Promise<CatalogItem[]> {
-	const { data } = await axiosClient.get<CatalogItem[]>(
+	page: number = 1,
+	pageSize: number = 50,
+	search?: string,
+): Promise<AssortmentItemsResponse> {
+	const { data } = await axiosClient.get<AssortmentItemsResponse>(
 		`/assortment/${encodeURIComponent(assortmentNumber)}/items`,
+		{ params: { page, pageSize, ...(search ? { search } : {}) } },
 	);
 	return data;
 }

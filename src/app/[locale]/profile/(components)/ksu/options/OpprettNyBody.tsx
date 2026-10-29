@@ -1,25 +1,12 @@
 "use client";
 
-/**
- * "Opprett ny KSU" option body.
- *
- * Spec constraint: the tree menu for this option is ALWAYS the TESS catalog
- * (DEFAULT_SALES_NEW) — hardcoded here, no source picker.
- *
- * Illustration selector: UI slot per Figma. Clicking "Velg illustrasjon"
- * surfaces a placeholder selection; the actual illustration library/picker
- * isn't scoped for v1 so the button opens nothing yet. When illustrations
- * land, swap the handler for a modal and persist the choice onto the
- * wizard formData.
- */
-
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { AssortmentWizardController } from "@/hooks/useAssortmentWizard";
-import { Image as ImageIcon, Settings2 } from "lucide-react";
+import { Settings2 } from "lucide-react";
 
 import { NameAvailabilityHint } from "./NameAvailabilityHint";
 import { TilpassKatalogDrawer } from "../sections/TilpassKatalogDrawer";
@@ -46,20 +33,6 @@ export function OpprettNyBody({ wizard }: Props) {
 					available={wizard.nameAvailable}
 					isChecking={wizard.isCheckingName}
 				/>
-			</div>
-
-			<div>
-				<Button
-					variant="outlineGreen"
-					size="sm"
-					className="gap-2"
-					onClick={() => {
-						// TODO: wire up illustration picker modal when the library
-						// ships. Placeholder keeps the UI slot per Figma.
-					}}>
-					<ImageIcon className="h-4 w-4" />
-					Velg illustrasjon
-				</Button>
 			</div>
 
 			<div className="space-y-1 max-w-md">

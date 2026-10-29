@@ -56,12 +56,12 @@ export interface CreateAssortmentBody {
 }
 
 export interface CreateAssortmentResponse {
-	assortment: {
-		assortmentId: number;
-		assortmentNumber: string;
-		assortmentName: string;
-	};
-	children?: unknown[];
+	assortmentNumber: string;
+	assortmentId: number;
+	categoryCount: number;
+	productCount: number;
+	itemCount: number;
+	basedOn: string | null;
 }
 
 export interface NameAvailabilityResponse {
@@ -72,43 +72,46 @@ export interface NameAvailabilityResponse {
 
 export interface UserSearchResult {
 	userId: number;
+	name?: string;
 	firstName?: string;
 	lastName?: string;
 	email?: string;
 	phone?: string;
 }
 
-export interface ExcelValidationIssue {
-	row: number;
-	message: string;
-	severity?: "error" | "warning";
+export interface ExcelParsedRow {
+	varenummer?: string;
+	remove?: boolean;
+	[key: string]: unknown;
 }
 
 export interface ExcelValidationResult {
-	ok: boolean;
-	issues: ExcelValidationIssue[];
-	/** Counts BE reports back once parsed — used to pre-fill the summary panel. */
-	rowCount?: number;
-	productsFound?: number;
-	productsMissing?: number;
+	rowCount: number;
+	errors: Array<{ row: number; message: string }>;
+	notFound: Array<{ row: number; varenummer: string }>;
+	unknownPaths: string[];
+	summary: {
+		antallIFil: number;
+		antallIkkeFunnet: number;
+		antallLeggesTil: number;
+		antallFjernes: number;
+		antallNyeKategorier: number;
+	};
+	rows: ExcelParsedRow[];
 }
 
 export interface ExcelCommitResult {
 	assortmentNumber: string;
-	rowsImported: number;
+	antallIFil: number;
+	antallLagtTil: number;
+	antallFjernet: number;
+	antallNyeKategorier: number;
 }
 
-/** A product/item that lives inside a catalog category — surfaced in the
- *  "Opprett og tilpass KSU" admin drawer so the user can pick individual
- *  items (not just whole categories) when composing a custom structure.
- *  BE needs an endpoint to list items within an assortment node. */
 export interface CatalogItem {
 	itemNumber: string;
-	productNumber: string;
-	productName: string;
-	/** The assortment node this item currently sits in (so left-column
-	 *  filter + drag source know where it came from). */
-	assortmentNumber: string;
+	categoryNumber: string;
+	categoryName: string | null;
 }
 
 /** User-authored custom group inside a KSU. Not a BS catalog node — this

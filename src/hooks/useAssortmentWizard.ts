@@ -185,7 +185,7 @@ export function useAssortmentWizard(deps: SubmitDependencies = {}) {
 
 		try {
 			const result = await createMutation.mutateAsync(body);
-			deps.onSuccess?.(result.assortment.assortmentNumber);
+			deps.onSuccess?.(result.assortmentNumber);
 			reset();
 		} catch (err) {
 			deps.onError?.(err);

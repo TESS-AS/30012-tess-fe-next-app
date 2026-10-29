@@ -45,6 +45,7 @@ import {
 	SheetDescription,
 	SheetTitle,
 } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	useGetAssortmentStructure,
@@ -57,6 +58,7 @@ import {
 	Check,
 	CircleX,
 	Maximize2,
+	Minimize2,
 	Minus,
 	RotateCcw,
 	Search,
@@ -113,7 +115,10 @@ export function TilpassKatalogDrawer({
 	});
 
 	const [searchTerm, setSearchTerm] = React.useState("");
-	const [autoUpdates, setAutoUpdates] = React.useState(true);
+	const [isFullscreen, setIsFullscreen] = React.useState(false);
+	React.useEffect(() => {
+		if (!open) setIsFullscreen(false);
+	}, [open]);
 
 	// Count every node in the tree so the root display can show
 	// "N av N kategorier inkludert" (selected vs total).
@@ -173,17 +178,8 @@ export function TilpassKatalogDrawer({
 	const handleResetToInitial = () =>
 		setDraftSelected(new Set(initialSelected));
 
-	// Checkbox: "Start uten valgte kategorier" — purely UI state until
-	// toggled, so the user can tick it and then confirm with "Bruk valg".
-	// Not a commit shortcut (the design renders it as a checkbox, not a
-	// button).
-	const [startEmpty, setStartEmpty] = React.useState(false);
-	React.useEffect(() => {
-		if (open) setStartEmpty(false);
-	}, [open]);
-
 	const handleCommit = () => {
-		commit(startEmpty ? new Set() : new Set(draftSelected));
+		commit(new Set(draftSelected));
 	};
 
 	const title =
@@ -195,7 +191,10 @@ export function TilpassKatalogDrawer({
 			onOpenChange={onOpenChange}>
 			<SheetContent
 				side="right"
-				className="flex w-full flex-col gap-0 p-0 sm:max-w-[680px] [&>button]:hidden">
+				className={cn(
+					"flex w-full flex-col gap-0 p-0 [&>button]:hidden",
+					isFullscreen ? "sm:max-w-none" : "sm:max-w-[680px]",
+				)}>
 				{/* ---------------- Header ---------------- */}
 				<div className="flex items-start justify-between border-b border-[#E5E7E6] px-5 pt-5 pb-4">
 					<SheetTitle className="text-lg font-semibold text-[#0F1912]">
@@ -207,9 +206,14 @@ export function TilpassKatalogDrawer({
 					<div className="flex items-center gap-2 text-[#5A615D]">
 						<button
 							type="button"
-							aria-label="Fullscreen"
+							onClick={() => setIsFullscreen((v) => !v)}
+							aria-label={isFullscreen ? "Avslutt fullskjerm" : "Fullskjerm"}
 							className="rounded p-1 hover:bg-[#F3F4F3] hover:text-[#0F1912]">
-							<Maximize2 className="h-4 w-4" />
+							{isFullscreen ? (
+								<Minimize2 className="h-4 w-4" />
+							) : (
+								<Maximize2 className="h-4 w-4" />
+							)}
 						</button>
 						<button
 							type="button"
@@ -297,8 +301,8 @@ export function TilpassKatalogDrawer({
 						<div className="mt-3 space-y-2 text-sm">
 							<label className="flex items-start gap-2 text-[#0F1912]">
 								<Checkbox
-									checked={autoUpdates}
-									onCheckedChange={(v) => setAutoUpdates(v === true)}
+									checked
+									disabled
 									className="mt-0.5"
 								/>
 								<span>
@@ -308,8 +312,8 @@ export function TilpassKatalogDrawer({
 							</label>
 							<label className="flex items-start gap-2 text-[#0F1912]">
 								<Checkbox
-									checked={startEmpty}
-									onCheckedChange={(v) => setStartEmpty(v === true)}
+									checked
+									disabled
 									className="mt-0.5"
 								/>
 								<span>Start uten valgte kategorier</span>

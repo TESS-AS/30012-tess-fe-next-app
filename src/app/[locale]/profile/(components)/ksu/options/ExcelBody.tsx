@@ -55,7 +55,7 @@ import {
 } from "@/hooks/useAssortmentQueries";
 import type { AssortmentWizardController } from "@/hooks/useAssortmentWizard";
 import { useGetAssortments } from "@/hooks/useGetAssortments";
-import { getExcelTemplateUrl } from "@/services/assortment.service";
+import { downloadExcelTemplate } from "@/services/assortment.service";
 import type { ExcelValidationResult } from "@/types/assortment.types";
 import {
 	AlertTriangle,
@@ -120,13 +120,15 @@ export function ExcelBody({ wizard, onCreated, onHandleChange }: Props) {
 		setValidation(null);
 	};
 
+	const validationOk = (validation?.errors?.length ?? 0) === 0;
+
 	const handleUpload = async () => {
 		if (!file) return;
 		try {
 			const res = await validateMutation.mutateAsync(file);
 			setValidation(res);
 			setUploadedFileName(file.name);
-			if (!res.ok) {
+			if ((res.errors?.length ?? 0) > 0) {
 				toast.error("Excel-filen inneholder feil. Se oppsummeringen under.");
 			} else {
 				toast.success("Fil opplastet og validert.");
@@ -139,7 +141,7 @@ export function ExcelBody({ wizard, onCreated, onHandleChange }: Props) {
 
 	const canCommit =
 		file != null &&
-		validation?.ok === true &&
+		validationOk &&
 		activeDestination !== null &&
 		!commitMutation.isPending;
 
@@ -239,14 +241,17 @@ export function ExcelBody({ wizard, onCreated, onHandleChange }: Props) {
 									<Button
 										variant="greenSolid"
 										size="sm"
-										asChild
-										className="gap-2">
-										<a
-											href={getExcelTemplateUrl()}
-											download>
-											<Download className="h-4 w-4" />
-											Last ned mal
-										</a>
+										className="gap-2"
+										onClick={async () => {
+											try {
+												await downloadExcelTemplate();
+											} catch (err) {
+												console.error("Failed to download Excel template", err);
+												toast.error("Kunne ikke laste ned Excel-malen.");
+											}
+										}}>
+										<Download className="h-4 w-4" />
+										Last ned mal
 									</Button>
 								</>
 							)}
@@ -415,14 +420,14 @@ export function ExcelBody({ wizard, onCreated, onHandleChange }: Props) {
 						4. Bekreftelse og resultat
 					</h4>
 
-					{validation && !validation.ok && validation.issues.length > 0 && (
+					{validation && !validationOk && validation.errors.length > 0 && (
 						<div className="rounded-md border border-[#F0C9B8] bg-[#FDF0E7] px-3 py-2 text-sm">
 							<div className="flex items-center gap-2 font-medium text-[#B35C0B]">
 								<AlertTriangle className="h-4 w-4" />
 								Validering feilet
 							</div>
 							<ul className="mt-2 ml-6 list-disc space-y-0.5 text-xs text-[#5A4030]">
-								{validation.issues.slice(0, 20).map((i, idx) => (
+								{validation.errors.slice(0, 20).map((i, idx) => (
 									<li key={idx}>
 										Rad {i.row}: {i.message}
 									</li>
@@ -441,8 +446,8 @@ export function ExcelBody({ wizard, onCreated, onHandleChange }: Props) {
 
 					<OppsummeringCard
 						rowCount={validation?.rowCount}
-						productsFound={validation?.productsFound}
-						productsMissing={validation?.productsMissing}
+						productsFound={validation?.summary?.antallLeggesTil}
+						productsMissing={validation?.summary?.antallIkkeFunnet}
 					/>
 
 					<Button

@@ -63,6 +63,7 @@ import {
 	ChevronDown,
 	ChevronRight,
 	Maximize2,
+	Minimize2,
 	Pencil,
 	Plus,
 	Search,
@@ -105,6 +106,10 @@ export function OpprettOgTilpassDrawer({
 
 	const [newGroupName, setNewGroupName] = React.useState("");
 	const [searchTerm, setSearchTerm] = React.useState("");
+	const [isFullscreen, setIsFullscreen] = React.useState(false);
+	React.useEffect(() => {
+		if (!open) setIsFullscreen(false);
+	}, [open]);
 	const dragPayload = React.useRef<DragPayload | null>(null);
 
 	const handleCreateGroup = () => {
@@ -235,7 +240,10 @@ export function OpprettOgTilpassDrawer({
 			onOpenChange={onOpenChange}>
 			<SheetContent
 				side="right"
-				className="flex w-full flex-col gap-0 p-0 sm:max-w-[1120px] [&>button]:hidden">
+				className={cn(
+					"flex w-full flex-col gap-0 p-0 [&>button]:hidden",
+					isFullscreen ? "sm:max-w-none" : "sm:max-w-[1120px]",
+				)}>
 				{/* Header */}
 				<div className="flex items-start justify-between border-b border-[#E5E7E6] px-5 pt-5 pb-4">
 					<SheetTitle className="text-lg font-semibold text-[#0F1912]">
@@ -248,9 +256,14 @@ export function OpprettOgTilpassDrawer({
 					<div className="flex items-center gap-2 text-[#5A615D]">
 						<button
 							type="button"
-							aria-label="Fullscreen"
+							onClick={() => setIsFullscreen((v) => !v)}
+							aria-label={isFullscreen ? "Avslutt fullskjerm" : "Fullskjerm"}
 							className="rounded p-1 hover:bg-[#F3F4F3] hover:text-[#0F1912]">
-							<Maximize2 className="h-4 w-4" />
+							{isFullscreen ? (
+								<Minimize2 className="h-4 w-4" />
+							) : (
+								<Maximize2 className="h-4 w-4" />
+							)}
 						</button>
 						<button
 							type="button"
@@ -482,10 +495,10 @@ function CatalogNodeRow({
 	const normalizedSearch = searchTerm.trim().toLowerCase();
 
 	const label = node.nameNo ?? node.assortmentName;
-	const items = itemsQuery.data ?? [];
+	const items = itemsQuery.data?.items ?? [];
 	const filteredItems = normalizedSearch
 		? items.filter((i) =>
-				i.productName.toLowerCase().includes(normalizedSearch),
+				i.itemNumber.toLowerCase().includes(normalizedSearch),
 			)
 		: items;
 
@@ -555,7 +568,7 @@ function CatalogItemRow({
 			onDragStart={onDragStart}
 			style={{ paddingLeft: `${depth * 14 + 24}px` }}
 			className="flex cursor-grab items-center gap-2 rounded-sm px-1 py-1 text-xs text-[#0F1912] hover:bg-[#F3F4F3] active:cursor-grabbing">
-			<span className="truncate">{item.productName}</span>
+			<span className="truncate">{item.itemNumber}</span>
 		</li>
 	);
 }
@@ -762,11 +775,11 @@ function StructuredGroupCard({
 									draggable
 									onDragStart={onItemDragStart(it, group.id)}
 									className="flex cursor-grab items-center gap-2 rounded-sm bg-[#F8F9F8] px-2 py-1 text-xs text-[#0F1912] active:cursor-grabbing hover:bg-[#F3F4F3]">
-									<span className="flex-1 truncate">{it.productName}</span>
+									<span className="flex-1 truncate">{it.itemNumber}</span>
 									<button
 										type="button"
 										onClick={() => onRemoveItem(group.id, it.itemNumber)}
-										aria-label={`Fjern ${it.productName}`}
+										aria-label={`Fjern ${it.itemNumber}`}
 										className="rounded p-0.5 text-[#5A615D] hover:bg-[#F3F4F3] hover:text-[#0F1912]">
 										<X className="h-3 w-3" />
 									</button>

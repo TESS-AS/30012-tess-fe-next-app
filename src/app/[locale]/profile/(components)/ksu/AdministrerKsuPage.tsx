@@ -56,7 +56,7 @@ import {
 import { useGetAssortments } from "@/hooks/useGetAssortments";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { getExportAssortmentExcelUrl } from "@/services/assortment.service";
+import { downloadAssortmentExcel } from "@/services/assortment.service";
 import type { AssortmentDetail } from "@/services/assortment.service";
 import type { UserSearchResult } from "@/types/assortment.types";
 import type { AxiosError } from "axios";
@@ -477,14 +477,16 @@ function KsuDetailPanel({
 				<Button
 					variant="outlineGreen"
 					size="sm"
-					asChild
-					className="mt-3 gap-2">
-					<a
-						href={getExportAssortmentExcelUrl(listRow.assortmentNumber)}
-						download>
-						<Download className="h-4 w-4" />
-						Eksporter til Excel
-					</a>
+					className="mt-3 gap-2"
+					onClick={async () => {
+						try {
+							await downloadAssortmentExcel(listRow.assortmentNumber);
+						} catch (err) {
+							console.error("Failed to download assortment excel", err);
+						}
+					}}>
+					<Download className="h-4 w-4" />
+					Eksporter til Excel
 				</Button>
 			</section>
 		</div>
