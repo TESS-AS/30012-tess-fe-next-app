@@ -6,10 +6,19 @@ export interface IProductSearch {
 	attribute1?: string | null;
 	attribute2?: string | null;
 	redirect?: string | null;
+	redirectType?: string | null;
 	ranking?: number | null;
 	// Not returned by /proxy/search today — kept optional in case BE re-adds it.
 	inStock?: boolean;
 }
+
+export const VARIANT_REDIRECT_TYPES = new Set([
+	"itemNumber",
+	"sap",
+	"gtin",
+	"skf",
+	"supplier",
+]);
 
 export type ISuggestions = string;
 

@@ -87,9 +87,11 @@ const getLineStatusIcon = (status: string) => {
 };
 
 function formatQuantity(line: OrderLine) {
-	const qty = line.quantity ?? 0;
+	const raw = Number(line.quantity ?? 0);
+	const qty = Number.isFinite(raw) ? raw : 0;
+	const qtyStr = Number.isInteger(qty) ? String(qty) : String(qty);
 	const unit = String(line.unit ?? "").trim();
-	return unit ? `${qty} ${unit}` : String(qty);
+	return unit ? `${qtyStr} ${unit}` : qtyStr;
 }
 
 export function OrderExpandedRow({ order, labels }: OrderExpandedRowProps) {
