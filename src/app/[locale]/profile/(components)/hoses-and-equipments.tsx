@@ -42,6 +42,7 @@ import {
 	matchS1FromList,
 	setSelectedS1Code as persistSelectedS1Code,
 } from "@/lib/equinor-s1-storage";
+import { isDirectPurchaseBlocked } from "@/lib/hose-purchase";
 import { cn } from "@/lib/utils";
 import { postCartKit } from "@/services/carts.service";
 import { ProfileUser } from "@/types/user.types";
@@ -69,6 +70,7 @@ export interface HoseOrder {
 	beskrivelse: string;
 	status: "Processed" | "Pending" | "Failed" | string;
 	ecom?: number | boolean;
+	ecomEligible?: boolean;
 	dato: string;
 	warehouse: string;
 	assetId: string;
@@ -125,6 +127,7 @@ export function HosesAndEquipments({
 	const S1_CODE_1755_GRANE = "2070299";
 	const S1_CODE_1170_HEIDRUN_A = "1292728";
 	const S1_CODE_1140_SLEIPNER = "1291571";
+	const S1_CODE_1901_JOHAN_SVERDRUP = "1405630";
 
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
 	const [supportOpen, setSupportOpen] = useState(false);
@@ -270,6 +273,7 @@ export function HosesAndEquipments({
 		beskrivelse: asset?.hoseLine?.itemDescription ?? "",
 		status: asset?.hoseLine?.currentStatus ?? "",
 		ecom: asset?.hoseLine?.ecom,
+		ecomEligible: asset?.hoseLine?.ecomEligible,
 		dato: asset?.hoseHeader?.requestDate ?? "",
 		warehouse: asset?.hoseHeader?.department ?? "",
 		assetId: asset?.hoseHeader?.assetId?.toString?.() || "",
@@ -299,13 +303,16 @@ export function HosesAndEquipments({
 	// Keep a ref to always have the latest transformed assets
 	const transformedAssetsRef = useRef(transformedAssets);
 	const assetsByHexagonIdRef = useRef(
-		new Map<string, Pick<HoseOrder, "ecom">>(),
+		new Map<string, Pick<HoseOrder, "ecom" | "ecomEligible">>(),
 	);
 	useEffect(() => {
 		transformedAssetsRef.current = transformedAssets;
 		for (const asset of transformedAssets) {
 			if (!asset?.hexagonId) continue;
-			assetsByHexagonIdRef.current.set(asset.hexagonId, { ecom: asset.ecom });
+			assetsByHexagonIdRef.current.set(asset.hexagonId, {
+				ecom: asset.ecom,
+				ecomEligible: asset.ecomEligible,
+			});
 		}
 	}, [transformedAssets]);
 
@@ -314,10 +321,8 @@ export function HosesAndEquipments({
 		return selectedRows.includes(hexagonId);
 	};
 
-	const isEcomBlocked = (row: Pick<HoseOrder, "ecom">) => {
-		const ecom = Number(row.ecom);
-		return ecom === 2 || ecom === 3;
-	};
+	const isEcomBlocked = (row: Pick<HoseOrder, "ecom" | "ecomEligible">) =>
+		isDirectPurchaseBlocked(row);
 
 	const selectedCount = allAcrossPages
 		? Math.max(0, (pagination?.totalItems ?? 0) - deselectedIds.size)
@@ -325,13 +330,15 @@ export function HosesAndEquipments({
 
 	const selectedAssetMeta = useMemo(() => {
 		if (allAcrossPages) {
-			const known: Array<Pick<HoseOrder, "hexagonId" | "ecom" | "beskrivelse">> =
-				[];
+			const known: Array<
+				Pick<HoseOrder, "hexagonId" | "ecom" | "ecomEligible" | "beskrivelse">
+			> = [];
 			for (const asset of transformedAssets) {
 				if (!deselectedIds.has(asset.hexagonId)) {
 					known.push({
 						hexagonId: asset.hexagonId,
 						ecom: asset.ecom,
+						ecomEligible: asset.ecomEligible,
 						beskrivelse: asset.beskrivelse,
 					});
 				}
@@ -342,6 +349,7 @@ export function HosesAndEquipments({
 				known.push({
 					hexagonId,
 					ecom: meta.ecom,
+					ecomEligible: meta.ecomEligible,
 					beskrivelse: "",
 				});
 			}
@@ -354,6 +362,7 @@ export function HosesAndEquipments({
 			return {
 				hexagonId,
 				ecom: fromPage?.ecom ?? fromCache?.ecom,
+				ecomEligible: fromPage?.ecomEligible ?? fromCache?.ecomEligible,
 				beskrivelse: fromPage?.beskrivelse ?? "",
 			};
 		});
@@ -1241,7 +1250,8 @@ export function HosesAndEquipments({
 							s1.S1Code === S1_CODE_1930_JOHAN_CASTBERG ||
 							s1.S1Code === S1_CODE_1755_GRANE ||
 							s1.S1Code === S1_CODE_1170_HEIDRUN_A ||
-							s1.S1Code === S1_CODE_1140_SLEIPNER,
+							s1.S1Code === S1_CODE_1140_SLEIPNER ||
+							s1.S1Code === S1_CODE_1901_JOHAN_SVERDRUP,
 					)
 					.sort((a, b) => {
 						const plantA = /^\s*(\d+)/.exec(a.S1Name)?.[1];
@@ -1448,19 +1458,13 @@ export function HosesAndEquipments({
 								labels={columnLabels}
 							/>
 
-							{/* Equinor's operators only want the location + column
-							 *  controls — the inspection/replacement/age filter set is
-							 *  hidden entirely for them. */}
-							{!isEquinorHoseManagement && (
-								<HoseFiltersDropdown
-									selectedFilters={selectedFilters}
-									selectedAgeRanges={selectedAgeRanges}
-									onToggleFilter={(value) => handleFilterChange(value)}
-									onToggleAgeRange={handleAgeRangeChange}
-									onClearAll={handleClearAllFilters}
-									profile={profile}
-								/>
-							)}
+							<HoseFiltersDropdown
+								selectedFilters={selectedFilters}
+								selectedAgeRanges={selectedAgeRanges}
+								onToggleFilter={(value) => handleFilterChange(value)}
+								onToggleAgeRange={handleAgeRangeChange}
+								onClearAll={handleClearAllFilters}
+							/>
 						</div>
 					</div>
 

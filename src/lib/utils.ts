@@ -85,16 +85,11 @@ export function formatDate(date: string | Date, time?: string) {
 export function formatUrlToDisplayName(urlString: string): string {
 	if (!urlString) return "";
 	const decodedString = decodeURIComponent(urlString);
-	// Replace hyphens with spaces, normalize Norwegian characters, and convert to lowercase
-	const normalizedString = decodedString
-		.replace(/-/g, " ")
-		.replace(/å/g, "a")
-		.replace(/ø/g, "o")
-		.replace(/æ/g, "ae")
-		.replace(/Å/g, "a")
-		.replace(/Ø/g, "o")
-		.replace(/Æ/g, "ae")
-		.toLowerCase();
+	// Hyphens → spaces, lowercase. Previously this also transliterated
+	// ø→o / æ→ae / å→a, which produced "Verktoy" in breadcrumb labels even
+	// when the source slug carried the real Norwegian characters. BE now
+	// preserves ø/æ/å in slugs so we keep them through to the display label.
+	const normalizedString = decodedString.replace(/-/g, " ").toLowerCase();
 
 	// Norwegian lowercase words that should remain lowercase (unless first word)
 	const norwegianLowercaseWords = new Set([
@@ -342,12 +337,22 @@ export function deserializeFilters(
 
 	if (!filterString) return filters;
 
-	const params = new URLSearchParams(filterString);
-	params.forEach((value, key) => {
-		// Split comma-separated values
-		const values = value.split(",").map((v) => decodeURIComponent(v));
-		filters[decodeURIComponent(key)] = values;
-	});
+	// Parse the raw string manually instead of URLSearchParams. The latter
+	// auto-decodes %2C → "," before our code runs, collapsing escaped commas
+	// inside a value (e.g. the filter option "Steel, Carbon") into the
+	// separator and splitting one chip into two. We split on the raw-string
+	// comma BEFORE decoding so %2C stays intact until after the split.
+	for (const part of filterString.split("&")) {
+		if (!part) continue;
+		const eqIndex = part.indexOf("=");
+		const rawKey = eqIndex === -1 ? part : part.slice(0, eqIndex);
+		const rawValues = eqIndex === -1 ? "" : part.slice(eqIndex + 1);
+		const key = decodeURIComponent(rawKey);
+		const values = rawValues
+			? rawValues.split(",").map((v) => decodeURIComponent(v))
+			: [];
+		filters[key] = values;
+	}
 
 	return filters;
 }

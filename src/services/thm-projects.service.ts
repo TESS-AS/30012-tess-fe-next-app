@@ -107,6 +107,13 @@ function formatDdMmmYyyy(raw: string | undefined): string {
 // page/pageSize/searchTerm through to BE) once BE returns grouped data
 // with `numberOfIds = COUNT(hexagonId)` aggregated.
 const FETCH_ALL_PAGE_SIZE = 1000;
+// Safety cap when looping through pages: 20 × 1000 = 20k hose rows. For a
+// WO with 201 hoses to show "201" in the "No of IDs" column we need every
+// row for that WO on the client — a single page of 1000 under-counts WOs
+// whose rows get truncated at the page boundary (e.g. 2 of 201 landed on
+// page 1 → column rendered "2"). Looping guarantees a correct count until
+// BE returns a server-aggregated `numberOfIds`.
+const MAX_PAGES_TO_FETCH = 20;
 
 function groupByWorkOrder(beRows: BeWorkOrder[]): ThmWorkOrder[] {
 	const groups = new Map<string, { rep: BeWorkOrder; count: number }>();
@@ -154,18 +161,26 @@ export async function getThmActiveProjects(
 	const page = params.page ?? 1;
 	const pageSize = params.pageSize ?? 25;
 
-	const { data: beList } = await axiosClient.get<BeGetWorkOrderResponse>(
-		"/asset/getWorkOrder",
-		{
-			params: {
-				workOrderType: "MR",
-				page: 1,
-				pageSize: FETCH_ALL_PAGE_SIZE,
+	// Fetch all BE pages (up to MAX_PAGES_TO_FETCH) so the client-side
+	// group-by sees every hexagonId per WO and reports the correct count.
+	const allRows: BeWorkOrder[] = [];
+	for (let fetchPage = 1; fetchPage <= MAX_PAGES_TO_FETCH; fetchPage++) {
+		const { data: beList } = await axiosClient.get<BeGetWorkOrderResponse>(
+			"/asset/getWorkOrder",
+			{
+				params: {
+					workOrderType: "MR",
+					page: fetchPage,
+					pageSize: FETCH_ALL_PAGE_SIZE,
+				},
 			},
-		},
-	);
+		);
+		const rows = beList.data ?? [];
+		allRows.push(...rows);
+		if (rows.length < FETCH_ALL_PAGE_SIZE) break; // last page
+	}
 
-	const grouped = groupByWorkOrder(beList.data ?? []);
+	const grouped = groupByWorkOrder(allRows);
 	const filtered = grouped.filter((row) => matchesSearch(row, params.search));
 
 	const totalItems = filtered.length;

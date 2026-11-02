@@ -1,18 +1,23 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { profileKeys, useGetProfileData } from "@/hooks/useGetProfileData";
 import {
 	profileSchema,
 	ProfileFormValues,
 } from "@/lib/validation/profileSchema";
+import { updateUserProfile } from "@/services/user.service";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 export default function PersonalInfoTab() {
 	const { data: profile } = useGetProfileData();
+	const queryClient = useQueryClient();
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const {
 		register,
@@ -32,8 +37,26 @@ export default function PersonalInfoTab() {
 		}
 	}, [profile, setValue]);
 
-	const onSubmit = () => {
-		// TODO: Handle profile update
+	const onSubmit = async (data: ProfileFormValues) => {
+		if (isSubmitting) return;
+		setIsSubmitting(true);
+		try {
+			await updateUserProfile(
+				data.firstName,
+				data.lastName,
+				data.phoneNumber ?? "",
+			);
+			// Refresh cached profile so checkout + settings reflect the new phone
+			// immediately — this is the whole reason users (e.g. Jarle W.) had to
+			// retype on every checkout: PATCH `/user` was never fired.
+			await queryClient.invalidateQueries({ queryKey: profileKeys.detail() });
+			toast.success("Profile updated");
+		} catch (error) {
+			console.error("Failed to update user profile", error);
+			toast.error("Could not update profile");
+		} finally {
+			setIsSubmitting(false);
+		}
 	};
 
 	return (
@@ -103,8 +126,9 @@ export default function PersonalInfoTab() {
 					<Button
 						type="submit"
 						variant="greenSolid"
-						className="rounded-full px-6 font-semibold">
-						Update Profile
+						className="rounded-full px-6 font-semibold"
+						disabled={isSubmitting}>
+						{isSubmitting ? "Saving..." : "Update Profile"}
 					</Button>
 				</div>
 			</form>

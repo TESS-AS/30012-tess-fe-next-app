@@ -24,6 +24,8 @@ export interface CartKitItem {
 	hexagonId: string;
 	assetId: number;
 	cartLine: number;
+	ecom?: number | boolean;
+	ecomEligible?: boolean;
 	services?: Record<
 		string,
 		{
@@ -40,6 +42,8 @@ export interface CartKitItem {
 		itemDescription: string;
 		genericHoseName: string;
 		quantity: number;
+		ecom?: number | boolean;
+		ecomEligible?: boolean;
 	};
 	ferrule1: HoseComponent;
 	ferrule2: HoseComponent;

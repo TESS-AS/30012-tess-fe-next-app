@@ -41,6 +41,7 @@ interface VariantItemData {
 	attributes: Attribute[];
 	mediaId: MediaItem[];
 	relatedProducts?: Array<Record<string, unknown>>;
+	contentDescription?: string | null;
 }
 
 interface VariantData {
@@ -65,8 +66,8 @@ interface ProductData {
 	shortDescNo?: string;
 	longDescEn?: string;
 	longDescNo?: string;
-	uspEn?: Record<string, string>;
-	uspNo?: Record<string, string>;
+	uspEn?: Array<{ name: string; language: string; valueDef: string }>;
+	uspNo?: Array<{ name: string; language: string; valueDef: string }>;
 	bvp?: string;
 	mediaId?: MediaItem;
 	defaultAttributes?: Array<{
@@ -107,6 +108,7 @@ export type ColumnAttributeResponse = {
 				attributes: Attribute[];
 				mediaId?: MediaItem[];
 				relatedProducts?: Array<Record<string, unknown>>;
+				contentDescription?: string | null;
 		  }
 		| Attribute[]
 		| undefined;
@@ -186,6 +188,7 @@ export function useGetColumnAttributes(variantNumber?: string) {
 							attributes: itemData.attributes || [],
 							mediaId: toMediaArray(itemData.mediaId),
 							relatedProducts: itemData.relatedProducts ?? [],
+							contentDescription: itemData.contentDescription ?? null,
 						};
 					});
 				}

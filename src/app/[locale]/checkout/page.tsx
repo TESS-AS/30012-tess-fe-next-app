@@ -34,6 +34,7 @@ import { useModals } from "@/hooks/useModals";
 import { useOrderStepper } from "@/hooks/useOrderStepper";
 import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { useAppContext } from "@/lib/appContext";
+import { isDirectPurchaseBlocked } from "@/lib/hose-purchase";
 import { sendOrderConfirmationEmail } from "@/lib/sendOrderConfirmationEmail";
 import { CartKitItem, CartLine } from "@/types/carts.types";
 import { Order, OrderResponse } from "@/types/orders.types";
@@ -228,7 +229,16 @@ export default function CheckoutPage() {
 		}
 	};
 
+	const hasUnorderableHose = (cartItems?.cartKit ?? []).some((kit) =>
+		isDirectPurchaseBlocked(kit, kit.hose),
+	);
+
 	const handleCheckout = async () => {
+		if (hasUnorderableHose) {
+			toast.error(t("Cart.hoseNotOrderableCheckout"));
+			return;
+		}
+
 		if (!profile?.punchout) {
 			if (!contactPerson.phone?.trim()) {
 				toast.error(t("Checkout.errors.phoneRequired"));
@@ -309,6 +319,10 @@ export default function CheckoutPage() {
 	};
 
 	const confirmExcelCheckout = async (archiveCartAfterExcelExport: boolean) => {
+		if (hasUnorderableHose) {
+			toast.error(t("Cart.hoseNotOrderableCheckout"));
+			return;
+		}
 		setExcelArchiveModalOpen(false);
 		setIsCheckoutLoading(true);
 		try {

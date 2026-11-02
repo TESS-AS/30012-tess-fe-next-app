@@ -86,9 +86,15 @@ function resolveLabel(node: ProductCategoryNode, locale: string): string {
 		if (localized) return localized;
 	}
 	if (typeof node.label === "string" && node.label) return node.label;
+	// Prefer the raw name when BE provides one — it preserves ø/æ/å that
+	// the slug-based fallback would strip.
+	if (node.name) return node.name;
+	// Fallback: format the raw slug segment directly. We deliberately DO NOT
+	// run `sanitizeSlugSegment` here (that transliterates ø→o for href use);
+	// labels keep the original Norwegian characters so breadcrumbs read as
+	// "Verktøy" rather than "Verktoy".
 	const lastSlug = node.slug[node.slug.length - 1] ?? "";
-	const sanitized = sanitizeSlugSegment(lastSlug);
-	return sanitized ? formatUrlToDisplayName(sanitized) : "";
+	return lastSlug ? formatUrlToDisplayName(lastSlug) : "";
 }
 
 interface RenderedNode {

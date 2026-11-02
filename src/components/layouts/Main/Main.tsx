@@ -7,6 +7,7 @@ import { ScrollRestoreOnRoute } from "@/components/navigation/scroll-restore-on-
 import { OnboardingModal } from "@/components/ui/dialogs/onboarding-modal";
 import { UserStateBanner } from "@/components/user-state-banner";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
+import { isTessEmployeeEmail } from "@/lib/user";
 import { cn } from "@/lib/utils";
 import { useNavMenuStore } from "@/stores/useNavMenuStore";
 import { usePathname } from "next/navigation";
@@ -25,6 +26,9 @@ export default function Main({ children }: { children?: ReactNode }) {
 	const isNewUser = useMemo(() => {
 		if (!profile || isLoading) return false;
 		if (onboardingCompleted) return false;
+		// Internal TESS employees are provisioned through a different flow
+		// and skip the velkommen/onboarding modal entirely.
+		if (isTessEmployeeEmail(profile.email)) return false;
 		return profile.userstate === "new";
 	}, [profile, isLoading, onboardingCompleted]);
 

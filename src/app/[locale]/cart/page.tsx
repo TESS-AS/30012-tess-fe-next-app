@@ -36,6 +36,7 @@ import {
 	formatCartKitAdditionalLabel,
 	getCartKitPartEntries,
 } from "@/lib/cart-kit";
+import { isDirectPurchaseBlocked } from "@/lib/hose-purchase";
 import { getItemBalanceArray, postCartKit } from "@/services/carts.service";
 import { loadCategoryTree } from "@/services/categories.service";
 import {
@@ -296,7 +297,16 @@ const CartPage = () => {
 		if (!isLoading) loadWarehousesData();
 	}, [cartItems, isLoading]);
 
+	const hasUnorderableHose = (cartItems?.cartKit ?? []).some((kit) =>
+		isDirectPurchaseBlocked(kit, kit.hose),
+	);
+
 	const handleCheckout = async () => {
+		if (hasUnorderableHose) {
+			toast.error(t("Cart.hoseNotOrderableCheckout"));
+			return;
+		}
+
 		const isExcelCustomer =
 		 SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER.includes(profile?.defaultCustomerNumber || "");
 
@@ -329,6 +339,10 @@ const CartPage = () => {
 	};
 
 	const confirmExcelCheckout = async (archiveCartAfterExcelExport: boolean) => {
+		if (hasUnorderableHose) {
+			toast.error(t("Cart.hoseNotOrderableCheckout"));
+			return;
+		}
 		setExcelArchiveModalOpen(false);
 		setIsCheckoutLoading(true);
 		try {
@@ -527,6 +541,26 @@ const CartPage = () => {
 							quantity={item.quantity}
 							step={multiple}
 							min={multiple}
+							allowInput
+							onQuantityChange={async (nextQty) => {
+								if (nextQty === item.quantity) return;
+								setLoadingItems((prev) => ({
+									...prev,
+									[item.itemNumber]: true,
+								}));
+								try {
+									await updateQuantity(
+										item.cartLine ?? 0,
+										item.itemNumber,
+										nextQty,
+									);
+								} finally {
+									setLoadingItems((prev) => ({
+										...prev,
+										[item.itemNumber]: false,
+									}));
+								}
+							}}
 							onIncrease={async (e) => {
 								e.stopPropagation();
 								setLoadingItems((prev) => ({
@@ -733,6 +767,10 @@ const CartPage = () => {
 										const additionalItems = getCartKitPartEntries(
 											item.additionals,
 										);
+										const kitNotOrderable = isDirectPurchaseBlocked(
+											item,
+											item.hose,
+										);
 										return (
 											<div
 												key={idx}
@@ -774,6 +812,34 @@ const CartPage = () => {
 														<QuantityButtons
 															isLoading={!!loadingItems[item.hexagonId]}
 															quantity={item.ferrule1.quantity}
+															disabled={kitNotOrderable}
+															allowInput
+															onQuantityChange={async (nextQty) => {
+																const delta = nextQty - item.ferrule1.quantity;
+																if (delta === 0) return;
+																setLoadingItems((prev) => ({
+																	...prev,
+																	[item.hexagonId]: true,
+																}));
+																try {
+																	await postCartKit([
+																		{
+																			hexagonId: Number(item.hexagonId),
+																			quantity: delta,
+																			warehouseNumber:
+																				profile?.defaultWarehouseNumber,
+																			companyNumber:
+																				profile?.defaultCompanyNumber,
+																		},
+																	]);
+																	setIsCartChanging((v) => !v);
+																} finally {
+																	setLoadingItems((prev) => ({
+																		...prev,
+																		[item.hexagonId]: false,
+																	}));
+																}
+															}}
 															onIncrease={async (e) => {
 																e.stopPropagation();
 																setLoadingItems((prev) => ({
@@ -852,6 +918,12 @@ const CartPage = () => {
 														</div>
 													</div>
 												</div>
+
+												{kitNotOrderable && (
+													<p className="px-4 pb-2 pl-11 text-sm text-[#5A615D]">
+														{t("Cart.hoseNotOrderable")}
+													</p>
+												)}
 
 												{expandedItems[item.hexagonId] && (
 													<div className="border-t p-4">

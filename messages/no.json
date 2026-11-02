@@ -622,7 +622,9 @@
 		"company": "Selskap",
 		"page": "Side",
 		"of": "av",
-		"itemRemoved": "Varen er fjernet fra handlekurven"
+		"itemRemoved": "Varen er fjernet fra handlekurven",
+		"hoseNotOrderable": "Denne slangen kan ikke bestilles. Fjern den fra handlekurven for å fortsette.",
+		"hoseNotOrderableCheckout": "En eller flere slanger kan ikke bestilles. Fjern dem fra handlekurven for å fortsette."
 	},
 	"Login": {
 		"title": "Login",
@@ -1241,7 +1243,15 @@
 		"employee": "Ansatt",
 		"employeeDesc": "Handle produkter (etter fastsatt budsjett), se ordrehistorikk, kontakte kundeservice",
 		"addUser": "Legg til bruker",
-		"close": "Lukk"
+		"close": "Lukk",
+		"contactsSection": "Kontakter (TESS-ansatte)",
+		"contactsHint": "Tag TESS-ansatte som kan administrere denne brukeren. Maks 20.",
+		"contactsSearchPlaceholder": "Søk etter TESS-ansatt (navn eller e-post)...",
+		"contactsNoResults": "Ingen treff",
+		"contactsSearching": "Søker...",
+		"contactsMaxReached": "Maks 20 kontakter er valgt",
+		"contactsSuccess": "Kontakter lagret",
+		"contactsError": "Kunne ikke lagre kontakter"
 	},
 	"DeleteUserModal": {
 		"title": "Slett bruker?",
@@ -1265,7 +1275,20 @@
 			"warehouse": "LAGER",
 			"company": "TESS FIRMA",
 			"budget": "BUDSJETT KR",
+			"contacts": "KONTAKTER",
+			"taggedBy": "TAGGET AV",
 			"action": "HANDLING"
+		},
+		"deleteDialog": {
+			"title": "Slett bruker",
+			"description": "Er du sikker på at du vil slette {name}? Dette kan ikke angres.",
+			"cancel": "Avbryt",
+			"confirm": "Slett bruker",
+			"deleting": "Sletter...",
+			"success": "Bruker slettet",
+			"error": "Kunne ikke slette brukeren",
+			"blockedTitle": "Brukeren kan ikke slettes",
+			"blockedIntro": "Rydd opp i følgende før du prøver igjen:"
 		},
 		"actions": {
 			"viewDetails": "Vis detaljer",
@@ -1277,7 +1300,8 @@
 			"customers": "{count} kunder",
 			"catalogs": "{count} kataloger",
 			"warehouses": "{count} lager",
-			"companies": "{count} firmaer"
+			"companies": "{count} firmaer",
+			"contacts": "{count} kontakter"
 		},
 		"andMore": "og {count} flere"
 	},
@@ -1295,8 +1319,11 @@
 		"activeTemporary": "Aktive midlertidige slangebytter",
 		"dueInSixMonths": "Forfaller om mindre enn 6 måneder",
 		"byAge": "Etter alder",
-		"age5to6": "5-6 år gamle",
-		"age7to8": "7-8 år gamle"
+		"age5to6": "Slanger 5-6 år gamle",
+		"age7to8": "Slanger 7-8 år gamle",
+		"age8to10": "Slanger 8-10 år gamle",
+		"age10plus": "Slanger eldre enn 10 år",
+		"spareHoses": "Nødslanger"
 	},
 	"Dimensions": {
 		"title": "Konteringsdimensjoner",
@@ -1518,7 +1545,13 @@
 			"ansatt": "Kan kun handle på vegne av seg selv"
 		},
 		"edit": "Rediger",
-		"delete": "Slett bruker"
+		"delete": "Slett bruker",
+		"contacts": "Kontakter",
+		"taggedBy": "Tagget av",
+		"noContacts": "Ingen kontakter",
+		"removeContact": "Fjern kontakt",
+		"contactRemoved": "Kontakt fjernet",
+		"contactRemoveError": "Kunne ikke fjerne kontakten"
 	},
 	"BulkEditConfirmationModal": {
 		"title": "Endre innstillinger",

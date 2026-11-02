@@ -69,6 +69,7 @@ export interface GetAssetsResponse {
 		breakaway: string;
 		currentStatus: "Processed" | "Pending" | "Failed";
 		ecom: number | boolean;
+		ecomEligible?: boolean;
 		outerCover?: string;
 		gs1?: string;
 		constructionType?: {
