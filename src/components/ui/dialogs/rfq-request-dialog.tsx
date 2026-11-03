@@ -78,12 +78,18 @@ export function RFQRequestDialog({
 	);
 
 	// Equinor customers default the pressure-test checkbox to checked and
-	// prefill the email field. Re-sync each time the dialog opens.
+	// prefill the email field when the profile already uses @equinor.com.
 	React.useEffect(() => {
 		if (open) {
 			setIncludePressureTest(isEquinor);
 			setWarehouseNumber(profile?.defaultWarehouseNumber ?? "");
-			setDeliveryAddress(isEquinor ? (profile?.email ?? "") : "");
+			const profileEmail = (profile?.email ?? "").trim();
+			const equinorProfileEmail = profileEmail
+				.toLowerCase()
+				.endsWith("@equinor.com")
+				? profileEmail
+				: "";
+			setDeliveryAddress(isEquinor ? equinorProfileEmail : "");
 			setPreferPhone(false);
 			setContactValue("");
 		}
@@ -145,19 +151,27 @@ export function RFQRequestDialog({
 
 	const validateForm = () => {
 		const nextErrors: typeof errors = {};
+		const trimmedDeliveryAddress = deliveryAddress.trim();
 
 		if (selectedIds.length === 0) {
 			nextErrors.selectedIds = "Velg minst én slange.";
 		}
-		if (!deliveryAddress.trim()) {
+		if (!trimmedDeliveryAddress) {
 			nextErrors.deliveryAddress = isEquinor
 				? "Fyll inn e-postadresse."
 				: "Fyll inn leveringsadresse.";
-		} else if (
-			isEquinor &&
-			!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(deliveryAddress.trim())
-		) {
-			nextErrors.deliveryAddress = "Skriv inn en gyldig e-postadresse.";
+		} else if (isEquinor) {
+			const isValidEmail =
+				/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedDeliveryAddress);
+			const isEquinorEmail = trimmedDeliveryAddress
+				.toLowerCase()
+				.endsWith("@equinor.com");
+			if (!isValidEmail) {
+				nextErrors.deliveryAddress = "Skriv inn en gyldig e-postadresse.";
+			} else if (!isEquinorEmail) {
+				nextErrors.deliveryAddress =
+					"E-postadressen må være en @equinor.com-adresse.";
+			}
 		}
 		if (!warehouseNumber) {
 			// Equinor punchout users can't pick a warehouse — use profile default.
@@ -193,6 +207,12 @@ export function RFQRequestDialog({
 				? deliveryAddress.trim()
 				: (profile.email ?? "").trim();
 
+		// Punchout From is no-reply; Reply-To must be the address typed in E-post
+		// (Equinor) or the profile/contact email so TESS can answer the requester.
+		const replyToEmail = (
+			isEquinor ? deliveryAddress : (profile.email ?? "")
+		).trim();
+
 		const resolvedWarehouseNumber = isEquinor
 			? (profile.defaultWarehouseNumber ?? warehouseNumber)
 			: (selectedWarehouse?.id ?? warehouseNumber);
@@ -203,7 +223,7 @@ export function RFQRequestDialog({
 		const htmlBody = buildHoseRfqEmailHtml({
 			caseId: generatedCaseId,
 			userName,
-			userEmail: profile.email ?? "—",
+			userEmail: replyToEmail || profile.email || "—",
 			userPhone: profile.phoneNumber,
 			customerNumber,
 			companyName,
@@ -226,10 +246,15 @@ export function RFQRequestDialog({
 			buildHoseRfqEmailSubject(urgent, customerNumber),
 		);
 		formData.append("htmlBody", htmlBody);
+		if (replyToEmail) {
+			formData.append("replyTo", replyToEmail);
+		}
 		formData.append("category", "HoseRFQ");
 
 		try {
-			await axiosClient.post("/sendgrid/sendEmail", formData,);
+			await axiosClient.post("/sendgrid/sendEmail", formData, {
+				params: { replyToCustomer: true },
+			});
 			setCaseId(generatedCaseId);
 		} finally {
 			setSubmitting(false);
@@ -312,7 +337,7 @@ export function RFQRequestDialog({
 								</label>
 								<Input
 									placeholder={
-										isEquinor ? "navn@firma.no" : "Leveringsadresse"
+										isEquinor ? "navn@equinor.com" : "Leveringsadresse"
 									}
 									value={deliveryAddress}
 									onChange={(e) => {
@@ -327,6 +352,11 @@ export function RFQRequestDialog({
 											"border-[#B42318] focus-visible:ring-[#B42318]",
 									)}
 								/>
+								{isEquinor && !errors.deliveryAddress && (
+									<p className="text-xs text-[#5A615D]">
+										Kun @equinor.com-adresser er tillatt.
+									</p>
+								)}
 								{errors.deliveryAddress && (
 									<p className="text-sm text-[#B42318]">
 										{errors.deliveryAddress}

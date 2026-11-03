@@ -88,10 +88,15 @@ export function EquinorSupportDialog({
 			`${profile.firstName ?? ""} ${profile.lastName ?? ""}`.trim() ||
 			"Ukjent bruker";
 
+		const replyToEmail =
+			contactMethod === "email"
+				? contactValue.trim()
+				: (profile.email ?? "").trim();
+
 		const htmlBody = buildHoseContactEmailHtml({
 			caseId: generatedCaseId,
 			userName,
-			userEmail: profile.email ?? "—",
+			userEmail: replyToEmail || profile.email || "—",
 			userPhone: profile.phoneNumber,
 			customerNumber,
 			companyName,
@@ -109,10 +114,15 @@ export function EquinorSupportDialog({
 			buildHoseContactEmailSubject(urgent, customerNumber),
 		);
 		formData.append("htmlBody", htmlBody);
+		if (replyToEmail) {
+			formData.append("replyTo", replyToEmail);
+		}
 		formData.append("category", "HoseContact");
 
 		try {
-			await axiosClient.post("/sendgrid/sendEmail", formData);
+			await axiosClient.post("/sendgrid/sendEmail", formData, {
+				params: { replyToCustomer: true },
+			});
 			setCaseId(generatedCaseId);
 		} finally {
 			setSubmitting(false);
