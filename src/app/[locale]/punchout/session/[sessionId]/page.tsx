@@ -65,17 +65,16 @@ export default function PunchoutSessionPage() {
 				const { data: user } = await axiosClient.get("/user");
 				const userProfile = Array.isArray(user) ? user[0] : user;
 
-				// PBI 2584: remember S1/Lokasjon from punchout login payload
-				const punchoutS1 =
-					extractS1FromUnknownPayload(response.data) ??
-					extractS1FromUnknownPayload(userProfile) ??
-					extractS1FromUnknownPayload(user);
+				// PBI 2584: remember S1/Lokasjon from Equinor PlantID (plantNumber).
+				// Prefer plantNumber from /user; skip placeholders like "0000".
 				if (
 					userProfile?.defaultCustomerNumber ===
-						SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER &&
-					punchoutS1
+					SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
 				) {
-					rememberPunchoutS1(punchoutS1);
+					rememberPunchoutS1(userProfile?.plantNumber) ??
+						rememberPunchoutS1(extractS1FromUnknownPayload(userProfile)) ??
+						rememberPunchoutS1(extractS1FromUnknownPayload(user)) ??
+						rememberPunchoutS1(extractS1FromUnknownPayload(response.data));
 				}
 
 				triggerProfileRefetch();

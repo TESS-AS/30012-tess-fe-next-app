@@ -19,6 +19,7 @@ import { useGetHoseHistory } from "@/hooks/useGetHoseHistory";
 import type { LocationNode } from "@/hooks/useGetHoseSystems";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useAppContext } from "@/lib/appContext";
+import { isDirectPurchaseBlocked } from "@/lib/hose-purchase";
 import { postCartKit } from "@/services/carts.service";
 import {
 	ChevronLeft,
@@ -83,8 +84,7 @@ export default function HoseDetailsPage({
 	const [supportOpen, setSupportOpen] = useState(false);
 	const [rfqOpen, setRfqOpen] = useState(false);
 
-	const hoseEcom = Number(hoseDetails?.hoseLine?.ecom);
-	const isDirectPurchaseBlocked = hoseEcom === 2 || hoseEcom === 3;
+	const hosePurchaseBlocked = isDirectPurchaseBlocked(hoseDetails?.hoseLine);
 	const directPurchaseTooltipText =
 		"Slangen er ikke tilgjengelig for direktekjøp. Send forespørsel for pris og levering.";
 
@@ -125,6 +125,7 @@ export default function HoseDetailsPage({
 	];
 
 	const handleAddToCart = async () => {
+		if (hosePurchaseBlocked) return;
 		if (!hoseDetails?.hoseLine?.hexagonId || !profile) {
 			toast.error("Missing required information to add to cart");
 			return;
@@ -233,7 +234,7 @@ export default function HoseDetailsPage({
 						<SquarePen />
 						{isEditMode ? "Avbryt" : "Rediger slangedetaljer"}
 					</Button>
-					{isDirectPurchaseBlocked ? (
+					{hosePurchaseBlocked ? (
 						<TooltipProvider>
 							<Tooltip>
 								<TooltipTrigger asChild>
@@ -266,7 +267,7 @@ export default function HoseDetailsPage({
 					<HoseActionsDropdown
 						selectedCount={1}
 						isAddingToCart={isAddingToCart}
-						disableAddToCart={isDirectPurchaseBlocked}
+						disableAddToCart={hosePurchaseBlocked}
 						onAddToCart={handleAddToCart}
 						onContactSupport={() => setSupportOpen(true)}
 						onSendRfq={() => setRfqOpen(true)}
@@ -402,7 +403,7 @@ export default function HoseDetailsPage({
 						variant="outline">
 						<SquarePen /> {isEditMode ? t("cancel") : t("edit")}
 					</Button>
-					{isDirectPurchaseBlocked ? (
+					{hosePurchaseBlocked ? (
 						<TooltipProvider>
 							<Tooltip>
 								<TooltipTrigger asChild>
@@ -440,7 +441,7 @@ export default function HoseDetailsPage({
 					<HoseActionsDropdown
 						selectedCount={1}
 						isAddingToCart={isAddingToCart}
-						disableAddToCart={isDirectPurchaseBlocked}
+						disableAddToCart={hosePurchaseBlocked}
 						onAddToCart={handleAddToCart}
 						onContactSupport={() => setSupportOpen(true)}
 						onSendRfq={() => setRfqOpen(true)}

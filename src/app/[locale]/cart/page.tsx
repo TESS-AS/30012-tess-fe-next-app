@@ -34,6 +34,7 @@ import { useSubmitOrder } from "@/hooks/useSubmitOrder";
 import { Link } from "@/i18n/navigation";
 import { useAppContext } from "@/lib/appContext";
 import { getCartKitPartEntries } from "@/lib/cart-kit";
+import { isDirectPurchaseBlocked } from "@/lib/hose-purchase";
 import {
 	getItemBalanceArray,
 	postCartKit,
@@ -299,7 +300,16 @@ const CartPage = () => {
 		if (!isLoading) loadWarehousesData();
 	}, [cartItems, isLoading]);
 
+	const hasUnorderableHose = (cartItems?.cartKit ?? []).some((kit) =>
+		isDirectPurchaseBlocked(kit, kit.hose),
+	);
+
 	const handleCheckout = async () => {
+		if (hasUnorderableHose) {
+			toast.error(t("Cart.hoseNotOrderableCheckout"));
+			return;
+		}
+
 		const isExcelCustomer =
 		 SHOW_EXCEL_EXPORT_CUSTOMER_NUMBER.includes(profile?.defaultCustomerNumber || "");
 
@@ -332,6 +342,10 @@ const CartPage = () => {
 	};
 
 	const confirmExcelCheckout = async (archiveCartAfterExcelExport: boolean) => {
+		if (hasUnorderableHose) {
+			toast.error(t("Cart.hoseNotOrderableCheckout"));
+			return;
+		}
 		setExcelArchiveModalOpen(false);
 		setIsCheckoutLoading(true);
 		try {
@@ -837,6 +851,10 @@ const CartPage = () => {
 													(entry) =>
 														entry.warehouseNumber === item.warehouseNumber,
 												) ?? hoseBalance?.warehouses[0];
+											const kitNotOrderable = isDirectPurchaseBlocked(
+												item,
+												item.hose,
+											);
 											return (
 												<CartKitRow
 													key={item.cartLine}
@@ -848,6 +866,7 @@ const CartPage = () => {
 															[item.hexagonId]: !prev[item.hexagonId],
 														}))
 													}
+													notOrderable={kitNotOrderable}
 													onRemove={async (e) => {
 														e.stopPropagation();
 														try {

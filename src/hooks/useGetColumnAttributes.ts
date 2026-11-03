@@ -41,6 +41,7 @@ interface VariantItemData {
 	attributes: Attribute[];
 	mediaId: MediaItem[];
 	relatedProducts?: Array<Record<string, unknown>>;
+	contentDescription?: string | null;
 }
 
 interface VariantData {
@@ -65,10 +66,6 @@ interface ProductData {
 	shortDescNo?: string;
 	longDescEn?: string;
 	longDescNo?: string;
-	// BE now returns an array of `{name, language, valueDef}` per locale (one
-	// entry per usp1..usp6). Previously declared as a Record<string,string>
-	// map but the actual shape has always been a list — see the sample in
-	// `/columnAttributes` for product 1025.
 	uspEn?: Array<{ name: string; language: string; valueDef: string }>;
 	uspNo?: Array<{ name: string; language: string; valueDef: string }>;
 	bvp?: string;
@@ -111,6 +108,7 @@ export type ColumnAttributeResponse = {
 				attributes: Attribute[];
 				mediaId?: MediaItem[];
 				relatedProducts?: Array<Record<string, unknown>>;
+				contentDescription?: string | null;
 		  }
 		| Attribute[]
 		| undefined;
@@ -190,6 +188,7 @@ export function useGetColumnAttributes(variantNumber?: string) {
 							attributes: itemData.attributes || [],
 							mediaId: toMediaArray(itemData.mediaId),
 							relatedProducts: itemData.relatedProducts ?? [],
+							contentDescription: itemData.contentDescription ?? null,
 						};
 					});
 				}

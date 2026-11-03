@@ -25,7 +25,8 @@ export interface CartKitItem {
 	assetId: number;
 	cartLine: number;
 	warehouseNumber?: string;
-	ecom?: number;
+	ecom?: number | boolean;
+	ecomEligible?: boolean;
 	services?: Record<
 		string,
 		{
@@ -47,6 +48,8 @@ export interface CartKitItem {
 		quantity: number;
 		imageUrl?: string;
 		mediaId?: Media[];
+		ecom?: number | boolean;
+		ecomEligible?: boolean;
 	};
 	ferrule1: HoseComponent;
 	ferrule2: HoseComponent;

@@ -5,7 +5,8 @@ export type OrderStatus =
 	| "Plukket"
 	| "Pakket"
 	| "Under transport"
-	| "Levert";
+	| "Levert"
+	| "Venter på faktura";
 
 export const mapLineStatusToOrderStatus = (status: number): OrderStatus => {
 	switch (status) {
@@ -19,6 +20,8 @@ export const mapLineStatusToOrderStatus = (status: number): OrderStatus => {
 		case 40:
 		case 45:
 			return "Plukket";
+		case 50:
+			return "Venter på faktura";
 		case 60:
 			return "Levert";
 		default:
@@ -77,6 +80,11 @@ export function getStatusBadgeProps(status: OrderStatus) {
 			return {
 				variant: "destructive" as const,
 				className: "text-red-700 border-red-700 bg-red-100",
+			};
+		case "Venter på faktura":
+			return {
+				variant: "default" as const,
+				className: "text-amber-800 border-amber-800 bg-amber-100",
 			};
 		default:
 			return {

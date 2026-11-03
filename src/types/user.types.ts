@@ -19,6 +19,8 @@ export interface ProfileUser {
 	defaultCompanyNumber: string;
 	defaultWarehouseNumber: string;
 	punchout: boolean;
+	/** Equinor punchout PlantID — maps to Lokasjon / S1 (PBI 2584). */
+	plantNumber?: string | null;
 	role: UserRole;
 	/** BE-gated permission for employees to override the calculated unit price
 	 *  on a requisition line (used when writing offers to customers). Source:
@@ -101,6 +103,11 @@ export interface User {
 	company: {
 		name: string;
 		number: string;
+	}[];
+	contacts?: {
+		userId: number;
+		name: string;
+		email: string;
 	}[];
 	phone?: string;
 	firma?: string[];

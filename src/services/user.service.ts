@@ -51,6 +51,95 @@ export async function patchUserState(
 	}
 }
 
+/** Customer credit snapshot from GET /customerCredit (APIproxy commit
+ *  `9c893606`). `creditRemaining` is a Postgres generated column
+ *  (`credit_limit - credit_spent`) so it stays in sync automatically. */
+export interface CustomerCredit {
+	creditLimit: number;
+	creditSpent: number;
+	creditRemaining: number;
+}
+
+export interface DeleteUserBlockers {
+	error: string;
+	blockers?: string[];
+}
+
+export async function deleteUser(userId: number): Promise<void> {
+	try {
+		await axiosInstance.delete(`/userAdmin/user/${encodeURIComponent(userId)}`);
+	} catch (error) {
+		console.error("Error deleting user:", error);
+		throw error;
+	}
+}
+
+export async function deleteUserContact(
+	userId: number,
+	contactUserId?: number,
+): Promise<void> {
+	try {
+		const query =
+			contactUserId !== undefined
+				? `?contactUserId=${encodeURIComponent(contactUserId)}`
+				: "";
+		await axiosInstance.delete(
+			`/user/contacts/${encodeURIComponent(userId)}${query}`,
+		);
+	} catch (error) {
+		console.error("Error deleting user contact:", error);
+		throw error;
+	}
+}
+
+export interface TessEmployee {
+	userId: number;
+	firstName: string | null;
+	lastName: string | null;
+	email: string;
+}
+
+export async function searchTessEmployees(
+	search: string,
+	limit: number = 25,
+): Promise<TessEmployee[]> {
+	try {
+		const response = await axiosInstance.get<{ users?: TessEmployee[] }>(
+			"/user/tessEmployees",
+			{ params: { search, limit } },
+		);
+		return response.data?.users ?? [];
+	} catch (error) {
+		console.error("Error searching TESS employees:", error);
+		throw error;
+	}
+}
+
+export async function postUserContacts(
+	contactUserIds: number[],
+): Promise<void> {
+	try {
+		await axiosInstance.post("/user/contacts", { contactUserIds });
+	} catch (error) {
+		console.error("Error posting user contacts:", error);
+		throw error;
+	}
+}
+
+export async function getCustomerCredit(): Promise<CustomerCredit | null> {
+	try {
+		const response = await axiosInstance.get<{
+			message?: string;
+			credit?: CustomerCredit;
+			cat?: string;
+		}>("/customerCredit");
+		return response.data?.credit ?? null;
+	} catch (error) {
+		console.error("Error fetching customer credit:", error);
+		throw error;
+	}
+}
+
 export async function updateUserProfile(
 	firstName: string,
 	lastName: string,

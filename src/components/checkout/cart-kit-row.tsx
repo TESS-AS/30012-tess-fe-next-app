@@ -36,6 +36,7 @@ type CartKitRowProps = {
 	priceInputSlot?: (itemNumber: string) => ReactNode;
 	warehouseName?: string;
 	inStock?: boolean;
+	notOrderable?: boolean;
 };
 
 type PartLine = {
@@ -308,8 +309,10 @@ export function CartKitRow({
 	priceInputSlot,
 	warehouseName,
 	inStock,
+	notOrderable = false,
 }: CartKitRowProps) {
 	const t = useTranslations("Cart.kit");
+	const tCart = useTranslations("Cart");
 	const [selected, setSelected] = useState(false);
 	const [mainOpen, setMainOpen] = useState(true);
 	const [extrasOpen, setExtrasOpen] = useState(true);
@@ -455,6 +458,12 @@ export function CartKitRow({
 					</Button>
 				</div>
 			</div>
+
+			{notOrderable ? (
+				<p className="border-t border-[#E8EAE9] px-4 py-2 text-sm text-[#5A615D] md:px-6">
+					{tCart("hoseNotOrderable")}
+				</p>
+			) : null}
 
 			{expanded ? (
 				<div>

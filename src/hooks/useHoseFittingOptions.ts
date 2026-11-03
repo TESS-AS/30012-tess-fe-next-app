@@ -25,6 +25,43 @@ function bySortOrder<T extends { sortOrder?: number }>(a: T, b: T) {
 	return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
 }
 
+/**
+ * ecom lookups return a string array ("BSP", "Female", "90°").
+ * Older responses are objects with an id and a name. Both become select options.
+ */
+function toSelectOptions(
+	items: readonly unknown[] | undefined,
+	labelKey: string,
+	idKey: string,
+	sort: boolean,
+): SelectOption[] {
+	const list = [...(items ?? [])];
+	const objects = list.filter(
+		(item): item is { sortOrder?: number } =>
+			typeof item === "object" && item != null,
+	);
+	if (sort && objects.length === list.length) {
+		objects.sort(bySortOrder);
+	}
+	const source = sort && objects.length === list.length ? objects : list;
+
+	return source.flatMap((item) => {
+		if (typeof item === "string") {
+			const label = item.trim();
+			return label ? [{ value: label, label }] : [];
+		}
+		if (typeof item !== "object" || item == null) return [];
+		const record = item as Record<string, unknown>;
+		const rawLabel = record[labelKey];
+		const label = typeof rawLabel === "string" ? rawLabel.trim() : "";
+		if (!label) return [];
+		const rawId = record[idKey];
+		const value =
+			rawId != null && String(rawId).trim() !== "" ? String(rawId) : label;
+		return [{ value, label }];
+	});
+}
+
 /** "Velg ende" cards — only these four orientations are shown in the UI. */
 const ALLOWED_ROTATION_DEGREES = ["0", "90", "180", "270"] as const;
 
@@ -91,45 +128,30 @@ export function useHoseFittingOptions(enabled = true) {
 		rotationQuery,
 	] = results;
 
-	const fittingTypeOptions = useMemo<SelectOption[]>(
+	const fittingTypeOptions = useMemo(
 		() =>
-			(typeFittingQuery.data ?? []).map((item) => ({
-				value: String(item.typeFittingId),
-				label: item.typeFittingName,
-			})),
+			toSelectOptions(
+				typeFittingQuery.data,
+				"typeFittingName",
+				"typeFittingId",
+				false,
+			),
 		[typeFittingQuery.data],
 	);
 
-	const connectionOptions = useMemo<SelectOption[]>(
-		() =>
-			[...(genderQuery.data ?? [])]
-				.sort(bySortOrder)
-				.map((item) => ({
-					value: String(item.genderId),
-					label: item.genderName,
-				})),
+	const connectionOptions = useMemo(
+		() => toSelectOptions(genderQuery.data, "genderName", "genderId", true),
 		[genderQuery.data],
 	);
 
-	const designOptions = useMemo<SelectOption[]>(
-		() =>
-			[...(angleQuery.data ?? [])]
-				.sort(bySortOrder)
-				.map((item) => ({
-					value: String(item.angleId),
-					label: item.angleName,
-				})),
+	const designOptions = useMemo(
+		() => toSelectOptions(angleQuery.data, "angleName", "angleId", true),
 		[angleQuery.data],
 	);
 
-	const materialOptions = useMemo<SelectOption[]>(
+	const materialOptions = useMemo(
 		() =>
-			[...(materialQuery.data ?? [])]
-				.sort(bySortOrder)
-				.map((item) => ({
-					value: String(item.materialId),
-					label: item.materialType,
-				})),
+			toSelectOptions(materialQuery.data, "materialType", "materialId", true),
 		[materialQuery.data],
 	);
 

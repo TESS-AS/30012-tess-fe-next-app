@@ -9,7 +9,7 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { setProductReturnTarget } from "@/lib/productReturnNavigation";
 import { categoryTreeToUrlPath, cn } from "@/lib/utils";
 import { loadCategoryTree } from "@/services/categories.service";
-import { IProductSearch } from "@/types/search.types";
+import { IProductSearch, VARIANT_REDIRECT_TYPES } from "@/types/search.types";
 // import { BadgeCheck } from "lucide-react"; // re-enable when inStock block below is uncommented
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
@@ -163,6 +163,16 @@ export function ProductItem({
 		router.push(productLink);
 	};
 
+	const redirectItemNumber = (() => {
+		if (!product.redirect) return null;
+		const match = /[?&]itemNumber=([^&]+)/i.exec(product.redirect);
+		return match ? decodeURIComponent(match[1]) : null;
+	})();
+	const isVariantRedirect =
+		(product.redirectType != null &&
+			VARIANT_REDIRECT_TYPES.has(product.redirectType)) ||
+		redirectItemNumber != null;
+
 	return (
 		<div>
 			<div
@@ -222,34 +232,40 @@ export function ProductItem({
 								</div>
 							)}
 							*/}
-							<Button
-								type="button"
-								variant="outlineGrey"
-								className={cn(
-									"mt-1 w-full rounded-md px-5 py-2 text-sm font-medium transition-colors sm:hidden",
-									"group-hover:border-[#009640] group-hover:bg-[#009640] group-hover:text-white",
-									"hover:border-[#005522] hover:bg-[#005522] hover:text-white",
-								)}
-								onClick={async (e) => {
-									e.stopPropagation();
-									e.nativeEvent.stopImmediatePropagation();
-									setIsModalIdOpen(product.productNumber);
-									const productVariations = await getProductVariations(
-										product.productNumber,
-										profile?.defaultWarehouseNumber || "",
-										profile?.defaultCompanyNumber || "",
-									);
-									setVariations((prev: Record<string, any>) => ({
-										...prev,
-										[product.productNumber]: productVariations,
-									}));
+							{isVariantRedirect && redirectItemNumber ? (
+								<span className="mt-1 inline-flex w-fit items-center rounded-md border border-[#C1C4C2] bg-[#F8F9F8] px-2 py-1 text-xs font-medium text-[#0F1912] sm:hidden">
+									{redirectItemNumber}
+								</span>
+							) : (
+								<Button
+									type="button"
+									variant="outlineGrey"
+									className={cn(
+										"mt-1 w-full rounded-md px-5 py-2 text-sm font-medium transition-colors sm:hidden",
+										"group-hover:border-[#009640] group-hover:bg-[#009640] group-hover:text-white",
+										"hover:border-[#005522] hover:bg-[#005522] hover:text-white",
+									)}
+									onClick={async (e) => {
+										e.stopPropagation();
+										e.nativeEvent.stopImmediatePropagation();
+										setIsModalIdOpen(product.productNumber);
+										const productVariations = await getProductVariations(
+											product.productNumber,
+											profile?.defaultWarehouseNumber || "",
+											profile?.defaultCompanyNumber || "",
+										);
+										setVariations((prev: Record<string, any>) => ({
+											...prev,
+											[product.productNumber]: productVariations,
+										}));
 
-									if (productVariations.length > 0) {
-										setSelectedVariantNumber(productVariations[0].itemNumber);
-									}
-								}}>
-								Se produktvarianter ({product.itemVariantCount || 0}) →
-							</Button>
+										if (productVariations.length > 0) {
+											setSelectedVariantNumber(productVariations[0].itemNumber);
+										}
+									}}>
+									Se produktvarianter ({product.itemVariantCount || 0}) →
+								</Button>
+							)}
 						</div>
 						<div className="ml-auto hidden flex-col items-end gap-5 sm:flex">
 							{/* inStock not returned by /proxy/search today — re-enable if BE adds it back
@@ -260,34 +276,40 @@ export function ProductItem({
 								</div>
 							)}
 							*/}
-							<Button
-								type="button"
-								variant="outlineGrey"
-								className={cn(
-									"mt-2 ml-auto self-center rounded-md px-5 py-2 text-sm font-medium transition-colors",
-									"group-hover:border-[#009640] group-hover:bg-[#009640] group-hover:text-white",
-									"hover:border-[#005522] hover:bg-[#005522] hover:text-white",
-								)}
-								onClick={async (e) => {
-									e.stopPropagation();
-									e.nativeEvent.stopImmediatePropagation();
-									setIsModalIdOpen(product.productNumber);
-									const productVariations = await getProductVariations(
-										product.productNumber,
-										profile?.defaultWarehouseNumber || "",
-										profile?.defaultCompanyNumber || "",
-									);
-									setVariations((prev: Record<string, any>) => ({
-										...prev,
-										[product.productNumber]: productVariations,
-									}));
+							{isVariantRedirect && redirectItemNumber ? (
+								<span className="mt-2 ml-auto inline-flex items-center self-center rounded-md border border-[#C1C4C2] bg-[#F8F9F8] px-3 py-1.5 text-sm font-medium text-[#0F1912]">
+									{redirectItemNumber}
+								</span>
+							) : (
+								<Button
+									type="button"
+									variant="outlineGrey"
+									className={cn(
+										"mt-2 ml-auto self-center rounded-md px-5 py-2 text-sm font-medium transition-colors",
+										"group-hover:border-[#009640] group-hover:bg-[#009640] group-hover:text-white",
+										"hover:border-[#005522] hover:bg-[#005522] hover:text-white",
+									)}
+									onClick={async (e) => {
+										e.stopPropagation();
+										e.nativeEvent.stopImmediatePropagation();
+										setIsModalIdOpen(product.productNumber);
+										const productVariations = await getProductVariations(
+											product.productNumber,
+											profile?.defaultWarehouseNumber || "",
+											profile?.defaultCompanyNumber || "",
+										);
+										setVariations((prev: Record<string, any>) => ({
+											...prev,
+											[product.productNumber]: productVariations,
+										}));
 
-									if (productVariations.length > 0) {
-										setSelectedVariantNumber(productVariations[0].itemNumber);
-									}
-								}}>
-								Se produktvarianter ({product.itemVariantCount || 0}) →
-							</Button>
+										if (productVariations.length > 0) {
+											setSelectedVariantNumber(productVariations[0].itemNumber);
+										}
+									}}>
+									Se produktvarianter ({product.itemVariantCount || 0}) →
+								</Button>
+							)}
 						</div>
 					</div>
 				</div>

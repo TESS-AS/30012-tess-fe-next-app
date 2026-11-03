@@ -32,7 +32,31 @@ export const EQUINOR_S1_CODES = {
 	JOHAN_CASTBERG: "1958795",
 	GRANE: "2070299",
 	HEIDRUN_A: "1292728",
+	SLEIPNER: "1291571",
+	JOHAN_SVERDRUP: "1405630",
 } as const;
+
+/**
+ * Equinor punchout PlantID (`plantNumber` on /user) → Tess S1 code.
+ * Plant IDs match the leading number in S1 names (e.g. "1130 Troll A").
+ */
+export const EQUINOR_PLANT_ID_TO_S1: Record<string, string> = {
+	"1130": EQUINOR_S1_CODES.TROLL_A,
+	"1775": EQUINOR_S1_CODES.TROLL_B,
+	"1776": EQUINOR_S1_CODES.TROLL_C,
+	"1765": EQUINOR_S1_CODES.OSEBERG_C,
+	"1772": EQUINOR_S1_CODES.OSEBERG_FELTSENTER,
+	"1766": EQUINOR_S1_CODES.OSEBERG_SOR,
+	"1767": EQUINOR_S1_CODES.OSEBERG_OST,
+	"1219": EQUINOR_S1_CODES.AASTA_HANSTEEN,
+	"1820": EQUINOR_S1_CODES.NJORD_A,
+	"1821": EQUINOR_S1_CODES.NJORD_B,
+	"1930": EQUINOR_S1_CODES.JOHAN_CASTBERG,
+	"1755": EQUINOR_S1_CODES.GRANE,
+	"1170": EQUINOR_S1_CODES.HEIDRUN_A,
+	"1140": EQUINOR_S1_CODES.SLEIPNER,
+	"1901": EQUINOR_S1_CODES.JOHAN_SVERDRUP,
+};
 
 const S1_NAME_TO_CODE: Record<string, string> = {
 	"troll a": EQUINOR_S1_CODES.TROLL_A,
@@ -64,6 +88,10 @@ const S1_NAME_TO_CODE: Record<string, string> = {
 	"1755 grane": EQUINOR_S1_CODES.GRANE,
 	"heidrun a": EQUINOR_S1_CODES.HEIDRUN_A,
 	"1170 heidrun a": EQUINOR_S1_CODES.HEIDRUN_A,
+	"johan sverdrup": EQUINOR_S1_CODES.JOHAN_SVERDRUP,
+	"1901 johan sverdrup": EQUINOR_S1_CODES.JOHAN_SVERDRUP,
+	sleipner: EQUINOR_S1_CODES.SLEIPNER,
+	"1140 sleipner": EQUINOR_S1_CODES.SLEIPNER,
 };
 
 const KNOWN_CODES = new Set<string>(Object.values(EQUINOR_S1_CODES));
@@ -72,12 +100,26 @@ function normalizeS1Key(value: string): string {
 	return value.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
-/** Resolve a free-text plant name or raw S1 code to a canonical S1 code. */
+/** Empty / placeholder PlantIDs from punchout (e.g. test value "0000"). */
+export function isBlankPlantNumber(raw?: string | null): boolean {
+	if (raw == null) return true;
+	const trimmed = String(raw).trim();
+	if (!trimmed) return true;
+	return /^0+$/.test(trimmed);
+}
+
+/** Resolve a PlantID, plant name, or raw S1 code to a canonical S1 code. */
 export function resolveEquinorS1Code(raw?: string | null): string | null {
 	if (!raw) return null;
 	const trimmed = String(raw).trim();
-	if (!trimmed) return null;
+	if (!trimmed || isBlankPlantNumber(trimmed)) return null;
 	if (KNOWN_CODES.has(trimmed)) return trimmed;
+
+	const plantId = trimmed.replace(/^0+(?=\d)/, "");
+	if (EQUINOR_PLANT_ID_TO_S1[trimmed]) return EQUINOR_PLANT_ID_TO_S1[trimmed];
+	if (plantId && EQUINOR_PLANT_ID_TO_S1[plantId]) {
+		return EQUINOR_PLANT_ID_TO_S1[plantId];
+	}
 
 	const key = normalizeS1Key(trimmed);
 	if (S1_NAME_TO_CODE[key]) return S1_NAME_TO_CODE[key];
@@ -110,10 +152,10 @@ function writeStorage(key: string, value: string) {
 
 /** Persist S1 from punchout login and sync the location selector key. */
 export function rememberPunchoutS1(raw?: string | null): string | null {
-	if (!raw) return null;
+	if (!raw || isBlankPlantNumber(raw)) return null;
 	const trimmed = String(raw).trim();
-	if (!trimmed) return null;
-	const code = resolveEquinorS1Code(trimmed) ?? trimmed;
+	const code = resolveEquinorS1Code(trimmed);
+	if (!code) return null;
 	writeStorage(PUNCHOUT_S1_STORAGE_KEY, code);
 	writeStorage(SELECTED_S1_STORAGE_KEY, code);
 	if (typeof window !== "undefined") {
@@ -171,6 +213,10 @@ export function extractS1FromUnknownPayload(payload: unknown): string | null {
 	const obj = payload as Record<string, unknown>;
 
 	const directKeys = [
+		"plantNumber",
+		"PlantID",
+		"plantId",
+		"PlantId",
 		"s1Code",
 		"S1Code",
 		"s1",

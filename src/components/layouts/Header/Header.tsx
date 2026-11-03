@@ -43,6 +43,7 @@ import { useAppContext } from "@/lib/appContext";
 import { useCategories } from "@/lib/CategoriesProvider";
 import { buildCategoryPath, findCategoryByGroupId } from "@/lib/category-utils";
 import { useSearchStore } from "@/lib/searchStore";
+import { isTessEmployeeEmail } from "@/lib/user";
 import axiosClient from "@/services/axiosClient";
 import { getProductVariations } from "@/services/product.service";
 import { Category } from "@/types/categories.types";
@@ -125,7 +126,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 	}, [profile]);
 
 	const isTessEmployee = useMemo(
-		() => !!profile?.email?.toLowerCase().endsWith("@tess.no"),
+		() => isTessEmployeeEmail(profile?.email),
 		[profile?.email],
 	);
 
