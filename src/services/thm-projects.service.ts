@@ -163,6 +163,7 @@ export async function getThmActiveProjects(
 
 	// Fetch all BE pages (up to MAX_PAGES_TO_FETCH) so the client-side
 	// group-by sees every hexagonId per WO and reports the correct count.
+	// Sort is forwarded to BE so page ordering is server-authoritative.
 	const allRows: BeWorkOrder[] = [];
 	for (let fetchPage = 1; fetchPage <= MAX_PAGES_TO_FETCH; fetchPage++) {
 		const { data: beList } = await axiosClient.get<BeGetWorkOrderResponse>(
@@ -172,6 +173,8 @@ export async function getThmActiveProjects(
 					workOrderType: "MR",
 					page: fetchPage,
 					pageSize: FETCH_ALL_PAGE_SIZE,
+					...(params.sort ? { sort: params.sort } : {}),
+					...(params.sortDir ? { sortDir: params.sortDir } : {}),
 				},
 			},
 		);

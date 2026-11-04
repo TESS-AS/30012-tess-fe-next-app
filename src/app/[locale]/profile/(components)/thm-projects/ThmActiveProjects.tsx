@@ -20,18 +20,65 @@ const ITEMS_PER_PAGE = 25;
 const RECENT_PAGE_SIZE_OPTIONS = [3, 5, 10] as const;
 const DEFAULT_RECENT_PAGE_SIZE = 3;
 
+// FE column key → BE sort key (case-insensitive on BE).
+// Allowed BE sort keys per Albert: workordernumber, description,
+// customernumber, customername, s1name, createddate, numberofhoses,
+// assignedto, status.
+const SORT_KEY_MAP: Record<string, string> = {
+	workOrderNumber: "workordernumber",
+	description: "description",
+	customerNumber: "customernumber",
+	customerName: "customername",
+	s1PlantVesselUnit: "s1name",
+	dateCreated: "createddate",
+	numberOfIds: "numberofhoses",
+	assignedTo: "assignedto",
+	status: "status",
+};
+
 export function ThmActiveProjects() {
 	const [search, setSearch] = useState("");
 	const [page, setPage] = useState(1);
 	const [recentPageSize, setRecentPageSize] = useState<number>(
 		DEFAULT_RECENT_PAGE_SIZE,
 	);
+	const [sortColumn, setSortColumn] = useState<string | null>(null);
+	const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(
+		null,
+	);
+
+	const handleSort = (columnKey: string) => {
+		if (sortColumn === columnKey) {
+			if (sortDirection === "asc") {
+				setSortDirection("desc");
+			} else if (sortDirection === "desc") {
+				setSortColumn(null);
+				setSortDirection(null);
+			} else {
+				setSortDirection("asc");
+			}
+		} else {
+			setSortColumn(columnKey);
+			setSortDirection("asc");
+		}
+		setPage(1);
+	};
 
 	const recentlyVisitedQuery = useThmRecentlyVisited();
 	const activeProjectsQuery = useThmActiveProjects({
 		page,
 		pageSize: ITEMS_PER_PAGE,
 		search,
+		sort:
+			sortColumn && SORT_KEY_MAP[sortColumn]
+				? SORT_KEY_MAP[sortColumn]
+				: undefined,
+		sortDir:
+			sortDirection === "asc"
+				? "ASC"
+				: sortDirection === "desc"
+					? "DESC"
+					: undefined,
 	});
 
 	const meta = activeProjectsQuery.data?.meta;
@@ -129,6 +176,9 @@ export function ThmActiveProjects() {
 						totalItems={meta?.totalItems ?? 0}
 						itemsPerPage={ITEMS_PER_PAGE}
 						onPageChange={setPage}
+						sortColumn={sortColumn}
+						sortDirection={sortDirection}
+						onSort={handleSort}
 					/>
 				</div>
 			</section>

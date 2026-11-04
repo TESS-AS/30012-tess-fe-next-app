@@ -40,6 +40,9 @@ interface ThmProjectsTableProps {
 	totalItems?: number;
 	itemsPerPage?: number;
 	onPageChange?: (page: number) => void;
+	sortColumn?: string | null;
+	sortDirection?: "asc" | "desc" | null;
+	onSort?: (columnKey: string) => void;
 }
 
 export function ThmProjectsTable({
@@ -52,6 +55,9 @@ export function ThmProjectsTable({
 	totalItems,
 	itemsPerPage,
 	onPageChange,
+	sortColumn = null,
+	sortDirection = null,
+	onSort,
 }: ThmProjectsTableProps) {
 	const router = useRouter();
 
@@ -79,6 +85,7 @@ export function ThmProjectsTable({
 			key: "workOrderNumber",
 			header: "Work Order",
 			cell: (row) => row.workOrderNumber,
+			sortable: true,
 		},
 		{
 			key: "listView",
@@ -116,31 +123,37 @@ export function ThmProjectsTable({
 			key: "description",
 			header: "Description",
 			cell: (row) => row.description || "—",
+			sortable: true,
 		},
 		{
 			key: "customerNumber",
 			header: "Customer no.",
 			cell: (row) => row.customerNumber || "—",
+			sortable: true,
 		},
 		{
 			key: "customerName",
 			header: "Customer",
 			cell: (row) => row.customerName || "—",
+			sortable: true,
 		},
 		{
 			key: "s1PlantVesselUnit",
 			header: "S1 Plant, Vessel, Unit",
 			cell: (row) => row.s1PlantVesselUnit || "—",
+			sortable: true,
 		},
 		{
 			key: "dateCreated",
 			header: "Date created",
 			cell: (row) => row.dateCreated || "—",
+			sortable: true,
 		},
 		{
 			key: "numberOfIds",
 			header: "No of IDs",
 			cell: (row) => row.numberOfIds.toLocaleString(),
+			sortable: true,
 		},
 		{
 			key: "createdBy",
@@ -151,11 +164,13 @@ export function ThmProjectsTable({
 			key: "assignedTo",
 			header: "Assigned to",
 			cell: (row) => row.assignedTo || "—",
+			sortable: true,
 		},
 		{
 			key: "status",
 			header: "Status",
 			cell: (row) => <StatusBadge status={row.status} />,
+			sortable: true,
 		},
 	];
 
@@ -175,6 +190,9 @@ export function ThmProjectsTable({
 			totalItems={effectiveTotal}
 			itemsPerPage={effectivePerPage}
 			onPageChange={onPageChange}
+			sortColumn={sortColumn}
+			sortDirection={sortDirection}
+			onSort={onSort}
 			noWrap
 		/>
 	);

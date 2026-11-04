@@ -48,6 +48,8 @@ export interface ThmWorkOrderListParams {
 	page?: number;
 	pageSize?: number;
 	search?: string;
+	sort?: string;
+	sortDir?: "ASC" | "DESC";
 }
 
 // ---------- Dashboard view (/survey/getTag) -------------------------------
