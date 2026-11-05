@@ -35,6 +35,7 @@ import {
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useUpdateUserRelations } from "@/hooks/useUpdateUserRelations";
 import { isTessEmployeeEmail } from "@/lib/user";
+import type { EditableUserFilters } from "@/services/user.service";
 import { User, BulkEditChanges } from "@/types/user.types";
 import type { AxiosError } from "axios";
 import {
@@ -59,7 +60,6 @@ import { ConfirmChangesModal } from "./confirm-changes-modal";
 import { SetBudgetModal } from "./set-budget-modal";
 import { UserAdminColumnFilter } from "./user-admin-column-filter";
 import { ViewUserModal } from "./view-user-modal";
-import type { EditableUserFilters } from "@/services/user.service";
 
 type UserRow = {
 	orderId: string;
@@ -133,9 +133,8 @@ const UsersBrukere = () => {
 	const [currentPage, setCurrentPage] = useState(1);
 	const pageSize = 10;
 
-	const [visibleColumns, setVisibleColumns] = useState<ToggleableColumnKey[]>(
-		TOGGLEABLE_COLUMNS,
-	);
+	const [visibleColumns, setVisibleColumns] =
+		useState<ToggleableColumnKey[]>(TOGGLEABLE_COLUMNS);
 
 	const [columnFilters, setColumnFilters] = useState<EditableUserFilters>({});
 
@@ -306,7 +305,8 @@ const UsersBrukere = () => {
 	};
 
 	const canSetBudget =
-		profile?.role === USER_ROLES.SUPERUSER || profile?.role === USER_ROLES.ADMIN;
+		profile?.role === USER_ROLES.SUPERUSER ||
+		profile?.role === USER_ROLES.ADMIN;
 
 	const isAdmin = profile?.role === USER_ROLES.ADMIN;
 	const isEmployee = profile?.role === USER_ROLES.EMPLOYEE;
@@ -496,8 +496,12 @@ const UsersBrukere = () => {
 						cell: (row) => (
 							<span
 								className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium ${getRoleBadgeClass(row.user.role)}`}>
-								{row.user.role === USER_ROLES.ADMIN && <LockKeyhole size={12} />}
-								{row.user.role === USER_ROLES.SUPERUSER && <UserPen size={12} />}
+								{row.user.role === USER_ROLES.ADMIN && (
+									<LockKeyhole size={12} />
+								)}
+								{row.user.role === USER_ROLES.SUPERUSER && (
+									<UserPen size={12} />
+								)}
 								{row.user.role === USER_ROLES.USER && <Eye size={12} />}
 								{row.user.role}
 							</span>
@@ -521,7 +525,11 @@ const UsersBrukere = () => {
 							</span>
 						),
 						cell: (row) =>
-							renderTruncatedList(row.user.customerAccess, "customers", row.user),
+							renderTruncatedList(
+								row.user.customerAccess,
+								"customers",
+								row.user,
+							),
 					}
 				: null,
 			isVisible("catalog")
@@ -635,7 +643,8 @@ const UsersBrukere = () => {
 								{t("actions.viewDetails")}
 							</DropdownMenuItem>
 							{canSetBudget && (
-								<DropdownMenuItem onClick={() => handleSetBudgetClick(row.user)}>
+								<DropdownMenuItem
+									onClick={() => handleSetBudgetClick(row.user)}>
 									<Wallet className="mr-2 h-4 w-4" />
 									{t("actions.setBudget")}
 								</DropdownMenuItem>
@@ -832,7 +841,7 @@ const UsersBrukere = () => {
 				{deleteBlockers && deleteBlockers.length > 0 && (
 					<div className="text-sm text-[#0F1912]">
 						<p className="mb-2">{tDelete("blockedIntro")}</p>
-						<ul className="list-disc pl-5 space-y-1">
+						<ul className="list-disc space-y-1 pl-5">
 							{deleteBlockers.map((b) => (
 								<li key={b}>{b}</li>
 							))}
