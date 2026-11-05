@@ -1265,17 +1265,19 @@
 		"subtitle": "Her kan du administrere brukere.",
 		"searchPlaceholder": "Søk etter brukere",
 		"addUser": "Legg til ny bruker",
+		"customizeColumns": "Tilpass kolonner",
 		"editSelected": "Rediger ({count})",
 		"totalUsers": "Brukere totalt",
 		"columns": {
 			"name": "NAVN",
+			"email": "E-POST",
 			"role": "BRUKERROLLE",
 			"customerAccess": "KUNDETILGANG",
 			"catalog": "KATALOG",
 			"warehouse": "LAGER",
 			"company": "TESS FIRMA",
 			"budget": "BUDSJETT KR",
-			"contacts": "KONTAKTER",
+			"contacts": "KONTAKTPERSON",
 			"taggedBy": "TAGGET AV",
 			"action": "HANDLING"
 		},
@@ -1302,6 +1304,13 @@
 			"warehouses": "{count} lager",
 			"companies": "{count} firmaer",
 			"contacts": "{count} kontakter"
+		},
+		"filters": {
+			"open": "Filtrer {label}",
+			"searchPlaceholder": "Søk...",
+			"clear": "Fjern",
+			"empty": "Ingen resultater",
+			"done": "Ferdig"
 		},
 		"andMore": "og {count} flere"
 	},

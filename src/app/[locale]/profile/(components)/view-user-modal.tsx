@@ -7,6 +7,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { USER_ROLES } from "@/constants/userRoles";
 import { useDeleteUserContact } from "@/hooks/useDeleteUserContact";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { isTessEmployeeEmail } from "@/lib/user";
@@ -36,6 +37,16 @@ export function ViewUserModal({
 		useDeleteUserContact();
 
 	if (!user) return null;
+
+	const isAdmin = profile?.role === USER_ROLES.ADMIN;
+	const isEmployee = profile?.role === USER_ROLES.EMPLOYEE;
+	const isTaggedByUser =
+		!!profile?.userId &&
+		(user.contacts ?? []).some((c) => c.userId === profile.userId);
+	const canEdit = isAdmin || (isEmployee && isTaggedByUser);
+	const canDelete = isAdmin;
+	const canRemoveContact = (contactUserId: number) =>
+		isAdmin || contactUserId === profile?.userId;
 
 	const getRoleDescription = (role: string) => {
 		switch (role) {
@@ -172,29 +183,31 @@ export function ViewUserModal({
 										key={c.userId}
 										className="inline-flex items-center gap-1 rounded-full bg-[#E8F5E9] px-3 py-1 text-sm text-[#0F1912]">
 										{c.name || c.email}
-										<button
-											type="button"
-											aria-label={t("removeContact")}
-											disabled={isRemovingContact}
-											className="text-[#5A615D] hover:text-[#0F1912] disabled:opacity-50"
-											onClick={async () => {
-												try {
-													await deleteContact({
-														userId: user.userId,
-														contactUserId: c.userId,
-													});
-													toast(t("contactRemoved"), { type: "success" });
-												} catch (err) {
-													console.error("Failed to remove contact", err);
-													toast(t("contactRemoveError"), { type: "error" });
-												}
-											}}>
-											{isRemovingContact ? (
-												<Loader2 className="h-3.5 w-3.5 animate-spin" />
-											) : (
-												<X className="h-3.5 w-3.5" />
-											)}
-										</button>
+										{canRemoveContact(c.userId) && (
+											<button
+												type="button"
+												aria-label={t("removeContact")}
+												disabled={isRemovingContact}
+												className="text-[#5A615D] hover:text-[#0F1912] disabled:opacity-50"
+												onClick={async () => {
+													try {
+														await deleteContact({
+															userId: user.userId,
+															contactUserId: c.userId,
+														});
+														toast(t("contactRemoved"), { type: "success" });
+													} catch (err) {
+														console.error("Failed to remove contact", err);
+														toast(t("contactRemoveError"), { type: "error" });
+													}
+												}}>
+												{isRemovingContact ? (
+													<Loader2 className="h-3.5 w-3.5 animate-spin" />
+												) : (
+													<X className="h-3.5 w-3.5" />
+												)}
+											</button>
+										)}
 									</span>
 								))}
 							</div>
@@ -217,27 +230,33 @@ export function ViewUserModal({
 					</div>
 				</div>
 
-				<div className="flex gap-3 border-t border-[#E5E7E6] px-6 py-4">
-					<Button
-						variant="greenSolid"
-						onClick={() => {
-							onOpenChange(false);
-							onEdit?.();
-						}}>
-						<SquarePen />
-						{t("edit")}
-					</Button>
-					<Button
-						variant="destructive"
-						className="bg-[#D32F2F] hover:bg-[#B71C1C]"
-						onClick={() => {
-							onOpenChange(false);
-							onDelete?.();
-						}}>
-						<Trash2 />
-						{t("delete")}
-					</Button>
-				</div>
+				{(canEdit || canDelete) && (
+					<div className="flex gap-3 border-t border-[#E5E7E6] px-6 py-4">
+						{canEdit && (
+							<Button
+								variant="greenSolid"
+								onClick={() => {
+									onOpenChange(false);
+									onEdit?.();
+								}}>
+								<SquarePen />
+								{t("edit")}
+							</Button>
+						)}
+						{canDelete && (
+							<Button
+								variant="destructive"
+								className="bg-[#D32F2F] hover:bg-[#B71C1C]"
+								onClick={() => {
+									onOpenChange(false);
+									onDelete?.();
+								}}>
+								<Trash2 />
+								{t("delete")}
+							</Button>
+						)}
+					</div>
+				)}
 			</DialogContent>
 		</Dialog>
 	);

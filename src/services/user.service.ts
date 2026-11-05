@@ -166,10 +166,67 @@ export async function updateUserProfile(
 	}
 }
 
+export type UserAdminFilterType =
+	| "customer"
+	| "catalog"
+	| "warehouse"
+	| "company"
+	| "role";
+
+export interface UserAdminFilterOption {
+	value: string;
+	label: string;
+}
+
+export async function getUserAdminFilterOptions(
+	type: UserAdminFilterType,
+	search?: string,
+	limit?: number,
+): Promise<UserAdminFilterOption[]> {
+	try {
+		const response = await axiosInstance.get<{
+			success: boolean;
+			options?: UserAdminFilterOption[];
+		}>(`/userAdmin/filterOptions`, {
+			params: {
+				type,
+				...(search ? { search } : {}),
+				...(limit ? { limit } : {}),
+			},
+		});
+		return response.data?.options ?? [];
+	} catch (error) {
+		console.error("Error fetching user admin filter options:", error);
+		throw error;
+	}
+}
+
+export interface EditableUserFilters {
+	customerNumbers?: string[];
+	assortmentNumbers?: string[];
+	warehouseNumbers?: string[];
+	companyNumbers?: string[];
+	roles?: string[];
+	sortCreated?: "asc" | "desc";
+}
+
+const toCsv = (values?: string[]) =>
+	values && values.length > 0 ? values.join(",") : undefined;
+
+const filtersToParams = (filters?: EditableUserFilters) => ({
+	customerNumbers: toCsv(filters?.customerNumbers),
+	assortmentNumbers: toCsv(filters?.assortmentNumbers),
+	warehouseNumbers: toCsv(filters?.warehouseNumbers),
+	companyNumbers: toCsv(filters?.companyNumbers),
+	roles: toCsv(filters?.roles),
+	sortCreated: filters?.sortCreated,
+});
+
 export async function getEditableUsers(
 	page: string,
 	pageSize: string,
 	userId?: string,
+	filters?: EditableUserFilters,
 ): Promise<EditableUser> {
 	try {
 		const response = await axiosInstance.get(`/userAdmin/getEditableUsers`, {
@@ -177,6 +234,7 @@ export async function getEditableUsers(
 				page,
 				pageSize,
 				userId,
+				...filtersToParams(filters),
 			},
 		});
 		return response.data;
@@ -205,6 +263,7 @@ export async function searchEditableUsers(
 	search: string,
 	page: string,
 	pageSize: string,
+	filters?: EditableUserFilters,
 ): Promise<EditableUser> {
 	try {
 		const response = await axiosInstance.get(`/userAdmin/searchEditableUsers`, {
@@ -212,6 +271,7 @@ export async function searchEditableUsers(
 				search,
 				page,
 				pageSize,
+				...filtersToParams(filters),
 			},
 		});
 		return response.data;

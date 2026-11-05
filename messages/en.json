@@ -1263,17 +1263,19 @@
 		"subtitle": "Here you can manage users.",
 		"searchPlaceholder": "Search for users",
 		"addUser": "Add new user",
+		"customizeColumns": "Customize columns",
 		"editSelected": "Edit ({count})",
 		"totalUsers": "Total users",
 		"columns": {
 			"name": "NAME",
+			"email": "EMAIL",
 			"role": "USER ROLE",
 			"customerAccess": "CUSTOMER ACCESS",
 			"catalog": "CATALOG",
 			"warehouse": "WAREHOUSE",
 			"company": "TESS COMPANY",
 			"budget": "BUDGET KR",
-			"contacts": "CONTACTS",
+			"contacts": "CONTACT PERSON",
 			"taggedBy": "TAGGED BY",
 			"action": "ACTION"
 		},
@@ -1300,6 +1302,13 @@
 			"warehouses": "{count} warehouses",
 			"companies": "{count} companies",
 			"contacts": "{count} contacts"
+		},
+		"filters": {
+			"open": "Filter {label}",
+			"searchPlaceholder": "Search...",
+			"clear": "Clear",
+			"empty": "No results",
+			"done": "Done"
 		},
 		"andMore": "and {count} more"
 	},
