@@ -12,6 +12,14 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { MultiSelectWithTags } from "@/components/ui/multi-select";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { USER_ROLES, type UserRole } from "@/constants/userRoles";
 import { useFetchUserDataBrukere } from "@/hooks/useFetchUserDataBrukere";
 import { useMergedPagedItems } from "@/hooks/useMergedPagedItems";
 import { fetchUserDataBrukere } from "@/services/user.service";
@@ -30,9 +38,11 @@ export function BulkEditConfirmationModal({
 	selectedUsers,
 	onConfirm,
 	removeUser,
+	canEditRole = false,
 }: BulkEditConfirmationModalProps) {
 	const t = useTranslations("BulkEditConfirmationModal");
 	const [showWarning, setShowWarning] = useState(true);
+	const [selectedRole, setSelectedRole] = useState<UserRole | "">("");
 
 	const isNumericId = (value: string) => /^\d+$/.test(value.trim());
 
@@ -321,6 +331,19 @@ export function BulkEditConfirmationModal({
 	}, [companies, selectedUsers]);
 
 	useEffect(() => {
+		if (!open) {
+			setSelectedRole("");
+			return;
+		}
+		if (selectedUsers.length === 1) {
+			const role = selectedUsers[0].role as UserRole | undefined;
+			setSelectedRole(role ?? "");
+		} else {
+			setSelectedRole("");
+		}
+	}, [open, selectedUsers]);
+
+	useEffect(() => {
 		if (!open || selectedUsers.length === 0) return;
 
 		const customerAccessSet = new Set<string>();
@@ -402,11 +425,21 @@ export function BulkEditConfirmationModal({
 				};
 			});
 
+		const originalRole =
+			selectedUsers.length === 1
+				? (selectedUsers[0].role as UserRole | undefined)
+				: undefined;
+		const roleChanged =
+			canEditRole &&
+			selectedRole !== "" &&
+			selectedRole !== originalRole;
+
 		const changes: BulkEditChanges = {
 			customerAccess: selectedCustomers.filter(Boolean),
 			catalogs: selectedCatalogs.filter(Boolean),
 			warehouses: warehousesPayload,
 			companies: selectedCompanies.filter(Boolean),
+			...(roleChanged ? { role: selectedRole as UserRole } : {}),
 		};
 
 		onConfirm(changes);
@@ -612,6 +645,36 @@ export function BulkEditConfirmationModal({
 								/>
 							</div>
 						</div>
+						{canEditRole && selectedUsers.length === 1 && (
+							<div className="mb-4 grid grid-cols-2 gap-4">
+								<div className="space-y-2">
+									<Label htmlFor="role">{t("role")}</Label>
+									<Select
+										value={selectedRole}
+										onValueChange={(v) => setSelectedRole(v as UserRole)}>
+										<SelectTrigger
+											id="role"
+											className="w-full">
+											<SelectValue placeholder={t("rolePlaceholder")} />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value={USER_ROLES.USER}>
+												{t("roles.user")}
+											</SelectItem>
+											<SelectItem value={USER_ROLES.SUPERUSER}>
+												{t("roles.superuser")}
+											</SelectItem>
+											<SelectItem value={USER_ROLES.EMPLOYEE}>
+												{t("roles.employee")}
+											</SelectItem>
+											<SelectItem value={USER_ROLES.ADMIN}>
+												{t("roles.admin")}
+											</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
+							</div>
+						)}
 					</div>
 				</div>
 

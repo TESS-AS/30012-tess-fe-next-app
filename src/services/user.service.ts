@@ -117,9 +117,13 @@ export async function searchTessEmployees(
 
 export async function postUserContacts(
 	contactUserIds: number[],
+	userId?: number,
 ): Promise<void> {
 	try {
-		await axiosInstance.post("/user/contacts", { contactUserIds });
+		await axiosInstance.post("/user/contacts", {
+			contactUserIds,
+			...(userId !== undefined ? { userId } : {}),
+		});
 	} catch (error) {
 		console.error("Error posting user contacts:", error);
 		throw error;
@@ -207,7 +211,7 @@ export interface EditableUserFilters {
 	warehouseNumbers?: string[];
 	companyNumbers?: string[];
 	roles?: string[];
-	sortCreated?: "asc" | "desc";
+	sortCreated?: "newest" | "oldest";
 }
 
 const toCsv = (values?: string[]) =>
@@ -233,7 +237,7 @@ export async function getEditableUsers(
 			params: {
 				page,
 				pageSize,
-				userId,
+				...(userId ? { userId } : {}),
 				...filtersToParams(filters),
 			},
 		});

@@ -42,7 +42,7 @@ export function ViewUserModal({
 	const isEmployee = profile?.role === USER_ROLES.EMPLOYEE;
 	const isTaggedByUser =
 		!!profile?.userId &&
-		(user.contacts ?? []).some((c) => c.userId === profile.userId);
+		(user.contactPerson ?? []).some((c) => c.userId === profile.userId);
 	const canEdit = isAdmin || (isEmployee && isTaggedByUser);
 	const canDelete = isAdmin;
 	const canRemoveContact = (contactUserId: number) =>
@@ -174,11 +174,11 @@ export function ViewUserModal({
 								? t("taggedBy")
 								: t("contacts")}
 						</h3>
-						{(user.contacts ?? []).length === 0 ? (
+						{(user.contactPerson ?? []).length === 0 ? (
 							<p className="text-sm text-[#5A615D]">{t("noContacts")}</p>
 						) : (
 							<div className="flex flex-wrap gap-2">
-								{(user.contacts ?? []).map((c) => (
+								{(user.contactPerson ?? []).map((c) => (
 									<span
 										key={c.userId}
 										className="inline-flex items-center gap-1 rounded-full bg-[#E8F5E9] px-3 py-1 text-sm text-[#0F1912]">

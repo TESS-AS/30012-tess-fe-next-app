@@ -54,6 +54,11 @@
 		"postalCodeTitle": "Help us find your TESS service center by entering postal code.",
 		"postalCodeLabel": "Postal code",
 		"postalCodePlaceholder": "Enter postal code",
+		"tessContactsTitle": "Tag TESS contacts",
+		"tessContactsHelper": "Add TESS employees who should be notified once you finish registration.",
+		"tessContactsLabel": "TESS contacts",
+		"tessContactsSearchPlaceholder": "Search by name or email...",
+		"tessContactsEmpty": "No results",
 		"helpText": "Unsure? Get help on",
 		"helpTextOr": "or send e-mail to",
 		"submit": "Send",
@@ -1277,6 +1282,7 @@
 			"budget": "BUDGET KR",
 			"contacts": "CONTACT PERSON",
 			"taggedBy": "TAGGED BY",
+			"createdAt": "CREATED",
 			"action": "ACTION"
 		},
 		"deleteDialog": {
@@ -1294,7 +1300,18 @@
 			"viewDetails": "View details",
 			"setBudget": "Set budget",
 			"editUser": "Edit user",
+			"addContact": "Add contact",
 			"deleteUser": "Delete user"
+		},
+		"addContact": {
+			"title": "Add TESS contacts",
+			"searchPlaceholder": "Search TESS employee...",
+			"hint": "Type to search for TESS employees",
+			"empty": "No results",
+			"cancel": "Cancel",
+			"confirm": "Add ({count})",
+			"success": "Contacts added",
+			"error": "Could not add contacts"
 		},
 		"counts": {
 			"customers": "{count} customers",
@@ -1586,6 +1603,14 @@
 		"tessCompany": "TESS Company",
 		"companyPlaceholder": "{count} companies selected",
 		"companySearchPlaceholder": "Search for company...",
+		"role": "User role",
+		"rolePlaceholder": "Select role",
+		"roles": {
+			"user": "User",
+			"superuser": "Superuser",
+			"employee": "Employee",
+			"admin": "Administrator"
+		},
 		"updateUsers": "Update {count} users",
 		"close": "Close"
 	},

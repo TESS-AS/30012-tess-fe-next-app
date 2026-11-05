@@ -54,6 +54,11 @@
 		"postalCodeTitle": "Hjelp oss med å finne ditt TESS servicesenter ved å fylle inn postnummer.",
 		"postalCodeLabel": "Postnummer",
 		"postalCodePlaceholder": "Skriv postnummer",
+		"tessContactsTitle": "Tagg TESS-kontakter",
+		"tessContactsHelper": "Legg til TESS-ansatte som skal få varsel når du er ferdig med registreringen.",
+		"tessContactsLabel": "TESS-kontakter",
+		"tessContactsSearchPlaceholder": "Søk etter navn eller e-post...",
+		"tessContactsEmpty": "Ingen treff",
 		"helpText": "Usikker? Få hjelp på",
 		"helpTextOr": "eller send e-post til",
 		"submit": "Send",
@@ -1279,6 +1284,7 @@
 			"budget": "BUDSJETT KR",
 			"contacts": "KONTAKTPERSON",
 			"taggedBy": "TAGGET AV",
+			"createdAt": "OPPRETTET",
 			"action": "HANDLING"
 		},
 		"deleteDialog": {
@@ -1296,7 +1302,18 @@
 			"viewDetails": "Vis detaljer",
 			"setBudget": "Sett budsjett",
 			"editUser": "Rediger bruker",
+			"addContact": "Legg til kontakt",
 			"deleteUser": "Slett bruker"
+		},
+		"addContact": {
+			"title": "Legg til TESS-kontakter",
+			"searchPlaceholder": "Søk etter TESS-ansatt...",
+			"hint": "Skriv for å søke etter TESS-ansatte",
+			"empty": "Ingen treff",
+			"cancel": "Avbryt",
+			"confirm": "Legg til ({count})",
+			"success": "Kontakter lagt til",
+			"error": "Kunne ikke legge til kontakter"
 		},
 		"counts": {
 			"customers": "{count} kunder",
@@ -1588,6 +1605,14 @@
 		"tessCompany": "TESS Firma",
 		"companyPlaceholder": "{count} firma valgt",
 		"companySearchPlaceholder": "Søk etter firma...",
+		"role": "Brukerrolle",
+		"rolePlaceholder": "Velg rolle",
+		"roles": {
+			"user": "Bruker",
+			"superuser": "Superbruker",
+			"employee": "Ansatt",
+			"admin": "Administrator"
+		},
 		"updateUsers": "Oppdater {count} brukere",
 		"close": "Lukk"
 	},

@@ -25,7 +25,7 @@ export function useGetEditableUsers(
 	page: number = 1,
 	pageSize: number = 10,
 	enabled: boolean = true,
-	userId: string,
+	userId?: string,
 	filters?: EditableUserFilters,
 ) {
 	const { data, isLoading, error, refetch } = useQuery({

@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useGetProfileData, profileKeys } from "@/hooks/useGetProfileData";
+import { useSearchTessEmployees } from "@/hooks/useSearchTessEmployees";
 import {
 	SUPPORT_EMAIL_RECIPIENT,
 	buildOnboardingEmailHtml,
@@ -23,6 +24,7 @@ import axiosClient from "@/services/axiosClient";
 import {
 	getOrganizationAddresses,
 	patchUserState,
+	postUserContacts,
 	type OrganizationRecord,
 } from "@/services/user.service";
 import { useQueryClient } from "@tanstack/react-query";
@@ -32,6 +34,8 @@ import {
 	Loader2,
 	ChevronRight,
 	CheckCircle2,
+	UserPlus,
+	X,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -65,6 +69,29 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const [foundOrganization, setFoundOrganization] =
 		useState<OrganizationRecord | null>(null);
+
+	const [tessContactSearch, setTessContactSearch] = useState("");
+	const [selectedTessContacts, setSelectedTessContacts] = useState<
+		{ userId: number; label: string }[]
+	>([]);
+	const { results: tessEmployeeResults, isFetching: isSearchingTessEmployees } =
+		useSearchTessEmployees(tessContactSearch);
+
+	const selectedTessContactIds = new Set(
+		selectedTessContacts.map((c) => c.userId),
+	);
+	const tessEmployeeResultsFiltered = tessEmployeeResults.filter(
+		(r) => !selectedTessContactIds.has(r.userId),
+	);
+
+	const formatTessContactLabel = (
+		firstName: string | null,
+		lastName: string | null,
+		email: string,
+	) => {
+		const name = `${firstName ?? ""} ${lastName ?? ""}`.trim();
+		return name ? `${name} (${email})` : email;
+	};
 
 	const handleOrgSearch = async () => {
 		if (!isValidOrgNumber(orgNumber)) {
@@ -107,6 +134,13 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 		setIsSubmitting(true);
 
 		try {
+			if (selectedTessContacts.length > 0) {
+				try {
+					await postUserContacts(selectedTessContacts.map((c) => c.userId));
+				} catch (contactErr) {
+					console.error("Failed to tag TESS contacts on onboarding", contactErr);
+				}
+			}
 			// Set userstate to "onboarding" so onboarding notification shows under header
 			await patchUserState("onboarding");
 
@@ -354,6 +388,96 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 								maxLength={4}
 								inputMode="numeric"
 							/>
+						</div>
+					</div>
+
+					{/* TESS Contacts Section */}
+					<div className="space-y-4">
+						<div className="flex items-center gap-2">
+							<UserPlus className="h-5 w-5 text-gray-900" />
+							<h3 className="text-lg font-semibold">
+								{t("tessContactsTitle")}
+							</h3>
+						</div>
+						<p className="text-sm text-gray-600">
+							{t("tessContactsHelper")}
+						</p>
+						<div className="space-y-2">
+							<Label htmlFor="tessContacts">{t("tessContactsLabel")}</Label>
+							<div className="relative">
+								<Search className="pointer-events-none absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+								<Input
+									id="tessContacts"
+									placeholder={t("tessContactsSearchPlaceholder")}
+									value={tessContactSearch}
+									onChange={(e) => setTessContactSearch(e.target.value)}
+									className="pl-8"
+								/>
+							</div>
+							{selectedTessContacts.length > 0 && (
+								<div className="flex flex-wrap gap-1.5 pt-1">
+									{selectedTessContacts.map((c) => (
+										<span
+											key={c.userId}
+											className="inline-flex items-center gap-1 rounded-full bg-[#E8F5E9] px-2 py-0.5 text-xs text-[#0F1912]">
+											{c.label}
+											<button
+												type="button"
+												onClick={() =>
+													setSelectedTessContacts((prev) =>
+														prev.filter((s) => s.userId !== c.userId),
+													)
+												}
+												className="text-[#5A615D] hover:text-[#0F1912]">
+												<X className="h-3 w-3" />
+											</button>
+										</span>
+									))}
+								</div>
+							)}
+							{tessContactSearch.trim().length > 0 && (
+								<div className="max-h-[180px] overflow-y-auto rounded border border-[#E5E7E6]">
+									{isSearchingTessEmployees ? (
+										<div className="flex items-center justify-center py-3">
+											<Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+										</div>
+									) : tessEmployeeResultsFiltered.length === 0 ? (
+										<p className="px-3 py-3 text-center text-sm text-gray-500">
+											{t("tessContactsEmpty")}
+										</p>
+									) : (
+										<ul>
+											{tessEmployeeResultsFiltered.map((r) => (
+												<li key={r.userId}>
+													<button
+														type="button"
+														onClick={() => {
+															setSelectedTessContacts((prev) => [
+																...prev,
+																{
+																	userId: r.userId,
+																	label: formatTessContactLabel(
+																		r.firstName,
+																		r.lastName,
+																		r.email,
+																	),
+																},
+															]);
+															setTessContactSearch("");
+														}}
+														className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50">
+														{formatTessContactLabel(
+															r.firstName,
+															r.lastName,
+															r.email,
+														)}
+													</button>
+												</li>
+											))}
+										</ul>
+									)}
+								</div>
+							)}
 						</div>
 					</div>
 				</div>

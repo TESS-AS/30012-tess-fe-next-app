@@ -50,10 +50,15 @@ import {
 	Loader2,
 	ChevronDown,
 	Columns3,
+	ArrowDown,
+	ArrowUp,
+	ArrowUpDown,
+	UserPlus,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
+import { AddContactPopover } from "./add-contact-popover";
 import { AddUserModal } from "./add-user-modal";
 import { BulkEditConfirmationModal } from "./bulk-edit-confirmation-modal";
 import { ConfirmChangesModal } from "./confirm-changes-modal";
@@ -74,7 +79,8 @@ type ToggleableColumnKey =
 	| "warehouse"
 	| "company"
 	| "contacts"
-	| "budget";
+	| "budget"
+	| "createdAt";
 
 const TOGGLEABLE_COLUMNS: ToggleableColumnKey[] = [
 	"email",
@@ -85,6 +91,7 @@ const TOGGLEABLE_COLUMNS: ToggleableColumnKey[] = [
 	"company",
 	"contacts",
 	"budget",
+	"createdAt",
 ];
 
 const COLUMN_VISIBILITY_STORAGE_KEY = "users-brukere.visibleColumns";
@@ -97,10 +104,13 @@ const readStoredVisibleColumns = (): ToggleableColumnKey[] | null => {
 		const parsed = JSON.parse(raw);
 		if (!Array.isArray(parsed)) return null;
 		const allowed = new Set<ToggleableColumnKey>(TOGGLEABLE_COLUMNS);
-		return parsed.filter(
+		const stored = parsed.filter(
 			(k): k is ToggleableColumnKey =>
 				typeof k === "string" && allowed.has(k as ToggleableColumnKey),
 		);
+		const storedSet = new Set(stored);
+		const missingDefaults = TOGGLEABLE_COLUMNS.filter((k) => !storedSet.has(k));
+		return [...stored, ...missingDefaults];
 	} catch {
 		return null;
 	}
@@ -137,6 +147,9 @@ const UsersBrukere = () => {
 		useState<ToggleableColumnKey[]>(TOGGLEABLE_COLUMNS);
 
 	const [columnFilters, setColumnFilters] = useState<EditableUserFilters>({});
+	const [sortCreated, setSortCreated] = useState<
+		"newest" | "oldest" | undefined
+	>(undefined);
 
 	const filtersForRequest = useMemo<EditableUserFilters>(
 		() => ({
@@ -145,9 +158,17 @@ const UsersBrukere = () => {
 			warehouseNumbers: columnFilters.warehouseNumbers,
 			companyNumbers: columnFilters.companyNumbers,
 			roles: columnFilters.roles,
+			sortCreated,
 		}),
-		[columnFilters],
+		[columnFilters, sortCreated],
 	);
+
+	const toggleCreatedSort = () => {
+		setSortCreated((prev) =>
+			prev === undefined ? "newest" : prev === "newest" ? "oldest" : undefined,
+		);
+		setCurrentPage(1);
+	};
 
 	const setFilterValues = (
 		key: keyof EditableUserFilters,
@@ -200,7 +221,7 @@ const UsersBrukere = () => {
 		currentPage,
 		pageSize,
 		!isSearching,
-		profile?.userId?.toString() || "",
+		undefined,
 		filtersForRequest,
 	);
 
@@ -314,10 +335,12 @@ const UsersBrukere = () => {
 		isAdmin ||
 		(isEmployee &&
 			!!profile?.userId &&
-			(target.contacts ?? []).some((c) => c.userId === profile.userId));
+			(target.contactPerson ?? []).some((c) => c.userId === profile.userId));
 	const canDeleteUser = () => isAdmin;
 
-	const handleEditClick = (user: User) => {};
+	const handleEditClick = (user: User) => {
+		handleBulkEditClick(user);
+	};
 
 	const handleBulkEditClick = (user?: User) => {
 		if (user) {
@@ -352,6 +375,7 @@ const UsersBrukere = () => {
 						isDefault: false,
 					})) ?? [],
 				companies: changes.companies ?? [],
+				...(changes.role ? { role: changes.role } : {}),
 			});
 			setPendingBulkChanges(null);
 			setSelectedUsers([]);
@@ -568,8 +592,10 @@ const UsersBrukere = () => {
 								/>
 							</span>
 						),
-						cell: (row) =>
-							renderTruncatedList(row.user.warehouse, "warehouses", row.user),
+						cell: (row) => {
+							const dw = row.user.defaultWarehouse;
+							return dw?.name || dw?.number || "—";
+						},
 					}
 				: null,
 			isVisible("company")
@@ -600,7 +626,7 @@ const UsersBrukere = () => {
 							: t("columns.contacts"),
 						cell: (row) =>
 							renderTruncatedList(
-								row.user.contacts?.map((c) => ({
+								row.user.contactPerson?.map((c) => ({
 									name: c.name,
 									number: c.email,
 								})),
@@ -624,20 +650,59 @@ const UsersBrukere = () => {
 						},
 					}
 				: null,
+			isVisible("createdAt")
+				? {
+						key: "createdAt",
+						header: (
+							<button
+								type="button"
+								onClick={toggleCreatedSort}
+								className="inline-flex cursor-pointer items-center gap-1 hover:text-[#0F1912]">
+								<span>{t("columns.createdAt")}</span>
+								{sortCreated === "newest" ? (
+									<ArrowDown className="h-3 w-3" />
+								) : sortCreated === "oldest" ? (
+									<ArrowUp className="h-3 w-3" />
+								) : (
+									<ArrowUpDown className="h-3 w-3 text-[#8A8F8C]" />
+								)}
+							</button>
+						),
+						cell: (row) => row.user.creationDate || "—",
+					}
+				: null,
 			{
 				key: "action",
 				header: t("columns.action"),
 				cell: (row) => (
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button
-								variant="ghost"
-								size="sm"
-								className="h-8 w-8 p-0">
-								<MoreHorizontal className="h-4 w-4" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
+					<div className="flex items-center gap-1">
+						{isAdmin && (
+							<AddContactPopover
+								targetUserId={row.user.userId}
+								existingContactIds={(row.user.contactPerson ?? []).map(
+									(c) => c.userId,
+								)}
+								trigger={
+									<Button
+										variant="ghost"
+										size="sm"
+										aria-label={t("actions.addContact")}
+										className="h-8 w-8 p-0">
+										<UserPlus className="h-4 w-4" />
+									</Button>
+								}
+							/>
+						)}
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button
+									variant="ghost"
+									size="sm"
+									className="h-8 w-8 p-0">
+									<MoreHorizontal className="h-4 w-4" />
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end">
 							<DropdownMenuItem onClick={() => handleViewClick(row.user)}>
 								<Eye className="mr-2 h-4 w-4" />
 								{t("actions.viewDetails")}
@@ -665,6 +730,7 @@ const UsersBrukere = () => {
 							)}
 						</DropdownMenuContent>
 					</DropdownMenu>
+					</div>
 				),
 			},
 		];
@@ -684,6 +750,7 @@ const UsersBrukere = () => {
 		profile?.email,
 		visibleColumns,
 		columnFilters,
+		sortCreated,
 		t,
 	]);
 
@@ -793,6 +860,7 @@ const UsersBrukere = () => {
 				removeUser={(user) =>
 					setSelectedUsers((prev) => prev.filter((u) => u !== user.email))
 				}
+				canEditRole={isAdmin}
 			/>
 
 			<ConfirmChangesModal

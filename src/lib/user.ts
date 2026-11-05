@@ -1,4 +1,4 @@
-import { isAdminOrSuperuser } from "@/constants/userRoles";
+import { USER_ROLES, isAdminOrSuperuser } from "@/constants/userRoles";
 import type { ProfileUser } from "@/types/user.types";
 
 export function isTessEmployeeEmail(email: string | null | undefined): boolean {
@@ -11,6 +11,8 @@ export function canSeeUsersTab(
 ): boolean {
 	if (!profile) return false;
 	return (
-		isAdminOrSuperuser(profile.role) || isTessEmployeeEmail(profile.email)
+		isAdminOrSuperuser(profile.role) ||
+		profile.role === USER_ROLES.EMPLOYEE ||
+		isTessEmployeeEmail(profile.email)
 	);
 }
