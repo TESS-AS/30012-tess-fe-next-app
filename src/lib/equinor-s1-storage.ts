@@ -33,6 +33,9 @@ export const EQUINOR_S1_CODES = {
 	GRANE: "2070299",
 	HEIDRUN_A: "1292728",
 	JOHAN_SVERDRUP: "1405630",
+	STATFJORD_A: "1953155",
+	STATFJORD_B: "2077757",
+	STATFJORD_C: "1937611",
 } as const;
 
 const S1_NAME_TO_CODE: Record<string, string> = {
@@ -67,6 +70,12 @@ const S1_NAME_TO_CODE: Record<string, string> = {
 	"1170 heidrun a": EQUINOR_S1_CODES.HEIDRUN_A,
 	"johan sverdrup": EQUINOR_S1_CODES.JOHAN_SVERDRUP,
 	"1901 johan sverdrup": EQUINOR_S1_CODES.JOHAN_SVERDRUP,
+	"statfjord a": EQUINOR_S1_CODES.STATFJORD_A,
+	"1100 statfjord a": EQUINOR_S1_CODES.STATFJORD_A,
+	"statfjord b": EQUINOR_S1_CODES.STATFJORD_B,
+	"1101 statfjord b": EQUINOR_S1_CODES.STATFJORD_B,
+	"statfjord c": EQUINOR_S1_CODES.STATFJORD_C,
+	"1102 statfjord c": EQUINOR_S1_CODES.STATFJORD_C,
 };
 
 const KNOWN_CODES = new Set<string>(Object.values(EQUINOR_S1_CODES));
