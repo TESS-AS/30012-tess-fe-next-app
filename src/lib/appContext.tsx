@@ -248,8 +248,12 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
 		const isCheckout = pathname.includes("/checkout");
 		const isCart = pathname.includes("/cart");
 		const isWelcome = pathname.includes("/welcome");
+		// Product detail from cart "Se detaljer" (/search/:itemNumber or /produkt/:id)
+		const isProductDetail =
+			/\/search\/[^/]+\/?$/.test(pathname) ||
+			/\/produkt\/[^/]+\/?$/.test(pathname);
 
-		if (isCheckout || isCart || isWelcome) return;
+		if (isCheckout || isCart || isWelcome || isProductDetail) return;
 
 		const dismissed =
 			typeof window !== "undefined" &&

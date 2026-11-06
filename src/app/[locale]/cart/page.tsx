@@ -891,6 +891,20 @@ const CartPage = () => {
 													priceInputSlot={renderUnitPriceInput}
 													warehouseName={warehouse?.warehouseName}
 													inStock={(warehouse?.balance ?? 0) > 0}
+													onLengthChange={async (hoseLengthMm) => {
+														try {
+															await updateCartLine(item.cartLine, {
+																itemNumber: item.hose.itemNumber,
+																hoseItemNumber: item.hose.itemNumber,
+																warehouseNumber: item.warehouseNumber,
+																hoseLengthMm,
+															});
+															setIsCartChanging((value) => !value);
+														} catch {
+															toast.error(t("Cart.review.updateFailed"));
+															throw new Error("length update failed");
+														}
+													}}
 												/>
 											);
 										})}

@@ -201,6 +201,7 @@ function PartCard({
 	seeDetails,
 	nameLabel,
 	itemNumberLabel,
+	detailsHref,
 }: {
 	label?: string;
 	line: PartLine;
@@ -208,6 +209,7 @@ function PartCard({
 	seeDetails: string;
 	nameLabel: string;
 	itemNumberLabel: string;
+	detailsHref: string;
 }) {
 	return (
 		<div className="space-y-2">
@@ -235,7 +237,7 @@ function PartCard({
 				</div>
 				<div className="flex shrink-0 items-center gap-3">
 					<Link
-						href={`/search?q=${encodeURIComponent(line.itemNumber)}`}
+						href={detailsHref}
 						className="rounded-md border border-[#D5D9D7] bg-white px-3 py-1.5 text-xs text-[#0F1912]">
 						{seeDetails}
 					</Link>
@@ -276,6 +278,7 @@ export function HoseCartReview({
 	const { locations } = useGetHoseSystems();
 
 	const kit = kits[Math.min(index, kits.length - 1)];
+	const hoseDetailsHref = `/profile?tab=hose-orders&hoseId=${encodeURIComponent(kit.hexagonId)}`;
 	// ferrule quantity is the number of assemblies already in the cart.
 	// One assembly uses both ends, so ferrule and insert show 2x at quantity 1.
 	const savedQuantity = Math.max(1, Number(kit.ferrule1?.quantity) || 1);
@@ -484,6 +487,7 @@ export function HoseCartReview({
 								seeDetails={t("seeDetails")}
 								nameLabel={t("name")}
 								itemNumberLabel={t("itemNumber")}
+								detailsHref={hoseDetailsHref}
 							/>
 						) : null}
 						{scaledFerrules.length > 0 ? (
@@ -497,6 +501,7 @@ export function HoseCartReview({
 										seeDetails={t("seeDetails")}
 										nameLabel={t("name")}
 										itemNumberLabel={t("itemNumber")}
+										detailsHref={hoseDetailsHref}
 									/>
 								))}
 							</div>
@@ -512,6 +517,7 @@ export function HoseCartReview({
 										seeDetails={t("seeDetails")}
 										nameLabel={t("name")}
 										itemNumberLabel={t("itemNumber")}
+										detailsHref={hoseDetailsHref}
 									/>
 								))}
 							</div>
@@ -531,6 +537,7 @@ export function HoseCartReview({
 									seeDetails={t("seeDetails")}
 									nameLabel={t("name")}
 									itemNumberLabel={t("itemNumber")}
+									detailsHref={hoseDetailsHref}
 								/>
 							))}
 						</Accordion>

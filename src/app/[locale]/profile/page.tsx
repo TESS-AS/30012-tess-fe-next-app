@@ -261,6 +261,12 @@ export default function ProfilePage() {
 
 		setActiveTab(tabParam);
 
+		// Cart "Se detaljer" deep-link: /profile?tab=hose-orders&hoseId=2366713
+		const hoseIdParam = searchParams.get("hoseId");
+		if (tabParam === "hose-orders" && hoseIdParam?.trim()) {
+			setSelectedHexagonId(hoseIdParam.trim());
+		}
+
 		// If navigating to tess-edi, switch to tess-edi mode (admin + employee).
 		if (
 			tabParam === "tess-edi" &&
@@ -823,12 +829,23 @@ export default function ProfilePage() {
 								(selectedHexagonId ? (
 									<HoseDetailsPage
 										hexagonId={selectedHexagonId}
-										onBack={() => setSelectedHexagonId(null)}
+										onBack={() => {
+											setSelectedHexagonId(null);
+											router.replace("/profile?tab=hose-orders", {
+												scroll: false,
+											});
+										}}
 										hoseSystems={hoseSystems}
 									/>
 								) : (
 									<HosesAndEquipments
-										goToHose={setSelectedHexagonId}
+										goToHose={(hoseId) => {
+											setSelectedHexagonId(hoseId);
+											router.replace(
+												`/profile?tab=hose-orders&hoseId=${encodeURIComponent(hoseId)}`,
+												{ scroll: false },
+											);
+										}}
 										profile={profile}
 									/>
 								))}

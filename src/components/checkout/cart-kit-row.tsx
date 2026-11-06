@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -37,6 +37,7 @@ type CartKitRowProps = {
 	warehouseName?: string;
 	inStock?: boolean;
 	notOrderable?: boolean;
+	onLengthChange?: (hoseLengthMm: number) => void | Promise<void>;
 };
 
 type PartLine = {
@@ -169,6 +170,7 @@ function PartCard({
 	seeDetailsLabel,
 	nameLabel,
 	itemNumberLabel,
+	detailsHref,
 	extra,
 }: {
 	label?: string;
@@ -178,6 +180,7 @@ function PartCard({
 	seeDetailsLabel: string;
 	nameLabel: string;
 	itemNumberLabel: string;
+	detailsHref: string;
 	extra?: ReactNode;
 }) {
 	return (
@@ -212,7 +215,7 @@ function PartCard({
 				</div>
 				<div className="flex shrink-0 items-center gap-3">
 					<Link
-						href={`/search?q=${encodeURIComponent(line.itemNumber)}`}
+						href={detailsHref}
 						className="rounded-md border border-[#D5D9D7] bg-white px-3 py-1.5 text-xs text-[#0F1912] hover:border-[#009640]">
 						{seeDetailsLabel}
 					</Link>
@@ -239,12 +242,14 @@ function ExtraEquipmentCard({
 	seeDetailsLabel,
 	editLabel,
 	removeLabel,
+	detailsHref,
 }: {
 	line: PartLine;
 	price: number;
 	seeDetailsLabel: string;
 	editLabel: string;
 	removeLabel: string;
+	detailsHref: string;
 }) {
 	return (
 		<div className="flex flex-col gap-3 rounded-md border border-[#E8EAE9] bg-[#FAFBFA] p-3 sm:flex-row sm:items-center">
@@ -269,7 +274,7 @@ function ExtraEquipmentCard({
 			</div>
 			<div className="flex shrink-0 items-center gap-2">
 				<Link
-					href={`/search?q=${encodeURIComponent(line.itemNumber)}`}
+					href={detailsHref}
 					className="rounded-md border border-[#D5D9D7] bg-white px-3 py-1.5 text-xs text-[#0F1912] hover:border-[#009640]">
 					{seeDetailsLabel}
 				</Link>
@@ -310,6 +315,7 @@ export function CartKitRow({
 	warehouseName,
 	inStock,
 	notOrderable = false,
+	onLengthChange,
 }: CartKitRowProps) {
 	const t = useTranslations("Cart.kit");
 	const tCart = useTranslations("Cart");
@@ -318,6 +324,12 @@ export function CartKitRow({
 	const [extrasOpen, setExtrasOpen] = useState(true);
 	const [servicesOpen, setServicesOpen] = useState(false);
 	const [lengthChangeDismissed, setLengthChangeDismissed] = useState(false);
+	const [draftLength, setDraftLength] = useState(() =>
+		kit.hose?.lengthMm != null && kit.hose.lengthMm > 0
+			? String(kit.hose.lengthMm)
+			: "",
+	);
+	const [isSavingLength, setIsSavingLength] = useState(false);
 
 	const ferrules = groupParts([kit.ferrule1, kit.ferrule2], "ferrule");
 	const inserts = groupParts([kit.insert1, kit.insert2], "insert");
@@ -357,16 +369,44 @@ export function CartKitRow({
 
 	const lengthMm = kit.hose?.lengthMm;
 	const originalLengthMm = readOriginalLengthMm(kit.hose);
+	const displayLengthMm = Number(draftLength) || lengthMm;
 	const title = kit.hose?.itemDescription?.trim()
 		? kit.hose.itemDescription
 		: [kit.hose?.itemNumber, lengthMm ? `${lengthMm} mm` : ""]
 				.filter(Boolean)
 				.join(" × ");
 
+	useEffect(() => {
+		if (lengthMm != null && lengthMm > 0) {
+			setDraftLength(String(lengthMm));
+		}
+	}, [lengthMm]);
+
+	const commitLengthChange = async () => {
+		if (!onLengthChange || isSavingLength) return;
+		const next = Number(draftLength);
+		if (!Number.isFinite(next) || next <= 0) {
+			if (lengthMm != null && lengthMm > 0) setDraftLength(String(lengthMm));
+			return;
+		}
+		if (next === lengthMm) return;
+		setIsSavingLength(true);
+		try {
+			await onLengthChange(next);
+			setLengthChangeDismissed(false);
+		} catch {
+			if (lengthMm != null && lengthMm > 0) setDraftLength(String(lengthMm));
+		} finally {
+			setIsSavingLength(false);
+		}
+	};
+
+	const hoseDetailsHref = `/profile?tab=hose-orders&hoseId=${encodeURIComponent(kit.hexagonId)}`;
 	const partLabels = {
 		seeDetailsLabel: t("seeDetails"),
 		nameLabel: t("name"),
 		itemNumberLabel: t("itemNumber"),
+		detailsHref: hoseDetailsHref,
 	};
 
 	return (
@@ -479,7 +519,7 @@ export function CartKitRow({
 								priceInputSlot={priceInputSlot?.(hoseLine.itemNumber)}
 								{...partLabels}
 								extra={
-									lengthMm ? (
+									lengthMm != null || onLengthChange ? (
 										<div className="flex flex-wrap items-center gap-3 border-t border-[#E8EAE9] pt-3">
 											<span className="flex items-center gap-1.5 text-sm text-[#0F1912]">
 												{t("changeLength")}
@@ -490,26 +530,42 @@ export function CartKitRow({
 											</span>
 											<div className="flex items-center">
 												<input
-													readOnly
-													value={formatQuantity(lengthMm)}
+													inputMode="numeric"
+													value={draftLength}
+													disabled={isSavingLength || !onLengthChange}
 													aria-label={t("changeLength")}
-													className="h-9 w-20 rounded-l-md border border-[#D5D9D7] bg-white px-3 text-sm text-[#0F1912]"
+													onChange={(event) =>
+														setDraftLength(
+															event.target.value.replace(/[^\d]/g, ""),
+														)
+													}
+													onBlur={() => {
+														void commitLengthChange();
+													}}
+													onKeyDown={(event) => {
+														if (event.key === "Enter") {
+															event.currentTarget.blur();
+														}
+													}}
+													className="h-9 w-20 rounded-l-md border border-[#D5D9D7] bg-white px-3 text-sm text-[#0F1912] disabled:bg-[#F3F4F3]"
 												/>
 												<span className="flex h-9 items-center rounded-r-md border border-l-0 border-[#D5D9D7] bg-[#F3F4F3] px-3 text-sm text-[#5A615D]">
 													{t("unitMm")}
 												</span>
 											</div>
-											{!lengthChangeDismissed ? (
+											{!lengthChangeDismissed &&
+											displayLengthMm != null &&
+											displayLengthMm > 0 ? (
 												<span className="inline-flex items-center gap-1.5 rounded-md bg-[#EEF0FF] px-2.5 py-1 text-xs text-[#5B4DFF]">
 													<Link2 className="h-3.5 w-3.5" aria-hidden />
 													{originalLengthMm != null &&
-													originalLengthMm !== lengthMm
+													originalLengthMm !== displayLengthMm
 														? t("lengthChanged", {
 																from: formatQuantity(originalLengthMm),
-																to: formatQuantity(lengthMm),
+																to: formatQuantity(displayLengthMm),
 															})
 														: t("lengthChangedCurrent", {
-																to: formatQuantity(lengthMm),
+																to: formatQuantity(displayLengthMm),
 															})}
 													<button
 														type="button"
@@ -571,6 +627,7 @@ export function CartKitRow({
 								seeDetailsLabel={t("seeDetails")}
 								editLabel={t("editEquipment")}
 								removeLabel={t("removeEquipment")}
+								detailsHref={hoseDetailsHref}
 							/>
 						))}
 						<Button

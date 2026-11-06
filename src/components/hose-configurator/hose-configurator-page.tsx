@@ -61,7 +61,7 @@ function mapSelectionToProduct(
 		name,
 		description: item.shortDescNo?.trim() || name,
 		imageSrc,
-		href: `/search?q=${encodeURIComponent(item.itemNumber)}`,
+		href: `/search/${encodeURIComponent(item.itemNumber)}`,
 		itemNumber: item.itemNumber,
 		productNumber: item.productNumber,
 	};
