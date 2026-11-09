@@ -1608,10 +1608,9 @@
 		"role": "Brukerrolle",
 		"rolePlaceholder": "Velg rolle",
 		"roles": {
-			"user": "Bruker",
-			"superuser": "Superbruker",
+			"customer": "Kunde",
 			"employee": "Ansatt",
-			"admin": "Administrator"
+			"superuser": "Superbruker"
 		},
 		"updateUsers": "Oppdater {count} brukere",
 		"close": "Lukk"

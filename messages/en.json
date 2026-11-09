@@ -1606,10 +1606,9 @@
 		"role": "User role",
 		"rolePlaceholder": "Select role",
 		"roles": {
-			"user": "User",
-			"superuser": "Superuser",
+			"customer": "Customer",
 			"employee": "Employee",
-			"admin": "Administrator"
+			"superuser": "Superuser"
 		},
 		"updateUsers": "Update {count} users",
 		"close": "Close"

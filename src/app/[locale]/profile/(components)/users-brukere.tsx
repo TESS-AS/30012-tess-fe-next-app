@@ -34,6 +34,7 @@ import {
 } from "@/hooks/useGetEditableUsers";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useUpdateUserRelations } from "@/hooks/useUpdateUserRelations";
+import { useUpdateUserRole } from "@/hooks/useUpdateUserRole";
 import { isTessEmployeeEmail } from "@/lib/user";
 import type { EditableUserFilters } from "@/services/user.service";
 import { User, BulkEditChanges } from "@/types/user.types";
@@ -72,7 +73,6 @@ type UserRow = {
 };
 
 type ToggleableColumnKey =
-	| "email"
 	| "role"
 	| "customerAccess"
 	| "catalog"
@@ -83,7 +83,6 @@ type ToggleableColumnKey =
 	| "createdAt";
 
 const TOGGLEABLE_COLUMNS: ToggleableColumnKey[] = [
-	"email",
 	"role",
 	"customerAccess",
 	"catalog",
@@ -93,6 +92,14 @@ const TOGGLEABLE_COLUMNS: ToggleableColumnKey[] = [
 	"budget",
 	"createdAt",
 ];
+
+const formatShortDate = (iso: string | null | undefined): string => {
+	if (!iso) return "—";
+	const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+	if (!match) return iso;
+	const [, y, m, d] = match;
+	return `${d}.${m}.${y.slice(2)}`;
+};
 
 const COLUMN_VISIBILITY_STORAGE_KEY = "users-brukere.visibleColumns";
 
@@ -120,6 +127,7 @@ const UsersBrukere = () => {
 	const t = useTranslations("UsersBrukere");
 	const tBulk = useTranslations("BulkEditConfirmationModal");
 	const { mutateAsync: updateUserRelations } = useUpdateUserRelations();
+	const { mutateAsync: updateUserRoleMutate } = useUpdateUserRole();
 	const { mutateAsync: deleteUserMutate, isPending: isDeletingUser } =
 		useDeleteUser();
 
@@ -375,8 +383,14 @@ const UsersBrukere = () => {
 						isDefault: false,
 					})) ?? [],
 				companies: changes.companies ?? [],
-				...(changes.role ? { role: changes.role } : {}),
 			});
+			if (changes.role) {
+				await Promise.all(
+					usersToUpdate.map((u) =>
+						updateUserRoleMutate({ userId: u.userId, role: changes.role! }),
+					),
+				);
+			}
 			setPendingBulkChanges(null);
 			setSelectedUsers([]);
 
@@ -465,7 +479,14 @@ const UsersBrukere = () => {
 			);
 		}
 
-		return displayItems.join(", ");
+		const joined = displayItems.join(", ");
+		return (
+			<span
+				className="block max-w-[140px] truncate"
+				title={joined}>
+				{joined}
+			</span>
+		);
 	};
 
 	const columns: Column<UserRow>[] = useMemo(() => {
@@ -489,20 +510,34 @@ const UsersBrukere = () => {
 						onCheckedChange={() => toggleUserSelection(row.user.email)}
 					/>
 				),
+				thClassName:
+					"sticky left-0 z-20 bg-[#F8F9F8] w-10 min-w-[40px]",
+				tdClassName:
+					"sticky left-0 z-10 bg-white group-hover:bg-[#F0FCF2] w-10 min-w-[40px]",
 			},
 			{
 				key: "name",
 				header: t("columns.name"),
-				cell: (row) =>
-					`${row.user.firstName ?? ""} ${row.user.lastName ?? ""}`.trim(),
+				cell: (row) => {
+					const fullName =
+						`${row.user.firstName ?? ""} ${row.user.lastName ?? ""}`.trim();
+					const email = row.user.email ?? "";
+					return (
+						<div
+							className="flex max-w-[180px] flex-col"
+							title={email ? `${fullName} — ${email}` : fullName}>
+							<span className="truncate text-[14px] font-medium text-[#0F1912]">
+								{fullName || "—"}
+							</span>
+							{email && (
+								<span className="truncate text-[12px] font-normal text-[#5A615D]">
+									{email}
+								</span>
+							)}
+						</div>
+					);
+				},
 			},
-			isVisible("email")
-				? {
-						key: "email",
-						header: t("columns.email"),
-						cell: (row) => row.user.email || "—",
-					}
-				: null,
 			isVisible("role")
 				? {
 						key: "role",
@@ -668,12 +703,22 @@ const UsersBrukere = () => {
 								)}
 							</button>
 						),
-						cell: (row) => row.user.creationDate || "—",
+						cell: (row) => (
+							<span
+								className="whitespace-nowrap"
+								title={row.user.creationDate ?? undefined}>
+								{formatShortDate(row.user.creationDate)}
+							</span>
+						),
 					}
 				: null,
 			{
 				key: "action",
 				header: t("columns.action"),
+				thClassName:
+					"sticky right-0 z-20 bg-[#F8F9F8] shadow-[inset_1px_0_0_0_#C1C4C2]",
+				tdClassName:
+					"sticky right-0 z-10 bg-white group-hover:bg-[#F0FCF2] shadow-[inset_1px_0_0_0_#C1C4C2]",
 				cell: (row) => (
 					<div className="flex items-center gap-1">
 						{isAdmin && (
@@ -833,6 +878,7 @@ const UsersBrukere = () => {
 					selectedIds={selectedUsers}
 					selectedRowBgClass="bg-[#E6F7EA]"
 					className="border-t border-[#C1C4C2]"
+					compact
 				/>
 			</div>
 

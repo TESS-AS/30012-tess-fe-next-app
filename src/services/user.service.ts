@@ -263,6 +263,23 @@ export async function updateUserRelations(
 	}
 }
 
+export type AssignableUserRole = "customer" | "employee" | "superuser";
+
+export async function updateUserRole(
+	userId: number,
+	role: AssignableUserRole,
+): Promise<void> {
+	try {
+		await axiosInstance.patch(
+			`/userAdmin/role/${encodeURIComponent(userId)}`,
+			{ role },
+		);
+	} catch (error) {
+		console.error("Error updating user role:", error);
+		throw error;
+	}
+}
+
 export async function searchEditableUsers(
 	search: string,
 	page: string,

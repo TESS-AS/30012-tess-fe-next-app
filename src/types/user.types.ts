@@ -176,7 +176,6 @@ export interface UpdateUserRelationsPayload {
 		isDefault: boolean;
 	}[];
 	companies: string[];
-	role?: UserRole;
 }
 
 export interface UpdateUserRelationsResponse {
@@ -255,5 +254,5 @@ export interface BulkEditChanges {
 	catalogs?: string[];
 	warehouses?: { warehouseNumber: string; companyNumber: string }[];
 	companies?: string[];
-	role?: UserRole;
+	role?: "customer" | "employee" | "superuser";
 }
