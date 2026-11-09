@@ -117,9 +117,13 @@ export async function searchTessEmployees(
 
 export async function postUserContacts(
 	contactUserIds: number[],
+	userId?: number,
 ): Promise<void> {
 	try {
-		await axiosInstance.post("/user/contacts", { contactUserIds });
+		await axiosInstance.post("/user/contacts", {
+			contactUserIds,
+			...(userId !== undefined ? { userId } : {}),
+		});
 	} catch (error) {
 		console.error("Error posting user contacts:", error);
 		throw error;
@@ -166,17 +170,75 @@ export async function updateUserProfile(
 	}
 }
 
+export type UserAdminFilterType =
+	| "customer"
+	| "catalog"
+	| "warehouse"
+	| "company"
+	| "role";
+
+export interface UserAdminFilterOption {
+	value: string;
+	label: string;
+}
+
+export async function getUserAdminFilterOptions(
+	type: UserAdminFilterType,
+	search?: string,
+	limit?: number,
+): Promise<UserAdminFilterOption[]> {
+	try {
+		const response = await axiosInstance.get<{
+			success: boolean;
+			options?: UserAdminFilterOption[];
+		}>(`/userAdmin/filterOptions`, {
+			params: {
+				type,
+				...(search ? { search } : {}),
+				...(limit ? { limit } : {}),
+			},
+		});
+		return response.data?.options ?? [];
+	} catch (error) {
+		console.error("Error fetching user admin filter options:", error);
+		throw error;
+	}
+}
+
+export interface EditableUserFilters {
+	customerNumbers?: string[];
+	assortmentNumbers?: string[];
+	warehouseNumbers?: string[];
+	companyNumbers?: string[];
+	roles?: string[];
+	sortCreated?: "newest" | "oldest";
+}
+
+const toCsv = (values?: string[]) =>
+	values && values.length > 0 ? values.join(",") : undefined;
+
+const filtersToParams = (filters?: EditableUserFilters) => ({
+	customerNumbers: toCsv(filters?.customerNumbers),
+	assortmentNumbers: toCsv(filters?.assortmentNumbers),
+	warehouseNumbers: toCsv(filters?.warehouseNumbers),
+	companyNumbers: toCsv(filters?.companyNumbers),
+	roles: toCsv(filters?.roles),
+	sortCreated: filters?.sortCreated,
+});
+
 export async function getEditableUsers(
 	page: string,
 	pageSize: string,
 	userId?: string,
+	filters?: EditableUserFilters,
 ): Promise<EditableUser> {
 	try {
 		const response = await axiosInstance.get(`/userAdmin/getEditableUsers`, {
 			params: {
 				page,
 				pageSize,
-				userId,
+				...(userId ? { userId } : {}),
+				...filtersToParams(filters),
 			},
 		});
 		return response.data;
@@ -201,10 +263,28 @@ export async function updateUserRelations(
 	}
 }
 
+export type AssignableUserRole = "customer" | "employee" | "superuser";
+
+export async function updateUserRole(
+	userId: number,
+	role: AssignableUserRole,
+): Promise<void> {
+	try {
+		await axiosInstance.patch(
+			`/userAdmin/role/${encodeURIComponent(userId)}`,
+			{ role },
+		);
+	} catch (error) {
+		console.error("Error updating user role:", error);
+		throw error;
+	}
+}
+
 export async function searchEditableUsers(
 	search: string,
 	page: string,
 	pageSize: string,
+	filters?: EditableUserFilters,
 ): Promise<EditableUser> {
 	try {
 		const response = await axiosInstance.get(`/userAdmin/searchEditableUsers`, {
@@ -212,6 +292,7 @@ export async function searchEditableUsers(
 				search,
 				page,
 				pageSize,
+				...filtersToParams(filters),
 			},
 		});
 		return response.data;

@@ -12,9 +12,19 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { MultiSelectWithTags } from "@/components/ui/multi-select";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { useFetchUserDataBrukere } from "@/hooks/useFetchUserDataBrukere";
 import { useMergedPagedItems } from "@/hooks/useMergedPagedItems";
-import { fetchUserDataBrukere } from "@/services/user.service";
+import {
+	fetchUserDataBrukere,
+	type AssignableUserRole,
+} from "@/services/user.service";
 import {
 	BulkEditChanges,
 	BulkEditConfirmationModalProps,
@@ -30,9 +40,13 @@ export function BulkEditConfirmationModal({
 	selectedUsers,
 	onConfirm,
 	removeUser,
+	canEditRole = false,
 }: BulkEditConfirmationModalProps) {
 	const t = useTranslations("BulkEditConfirmationModal");
 	const [showWarning, setShowWarning] = useState(true);
+	const [selectedRole, setSelectedRole] = useState<AssignableUserRole | "">(
+		"",
+	);
 
 	const isNumericId = (value: string) => /^\d+$/.test(value.trim());
 
@@ -321,6 +335,27 @@ export function BulkEditConfirmationModal({
 	}, [companies, selectedUsers]);
 
 	useEffect(() => {
+		if (!open) {
+			setSelectedRole("");
+			return;
+		}
+		if (selectedUsers.length === 1) {
+			const raw = String(selectedUsers[0].role ?? "").toLowerCase();
+			const mapped: AssignableUserRole | "" =
+				raw === "customer" || raw === "user" || raw === "kunde"
+					? "customer"
+					: raw === "superuser" || raw === "superbruker"
+						? "superuser"
+						: raw === "employee" || raw === "ansatt"
+							? "employee"
+							: "";
+			setSelectedRole(mapped);
+		} else {
+			setSelectedRole("");
+		}
+	}, [open, selectedUsers]);
+
+	useEffect(() => {
 		if (!open || selectedUsers.length === 0) return;
 
 		const customerAccessSet = new Set<string>();
@@ -402,11 +437,31 @@ export function BulkEditConfirmationModal({
 				};
 			});
 
+		const originalRoleRaw =
+			selectedUsers.length === 1
+				? String(selectedUsers[0].role ?? "").toLowerCase()
+				: "";
+		const normalizedOriginal: AssignableUserRole | "" =
+			originalRoleRaw === "customer" ||
+			originalRoleRaw === "user" ||
+			originalRoleRaw === "kunde"
+				? "customer"
+				: originalRoleRaw === "superuser" || originalRoleRaw === "superbruker"
+					? "superuser"
+					: originalRoleRaw === "employee" || originalRoleRaw === "ansatt"
+						? "employee"
+						: "";
+		const roleChanged =
+			canEditRole &&
+			selectedRole !== "" &&
+			selectedRole !== normalizedOriginal;
+
 		const changes: BulkEditChanges = {
 			customerAccess: selectedCustomers.filter(Boolean),
 			catalogs: selectedCatalogs.filter(Boolean),
 			warehouses: warehousesPayload,
 			companies: selectedCompanies.filter(Boolean),
+			...(roleChanged ? { role: selectedRole as AssignableUserRole } : {}),
 		};
 
 		onConfirm(changes);
@@ -612,6 +667,35 @@ export function BulkEditConfirmationModal({
 								/>
 							</div>
 						</div>
+						{canEditRole && selectedUsers.length === 1 && (
+							<div className="mb-4 grid grid-cols-2 gap-4">
+								<div className="space-y-2">
+									<Label htmlFor="role">{t("role")}</Label>
+									<Select
+										value={selectedRole}
+										onValueChange={(v) =>
+											setSelectedRole(v as AssignableUserRole)
+										}>
+										<SelectTrigger
+											id="role"
+											className="w-full">
+											<SelectValue placeholder={t("rolePlaceholder")} />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="customer">
+												{t("roles.customer")}
+											</SelectItem>
+											<SelectItem value="employee">
+												{t("roles.employee")}
+											</SelectItem>
+											<SelectItem value="superuser">
+												{t("roles.superuser")}
+											</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
+							</div>
+						)}
 					</div>
 				</div>
 

@@ -1,5 +1,8 @@
-import { getEditableUsers, searchEditableUsers } from "@/services/user.service";
-import { EditableUser } from "@/types/user.types";
+import {
+	EditableUserFilters,
+	getEditableUsers,
+	searchEditableUsers,
+} from "@/services/user.service";
 import { useQuery } from "@tanstack/react-query";
 
 export const editableUsersKeys = {
@@ -9,19 +12,33 @@ export const editableUsersKeys = {
 		[...editableUsersKeys.lists(), page, pageSize] as const,
 };
 
+const normalizeFiltersForKey = (filters?: EditableUserFilters) => ({
+	customerNumbers: filters?.customerNumbers ?? [],
+	assortmentNumbers: filters?.assortmentNumbers ?? [],
+	warehouseNumbers: filters?.warehouseNumbers ?? [],
+	companyNumbers: filters?.companyNumbers ?? [],
+	roles: filters?.roles ?? [],
+	sortCreated: filters?.sortCreated ?? null,
+});
+
 export function useGetEditableUsers(
 	page: number = 1,
 	pageSize: number = 10,
 	enabled: boolean = true,
-	userId: string,
+	userId?: string,
+	filters?: EditableUserFilters,
 ) {
 	const { data, isLoading, error, refetch } = useQuery({
-		queryKey: editableUsersKeys.list(page, pageSize),
+		queryKey: [
+			...editableUsersKeys.list(page, pageSize),
+			normalizeFiltersForKey(filters),
+		],
 		queryFn: async () => {
 			const response = await getEditableUsers(
 				page.toString(),
 				pageSize.toString(),
 				userId,
+				filters,
 			);
 			return response;
 		},
@@ -47,6 +64,7 @@ export function useSearchEditableUsers(
 	pageSize: number = 10,
 	searchQuery: string,
 	enabled: boolean = true,
+	filters?: EditableUserFilters,
 ) {
 	const trimmedQuery = searchQuery.trim();
 	const { data, isLoading, error, refetch } = useQuery({
@@ -54,12 +72,14 @@ export function useSearchEditableUsers(
 			...editableUsersKeys.list(page, pageSize),
 			"search",
 			trimmedQuery,
+			normalizeFiltersForKey(filters),
 		],
 		queryFn: async () => {
 			const response = await searchEditableUsers(
 				trimmedQuery,
 				page.toString(),
 				pageSize.toString(),
+				filters,
 			);
 			return response;
 		},

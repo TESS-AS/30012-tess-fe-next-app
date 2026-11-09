@@ -54,6 +54,11 @@
 		"postalCodeTitle": "Help us find your TESS service center by entering postal code.",
 		"postalCodeLabel": "Postal code",
 		"postalCodePlaceholder": "Enter postal code",
+		"tessContactsTitle": "Tag TESS contacts",
+		"tessContactsHelper": "Add TESS employees who should be notified once you finish registration.",
+		"tessContactsLabel": "TESS contacts",
+		"tessContactsSearchPlaceholder": "Search by name or email...",
+		"tessContactsEmpty": "No results",
 		"helpText": "Unsure? Get help on",
 		"helpTextOr": "or send e-mail to",
 		"submit": "Send",
@@ -1263,18 +1268,21 @@
 		"subtitle": "Here you can manage users.",
 		"searchPlaceholder": "Search for users",
 		"addUser": "Add new user",
+		"customizeColumns": "Customize columns",
 		"editSelected": "Edit ({count})",
 		"totalUsers": "Total users",
 		"columns": {
 			"name": "NAME",
+			"email": "EMAIL",
 			"role": "USER ROLE",
 			"customerAccess": "CUSTOMER ACCESS",
 			"catalog": "CATALOG",
 			"warehouse": "WAREHOUSE",
 			"company": "TESS COMPANY",
 			"budget": "BUDGET KR",
-			"contacts": "CONTACTS",
+			"contacts": "CONTACT PERSON",
 			"taggedBy": "TAGGED BY",
+			"createdAt": "CREATED",
 			"action": "ACTION"
 		},
 		"deleteDialog": {
@@ -1292,7 +1300,18 @@
 			"viewDetails": "View details",
 			"setBudget": "Set budget",
 			"editUser": "Edit user",
+			"addContact": "Add contact",
 			"deleteUser": "Delete user"
+		},
+		"addContact": {
+			"title": "Add TESS contacts",
+			"searchPlaceholder": "Search TESS employee...",
+			"hint": "Type to search for TESS employees",
+			"empty": "No results",
+			"cancel": "Cancel",
+			"confirm": "Add ({count})",
+			"success": "Contacts added",
+			"error": "Could not add contacts"
 		},
 		"counts": {
 			"customers": "{count} customers",
@@ -1300,6 +1319,13 @@
 			"warehouses": "{count} warehouses",
 			"companies": "{count} companies",
 			"contacts": "{count} contacts"
+		},
+		"filters": {
+			"open": "Filter {label}",
+			"searchPlaceholder": "Search...",
+			"clear": "Clear",
+			"empty": "No results",
+			"done": "Done"
 		},
 		"andMore": "and {count} more"
 	},
@@ -1577,6 +1603,13 @@
 		"tessCompany": "TESS Company",
 		"companyPlaceholder": "{count} companies selected",
 		"companySearchPlaceholder": "Search for company...",
+		"role": "User role",
+		"rolePlaceholder": "Select role",
+		"roles": {
+			"customer": "Customer",
+			"employee": "Employee",
+			"superuser": "Superuser"
+		},
 		"updateUsers": "Update {count} users",
 		"close": "Close"
 	},

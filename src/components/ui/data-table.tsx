@@ -36,6 +36,8 @@ export interface Column<T> {
 	cell: (item: T) => React.ReactNode;
 	sortable?: boolean;
 	sortFn?: (a: T, b: T) => number;
+	thClassName?: string;
+	tdClassName?: string;
 }
 
 type SortDirection = "asc" | "desc" | null;
@@ -72,6 +74,7 @@ interface DataTableProps<T> {
 	onHoseClick?: (hoseId: string) => void;
 	isRowDisabled?: (item: T) => boolean;
 	noWrap?: boolean;
+	compact?: boolean;
 }
 
 export function DataTable<
@@ -108,7 +111,9 @@ export function DataTable<
 	onHoseClick,
 	isRowDisabled,
 	noWrap = false,
+	compact = false,
 }: DataTableProps<T>) {
+	const cellPad = compact ? "px-2 py-2" : "px-3 py-3";
 	const [expandedRows, setExpandedRows] = useState<number[]>([]);
 	const safeColumns = useMemo(
 		() => (columns ?? []).filter(Boolean) as Column<T>[],
@@ -168,7 +173,8 @@ export function DataTable<
 											<th
 												key={column.key}
 												className={cn(
-													"border-b border-[#C1C4C2] bg-[#F8F9F8] px-3 py-3 text-left text-[13px] font-medium text-[#5A615D]",
+													"border-b border-[#C1C4C2] bg-[#F8F9F8] text-left text-[13px] font-medium text-[#5A615D]",
+													cellPad,
 													noWrap && "whitespace-nowrap",
 													{
 														"min-w-[160px]": column.key === "orderId",
@@ -176,9 +182,8 @@ export function DataTable<
 														"min-w-[120px]": column.key === "createdDate",
 														"min-w-[100px]": column.key === "price",
 														"min-w-[180px]": column.key === "status",
-														// "sticky right-0": column.key === "action",
-														// "p-0": column.key === "action",
 													},
+													column.thClassName,
 												)}>
 												<div className="flex items-center gap-1">
 													{typeof column.header === "string"
@@ -299,10 +304,10 @@ export function DataTable<
 															<td
 																key={column.key}
 																className={cn(
-																	"px-3 py-3 text-[14px] font-medium text-[#0F1912]",
+																	"text-[14px] font-medium text-[#0F1912]",
+																	cellPad,
 																	noWrap && "whitespace-nowrap",
-																	// column.key === "action" &&
-																	// 	"sticky right-0",
+																	column.tdClassName,
 																)}>
 																{column.cell(item)}
 															</td>

@@ -55,7 +55,9 @@ export default function OrderSummary({
 	const t = useTranslations();
 
 	const { data: profile } = usePunchoutProfile();
-	const { credit } = useCustomerCredit(!!profile);
+	// Credit-limit UI disabled for prod per PM request.
+	// Re-enable by uncommenting (and the `<CreditCheckoutSummary>` below).
+	// const { credit } = useCustomerCredit(!!profile);
 	const {
 		cartItems,
 		isLoading,
@@ -586,10 +588,13 @@ export default function OrderSummary({
 
 							<BudgetCheckoutSummary evaluation={cartEvaluation} />
 
-							<CreditCheckoutSummary
+							{/* Credit-limit UI disabled for prod per PM request.
+							    Re-enable by uncommenting this block + the
+							    `useCustomerCredit` hook call above. */}
+							{/* <CreditCheckoutSummary
 								credit={credit}
 								cartTotal={sumAfterDiscount}
-							/>
+							/> */}
 
 							{currentStep === 2 && (
 								<div className="mt-3 flex items-start gap-2">

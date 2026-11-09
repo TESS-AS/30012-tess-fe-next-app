@@ -85,6 +85,7 @@ export interface User {
 	email: string;
 	role: UserRole;
 	accessLevel: string;
+	creationDate?: string | null;
 	customerAccess: {
 		name: string;
 		number: string;
@@ -94,6 +95,11 @@ export interface User {
 		number: string;
 		companyNumber: string;
 	}[];
+	defaultWarehouse?: {
+		name: string;
+		number: string;
+		companyNumber: string;
+	} | null;
 	catalog: {
 		name: string;
 		number: string;
@@ -102,7 +108,7 @@ export interface User {
 		name: string;
 		number: string;
 	}[];
-	contacts?: {
+	contactPerson?: {
 		userId: number;
 		name: string;
 		email: string;
@@ -240,6 +246,7 @@ export interface BulkEditConfirmationModalProps {
 	selectedUsers: User[];
 	onConfirm: (changes: BulkEditChanges) => void;
 	removeUser?: (user: User) => void;
+	canEditRole?: boolean;
 }
 
 export interface BulkEditChanges {
@@ -247,4 +254,5 @@ export interface BulkEditChanges {
 	catalogs?: string[];
 	warehouses?: { warehouseNumber: string; companyNumber: string }[];
 	companies?: string[];
+	role?: "customer" | "employee" | "superuser";
 }
