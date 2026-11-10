@@ -52,6 +52,7 @@ import { ProfileUser } from "@/types/user.types";
 import { useQueryClient } from "@tanstack/react-query";
 import {
 	ArrowLeft,
+	ArrowRight,
 	BookOpen,
 	ChevronDown,
 	ChevronRight,
@@ -512,62 +513,6 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 													}, 200);
 												}}
 											/>
-											{searchQuery && !isDesktopOverlayDismissed && (
-												<div className="animate-in fade-in-0 zoom-in-95 fixed top-34 left-1/2 z-[11] grid max-h-[80vh] w-[80vw] -translate-x-1/2 grid-cols-3 gap-4 overflow-y-auto bg-white p-4 shadow-lg duration-200">
-													<div className="col-span-1 space-y-4 pr-4">
-														<SearchAside
-															suggestions={searchData?.suggestions ?? []}
-															categories={searchCategories}
-															query={searchQuery}
-															onPick={handlePick}
-														/>
-													</div>
-													<div className="col-span-2">
-														<div className="mb-3 flex items-center justify-between">
-															<h3 className="text-lg font-semibold">
-																{t("Search.resultsTitle", {
-																	default: "Dine treff",
-																})}
-															</h3>
-														</div>
-
-														{isSearchLoading ? (
-															<div className="flex items-center justify-center py-8">
-																<div className="h-6 w-6 animate-spin rounded-full border-b-2 border-green-600"></div>
-															</div>
-														) : searchData?.productRes?.length ? (
-															searchData.productRes.map(
-																(product: IProductSearch) => {
-																	return (
-																		<ProductItem
-																			key={product.productNumber}
-																			product={product}
-																			currentLocale={currentLocale}
-																			setSearchQuery={setSearchQuery}
-																			isModalIdOpen={isModalIdOpen}
-																			setIsModalIdOpen={setIsModalIdOpen}
-																			getProductVariations={
-																				getProductVariations
-																			}
-																			setVariations={setVariations}
-																			variations={variations}
-																			searchQuery={searchQuery}
-																		/>
-																	);
-																},
-															)
-														) : searchData ? (
-															<NoResults query={searchQuery} />
-														) : (
-															<div className="flex items-center justify-center py-8">
-																<span className="text-gray-500">
-																	Skriv for å søke...
-																</span>
-															</div>
-														)}
-													</div>
-												</div>
-											)}
 										</div>
 										{profile && assortments.length > 0 && (
 											<div className="max-w-[240px] border-l border-gray-300">
@@ -618,6 +563,89 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 										</Button>
 									</form>
 								</div>
+								{searchQuery && !isDesktopOverlayDismissed && (
+									<div className="animate-in fade-in-0 zoom-in-95 absolute top-full left-0 -right-[120px] z-[11] mt-1 flex max-h-[80vh] flex-col border border-gray-200 border-t-[3px] border-t-[#009640] bg-white shadow-lg duration-200">
+								<div className="grid flex-1 grid-cols-3 gap-4 overflow-y-auto p-4">
+										<div className="col-span-1 space-y-4 pr-4">
+											<SearchAside
+												suggestions={searchData?.suggestions ?? []}
+												categories={searchCategories}
+												query={searchQuery}
+												onPick={handlePick}
+											/>
+										</div>
+										<div className="col-span-2 border-l border-gray-200 pl-4">
+											<div className="mb-3 flex items-center justify-between">
+												<h3 className="text-base font-semibold">
+													{t("Search.resultsTitle", {
+														default: "Dine treff",
+													})}
+												</h3>
+											</div>
+
+											{isSearchLoading ? (
+												<div className="flex items-center justify-center py-8">
+													<div className="h-6 w-6 animate-spin rounded-full border-b-2 border-green-600"></div>
+												</div>
+											) : searchData?.productRes?.length ? (
+												searchData.productRes.map((product: IProductSearch) => (
+													<ProductItem
+														key={product.productNumber}
+														product={product}
+														currentLocale={currentLocale}
+														setSearchQuery={setSearchQuery}
+														isModalIdOpen={isModalIdOpen}
+														setIsModalIdOpen={setIsModalIdOpen}
+														getProductVariations={getProductVariations}
+														setVariations={setVariations}
+														variations={variations}
+														searchQuery={searchQuery}
+													/>
+												))
+											) : searchData ? (
+												<NoResults query={searchQuery} />
+											) : (
+												<div className="flex items-center justify-center py-8">
+													<span className="text-gray-500">
+														Skriv for å søke...
+													</span>
+												</div>
+											)}
+										</div>
+									</div>
+									{searchData && !isSearchLoading && (
+										<div className="shrink-0">
+											<div className="mx-4 border-t border-gray-200" />
+											<button
+												type="button"
+												onClick={() => {
+													setIsSearchOpen(false);
+													setIsDesktopOverlayDismissed(true);
+													router.push(
+														`/search?query=${encodeURIComponent(searchQuery)}`,
+													);
+												}}
+												className="group flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm font-normal text-[#0F1912] hover:underline">
+												<span>
+													{t.rich("Search.seeAllResults", {
+														count: searchData.numberOfHits ?? 0,
+														query: searchQuery,
+														green: (chunks) => (
+															<span className="font-bold text-[#009640]">
+																{chunks}
+															</span>
+														),
+													})}
+												</span>
+												<ArrowRight
+												strokeWidth={3}
+												className="h-4 w-4 shrink-0 text-[#009640] transition-transform duration-200 group-hover:translate-x-1"
+											/>
+											</button>
+										</div>
+									)}
+								</div>
+								)}
 								{profile &&
 									hasMultipleAssortments &&
 									isAssortmentDropdownOpen && (
