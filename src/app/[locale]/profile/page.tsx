@@ -245,6 +245,23 @@ export default function ProfilePage() {
 		if (hoseTabs.has(tabParam)) {
 			setActiveMode("hose");
 		}
+
+		// Equinor punchout: no e-handel / order history — stay on hose management.
+		const isEquinor =
+			profile?.defaultCustomerNumber ===
+			SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
+		if (
+			isEquinor &&
+			(tabParam === "ordrehistorikk" ||
+				tabParam === "mine-bestillinger" ||
+				tabParam === "rekvisisjoner")
+		) {
+			setActiveMode("hose");
+			setActiveTab("hose-orders");
+			router.replace("/profile?tab=hose-orders", { scroll: false });
+			return;
+		}
+
 		if (tabParam === "ordrehistorikk") {
 			setActiveMode("ehandel");
 		} else if (tabParam === "settings") {
@@ -319,12 +336,18 @@ export default function ProfilePage() {
 		}
 		setActiveMode(mode);
 		if (mode === "ehandel") {
-			const isEquinor =
+			// Equinor punchout has no e-handel / order history.
+			if (
 				profile?.defaultCustomerNumber ===
-				SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
-			const ehandelTab = isEquinor ? "ordrehistorikk" : "rekvisisjoner";
-			setActiveTab(ehandelTab);
-			router.replace(`/profile?tab=${ehandelTab}`, { scroll: false });
+				SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+			) {
+				setActiveMode("hose");
+				setActiveTab("hose-orders");
+				router.replace("/profile?tab=hose-orders", { scroll: false });
+				return;
+			}
+			setActiveTab("rekvisisjoner");
+			router.replace("/profile?tab=rekvisisjoner", { scroll: false });
 		} else if (mode === "hose") {
 			setActiveTab("hose-orders");
 			router.replace("/profile?tab=hose-orders", { scroll: false });
@@ -450,10 +473,7 @@ export default function ProfilePage() {
 				? "hose-orders"
 				: activeMode === "tess-edi"
 					? "tess-edi"
-					: profile.defaultCustomerNumber ===
-						  SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
-						? "ordrehistorikk"
-						: "mine-bestillinger";
+					: "mine-bestillinger";
 
 		items.push({
 			href: "/profile",
@@ -573,41 +593,31 @@ export default function ProfilePage() {
 							profile={profile}
 							items={
 								activeMode === "ehandel"
-									? profile.defaultCustomerNumber ===
-										SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
-										? [
-												{
-													href: "ordrehistorikk",
-													label: t("ProfilePage.sidebar.orderHistory"),
-													icon: ShoppingCart,
-												},
-												...commonBottomItems,
-											]
-										: [
-										{
-											href: "#",
-											label: t("ProfilePage.sidebar.orders"),
-											icon: ShoppingCart,
-											subitems: [
-												{
-													href: "mine-bestillinger",
-													label: t("ProfilePage.sidebar.myOrders"),
-												},
-												...(profile.role === USER_ROLES.ADMIN ||
-												profile.role === USER_ROLES.SUPERUSER
-													? [
-															{
-																href: "rekvisisjoner",
-																label: t("ProfilePage.sidebar.requisitions"),
-															},
-														]
-													: []),
-												{
-													href: "ordrehistorikk",
-													label: t("ProfilePage.sidebar.orderHistory"),
-												},
-											],
-										},
+									? [
+											{
+												href: "#",
+												label: t("ProfilePage.sidebar.orders"),
+												icon: ShoppingCart,
+												subitems: [
+													{
+														href: "mine-bestillinger",
+														label: t("ProfilePage.sidebar.myOrders"),
+													},
+													...(profile.role === USER_ROLES.ADMIN ||
+													profile.role === USER_ROLES.SUPERUSER
+														? [
+																{
+																	href: "rekvisisjoner",
+																	label: t("ProfilePage.sidebar.requisitions"),
+																},
+															]
+														: []),
+													{
+														href: "ordrehistorikk",
+														label: t("ProfilePage.sidebar.orderHistory"),
+													},
+												],
+											},
 											// {
 											// 	href: "dimensions",
 											// 	label: t("ProfilePage.sidebar.dimensions"),
