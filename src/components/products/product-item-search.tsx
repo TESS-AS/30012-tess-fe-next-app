@@ -9,7 +9,7 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { setProductReturnTarget } from "@/lib/productReturnNavigation";
 import { categoryTreeToUrlPath, cn } from "@/lib/utils";
 import { loadCategoryTree } from "@/services/categories.service";
-import { IProductSearch, VARIANT_REDIRECT_TYPES } from "@/types/search.types";
+import { IProductSearch } from "@/types/search.types";
 import { BadgeCheck } from "lucide-react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
@@ -163,15 +163,12 @@ export function ProductItem({
 		router.push(productLink);
 	};
 
-	const redirectItemNumber = (() => {
-		if (!product.redirect) return null;
-		const match = /[?&]itemNumber=([^&]+)/i.exec(product.redirect);
-		return match ? decodeURIComponent(match[1]) : null;
+	const isExactHit = Boolean(product.redirect);
+	const exactHitLabel = (() => {
+		if (!isExactHit) return null;
+		const type = product.redirectType ?? "";
+		return t(`Search.exactHit.${type}`, { default: t("Search.exactHit.default") });
 	})();
-	const isVariantRedirect =
-		(product.redirectType != null &&
-			VARIANT_REDIRECT_TYPES.has(product.redirectType)) ||
-		redirectItemNumber != null;
 
 	const openVariantsModal = async (
 		e: React.MouseEvent<HTMLButtonElement>,
@@ -263,9 +260,11 @@ export function ProductItem({
 							)}
 						</div>
 					</div>
-					{isVariantRedirect && redirectItemNumber ? (
-						<span className="inline-flex w-fit items-center rounded-md border border-[#C1C4C2] bg-[#F8F9F8] px-3 py-1.5 text-sm font-medium text-[#0F1912]">
-							{redirectItemNumber}
+					{isExactHit ? (
+						<span className="inline-flex w-fit items-center gap-1 rounded bg-[#DCF7E0] px-2 py-1 text-xs font-medium text-[#005522]">
+							<BadgeCheck className="h-4 w-4 fill-[#005522] text-white" />
+							{t("Search.exactHit.prefix")}
+							{exactHitLabel ? ` — ${exactHitLabel}` : ""}
 						</span>
 					) : (
 						<Button

@@ -465,6 +465,16 @@
 		"inMainWarehouse": "På hovedlager",
 		"itemNumber": "Varenummer",
 		"seeAllResults": "Se alle <green>{count}</green> treff for <green>«{query}»</green>",
+		"exactHit": {
+			"prefix": "Eksakt treff",
+			"default": "",
+			"itemNumber": "Varenummer",
+			"sap": "SAP",
+			"gtin": "GTIN",
+			"skf": "SKF",
+			"supplier": "Leverandør",
+			"name": "Navn"
+		},
 		"noResults": {
 			"title": "Ingen treff for",
 			"description": "Beklager. Vi fant ingen produkter som matcher søket \"{query}\"",
