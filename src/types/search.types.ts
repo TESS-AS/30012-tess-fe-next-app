@@ -18,6 +18,7 @@ export const VARIANT_REDIRECT_TYPES = new Set([
 	"gtin",
 	"skf",
 	"supplier",
+	"name",
 ]);
 
 export type ISuggestions = string;
