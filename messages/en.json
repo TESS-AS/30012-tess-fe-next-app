@@ -417,13 +417,25 @@
 		"selectAll": "Select all"
 	},
 	"Search": {
-		"categories": "Categories",
+		"categories": "Search in categories",
 		"suggestions": "Suggestions",
 		"noSuggestions": "No Suggestions found",
 		"noProductsFound": "No products found",
 		"seeMoreCategories": "See more categories",
 		"resultsTitle": "Search results",
 		"inMainWarehouse": "In main warehouse",
+		"itemNumber": "Item number",
+		"seeAllResults": "See all <green>{count}</green> results for <green>«{query}»</green>",
+		"exactHit": {
+			"prefix": "Exact match",
+			"default": "",
+			"itemNumber": "Item number",
+			"sap": "SAP",
+			"gtin": "GTIN",
+			"skf": "SKF",
+			"supplier": "Supplier",
+			"name": "Name"
+		},
 		"noResults": {
 			"title": "No results found",
 			"description": "Sorry. We couldn\u2019t find any products matching \"{query}\"",

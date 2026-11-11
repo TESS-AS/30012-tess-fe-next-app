@@ -1,55 +1,73 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { AlertCircle, Mail } from "lucide-react";
+import { Folder } from "lucide-react";
 import { useTranslations } from "next-intl";
+
+interface PopularCategory {
+	id: string | number;
+	name: string;
+	href?: string;
+}
 
 interface NoResultsProps {
 	query?: string | undefined;
 	className?: string;
+	popularCategories?: PopularCategory[];
+	onCategoryClick?: (href: string) => void;
 }
 
-export function NoResults({ query, className }: NoResultsProps) {
+export function NoResults({
+	query,
+	className,
+	popularCategories = [],
+	onCategoryClick,
+}: NoResultsProps) {
 	const t = useTranslations("Search.noResults");
 
 	return (
-		<div
-			className={cn(
-				"w-full space-y-6 rounded-md border-gray-200 bg-white p-6 text-gray-800",
-				className,
-			)}>
+		<div className={cn("w-full space-y-5 text-[#0F1912]", className)}>
 			<div>
-				<div className="mb-3 flex items-center gap-2">
-					<AlertCircle className="h-5 w-5 text-gray-600" />
-					<h2 className="text-lg font-semibold">{t("title")}</h2>
-				</div>
-				<p className="mb-4 text-sm">
-					{t("description", { query: query ?? "" })}
-				</p>
-				<div>
-					<h3 className="mb-2 font-medium">{t("tipsTitle")}</h3>
-					<ul className="list-disc space-y-1 pl-6 text-sm text-gray-700">
-						<li>{t("tips.checkSpelling")}</li>
-						<li>{t("tips.useFewerWords")}</li>
-						<li>{t("tips.searchByType")}</li>
-						<li>{t("tips.searchBySpec")}</li>
-					</ul>
-				</div>
+				<h2 className="text-base font-semibold">
+					{t("title")}{" "}
+					<span className="text-[#009640]">&laquo;{query ?? ""}&raquo;</span>
+				</h2>
+				<ul className="mt-3 space-y-2 text-sm">
+					<li className="flex items-start gap-2">
+						<span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#009640]" />
+						<span>{t("tips.checkSpelling")}</span>
+					</li>
+					<li className="flex items-start gap-2">
+						<span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#009640]" />
+						<span>{t("tips.useFewerWords")}</span>
+					</li>
+					<li className="flex items-start gap-2">
+						<span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#009640]" />
+						<span>{t("tips.searchByType")}</span>
+					</li>
+				</ul>
 			</div>
 
-			<div className="rounded-md bg-[#F0FCF2] p-4">
-				<div className="mb-1 flex items-center gap-2 text-green-800">
-					<AlertCircle className="h-5 w-5" />
-					<h3 className="font-medium">{t("help.title")}</h3>
+			{popularCategories.length > 0 && (
+				<div className="border-t border-gray-200 pt-4">
+					<h3 className="mb-2 text-base font-semibold">
+						{t("popularCategoriesTitle")}
+					</h3>
+					<ul className="space-y-1">
+						{popularCategories.map((cat) => (
+							<li key={cat.id}>
+								<button
+									type="button"
+									onClick={() => cat.href && onCategoryClick?.(cat.href)}
+									className="flex w-full items-center gap-2 py-1 text-left text-sm text-[#0F1912] hover:underline">
+									<Folder className="h-4 w-4 shrink-0 text-[#009640]" />
+									<span>{cat.name}</span>
+								</button>
+							</li>
+						))}
+					</ul>
 				</div>
-				<p className="mb-3 text-sm text-green-800">{t("help.description")}</p>
-				<a
-					href="mailto:tess@tess.no"
-					className="inline-flex items-center gap-2 rounded-md bg-green-700 px-3 py-2 text-sm font-medium text-white hover:bg-green-700">
-					<Mail className="h-4 w-4" />
-					{t("help.email")}
-				</a>
-			</div>
+			)}
 		</div>
 	);
 }
