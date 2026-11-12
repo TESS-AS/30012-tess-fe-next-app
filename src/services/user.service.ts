@@ -208,7 +208,7 @@ export async function getUserAdminFilterOptions(
 export interface EditableUserFilters {
 	customerNumbers?: string[];
 	assortmentNumbers?: string[];
-	warehouseNumbers?: string[];
+	warehouseIds?: string[];
 	companyNumbers?: string[];
 	roles?: string[];
 	sortCreated?: "newest" | "oldest";
@@ -220,7 +220,7 @@ const toCsv = (values?: string[]) =>
 const filtersToParams = (filters?: EditableUserFilters) => ({
 	customerNumbers: toCsv(filters?.customerNumbers),
 	assortmentNumbers: toCsv(filters?.assortmentNumbers),
-	warehouseNumbers: toCsv(filters?.warehouseNumbers),
+	warehouseIds: toCsv(filters?.warehouseIds),
 	companyNumbers: toCsv(filters?.companyNumbers),
 	roles: toCsv(filters?.roles),
 	sortCreated: filters?.sortCreated,

@@ -163,7 +163,7 @@ const UsersBrukere = () => {
 		() => ({
 			customerNumbers: columnFilters.customerNumbers,
 			assortmentNumbers: columnFilters.assortmentNumbers,
-			warehouseNumbers: columnFilters.warehouseNumbers,
+			warehouseIds: columnFilters.warehouseIds,
 			companyNumbers: columnFilters.companyNumbers,
 			roles: columnFilters.roles,
 			sortCreated,
@@ -620,9 +620,9 @@ const UsersBrukere = () => {
 								<UserAdminColumnFilter
 									type="warehouse"
 									label={t("columns.warehouse")}
-									selected={columnFilters.warehouseNumbers ?? []}
+									selected={columnFilters.warehouseIds ?? []}
 									onChange={(values) =>
-										setFilterValues("warehouseNumbers", values)
+										setFilterValues("warehouseIds", values)
 									}
 								/>
 							</span>
