@@ -15,7 +15,7 @@ export const editableUsersKeys = {
 const normalizeFiltersForKey = (filters?: EditableUserFilters) => ({
 	customerNumbers: filters?.customerNumbers ?? [],
 	assortmentNumbers: filters?.assortmentNumbers ?? [],
-	warehouseNumbers: filters?.warehouseNumbers ?? [],
+	warehouseIds: filters?.warehouseIds ?? [],
 	companyNumbers: filters?.companyNumbers ?? [],
 	roles: filters?.roles ?? [],
 	sortCreated: filters?.sortCreated ?? null,
