@@ -462,7 +462,7 @@
 		"noProductsFound": "Ingen produkter funnet",
 		"seeMoreCategories": "Se flere kategorier",
 		"resultsTitle": "Dine treff",
-		"inMainWarehouse": "På hovedlager",
+		"inMainWarehouse": "På lager",
 		"itemNumber": "Varenummer",
 		"seeAllResults": "Se alle <green>{count}</green> treff for <green>«{query}»</green>",
 		"exactHit": {

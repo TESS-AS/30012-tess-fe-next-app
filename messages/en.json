@@ -423,7 +423,7 @@
 		"noProductsFound": "No products found",
 		"seeMoreCategories": "See more categories",
 		"resultsTitle": "Search results",
-		"inMainWarehouse": "In main warehouse",
+		"inMainWarehouse": "In stock",
 		"itemNumber": "Item number",
 		"seeAllResults": "See all <green>{count}</green> results for <green>«{query}»</green>",
 		"exactHit": {
