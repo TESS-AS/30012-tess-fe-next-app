@@ -231,7 +231,7 @@ export function ProductItem({
 							<div className="mt-2 flex items-center justify-between gap-2">
 								<span className="text-sm font-normal text-[#5A615D]">
 									{t("Search.itemNumber", { default: "Varenummer" })}:{" "}
-									<span className="font-semibold text-[#0F1912]">
+									<span className="font-semibold text-[#0F1912] uppercase">
 										{product.itemNumber || product.productNumber}
 									</span>
 								</span>
