@@ -324,6 +324,9 @@ export function CartKitRow({
 	const [extrasOpen, setExtrasOpen] = useState(true);
 	const [servicesOpen, setServicesOpen] = useState(false);
 	const [lengthChangeDismissed, setLengthChangeDismissed] = useState(false);
+	const [sessionOriginalLengthMm, setSessionOriginalLengthMm] = useState<
+		number | undefined
+	>(() => readOriginalLengthMm(kit.hose));
 	const [draftLength, setDraftLength] = useState(() =>
 		kit.hose?.lengthMm != null && kit.hose.lengthMm > 0
 			? String(kit.hose.lengthMm)
@@ -368,13 +371,25 @@ export function CartKitRow({
 	}));
 
 	const lengthMm = kit.hose?.lengthMm;
-	const originalLengthMm = readOriginalLengthMm(kit.hose);
-	const displayLengthMm = Number(draftLength) || lengthMm;
+	const apiOriginalLengthMm = readOriginalLengthMm(kit.hose);
+	const originalLengthMm = apiOriginalLengthMm ?? sessionOriginalLengthMm;
+	const displayLengthMm = Number(draftLength);
+	const lengthWasChanged =
+		Number.isFinite(displayLengthMm) &&
+		displayLengthMm > 0 &&
+		originalLengthMm != null &&
+		originalLengthMm !== displayLengthMm;
 	const title = kit.hose?.itemDescription?.trim()
 		? kit.hose.itemDescription
 		: [kit.hose?.itemNumber, lengthMm ? `${lengthMm} mm` : ""]
 				.filter(Boolean)
 				.join(" × ");
+
+	useEffect(() => {
+		if (apiOriginalLengthMm != null) {
+			setSessionOriginalLengthMm(apiOriginalLengthMm);
+		}
+	}, [apiOriginalLengthMm]);
 
 	useEffect(() => {
 		if (lengthMm != null && lengthMm > 0) {
@@ -534,11 +549,25 @@ export function CartKitRow({
 													value={draftLength}
 													disabled={isSavingLength || !onLengthChange}
 													aria-label={t("changeLength")}
-													onChange={(event) =>
-														setDraftLength(
-															event.target.value.replace(/[^\d]/g, ""),
-														)
-													}
+													onChange={(event) => {
+														const nextValue = event.target.value.replace(
+															/[^\d]/g,
+															"",
+														);
+														const next = Number(nextValue);
+														if (
+															sessionOriginalLengthMm == null &&
+															apiOriginalLengthMm == null &&
+															lengthMm != null &&
+															lengthMm > 0 &&
+															Number.isFinite(next) &&
+															next > 0 &&
+															next !== lengthMm
+														) {
+															setSessionOriginalLengthMm(lengthMm);
+														}
+														setDraftLength(nextValue);
+													}}
 													onBlur={() => {
 														void commitLengthChange();
 													}}
@@ -553,20 +582,13 @@ export function CartKitRow({
 													{t("unitMm")}
 												</span>
 											</div>
-											{!lengthChangeDismissed &&
-											displayLengthMm != null &&
-											displayLengthMm > 0 ? (
+											{!lengthChangeDismissed && lengthWasChanged ? (
 												<span className="inline-flex items-center gap-1.5 rounded-md bg-[#EEF0FF] px-2.5 py-1 text-xs text-[#5B4DFF]">
 													<Link2 className="h-3.5 w-3.5" aria-hidden />
-													{originalLengthMm != null &&
-													originalLengthMm !== displayLengthMm
-														? t("lengthChanged", {
-																from: formatQuantity(originalLengthMm),
-																to: formatQuantity(displayLengthMm),
-															})
-														: t("lengthChangedCurrent", {
-																to: formatQuantity(displayLengthMm),
-															})}
+													{t("lengthChanged", {
+														from: formatQuantity(originalLengthMm ?? 0),
+														to: formatQuantity(displayLengthMm),
+													})}
 													<button
 														type="button"
 														aria-label={t("dismissLengthChange")}
