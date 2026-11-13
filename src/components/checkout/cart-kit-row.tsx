@@ -177,10 +177,10 @@ function PartCard({
 	line: PartLine;
 	price: number;
 	priceInputSlot?: ReactNode;
-	seeDetailsLabel: string;
+	seeDetailsLabel?: string;
 	nameLabel: string;
 	itemNumberLabel: string;
-	detailsHref: string;
+	detailsHref?: string;
 	extra?: ReactNode;
 }) {
 	return (
@@ -214,13 +214,20 @@ function PartCard({
 					) : null}
 				</div>
 				<div className="flex shrink-0 items-center gap-3">
-					<Link
-						href={detailsHref}
-						className="rounded-md border border-[#D5D9D7] bg-white px-3 py-1.5 text-xs text-[#0F1912] hover:border-[#009640]">
-						{seeDetailsLabel}
-					</Link>
+					{seeDetailsLabel && detailsHref ? (
+						<Link
+							href={detailsHref}
+							className="rounded-md border border-[#D5D9D7] bg-white px-3 py-1.5 text-xs text-[#0F1912] hover:border-[#009640]">
+							{seeDetailsLabel}
+						</Link>
+					) : null}
 					{priceInputSlot}
-					<div className="flex items-center border-l border-[#E8EAE9] pl-3">
+					<div
+						className={`flex items-center ${
+							(seeDetailsLabel && detailsHref) || priceInputSlot
+								? "border-l border-[#E8EAE9] pl-3"
+								: ""
+						}`}>
 						<span className="w-14 shrink-0 text-sm whitespace-nowrap text-[#5A615D] tabular-nums">
 							{formatQuantity(line.quantity)}x
 						</span>
@@ -671,7 +678,8 @@ export function CartKitRow({
 								line={line}
 								price={lineTotal(line.itemNumber, line.quantity)}
 								priceInputSlot={priceInputSlot?.(line.itemNumber)}
-								{...partLabels}
+								nameLabel={partLabels.nameLabel}
+								itemNumberLabel={partLabels.itemNumberLabel}
 							/>
 						))}
 					</Section>
