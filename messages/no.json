@@ -54,6 +54,11 @@
 		"postalCodeTitle": "Hjelp oss med å finne ditt TESS servicesenter ved å fylle inn postnummer.",
 		"postalCodeLabel": "Postnummer",
 		"postalCodePlaceholder": "Skriv postnummer",
+		"tessContactsTitle": "Tagg TESS-kontakter",
+		"tessContactsHelper": "Legg til TESS-ansatte som skal få varsel når du er ferdig med registreringen.",
+		"tessContactsLabel": "TESS-kontakter",
+		"tessContactsSearchPlaceholder": "Søk etter navn eller e-post...",
+		"tessContactsEmpty": "Ingen treff",
 		"helpText": "Usikker? Få hjelp på",
 		"helpTextOr": "eller send e-post til",
 		"submit": "Send",
@@ -451,29 +456,43 @@
 		"imageCaption": "Eksempelbilde. Faktisk løsning kan avvike."
 	},
 	"Search": {
-		"categories": "Kategori",
+		"categories": "Søk i kategoriene",
 		"suggestions": "Søkeforslag",
 		"noSuggestions": "Ingen søkeforslag funnet",
 		"noProductsFound": "Ingen produkter funnet",
 		"seeMoreCategories": "Se flere kategorier",
 		"resultsTitle": "Dine treff",
-		"inMainWarehouse": "På hovedlager",
+		"inMainWarehouse": "På lager",
+		"itemNumber": "Varenummer",
+		"seeAllResults": "Se alle <green>{count}</green> treff for <green>«{query}»</green>",
+		"exactHit": {
+			"prefix": "Eksakt treff",
+			"default": "",
+			"itemNumber": "Varenummer",
+			"sap": "SAP",
+			"gtin": "GTIN",
+			"skf": "SKF",
+			"supplier": "Leverandør",
+			"name": "Navn"
+		},
 		"noResults": {
-			"title": "Ingen resultater funnet",
+			"title": "Ingen treff for",
 			"description": "Beklager. Vi fant ingen produkter som matcher søket \"{query}\"",
 			"tipsTitle": "Tips for bedre søkeresultater:",
 			"tips": {
-				"checkSpelling": "Sjekk stave måten og prøv alternative skrivemåter",
-				"useFewerWords": "Bruk færre eller mer generelle søkeord",
-				"searchByType": "Søk på produkttype eller kategori i stedet",
+				"checkSpelling": "Sjekk stavemåten",
+				"useFewerWords": "Prøv et mer generelt søk, f.eks. «rør» eller «slange» eller beskriv hva du trenger",
+				"searchByType": "Søk med produktnummer eller leverandørnummer",
 				"searchBySpec": "Prøv å søke på tekniske spesifikasjoner"
 			},
+			"popularCategoriesTitle": "Populære kategorier",
 			"help": {
 				"title": "Mangler du vare?",
 				"description": "Våre eksperter hjelper deg med å finne riktige produkter for dine behov.",
 				"email": "E-post: tess@tess.no"
 			}
-		}
+		},
+		"seeFullCatalog": "Se hele Tess-katalogen"
 	},
 	"Seo": {
 		"defaultTitle": "TESS - Teknisk Faghandel | Netthandel",
@@ -1346,18 +1365,21 @@
 		"subtitle": "Her kan du administrere brukere.",
 		"searchPlaceholder": "Søk etter brukere",
 		"addUser": "Legg til ny bruker",
+		"customizeColumns": "Tilpass kolonner",
 		"editSelected": "Rediger ({count})",
 		"totalUsers": "Brukere totalt",
 		"columns": {
 			"name": "NAVN",
+			"email": "E-POST",
 			"role": "BRUKERROLLE",
 			"customerAccess": "KUNDETILGANG",
 			"catalog": "KATALOG",
 			"warehouse": "LAGER",
 			"company": "TESS FIRMA",
 			"budget": "BUDSJETT KR",
-			"contacts": "KONTAKTER",
+			"contacts": "KONTAKTPERSON",
 			"taggedBy": "TAGGET AV",
+			"createdAt": "OPPRETTET",
 			"action": "HANDLING"
 		},
 		"deleteDialog": {
@@ -1375,7 +1397,18 @@
 			"viewDetails": "Vis detaljer",
 			"setBudget": "Sett budsjett",
 			"editUser": "Rediger bruker",
+			"addContact": "Legg til kontakt",
 			"deleteUser": "Slett bruker"
+		},
+		"addContact": {
+			"title": "Legg til TESS-kontakter",
+			"searchPlaceholder": "Søk etter TESS-ansatt...",
+			"hint": "Skriv for å søke etter TESS-ansatte",
+			"empty": "Ingen treff",
+			"cancel": "Avbryt",
+			"confirm": "Legg til ({count})",
+			"success": "Kontakter lagt til",
+			"error": "Kunne ikke legge til kontakter"
 		},
 		"counts": {
 			"customers": "{count} kunder",
@@ -1383,6 +1416,13 @@
 			"warehouses": "{count} lager",
 			"companies": "{count} firmaer",
 			"contacts": "{count} kontakter"
+		},
+		"filters": {
+			"open": "Filtrer {label}",
+			"searchPlaceholder": "Søk...",
+			"clear": "Fjern",
+			"empty": "Ingen resultater",
+			"done": "Ferdig"
 		},
 		"andMore": "og {count} flere"
 	},
@@ -1660,6 +1700,13 @@
 		"tessCompany": "TESS Firma",
 		"companyPlaceholder": "{count} firma valgt",
 		"companySearchPlaceholder": "Søk etter firma...",
+		"role": "Brukerrolle",
+		"rolePlaceholder": "Velg rolle",
+		"roles": {
+			"customer": "Kunde",
+			"employee": "Ansatt",
+			"superuser": "Superbruker"
+		},
 		"updateUsers": "Oppdater {count} brukere",
 		"close": "Lukk"
 	},

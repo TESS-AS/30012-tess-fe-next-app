@@ -31,6 +31,8 @@ import {
 	Settings,
 	LogOut,
 	List,
+	BookOpen,
+	type LucideProps,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
@@ -38,6 +40,20 @@ import { useTranslations } from "next-intl";
 
 import { InnstillingerTab } from "./(components)/innstillinger-tab";
 import { SidebarNav } from "./(components)/sidebar-nav";
+
+// Local-only wrapper for the KSU sidebar entry. Lucide's BookOpen renders
+// thinner than the sibling custom SVG icons at the shared 18px slot. We
+// visually enlarge it with `scale` so it reads at a weight consistent with
+// the other icons, while keeping the icon's LAYOUT box at 18px — otherwise
+// a 25px icon would push the item's label to the right and break the
+// vertical alignment of the sidebar's text column.
+const KsuNavIcon = (props: LucideProps) => (
+	<BookOpen
+		{...props}
+		strokeWidth={1.75}
+		className={`scale-[1.4] ${props.className ?? ""}`.trim()}
+	/>
+);
 
 // Lazy load tab content to reduce profile page First Load JS (each tab in its own chunk)
 const AvvikendeOrdre = dynamic(
@@ -149,6 +165,27 @@ const Rekvisisjoner = dynamic(
 		})),
 	{ ssr: false },
 );
+const CreateKsuPage = dynamic(
+	() =>
+		import("./(components)/ksu/CreateKsuPage").then((m) => ({
+			default: m.CreateKsuPage,
+		})),
+	{ ssr: false },
+);
+const AdministrerKsuPage = dynamic(
+	() =>
+		import("./(components)/ksu/AdministrerKsuPage").then((m) => ({
+			default: m.AdministrerKsuPage,
+		})),
+	{ ssr: false },
+);
+const CreatedKsuSuccessPage = dynamic(
+	() =>
+		import("./(components)/ksu/CreatedKsuSuccessPage").then((m) => ({
+			default: m.CreatedKsuSuccessPage,
+		})),
+	{ ssr: false },
+);
 
 export default function ProfilePage() {
 	const { setIsAuthOpen } = useAppContext();
@@ -245,6 +282,23 @@ export default function ProfilePage() {
 		if (hoseTabs.has(tabParam)) {
 			setActiveMode("hose");
 		}
+
+		// Equinor punchout: no e-handel / order history — stay on hose management.
+		const isEquinor =
+			profile?.defaultCustomerNumber ===
+			SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
+		if (
+			isEquinor &&
+			(tabParam === "ordrehistorikk" ||
+				tabParam === "mine-bestillinger" ||
+				tabParam === "rekvisisjoner")
+		) {
+			setActiveMode("hose");
+			setActiveTab("hose-orders");
+			router.replace("/profile?tab=hose-orders", { scroll: false });
+			return;
+		}
+
 		if (tabParam === "ordrehistorikk") {
 			setActiveMode("ehandel");
 		} else if (tabParam === "settings") {
@@ -325,12 +379,18 @@ export default function ProfilePage() {
 		}
 		setActiveMode(mode);
 		if (mode === "ehandel") {
-			const isEquinor =
+			// Equinor punchout has no e-handel / order history.
+			if (
 				profile?.defaultCustomerNumber ===
-				SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
-			const ehandelTab = isEquinor ? "ordrehistorikk" : "rekvisisjoner";
-			setActiveTab(ehandelTab);
-			router.replace(`/profile?tab=${ehandelTab}`, { scroll: false });
+				SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
+			) {
+				setActiveMode("hose");
+				setActiveTab("hose-orders");
+				router.replace("/profile?tab=hose-orders", { scroll: false });
+				return;
+			}
+			setActiveTab("rekvisisjoner");
+			router.replace("/profile?tab=rekvisisjoner", { scroll: false });
 		} else if (mode === "hose") {
 			setActiveTab("hose-orders");
 			router.replace("/profile?tab=hose-orders", { scroll: false });
@@ -440,6 +500,9 @@ export default function ProfilePage() {
 			"hose-settings": t("ProfilePage.tabs.settings"),
 			// THM Projects (MSL) tabs
 			"thm-active-projects": "Active Projects",
+			// KSU (Kundespesifikke utvalg) tabs
+			"ksu-create": "Opprett nytt KSU",
+			"ksu-admin": "Administrer KSU",
 		};
 
 		const isThmTab = activeTab?.startsWith("thm-");
@@ -459,10 +522,7 @@ export default function ProfilePage() {
 				? "hose-orders"
 				: activeMode === "tess-edi"
 					? "tess-edi"
-					: profile.defaultCustomerNumber ===
-						  SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
-						? "ordrehistorikk"
-						: "mine-bestillinger";
+					: "mine-bestillinger";
 
 		items.push({
 			href: "/profile",
@@ -582,41 +642,31 @@ export default function ProfilePage() {
 							profile={profile}
 							items={
 								activeMode === "ehandel"
-									? profile.defaultCustomerNumber ===
-										SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER
-										? [
-												{
-													href: "ordrehistorikk",
-													label: t("ProfilePage.sidebar.orderHistory"),
-													icon: ShoppingCart,
-												},
-												...commonBottomItems,
-											]
-										: [
-										{
-											href: "#",
-											label: t("ProfilePage.sidebar.orders"),
-											icon: ShoppingCart,
-											subitems: [
-												{
-													href: "mine-bestillinger",
-													label: t("ProfilePage.sidebar.myOrders"),
-												},
-												...(profile.role === USER_ROLES.ADMIN ||
-												profile.role === USER_ROLES.SUPERUSER
-													? [
-															{
-																href: "rekvisisjoner",
-																label: t("ProfilePage.sidebar.requisitions"),
-															},
-														]
-													: []),
-												{
-													href: "ordrehistorikk",
-													label: t("ProfilePage.sidebar.orderHistory"),
-												},
-											],
-										},
+									? [
+											{
+												href: "#",
+												label: t("ProfilePage.sidebar.orders"),
+												icon: ShoppingCart,
+												subitems: [
+													{
+														href: "mine-bestillinger",
+														label: t("ProfilePage.sidebar.myOrders"),
+													},
+													...(profile.role === USER_ROLES.ADMIN ||
+													profile.role === USER_ROLES.SUPERUSER
+														? [
+																{
+																	href: "rekvisisjoner",
+																	label: t("ProfilePage.sidebar.requisitions"),
+																},
+															]
+														: []),
+													{
+														href: "ordrehistorikk",
+														label: t("ProfilePage.sidebar.orderHistory"),
+													},
+												],
+											},
 											// {
 											// 	href: "dimensions",
 											// 	label: t("ProfilePage.sidebar.dimensions"),
@@ -633,6 +683,21 @@ export default function ProfilePage() {
 															href: "users",
 															label: t("ProfilePage.sidebar.users"),
 															icon: "/icons/profile/navbar/user-settings-outline.svg",
+														},
+														{
+															href: "#ksu",
+															label: "Kundespesifikke utvalg (KSU)",
+															icon: KsuNavIcon,
+															subitems: [
+																{
+																	href: "ksu-create",
+																	label: "Opprett nytt KSU",
+																},
+																{
+																	href: "ksu-admin",
+																	label: "Administrer KSU",
+																},
+															],
 														},
 													]
 												: []),
@@ -757,6 +822,27 @@ export default function ProfilePage() {
 							value="users"
 							className="mt-0">
 							<UsersBrukere />
+						</TabsContent>
+
+						<TabsContent
+							value="ksu-create"
+							className="mt-0">
+							{activeTab === "ksu-create" &&
+								(searchParams.get("created") ? (
+									<CreatedKsuSuccessPage
+										assortmentNumber={
+											searchParams.get("created") as string
+										}
+									/>
+								) : (
+									<CreateKsuPage />
+								))}
+						</TabsContent>
+
+						<TabsContent
+							value="ksu-admin"
+							className="mt-0">
+							{activeTab === "ksu-admin" && <AdministrerKsuPage />}
 						</TabsContent>
 
 						{(profile.role === USER_ROLES.ADMIN ||

@@ -9,8 +9,8 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { setProductReturnTarget } from "@/lib/productReturnNavigation";
 import { categoryTreeToUrlPath, cn } from "@/lib/utils";
 import { loadCategoryTree } from "@/services/categories.service";
-import { IProductSearch, VARIANT_REDIRECT_TYPES } from "@/types/search.types";
-// import { BadgeCheck } from "lucide-react"; // re-enable when inStock block below is uncommented
+import { IProductSearch } from "@/types/search.types";
+import { BadgeCheck } from "lucide-react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
@@ -130,7 +130,7 @@ export function ProductItem({
 			lower.includes(part.toLowerCase()) ? (
 				<span
 					key={i}
-					className="bg-emerald-100 font-semibold">
+					className="bg-[#DCF7E0] px-1.5 py-0.5 font-semibold">
 					{part}
 				</span>
 			) : (
@@ -163,155 +163,122 @@ export function ProductItem({
 		router.push(productLink);
 	};
 
-	const redirectItemNumber = (() => {
-		if (!product.redirect) return null;
-		const match = /[?&]itemNumber=([^&]+)/i.exec(product.redirect);
-		return match ? decodeURIComponent(match[1]) : null;
+	const isExactHit = Boolean(product.redirect);
+	const exactHitLabel = (() => {
+		if (!isExactHit) return null;
+		const type = product.redirectType ?? "";
+		return t(`Search.exactHit.${type}`, { default: t("Search.exactHit.default") });
 	})();
-	const isVariantRedirect =
-		(product.redirectType != null &&
-			VARIANT_REDIRECT_TYPES.has(product.redirectType)) ||
-		redirectItemNumber != null;
+
+	const openVariantsModal = async (
+		e: React.MouseEvent<HTMLButtonElement>,
+	) => {
+		e.stopPropagation();
+		e.nativeEvent.stopImmediatePropagation();
+		setIsModalIdOpen(product.productNumber);
+		const productVariations = await getProductVariations(
+			product.productNumber,
+			profile?.defaultWarehouseNumber || "",
+			profile?.defaultCompanyNumber || "",
+		);
+		setVariations((prev: Record<string, any>) => ({
+			...prev,
+			[product.productNumber]: productVariations,
+		}));
+
+		if (productVariations.length > 0) {
+			setSelectedVariantNumber(productVariations[0].itemNumber);
+		}
+	};
+
+	const attributePills = [product.attribute1, product.attribute2].filter(
+		Boolean,
+	) as string[];
 
 	return (
 		<div>
 			<div
 				onClick={handleProductClick}
 				className="cursor-pointer">
-				<div key={product.productNumber}>
-					<div className="group mb-3 flex w-full cursor-pointer flex-col gap-3 rounded-md border border-gray-200 p-3 hover:border-gray-400 sm:flex-row sm:items-center sm:gap-4">
-						<div className="flex h-24 w-24 shrink-0 items-center justify-center self-center overflow-hidden rounded-md sm:h-32 sm:w-32">
+				<div
+					key={product.productNumber}
+					className="group flex w-full cursor-pointer flex-col gap-3 border-b border-gray-200 py-3">
+					<div className="flex items-start gap-3 sm:gap-4">
+						<div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md sm:h-20 sm:w-20">
 							{product.thumbnail ? (
 								<Image
 									src={product.thumbnail}
 									alt={product.productName}
 									unoptimized
-									width={128}
-									height={128}
-									className="max-h-24 max-w-24 object-contain sm:max-h-23 sm:max-w-32"
+									width={80}
+									height={80}
+									className="max-h-16 max-w-16 object-contain sm:max-h-20 sm:max-w-20"
 									loading="eager"
 								/>
 							) : (
-								<div className="h-24 w-24 rounded bg-gray-300 sm:h-32 sm:w-32" />
+								<div className="h-16 w-16 rounded bg-gray-300 sm:h-20 sm:w-20" />
 							)}
 						</div>
-						<div className="flex flex-1 flex-col justify-center gap-1.5">
+						<div className="flex min-w-0 flex-1 flex-col">
 							<Link
 								className="w-fit"
 								href={productLink}
-								onClick={() => {
-									captureReturnTarget();
-								}}>
-								<span
-									className={cn(
-										"text-base font-medium",
-										"border-black group-hover:border-b",
-									)}>
+								onClick={captureReturnTarget}>
+								<span className="text-sm font-bold text-[#0F1912]">
 									{highlightParts(product.productName, matchedAttributes)}
 								</span>
 							</Link>
-							{(product.attribute1 || product.attribute2) && (
-								<div className="flex max-w-xs flex-col gap-1">
-									{[product.attribute1, product.attribute2].map((value, i) => {
-										if (!value) return null;
-										return (
-											<div
-												key={i}
-												className="flex items-center rounded-sm bg-white text-[12px] text-gray-800">
-												{value}
-											</div>
-										);
-									})}
-								</div>
-							)}
-							{/* inStock not returned by /proxy/search today — re-enable if BE adds it back
-							{product.inStock && (
-								<div className="flex w-fit items-center gap-1 rounded bg-[#DCF7E0] px-2 py-1 text-xs font-medium text-emerald-800 sm:hidden">
-									<BadgeCheck className="h-4 w-4 fill-emerald-800 text-white" />
-									<span>{t("Search.inMainWarehouse")}</span>
-								</div>
-							)}
-							*/}
-							{isVariantRedirect && redirectItemNumber ? (
-								<span className="mt-1 inline-flex w-fit items-center rounded-md border border-[#C1C4C2] bg-[#F8F9F8] px-2 py-1 text-xs font-medium text-[#0F1912] sm:hidden">
-									{redirectItemNumber}
+							<div className="mt-2 flex items-center justify-between gap-2">
+								<span className="text-sm font-normal text-[#5A615D]">
+									{t("Search.itemNumber", { default: "Varenummer" })}:{" "}
+									<span className="font-semibold text-[#0F1912]">
+										{product.itemNumber || product.productNumber}
+									</span>
 								</span>
-							) : (
-								<Button
-									type="button"
-									variant="outlineGrey"
-									className={cn(
-										"mt-1 w-full rounded-md px-5 py-2 text-sm font-medium transition-colors sm:hidden",
-										"group-hover:border-[#009640] group-hover:bg-[#009640] group-hover:text-white",
-										"hover:border-[#005522] hover:bg-[#005522] hover:text-white",
-									)}
-									onClick={async (e) => {
-										e.stopPropagation();
-										e.nativeEvent.stopImmediatePropagation();
-										setIsModalIdOpen(product.productNumber);
-										const productVariations = await getProductVariations(
-											product.productNumber,
-											profile?.defaultWarehouseNumber || "",
-											profile?.defaultCompanyNumber || "",
-										);
-										setVariations((prev: Record<string, any>) => ({
-											...prev,
-											[product.productNumber]: productVariations,
-										}));
-
-										if (productVariations.length > 0) {
-											setSelectedVariantNumber(productVariations[0].itemNumber);
-										}
-									}}>
-									Se produktvarianter ({product.itemVariantCount || 0}) →
-								</Button>
+								{product.inStock && (
+									<span className="inline-flex shrink-0 items-center gap-1 rounded bg-[#DCF7E0] px-2 py-1 text-xs font-medium text-[#005522]">
+										<BadgeCheck className="h-4 w-4 fill-[#005522] text-white" />
+										{t("Search.inMainWarehouse")}
+									</span>
+								)}
+							</div>
+							{product.itemName && (
+								<p className="mt-0.5 truncate text-sm text-[#5A615D]">
+									{product.itemName}
+								</p>
 							)}
-						</div>
-						<div className="ml-auto hidden flex-col items-end gap-5 sm:flex">
-							{/* inStock not returned by /proxy/search today — re-enable if BE adds it back
-							{product.inStock && (
-								<div className="flex items-center gap-1 rounded bg-[#DCF7E0] px-2 py-1 text-xs font-medium text-emerald-800">
-									<BadgeCheck className="h-4 w-4 fill-emerald-800 text-white" />
-									<span>{t("Search.inMainWarehouse")}</span>
+							{attributePills.length > 0 && (
+								<div className="mt-2 flex flex-wrap gap-2">
+									{attributePills.map((value, i) => (
+										<span
+											key={i}
+											className="inline-flex items-center rounded bg-[#E8EAE9] px-2 py-1 text-sm font-normal text-[#0F1912]">
+											{value}
+										</span>
+									))}
 								</div>
-							)}
-							*/}
-							{isVariantRedirect && redirectItemNumber ? (
-								<span className="mt-2 ml-auto inline-flex items-center self-center rounded-md border border-[#C1C4C2] bg-[#F8F9F8] px-3 py-1.5 text-sm font-medium text-[#0F1912]">
-									{redirectItemNumber}
-								</span>
-							) : (
-								<Button
-									type="button"
-									variant="outlineGrey"
-									className={cn(
-										"mt-2 ml-auto self-center rounded-md px-5 py-2 text-sm font-medium transition-colors",
-										"group-hover:border-[#009640] group-hover:bg-[#009640] group-hover:text-white",
-										"hover:border-[#005522] hover:bg-[#005522] hover:text-white",
-									)}
-									onClick={async (e) => {
-										e.stopPropagation();
-										e.nativeEvent.stopImmediatePropagation();
-										setIsModalIdOpen(product.productNumber);
-										const productVariations = await getProductVariations(
-											product.productNumber,
-											profile?.defaultWarehouseNumber || "",
-											profile?.defaultCompanyNumber || "",
-										);
-										setVariations((prev: Record<string, any>) => ({
-											...prev,
-											[product.productNumber]: productVariations,
-										}));
-
-										if (productVariations.length > 0) {
-											setSelectedVariantNumber(productVariations[0].itemNumber);
-										}
-									}}>
-									Se produktvarianter ({product.itemVariantCount || 0}) →
-								</Button>
 							)}
 						</div>
 					</div>
+					{isExactHit ? (
+						<span className="inline-flex w-fit items-center gap-1 rounded bg-[#DCF7E0] px-2 py-1 text-xs font-medium text-[#005522]">
+							<BadgeCheck className="h-4 w-4 fill-[#005522] text-white" />
+							{t("Search.exactHit.prefix")}
+							{exactHitLabel ? ` — ${exactHitLabel}` : ""}
+						</span>
+					) : (
+						<Button
+							type="button"
+							variant="outlineGrey"
+							className={cn(
+								"w-full rounded-md px-5 py-2 text-xs font-medium transition-colors",
+								"group-hover:border-[#009640] group-hover:bg-[#009640] group-hover:text-white",
+								"hover:border-[#005522] hover:bg-[#005522] hover:text-white",
+							)}
+							onClick={openVariantsModal}>
+							→ Se produktvarianter ({product.itemVariantCount || 0})
+						</Button>
+					)}
 				</div>
 			</div>
 			<Modal

@@ -2,13 +2,14 @@ export interface IProductSearch {
 	itemVariantCount: number;
 	productName: string;
 	productNumber: string;
+	itemNumber?: string | null;
 	thumbnail: string;
+	itemName?: string | null;
 	attribute1?: string | null;
 	attribute2?: string | null;
 	redirect?: string | null;
 	redirectType?: string | null;
 	ranking?: number | null;
-	// Not returned by /proxy/search today — kept optional in case BE re-adds it.
 	inStock?: boolean;
 }
 
@@ -18,6 +19,7 @@ export const VARIANT_REDIRECT_TYPES = new Set([
 	"gtin",
 	"skf",
 	"supplier",
+	"name",
 ]);
 
 export type ISuggestions = string;
@@ -46,6 +48,7 @@ export interface SearchResponse {
 	suggestions: ISuggestions[];
 	productRes: IProductSearch[];
 	categories: SearchCategory[];
+	numberOfHits?: number;
 }
 
 export interface PriceResponse {

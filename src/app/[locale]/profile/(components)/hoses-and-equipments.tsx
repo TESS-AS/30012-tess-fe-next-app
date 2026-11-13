@@ -126,8 +126,12 @@ export function HosesAndEquipments({
 	const S1_CODE_1930_JOHAN_CASTBERG = "1958795";
 	const S1_CODE_1755_GRANE = "2070299";
 	const S1_CODE_1170_HEIDRUN_A = "1292728";
+	const S1_CODE_1149_HEIDRUN_B = "1328371";
 	const S1_CODE_1140_SLEIPNER = "1291571";
 	const S1_CODE_1901_JOHAN_SVERDRUP = "1405630";
+	const S1_CODE_1100_STATFJORD_A = "1953155";
+	const S1_CODE_1101_STATFJORD_B = "2077757";
+	const S1_CODE_1102_STATFJORD_C = "1937611";
 
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
 	const [supportOpen, setSupportOpen] = useState(false);
@@ -1233,8 +1237,12 @@ export function HosesAndEquipments({
 							s1.S1Code === S1_CODE_1930_JOHAN_CASTBERG ||
 							s1.S1Code === S1_CODE_1755_GRANE ||
 							s1.S1Code === S1_CODE_1170_HEIDRUN_A ||
+							s1.S1Code === S1_CODE_1149_HEIDRUN_B ||
 							s1.S1Code === S1_CODE_1140_SLEIPNER ||
-							s1.S1Code === S1_CODE_1901_JOHAN_SVERDRUP,
+							s1.S1Code === S1_CODE_1901_JOHAN_SVERDRUP ||
+							s1.S1Code === S1_CODE_1100_STATFJORD_A ||
+							s1.S1Code === S1_CODE_1101_STATFJORD_B ||
+							s1.S1Code === S1_CODE_1102_STATFJORD_C,
 					)
 					.sort((a, b) => {
 						const plantA = /^\s*(\d+)/.exec(a.S1Name)?.[1];

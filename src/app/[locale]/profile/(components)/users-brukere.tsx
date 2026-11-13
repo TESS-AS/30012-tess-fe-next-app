@@ -34,7 +34,9 @@ import {
 } from "@/hooks/useGetEditableUsers";
 import { usePunchoutProfile } from "@/hooks/usePunchoutProfile";
 import { useUpdateUserRelations } from "@/hooks/useUpdateUserRelations";
+import { useUpdateUserRole } from "@/hooks/useUpdateUserRole";
 import { isTessEmployeeEmail } from "@/lib/user";
+import type { EditableUserFilters } from "@/services/user.service";
 import { User, BulkEditChanges } from "@/types/user.types";
 import type { AxiosError } from "axios";
 import {
@@ -47,14 +49,22 @@ import {
 	UserPen,
 	Wallet,
 	Loader2,
+	ChevronDown,
+	Columns3,
+	ArrowDown,
+	ArrowUp,
+	ArrowUpDown,
+	UserPlus,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
+import { AddContactPopover } from "./add-contact-popover";
 import { AddUserModal } from "./add-user-modal";
 import { BulkEditConfirmationModal } from "./bulk-edit-confirmation-modal";
 import { ConfirmChangesModal } from "./confirm-changes-modal";
 import { SetBudgetModal } from "./set-budget-modal";
+import { UserAdminColumnFilter } from "./user-admin-column-filter";
 import { ViewUserModal } from "./view-user-modal";
 
 type UserRow = {
@@ -62,10 +72,62 @@ type UserRow = {
 	user: User;
 };
 
+type ToggleableColumnKey =
+	| "role"
+	| "customerAccess"
+	| "catalog"
+	| "warehouse"
+	| "company"
+	| "contacts"
+	| "budget"
+	| "createdAt";
+
+const TOGGLEABLE_COLUMNS: ToggleableColumnKey[] = [
+	"role",
+	"customerAccess",
+	"catalog",
+	"warehouse",
+	"company",
+	"contacts",
+	"budget",
+	"createdAt",
+];
+
+const formatShortDate = (iso: string | null | undefined): string => {
+	if (!iso) return "—";
+	const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+	if (!match) return iso;
+	const [, y, m, d] = match;
+	return `${d}.${m}.${y.slice(2)}`;
+};
+
+const COLUMN_VISIBILITY_STORAGE_KEY = "users-brukere.visibleColumns";
+
+const readStoredVisibleColumns = (): ToggleableColumnKey[] | null => {
+	if (typeof window === "undefined") return null;
+	try {
+		const raw = window.localStorage.getItem(COLUMN_VISIBILITY_STORAGE_KEY);
+		if (!raw) return null;
+		const parsed = JSON.parse(raw);
+		if (!Array.isArray(parsed)) return null;
+		const allowed = new Set<ToggleableColumnKey>(TOGGLEABLE_COLUMNS);
+		const stored = parsed.filter(
+			(k): k is ToggleableColumnKey =>
+				typeof k === "string" && allowed.has(k as ToggleableColumnKey),
+		);
+		const storedSet = new Set(stored);
+		const missingDefaults = TOGGLEABLE_COLUMNS.filter((k) => !storedSet.has(k));
+		return [...stored, ...missingDefaults];
+	} catch {
+		return null;
+	}
+};
+
 const UsersBrukere = () => {
 	const t = useTranslations("UsersBrukere");
 	const tBulk = useTranslations("BulkEditConfirmationModal");
 	const { mutateAsync: updateUserRelations } = useUpdateUserRelations();
+	const { mutateAsync: updateUserRoleMutate } = useUpdateUserRole();
 	const { mutateAsync: deleteUserMutate, isPending: isDeletingUser } =
 		useDeleteUser();
 
@@ -89,6 +151,63 @@ const UsersBrukere = () => {
 	const [currentPage, setCurrentPage] = useState(1);
 	const pageSize = 10;
 
+	const [visibleColumns, setVisibleColumns] =
+		useState<ToggleableColumnKey[]>(TOGGLEABLE_COLUMNS);
+
+	const [columnFilters, setColumnFilters] = useState<EditableUserFilters>({});
+	const [sortCreated, setSortCreated] = useState<
+		"newest" | "oldest" | undefined
+	>(undefined);
+
+	const filtersForRequest = useMemo<EditableUserFilters>(
+		() => ({
+			customerNumbers: columnFilters.customerNumbers,
+			assortmentNumbers: columnFilters.assortmentNumbers,
+			warehouseIds: columnFilters.warehouseIds,
+			companyNumbers: columnFilters.companyNumbers,
+			roles: columnFilters.roles,
+			sortCreated,
+		}),
+		[columnFilters, sortCreated],
+	);
+
+	const toggleCreatedSort = () => {
+		setSortCreated((prev) =>
+			prev === undefined ? "newest" : prev === "newest" ? "oldest" : undefined,
+		);
+		setCurrentPage(1);
+	};
+
+	const setFilterValues = (
+		key: keyof EditableUserFilters,
+		values: string[],
+	) => {
+		setColumnFilters((prev) => ({
+			...prev,
+			[key]: values.length > 0 ? values : undefined,
+		}));
+		setCurrentPage(1);
+	};
+
+	useEffect(() => {
+		const stored = readStoredVisibleColumns();
+		if (stored) setVisibleColumns(stored);
+	}, []);
+
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		window.localStorage.setItem(
+			COLUMN_VISIBILITY_STORAGE_KEY,
+			JSON.stringify(visibleColumns),
+		);
+	}, [visibleColumns]);
+
+	const toggleColumn = (key: ToggleableColumnKey) => {
+		setVisibleColumns((prev) =>
+			prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+		);
+	};
+
 	useEffect(() => {
 		const handler = setTimeout(() => {
 			setDebouncedSearch(searchQuery);
@@ -110,7 +229,8 @@ const UsersBrukere = () => {
 		currentPage,
 		pageSize,
 		!isSearching,
-		profile?.userId?.toString() || "",
+		undefined,
+		filtersForRequest,
 	);
 
 	const {
@@ -123,6 +243,7 @@ const UsersBrukere = () => {
 		pageSize,
 		debouncedSearch,
 		isSearching,
+		filtersForRequest,
 	);
 
 	const users = isSearching ? searchedUsers : editableUsers;
@@ -213,9 +334,21 @@ const UsersBrukere = () => {
 	};
 
 	const canSetBudget =
-		profile?.role === USER_ROLES.SUPERUSER || profile?.role === USER_ROLES.ADMIN;
+		profile?.role === USER_ROLES.SUPERUSER ||
+		profile?.role === USER_ROLES.ADMIN;
 
-	const handleEditClick = (user: User) => {};
+	const isAdmin = profile?.role === USER_ROLES.ADMIN;
+	const isEmployee = profile?.role === USER_ROLES.EMPLOYEE;
+	const canEditUser = (target: User) =>
+		isAdmin ||
+		(isEmployee &&
+			!!profile?.userId &&
+			(target.contactPerson ?? []).some((c) => c.userId === profile.userId));
+	const canDeleteUser = () => isAdmin;
+
+	const handleEditClick = (user: User) => {
+		handleBulkEditClick(user);
+	};
 
 	const handleBulkEditClick = (user?: User) => {
 		if (user) {
@@ -251,6 +384,13 @@ const UsersBrukere = () => {
 					})) ?? [],
 				companies: changes.companies ?? [],
 			});
+			if (changes.role) {
+				await Promise.all(
+					usersToUpdate.map((u) =>
+						updateUserRoleMutate({ userId: u.userId, role: changes.role! }),
+					),
+				);
+			}
 			setPendingBulkChanges(null);
 			setSelectedUsers([]);
 
@@ -339,11 +479,20 @@ const UsersBrukere = () => {
 			);
 		}
 
-		return displayItems.join(", ");
+		const joined = displayItems.join(", ");
+		return (
+			<span
+				className="block max-w-[140px] truncate"
+				title={joined}>
+				{joined}
+			</span>
+		);
 	};
 
-	const columns: Column<UserRow>[] = useMemo(
-		() => [
+	const columns: Column<UserRow>[] = useMemo(() => {
+		const isVisible = (key: ToggleableColumnKey) =>
+			visibleColumns.includes(key);
+		const allColumns: (Column<UserRow> | null)[] = [
 			{
 				key: "select",
 				header: (
@@ -361,127 +510,294 @@ const UsersBrukere = () => {
 						onCheckedChange={() => toggleUserSelection(row.user.email)}
 					/>
 				),
+				thClassName:
+					"sticky left-0 z-20 bg-[#F8F9F8] w-10 min-w-[40px]",
+				tdClassName:
+					"sticky left-0 z-10 bg-white group-hover:bg-[#F0FCF2] w-10 min-w-[40px]",
 			},
 			{
 				key: "name",
 				header: t("columns.name"),
-				cell: (row) =>
-					`${row.user.firstName ?? ""} ${row.user.lastName ?? ""}`.trim(),
-			},
-			{
-				key: "role",
-				header: t("columns.role"),
-				cell: (row) => (
-					<span
-						className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium ${getRoleBadgeClass(row.user.role)}`}>
-						{row.user.role === USER_ROLES.ADMIN && <LockKeyhole size={12} />}
-						{row.user.role === USER_ROLES.SUPERUSER && <UserPen size={12} />}
-						{row.user.role === USER_ROLES.USER && <Eye size={12} />}
-						{row.user.role}
-					</span>
-				),
-			},
-			{
-				key: "customerAccess",
-				header: t("columns.customerAccess"),
-				cell: (row) =>
-					renderTruncatedList(row.user.customerAccess, "customers", row.user),
-			},
-			{
-				key: "catalog",
-				header: t("columns.catalog"),
-				cell: (row) =>
-					renderTruncatedList(row.user.catalog, "catalogs", row.user),
-			},
-			{
-				key: "warehouse",
-				header: t("columns.warehouse"),
-				cell: (row) =>
-					renderTruncatedList(row.user.warehouse, "warehouses", row.user),
-			},
-			{
-				key: "company",
-				header: t("columns.company"),
-				cell: (row) =>
-					renderTruncatedList(row.user.company, "companies", row.user),
-			},
-			{
-				key: "contacts",
-				header: isTessEmployeeEmail(profile?.email)
-					? t("columns.taggedBy")
-					: t("columns.contacts"),
-				cell: (row) =>
-					renderTruncatedList(
-						row.user.contacts?.map((c) => ({ name: c.name, number: c.email })),
-						"contacts",
-						row.user,
-					),
-			},
-			{
-				key: "budget",
-				header: t("columns.budget"),
 				cell: (row) => {
-					const budget = budgetsByUserId.get(row.user.userId);
+					const fullName =
+						`${row.user.firstName ?? ""} ${row.user.lastName ?? ""}`.trim();
+					const email = row.user.email ?? "";
 					return (
-						<BudgetProgress
-							annualAmount={budget?.annualAmount}
-							used={budget?.used}
-						/>
+						<div
+							className="flex max-w-[180px] flex-col"
+							title={email ? `${fullName} — ${email}` : fullName}>
+							<span className="truncate text-[14px] font-medium text-[#0F1912]">
+								{fullName || "—"}
+							</span>
+							{email && (
+								<span className="truncate text-[12px] font-normal text-[#5A615D]">
+									{email}
+								</span>
+							)}
+						</div>
 					);
 				},
 			},
+			isVisible("role")
+				? {
+						key: "role",
+						header: (
+							<span className="inline-flex items-center">
+								{t("columns.role")}
+								<UserAdminColumnFilter
+									type="role"
+									label={t("columns.role")}
+									selected={columnFilters.roles ?? []}
+									onChange={(values) => setFilterValues("roles", values)}
+								/>
+							</span>
+						),
+						cell: (row) => (
+							<span
+								className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium ${getRoleBadgeClass(row.user.role)}`}>
+								{row.user.role === USER_ROLES.ADMIN && (
+									<LockKeyhole size={12} />
+								)}
+								{row.user.role === USER_ROLES.SUPERUSER && (
+									<UserPen size={12} />
+								)}
+								{row.user.role === USER_ROLES.USER && <Eye size={12} />}
+								{row.user.role}
+							</span>
+						),
+					}
+				: null,
+			isVisible("customerAccess")
+				? {
+						key: "customerAccess",
+						header: (
+							<span className="inline-flex items-center">
+								{t("columns.customerAccess")}
+								<UserAdminColumnFilter
+									type="customer"
+									label={t("columns.customerAccess")}
+									selected={columnFilters.customerNumbers ?? []}
+									onChange={(values) =>
+										setFilterValues("customerNumbers", values)
+									}
+								/>
+							</span>
+						),
+						cell: (row) =>
+							renderTruncatedList(
+								row.user.customerAccess,
+								"customers",
+								row.user,
+							),
+					}
+				: null,
+			isVisible("catalog")
+				? {
+						key: "catalog",
+						header: (
+							<span className="inline-flex items-center">
+								{t("columns.catalog")}
+								<UserAdminColumnFilter
+									type="catalog"
+									label={t("columns.catalog")}
+									selected={columnFilters.assortmentNumbers ?? []}
+									onChange={(values) =>
+										setFilterValues("assortmentNumbers", values)
+									}
+								/>
+							</span>
+						),
+						cell: (row) =>
+							renderTruncatedList(row.user.catalog, "catalogs", row.user),
+					}
+				: null,
+			isVisible("warehouse")
+				? {
+						key: "warehouse",
+						header: (
+							<span className="inline-flex items-center">
+								{t("columns.warehouse")}
+								<UserAdminColumnFilter
+									type="warehouse"
+									label={t("columns.warehouse")}
+									selected={columnFilters.warehouseIds ?? []}
+									onChange={(values) =>
+										setFilterValues("warehouseIds", values)
+									}
+								/>
+							</span>
+						),
+						cell: (row) => {
+							const dw = row.user.defaultWarehouse;
+							return dw?.name || dw?.number || "—";
+						},
+					}
+				: null,
+			isVisible("company")
+				? {
+						key: "company",
+						header: (
+							<span className="inline-flex items-center">
+								{t("columns.company")}
+								<UserAdminColumnFilter
+									type="company"
+									label={t("columns.company")}
+									selected={columnFilters.companyNumbers ?? []}
+									onChange={(values) =>
+										setFilterValues("companyNumbers", values)
+									}
+								/>
+							</span>
+						),
+						cell: (row) =>
+							renderTruncatedList(row.user.company, "companies", row.user),
+					}
+				: null,
+			isVisible("contacts")
+				? {
+						key: "contacts",
+						header: isTessEmployeeEmail(profile?.email)
+							? t("columns.taggedBy")
+							: t("columns.contacts"),
+						cell: (row) =>
+							renderTruncatedList(
+								row.user.contactPerson?.map((c) => ({
+									name: c.name,
+									number: c.email,
+								})),
+								"contacts",
+								row.user,
+							),
+					}
+				: null,
+			isVisible("budget")
+				? {
+						key: "budget",
+						header: t("columns.budget"),
+						cell: (row) => {
+							const budget = budgetsByUserId.get(row.user.userId);
+							return (
+								<BudgetProgress
+									annualAmount={budget?.annualAmount}
+									used={budget?.used}
+								/>
+							);
+						},
+					}
+				: null,
+			isVisible("createdAt")
+				? {
+						key: "createdAt",
+						header: (
+							<button
+								type="button"
+								onClick={toggleCreatedSort}
+								className="inline-flex cursor-pointer items-center gap-1 hover:text-[#0F1912]">
+								<span>{t("columns.createdAt")}</span>
+								{sortCreated === "newest" ? (
+									<ArrowDown className="h-3 w-3" />
+								) : sortCreated === "oldest" ? (
+									<ArrowUp className="h-3 w-3" />
+								) : (
+									<ArrowUpDown className="h-3 w-3 text-[#8A8F8C]" />
+								)}
+							</button>
+						),
+						cell: (row) => (
+							<span
+								className="whitespace-nowrap"
+								title={row.user.creationDate ?? undefined}>
+								{formatShortDate(row.user.creationDate)}
+							</span>
+						),
+					}
+				: null,
 			{
 				key: "action",
 				header: t("columns.action"),
+				thClassName:
+					"sticky right-0 z-20 bg-[#F8F9F8] shadow-[inset_1px_0_0_0_#C1C4C2]",
+				tdClassName:
+					"sticky right-0 z-10 bg-white group-hover:bg-[#F0FCF2] shadow-[inset_1px_0_0_0_#C1C4C2]",
 				cell: (row) => (
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button
-								variant="ghost"
-								size="sm"
-								className="h-8 w-8 p-0">
-								<MoreHorizontal className="h-4 w-4" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end">
+					<div className="flex items-center gap-1">
+						{isAdmin && (
+							<AddContactPopover
+								targetUserId={row.user.userId}
+								existingContactIds={(row.user.contactPerson ?? []).map(
+									(c) => c.userId,
+								)}
+								trigger={
+									<Button
+										variant="ghost"
+										size="sm"
+										aria-label={t("actions.addContact")}
+										className="h-8 w-8 p-0">
+										<UserPlus className="h-4 w-4" />
+									</Button>
+								}
+							/>
+						)}
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button
+									variant="ghost"
+									size="sm"
+									className="h-8 w-8 p-0">
+									<MoreHorizontal className="h-4 w-4" />
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="end">
 							<DropdownMenuItem onClick={() => handleViewClick(row.user)}>
 								<Eye className="mr-2 h-4 w-4" />
 								{t("actions.viewDetails")}
 							</DropdownMenuItem>
 							{canSetBudget && (
-								<DropdownMenuItem onClick={() => handleSetBudgetClick(row.user)}>
+								<DropdownMenuItem
+									onClick={() => handleSetBudgetClick(row.user)}>
 									<Wallet className="mr-2 h-4 w-4" />
 									{t("actions.setBudget")}
 								</DropdownMenuItem>
 							)}
-							<DropdownMenuItem onClick={() => handleBulkEditClick(row.user)}>
-								<Edit className="mr-2 h-4 w-4" />
-								{t("actions.editUser")}
-							</DropdownMenuItem>
-							<DropdownMenuItem
-								className="text-red-600"
-								onClick={() => handleDeleteClick(row.user)}>
-								<Trash2 className="mr-2 h-4 w-4" />
-								{t("actions.deleteUser")}
-							</DropdownMenuItem>
+							{canEditUser(row.user) && (
+								<DropdownMenuItem onClick={() => handleBulkEditClick(row.user)}>
+									<Edit className="mr-2 h-4 w-4" />
+									{t("actions.editUser")}
+								</DropdownMenuItem>
+							)}
+							{canDeleteUser() && (
+								<DropdownMenuItem
+									className="text-red-600"
+									onClick={() => handleDeleteClick(row.user)}>
+									<Trash2 className="mr-2 h-4 w-4" />
+									{t("actions.deleteUser")}
+								</DropdownMenuItem>
+							)}
 						</DropdownMenuContent>
 					</DropdownMenu>
+					</div>
 				),
 			},
-		],
-		[
-			handleBulkEditClick,
-			handleDeleteClick,
-			handleViewClick,
-			handleSetBudgetClick,
-			canSetBudget,
-			users,
-			selectedUsers,
-			budgetsByUserId,
-			profile?.email,
-			t,
-		],
-	);
+		];
+		return allColumns.filter((c): c is Column<UserRow> => c !== null);
+	}, [
+		handleBulkEditClick,
+		handleDeleteClick,
+		handleViewClick,
+		handleSetBudgetClick,
+		canSetBudget,
+		isAdmin,
+		isEmployee,
+		profile?.userId,
+		users,
+		selectedUsers,
+		budgetsByUserId,
+		profile?.email,
+		visibleColumns,
+		columnFilters,
+		sortCreated,
+		t,
+	]);
 
 	return (
 		<div className="space-y-6">
@@ -503,6 +819,43 @@ const UsersBrukere = () => {
 						</div>
 
 						<div className="flex gap-3">
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									<Button
+										variant="outline"
+										className="h-9 gap-2 border-[#C1C4C2] bg-white text-[#0F1912]">
+										<Columns3 className="h-4 w-4" />
+										{t("customizeColumns")}
+										<ChevronDown className="h-4 w-4 text-[#5A615D]" />
+									</Button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent
+									align="end"
+									className="w-[240px] p-2">
+									{TOGGLEABLE_COLUMNS.map((key) => {
+										const label =
+											key === "contacts" && isTessEmployeeEmail(profile?.email)
+												? t("columns.taggedBy")
+												: t(`columns.${key}`);
+										const checked = visibleColumns.includes(key);
+										return (
+											<DropdownMenuItem
+												key={key}
+												onSelect={(e) => {
+													e.preventDefault();
+													toggleColumn(key);
+												}}
+												className="cursor-pointer">
+												<Checkbox
+													checked={checked}
+													className="mr-2"
+												/>
+												<span className="text-sm text-[#0F1912]">{label}</span>
+											</DropdownMenuItem>
+										);
+									})}
+								</DropdownMenuContent>
+							</DropdownMenu>
 							<Button
 								variant="greenSolid"
 								className="h-9"
@@ -525,6 +878,7 @@ const UsersBrukere = () => {
 					selectedIds={selectedUsers}
 					selectedRowBgClass="bg-[#E6F7EA]"
 					className="border-t border-[#C1C4C2]"
+					compact
 				/>
 			</div>
 
@@ -552,6 +906,7 @@ const UsersBrukere = () => {
 				removeUser={(user) =>
 					setSelectedUsers((prev) => prev.filter((u) => u !== user.email))
 				}
+				canEditRole={isAdmin}
 			/>
 
 			<ConfirmChangesModal
@@ -600,7 +955,7 @@ const UsersBrukere = () => {
 				{deleteBlockers && deleteBlockers.length > 0 && (
 					<div className="text-sm text-[#0F1912]">
 						<p className="mb-2">{tDelete("blockedIntro")}</p>
-						<ul className="list-disc pl-5 space-y-1">
+						<ul className="list-disc space-y-1 pl-5">
 							{deleteBlockers.map((b) => (
 								<li key={b}>{b}</li>
 							))}

@@ -31,8 +31,6 @@ export function SidebarNav({
 	profile,
 }: SidebarNavProps) {
 	const t = useTranslations("SidebarNav");
-	const isOrderHistoryOnly =
-		profile?.defaultCustomerNumber === SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER;
 	const pathname = usePathname();
 	const [expandedItems, setExpandedItems] = useState<string[]>([]);
 	const [isCollapsed, setIsCollapsed] = useState(
@@ -155,31 +153,6 @@ export function SidebarNav({
 							)}
 						</>
 					)}
-					{/* Equinor punchout: e-handel rail with order history only */}
-					{profile?.defaultCustomerNumber ===
-						SHOW_ONLY_HOSE_MANAGEMENT_CUSTOMER_NUMBER && (
-						<button
-							onClick={() => onModeChange("ehandel")}
-							className={cn(
-								"flex w-[58px] cursor-pointer flex-col items-center gap-1 rounded-md p-0.5 text-[9px] leading-tight font-medium transition-colors",
-							)}>
-							<div
-								className={cn(
-									"flex h-9 w-9 items-center justify-center rounded",
-									activeMode === "ehandel" && "bg-[#DCF7E0]",
-								)}>
-									<Image
-										src={CartSvg}
-										alt={t("myPage")}
-										width={20}
-										height={20}
-										loading="eager"
-										className="h-5 w-5"
-									/>
-								</div>
-							<span className="text-center">{t("myPage")}</span>
-						</button>
-					)}
 				</div>
 				<div
 					className={`relative flex min-w-0 flex-1 flex-col items-end border-l pb-30 ${!isCollapsed ? "pr-2" : ""}`}>
@@ -187,9 +160,7 @@ export function SidebarNav({
 						<div className="flex w-full flex-col">
 							<p className="mt-3.5 ml-3 text-[12px] font-medium tracking-wide uppercase text-[#5A615D]">
 								{activeMode === "ehandel"
-									? isOrderHistoryOnly
-										? t("myPage")
-										: t("eCommerce")
+									? t("eCommerce")
 									: activeMode === "tess-edi"
 										? "TESS EDI"
 										: activeMode === "thm"
@@ -252,7 +223,9 @@ export function SidebarNav({
 															return <IconComp className="h-[18px] w-[18px]" />;
 														})()
 													)}
-													{!isCollapsed && <span>{item.label}</span>}
+													{!isCollapsed && (
+														<span className="text-left">{item.label}</span>
+													)}
 												</div>
 												{!item.subitems && isActive && (
 													<ArrowRight className="h-4 w-4 shrink-0 text-[#1C6D2C]" />
