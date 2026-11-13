@@ -232,7 +232,7 @@ export function ProductItem({
 								<span className="text-sm font-normal text-[#5A615D]">
 									{t("Search.itemNumber", { default: "Varenummer" })}:{" "}
 									<span className="font-semibold text-[#0F1912]">
-										{product.productNumber}
+										{product.itemNumber || product.productNumber}
 									</span>
 								</span>
 								{product.inStock && (
