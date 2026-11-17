@@ -30,8 +30,10 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { USER_ROLES } from "@/constants/userRoles";
-import { useAddProductsToAssortment } from "@/hooks/useAssortmentQueries";
-import { useGetAssortments } from "@/hooks/useGetAssortments";
+import {
+	useAddProductsToAssortment,
+	useGetKsuList,
+} from "@/hooks/useAssortmentQueries";
 import { useGetProfileData } from "@/hooks/useGetProfileData";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -66,12 +68,15 @@ export function AddToKsuCard({
 		profile?.role === USER_ROLES.SUPERUSER;
 
 	const [selected, setSelected] = React.useState("");
-	const { assortments, isLoading } = useGetAssortments(isPrivileged);
+	// Non-admin flavor: user-joined KSUs + TESS catalog, no counts needed here.
+	const { data: ksuList, isLoading } = useGetKsuList({
+		enabled: isPrivileged,
+	});
 	const addMutation = useAddProductsToAssortment();
 
 	if (!isPrivileged) return null;
 
-	const items = (assortments ?? []) as Array<Record<string, any>>;
+	const items = ksuList ?? [];
 	const hasPayload =
 		(productNumbers?.length ?? 0) + (itemNumbers?.length ?? 0) > 0;
 
@@ -104,17 +109,13 @@ export function AddToKsuCard({
 			</SelectTrigger>
 			<SelectContent>
 				{items.map((a) => {
-					const num = a.assortmentNumber as string | undefined;
+					const num = a.assortmentNumber;
 					if (!num) return null;
-					const label =
-						(a.nameNo as string | undefined) ??
-						(a.assortmentName as string | undefined) ??
-						num;
 					return (
 						<SelectItem
 							key={num}
 							value={num}>
-							{label}
+							{a.assortmentName || num}
 						</SelectItem>
 					);
 				})}
