@@ -28,6 +28,38 @@ export async function getCatalogStructure(): Promise<CatalogStructureResponse> {
 	return data;
 }
 
+/** Row shape returned by `GET /assortment/ksu`.
+ *  `categoryCount`, `productCount`, `userCount` are only populated when the
+ *  endpoint is called with `?administrable=true` — otherwise the BE returns
+ *  nulls (the copy-dropdown use case doesn't need them). */
+export interface KsuListRow {
+	assortmentId: number;
+	assortmentNumber: string;
+	assortmentName: string;
+	assortmentDescription?: string | null;
+	type?: string | null;
+	canAdminister: boolean;
+	updatedAt?: string | null;
+	autoIncludeNewProducts?: boolean | null;
+	customerName?: string | null;
+	categoryCount?: number | null;
+	productCount?: number | null;
+	userCount?: number | null;
+}
+
+/** New KSU-scoped list endpoint. Replaces `/assortment` for KSU surfaces:
+ *  - `getKsuList()` → copy dropdown: user-joined KSUs + the catalog, no counts
+ *  - `getKsuList({ administrable: true })` → admin page: only admin-able roots
+ *    with populated categoryCount / productCount / userCount. */
+export async function getKsuList(
+	opts: { administrable?: boolean } = {},
+): Promise<KsuListRow[]> {
+	const { data } = await axiosClient.get<KsuListRow[]>("/assortment/ksu", {
+		params: opts.administrable ? { administrable: true } : {},
+	});
+	return data ?? [];
+}
+
 export interface AssortmentDetail {
 	assortmentNumber: string;
 	assortmentName: string;

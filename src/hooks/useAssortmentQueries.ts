@@ -23,12 +23,14 @@ import {
 	getCatalogStructure,
 	getCustomGroups,
 	getItemsForAssortment,
+	getKsuList,
 	patchAssortment,
 	removeUserFromAssortment,
 	saveCustomGroups,
 	searchUsers,
 	validateExcelImport,
 	type AddProductsToAssortmentPayload,
+	type KsuListRow,
 	type PatchAssortmentBody,
 } from "@/services/assortment.service";
 import type { CustomGroup } from "@/types/assortment.types";
@@ -50,7 +52,26 @@ export const assortmentWizardKeys = {
 		[...assortmentWizardKeys.all, "items", assortmentNumber ?? ""] as const,
 	customGroups: (assortmentNumber: string | null) =>
 		[...assortmentWizardKeys.all, "customGroups", assortmentNumber ?? ""] as const,
+	ksuList: (administrable: boolean) =>
+		[...assortmentWizardKeys.all, "ksuList", administrable] as const,
 };
+
+/** `GET /assortment/ksu` — replaces the old `/assortment` call for KSU
+ *  surfaces. Pass `{ administrable: true }` from the admin page to get real
+ *  category/product/user counts; call with no args for the copy dropdown
+ *  (returns user-joined KSUs + the catalog, counts are null). */
+export function useGetKsuList(
+	opts: { administrable?: boolean; enabled?: boolean } = {},
+) {
+	const administrable = Boolean(opts.administrable);
+	const enabled = opts.enabled ?? true;
+	return useQuery<KsuListRow[]>({
+		queryKey: assortmentWizardKeys.ksuList(administrable),
+		queryFn: () => getKsuList({ administrable }),
+		enabled,
+		staleTime: 60 * 1000,
+	});
+}
 
 /** TESS Katalog 2026 (DEFAULT_SALES_NEW) — static per deploy, cache aggressively. */
 export function useGetCatalogStructure(enabled = true) {

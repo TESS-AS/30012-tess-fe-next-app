@@ -25,8 +25,8 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useGetKsuList } from "@/hooks/useAssortmentQueries";
 import type { AssortmentWizardController } from "@/hooks/useAssortmentWizard";
-import { useGetAssortments } from "@/hooks/useGetAssortments";
 import { Settings2 } from "lucide-react";
 
 import { NameAvailabilityHint } from "./NameAvailabilityHint";
@@ -36,21 +36,13 @@ interface Props {
 	wizard: AssortmentWizardController;
 }
 
-interface AssortmentListItem {
-	assortmentId?: number;
-	assortmentNumber?: string;
-	assortmentName?: string;
-	nameNo?: string;
-	nameEn?: string;
-}
-
 export function KopierBody({ wizard }: Props) {
 	const [drawerOpen, setDrawerOpen] = React.useState(false);
 
-	// Available KSUs for the current user — reused list hook so the sidebar
-	// badge count and this dropdown stay in sync.
-	const { assortments, isLoading: isLoadingAssortments } = useGetAssortments(true);
-	const items = (assortments ?? []) as AssortmentListItem[];
+	// KSUs the user can copy from (user-joined KSUs + the TESS catalog). The
+	// admin-counts flavor is not needed here — this dropdown just needs names.
+	const { data: ksuList, isLoading: isLoadingAssortments } = useGetKsuList();
+	const items = ksuList ?? [];
 
 	const sourceNumber = wizard.formData.sourceAssortmentNumber;
 	const selectedCount = wizard.formData.selectedCategoryNumbers.size;
@@ -75,15 +67,13 @@ export function KopierBody({ wizard }: Props) {
 					</SelectTrigger>
 					<SelectContent>
 						{items.map((a) => {
-							const value = a.assortmentNumber ?? "";
+							const value = a.assortmentNumber;
 							if (!value) return null;
-							const label =
-								a.nameNo || a.assortmentName || value;
 							return (
 								<SelectItem
 									key={value}
 									value={value}>
-									{label}
+									{a.assortmentName || value}
 								</SelectItem>
 							);
 						})}

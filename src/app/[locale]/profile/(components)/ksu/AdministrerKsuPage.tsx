@@ -49,11 +49,11 @@ import {
 	useAddAssortmentUser,
 	useDeleteAssortment,
 	useGetAssortmentDetail,
+	useGetKsuList,
 	useRemoveAssortmentUser,
 	useSearchUsers,
 	useUpdateAssortment,
 } from "@/hooks/useAssortmentQueries";
-import { useGetAssortments } from "@/hooks/useGetAssortments";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { downloadAssortmentExcel } from "@/services/assortment.service";
@@ -79,17 +79,20 @@ interface AssortmentListItem {
 	nameNo?: string;
 	nameEn?: string;
 	assortmentDescription?: string | null;
-	categoryCount?: number;
-	productCount?: number;
-	customerCount?: number;
-	updatedAt?: string;
+	categoryCount?: number | null;
+	productCount?: number | null;
+	customerCount?: number | null;
+	userCount?: number | null;
+	updatedAt?: string | null;
 }
 
 type FilterMode = "alle" | "kunde" | "status";
 
 export function AdministrerKsuPage() {
 	const router = useRouter();
-	const { assortments, isLoading } = useGetAssortments(true);
+	// Admin-only variant → BE returns categoryCount / productCount / userCount
+	// populated. Catalog + non-admin KSUs are excluded by the BE for this flag.
+	const { data: assortments, isLoading } = useGetKsuList({ administrable: true });
 	const [search, setSearch] = React.useState("");
 	const [filterMode, setFilterMode] = React.useState<FilterMode>("alle");
 	const [selectedNumber, setSelectedNumber] = React.useState<string | null>(
@@ -103,18 +106,15 @@ export function AdministrerKsuPage() {
 
 	const rows: AssortmentListItem[] = React.useMemo(
 		() =>
-			(assortments ?? []).map((a: Record<string, any>) => ({
+			(assortments ?? []).map((a) => ({
 				assortmentId: a.assortmentId,
-				assortmentNumber: String(a.assortmentNumber ?? ""),
-				assortmentName: String(
-					a.nameNo ?? a.assortmentName ?? a.assortmentNumber ?? "",
-				),
-				nameNo: a.nameNo,
-				nameEn: a.nameEn,
+				assortmentNumber: a.assortmentNumber,
+				assortmentName: a.assortmentName || a.assortmentNumber,
 				assortmentDescription: a.assortmentDescription,
 				categoryCount: a.categoryCount,
 				productCount: a.productCount,
-				customerCount: a.customerCount,
+				customerCount: a.userCount, // BE's userCount maps to the "Kunder" column label
+				userCount: a.userCount,
 				updatedAt: a.updatedAt,
 			})),
 		[assortments],

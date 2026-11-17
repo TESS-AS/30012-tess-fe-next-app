@@ -178,14 +178,23 @@ export function ExcelBody({ wizard, onCreated, onHandleChange }: Props) {
 	// "Opprett KSU" button can route through it. Clear on unmount so when
 	// the user switches away from Excel, the footer stops thinking it has
 	// an Excel commit to drive.
+	//
+	// handleCommit is held in a ref so the effect doesn't need it as a dep
+	// — otherwise its unstable deps (commitMutation + wizard objects are new
+	// each render) would cause the effect to re-fire every render, which
+	// would setState in the parent and trigger an infinite re-render loop.
+	const handleCommitRef = React.useRef(handleCommit);
+	React.useEffect(() => {
+		handleCommitRef.current = handleCommit;
+	});
 	React.useEffect(() => {
 		onHandleChange?.({
-			commit: handleCommit,
+			commit: () => handleCommitRef.current(),
 			canCommit,
 			isSubmitting: commitMutation.isPending,
 		});
 		return () => onHandleChange?.(null);
-	}, [onHandleChange, handleCommit, canCommit, commitMutation.isPending]);
+	}, [onHandleChange, canCommit, commitMutation.isPending]);
 
 	const assortmentsList = (assortments ?? []) as Array<Record<string, any>>;
 	const existingKatalogList = assortmentsList
