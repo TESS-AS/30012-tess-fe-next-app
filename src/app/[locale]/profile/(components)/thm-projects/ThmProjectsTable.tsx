@@ -43,7 +43,7 @@ interface ThmProjectsTableProps {
 	sortColumn?: string | null;
 	sortDirection?: "asc" | "desc" | null;
 	onSort?: (columnKey: string) => void;
-	scrollMaxHeightClassName?: string;
+	scrollMaxHeight?: number | string;
 }
 
 export function ThmProjectsTable({
@@ -59,7 +59,7 @@ export function ThmProjectsTable({
 	sortColumn = null,
 	sortDirection = null,
 	onSort,
-	scrollMaxHeightClassName,
+	scrollMaxHeight,
 }: ThmProjectsTableProps) {
 	const router = useRouter();
 
@@ -196,7 +196,7 @@ export function ThmProjectsTable({
 			sortDirection={sortDirection}
 			onSort={onSort}
 			noWrap
-			scrollMaxHeightClassName={scrollMaxHeightClassName}
+			scrollMaxHeight={scrollMaxHeight}
 		/>
 	);
 }
