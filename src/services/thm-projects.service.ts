@@ -127,15 +127,14 @@ function groupByWorkOrder(beRows: BeWorkOrder[]): ThmWorkOrder[] {
 		}
 	}
 
-	return Array.from(groups.values()).map(({ rep, count }) => ({
+	return Array.from(groups.values()).map(({ rep }) => ({
 		workOrderNumber: String(rep.workOrderNumber),
 		description: rep.description ?? "",
 		customerNumber: rep.customerNumber ?? "",
 		customerName: rep.customerName ?? "",
 		s1PlantVesselUnit: rep.s1Name ?? "",
 		dateCreated: isoFromBeDate(rep.dateCreated),
-		// Prefer BE-provided count once they ship the aggregated field.
-		numberOfIds: rep.numberOfIds ?? count,
+		numberOfIds: rep.numberOfIds ?? 0,
 		createdBy: rep.createdBy ?? "",
 		assignedTo: rep.assignedTo ?? "",
 		status: mapStatus(rep.status),
