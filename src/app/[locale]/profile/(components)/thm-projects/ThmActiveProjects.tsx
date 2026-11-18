@@ -95,8 +95,8 @@ export function ThmActiveProjects() {
 	const showingRecentCount = visibleRecentlyVisited.length;
 
 	return (
-		<div className="space-y-8">
-			<header className="space-y-2">
+		<div className="space-y-4">
+			<header>
 				<h1 className="text-2xl font-semibold text-[#0F1912]">
 					THM Projects (MSL)
 				</h1>
@@ -163,12 +163,13 @@ export function ThmActiveProjects() {
 				</section>
 			)}
 
-			<section className="space-y-3">
+			<section className="space-y-2">
 				<h2 className="text-base font-semibold text-[#0F1912]">
 					All active projects
 				</h2>
 				<div className="rounded-lg border border-[#C1C4C2] bg-white">
 					<ThmProjectsTable
+						scrollMaxHeightClassName="max-h-[calc(100vh-280px)]"
 						rows={activeProjectsQuery.data?.data ?? []}
 						loading={activeProjectsQuery.isLoading}
 						currentPage={page}
