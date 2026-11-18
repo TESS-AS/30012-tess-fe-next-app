@@ -169,7 +169,7 @@ export function ThmActiveProjects() {
 				</h2>
 				<div className="rounded-lg border border-[#C1C4C2] bg-white">
 					<ThmProjectsTable
-						scrollMaxHeightClassName="max-h-[calc(100vh-360px)]"
+						scrollMaxHeightClassName="max-h-[calc(100vh-471px)]"
 						rows={activeProjectsQuery.data?.data ?? []}
 						loading={activeProjectsQuery.isLoading}
 						currentPage={page}
