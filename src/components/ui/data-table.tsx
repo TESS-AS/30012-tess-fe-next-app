@@ -75,6 +75,11 @@ interface DataTableProps<T> {
 	isRowDisabled?: (item: T) => boolean;
 	noWrap?: boolean;
 	compact?: boolean;
+	/** Cap the scrollable area's height so the horizontal scrollbar stays
+	 *  within the viewport. Pair with something like `max-h-[calc(100vh-280px)]`.
+	 *  When set, the inner wrapper also gets `overflow-y-auto` so rows
+	 *  scroll vertically inside the table instead of pushing the page. */
+	scrollMaxHeightClassName?: string;
 }
 
 export function DataTable<
@@ -112,6 +117,7 @@ export function DataTable<
 	isRowDisabled,
 	noWrap = false,
 	compact = false,
+	scrollMaxHeightClassName,
 }: DataTableProps<T>) {
 	const cellPad = compact ? "px-2 py-2" : "px-3 py-3";
 	const [expandedRows, setExpandedRows] = useState<number[]>([]);
@@ -134,7 +140,12 @@ export function DataTable<
 	return (
 		<div className={className}>
 			<div className="overflow-hidden">
-				<div className="overflow-x-auto">
+				<div
+					className={cn(
+						"overflow-x-auto",
+						scrollMaxHeightClassName && "overflow-y-auto",
+						scrollMaxHeightClassName,
+					)}>
 					<table className="w-full min-w-[800px]">
 						{isLoading ? (
 							<tbody>
@@ -164,7 +175,14 @@ export function DataTable<
 							</tbody>
 						) : (
 							<>
-								<thead className="border-b">
+								<thead
+									className={cn(
+										"border-b",
+										// Keep column headers visible as rows scroll vertically
+										// inside the (optionally capped) scroll container.
+										scrollMaxHeightClassName &&
+											"sticky top-0 z-10 bg-[#F8F9F8]",
+									)}>
 									<tr>
 										{isExpandable && (
 											<th className="w-10 min-w-[40px] border-b border-[#C1C4C2] bg-[#F8F9F8] px-3 py-3"></th>
