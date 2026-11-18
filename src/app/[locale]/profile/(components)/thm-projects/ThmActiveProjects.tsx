@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import {
@@ -94,8 +94,38 @@ export function ThmActiveProjects() {
 
 	const showingRecentCount = visibleRecentlyVisited.length;
 
+	// Keep the active-projects table scroll area capped so the horizontal
+	// scrollbar + pagination stay visible without page-scrolling, no matter
+	// what else is above it (recently-visited visible or not, page size 3/5/10).
+	// We measure the card's top position on every potential layout change and
+	// subtract from the viewport height.
+	const activeCardRef = useRef<HTMLDivElement>(null);
+	const [activeTableMaxHeight, setActiveTableMaxHeight] = useState<
+		number | undefined
+	>(undefined);
+
+	useLayoutEffect(() => {
+		const el = activeCardRef.current;
+		if (!el) return;
+		const PAGINATION_AND_SAFETY = 80; // pagination row (~60) + border + safety
+		const update = () => {
+			const top = el.getBoundingClientRect().top;
+			const h = Math.max(window.innerHeight - top - PAGINATION_AND_SAFETY, 200);
+			setActiveTableMaxHeight(h);
+		};
+		update();
+		const ro = new ResizeObserver(update);
+		ro.observe(document.body);
+		window.addEventListener("resize", update);
+		return () => {
+			ro.disconnect();
+			window.removeEventListener("resize", update);
+		};
+		// Re-run when chrome above the card changes shape.
+	}, [hasRecentlyVisited, recentPageSize, showingRecentCount]);
+
 	return (
-		<div className="space-y-4">
+		<div className="space-y-2">
 			<header>
 				<h1 className="text-2xl font-semibold text-[#0F1912]">
 					THM Projects (MSL)
@@ -167,9 +197,11 @@ export function ThmActiveProjects() {
 				<h2 className="text-base font-semibold text-[#0F1912]">
 					All active projects
 				</h2>
-				<div className="rounded-lg border border-[#C1C4C2] bg-white">
+				<div
+					ref={activeCardRef}
+					className="rounded-lg border border-[#C1C4C2] bg-white">
 					<ThmProjectsTable
-						scrollMaxHeightClassName="max-h-[calc(100vh-471px)]"
+						scrollMaxHeight={activeTableMaxHeight}
 						rows={activeProjectsQuery.data?.data ?? []}
 						loading={activeProjectsQuery.isLoading}
 						currentPage={page}
