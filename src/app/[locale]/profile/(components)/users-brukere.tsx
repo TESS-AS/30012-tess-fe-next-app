@@ -60,7 +60,6 @@ import { useTranslations } from "next-intl";
 import { toast } from "react-toastify";
 
 import { AddContactPopover } from "./add-contact-popover";
-import { AddUserModal } from "./add-user-modal";
 import { BulkEditConfirmationModal } from "./bulk-edit-confirmation-modal";
 import { ConfirmChangesModal } from "./confirm-changes-modal";
 import { SetBudgetModal } from "./set-budget-modal";
@@ -138,7 +137,6 @@ const UsersBrukere = () => {
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [userToDelete, setUserToDelete] = useState<User | null>(null);
 	const [deleteBlockers, setDeleteBlockers] = useState<string[] | null>(null);
-	const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
 	const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 	const [userToView, setUserToView] = useState<User | null>(null);
 	const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
@@ -856,12 +854,6 @@ const UsersBrukere = () => {
 									})}
 								</DropdownMenuContent>
 							</DropdownMenu>
-							<Button
-								variant="greenSolid"
-								className="h-9"
-								onClick={() => setIsAddUserModalOpen(true)}>
-								+ {t("addUser")}
-							</Button>
 						</div>
 					</div>
 				</div>
@@ -921,11 +913,6 @@ const UsersBrukere = () => {
 				open={isSetBudgetModalOpen}
 				onOpenChange={setIsSetBudgetModalOpen}
 				user={userForBudget}
-			/>
-
-			<AddUserModal
-				open={isAddUserModalOpen}
-				onOpenChange={setIsAddUserModalOpen}
 			/>
 
 			<Modal
