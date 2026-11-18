@@ -175,7 +175,14 @@ export function DataTable<
 							</tbody>
 						) : (
 							<>
-								<thead className="border-b">
+								<thead
+									className={cn(
+										"border-b",
+										// Keep column headers visible as rows scroll vertically
+										// inside the (optionally capped) scroll container.
+										scrollMaxHeightClassName &&
+											"sticky top-0 z-10 bg-[#F8F9F8]",
+									)}>
 									<tr>
 										{isExpandable && (
 											<th className="w-10 min-w-[40px] border-b border-[#C1C4C2] bg-[#F8F9F8] px-3 py-3"></th>
