@@ -76,10 +76,11 @@ interface DataTableProps<T> {
 	noWrap?: boolean;
 	compact?: boolean;
 	/** Cap the scrollable area's height so the horizontal scrollbar stays
-	 *  within the viewport. Pair with something like `max-h-[calc(100vh-280px)]`.
-	 *  When set, the inner wrapper also gets `overflow-y-auto` so rows
-	 *  scroll vertically inside the table instead of pushing the page. */
-	scrollMaxHeightClassName?: string;
+	 *  within the viewport. Number → pixels, string → raw CSS length
+	 *  (e.g. `"calc(100vh - 280px)"`). When set, the inner wrapper also
+	 *  gets `overflow-y-auto` and the thead becomes sticky so column
+	 *  headers stay visible as rows scroll. */
+	scrollMaxHeight?: number | string;
 }
 
 export function DataTable<
@@ -117,8 +118,17 @@ export function DataTable<
 	isRowDisabled,
 	noWrap = false,
 	compact = false,
-	scrollMaxHeightClassName,
+	scrollMaxHeight,
 }: DataTableProps<T>) {
+	const hasScrollCap = scrollMaxHeight != null;
+	const scrollWrapperStyle = hasScrollCap
+		? {
+				maxHeight:
+					typeof scrollMaxHeight === "number"
+						? `${scrollMaxHeight}px`
+						: scrollMaxHeight,
+			}
+		: undefined;
 	const cellPad = compact ? "px-2 py-2" : "px-3 py-3";
 	const [expandedRows, setExpandedRows] = useState<number[]>([]);
 	const safeColumns = useMemo(
@@ -143,9 +153,9 @@ export function DataTable<
 				<div
 					className={cn(
 						"overflow-x-auto",
-						scrollMaxHeightClassName && "overflow-y-auto",
-						scrollMaxHeightClassName,
-					)}>
+						hasScrollCap && "overflow-y-auto",
+					)}
+					style={scrollWrapperStyle}>
 					<table className="w-full min-w-[800px]">
 						{isLoading ? (
 							<tbody>
@@ -180,8 +190,7 @@ export function DataTable<
 										"border-b",
 										// Keep column headers visible as rows scroll vertically
 										// inside the (optionally capped) scroll container.
-										scrollMaxHeightClassName &&
-											"sticky top-0 z-10 bg-[#F8F9F8]",
+										hasScrollCap && "sticky top-0 z-10 bg-[#F8F9F8]",
 									)}>
 									<tr>
 										{isExpandable && (
