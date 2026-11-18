@@ -125,7 +125,7 @@ export function ThmActiveProjects() {
 	}, [hasRecentlyVisited, recentPageSize, showingRecentCount]);
 
 	return (
-		<div className="space-y-4">
+		<div className="space-y-2">
 			<header>
 				<h1 className="text-2xl font-semibold text-[#0F1912]">
 					THM Projects (MSL)
