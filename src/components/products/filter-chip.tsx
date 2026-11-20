@@ -29,12 +29,11 @@ export const FilterChip = memo(function FilterChip({
 	onRemove,
 }: FilterChipProps) {
 	return (
-		<div className="bg-primary/10 flex items-center gap-1 rounded-md px-3 py-1 text-sm">
+		<div className="flex items-center gap-1 rounded-full border border-[#009640] bg-[#F0FAF4] px-2 py-0.5 text-[11px] leading-[16.5px] font-medium text-[#005222]">
 			<TooltipProvider>
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<div className="flex items-center gap-1">
-							<span className="text-md max-w-[100px] truncate">{label}:</span>
 							<span className="max-w-[100px] truncate">{value}</span>
 						</div>
 					</TooltipTrigger>
@@ -49,8 +48,11 @@ export const FilterChip = memo(function FilterChip({
 				type="button"
 				onClick={onRemove}
 				aria-label={`Fjern ${label}: ${value}`}
-				className="hover:bg-primary/20 ml-1 rounded-md p-0.5">
-				<X className="h-3 w-3" />
+				className="ml-0.5 rounded-sm hover:bg-[#009640]/10">
+				<X
+					className="h-2.5 w-2.5"
+					strokeWidth={3}
+				/>
 			</button>
 		</div>
 	);

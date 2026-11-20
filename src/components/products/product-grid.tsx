@@ -14,14 +14,14 @@ import {
 	FilterValues,
 	SliderValues,
 } from "@/types/filter.types";
-import { LayoutGrid, AlignJustify, X } from "lucide-react";
+import { LayoutGrid, AlignJustify } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { FilterChip } from "./filter-chip";
 import { ProductCard } from "./product-card";
-import { Button } from "../ui/button";
+import { SearchResultBanner } from "./search-result-banner";
 import { Filter } from "../ui/filter";
 
 interface ProductGridProps {
@@ -54,6 +54,8 @@ export function ProductGrid({
 	const loadMoreTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const {
 		products,
+		totalPages,
+		pageSize,
 		isLoading,
 		isFetchingNextPage,
 		hasMore,
@@ -197,9 +199,25 @@ export function ProductGrid({
 		};
 	}, [hasMore, isLoading, isFetchingNextPage, loadMore]);
 
+	// Approximate total product count for the results banner. Exact when the
+	// last page is already loaded (short pages mean products.length is the
+	// true count), otherwise best-effort = totalPages * pageSize.
+	const approxTotal =
+		!hasMore && products.length > 0
+			? products.length
+			: totalPages > 0
+				? totalPages * pageSize
+				: products.length;
+
 	return (
-		<div className="flex flex-col gap-8 lg:flex-row">
-			<aside className="w-full pr-4 lg:w-1/4">
+		<>
+			<SearchResultBanner
+				query={query}
+				categoryName={categoryName}
+				count={approxTotal}
+			/>
+			<div className="flex flex-col gap-8 pt-6 lg:flex-row">
+				<aside className="w-full pr-4 lg:w-1/4">
 				<Filter
 					filters={filtersState}
 					variant="default"
@@ -225,54 +243,19 @@ export function ProductGrid({
 			</aside>
 
 			<div className="flex-1">
-				<div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-					<h2 className="text-2xl font-semibold">{query}</h2>
-
-					<div className="flex shrink-0 items-center gap-2">
-						<Button
-							variant="outline"
-							onClick={() => setViewLayout("list")}
-							size="icon"
-							className={cn(
-								"h-8 w-8 border",
-								viewLayout === "list"
-									? "border-neutral-800"
-									: "border-neutral-300",
-							)}>
-							<AlignJustify
-								className={cn(
-									"h-4 w-4",
-									viewLayout === "list"
-										? "text-neutral-800"
-										: "text-neutral-500",
-								)}
-							/>
-						</Button>
-
-						<Button
-							variant="outline"
-							onClick={() => setViewLayout("grid")}
-							size="icon"
-							className={cn(
-								"h-8 w-8 border",
-								viewLayout === "grid"
-									? "border-neutral-800"
-									: "border-neutral-300",
-							)}>
-							<LayoutGrid
-								className={cn(
-									"h-4 w-4",
-									viewLayout === "grid"
-										? "text-neutral-800"
-										: "text-neutral-500",
-								)}
-							/>
-						</Button>
-					</div>
-				</div>
-
-				<div className="mb-4 flex items-center justify-between align-middle">
-					<div className="flex flex-wrap gap-2">
+				<div className="mb-4 flex items-start gap-4">
+					<div className="flex w-[85%] items-start gap-3">
+						<span className="shrink-0 pt-[3px] text-[13px] font-medium whitespace-nowrap text-[#0F1912]">
+							{t("Search.productCount", {
+								count:
+									!hasMore && products.length > 0
+										? products.length
+										: totalPages > 0
+											? totalPages * pageSize
+											: products.length,
+							})}
+						</span>
+						<div className="flex min-w-0 flex-wrap items-center gap-2">
 						{/* PBI2940 multi-select category chips — driven by
 						 * `selectedCategoryChips` from the Set-based selection.
 						 * Rendered first so they appear ahead of attribute
@@ -321,6 +304,40 @@ export function ProductGrid({
 									/>
 								));
 						})}
+						</div>
+					</div>
+					<div className="flex w-[15%] shrink-0 items-center justify-end">
+					<div
+						role="group"
+						aria-label="View layout"
+						className="flex shrink-0 items-center overflow-hidden rounded-md border border-[#C1C4C2]">
+						<button
+							type="button"
+							onClick={() => setViewLayout("list")}
+							aria-label="List view"
+							aria-pressed={viewLayout === "list"}
+							className={cn(
+								"flex h-7 w-9 items-center justify-center transition-colors",
+								viewLayout === "list"
+									? "bg-[#009640] text-white hover:bg-[#005222]"
+									: "bg-white text-[#009640] hover:bg-[#F0FCF2]",
+							)}>
+							<AlignJustify className="h-3.5 w-3.5" />
+						</button>
+						<button
+							type="button"
+							onClick={() => setViewLayout("grid")}
+							aria-label="Grid view"
+							aria-pressed={viewLayout === "grid"}
+							className={cn(
+								"flex h-7 w-9 items-center justify-center transition-colors",
+								viewLayout === "grid"
+									? "bg-[#009640] text-white hover:bg-[#005222]"
+									: "bg-white text-[#009640] hover:bg-[#F0FCF2]",
+							)}>
+							<LayoutGrid className="h-3.5 w-3.5" />
+						</button>
+					</div>
 					</div>
 				</div>
 				<div
@@ -348,11 +365,20 @@ export function ProductGrid({
 						</>
 					) : products.length > 0 ? (
 						products.map((product, idx) => {
-							const { attributes } = product as any;
+							const raw = product as any;
+							const { attributes } = raw;
 							const searchAttribute1 =
 								product.searchAttribute1 || attributes?.searchAttribute1;
 							const searchAttribute2 =
 								product.searchAttribute2 || attributes?.searchAttribute2;
+							// Optional fields BE may return on /searchList rows but
+							// aren't on IProduct yet — read defensively; the card
+							// hides the related UI when absent.
+							const productClass: string | undefined =
+								raw.productClass ?? raw.vareklasse;
+							const inStock: boolean | undefined = raw.inStock;
+							const itemVariantCount: number | undefined =
+								raw.itemVariantCount;
 							const productPrice = productPrices[product.productNumber];
 							// Show loading skeleton if we're fetching and don't have the price yet
 							const isPriceLoading =
@@ -411,6 +437,10 @@ export function ProductGrid({
 										searchAttribute2={searchAttribute2}
 										price={productPrice}
 										isPriceLoading={isPriceLoading}
+										productClass={productClass}
+										inStock={inStock}
+										itemVariantCount={itemVariantCount}
+										searchQuery={query}
 										variant={variant}
 										viewLayout={viewLayout}
 										priority={idx < 4}
@@ -460,5 +490,6 @@ export function ProductGrid({
 				</div>
 			</div>
 		</div>
+		</>
 	);
 }

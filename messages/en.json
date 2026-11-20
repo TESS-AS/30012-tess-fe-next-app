@@ -95,6 +95,7 @@
 		"notFound": "TESS - Teknisk Faghandel | Netthandel",
 		"backToPrevious": "Back",
 		"seeAllVariants": "See all variants",
+		"seeProductVariants": "See product variants",
 		"copied": "Copied!",
 		"productDescription": "Product Description",
 		"selectSize": "Select size",
@@ -162,7 +163,8 @@
 		"hoseManagement": "Hose Management",
 		"faq": "FAQ",
 		"hosesAndPipes": "Hoses & pipes",
-		"hoseConfigurator": "Hose configurator"
+		"hoseConfigurator": "Hose configurator",
+		"searchResult": "Search result"
 	},
 	"HoseConfigurator": {
 		"steps": {
@@ -400,7 +402,8 @@
 		"orderDetail": "Order Details"
 	},
 	"Common": {
-		"reset": "Nullstill",
+		"filters": "Filters",
+		"reset": "Reset",
 		"error": {
 			"title": "Noe gikk galt!",
 			"tryAgain": "Pr\u00f8v igjen",
@@ -410,11 +413,13 @@
 		"sort": "Sorter",
 		"search": "Search",
 		"searchProducts": "Describe what you need ...",
-		"searchAttributes": "Search for attributes",
+		"searchAttributes": "Search for filter ...",
 		"showMore": "Show more",
 		"showLess": "Show less",
-		"attributes": "Attributes",
-		"selectAll": "Select all"
+		"attributes": "More filters (attributes)",
+		"selectAll": "Select all",
+		"itemNumber": "Item number",
+		"itemName": "Item name"
 	},
 	"Search": {
 		"categories": "Search in categories",
@@ -451,7 +456,14 @@
 				"description": "Our experts will help you find the right products for your needs.",
 				"email": "Email: netthandel@tess.no"
 			}
-		}
+		},
+		"resultsBanner": {
+			"forQuery": "<b>Search results for</b> <g>«{query}»</g> · <b>{count}</b> products",
+			"forQueryWithFamilies": "<b>Search results for</b> <g>«{query}»</g> · <b>{count}</b> products in <b>{families}</b> product families",
+			"forCategory": "<b>{name}</b> · <b>{count}</b> products",
+			"forCategoryWithFamilies": "<b>{name}</b> · <b>{count}</b> products in <b>{families}</b> product families"
+		},
+		"productCount": "{count} products"
 	},
 	"Seo": {
 		"defaultTitle": "TESS - Teknisk Faghandel | Netthandel",
