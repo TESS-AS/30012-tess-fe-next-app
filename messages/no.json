@@ -96,6 +96,7 @@
 		"notFound": "TESS - Teknisk Faghandel | Netthandel",
 		"backToPrevious": "Tilbake",
 		"seeAllVariants": "Se alle varianter",
+		"seeProductVariants": "Se produktvarianter",
 		"copied": "Kopiert!",
 		"productDescription": "Produktbeskrivelse",
 		"selectSize": "Velg størrelse",
@@ -164,7 +165,8 @@
 		"hoseManagement": "Slangestyring",
 		"faq": "FAQ",
 		"hosesAndPipes": "Slanger & rør",
-		"hoseConfigurator": "Slangekonfigurator"
+		"hoseConfigurator": "Slangekonfigurator",
+		"searchResult": "Søkeresultat"
 	},
 	"HoseConfigurator": {
 		"steps": {
@@ -402,6 +404,7 @@
 		"orderDetail": "Ordredetaljer"
 	},
 	"Common": {
+		"filters": "Filtre",
 		"reset": "Nullstill",
 		"error": {
 			"title": "Noe gikk galt!",
@@ -412,11 +415,13 @@
 		"sort": "Sorter",
 		"search": "Søk",
 		"searchProducts": "Beskriv hva du trenger ...",
-		"searchAttributes": "Søk etter attributter",
-		"attributes": "Attributter",
+		"searchAttributes": "Søk etter filter ...",
+		"attributes": "Flere filtre (attributter)",
 		"showMore": "Vis mer",
 		"showLess": "Vis mindre",
-		"selectAll": "Velg alle"
+		"selectAll": "Velg alle",
+		"itemNumber": "Varenummer",
+		"itemName": "Varenavn"
 	},
 	"CustomerSwitcher": {
 		"title": "Bytt handlekonto",
@@ -492,7 +497,14 @@
 				"email": "E-post: tess@tess.no"
 			}
 		},
-		"seeFullCatalog": "Se hele Tess-katalogen"
+		"seeFullCatalog": "Se hele Tess-katalogen",
+		"resultsBanner": {
+			"forQuery": "<b>Søkeresultater for</b> <g>«{query}»</g> · <b>{count}</b> produkter",
+			"forQueryWithFamilies": "<b>Søkeresultater for</b> <g>«{query}»</g> · <b>{count}</b> produkter i <b>{families}</b> produktfamilier",
+			"forCategory": "<b>{name}</b> · <b>{count}</b> produkter",
+			"forCategoryWithFamilies": "<b>{name}</b> · <b>{count}</b> produkter i <b>{families}</b> produktfamilier"
+		},
+		"productCount": "{count} produkter"
 	},
 	"Seo": {
 		"defaultTitle": "TESS - Teknisk Faghandel | Netthandel",

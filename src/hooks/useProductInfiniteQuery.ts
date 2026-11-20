@@ -20,6 +20,7 @@ interface ProductPage {
 	products: IProduct[];
 	hasMore: boolean;
 	page: number;
+	totalPages: number;
 	/** PBI2940: BE-inferred categories with a `flag` marking the ones that
 	 *  are pre-filtered/active for the current search. Only populated on the
 	 *  first page since categories are query-scoped, not page-scoped. */
@@ -61,6 +62,7 @@ export function useProductInfiniteQuery({
 				products: response.product || [],
 				hasMore: (response.product?.length || 0) === pageSize,
 				page: pageParam,
+				totalPages: response.totalPages ?? 0,
 				categories: response.categories,
 			};
 		},
@@ -91,9 +93,18 @@ export function useProductInfiniteQuery({
 	const categories: InferredCategory[] =
 		infiniteQuery.data?.pages[0]?.categories ?? [];
 
+	// First-page totalPages is authoritative for the current query; later
+	// pages echo the same value. Approximate total product families =
+	// totalPages * pageSize (accurate within one page since the last page
+	// may be short). Consumers who need an exact family count must wait for
+	// BE to expose one on /searchList.
+	const totalPages = infiniteQuery.data?.pages[0]?.totalPages ?? 0;
+
 	return {
 		products: uniqueProducts,
 		categories,
+		totalPages,
+		pageSize,
 		isLoading: infiniteQuery.isLoading && !infiniteQuery.data,
 		isFetching: infiniteQuery.isFetching,
 		isFetchingNextPage: infiniteQuery.isFetchingNextPage,

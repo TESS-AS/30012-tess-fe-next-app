@@ -117,22 +117,26 @@ export default function CategoryNavigationMenu({
 	const isTight = useChildrenOverflow(ulRef, slugsKey);
 
 	// Persistently highlight the top-level nav item that owns the current
-	// product page. Two sources, in order:
+	// listing/product context. Sources, in order:
 	//   1. Store value set by the product page from the fetched category tree.
 	//      Needed for `/produkt/:id` URLs rewritten with __default segments.
-	//   2. URL walk — for products reached via `/[category]/[subcategory]/...`,
-	//      match any URL segment against each top-level's descendant slugs.
+	//   2. URL walk — match any URL category/subcategory/segment slug against
+	//      each top-level's descendant tree. Applies to product AND listing
+	//      routes, so `/ror`, `/slanger/ror`, `/ror?query=...` all highlight.
 	const params = useParams();
 	const isProductPage = typeof params?.product === "string";
 	const storeTopLevelSlug = useNavMenuStore((s) => s.productTopLevelSlug);
-	const urlSegmentSlugs = isProductPage
-		? [params?.category, params?.subcategory, params?.segment]
-				.filter((s): s is string => typeof s === "string" && s !== "__default")
-		: [];
+	const urlSegmentSlugs = [
+		params?.category,
+		params?.subcategory,
+		params?.segment,
+	].filter((s): s is string => typeof s === "string" && s !== "__default");
 	const currentTopLevelSlug = isProductPage
 		? storeTopLevelSlug ??
 			findTopLevelSlugForUrl(visibleCategories ?? [], urlSegmentSlugs)
-		: null;
+		: urlSegmentSlugs.length > 0
+			? findTopLevelSlugForUrl(visibleCategories ?? [], urlSegmentSlugs)
+			: null;
 
 	return (
 		<nav

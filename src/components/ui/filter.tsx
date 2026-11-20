@@ -21,10 +21,9 @@ import type {
 	FilterDefinition,
 } from "@/types/filter.types";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Search, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { Button } from "./button";
 import { Checkbox } from "./checkbox";
 import { SliderFilterInput } from "./slider-filter-input";
 
@@ -75,7 +74,7 @@ interface FilterProps
 }
 
 const filterVariants = cva(
-	"flex flex-col gap-4 rounded-lg border bg-background p-6 shadow-sm",
+	"flex flex-col gap-4 rounded-lg border bg-background p-6",
 	{
 		variants: {
 			variant: {
@@ -128,6 +127,7 @@ export const Filter = React.forwardRef<
 
 		const [searchTerm, setSearchTerm] = React.useState("");
 		const [showAllCategories, setShowAllCategories] = React.useState(false);
+		const [categoryOpen, setCategoryOpen] = React.useState(true);
 		const [selectedCategory, setSelectedCategory] = React.useState<
 			string | null
 		>(null);
@@ -431,11 +431,6 @@ export const Filter = React.forwardRef<
 			onFilterChange([], []);
 		}, [onFilterChange]);
 
-		const selectedFilterCount = Object.values(selectedFilters).reduce(
-			(acc, values) => acc + values.length,
-			0,
-		);
-
 		const [expandedFilters, setExpandedFilters] = React.useState<
 			Record<string, boolean>
 		>({});
@@ -507,6 +502,17 @@ export const Filter = React.forwardRef<
 					"space-y-4",
 				)}
 				{...props}>
+				<div className="flex items-center justify-between">
+					<h2 className="text-[13px] leading-[19.5px] font-bold text-[#0F1912]">
+						{t("Common.filters")}
+					</h2>
+					<button
+						type="button"
+						onClick={resetFilters}
+						className="text-center text-[11px] leading-[16.5px] font-medium text-[#009640] hover:underline">
+						{t("Common.reset")}
+					</button>
+				</div>
 				{Array.isArray(categoryFilters) &&
 					categoryFilters.length > 0 &&
 					// Multi-select (Set-based) shows the full list always; legacy
@@ -517,71 +523,91 @@ export const Filter = React.forwardRef<
 						categoryFilters.some(
 							(cf) => getCategoryId(cf) === selectedCategory,
 						)) && (
-						<div className="space-y-2">
-							<h3 className="text-md font-semibold">Kategori</h3>
-							<div className="rounded-lg bg-white px-4 py-3 shadow-md">
-								<ul className="space-y-1 text-sm">
-									{(showAllCategories
-										? categoryFilters
-										: categoryFilters.slice(0, 5)
-									)
-										.filter(
-											(cf) =>
-												// Legacy single-select: hide non-selected rows
-												// once a pick is made. Multi-select: show all.
-												onToggleCategory ||
-												!selectedCategory ||
-												selectedCategory === getCategoryId(cf),
+						<div className="-mt-4 space-y-2">
+							<button
+								type="button"
+								onClick={() => setCategoryOpen((prev) => !prev)}
+								aria-expanded={categoryOpen}
+								className="flex w-full items-center justify-between py-1 text-left">
+								<h3 className="text-[13px] leading-[19.5px] font-semibold text-[#0F1912]">
+									Kategori
+								</h3>
+								{categoryOpen ? (
+									<ChevronUp className="h-4 w-4 text-[#0F1912]" />
+								) : (
+									<ChevronDown className="h-4 w-4 text-[#0F1912]" />
+								)}
+							</button>
+							{categoryOpen && (
+								<div>
+									<ul className="space-y-2 text-sm">
+										{(showAllCategories
+											? categoryFilters
+											: categoryFilters.slice(0, 5)
 										)
-										.map((cf) => {
-											const id = getCategoryId(cf);
-											// PBI2940 multi-select: checkbox reads from the Set
-											// prop. Legacy single-select falls back to the local
-											// `selectedCategory` state seeded from `flag: true`.
-											const isChecked = selectedCategoryIds
-												? selectedCategoryIds.has(id)
-												: selectedCategory === id ||
-													(!selectedCategory && cf.flag === true);
-											return (
-												<li
-													key={id}
-													className="mb-4 flex items-center space-x-2">
-													<Checkbox
-														id={`category-${id}`}
-														checked={isChecked}
-														onCheckedChange={() => handleCategorySelect(cf)}
-													/>
-													<label
-														htmlFor={`category-${id}`}
-														className="cursor-pointer text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-														<span className="text-green-600 hover:underline">
-															{cf.nameNo}
-														</span>{" "}
-														<span className="text-muted-foreground">
-															({cf.productCount})
-														</span>
-													</label>
-												</li>
-											);
-										})}
-								</ul>
+											.filter(
+												(cf) =>
+													// Legacy single-select: hide non-selected rows
+													// once a pick is made. Multi-select: show all.
+													onToggleCategory ||
+													!selectedCategory ||
+													selectedCategory === getCategoryId(cf),
+											)
+											.map((cf) => {
+												const id = getCategoryId(cf);
+												// PBI2940 multi-select: checkbox reads from the Set
+												// prop. Legacy single-select falls back to the local
+												// `selectedCategory` state seeded from `flag: true`.
+												const isChecked = selectedCategoryIds
+													? selectedCategoryIds.has(id)
+													: selectedCategory === id ||
+														(!selectedCategory && cf.flag === true);
+												return (
+													<li
+														key={id}
+														className="flex items-center space-x-2">
+														<Checkbox
+															id={`category-${id}`}
+															checked={isChecked}
+															onCheckedChange={() => handleCategorySelect(cf)}
+														/>
+														<label
+															htmlFor={`category-${id}`}
+															className="flex w-full cursor-pointer items-center justify-between gap-2 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+															<span
+																className={cn(
+																	"text-[12px] leading-[16.5px] font-normal",
+																	isChecked
+																		? "text-[#009640]"
+																		: "text-[#5A615D]",
+																)}>
+																{cf.nameNo}
+															</span>
+															<span className="text-[11px] leading-[16.5px] font-normal text-[#8A8F8C]">
+																({cf.productCount})
+															</span>
+														</label>
+													</li>
+												);
+											})}
+									</ul>
 
-								{categoryFilters.length > 5 &&
-									(onToggleCategory || !selectedCategory) && (
-										<Button
-											variant="link"
-											size="sm"
-											onClick={() => setShowAllCategories((prev) => !prev)}
-											className="text-primary px-0 text-sm hover:underline">
-											{showAllCategories ? "Vis mindre" : "Vis mer"}
-										</Button>
-									)}
-							</div>
+									{categoryFilters.length > 5 &&
+										(onToggleCategory || !selectedCategory) && (
+											<button
+												type="button"
+												onClick={() => setShowAllCategories((prev) => !prev)}
+												className="text-[12px] leading-[16.5px] font-normal text-[#5A615D] underline underline-offset-2">
+												{showAllCategories ? "Vis mindre" : "Vis mer"}
+											</button>
+										)}
+								</div>
+							)}
 						</div>
 					)}
 				{Array.isArray(categoryFilters) && categoryFilters.length === 0 && (
 					<div className="space-y-2">
-						<h3 className="text-md font-semibold">Kategori</h3>
+						<h3 className="text-[13px] leading-[19.5px] font-semibold text-[#0F1912]">Kategori</h3>
 						<div className="rounded-lg bg-white px-4 py-3 shadow-md">
 							<div className="space-y-2">
 								{[0, 1, 2].map((i) => (
@@ -596,34 +622,25 @@ export const Filter = React.forwardRef<
 						</div>
 					</div>
 				)}
-				<h3 className="text-md mb-[-10px] font-semibold">
-					{t("Common.attributes")}
-				</h3>
+				<div className="-mt-3 h-px bg-[#E8EAE9]" />
 
-				<div className="relative">
-					<Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
-					<Input
-						type="text"
-						placeholder={t("Common.searchAttributes")}
-						value={searchTerm}
-						onChange={(e) => setSearchTerm(e.target.value)}
-						className="pl-8"
-					/>
+				<div className="-mt-3 space-y-2">
+					<h3 className="text-[14px] leading-[150%] font-medium text-[#0F1912]">
+						{t("Common.attributes")}
+					</h3>
+					<div className="relative">
+						<Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
+						<Input
+							type="text"
+							placeholder={t("Common.searchAttributes")}
+							value={searchTerm}
+							onChange={(e) => setSearchTerm(e.target.value)}
+							className="border-[#8A8F8C] bg-[#F8F9F8] pl-8 placeholder:text-[#5A615D]"
+						/>
+					</div>
 				</div>
 
-				{selectedFilterCount > 0 && (
-					<div className="mb-4 flex justify-end">
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={resetFilters}>
-							<X className="mr-2 h-4 w-4" />
-							{t("Common.reset")}
-						</Button>
-					</div>
-				)}
-
-				<div className="pr-2">
+				<div className="-mt-6 pr-2">
 					{filteredCategories.length === 0 ? (
 						// Loading skeletons while filters are being fetched
 						<div className="space-y-4">
@@ -660,10 +677,10 @@ export const Filter = React.forwardRef<
 											key={filter.attributeIdentifier}
 											value={filter.attributeIdentifier}
 											className="border-b">
-											<AccordionTrigger className="text-md font-semibold hover:no-underline">
+											<AccordionTrigger className="text-[13px] leading-[19.5px] font-semibold text-[#0F1912] hover:no-underline">
 												{filter.key}
 											</AccordionTrigger>
-											<AccordionContent className="pt-2">
+											<AccordionContent className="pt-0">
 												{filter.slider ? (
 													<SliderFilterInput
 														filterKey={filter.attributeIdentifier}
@@ -680,14 +697,14 @@ export const Filter = React.forwardRef<
 														debounceTimerRef={debounceTimerRef}
 													/>
 												) : filter.values.length > 0 ? (
-													<div className="space-y-2 pl-2">
+													<div className="space-y-3">
 														{(expandedFilters[filter.attributeIdentifier]
 															? filter.values
 															: filter.values.slice(0, 5)
 														).map((child) => (
 															<div
 																key={child.value}
-																className="mb-5 flex items-center justify-between space-x-2 font-normal"
+																className="flex items-center justify-between space-x-2 font-normal"
 																onClick={(e) => e.stopPropagation()}>
 																<Checkbox
 																	id={`${filter.attributeIdentifier}-${child.value}`}
@@ -705,18 +722,27 @@ export const Filter = React.forwardRef<
 																/>
 																<label
 																	htmlFor={`${filter.attributeIdentifier}-${child.value}`}
-																	className="flex w-full cursor-pointer justify-between text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-																	<span>{child.value}</span>
-																	<span className="text-muted-foreground">
+																	className="flex w-full cursor-pointer justify-between peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+																	<span
+																		className={cn(
+																			"text-[12px] leading-[16.5px] font-normal",
+																			localSelectedFilters[
+																				filter.attributeIdentifier
+																			]?.includes(child.value)
+																				? "text-[#009640]"
+																				: "text-[#5A615D]",
+																		)}>
+																		{child.value}
+																	</span>
+																	<span className="text-[12px] leading-[16.5px] font-normal text-[#5A615D]">
 																		{child.productcount}
 																	</span>
 																</label>
 															</div>
 														))}
 														{filter.values.length > 5 && (
-															<Button
-																variant="link"
-																size="sm"
+															<button
+																type="button"
 																onClick={() =>
 																	setExpandedFilters((prev) => ({
 																		...prev,
@@ -724,11 +750,11 @@ export const Filter = React.forwardRef<
 																			!prev[filter.attributeIdentifier],
 																	}))
 																}
-																className="text-primary px-0 text-sm hover:underline">
+																className="text-[12px] leading-[16.5px] font-normal text-[#5A615D] underline underline-offset-2">
 																{expandedFilters[filter.attributeIdentifier]
 																	? "Vis mindre"
 																	: "Vis mer"}
-															</Button>
+															</button>
 														)}
 													</div>
 												) : (

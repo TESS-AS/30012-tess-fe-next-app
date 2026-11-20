@@ -31,7 +31,8 @@ export function NavTrigger({
 				"hover:font-extrabold hover:text-[#009640]",
 				"outline-none focus-visible:ring-0 focus-visible:outline-none",
 				isFirst && "pl-0",
-				highlighted && "font-extrabold",
+				highlighted && "font-black text-[#0F1912]",
+				isCurrent && "font-black text-[#0F1912]",
 			)}>
 			<span className="px-1">{category.name}</span>
 			{highlighted && (
