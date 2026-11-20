@@ -40,27 +40,52 @@ export default function CategoryContent({
 		}
 	}, []);
 
-	// Override breadcrumbs to include "Se alle kategorier" when on a category page
+	// Build the page's breadcrumbs with Hjem always first and (when applicable)
+	// a "Søkeresultat" leaf when a search query is active. Three shapes:
+	//   - Category-root page  → Hjem > Alle kategorier > {Category}
+	//   - Subcategory/segment → Hjem > {resolved URL chain from useBreadcrumbs}
+	//   - Search              → Hjem > [scoping cat/subcat?] > Søkeresultat
 	const categoryBreadcrumbs = useMemo(() => {
-		if (!categoryData) return breadcrumbs;
+		const home = { href: "/", label: t("BreadCrumbs.home") };
 
-		// Check if we're on a category page (not subcategory or segment)
-		const isCategoryPage = !segment && categoryData;
-
-		if (isCategoryPage) {
+		if (categoryData && !segment) {
 			return [
-				{ href: "/", label: t("BreadCrumbs.home") },
+				home,
 				{ href: "/alle-kategorier", label: t("Category.viewAll") },
 				{
 					href: `/${categoryData.slug}`,
 					label: categoryData.name,
-					current: true,
+					current: !query,
 				},
+				...(query
+					? [
+							{
+								href: "#",
+								label: t("BreadCrumbs.searchResult"),
+								current: true,
+							},
+						]
+					: []),
 			];
 		}
 
-		return breadcrumbs;
-	}, [breadcrumbs, categoryData, segment, t]);
+		const trail = [home, ...breadcrumbs];
+		if (query) {
+			// Drop `current` from the last URL item so Søkeresultat becomes the
+			// leaf and the resolved cats stay as green links the user can click
+			// back to.
+			const scoped = trail.map((item, i) =>
+				i === trail.length - 1 ? { ...item, current: false } : item,
+			);
+			scoped.push({
+				href: "#",
+				label: t("BreadCrumbs.searchResult"),
+				current: true,
+			});
+			return scoped;
+		}
+		return trail;
+	}, [breadcrumbs, categoryData, segment, query, t]);
 
 	const hasValidInput = !!categoryData?.groupId || !!query;
 
@@ -75,8 +100,8 @@ export default function CategoryContent({
 		fromCategoriesPage
 	) {
 		return (
-			<div className="py-8">
-				<div className="mb-6">
+			<div className="pt-3 pb-8">
+				<div className="mb-3">
 					<Breadcrumb items={categoryBreadcrumbs} />
 				</div>
 				<div className="container min-h-[500px] w-full">
@@ -140,12 +165,13 @@ export default function CategoryContent({
 
 	// If no subcategories, show products grid
 	return (
-		<div className="py-8">
-			<div className="mb-6">
+		<div className="pt-3 pb-8">
+			<div className="mb-3">
 				<Breadcrumb items={categoryBreadcrumbs} />
 			</div>
 			<ProductGrid
 				categoryNumber={categoryData?.groupId || ""}
+				categoryName={categoryData?.name}
 				query={query || null}
 			/>
 		</div>
