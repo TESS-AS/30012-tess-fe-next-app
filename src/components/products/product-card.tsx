@@ -86,7 +86,7 @@ export function ProductCard({
 	// /searchList rows. Prefer it for the Varenummer row; fall back to the
 	// parent productNumber so category-browse rows (no variant hit) still
 	// render a number.
-	const displayItemNumber = itemNumber || productNumber;
+	const displayItemNumber = (itemNumber || productNumber).toUpperCase();
 	const [isLoaded, setIsLoaded] = useState(false);
 	const [isVariantsOpen, setIsVariantsOpen] = useState(false);
 	const [variations, setVariations] = useState<any[]>([]);
