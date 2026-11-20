@@ -2,6 +2,14 @@ import { Media } from "./carts.types";
 
 export interface IProduct {
 	productName: string;
+	/** Specific variant name when BE has narrowed to one (e.g. via a query
+	 *  that matched a particular item). Shown in the Varenavn row on product
+	 *  cards; falls back to productName when absent. */
+	itemName?: string | null;
+	/** Specific variant number for the narrowed item. Mirrors the itemNumber
+	 *  inside the `redirect` URL. Shown in the Varenummer row on product
+	 *  cards; falls back to productNumber when absent. */
+	itemNumber?: string | null;
 	mediaM: string;
 	productNumber: string;
 	shortDesc?: string;

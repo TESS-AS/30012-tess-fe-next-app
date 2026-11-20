@@ -21,6 +21,8 @@ interface ProductPage {
 	hasMore: boolean;
 	page: number;
 	totalPages: number;
+	totalFamilies?: number;
+	totalItems?: number;
 	/** PBI2940: BE-inferred categories with a `flag` marking the ones that
 	 *  are pre-filtered/active for the current search. Only populated on the
 	 *  first page since categories are query-scoped, not page-scoped. */
@@ -63,6 +65,8 @@ export function useProductInfiniteQuery({
 				hasMore: (response.product?.length || 0) === pageSize,
 				page: pageParam,
 				totalPages: response.totalPages ?? 0,
+				totalFamilies: response.totalFamilies,
+				totalItems: response.totalItems,
 				categories: response.categories,
 			};
 		},
@@ -93,17 +97,20 @@ export function useProductInfiniteQuery({
 	const categories: InferredCategory[] =
 		infiniteQuery.data?.pages[0]?.categories ?? [];
 
-	// First-page totalPages is authoritative for the current query; later
-	// pages echo the same value. Approximate total product families =
-	// totalPages * pageSize (accurate within one page since the last page
-	// may be short). Consumers who need an exact family count must wait for
-	// BE to expose one on /searchList.
-	const totalPages = infiniteQuery.data?.pages[0]?.totalPages ?? 0;
+	// First-page metrics are authoritative for the current query; later pages
+	// echo the same values. Prefer BE-supplied `totalFamilies` / `totalItems`
+	// (exact) over `totalPages * pageSize` (ceiling approximation).
+	const firstPage = infiniteQuery.data?.pages[0];
+	const totalPages = firstPage?.totalPages ?? 0;
+	const totalFamilies = firstPage?.totalFamilies;
+	const totalItems = firstPage?.totalItems;
 
 	return {
 		products: uniqueProducts,
 		categories,
 		totalPages,
+		totalFamilies,
+		totalItems,
 		pageSize,
 		isLoading: infiniteQuery.isLoading && !infiniteQuery.data,
 		isFetching: infiniteQuery.isFetching,

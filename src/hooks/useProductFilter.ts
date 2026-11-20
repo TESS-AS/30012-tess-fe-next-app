@@ -72,6 +72,8 @@ export function useProductFilter({
 		products,
 		categories: inferredCategories,
 		totalPages,
+		totalFamilies,
+		totalItems,
 		pageSize,
 		isLoading,
 		isFetchingNextPage,
@@ -572,6 +574,8 @@ export function useProductFilter({
 		products,
 		inferredCategories,
 		totalPages,
+		totalFamilies,
+		totalItems,
 		pageSize,
 		// PBI2940 category multi-select surface — consumers use these to
 		// drive the sidebar checkboxes and the top-of-page removable chips.
