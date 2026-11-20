@@ -55,6 +55,8 @@ export function ProductGrid({
 	const {
 		products,
 		totalPages,
+		totalFamilies,
+		totalItems,
 		pageSize,
 		isLoading,
 		isFetchingNextPage,
@@ -199,22 +201,27 @@ export function ProductGrid({
 		};
 	}, [hasMore, isLoading, isFetchingNextPage, loadMore]);
 
-	// Approximate total product count for the results banner. Exact when the
-	// last page is already loaded (short pages mean products.length is the
-	// true count), otherwise best-effort = totalPages * pageSize.
-	const approxTotal =
-		!hasMore && products.length > 0
-			? products.length
-			: totalPages > 0
-				? totalPages * pageSize
-				: products.length;
+	// Prefer BE-supplied exact counts; fall back to the previous
+	// totalPages * pageSize ceiling (and finally to loaded length) when the
+	// response hasn't landed yet or BE hasn't been upgraded in a given env.
+	const approxFamilies =
+		typeof totalFamilies === "number"
+			? totalFamilies
+			: !hasMore && products.length > 0
+				? products.length
+				: totalPages > 0
+					? totalPages * pageSize
+					: products.length;
+	const approxItems =
+		typeof totalItems === "number" ? totalItems : approxFamilies;
 
 	return (
 		<>
 			<SearchResultBanner
 				query={query}
 				categoryName={categoryName}
-				count={approxTotal}
+				count={approxItems}
+				families={typeof totalFamilies === "number" ? totalFamilies : undefined}
 			/>
 			<div className="flex flex-col gap-8 pt-6 lg:flex-row">
 				<aside className="w-full pr-4 lg:w-1/4">
@@ -246,14 +253,7 @@ export function ProductGrid({
 				<div className="mb-4 flex items-start gap-4">
 					<div className="flex w-[85%] items-start gap-3">
 						<span className="shrink-0 pt-[3px] text-[13px] font-medium whitespace-nowrap text-[#0F1912]">
-							{t("Search.productCount", {
-								count:
-									!hasMore && products.length > 0
-										? products.length
-										: totalPages > 0
-											? totalPages * pageSize
-											: products.length,
-							})}
+							{t("Search.productCount", { count: approxFamilies })}
 						</span>
 						<div className="flex min-w-0 flex-wrap items-center gap-2">
 						{/* PBI2940 multi-select category chips — driven by

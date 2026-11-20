@@ -39,6 +39,14 @@ export interface SearchListResponse {
 	product: IProduct[];
 	page: number;
 	totalPages: number;
+	/** Total unique product families matching the current query + filters.
+	 *  Returned by BE on page 1 (may echo on later pages). Preferred over the
+	 *  previous `totalPages * pageSize` ceiling for both the banner and the
+	 *  "N produkter" label. */
+	totalFamilies?: number;
+	/** Total item variants summed across the matched families. Drives the
+	 *  "N produkter i M produktfamilier" banner. */
+	totalItems?: number;
 	categories?: InferredCategory[];
 }
 
