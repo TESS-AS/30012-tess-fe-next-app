@@ -16,71 +16,82 @@ interface BreadcrumbItem {
 interface BreadcrumbProps extends React.HTMLAttributes<HTMLElement> {
 	items: BreadcrumbItem[];
 	separator?: React.ReactNode;
+	/** Kept for backwards compatibility with existing callers — no longer
+	 *  controls a separate icon row. The home-icon treatment is applied
+	 *  automatically to the first item when its href is "/". */
 	showHome?: boolean;
 }
 
 const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
-	({ className, items, separator, showHome = true, ...props }, ref) => {
-		const Separator = separator || <ChevronRight className="h-4 w-4" />;
+	({ className, items, separator, ...props }, ref) => {
+		const Separator = separator || (
+			<ChevronRight className="h-4 w-4 text-[#5A615D]" />
+		);
+
+		// Only the explicit `current`-flagged item (or the last one as fallback)
+		// is rendered as the dead-leaf style. Everything else gets the green
+		// underline treatment.
+		const currentIndex = (() => {
+			const explicit = items.findIndex((i) => i.current);
+			return explicit >= 0 ? explicit : items.length - 1;
+		})();
 
 		return (
 			<nav
 				ref={ref}
 				aria-label="breadcrumb"
 				className={cn(
-					"text-muted-foreground inline-flex items-center space-x-2 text-sm",
+					"inline-flex items-center text-[14px] leading-[150%]",
 					className,
 				)}
 				{...props}>
-				<ol className="inline-flex items-center space-x-2">
-					{showHome && (
-						<li className="inline-flex cursor-pointer items-center">
-							<Link
-								href="/"
-								className="text-muted-foreground hover:text-foreground inline-flex items-center">
-								<Home className="h-4 w-4" />
-								<span className="sr-only">Home</span>
-							</Link>
-						</li>
-					)}
+				<ol className="inline-flex items-center gap-2">
 					{items.map((item, index) => {
-						const isLast = index === items.length - 1;
-						const linkClassName = cn("hover:text-foreground", {
-							"text-foreground pointer-events-none font-semibold":
-								item.current || isLast,
-							"text-muted-foreground": !item.current && !isLast,
-						});
+						const isCurrent = index === currentIndex;
+						const isHome = index === 0 && item.href === "/";
+
+						const labelNode = (
+							<>
+								{isHome && (
+									<Home
+										className="mr-1.5 h-4 w-4 text-[#009640]"
+										strokeWidth={2}
+									/>
+								)}
+								{item.label}
+							</>
+						);
+
+						const content = isCurrent ? (
+							<span
+								aria-current="page"
+								className="inline-flex items-center font-medium text-[#5A615D]">
+								{labelNode}
+							</span>
+						) : item.onClick ? (
+							<button
+								onClick={item.onClick}
+								className="inline-flex cursor-pointer items-center text-[#009640] underline underline-offset-4 hover:text-[#005222]">
+								{labelNode}
+							</button>
+						) : (
+							<Link
+								href={item.href}
+								className="inline-flex items-center text-[#009640] underline underline-offset-4 hover:text-[#005222]">
+								{labelNode}
+							</Link>
+						);
 
 						return (
-							<React.Fragment key={item.href}>
-								{index > 0 || showHome ? (
+							<React.Fragment key={`${item.href}-${index}`}>
+								{index > 0 && (
 									<li
 										aria-hidden="true"
-										className="text-muted-foreground/40 cursor-pointer select-none">
+										className="select-none">
 										{Separator}
 									</li>
-								) : null}
-								<li className="inline-flex cursor-pointer items-center">
-									{item.onClick ? (
-										<button
-											onClick={item.onClick}
-											className={linkClassName + " cursor-pointer"}
-											aria-current={
-												item.current || isLast ? "page" : undefined
-											}>
-											{item.label}
-										</button>
-									) : (
-										<Link
-											href={item.href}
-											className={linkClassName + " cursor-pointer"}
-											aria-current={
-												item.current || isLast ? "page" : undefined
-											}>
-											{item.label}
-										</Link>
-									)}
-								</li>
+								)}
+								<li className="inline-flex items-center">{content}</li>
 							</React.Fragment>
 						);
 					})}

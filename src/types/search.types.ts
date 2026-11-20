@@ -2,6 +2,7 @@ export interface IProductSearch {
 	itemVariantCount: number;
 	productName: string;
 	productNumber: string;
+	itemNumber?: string | null;
 	thumbnail: string;
 	itemName?: string | null;
 	attribute1?: string | null;
