@@ -44,6 +44,7 @@ import { useCategories } from "@/lib/CategoriesProvider";
 import { buildCategoryPath, findCategoryByGroupId } from "@/lib/category-utils";
 import { useSearchStore } from "@/lib/searchStore";
 import { isTessEmployeeEmail } from "@/lib/user";
+import { cn } from "@/lib/utils";
 import axiosClient from "@/services/axiosClient";
 import { getProductVariations } from "@/services/product.service";
 import { Category } from "@/types/categories.types";
@@ -515,11 +516,11 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 											/>
 										</div>
 										{profile && assortments.length > 0 && (
-											<div className="max-w-[240px] border-l border-gray-300">
+											<div className="border-l border-gray-300">
 												<Button
 													type="button"
 													variant="ghost"
-													className="flex h-[50px] w-full max-w-[240px] min-w-[240px] items-center justify-between gap-2 rounded-none bg-gray-100 px-4 text-[#0F1912]"
+													className="flex h-[50px] max-w-[220px] min-w-[160px] items-center justify-start gap-2 rounded-none bg-gray-100 px-3 text-[#0F1912]"
 													onClick={(e) => {
 														e.preventDefault();
 														e.stopPropagation();
@@ -564,7 +565,13 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 									</form>
 								</div>
 								{searchQuery && !isDesktopOverlayDismissed && (
-									<div className="animate-in fade-in-0 zoom-in-95 absolute top-full left-0 -right-[120px] z-[11] mt-1 flex max-h-[80vh] flex-col border border-gray-200 border-t-[3px] border-t-[#009640] bg-white shadow-lg duration-200">
+									<div
+									className={cn(
+										"animate-in fade-in-0 zoom-in-95 absolute top-full left-0 z-[11] mt-1 flex max-h-[80vh] flex-col border border-gray-200 border-t-[3px] border-t-[#009640] bg-white shadow-lg duration-200",
+										profile && assortments.length > 0
+											? "-right-[120px]"
+											: "-right-[250px]",
+									)}>
 								<div className="grid flex-1 grid-cols-3 gap-4 overflow-y-auto p-4">
 										<div className="col-span-1 space-y-4 pr-4">
 											<SearchAside
@@ -649,7 +656,7 @@ export default function Header({ profile }: { profile: ProfileUser | null }) {
 								{profile &&
 									hasMultipleAssortments &&
 									isAssortmentDropdownOpen && (
-										<div className="absolute top-[50px] right-0 z-[9999] max-h-[260px] w-[300px] max-w-[400px] overflow-y-auto rounded-b-lg bg-white py-2 shadow-lg">
+										<div className="absolute top-[50px] right-0 z-[9999] max-h-[260px] w-[260px] max-w-[320px] overflow-y-auto rounded-b-lg bg-white py-2 shadow-lg">
 											<TooltipProvider>
 												{assortments.map((a: any) => (
 													<Tooltip key={a.assortmentnumber}>
