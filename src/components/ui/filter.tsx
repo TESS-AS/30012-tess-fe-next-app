@@ -503,13 +503,13 @@ export const Filter = React.forwardRef<
 				)}
 				{...props}>
 				<div className="flex items-center justify-between">
-					<h2 className="text-[13px] leading-[19.5px] font-bold text-[#0F1912]">
+					<h2 className="text-[15px] leading-[19.5px] font-bold text-[#0F1912]">
 						{t("Common.filters")}
 					</h2>
 					<button
 						type="button"
 						onClick={resetFilters}
-						className="text-center text-[11px] leading-[16.5px] font-medium text-[#009640] hover:underline">
+						className="text-center text-[13px] leading-[19.5px] font-medium text-[#009640] hover:underline">
 						{t("Common.reset")}
 					</button>
 				</div>
@@ -529,7 +529,7 @@ export const Filter = React.forwardRef<
 								onClick={() => setCategoryOpen((prev) => !prev)}
 								aria-expanded={categoryOpen}
 								className="flex w-full items-center justify-between py-1 text-left">
-								<h3 className="text-[13px] leading-[19.5px] font-semibold text-[#0F1912]">
+								<h3 className="text-[15px] leading-[19.5px] font-semibold text-[#0F1912]">
 									Kategori
 								</h3>
 								{categoryOpen ? (
@@ -576,14 +576,14 @@ export const Filter = React.forwardRef<
 															className="flex w-full cursor-pointer items-center justify-between gap-2 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
 															<span
 																className={cn(
-																	"text-[12px] leading-[16.5px] font-normal",
+																	"text-[14px] leading-[16.5px] font-normal",
 																	isChecked
 																		? "text-[#009640]"
 																		: "text-[#5A615D]",
 																)}>
 																{cf.nameNo}
 															</span>
-															<span className="text-[11px] leading-[16.5px] font-normal text-[#8A8F8C]">
+															<span className="text-[14px] leading-[150%] font-normal text-[#8A8F8C]">
 																({cf.productCount})
 															</span>
 														</label>
@@ -597,7 +597,7 @@ export const Filter = React.forwardRef<
 											<button
 												type="button"
 												onClick={() => setShowAllCategories((prev) => !prev)}
-												className="text-[12px] leading-[16.5px] font-normal text-[#5A615D] underline underline-offset-2">
+												className="text-[14px] leading-[16.5px] font-normal text-[#5A615D] underline underline-offset-2">
 												{showAllCategories ? "Vis mindre" : "Vis mer"}
 											</button>
 										)}
@@ -607,7 +607,7 @@ export const Filter = React.forwardRef<
 					)}
 				{Array.isArray(categoryFilters) && categoryFilters.length === 0 && (
 					<div className="space-y-2">
-						<h3 className="text-[13px] leading-[19.5px] font-semibold text-[#0F1912]">Kategori</h3>
+						<h3 className="text-[15px] leading-[19.5px] font-semibold text-[#0F1912]">Kategori</h3>
 						<div className="rounded-lg bg-white px-4 py-3 shadow-md">
 							<div className="space-y-2">
 								{[0, 1, 2].map((i) => (
@@ -677,7 +677,7 @@ export const Filter = React.forwardRef<
 											key={filter.attributeIdentifier}
 											value={filter.attributeIdentifier}
 											className="border-b">
-											<AccordionTrigger className="text-[13px] leading-[19.5px] font-semibold text-[#0F1912] hover:no-underline">
+											<AccordionTrigger className="text-[15px] leading-[19.5px] font-semibold text-[#0F1912] hover:no-underline">
 												{filter.key}
 											</AccordionTrigger>
 											<AccordionContent className="pt-0">
@@ -725,7 +725,7 @@ export const Filter = React.forwardRef<
 																	className="flex w-full cursor-pointer justify-between peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
 																	<span
 																		className={cn(
-																			"text-[12px] leading-[16.5px] font-normal",
+																			"text-[14px] leading-[16.5px] font-normal",
 																			localSelectedFilters[
 																				filter.attributeIdentifier
 																			]?.includes(child.value)
@@ -734,7 +734,7 @@ export const Filter = React.forwardRef<
 																		)}>
 																		{child.value}
 																	</span>
-																	<span className="text-[12px] leading-[16.5px] font-normal text-[#5A615D]">
+																	<span className="text-[14px] leading-[16.5px] font-normal text-[#5A615D]">
 																		{child.productcount}
 																	</span>
 																</label>
@@ -750,7 +750,7 @@ export const Filter = React.forwardRef<
 																			!prev[filter.attributeIdentifier],
 																	}))
 																}
-																className="text-[12px] leading-[16.5px] font-normal text-[#5A615D] underline underline-offset-2">
+																className="text-[14px] leading-[16.5px] font-normal text-[#5A615D] underline underline-offset-2">
 																{expandedFilters[filter.attributeIdentifier]
 																	? "Vis mindre"
 																	: "Vis mer"}

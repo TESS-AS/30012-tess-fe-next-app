@@ -61,6 +61,8 @@ function highlight(text: string | null | undefined, matches: string[]) {
 export function ProductCard({
 	productNumber = "-",
 	productName = "",
+	itemName,
+	itemNumber,
 	mediaM,
 	price,
 	searchAttribute1,
@@ -79,6 +81,12 @@ export function ProductCard({
 	const t = useTranslations();
 	const pathname = usePathname();
 	const detailsHref = `${pathname}/${encodeURIComponent(productNumber)}`;
+
+	// BE ships the narrowed variant's itemNumber as a top-level field on
+	// /searchList rows. Prefer it for the Varenummer row; fall back to the
+	// parent productNumber so category-browse rows (no variant hit) still
+	// render a number.
+	const displayItemNumber = itemNumber || productNumber;
 	const [isLoaded, setIsLoaded] = useState(false);
 	const [isVariantsOpen, setIsVariantsOpen] = useState(false);
 	const [variations, setVariations] = useState<any[]>([]);
@@ -116,6 +124,7 @@ export function ProductCard({
 		if (productName.toLowerCase().includes(q)) set.add(trimmed);
 		if (productClass?.toLowerCase().includes(q)) set.add(trimmed);
 		if (productNumber.toLowerCase().includes(q)) set.add(trimmed);
+		if (displayItemNumber.toLowerCase().includes(q)) set.add(trimmed);
 		[searchAttribute1, searchAttribute2].forEach((v) => {
 			if (v && v.toLowerCase().includes(q)) set.add(v);
 		});
@@ -185,7 +194,7 @@ export function ProductCard({
 						{t("Common.itemNumber")}:
 					</span>
 					<span className="truncate font-medium">
-						{highlight(productNumber, matches)}
+						{highlight(displayItemNumber, matches)}
 					</span>
 				</div>
 
@@ -193,7 +202,7 @@ export function ProductCard({
 					<span className="shrink-0 font-bold">
 						{t("Common.itemName")}:
 					</span>
-					<span className="font-medium">{productName}</span>
+					<span className="font-medium">{itemName || productName}</span>
 				</div>
 
 				{(searchAttribute1 || searchAttribute2) && (
