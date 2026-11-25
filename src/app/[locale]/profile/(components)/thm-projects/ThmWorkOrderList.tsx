@@ -653,12 +653,20 @@ function downloadWorkOrderExcel(
 		},
 	]);
 
+	// Trigger the download via a hidden anchor in the DOM. Appending to body
+	// is required for Safari to honor programmatic clicks; the setTimeout
+	// around revokeObjectURL gives the browser time to start the download
+	// before we invalidate the blob URL (synchronous revoke races with the
+	// download kickoff and silently cancels it in some browsers).
 	const url = URL.createObjectURL(blob);
 	const link = document.createElement("a");
 	link.href = url;
 	link.download = filename;
+	link.style.display = "none";
+	document.body.appendChild(link);
 	link.click();
-	URL.revokeObjectURL(url);
+	document.body.removeChild(link);
+	setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 const DATE_COLUMNS = new Set<ColumnKey>(["uploaded", "synced", "inspectedDate"]);
