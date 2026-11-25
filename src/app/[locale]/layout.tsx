@@ -1,6 +1,5 @@
 import { ReactNode } from "react";
 
-import { Footer } from "@/components/layouts/Footer/Footer";
 import Main from "@/components/layouts/Main/Main";
 import { ProfileProvider } from "@/contexts/ProfileContext";
 import { AppContextProvider } from "@/lib/appContext";
@@ -67,10 +66,7 @@ export default async function LocaleLayout({
 											draggable
 											pauseOnHover
 										/>
-										<Main>
-											{children}
-											<Footer />
-										</Main>
+										<Main>{children}</Main>
 									</CategoriesProvider>
 								</AppContextProvider>
 							</ProfileProvider>

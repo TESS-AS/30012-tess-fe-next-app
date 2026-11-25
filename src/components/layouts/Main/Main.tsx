@@ -2,6 +2,7 @@
 
 import React, { ReactNode, useEffect, useMemo } from "react";
 
+import { Footer } from "@/components/layouts/Footer/Footer";
 import Header from "@/components/layouts/Header/Header";
 import { ScrollRestoreOnRoute } from "@/components/navigation/scroll-restore-on-route";
 import { OnboardingModal } from "@/components/ui/dialogs/onboarding-modal";
@@ -47,7 +48,16 @@ export default function Main({ children }: { children?: ReactNode }) {
 					isOpen && "pointer-events-none blur-xs",
 				)}>
 				<ScrollRestoreOnRoute />
-				<div className="container mx-auto">{children}</div>
+				{/* Flex column with min-h-full keeps the Footer glued to the
+				    bottom of the viewport during route transitions — while a
+				    new page's data is in flight, {children} may render as null
+				    for a tick. Without flex-1 reserving space, the Footer
+				    would flash up right under the header until the new page
+				    paints. */}
+				<div className="flex min-h-full flex-col">
+					<div className="container mx-auto flex-1">{children}</div>
+					<Footer />
+				</div>
 			</div>
 			<OnboardingModal
 				isOpen={isNewUser}
