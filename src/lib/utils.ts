@@ -315,6 +315,43 @@ export function extractProductNumberFromSlug(productSlug: string): string {
 	return productSlug;
 }
 
+/** URL-serialize the sliders lane in the same `key=min,max&key=min,max`
+ *  shape as serializeFilters. Lives in a SEPARATE `?sliders=` URL param so
+ *  URL rehydration can tell sliders apart from discrete filters (we can't
+ *  derive that from the filter catalog at mount time — it's async). */
+export function serializeSliders(
+	sliders: { key: string; min: number; max: number }[],
+): string {
+	if (!sliders?.length) return "";
+	return sliders
+		.map(
+			(s) =>
+				`${encodeURIComponent(s.key)}=${encodeURIComponent(String(s.min))},${encodeURIComponent(String(s.max))}`,
+		)
+		.join("&");
+}
+
+export function deserializeSliders(
+	s: string,
+): { key: string; min: number; max: number }[] {
+	if (!s) return [];
+	const out: { key: string; min: number; max: number }[] = [];
+	for (const part of s.split("&")) {
+		if (!part) continue;
+		const eq = part.indexOf("=");
+		if (eq === -1) continue;
+		const key = decodeURIComponent(part.slice(0, eq));
+		const tail = part.slice(eq + 1).split(",");
+		if (tail.length !== 2) continue;
+		const min = Number(decodeURIComponent(tail[0]));
+		const max = Number(decodeURIComponent(tail[1]));
+		if (Number.isFinite(min) && Number.isFinite(max)) {
+			out.push({ key, min, max });
+		}
+	}
+	return out;
+}
+
 export function serializeFilters(filters: Record<string, string[]>): string {
 	if (!filters || Object.keys(filters).length === 0) return "";
 

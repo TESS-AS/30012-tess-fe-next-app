@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 
 import { normalizeFilterResponse } from "@/lib/category-utils";
-import { deserializeFilters, serializeFilters } from "@/lib/utils";
+import {
+	deserializeFilters,
+	deserializeSliders,
+	serializeFilters,
+	serializeSliders,
+} from "@/lib/utils";
 import { loadFilterFamily } from "@/services/categories.service";
 import {
 	FilterCategory,
@@ -265,13 +270,27 @@ export function useProductFilter({
 			});
 			setSelectedFilters(newSelectedFilters);
 
-			// Sync filters into URL
+			// Sync filters + sliders into separate URL params. Sliders need
+			// their own `?sliders=` lane so URL rehydration can restore them
+			// back into `currentSliders` — if they rode along in `?filters=`
+			// (like the display chip map does), the rehydration path would
+			// mis-route them into `currentFilters` on refresh and BE would
+			// receive them as discrete filters instead of ranges.
 			const params = new URLSearchParams(searchParams.toString());
-			if (Object.keys(newSelectedFilters).length > 0) {
-				const filtersString = serializeFilters(newSelectedFilters);
-				params.set("filters", filtersString);
+			const sliderKeySet = new Set(sliders.map((s) => s.key));
+			const filtersOnly: Record<string, string[]> = {};
+			Object.entries(newSelectedFilters).forEach(([k, v]) => {
+				if (!sliderKeySet.has(k) && v.length > 0) filtersOnly[k] = v;
+			});
+			if (Object.keys(filtersOnly).length > 0) {
+				params.set("filters", serializeFilters(filtersOnly));
 			} else {
 				params.delete("filters");
+			}
+			if (sliders.length > 0) {
+				params.set("sliders", serializeSliders(sliders));
+			} else {
+				params.delete("sliders");
 			}
 
 			const newUrl = `${pathname}${params.toString() ? `?${params.toString()}` : ""}`;
@@ -503,11 +522,26 @@ export function useProductFilter({
 
 	useEffect(() => {
 		const filtersParam = searchParams.get("filters");
+		const slidersParam = searchParams.get("sliders");
 		const sortParam = searchParams.get("sort");
 
-		if (filtersParam) {
-			const restoredFilters = deserializeFilters(filtersParam);
-			setSelectedFilters(restoredFilters);
+		if (filtersParam || slidersParam) {
+			const restoredFilters = filtersParam
+				? deserializeFilters(filtersParam)
+				: {};
+			const restoredSliders = slidersParam
+				? deserializeSliders(slidersParam)
+				: [];
+
+			// Merge both into the chip-display map. Sliders go in as
+			// [String(min), String(max)] so the existing range-chip renderer
+			// (which keys off "two numeric values" in product-grid) keeps
+			// working without a parallel code path.
+			const chipMap: Record<string, string[]> = { ...restoredFilters };
+			restoredSliders.forEach((s) => {
+				chipMap[s.key] = [String(s.min), String(s.max)];
+			});
+			setSelectedFilters(chipMap);
 
 			const filterArray: FilterValues[] = Object.entries(restoredFilters)
 				.filter(([, vals]) => vals.length > 0)
@@ -517,12 +551,9 @@ export function useProductFilter({
 				}));
 
 			setCurrentFilters(filterArray.length > 0 ? filterArray : null);
-			// Sliders don't survive a refresh via the URL today — we don't
-			// know which keys were sliders at serialization time. Reset to
-			// null so a stale slider from the previous session doesn't
-			// linger. If deep-linking slider state becomes a requirement,
-			// serialize them as a separate `sliders=` URL param here.
-			setCurrentSliders(null);
+			setCurrentSliders(
+				restoredSliders.length > 0 ? restoredSliders : null,
+			);
 		} else if (hasInitialized.current) {
 			setSelectedFilters({});
 			setCurrentFilters(null);
